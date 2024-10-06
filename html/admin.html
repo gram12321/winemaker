@@ -8,46 +8,38 @@
 <body>
   <div class="d-flex" id="wrapper">
     <!-- Sidebar -->
-    <div id="sidebar-wrapper">
-    </div>
+    <div id="sidebar-wrapper"></div>
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Admin page</h1>
       <div class="text-center mt-4">
-        <button id="clear-storage-btn" class="btn btn-danger">Clear Game Data</button>
+        <button id="clear-storage-btn" class="btn btn-danger">Clear Local Storage</button>
+        <button id="clear-firestore-btn" class="btn btn-warning">Clear Firestore</button>
       </div>
     </div>
   </div>
 
-  <!-- Properly order JS dependencies -->
+  <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-
-  <script type="module" src="/js/loadSidebar.js"></script> <!-- Link to the new sidebar initialization script -->
   <script type="module">
     import { initializeSidebar } from '/js/loadSidebar.js';
+    import { clearLocalStorage, clearFirestore } from '/js/adminFunctions.js'; // Import functions from adminFunctions.js
+
     document.addEventListener('DOMContentLoaded', function() {
       fetch('/html/sidebar.html')
         .then(response => response.text())
         .then(data => {
           document.getElementById('sidebar-wrapper').innerHTML = data;
-          initializeSidebar();  // Call the function to initialize the sidebar
+          initializeSidebar();
         });
-    });
 
-    // Clear localstorage
-    document.getElementById('clear-storage-btn').addEventListener('click', function() {
-      if (confirm('Are you sure you want to clear all game data?')) {
-        clearGameData();
-      }
+      // Attach event listeners
+      document.getElementById('clear-storage-btn').addEventListener('click', clearLocalStorage);
+      document.getElementById('clear-firestore-btn').addEventListener('click', clearFirestore);
     });
-    function clearGameData() {
-      localStorage.removeItem('companyName');
-      localStorage.removeItem('money');
-      alert('Game data cleared successfully.');
-    }
   </script>
 </body>
 </html>
