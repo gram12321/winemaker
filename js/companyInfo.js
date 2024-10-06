@@ -1,4 +1,5 @@
 import { db, doc, getDoc } from './firebase.js';
+import { saveCompanyInfo } from './loadsave.js';
 
 async function storeCompanyName() {
   const companyNameInput = document.getElementById('company-name');
@@ -12,6 +13,7 @@ async function storeCompanyName() {
       } else {
         localStorage.setItem('companyName', companyName);
         localStorage.setItem('money', 10000); // Initialize money with 10000
+        saveCompanyInfo(); // Save company info to firestore
         window.location.href = 'html/game.html'; // Redirect to game.html
       }
     }
