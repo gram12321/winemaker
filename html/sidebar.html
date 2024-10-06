@@ -1,0 +1,24 @@
+<!-- public/html/sidebar.html -->
+<div id="sidebar-wrapper" class="border-right d-flex flex-column">
+  <div id="companyInfo">
+    <p><strong>Company Info:</strong></p>
+    <!-- Complete company and player details will be inserted here by JavaScript -->
+  </div>
+  <div class="sidebar-heading">Menu</div>
+  <div class="list-group list-group-flush flex-grow-1">
+    <a href="game.html" class="list-group-item list-group-item-action bg-dark text-white">Main</a>
+  </div>
+  <div class="list-group-item list-group-item-action bg-dark text-white dropdown">
+    <a href="#" class="dropdown-toggle text-white" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Playername
+
+    </a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+      <a class="dropdown-item" href="./game.html">Startpage</a>
+      <a class="dropdown-item" href="./profile.html">Profile</a>
+      <a class="dropdown-item" href="./settings.html">Settings</a>
+      <a class="dropdown-item" href="./admin.html">Admin Dashboard</a> 
+      <a class="dropdown-item" href="#" id="logout-link">Logout</a>
+    </div>
+  </div>
+</div>
