@@ -25,8 +25,8 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
   <script type="module">
-    import { initializeSidebar } from '/js/loadSidebar.js';
-    import { clearLocalStorage, clearFirestore } from '/js/adminFunctions.js'; // Import functions from adminFunctions.js
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { clearLocalStorage, clearFirestore } from '/js/database/adminFunctions.js'; // Import functions from adminFunctions.js
 
     document.addEventListener('DOMContentLoaded', function() {
       fetch('/html/sidebar.html')

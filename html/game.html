@@ -33,13 +33,13 @@
 
   <!-- Ensure init.js handles sidebar loading and player info updates -->
   <script type="module" src="/js/console.js"></script> <!-- Link to the console JS file -->
-  <script type="module" src="/js/loadSidebar.js"></script> <!-- Link to the new sidebar initialization script -->
+  <script type="module" src="/js/database/loadSidebar.js"></script> <!-- Link to the new sidebar initialization script -->
   <script type="module" src="/js/endDay.js"></script> <!-- Link to the endDay script -->
 
   <script type="module">
-    import { initializeSidebar } from '/js/loadSidebar.js';
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { addMoney } from '/js/endDay.js';
-    import { saveCompanyInfo } from '/js/companyInfo.js'; // Import from the newly created file
+    import { saveCompanyInfo } from '/js/database/companyInfo.js'; // Import from the newly created file
 
     document.addEventListener('DOMContentLoaded', function() {
       fetch('/html/sidebar.html')

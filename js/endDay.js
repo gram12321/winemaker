@@ -1,5 +1,5 @@
-import {updateCompanyInfo} from './companyInfo.js';
-function addMoney() {
+import {updateCompanyInfo} from './database/companyInfo.js';
+export function addMoney() {
     const currentMoney = localStorage.getItem('money');
     if (currentMoney !== null) {
         const newMoney = parseInt(currentMoney, 10) + 10000;
@@ -8,4 +8,3 @@ function addMoney() {
     } 
 }
 
-export { addMoney };
