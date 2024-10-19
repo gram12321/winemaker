@@ -4,18 +4,6 @@ import { renderCompanyInfo } from './database/loadSidebar.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
-export function initializeDay() {
-    if (localStorage.getItem('day') === null) {
-        localStorage.setItem('day', 1); // Initialize day to 1 if it doesn't exist
-    }
-    if (localStorage.getItem('season') === null) {
-        localStorage.setItem('season', SEASONS[0]); // Start with Spring
-    }
-    if (localStorage.getItem('year') === null) {
-        localStorage.setItem('year', 2023); // Start with current year
-    }
-}
-
 export function incrementDay() {
     let currentDay = parseInt(localStorage.getItem('day'), 10);
     let currentSeasonIndex = SEASONS.indexOf(localStorage.getItem('season'));
@@ -23,19 +11,18 @@ export function incrementDay() {
 
     currentDay += 1;
 
-    if (currentDay > 3) { // If day exceeds 3, reset to 1 and change season
+    if (currentDay > 3) { // If day exceeds 3, reset to 1
         currentDay = 1;
         currentSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length;
-        localStorage.setItem('season', SEASONS[currentSeasonIndex]);
+    }
 
-        if (currentSeasonIndex === 0) { // After Winter, enter Spring and increment year
-            currentYear += 1;
-            localStorage.setItem('year', currentYear);
-        }
+    if (currentSeasonIndex === 0 && currentDay === 1) { // Only increment year at the start of Spring
+        currentYear += 1;
     }
 
     localStorage.setItem('day', currentDay);
     localStorage.setItem('season', SEASONS[currentSeasonIndex]);
+    localStorage.setItem('year', currentYear); // Ensure the year is stored
 
     addConsoleMessage(`Day increased to: ${currentDay}, Season: ${SEASONS[currentSeasonIndex]}, Year: ${currentYear}`);
     renderCompanyInfo();

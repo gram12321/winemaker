@@ -1,3 +1,4 @@
+import { saveCompanyInfo } from './adminFunctions.js';
 function initializeSidebar() {
         renderCompanyInfo();
 
@@ -6,6 +7,7 @@ function initializeSidebar() {
     if (logoutLink) {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
+            saveCompanyInfo()
             localStorage.removeItem('companyName');
             window.location.href = '../index.html';
         });

@@ -40,7 +40,7 @@
 
   <script type="module">
       import { initializeSidebar } from '/js/database/loadSidebar.js';
-      import { addMoney, incrementDay, initializeDay } from '/js/endDay.js';
+      import { addMoney, incrementDay } from '/js/endDay.js';
       import { saveCompanyInfo } from '/js/database/adminFunctions.js';
       document.addEventListener('DOMContentLoaded', function() {
           fetch('/html/sidebar.html')
@@ -49,7 +49,7 @@
                   document.getElementById('sidebar-wrapper').innerHTML = data;
                   initializeSidebar();
               });
-          initializeDay(); // Initialize the day when document loads
+
           document.getElementById('add-money-btn').addEventListener('click', addMoney);
           document.getElementById('increment-day-btn').addEventListener('click', incrementDay); // Link button
           document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
