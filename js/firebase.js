@@ -4,9 +4,9 @@ import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs } fro
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD2lqM-Sib19LdlyT0mNRQMW5jOAWQCO78",
-  authDomain: "deepblue-d371b.firebaseapp.com",
-  projectId: "deepblue-d371b",
-  storageBucket: "deepblue-d371b.appspot.com",
+  authDomain: "squashplayer-ac6bb.firebaseapp.com",
+  projectId: "squashplayer-ac6bb",
+  storageBucket: "squashplayer-ac6bb.appspot.com",
   messagingSenderId: "1021331332576",
   appId: "1:1021331332576:web:b0ccde715f406c55d75f85"
 };
