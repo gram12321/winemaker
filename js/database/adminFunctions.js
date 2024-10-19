@@ -4,6 +4,8 @@ async function clearLocalStorage() {
     if (confirm('Are you sure you want to clear all local storage data?')) {
         localStorage.removeItem('companyName');
         localStorage.removeItem('money');
+        localStorage.removeItem('ownedFarmlands'); // Clear land-related data
+        localStorage.removeItem('consoleMessages'); // Clear console messages
         alert('Local storage cleared successfully.');
     }
 }
