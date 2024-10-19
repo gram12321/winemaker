@@ -4,9 +4,9 @@ import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs } fro
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD2lqM-Sib19LdlyT0mNRQMW5jOAWQCO78",
-  authDomain: "squashplayer-ac6bb.firebaseapp.com",
-  projectId: "squashplayer-ac6bb",
-  storageBucket: "squashplayer-ac6bb.appspot.com",
+  authDomain: "winemaker-65b77.firebaseapp.com",
+  projectId: "winemaker-65b77",
+  storageBucket: "winemaker-65b77.appspot.com",
   messagingSenderId: "1021331332576",
   appId: "1:1021331332576:web:b0ccde715f406c55d75f85"
 };
