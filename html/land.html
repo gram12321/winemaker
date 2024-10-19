@@ -13,23 +13,96 @@
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Farmland</h1>
-      <!-- Add game-related HTML and scripts here -->
+      <!-- Buy Land Button -->
+      <button id="buy-land-btn" class="btn btn-success mt-3">Buy Land</button>
+      
+      <!-- Table to display farmland instances -->
+      <table id="farmland-table" class="table table-striped mt-4">
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>Region</th>
+            <th>Acres</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be added dynamically here -->
+        </tbody>
+      </table>
     </div>
   </div>
+
+  <!-- JavaScript libraries -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-  <script type="module" src="/js/database/loadSidebar.js"></script> <!-- Link to the new sidebar initialization script -->
+  
+  <!-- Sidebar Initialization Script -->
+  <script type="module" src="/js/database/loadSidebar.js"></script>
+
+  <!-- Custom JavaScript -->
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { Farmland } from '/js/farmland.js';
+    import { addConsoleMessage } from '/js/console.js';
+
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize sidebar
       fetch('/html/sidebar.html')
         .then(response => response.text())
         .then(data => {
           document.getElementById('sidebar-wrapper').innerHTML = data;
           initializeSidebar();
         });
+
+      const farmlandTableBody = document.querySelector('#farmland-table tbody');
+      const buyLandButton = document.getElementById('buy-land-btn');
+
+      // Load farmland instances from localStorage
+      displayOwnedFarmland();
+
+      if (buyLandButton) {
+        buyLandButton.addEventListener('click', buyLand);
+      }
     });
+
+    function createFarmland(country, region, acres) {
+      return new Farmland(country, region, acres);
+    }
+
+    function buyLand() {
+      const country = "Italy";
+      const region = "Piedmont";
+      const acres = 100;
+
+      const newFarmland = createFarmland(country, region, acres);
+      const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+
+      farmlands.push(newFarmland);
+      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+      addConsoleMessage(`Successfully purchased new farmland: Country = ${newFarmland.country}, Region = ${newFarmland.region}, Acres = ${newFarmland.acres}`);
+      
+      // Refresh the display of owned farmlands
+      displayOwnedFarmland();
+    }
+
+    function displayOwnedFarmland() {
+      const farmlandTableBody = document.querySelector('#farmland-table tbody');
+      farmlandTableBody.innerHTML = ''; // Clear existing rows
+
+      const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+
+      farmlands.forEach(farmland => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${farmland.country}</td>
+          <td>${farmland.region}</td>
+          <td>${farmland.acres}</td>
+        `;
+        farmlandTableBody.appendChild(row);
+      });
+    }
   </script>
 </body>
 </html>
