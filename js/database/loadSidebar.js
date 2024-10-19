@@ -12,7 +12,6 @@ function initializeSidebar() {
     }
 }
 
-// loadSidebar.js
 export function renderCompanyInfo() {
     const companyName = localStorage.getItem('companyName');
     const money = localStorage.getItem('money');

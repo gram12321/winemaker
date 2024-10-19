@@ -41,7 +41,7 @@
   <script type="module">
       import { initializeSidebar } from '/js/database/loadSidebar.js';
       import { addMoney, incrementDay, initializeDay } from '/js/endDay.js';
-      import { saveCompanyInfo } from '/js/database/companyInfo.js';
+      import { saveCompanyInfo } from '/js/database/adminFunctions.js';
       document.addEventListener('DOMContentLoaded', function() {
           fetch('/html/sidebar.html')
               .then(response => response.text())

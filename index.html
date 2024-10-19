@@ -23,7 +23,7 @@
   </div>
   <script type="module" src="js/database/companyInfo.js"></script>
   <script type="module">
-    import { storeCompanyName } from './js/database/companyInfo.js';
+    import { storeCompanyName } from './js/database/adminFunctions.js';
     document.getElementById('login-form').addEventListener('submit', function(event) {
       event.preventDefault(); // Prevent the default form submission
       storeCompanyName(); // Store the company name and handle navigation
