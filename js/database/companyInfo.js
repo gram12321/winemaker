@@ -39,9 +39,6 @@ async function loadExistingCompanyData(companyName) {
 }
 
 
-
-
-
 async function saveCompanyInfo() {
   const companyName = localStorage.getItem('companyName');
   const money = localStorage.getItem('money');
