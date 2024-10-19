@@ -12,15 +12,18 @@ function initializeSidebar() {
     }
 }
 
+// loadSidebar.js
 export function renderCompanyInfo() {
     const companyName = localStorage.getItem('companyName');
     const money = localStorage.getItem('money');
+    const currentDay = localStorage.getItem('day');
     const companyInfoDiv = document.getElementById('companyInfo');
 
     if (companyInfoDiv) {
         companyInfoDiv.innerHTML = `
           <p><strong>Company Info:</strong> ${companyName}</p>
           <p><strong>Money:</strong> $${money}</p>
+          <p><strong>Day:</strong> ${currentDay}</p> <!-- Display day -->
         `;
     }
 

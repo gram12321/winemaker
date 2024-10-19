@@ -18,9 +18,11 @@
       <div class="console-output border mt-3 p-2" style="height: 200px; overflow-y: auto;"></div>
       
       <div class="text-center mt-4">
-        <button id="add-money-btn" class="btn btn-success">Add $10,000</button>
-        <button id="save-company-info-btn" class="btn btn-primary">Save Company Info</button>
+          <button id="add-money-btn" class="btn btn-success">Add $10,000</button>
+          <button id="increment-day-btn" class="btn btn-info">Increment Day</button> <!-- New button -->
+          <button id="save-company-info-btn" class="btn btn-primary">Save Company Info</button>
       </div>
+
 
       <!-- Add game-related HTML and scripts here -->
     </div>
@@ -37,21 +39,21 @@
   <script type="module" src="/js/endDay.js"></script> <!-- Link to the endDay script -->
 
   <script type="module">
-    import { initializeSidebar } from '/js/database/loadSidebar.js';
-    import { addMoney } from '/js/endDay.js';
-    import { saveCompanyInfo } from '/js/database/companyInfo.js'; // Import from the newly created file
-
-    document.addEventListener('DOMContentLoaded', function() {
-      fetch('/html/sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('sidebar-wrapper').innerHTML = data;
-          initializeSidebar();
-        });
-
-      document.getElementById('add-money-btn').addEventListener('click', addMoney);
-      document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo); // Save button event listener
-    });
+      import { initializeSidebar } from '/js/database/loadSidebar.js';
+      import { addMoney, incrementDay, initializeDay } from '/js/endDay.js';
+      import { saveCompanyInfo } from '/js/database/companyInfo.js';
+      document.addEventListener('DOMContentLoaded', function() {
+          fetch('/html/sidebar.html')
+              .then(response => response.text())
+              .then(data => {
+                  document.getElementById('sidebar-wrapper').innerHTML = data;
+                  initializeSidebar();
+              });
+          initializeDay(); // Initialize the day when document loads
+          document.getElementById('add-money-btn').addEventListener('click', addMoney);
+          document.getElementById('increment-day-btn').addEventListener('click', incrementDay); // Link button
+          document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
+      });
   </script>
 </body>
 </html>
