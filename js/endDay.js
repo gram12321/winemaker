@@ -1,4 +1,4 @@
-import {updateCompanyInfo} from './database/companyInfo.js';
+import {updateCompanyInfo} from './database/loadSidebar.js';
 export function addMoney() {
     const currentMoney = localStorage.getItem('money');
     if (currentMoney !== null) {

@@ -40,22 +40,7 @@ async function loadExistingCompanyData(companyName) {
 
 
 
-export function updateCompanyInfo() {
-    const companyName = localStorage.getItem('companyName');
-    const money = localStorage.getItem('money');
-    const companyInfoDiv = document.getElementById('companyInfo');
 
-    if (companyInfoDiv) {
-        companyInfoDiv.innerHTML = `
-          <p><strong>Company Info:</strong> ${companyName}</p>
-          <p><strong>Money:</strong> $${money}</p>
-        `;
-    }
-    const dropdownToggle = document.querySelector('#navbarDropdown');
-    if (companyName && dropdownToggle) {
-        dropdownToggle.textContent = companyName;
-    }
-}
 
 async function saveCompanyInfo() {
   const companyName = localStorage.getItem('companyName');
