@@ -1,49 +1,49 @@
-  class Resource {
-    constructor(name) {
-      this.name = name;
-    }
+class Resource {
+  constructor(name) {
+    this.name = name;
+  }
+}
+
+class Inventory {
+  constructor() {
+    this.resources = {};
   }
 
-  class Inventory {
-    constructor() {
-      this.resources = {};
+  addResource(resource, amount = 0) {
+    if (!this.resources[resource.name]) {
+      this.resources[resource.name] = 0;
     }
-
-    addResource(resource, amount = 0) {
-      if (!this.resources[resource.name]) {
-        this.resources[resource.name] = 0;
-      }
-      this.resources[resource.name] += amount;
-    }
-
-    getResourceAmount(name) {
-      return this.resources[name] || 0;
-    }
-
-    setResourceAmount(name, amount) {
-      this.resources[name] = amount;
-    }
+    this.resources[resource.name] += amount;
   }
 
-  function displayInventory(inventory) {
-    const inventoryTableBody = document.getElementById('inventory-table-body');
-    inventoryTableBody.innerHTML = ''; // Clear existing content
-    for (const [name, amount] of Object.entries(inventory.resources)) {
-      const row = document.createElement('tr');
-      row.innerHTML = `<td>${name}</td><td>${amount}</td>`;
-      inventoryTableBody.appendChild(row);
-    }
+  getResourceAmount(name) {
+    return this.resources[name] || 0;
   }
 
-  // Instantiate resources
-  const barbera = new Resource('Barbera');
-  const chardonnay = new Resource('Chardonnay');
+  setResourceAmount(name, amount) {
+    this.resources[name] = amount;
+  }
+}
 
-  // Create player inventory
-  const playerInventory = new Inventory();
+function displayInventory(inventory) {
+  const inventoryTableBody = document.getElementById('inventory-table-body');
+  inventoryTableBody.innerHTML = ''; // Clear existing content
+  for (const [name, amount] of Object.entries(inventory.resources)) {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${name}</td><td>${amount}</td>`;
+    inventoryTableBody.appendChild(row);
+  }
+}
 
-  // Add 1 Barbera to the inventory
-  playerInventory.addResource(barbera, 1);
+// Instantiate resources
+const barbera = new Resource('Barbera');
+const chardonnay = new Resource('Chardonnay');
+const allResources = [barbera, chardonnay]; // List of all resources
 
-  // Export necessary entities
-  export { Resource, Inventory, displayInventory, playerInventory };
+// Create player inventory
+const playerInventory = new Inventory();
+playerInventory.addResource(barbera, 5); // Sample inventory data
+
+
+// Export necessary entities
+export { Resource, Inventory, displayInventory, playerInventory, allResources };
