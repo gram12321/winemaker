@@ -25,9 +25,11 @@
             <th>Country</th>
             <th>Region</th>
             <th>Acres</th>
+            <th>Planted</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="farmland-table-body">
           <!-- Rows will be added dynamically here -->
         </tbody>
       </table>
@@ -44,11 +46,10 @@
 
   <!-- Custom JavaScript -->
   <script type="module">
+    import { displayOwnedFarmland, buyLand, plantField } from '/js/farmland.js';
     import { initializeSidebar } from '/js/database/loadSidebar.js';
-    import {displayOwnedFarmland, buyLand} from '/js/farmland.js';
 
-
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       // Initialize sidebar
       fetch('/html/sidebar.html')
         .then(response => response.text())
@@ -57,17 +58,15 @@
           initializeSidebar();
         });
 
-      const farmlandTableBody = document.querySelector('#farmland-table tbody');
       const buyLandButton = document.getElementById('buy-land-btn');
 
-      // Load farmland instances from localStorage
-      displayOwnedFarmland();
+      // Call displayOwnedFarmland after the DOM is fully loaded
+      displayOwnedFarmland(); 
 
       if (buyLandButton) {
         buyLandButton.addEventListener('click', buyLand);
       }
     });
-
   </script>
 </body>
 </html>
