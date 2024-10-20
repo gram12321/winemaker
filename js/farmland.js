@@ -3,13 +3,13 @@ import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import n
 import { allResources } from '/js/resource.js';
 
 class Farmland {
-  constructor(id, name, country, region, acres, planted = 0) {
+  constructor(id, name, country, region, acres, plantedResource = null) {
     this.id = id;
     this.name = name;
     this.country = country;
     this.region = region;
     this.acres = acres;
-    this.planted = planted;
+    this.plantedResource = plantedResource;
   }
 }
 
@@ -59,7 +59,7 @@ function displayOwnedFarmland() {
       <td>${farmland.country}</td>
       <td>${farmland.region}</td>
       <td>${farmland.acres}</td>
-      <td>${farmland.planted ? 'Planted' : 'Empty'}</td>
+      <td>${farmland.plantedResource || 'Empty'}</td>
       <td>
         <select class="resource-select">${resourceOptions}</select>
         <button class="btn btn-warning plant-field-btn">Plant the Field</button>
@@ -77,7 +77,7 @@ function displayOwnedFarmland() {
 function plantField(index, resourceName) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   if (farmlands[index]) {
-    farmlands[index].planted = resourceName;
+    farmlands[index].plantedResource = resourceName; // Update plantedResource
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     addConsoleMessage(`Field ID ${farmlands[index].id} has been planted with ${resourceName}.`);
     displayOwnedFarmland(); // Refresh the table display
