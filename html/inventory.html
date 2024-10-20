@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game Page</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+    </div>
+    <!-- Main Content -->
+    <div class="container text-center flex-grow-1" id="page-content-wrapper">
+      <h1>Inventory</h1>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Resource</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="inventory-table-body">
+          <!-- Resource rows will be dynamically generated here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Properly order JS dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Ensure init.js handles sidebar loading and player info updates -->
+  <script type="module" src="/js/database/loadSidebar.js"></script> <!-- Sidebar initialization script -->
+
+  <script type="module">
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { playerInventory, displayInventory } from '/js/resource.js'; // Import populated inventory and display function
+
+    document.addEventListener('DOMContentLoaded', function() {
+      fetch('/html/sidebar.html')
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById('sidebar-wrapper').innerHTML = data;
+          initializeSidebar();
+        });
+
+      // Display the inventory using the imported playerInventory
+      displayInventory(playerInventory);
+    });
+  </script>
+</body>
+</html>
