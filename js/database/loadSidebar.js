@@ -1,18 +1,25 @@
 import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
 function initializeSidebar() {
-        renderCompanyInfo();
-
+    renderCompanyInfo();
     // Attach logout event handler
     const logoutLink = document.getElementById('logout-link');
     if (logoutLink) {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
-            saveCompanyInfo()
-            clearLocalStorage()
+            saveCompanyInfo();
+            clearLocalStorage();
             window.location.href = '../index.html';
         });
     }
 }
+// Ensure data is saved when the user closes or reloads the page
+window.addEventListener('beforeunload', async (event) => {
+    await saveCompanyInfo();
+    clearLocalStorage();
+
+    event.returnValue = ''; // Triggers a confirmation dialog in supporting browsers
+});
+
 
 export function renderCompanyInfo() {
     const companyName = localStorage.getItem('companyName');
