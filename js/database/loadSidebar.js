@@ -1,4 +1,4 @@
-import { saveCompanyInfo } from './adminFunctions.js';
+import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
 function initializeSidebar() {
         renderCompanyInfo();
 
@@ -8,7 +8,7 @@ function initializeSidebar() {
         logoutLink.addEventListener('click', (e) => {
             e.preventDefault();
             saveCompanyInfo()
-            localStorage.removeItem('companyName');
+            clearLocalStorage()
             window.location.href = '../index.html';
         });
     }

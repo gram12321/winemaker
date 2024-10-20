@@ -16,16 +16,14 @@ async function clearFirestore() {
 }
 
 async function clearLocalStorage() {
-    if (confirm('Are you sure you want to clear all local storage data?')) {
-        localStorage.removeItem('companyName');
-        localStorage.removeItem('money');
-        localStorage.removeItem('day'); // Clear day
-        localStorage.removeItem('season'); // Clear season
-        localStorage.removeItem('year'); // Clear year
-        localStorage.removeItem('ownedFarmlands'); // Clear land-related data
-        localStorage.removeItem('consoleMessages'); // Clear console messages
-        alert('Local storage cleared successfully.');
-    }
+    localStorage.removeItem('companyName');
+    localStorage.removeItem('money');
+    localStorage.removeItem('day'); // Clear day
+    localStorage.removeItem('season'); // Clear season
+    localStorage.removeItem('year'); // Clear year
+    localStorage.removeItem('ownedFarmlands'); // Clear land-related data
+    localStorage.removeItem('playerInventory'); // Clear inventory data
+    localStorage.removeItem('consoleMessages'); // Clear console messages
 }
 
 async function storeCompanyName() {
@@ -69,7 +67,7 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('day', data.day); // Load day
     localStorage.setItem('season', data.season); // Load season
     localStorage.setItem('year', data.year); // Load year
-    localStorage.setItem('ownedFarmlands', data.ownedFarmlands); // Load owned farmlands
+    localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]'); // Load owned farmlands
   }
 }
 
@@ -94,7 +92,7 @@ async function saveCompanyInfo() {
       day: day, 
       season: season, 
       year: year, 
-      ownedFarmlands: ownedFarmlands 
+      ownedFarmlands: ownedFarmlands // Save farmlands
     });
     console.log("Company info saved successfully");
   } catch (error) {
