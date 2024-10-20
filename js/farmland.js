@@ -10,34 +10,11 @@ class Farmland {
   }
 }
 
-// Export the Farmland class to make it available for import in other scripts
-export { Farmland };
 
+// script for land.html
 
-
-import { initializeSidebar } from '/js/database/loadSidebar.js';
 import { addConsoleMessage } from '/js/console.js';
 import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import names
-
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize sidebar
-  fetch('/html/sidebar.html')
-    .then(response => response.text())
-    .then(data => {
-      document.getElementById('sidebar-wrapper').innerHTML = data;
-      initializeSidebar();
-    });
-
-  const farmlandTableBody = document.querySelector('#farmland-table tbody');
-  const buyLandButton = document.getElementById('buy-land-btn');
-
-  // Load farmland instances from localStorage
-  displayOwnedFarmland();
-
-  if (buyLandButton) {
-    buyLandButton.addEventListener('click', buyLand);
-  }
-});
 
 function createFarmland(id, name, country, region, acres) {
   return new Farmland(id, name, country, region, acres);
@@ -90,4 +67,5 @@ function displayOwnedFarmland() {
   });
 }
 
-export { buyLand, displayOwnedFarmland }
+export { buyLand, displayOwnedFarmland, Farmland }
+
