@@ -1,6 +1,6 @@
 import { addConsoleMessage } from '/js/console.js';
 import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import names
-import { allResources } from '/js/resource.js';
+import { allResources, playerInventory, Resource } from '/js/resource.js';
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResource = null) {
@@ -53,6 +53,9 @@ function displayOwnedFarmland() {
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
   farmlands.forEach((farmland, index) => {
     const row = document.createElement('tr');
+
+    const isPlanted = farmland.plantedResource != null;
+    const harvestButtonState = isPlanted ? '' : 'disabled';
     row.innerHTML = `
       <td>${farmland.id}</td>
       <td>${farmland.name}</td>
@@ -63,14 +66,22 @@ function displayOwnedFarmland() {
       <td>
         <select class="resource-select">${resourceOptions}</select>
         <button class="btn btn-warning plant-field-btn">Plant the Field</button>
+        <button class="btn btn-success harvest-field-btn" ${harvestButtonState}>Harvest</button>
       </td>
     `;
     farmlandTableBody.appendChild(row);
-    // Add event listener for the "Plant the Field" button
+    // Planted Resource Logic
     row.querySelector('.plant-field-btn').addEventListener('click', () => {
       const resourceSelect = row.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
       plantField(index, selectedResource);
+    });
+    // Harvest Logic
+    const harvestButton = row.querySelector('.harvest-field-btn');
+    harvestButton.addEventListener('click', () => {
+      if (isPlanted) {
+        harvestField(index);
+      }
     });
   });
 }
@@ -80,6 +91,22 @@ function plantField(index, resourceName) {
     farmlands[index].plantedResource = resourceName; // Update plantedResource
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     addConsoleMessage(`Field ID ${farmlands[index].id} has been planted with ${resourceName}.`);
+    displayOwnedFarmland(); // Refresh the table display
+  }
+}
+function harvestField(index) {
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  if (farmlands[index] && farmlands[index].plantedResource) {
+    const resourceName = farmlands[index].plantedResource;
+    const acres = farmlands[index].acres;
+    // Add to inventory
+    playerInventory.addResource(new Resource(resourceName), acres);
+    addConsoleMessage(`Harvested ${acres} of ${resourceName} from Field ID ${farmlands[index].id}.`);
+    // Update localStorage to reflect changes in the inventory
+    localStorage.setItem('playerInventory', JSON.stringify(playerInventory.resources));
+    // Reset plantedResource after harvesting
+    farmlands[index].plantedResource = null;
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     displayOwnedFarmland(); // Refresh the table display
   }
 }

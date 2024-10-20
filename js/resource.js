@@ -42,8 +42,10 @@ const allResources = [barbera, chardonnay]; // List of all resources
 
 // Create player inventory
 const playerInventory = new Inventory();
-playerInventory.addResource(barbera, 5); // Sample inventory data
-
+const savedResources = JSON.parse(localStorage.getItem('playerInventory')) || {};
+for (const [name, amount] of Object.entries(savedResources)) {
+  playerInventory.addResource(new Resource(name), amount);
+}
 
 // Export necessary entities
 export { Resource, Inventory, displayInventory, playerInventory, allResources };
