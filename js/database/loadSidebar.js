@@ -12,13 +12,7 @@ function initializeSidebar() {
         });
     }
 }
-// Ensure data is saved when the user closes or reloads the page
-window.addEventListener('beforeunload', async (event) => {
-    await saveCompanyInfo();
-    clearLocalStorage();
 
-    event.returnValue = ''; // Triggers a confirmation dialog in supporting browsers
-});
 
 
 export function renderCompanyInfo() {
