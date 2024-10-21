@@ -7,28 +7,27 @@ class Resource {
 }
 
 class Inventory {
-  constructor() {
-    this.resources = {};
-  }
+  // Use static property to store resources
+  static resources = {};
 
-  addResource(resource, amount = 0) {
+  static addResource(resource, amount = 0) {
     this.resources[resource.name] = (this.resources[resource.name] || 0) + amount;
   }
 
-  getResourceAmount(name) {
+  static getResourceAmount(name) {
     return this.resources[name] || 0;
   }
 
-  setResourceAmount(name, amount) {
+  static setResourceAmount(name, amount) {
     this.resources[name] = amount;
   }
 }
 
-function displayInventory(inventory) {
-  for (const [name, amount] of Object.entries(inventory.resources)) {
+function displayInventory() {
+  for (const [name, amount] of Object.entries(Inventory.resources)) { // Reference static property
     const resource = allResources.find((r) => r.name === name);
     if (resource) {
-      const tableBodyId = `${resource.category}-table-body`; // Use category to build the ID
+      const tableBodyId = `${resource.category}-table-body`;
       const inventoryTableBody = document.getElementById(tableBodyId);
 
       if (inventoryTableBody) {
@@ -53,21 +52,13 @@ resourceNames.forEach(name => {
   allResources.push(resource);
 });
 
-
-
-// Create player inventory
-const playerInventory = new Inventory();
+// Initialize player inventory from localStorage
 const savedResources = JSON.parse(localStorage.getItem('playerInventory')) || {};
 for (const [name, amount] of Object.entries(savedResources)) {
-  playerInventory.addResource(new Resource(name, 'warehouse', 'Grapes'), amount);
+  Inventory.addResource(new Resource(name, 'warehouse', 'Grapes'), amount); // Use static method
 }
 
-// Utility function to create resources dynamically during harvesting
-function createResource(name, category, state) {
-  const resource = new Resource(name, category, state);
-  allResources.push(resource);
-  return resource;
-}
+
 
 // Export necessary entities
-export { Resource, Inventory, displayInventory, playerInventory, createResource, allResources };
+export { Resource, Inventory, displayInventory, allResources };

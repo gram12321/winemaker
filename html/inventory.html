@@ -80,7 +80,7 @@
 
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
-    import { playerInventory, displayInventory } from '/js/resource.js'; // Import populated inventory and display function
+    import { Inventory, displayInventory } from '/js/resource.js'; // Adjusted import
 
     document.addEventListener('DOMContentLoaded', function() {
       fetch('/html/sidebar.html')
@@ -90,8 +90,8 @@
           initializeSidebar();
         });
 
-      // Display each inventory by category
-      displayInventory(playerInventory);
+      // Display each inventory by category using class method
+      displayInventory(Inventory);
     });
   </script>
 </body>

@@ -90,14 +90,14 @@
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { addConsoleMessage } from '/js/console.js';
-    import { playerInventory } from '/js/resource.js';
+    import { Inventory } from '/js/resource.js'; // Adjusted import
 
     const totalProcesses = 2; // Update this as you add more processes
     let completedProcesses = 0;
 
     function populateCrushInventoryList() {
       const crushInventoryList = document.getElementById('crush-inventory-list');
-      const resources = playerInventory.resources;
+      const resources = Inventory.resources; // Use static property
 
       crushInventoryList.innerHTML = ''; // Clear existing inventory list
 
@@ -113,7 +113,7 @@
 
     function populateResourceSelect() {
       const selectElement = document.getElementById('crush-resource-select');
-      const resources = playerInventory.resources;
+      const resources = Inventory.resources; // Use static property
 
       selectElement.innerHTML = ''; // Clear existing options
 

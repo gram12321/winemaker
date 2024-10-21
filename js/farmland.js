@@ -1,6 +1,6 @@
 import { addConsoleMessage } from '/js/console.js';
 import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import names
-import { allResources, playerInventory, Resource } from '/js/resource.js';
+import { allResources, Resource, Inventory } from '/js/resource.js';
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResource = null) {
@@ -96,28 +96,19 @@ function plantField(index, resourceName) {
     displayOwnedFarmland(); // Refresh the table display
   }
 }
-
 function harvestField(index) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-
   if (farmlands[index] && farmlands[index].plantedResource) {
     const resourceName = farmlands[index].plantedResource;
     const acres = farmlands[index].acres;
-
     const state = 'Grapes'; // Initial state of harvested resource
     const category = 'warehouse'; // Initial category of harvested resource
-
     const harvestedResource = new Resource(resourceName, category, state);
-
-    playerInventory.addResource(harvestedResource, acres);
-
+    Inventory.addResource(harvestedResource, acres); // Use static method
     addConsoleMessage(`Harvested ${acres} of ${resourceName} in ${state} state from Field ID ${farmlands[index].id}.`);
-
-    localStorage.setItem('playerInventory', JSON.stringify(playerInventory.resources));
-
+    localStorage.setItem('playerInventory', JSON.stringify(Inventory.resources)); // Use static property
     farmlands[index].plantedResource = null;
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
     displayOwnedFarmland();
   }
 }
