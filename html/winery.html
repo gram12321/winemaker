@@ -31,6 +31,9 @@
           </div>
           <div id="collapseCrush" class="collapse show" data-parent="#wineryProcesses">
             <div class="card-body">
+              <select class="form-control mb-2" id="crush-resource-select">
+                <!-- Options will be populated dynamically -->
+              </select>
               <button class="btn btn-primary mb-2" id="crush-grapes-btn">Start Crushing</button>
             </div>
           </div>
@@ -51,7 +54,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- More processes can be added similarly here... -->
 
       </div>
@@ -68,12 +71,12 @@
       <div class="console-output border mt-3 p-2" style="height: 200px; overflow-y: auto;"></div>
     </div>
   </div>
-  
+
   <!-- JavaScript Libraries -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-  
+
   <!-- Sidebar Initialization Script -->
   <script type="module" src="/js/database/loadSidebar.js"></script>
   
@@ -81,9 +84,26 @@
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { addConsoleMessage } from '/js/console.js';
+    import { playerInventory } from '/js/resource.js';
 
     const totalProcesses = 2; // Update this as you add more processes
     let completedProcesses = 0;
+
+    function populateResourceSelect() {
+      const selectElement = document.getElementById('crush-resource-select');
+      
+      // Assuming playerInventory.resources is a map of resources
+      const resources = playerInventory.resources;
+
+      for (const resourceName in resources) {
+        if (resources.hasOwnProperty(resourceName)) {
+          const option = document.createElement('option');
+          option.value = resourceName;
+          option.textContent = `${resourceName} (${resources[resourceName]} available)`;
+          selectElement.appendChild(option);
+        }
+      }
+    }
 
     function updateOverallProgress() {
       const progress = (completedProcesses / totalProcesses) * 100;
@@ -94,6 +114,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
+      // Populate the resource select dropdown
+      populateResourceSelect();
+
       // Initialize sidebar
       fetch('/html/sidebar.html')
           .then(response => response.text())
@@ -103,19 +126,20 @@
           });
 
       document.getElementById('crush-grapes-btn').addEventListener('click', function() {
-        if (completedProcesses < totalProcesses) {
+        const selectedResource = document.getElementById('crush-resource-select').value;
+        if(selectedResource) {
+          addConsoleMessage(`Crushing Grapes using ${selectedResource}.`);
           completedProcesses += 1;
-          addConsoleMessage('Crushing Grapes process completed.');
           updateOverallProgress();
+        } else {
+          addConsoleMessage('No resource selected for crushing.');
         }
       });
 
       document.getElementById('fermentation-btn').addEventListener('click', function() {
-        if (completedProcesses < totalProcesses) {
-          completedProcesses += 1;
-          addConsoleMessage('Fermentation process completed.');
-          updateOverallProgress();
-        }
+        completedProcesses += 1;
+        addConsoleMessage('Fermentation process completed.');
+        updateOverallProgress();
       });
 
       // Add more event listeners for other processes...
