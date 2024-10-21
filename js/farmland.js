@@ -16,7 +16,6 @@ class Farmland {
 function createFarmland(id, name, country, region, acres) {
   return new Farmland(id, name, country, region, acres);
 }
-// script for land.html
 
 function getLastId(farmlands) {
   if (farmlands.length === 0) return 0;
@@ -24,7 +23,7 @@ function getLastId(farmlands) {
 }
 
 function getRandomName() {
-  const allNames = italianMaleNames.concat(italianFemaleNames); // Combine male and female names
+  const allNames = italianMaleNames.concat(italianFemaleNames);
   return allNames[Math.floor(Math.random() * allNames.length)];
 }
 
@@ -35,14 +34,11 @@ function buyLand() {
 
   const newFarmland = createFarmland(newId, newName, "Italy", "Piedmont", 100);
 
-  // Save to localStorage
   farmlands.push(newFarmland);
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
-  // Add console message using addConsoleMessage function
   addConsoleMessage(`Successfully purchased new farmland: ID = ${newFarmland.id}, Name = ${newFarmland.name}, Country = ${newFarmland.country}, Region = ${newFarmland.region}, Acres = ${newFarmland.acres}`);
 
-  // Refresh the display of owned farmlands
   displayOwnedFarmland();
 }
 
@@ -50,10 +46,13 @@ function displayOwnedFarmland() {
   const farmlandTableBody = document.querySelector('#farmland-table-body');
   farmlandTableBody.innerHTML = ''; // Clear existing rows
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
+
+  // Ensure allResources is populated
+  const grapeResources = allResources.filter(resource => resource.state === 'Grapes'); // Only list resources that are in Grapes state
+  const resourceOptions = grapeResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
+
   farmlands.forEach((farmland, index) => {
     const row = document.createElement('tr');
-
     const isPlanted = farmland.plantedResource != null;
     const harvestButtonState = isPlanted ? '' : 'disabled';
     row.innerHTML = `
@@ -70,12 +69,14 @@ function displayOwnedFarmland() {
       </td>
     `;
     farmlandTableBody.appendChild(row);
+
     // Planted Resource Logic
     row.querySelector('.plant-field-btn').addEventListener('click', () => {
       const resourceSelect = row.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
       plantField(index, selectedResource);
     });
+
     // Harvest Logic
     const harvestButton = row.querySelector('.harvest-field-btn');
     harvestButton.addEventListener('click', () => {
@@ -85,33 +86,40 @@ function displayOwnedFarmland() {
     });
   });
 }
+
 function plantField(index, resourceName) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   if (farmlands[index]) {
-    farmlands[index].plantedResource = resourceName; // Update plantedResource
+    farmlands[index].plantedResource = resourceName;
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     addConsoleMessage(`Field ID ${farmlands[index].id} has been planted with ${resourceName}.`);
     displayOwnedFarmland(); // Refresh the table display
   }
 }
+
 function harvestField(index) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+
   if (farmlands[index] && farmlands[index].plantedResource) {
     const resourceName = farmlands[index].plantedResource;
     const acres = farmlands[index].acres;
-    // Add to inventory
-    playerInventory.addResource(new Resource(resourceName), acres);
-    addConsoleMessage(`Harvested ${acres} of ${resourceName} from Field ID ${farmlands[index].id}.`);
-    // Update localStorage to reflect changes in the inventory
+
+    const state = 'Grapes'; // Initial state of harvested resource
+    const category = 'warehouse'; // Initial category of harvested resource
+
+    const harvestedResource = new Resource(resourceName, category, state);
+
+    playerInventory.addResource(harvestedResource, acres);
+
+    addConsoleMessage(`Harvested ${acres} of ${resourceName} in ${state} state from Field ID ${farmlands[index].id}.`);
+
     localStorage.setItem('playerInventory', JSON.stringify(playerInventory.resources));
-    // Reset plantedResource after harvesting
+
     farmlands[index].plantedResource = null;
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-    displayOwnedFarmland(); // Refresh the table display
+
+    displayOwnedFarmland();
   }
 }
 
 export { buyLand, Farmland, displayOwnedFarmland, plantField };
-
-
-

@@ -17,9 +17,16 @@
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Winery</h1>
 
-      <!-- Winery Processes -->
-      <div class="accordion mt-5" id="wineryProcesses">
+      <!-- Player Inventory Section -->
+      <div class="my-4">
+        <h3>Player Inventory</h3>
+        <ul class="list-group" id="inventory-list">
+          <!-- Inventory items will be populated here -->
+        </ul>
+      </div>
 
+      <!-- Winery Processes -->
+      <div class="accordion" id="wineryProcesses">
         <!-- Crushing Grapes -->
         <div class="card">
           <div class="card-header" id="headingCrush">
@@ -89,10 +96,22 @@
     const totalProcesses = 2; // Update this as you add more processes
     let completedProcesses = 0;
 
+    function populateInventoryList() {
+      const inventoryList = document.getElementById('inventory-list');
+      const resources = playerInventory.resources;
+      
+      for (const resourceName in resources) {
+        if (resources.hasOwnProperty(resourceName)) {
+          const listItem = document.createElement('li');
+          listItem.className = 'list-group-item';
+          listItem.textContent = `${resourceName}: ${resources[resourceName]} available`;
+          inventoryList.appendChild(listItem);
+        }
+      }
+    }
+
     function populateResourceSelect() {
       const selectElement = document.getElementById('crush-resource-select');
-      
-      // Assuming playerInventory.resources is a map of resources
       const resources = playerInventory.resources;
 
       for (const resourceName in resources) {
@@ -114,7 +133,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      // Populate the resource select dropdown
+      // Populate inventory list and resource select dropdown
+      populateInventoryList();
       populateResourceSelect();
 
       // Initialize sidebar

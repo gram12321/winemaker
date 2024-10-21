@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Game Page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Page - Inventory</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/style.css" rel="stylesheet">
 </head>
@@ -10,20 +12,61 @@
     <!-- Sidebar -->
     <div id="sidebar-wrapper">
     </div>
+
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Inventory</h1>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Resource</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="inventory-table-body">
-          <!-- Resource rows will be dynamically generated here -->
-        </tbody>
-      </table>
+
+      <!-- Warehouse Inventory -->
+      <section class="my-4">
+        <h3>Warehouse</h3>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Amount</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody id="warehouse-table-body">
+            <!-- Warehouse resources will be dynamically generated here -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Fermentation Tanks Inventory -->
+      <section class="my-4">
+        <h3>Fermentation Tanks</h3>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Amount</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody id="fermentation-table-body">
+            <!-- Fermentation Tanks resources will be dynamically generated here -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Wine Cellar Inventory -->
+      <section class="my-4">
+        <h3>Wine Cellar</h3>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Amount</th>
+              <th>State</th>
+            </tr>
+          </thead>
+          <tbody id="winecellar-table-body">
+            <!-- Wine Cellar resources will be dynamically generated here -->
+          </tbody>
+        </table>
+      </section>
     </div>
   </div>
 
@@ -33,7 +76,7 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
   <!-- Ensure init.js handles sidebar loading and player info updates -->
-  <script type="module" src="/js/database/loadSidebar.js"></script> <!-- Sidebar initialization script -->
+  <script type="module" src="/js/database/loadSidebar.js"></script>
 
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
@@ -47,7 +90,7 @@
           initializeSidebar();
         });
 
-      // Display the inventory using the imported playerInventory
+      // Display each inventory by category
       displayInventory(playerInventory);
     });
   </script>

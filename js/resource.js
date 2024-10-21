@@ -1,6 +1,8 @@
 class Resource {
-  constructor(name) {
+  constructor(name, category, state) {
     this.name = name;
+    this.category = category; // Determines the inventory location
+    this.state = state; // Describes the current state of the resource
   }
 }
 
@@ -10,10 +12,7 @@ class Inventory {
   }
 
   addResource(resource, amount = 0) {
-    if (!this.resources[resource.name]) {
-      this.resources[resource.name] = 0;
-    }
-    this.resources[resource.name] += amount;
+    this.resources[resource.name] = (this.resources[resource.name] || 0) + amount;
   }
 
   getResourceAmount(name) {
@@ -26,26 +25,49 @@ class Inventory {
 }
 
 function displayInventory(inventory) {
-  const inventoryTableBody = document.getElementById('inventory-table-body');
-  inventoryTableBody.innerHTML = ''; // Clear existing content
   for (const [name, amount] of Object.entries(inventory.resources)) {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${name}</td><td>${amount}</td>`;
-    inventoryTableBody.appendChild(row);
+    const resource = allResources.find((r) => r.name === name);
+    if (resource) {
+      const tableBodyId = `${resource.category}-table-body`; // Use category to build the ID
+      const inventoryTableBody = document.getElementById(tableBodyId);
+
+      if (inventoryTableBody) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${name}</td><td>${amount}</td><td>${resource.state}</td>`;
+        inventoryTableBody.appendChild(row);
+      }
+    }
   }
 }
 
-// Instantiate resources
-const barbera = new Resource('Barbera');
-const chardonnay = new Resource('Chardonnay');
-const allResources = [barbera, chardonnay]; // List of all resources
+// Define resource names for use in resource creation
+const resourceNames = ['Barbera', 'Chardonnay']; // Add more as needed
+
+// Placeholder for dynamically created resources
+const allResources = [];
+
+// Initialize resources and add them to allResources
+resourceNames.forEach(name => {
+  // Initialize each resource with a suitable default category and state
+  const resource = new Resource(name, 'warehouse', 'Grapes');
+  allResources.push(resource);
+});
+
+
 
 // Create player inventory
 const playerInventory = new Inventory();
 const savedResources = JSON.parse(localStorage.getItem('playerInventory')) || {};
 for (const [name, amount] of Object.entries(savedResources)) {
-  playerInventory.addResource(new Resource(name), amount);
+  playerInventory.addResource(new Resource(name, 'warehouse', 'Grapes'), amount);
+}
+
+// Utility function to create resources dynamically during harvesting
+function createResource(name, category, state) {
+  const resource = new Resource(name, category, state);
+  allResources.push(resource);
+  return resource;
 }
 
 // Export necessary entities
-export { Resource, Inventory, displayInventory, playerInventory, allResources };
+export { Resource, Inventory, displayInventory, playerInventory, createResource, allResources };
