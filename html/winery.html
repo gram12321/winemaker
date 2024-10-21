@@ -12,18 +12,10 @@
     <!-- Sidebar -->
     <div id="sidebar-wrapper">
     </div>
-    
+
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Winery</h1>
-
-      <!-- Player Inventory Section -->
-      <div class="my-4">
-        <h3>Player Inventory</h3>
-        <ul class="list-group" id="inventory-list">
-          <!-- Inventory items will be populated here -->
-        </ul>
-      </div>
 
       <!-- Winery Processes -->
       <div class="accordion" id="wineryProcesses">
@@ -37,11 +29,22 @@
             </h2>
           </div>
           <div id="collapseCrush" class="collapse show" data-parent="#wineryProcesses">
-            <div class="card-body">
-              <select class="form-control mb-2" id="crush-resource-select">
-                <!-- Options will be populated dynamically -->
-              </select>
-              <button class="btn btn-primary mb-2" id="crush-grapes-btn">Start Crushing</button>
+            <div class="card-body d-flex">
+              <!-- Player Inventory Section -->
+              <div class="pr-4" style="min-width: 200px;">
+                <h4>Grapes in Inventory</h4>
+                <ul class="list-group" id="crush-inventory-list">
+                  <!-- Inventory items will be populated here dynamically -->
+                </ul>
+              </div>
+              <!-- Crushing Content Section -->
+              <div class="flex-grow-1">
+                <h4>Crushing</h4>
+                <select class="form-control mb-2" id="crush-resource-select">
+                  <!-- Options will be populated dynamically -->
+                </select>
+                <button class="btn btn-primary mb-2" id="crush-grapes-btn">Start Crushing</button>
+              </div>
             </div>
           </div>
         </div>
@@ -61,9 +64,6 @@
             </div>
           </div>
         </div>
-
-        <!-- More processes can be added similarly here... -->
-
       </div>
 
       <!-- Overall Progress Section -->
@@ -75,7 +75,9 @@
       </div>
 
       <!-- Console Output -->
-      <div class="console-output border mt-3 p-2" style="height: 200px; overflow-y: auto;"></div>
+      <div class="console-output border mt-3 p-2" style="height: 200px; overflow-y: auto;" id="console-output">
+        <!-- Console messages will be appended here dynamically -->
+      </div>
     </div>
   </div>
 
@@ -84,9 +86,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Sidebar Initialization Script -->
-  <script type="module" src="/js/database/loadSidebar.js"></script>
-  
   <!-- Custom JavaScript -->
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
@@ -96,16 +95,18 @@
     const totalProcesses = 2; // Update this as you add more processes
     let completedProcesses = 0;
 
-    function populateInventoryList() {
-      const inventoryList = document.getElementById('inventory-list');
+    function populateCrushInventoryList() {
+      const crushInventoryList = document.getElementById('crush-inventory-list');
       const resources = playerInventory.resources;
-      
+
+      crushInventoryList.innerHTML = ''; // Clear existing inventory list
+
       for (const resourceName in resources) {
         if (resources.hasOwnProperty(resourceName)) {
           const listItem = document.createElement('li');
           listItem.className = 'list-group-item';
           listItem.textContent = `${resourceName}: ${resources[resourceName]} available`;
-          inventoryList.appendChild(listItem);
+          crushInventoryList.appendChild(listItem);
         }
       }
     }
@@ -113,6 +114,8 @@
     function populateResourceSelect() {
       const selectElement = document.getElementById('crush-resource-select');
       const resources = playerInventory.resources;
+
+      selectElement.innerHTML = ''; // Clear existing options
 
       for (const resourceName in resources) {
         if (resources.hasOwnProperty(resourceName)) {
@@ -134,7 +137,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
       // Populate inventory list and resource select dropdown
-      populateInventoryList();
+      populateCrushInventoryList();
       populateResourceSelect();
 
       // Initialize sidebar
@@ -147,7 +150,7 @@
 
       document.getElementById('crush-grapes-btn').addEventListener('click', function() {
         const selectedResource = document.getElementById('crush-resource-select').value;
-        if(selectedResource) {
+        if (selectedResource) {
           addConsoleMessage(`Crushing Grapes using ${selectedResource}.`);
           completedProcesses += 1;
           updateOverallProgress();
@@ -161,8 +164,6 @@
         addConsoleMessage('Fermentation process completed.');
         updateOverallProgress();
       });
-
-      // Add more event listeners for other processes...
     });
   </script>
 </body>
