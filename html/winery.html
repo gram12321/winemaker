@@ -90,41 +90,39 @@
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { addConsoleMessage } from '/js/console.js';
-    import { Inventory } from '/js/resource.js'; // Adjusted import
+    import { inventoryInstance } from '/js/resource.js'; // Import inventoryInstance directly
 
     const totalProcesses = 2; // Update this as you add more processes
     let completedProcesses = 0;
 
     function populateCrushInventoryList() {
       const crushInventoryList = document.getElementById('crush-inventory-list');
-      const resources = Inventory.resources; // Use static property
 
       crushInventoryList.innerHTML = ''; // Clear existing inventory list
 
-      for (const resourceName in resources) {
-        if (resources.hasOwnProperty(resourceName)) {
+      inventoryInstance.items.forEach(item => {
+        if (item.state === 'Grapes') {
           const listItem = document.createElement('li');
           listItem.className = 'list-group-item';
-          listItem.textContent = `${resourceName}: ${resources[resourceName]} available`;
+          listItem.textContent = `${item.resource.name}: ${item.amount} available`;
           crushInventoryList.appendChild(listItem);
         }
-      }
+      });
     }
 
     function populateResourceSelect() {
       const selectElement = document.getElementById('crush-resource-select');
-      const resources = Inventory.resources; // Use static property
 
       selectElement.innerHTML = ''; // Clear existing options
 
-      for (const resourceName in resources) {
-        if (resources.hasOwnProperty(resourceName)) {
+      inventoryInstance.items.forEach(item => {
+        if (item.state === 'Grapes') {
           const option = document.createElement('option');
-          option.value = resourceName;
-          option.textContent = `${resourceName} (${resources[resourceName]} available)`;
+          option.value = item.resource.name;
+          option.textContent = `${item.resource.name} (${item.amount} available)`;
           selectElement.appendChild(option);
         }
-      }
+      });
     }
 
     function updateOverallProgress() {

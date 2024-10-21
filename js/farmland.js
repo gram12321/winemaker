@@ -1,15 +1,15 @@
 import { addConsoleMessage } from '/js/console.js';
 import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import names
-import { allResources, Resource, Inventory } from '/js/resource.js';
+import { allResources, inventoryInstance, saveInventory } from '/js/resource.js';
 
 class Farmland {
-  constructor(id, name, country, region, acres, plantedResource = null) {
+  constructor(id, name, country, region, acres, plantedResourceName = null) {
     this.id = id;
     this.name = name;
     this.country = country;
     this.region = region;
     this.acres = acres;
-    this.plantedResource = plantedResource;
+    this.plantedResourceName = plantedResourceName;
   }
 }
 
@@ -47,13 +47,12 @@ function displayOwnedFarmland() {
   farmlandTableBody.innerHTML = ''; // Clear existing rows
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 
-  // Ensure allResources is populated
-  const grapeResources = allResources.filter(resource => resource.state === 'Grapes'); // Only list resources that are in Grapes state
-  const resourceOptions = grapeResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
+  // Create options for each available resource
+  const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
 
   farmlands.forEach((farmland, index) => {
     const row = document.createElement('tr');
-    const isPlanted = farmland.plantedResource != null;
+    const isPlanted = farmland.plantedResourceName != null;
     const harvestButtonState = isPlanted ? '' : 'disabled';
     row.innerHTML = `
       <td>${farmland.id}</td>
@@ -61,9 +60,11 @@ function displayOwnedFarmland() {
       <td>${farmland.country}</td>
       <td>${farmland.region}</td>
       <td>${farmland.acres}</td>
-      <td>${farmland.plantedResource || 'Empty'}</td>
+      <td>${farmland.plantedResourceName || 'Empty'}</td>
       <td>
-        <select class="resource-select">${resourceOptions}</select>
+        <select class="resource-select">
+          ${resourceOptions}
+        </select>
         <button class="btn btn-warning plant-field-btn">Plant the Field</button>
         <button class="btn btn-success harvest-field-btn" ${harvestButtonState}>Harvest</button>
       </td>
@@ -90,24 +91,28 @@ function displayOwnedFarmland() {
 function plantField(index, resourceName) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   if (farmlands[index]) {
-    farmlands[index].plantedResource = resourceName;
+    farmlands[index].plantedResourceName = resourceName;
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     addConsoleMessage(`Field ID ${farmlands[index].id} has been planted with ${resourceName}.`);
     displayOwnedFarmland(); // Refresh the table display
   }
 }
+
 function harvestField(index) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  if (farmlands[index] && farmlands[index].plantedResource) {
-    const resourceName = farmlands[index].plantedResource;
+  if (farmlands[index] && farmlands[index].plantedResourceName) {
+    const resourceName = farmlands[index].plantedResourceName;
     const acres = farmlands[index].acres;
     const state = 'Grapes'; // Initial state of harvested resource
-    const category = 'warehouse'; // Initial category of harvested resource
-    const harvestedResource = new Resource(resourceName, category, state);
-    Inventory.addResource(harvestedResource, acres); // Use static method
-    addConsoleMessage(`Harvested ${acres} of ${resourceName} in ${state} state from Field ID ${farmlands[index].id}.`);
-    localStorage.setItem('playerInventory', JSON.stringify(Inventory.resources)); // Use static property
-    farmlands[index].plantedResource = null;
+    // Use game year from localStorage for vintage
+    const gameYear = parseInt(localStorage.getItem('year'), 10);
+    // Add to the inventory using the inventory instance
+    inventoryInstance.addResource(resourceName, acres, state, gameYear, 'High'); // Use arbitrary quality
+    addConsoleMessage(`Harvested ${acres} of ${resourceName} in ${state} state from Field ID ${farmlands[index].id}, Vintage: ${gameYear}.`);
+    // Save inventory to localStorage
+    saveInventory();
+    // Update farmland
+    farmlands[index].plantedResourceName = null;
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     displayOwnedFarmland();
   }

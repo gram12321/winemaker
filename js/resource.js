@@ -1,64 +1,150 @@
 class Resource {
-  constructor(name, category, state) {
+  constructor(name) {
     this.name = name;
-    this.category = category; // Determines the inventory location
-    this.state = state; // Describes the current state of the resource
   }
+}
+
+const allResources = [
+  new Resource('Barbera'),
+  new Resource('Chardonnay'),
+  // Add more resources as needed
+];
+
+function getResourceByName(name) {
+  return allResources.find(resource => resource.name === name);
 }
 
 class Inventory {
-  // Use static property to store resources
-  static resources = {};
-
-  static addResource(resource, amount = 0) {
-    this.resources[resource.name] = (this.resources[resource.name] || 0) + amount;
+  constructor() {
+    this.items = [];
   }
 
-  static getResourceAmount(name) {
-    return this.resources[name] || 0;
-  }
+  addResource(name, amount, state, vintage, quality) {
+    const resource = getResourceByName(name);
+    if (!resource) {
+      throw new Error('Resource not found');
+    }
 
-  static setResourceAmount(name, amount) {
-    this.resources[name] = amount;
-  }
-}
+    // Check if the item with these characteristics already exists
+    let existingItem = this.items.find(item =>
+      item.resource.name === name &&
+      item.state === state &&
+      item.vintage === vintage &&
+      item.quality === quality
+    );
 
-function displayInventory() {
-  for (const [name, amount] of Object.entries(Inventory.resources)) { // Reference static property
-    const resource = allResources.find((r) => r.name === name);
-    if (resource) {
-      const tableBodyId = `${resource.category}-table-body`;
-      const inventoryTableBody = document.getElementById(tableBodyId);
-
-      if (inventoryTableBody) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${name}</td><td>${amount}</td><td>${resource.state}</td>`;
-        inventoryTableBody.appendChild(row);
-      }
+    if (existingItem) {
+      existingItem.amount += amount;
+    } else {
+      // Add a new item if not found
+      this.items.push({
+        resource: resource,
+        amount: amount,
+        state: state,
+        vintage: vintage,
+        quality: quality
+      });
     }
   }
+
+  removeResource(name, amount, state, vintage, quality) {
+    const itemIndex = this.items.findIndex(item =>
+      item.resource.name === name &&
+      item.state === state &&
+      item.vintage === vintage &&
+      item.quality === quality
+    );
+
+    if (itemIndex !== -1) {
+      const item = this.items[itemIndex];
+      if (item.amount > amount) {
+        item.amount -= amount;
+      } else {
+        this.items.splice(itemIndex, 1);
+      }
+    } else {
+      throw new Error('Inventory item not found or insufficient amount');
+    }
+  }
+
+  getTotalAmount(name, state = null, vintage = null, quality = null) {
+    return this.items.reduce((total, item) => {
+      if (
+        item.resource.name === name &&
+        (state === null || item.state === state) &&
+        (vintage === null || item.vintage === vintage) &&
+        (quality === null || item.quality === quality)
+      ) {
+        return total + item.amount;
+      }
+      return total;
+    }, 0);
+  }
 }
 
-// Define resource names for use in resource creation
-const resourceNames = ['Barbera', 'Chardonnay']; // Add more as needed
+function displayInventory(inventory) {
+  inventory.items.forEach(item => {
+    const { name } = item.resource;
+    const { amount, state } = item;
 
-// Placeholder for dynamically created resources
-const allResources = [];
+    // Map states to table body IDs
+    let tableBodyId;
+    if (state === 'Grapes') {
+      tableBodyId = 'warehouse-table-body';
+    } else if (state === 'Must') {
+      tableBodyId = 'fermentation-table-body';
+    } else {
+      return; // Skip items with unknown states
+    }
 
-// Initialize resources and add them to allResources
-resourceNames.forEach(name => {
-  // Initialize each resource with a suitable default category and state
-  const resource = new Resource(name, 'warehouse', 'Grapes');
-  allResources.push(resource);
-});
+    const inventoryTableBody = document.getElementById(tableBodyId);
 
-// Initialize player inventory from localStorage
-const savedResources = JSON.parse(localStorage.getItem('playerInventory')) || {};
-for (const [name, amount] of Object.entries(savedResources)) {
-  Inventory.addResource(new Resource(name, 'warehouse', 'Grapes'), amount); // Use static method
+    if (inventoryTableBody) {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${name}</td><td>${amount}</td><td>${state}</td>`;
+      inventoryTableBody.appendChild(row);
+    }
+  });
 }
 
+// Inventory instance
+const inventoryInstance = new Inventory();
 
+// Function to load inventory from localStorage
+function loadInventory() {
+  let savedInventory = localStorage.getItem('playerInventory');
 
-// Export necessary entities
-export { Resource, Inventory, displayInventory, allResources };
+  // Safely parse JSON data
+  try {
+    savedInventory = JSON.parse(savedInventory);
+    // Ensure savedInventory is an array
+    if (!Array.isArray(savedInventory)) {
+      console.warn("playerInventory is not an array. Initializing with empty array.");
+      savedInventory = [];
+    }
+  } catch (error) {
+    console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
+    savedInventory = [];
+  }
+
+  // Populate the inventory instance
+  savedInventory.forEach(item => {
+    inventoryInstance.addResource(
+      item.resource.name,
+      item.amount,
+      item.state,
+      item.vintage,
+      item.quality
+    );
+  });
+}
+
+// Load the inventory at the start
+loadInventory();
+
+// Function to save inventory to localStorage
+function saveInventory() {
+  localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
+}
+
+export { Resource, Inventory, displayInventory, allResources, inventoryInstance, saveInventory };

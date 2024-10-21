@@ -16,7 +16,7 @@
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Inventory</h1>
-
+      
       <!-- Warehouse Inventory -->
       <section class="my-4">
         <h3>Warehouse</h3>
@@ -80,7 +80,7 @@
 
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
-    import { Inventory, displayInventory } from '/js/resource.js'; // Adjusted import
+    import { inventoryInstance, displayInventory } from '/js/resource.js'; // Ensure proper import
 
     document.addEventListener('DOMContentLoaded', function() {
       fetch('/html/sidebar.html')
@@ -90,8 +90,9 @@
           initializeSidebar();
         });
 
-      // Display each inventory by category using class method
-      displayInventory(Inventory);
+
+      // Show the inventory
+      displayInventory(inventoryInstance);
     });
   </script>
 </body>
