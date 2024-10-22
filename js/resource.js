@@ -1,3 +1,5 @@
+import { sellWines } from './endDay.js';
+
 class Resource {
   constructor(name) {
     this.name = name;
@@ -82,44 +84,57 @@ class Inventory {
   }
 }
 
-function displayInventory(inventory) {
-  const warehouseTableBody = document.getElementById('warehouse-table-body');
-  const fermentationTableBody = document.getElementById('fermentation-table-body');
-  const wineCellarTableBody = document.getElementById('winecellar-table-body');
+function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fermentation-table-body', 'winecellar-table-body'], includeSellButton = false) {
+    const warehouseTableBody = document.getElementById('warehouse-table-body');
+    const fermentationTableBody = document.getElementById('fermentation-table-body');
+    const wineCellarTableBody = document.getElementById('winecellar-table-body');
 
-  // Clear existing table contents
-  warehouseTableBody.innerHTML = '';
-  fermentationTableBody.innerHTML = '';
-  wineCellarTableBody.innerHTML = '';
-
-  inventory.items.forEach(item => {
-    // Extract proper variables from item for display
-    const { resource, amount, state, quality, vintage } = item;
-
-    let tableBodyId;
-    if (state === 'Grapes') {
-      tableBodyId = 'warehouse-table-body';
-    } else if (state === 'Must') {
-      tableBodyId = 'fermentation-table-body';
-    } else if (state === 'Bottle') {
-      tableBodyId = 'winecellar-table-body';
-    } else {
-      return; // Skip items with unknown statuses
+    if (tablesToShow.includes('warehouse-table-body') && warehouseTableBody) {
+      warehouseTableBody.innerHTML = '';
+    }
+    if (tablesToShow.includes('fermentation-table-body') && fermentationTableBody) {
+      fermentationTableBody.innerHTML = '';
+    }
+    if (tablesToShow.includes('winecellar-table-body') && wineCellarTableBody) {
+      wineCellarTableBody.innerHTML = '';
     }
 
-    const inventoryTableBody = document.getElementById(tableBodyId);
-    if (inventoryTableBody) {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${resource.name}, ${vintage || 'Unknown'}</td>
-        <td>${amount}</td>
-        <td>${quality}</td>
-        <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
-      `;
-      inventoryTableBody.appendChild(row);
-    }
-  });
-}
+    inventory.items.forEach(item => {
+      const { resource, amount, state, quality, vintage } = item;
+
+      let tableBodyId;
+      if (state === 'Grapes' && tablesToShow.includes('warehouse-table-body')) {
+        tableBodyId = 'warehouse-table-body';
+      } else if (state === 'Must' && tablesToShow.includes('fermentation-table-body')) {
+        tableBodyId = 'fermentation-table-body';
+      } else if (state === 'Bottle' && tablesToShow.includes('winecellar-table-body')) {
+        tableBodyId = 'winecellar-table-body';
+      } else {
+        return;
+      }
+
+      const inventoryTableBody = document.getElementById(tableBodyId);
+      if (inventoryTableBody) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${resource.name}, ${vintage || 'Unknown'}</td>
+          <td>${amount}</td>
+          <td>${quality}</td>
+          <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
+          ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
+        `;
+        inventoryTableBody.appendChild(row);
+
+        // Add event listener to sell button if it exists
+        if (includeSellButton) {
+          const sellButton = row.querySelector('.sell-btn');
+          sellButton.addEventListener('click', () => {
+            sellWines(resource.name);
+          });
+        }
+      }
+    });
+  }
 
 // Inventory instance
 const inventoryInstance = new Inventory();

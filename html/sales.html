@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Page - Farmland</title>
+  <title>Game Page - Sales</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/style.css" rel="stylesheet">
 </head>
@@ -16,7 +16,24 @@
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Sales</h1>
 
-      
+      <!-- Wine Cellar Inventory Section -->
+      <section class="my-4">
+        <h3>Wine Cellar Inventory</h3>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Amount</th>
+              <th>Quality</th>
+              <th>Status</th>
+              <th>Action</th> <!-- added a new header for actions -->
+            </tr>
+          </thead>
+          <tbody id="winecellar-table-body">
+            <!-- Wine Cellar resources will be dynamically populated here -->
+          </tbody>
+        </table>
+      </section>
     </div>
   </div>
 
@@ -28,6 +45,8 @@
   <!-- Custom JavaScript -->
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { inventoryInstance, displayInventory } from '/js/resource.js'; // import sellWines from resource.js
+    import { sellWines} from '/js/endDay.js'; // import sellWines from endDay.js'
 
     document.addEventListener('DOMContentLoaded', function () {
       // Load and initialize the sidebar
@@ -36,6 +55,9 @@
         .then(data => {
           document.getElementById('sidebar-wrapper').innerHTML = data;
           initializeSidebar();
+
+          // Display only the Wine Cellar Inventory with Sell buttons
+          displayInventory(inventoryInstance, ['winecellar-table-body'], true);
         });
     });
   </script>

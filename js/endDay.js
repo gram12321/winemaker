@@ -1,6 +1,8 @@
 // endDay.js
 import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
+import { inventoryInstance, saveInventory, displayInventory } from './resource.js'; // Import needed functions
+
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -28,10 +30,34 @@ export function incrementDay() {
     renderCompanyInfo();
 }
 
-export function addMoney() {
+export function sellWines(resourceName) {
+    const resourceIndex = inventoryInstance.items.findIndex(item => item.resource.name === resourceName && item.state === 'Bottle');
+
+    if (resourceIndex !== -1) {
+        const resource = inventoryInstance.items[resourceIndex];
+
+        if (resource.amount > 0) {
+            resource.amount -= 1; // Reduce the inventory by 1
+
+            addMoney(100); // Add $100 for each wine sold
+
+            if (resource.amount === 0) {
+                // Optionally remove the item if the amount reaches zero
+                inventoryInstance.items.splice(resourceIndex, 1);
+            }
+
+            saveInventory(); // Save the inventory updates
+
+            // Optionally, refresh the inventory display if your UI supports it
+            displayInventory(inventoryInstance, ['winecellar-table-body'], true);
+        }
+    }
+}
+
+export function addMoney(amount) {
     const currentMoney = localStorage.getItem('money');
     if (currentMoney !== null) {
-        const newMoney = parseInt(currentMoney, 10) + 10000;
+        const newMoney = parseInt(currentMoney, 10) + amount;
         localStorage.setItem('money', newMoney);
         renderCompanyInfo();
     }
