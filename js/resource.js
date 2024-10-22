@@ -83,22 +83,27 @@ class Inventory {
 }
 
 function displayInventory(inventory) {
+  // Clear existing table contents
+  const wineCellarTableBody = document.getElementById('winecellar-table-body');
+  wineCellarTableBody.innerHTML = ''; 
+
   inventory.items.forEach(item => {
     const { name } = item.resource;
     const { amount, state } = item;
 
-    // Map states to table body IDs
+    // Determine the correct table based on the state
     let tableBodyId;
     if (state === 'Grapes') {
       tableBodyId = 'warehouse-table-body';
     } else if (state === 'Must') {
       tableBodyId = 'fermentation-table-body';
+    } else if (state === 'Bottle') {
+      tableBodyId = 'winecellar-table-body';
     } else {
       return; // Skip items with unknown states
     }
 
     const inventoryTableBody = document.getElementById(tableBodyId);
-
     if (inventoryTableBody) {
       const row = document.createElement('tr');
       row.innerHTML = `<td>${name}</td><td>${amount}</td><td>${state}</td>`;
