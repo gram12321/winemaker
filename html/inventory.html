@@ -16,7 +16,7 @@
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Inventory</h1>
-      
+
       <!-- Warehouse Inventory -->
       <section class="my-4">
         <h3>Warehouse</h3>
@@ -25,7 +25,8 @@
             <tr>
               <th>Resource</th>
               <th>Amount</th>
-              <th>State</th>
+              <th>Quality</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="warehouse-table-body">
@@ -42,7 +43,8 @@
             <tr>
               <th>Resource</th>
               <th>Amount</th>
-              <th>State</th>
+              <th>Quality</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="fermentation-table-body">
@@ -59,7 +61,8 @@
             <tr>
               <th>Resource</th>
               <th>Amount</th>
-              <th>State</th>
+              <th>Quality</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody id="winecellar-table-body">
@@ -89,7 +92,6 @@
           document.getElementById('sidebar-wrapper').innerHTML = data;
           initializeSidebar();
         });
-
 
       // Show the inventory
       displayInventory(inventoryInstance);

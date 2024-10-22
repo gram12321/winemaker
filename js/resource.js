@@ -83,15 +83,19 @@ class Inventory {
 }
 
 function displayInventory(inventory) {
-  // Clear existing table contents
+  const warehouseTableBody = document.getElementById('warehouse-table-body');
+  const fermentationTableBody = document.getElementById('fermentation-table-body');
   const wineCellarTableBody = document.getElementById('winecellar-table-body');
-  wineCellarTableBody.innerHTML = ''; 
+
+  // Clear existing table contents
+  warehouseTableBody.innerHTML = '';
+  fermentationTableBody.innerHTML = '';
+  wineCellarTableBody.innerHTML = '';
 
   inventory.items.forEach(item => {
-    const { name } = item.resource;
-    const { amount, state } = item;
+    // Extract proper variables from item for display
+    const { resource, amount, state, quality, vintage } = item;
 
-    // Determine the correct table based on the state
     let tableBodyId;
     if (state === 'Grapes') {
       tableBodyId = 'warehouse-table-body';
@@ -100,13 +104,18 @@ function displayInventory(inventory) {
     } else if (state === 'Bottle') {
       tableBodyId = 'winecellar-table-body';
     } else {
-      return; // Skip items with unknown states
+      return; // Skip items with unknown statuses
     }
 
     const inventoryTableBody = document.getElementById(tableBodyId);
     if (inventoryTableBody) {
       const row = document.createElement('tr');
-      row.innerHTML = `<td>${name}</td><td>${amount}</td><td>${state}</td>`;
+      row.innerHTML = `
+        <td>${resource.name}, ${vintage || 'Unknown'}</td>
+        <td>${amount}</td>
+        <td>${quality}</td>
+        <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
+      `;
       inventoryTableBody.appendChild(row);
     }
   });
