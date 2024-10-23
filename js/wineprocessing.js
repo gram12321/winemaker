@@ -1,6 +1,7 @@
 // wineprocessing.js
 import { addConsoleMessage } from './console.js';
-import { inventoryInstance, saveInventory } from './resource.js'; // Import saveInventory
+import { inventoryInstance } from './resource.js'; // Import saveInventory
+import { saveInventory } from './database/adminFunctions.js'; // Import saveInventory
 
 export function grapeCrushing(selectedResource) {
     // Find the selected resource

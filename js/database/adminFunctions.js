@@ -1,4 +1,5 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
+import { inventoryInstance } from '../resource.js';
 
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -100,4 +101,41 @@ async function saveCompanyInfo() {
   }
 }
 
-export { storeCompanyName, saveCompanyInfo, clearLocalStorage, clearFirestore };
+// Function to load inventory from localStorage
+function loadInventory() {
+  let savedInventory = localStorage.getItem('playerInventory');
+
+  // Safely parse JSON data
+  try {
+    savedInventory = JSON.parse(savedInventory);
+    // Ensure savedInventory is an array
+    if (!Array.isArray(savedInventory)) {
+      console.warn("playerInventory is not an array. Initializing with empty array.");
+      savedInventory = [];
+    }
+  } catch (error) {
+    console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
+    savedInventory = [];
+  }
+
+  // Populate the inventory instance
+  savedInventory.forEach(item => {
+    inventoryInstance.addResource(
+      item.resource.name,
+      item.amount,
+      item.state,
+      item.vintage,
+      item.quality
+    );
+  });
+}
+
+// Load the inventory at the start
+loadInventory();
+
+// Function to save inventory to localStorage
+function saveInventory() {
+  localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
+}
+
+export { storeCompanyName, saveCompanyInfo, clearLocalStorage, clearFirestore, loadInventory, saveInventory };

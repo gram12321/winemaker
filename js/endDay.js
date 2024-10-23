@@ -1,7 +1,8 @@
 // endDay.js
 import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
-import { inventoryInstance, saveInventory, displayInventory } from './resource.js'; // Import needed functions
+import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
+import { saveInventory } from './database/adminFunctions.js';
 
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
