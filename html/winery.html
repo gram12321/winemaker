@@ -81,6 +81,9 @@
         </div>
       </div>
 
+      <!-- Add Spawn Dummy Task Button -->
+      <button id="spawn-dummy-task-btn" class="btn btn-secondary my-3">Spawn Dummy Task</button>
+
       <!-- Overall Progress Section -->
       <div class="my-4">
         <h3>Overall Progress</h3>
@@ -108,13 +111,14 @@
     import { addConsoleMessage } from '/js/console.js';
     import { inventoryInstance } from '/js/resource.js';
     import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
+    import { spawnTask } from '/js/loadPanel.js';  // Import the spawnTask function
 
-    const totalProcesses = 2; // Update this as you add more processes
+    const totalProcesses = 2; 
     let completedProcesses = 0;
 
     function populateCrushInventoryList() {
       const crushInventoryList = document.getElementById('crush-inventory-list');
-      crushInventoryList.innerHTML = ''; // Clear existing inventory list
+      crushInventoryList.innerHTML = ''; 
 
       inventoryInstance.items.forEach(item => {
         if (item.state === 'Grapes') {
@@ -128,7 +132,7 @@
 
     function populateFermentationInventoryList() {
       const fermentationList = document.getElementById('fermentation-inventory-list');
-      fermentationList.innerHTML = ''; // Clear existing list
+      fermentationList.innerHTML = ''; 
 
       inventoryInstance.items.forEach(item => {
         if (item.state === 'Must') {
@@ -142,7 +146,7 @@
 
     function populateFermentResourceSelect() {
       const selectElement = document.getElementById('ferment-resource-select');
-      selectElement.innerHTML = ''; // Clear existing options
+      selectElement.innerHTML = ''; 
       inventoryInstance.items.forEach(item => {
         if (item.state === 'Must') {
           const option = document.createElement('option');
@@ -152,10 +156,10 @@
         }
       });
     }
-    
+
     function populateResourceSelect() {
       const selectElement = document.getElementById('crush-resource-select');
-      selectElement.innerHTML = ''; // Clear existing options
+      selectElement.innerHTML = ''; 
 
       inventoryInstance.items.forEach(item => {
         if (item.state === 'Grapes') {
@@ -179,20 +183,29 @@
       populateCrushInventoryList();
       populateFermentationInventoryList();
       populateResourceSelect();
-      populateFermentResourceSelect(); // Populate fermentation select list
-      // Initialize sidebar
+      populateFermentResourceSelect();
+      
       fetch('/html/sidebar.html')
         .then(response => response.text())
         .then(data => {
           document.getElementById('sidebar-wrapper').innerHTML = data;
           initializeSidebar();
         });
+
       document.getElementById('crush-grapes-btn').addEventListener('click', function() {
         const selectedResource = document.getElementById('crush-resource-select').value;
+
         if (selectedResource) {
+          // Run the grapeCrushing immediately
           grapeCrushing(selectedResource);
-          completedProcesses += 1;
-          updateOverallProgress();
+
+          // Optionally log the immediate task execution
+          addConsoleMessage(`Started crushing ${selectedResource} immediately.`);
+
+          // Add the task to the task panel for visibility or tracking purpose
+          spawnTask("Crushing Grapes", () => grapeCrushing(selectedResource), () => true); // Assuming condition is true for immediate execution
+          // Update the UI elements
+          // These might involve refreshing lists or any other UI components
           populateCrushInventoryList();
           populateResourceSelect();
           populateFermentationInventoryList();
@@ -201,10 +214,11 @@
           addConsoleMessage('No resource selected for crushing.');
         }
       });
+
       document.getElementById('fermentation-btn').addEventListener('click', function() {
         const selectedResource = document.getElementById('ferment-resource-select').value;
         if (selectedResource) {
-          fermentMust(selectedResource); // Call the fermentMust function
+          fermentMust(selectedResource); 
           completedProcesses += 1;
           updateOverallProgress();
           populateFermentationInventoryList();
@@ -213,7 +227,22 @@
           addConsoleMessage('No resource selected for fermentation.');
         }
       });
+
+      document.getElementById('spawn-dummy-task-btn').addEventListener('click', function() {
+        const grapeResource = inventoryInstance.items.find(item => item.state === 'Grapes' && item.amount > 0);
+
+        if (grapeResource) {
+          spawnTask("Crushing Grapes", () => grapeCrushing(grapeResource.resource.name), dummyCondition);
+        } else {
+          addConsoleMessage('No grapes available for crushing.');
+        }
+      });
     });
+
+
+    function dummyCondition() {
+        return Math.random() > 0.9; 
+    }
   </script>
 </body>
 </html>
