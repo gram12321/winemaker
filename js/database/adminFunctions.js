@@ -25,6 +25,7 @@ async function clearLocalStorage() {
     localStorage.removeItem('ownedFarmlands'); // Clear land-related data
     localStorage.removeItem('playerInventory'); // Clear inventory data
     localStorage.removeItem('consoleMessages'); // Clear console messages
+    localStorage.removeItem('tasks'); // Clear tasks
 }
 
 async function storeCompanyName() {
