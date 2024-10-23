@@ -7,6 +7,7 @@ function initializePanel() {
             const panelContainer = document.createElement('div');
             panelContainer.innerHTML = data;
             document.body.appendChild(panelContainer);
+            loadTasks(); // Load tasks from local storage after the panel is initialized
         });
 }
 
@@ -25,11 +26,31 @@ function spawnTask(taskName, taskFunction, conditionFunction) {
     taskList.appendChild(taskBox);
     tasks.push({
         taskName,
-        taskFunction,
-        conditionFunction,
+        taskFunction: taskFunction.toString(), // Store the function as a string
+        conditionFunction: conditionFunction.toString(), // Store the function as a string
         taskBox
+    });
+    saveTasks(); // Save tasks to localStorage
+}
+
+function saveTasks() {
+    const tasksData = tasks.map(task => ({
+        taskName: task.taskName,
+        taskFunction: task.taskFunction,
+        conditionFunction: task.conditionFunction,
+    }));
+    localStorage.setItem('tasks', JSON.stringify(tasksData));
+}
+
+function loadTasks() {
+    const tasksData = JSON.parse(localStorage.getItem('tasks') || '[]');
+    tasksData.forEach(taskData => {
+        const taskFunction = new Function(`return ${taskData.taskFunction}`)();
+        const conditionFunction = new Function(`return ${taskData.conditionFunction}`)();
+        spawnTask(taskData.taskName, taskFunction, conditionFunction);
     });
 }
 
-initializePanel()
+initializePanel();
+
 export { initializePanel, spawnTask, tasks };
