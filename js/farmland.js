@@ -3,6 +3,7 @@ import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import n
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory } from '/js/database/adminFunctions.js';
 
+
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null) {
     this.id = id;
@@ -85,6 +86,7 @@ function displayOwnedFarmland() {
       if (isPlanted) {
         harvestField(index);
       }
+      
     });
   });
 }
