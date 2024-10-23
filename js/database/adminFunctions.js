@@ -69,6 +69,7 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('season', data.season); // Load season
     localStorage.setItem('year', data.year); // Load year
     localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]'); // Load owned farmlands
+    localStorage.setItem('playerInventory', data.playerInventory || '[]'); // Load player inventory
   }
 }
 
@@ -80,6 +81,9 @@ async function saveCompanyInfo() {
   const year = localStorage.getItem('year'); // Get the year
   const ownedFarmlands = localStorage.getItem('ownedFarmlands'); // Get owned farmlands
 
+  // Retrieve the player inventory
+  const playerInventory = localStorage.getItem('playerInventory'); // Get the inventory
+
   if (!companyName) {
     console.error("No company name found to save.");
     return;
@@ -88,12 +92,13 @@ async function saveCompanyInfo() {
   try {
     const docRef = doc(db, "companies", companyName); // Reference a document named after the company
     await setDoc(docRef, { 
-      name: companyName, 
-      money: money, 
-      day: day, 
-      season: season, 
-      year: year, 
-      ownedFarmlands: ownedFarmlands // Save farmlands
+      name: companyName,
+      money: money,
+      day: day,
+      season: season,
+      year: year,
+      ownedFarmlands: ownedFarmlands,
+      playerInventory: playerInventory // Save inventory
     });
     console.log("Company info saved successfully");
   } catch (error) {
