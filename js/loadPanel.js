@@ -1,5 +1,5 @@
 // loadPanel.js
-import { loadTasks } from './database/adminFunctions.js'
+import { loadTasks, saveTask, removeTask } from './database/adminFunctions.js';
 
 function initializePanel() {
     return fetch('/html/panel.html')
@@ -57,18 +57,20 @@ export class Task {
     this.taskBox = taskBox;
   }
 
-  executeTask() {
-    // Run the task function
-    this.taskFunction();
+    executeTask() {
+      // Run the task function
+      this.taskFunction();
 
-    // Check the condition
-    if (this.conditionFunction()) {
-      // Task condition is fulfilled, remove task box
-      this.removeTaskBox();
-    } else {
-      console.log("Task condition not yet fulfilled.");
+      // Check the condition
+      if (this.conditionFunction()) {
+        // Task condition is fulfilled, remove task box
+        this.removeTaskBox();
+        // Remove the task from localStorage
+        removeTask(this.taskName);
+      } else {
+        console.log("Task condition not yet fulfilled.");
+      }
     }
-  }
 
   removeTaskBox() {
     if (this.taskBox) {

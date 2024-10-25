@@ -148,7 +148,22 @@ function saveInventory() {
 
 export function saveTask(taskInfo) {
   let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  tasks.push(taskInfo);
+  const existingTaskIndex = tasks.findIndex(task => task.taskName === taskInfo.taskName);
+
+  if (existingTaskIndex === -1) {
+    // Only add the task if it doesn't already exist
+    tasks.push(taskInfo);
+  } else {
+    // Update the existing task with new info if it already exists
+    tasks[existingTaskIndex] = taskInfo;
+  }
+
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+export function removeTask(taskName) {
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  tasks = tasks.filter(task => task.taskName !== taskName);
   localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
