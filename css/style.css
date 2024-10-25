@@ -8,8 +8,6 @@ body {
   width: 100%;
 }
 
-
-
 /* Sidebar */
 
 #sidebar-wrapper {
@@ -27,15 +25,6 @@ body {
   border: none;
 }
 
-#page-content-wrapper {
-  flex: 1;
-  padding: 20px;
-}
-
-#content {
-  flex: 1;
-  padding: 20px;
-}
 
 .dropdown-menu {
   background-color: #343a40;
@@ -70,18 +59,6 @@ body {
   background-color: #94bde5 !important; /* Lighter hover effect */
 }
 
-#panel-wrapper .btn {
-  cursor: pointer !important; /* Cursor changes to a pointer on hover */
-}
-
-#panel-wrapper .btn-primary {
-  background-color: #007bff !important; /* Primary button color */
-}
-
-#panel-wrapper .btn-danger {
-  background-color: #dc3545 !important; /* Danger button color */
-}
-
 #panel-wrapper {
   position: fixed !important;
   right: 0 !important;
@@ -109,11 +86,14 @@ body {
     position: relative;      /* Add positioning context */
 }
 
-/* Centering the console vertically and horizontally */
+/* Centering the gamepages vertically and horizontally */
 #page-content-wrapper {
+    flex: 1;
+    padding: 20px;
     display: flex;
-    /* justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
+    align-items: center; /* Center content vertically */
     flex-direction: column; /* Stack elements vertically */
     min-height: 100vh; /* Take at least the full viewport height to center correctly */
+    margin-left: 250px; /* Account for sidebar width */
+    margin-right: 450px; /* Account for panel width */
 }
