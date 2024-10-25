@@ -1,5 +1,7 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
 import { inventoryInstance } from '../resource.js';
+import { Task } from '../loadPanel.js'
+import { grapeCrushing } from '/js/wineprocessing.js';
 
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -142,6 +144,28 @@ loadInventory();
 // Function to save inventory to localStorage
 function saveInventory() {
   localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
+}
+
+export function saveTask(taskInfo) {
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  tasks.push(taskInfo);
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+export function loadTasks() {
+  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  tasks.forEach(taskInfo => {
+      const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+      if (resource) {
+          new Task(
+              taskInfo.taskName,
+              () => grapeCrushing(taskInfo.resourceName),
+              () => Math.random() > taskInfo.conditionProbability
+          );
+      } else {
+          addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+      }
+  });
 }
 
 export { storeCompanyName, saveCompanyInfo, clearLocalStorage, clearFirestore, loadInventory, saveInventory };
