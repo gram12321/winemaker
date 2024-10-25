@@ -3,7 +3,7 @@ import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
 import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
 import { saveInventory } from './database/adminFunctions.js';
-import { tasks } from './loadPanel.js'; // Import the tasks array
+
 
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];

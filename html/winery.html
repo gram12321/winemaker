@@ -111,7 +111,7 @@
     import { addConsoleMessage } from '/js/console.js';
     import { inventoryInstance } from '/js/resource.js';
     import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
-    import { spawnTask } from '/js/loadPanel.js';  // Import the spawnTask function
+    import { Task } from '/js/loadPanel.js';  // Import the spawnTask function
 
     const totalProcesses = 2; 
     let completedProcesses = 0;
@@ -229,20 +229,20 @@
       });
 
       document.getElementById('spawn-dummy-task-btn').addEventListener('click', function() {
-        const grapeResource = inventoryInstance.items.find(item => item.state === 'Grapes' && item.amount > 0);
-
-        if (grapeResource) {
-          spawnTask("Crushing Grapes", () => grapeCrushing(grapeResource.resource.name), dummyCondition);
-        } else {
-          addConsoleMessage('No grapes available for crushing.');
-        }
+          const grapeResource = inventoryInstance.items.find(item => item.state === 'Grapes' && item.amount > 0);
+          if (grapeResource) {
+              // Create a new Task instance with an inline condition
+              new Task(
+                  "Crushing Grapes",
+                  () => grapeCrushing(grapeResource.resource.name), // Task function
+                  () => Math.random() > 0.9 // Inline condition function
+              );
+              addConsoleMessage('A dummy task has been spawned.');
+          } else {
+              addConsoleMessage('No grapes available for crushing.');
+          }
       });
-    });
-
-
-    function dummyCondition() {
-        return Math.random() > 0.9; 
-    }
+      });
   </script>
 </body>
 </html>
