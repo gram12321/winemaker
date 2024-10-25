@@ -20,7 +20,6 @@ async function clearFirestore() {
 }
 
 async function clearLocalStorage() {
-  await saveTasksToFirestore();  // Save tasks before clearing
   localStorage.removeItem('companyName');
   localStorage.removeItem('money');
   localStorage.removeItem('day'); 
