@@ -172,14 +172,17 @@ export function saveTask(taskInfo) {
         // Update the existing task
         tasks[existingTaskIndex] = taskInfo;
     }
+
+    // Store the updated tasks array in localStorage
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 export const activeTasks = []; // Exported array to hold task references
+
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-    // Load and set latestTaskId from localStorage
+    // Load and set the latestTaskId from localStorage
     const storedTaskId = parseInt(localStorage.getItem('latestTaskId'), 10);
     if (!isNaN(storedTaskId)) {
         Task.latestTaskId = storedTaskId;
@@ -191,14 +194,23 @@ export function loadTasks() {
     activeTasks.length = 0; // Mutate the array to clear
 
     tasks.forEach(taskInfo => {
+        const initialResourceTotal = taskInfo.workTotal; // Assume this was the initial total
         const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+
         if (resource) {
+            // Calculate work already done based on initial total and current amount
+            const workAlreadyDone = initialResourceTotal - resource.amount;
+
             const task = new Task(
                 taskInfo.taskName,
                 () => grapeCrushing(taskInfo.resourceName),
-                () => Math.random() > taskInfo.conditionProbability,
-                taskInfo.taskId // Ensure taskId is passed here
+                taskInfo.taskId, // Pass stored taskId
+                initialResourceTotal // Pass initial total, which represents workTotal
             );
+
+            // Set workProgress based on the calculated work already done
+            task.workProgress = workAlreadyDone;
+
             activeTasks.push(task); // Store reference to the created task
         } else {
             addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);

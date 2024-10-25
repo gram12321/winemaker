@@ -195,61 +195,45 @@
         const selectedResource = document.getElementById('crush-resource-select').value;
 
         if (selectedResource) {
-          // Log the initiation of the task
-          addConsoleMessage(`Crushing task started for ${selectedResource}.`);
+          // Get the initial amount of the selected resource
+          const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
 
-          // Directly create and add the task
-          const task = new Task(
-            "Crushing Grapes",
-            () => grapeCrushing(selectedResource),
-            () => {
-              const isConditionMet = Math.random() > 0.9; // Use the condition probability
-              if (isConditionMet) {
-                addConsoleMessage(`Crushing task completed for ${selectedResource}.`);
-              } else {
-                addConsoleMessage(`Crushing task not yet fulfilled for ${selectedResource}.`);
-              }
-              return isConditionMet;
-            }
-          );
+          if (resource) {
+            // Log the initiation of the task
+            addConsoleMessage(`Crushing task started for ${selectedResource}.`);
 
-          // Create task info object with the assigned taskId from the Task instance
-          const taskInfo = {
-            taskName: task.taskName,
-            resourceName: selectedResource,
-            conditionProbability: 0.9, // Maintain the condition probability info
-            taskId: task.taskId, // Use the taskId from the Task instance
-          };
+            // Create and add the task with workTotal set to the amount of the resource
+            const task = new Task(
+              "Crushing Grapes",
+              () => grapeCrushing(selectedResource),
+              undefined, // Let it auto-generate the taskId
+              resource.amount // Set initial workTotal based on the amount of resource
+            );
 
-          // Save the task including the taskId
-          saveTask(taskInfo);
+            // Create task info object with the assigned taskId from the Task instance
+            const taskInfo = {
+              taskName: task.taskName,
+              resourceName: selectedResource,
+              taskId: task.taskId, // Use the taskId from the Task instance
+              workTotal: resource.amount // Save workTotal as part of taskInfo if needed
+            };
 
-          // Update the UI elements (Not relevant after task is done in task panel)
-          // populateCrushInventoryList();
-          // populateResourceSelect();
-          // populateFermentationInventoryList();
-          // populateFermentResourceSelect();
+            // Save the task including the taskId
+            saveTask(taskInfo);
+
+            // Optionally update UI elements
+            // populateCrushInventoryList();
+            // populateResourceSelect();
+            // populateFermentationInventoryList();
+            // populateFermentResourceSelect();
+          } else {
+            addConsoleMessage(`The resource ${selectedResource} is not available.`);
+          }
         } else {
           addConsoleMessage('No resource selected for crushing.');
         }
       });
-
-      document.getElementById('fermentation-btn').addEventListener('click', function() {
-        const selectedResource = document.getElementById('ferment-resource-select').value;
-        if (selectedResource) {
-          fermentMust(selectedResource); 
-          completedProcesses += 1;
-          updateOverallProgress();
-          populateFermentationInventoryList();
-          populateFermentResourceSelect();
-        } else {
-          addConsoleMessage('No resource selected for fermentation.');
-        }
       });
-
-      
-      });
-
   </script>
 </body>
 </html>
