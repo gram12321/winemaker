@@ -44,20 +44,22 @@ export function executeAllTasks() {
 
 // Task class definition with static property for task ID management
 export class Task {
-    static latestTaskId = 0;  // Static property to track latest task ID
-
+    // Initialize 'latestTaskId' from localStorage, or start at 0 if not set
+    static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
+    
     constructor(taskName, taskFunction, conditionFunction, taskId = null) {
         this.taskName = taskName;
         this.taskFunction = taskFunction;
         this.conditionFunction = conditionFunction;
         this.taskId = taskId || Task.generateTaskId(); // Assign a new ID if not provided
-
         this.createTaskBox();
         console.log(`Task created with ID: ${this.taskId}`); // Debugging output
     }
-
     static generateTaskId() {
-        return ++Task.latestTaskId; // Increment and return the new task ID
+        const newTaskId = ++Task.latestTaskId; // Increment the task ID
+        // Store the new task ID back in localStorage
+        localStorage.setItem('latestTaskId', newTaskId);
+        return newTaskId;
     }
 
     createTaskBox() {
