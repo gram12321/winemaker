@@ -19,8 +19,6 @@ async function clearFirestore() {
     }
 }
 
-
-
 async function clearLocalStorage() {
   await saveTasksToFirestore();  // Save tasks before clearing
   localStorage.removeItem('companyName');
@@ -123,7 +121,7 @@ function loadInventory() {
     savedInventory = JSON.parse(savedInventory);
     // Ensure savedInventory is an array
     if (!Array.isArray(savedInventory)) {
-      console.warn("playerInventory is not an array. Initializing with empty array.");
+      console.log("playerInventory is not an array. Most likely nothing is in inventory");
       savedInventory = [];
     }
   } catch (error) {
