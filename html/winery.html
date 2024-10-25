@@ -81,8 +81,7 @@
         </div>
       </div>
 
-      <!-- Add Spawn Dummy Task Button -->
-      <button id="spawn-dummy-task-btn" class="btn btn-secondary my-3">Spawn Dummy Task</button>
+
 
       <!-- Overall Progress Section -->
       <div class="my-4">
@@ -253,26 +252,7 @@
         }
       });
 
-      document.getElementById('spawn-dummy-task-btn').addEventListener('click', function() {
-          const grapeResource = inventoryInstance.items.find(item => item.state === 'Grapes' && item.amount > 0);
-          if (grapeResource) {
-              const taskInfo = {
-                  taskName: "Crushing Grapes",
-                  resourceName: grapeResource.resource.name,
-                  conditionProbability: 0.9 // Store conditions as needed
-              };
-              saveTask(taskInfo);
-
-              new Task(
-                  taskInfo.taskName,
-                  () => grapeCrushing(taskInfo.resourceName),
-                  () => Math.random() > taskInfo.conditionProbability
-              );
-              addConsoleMessage('A dummy task has been spawned.');
-          } else {
-              addConsoleMessage('No grapes available for crushing.');
-          }
-      });
+      
       });
 
   </script>
