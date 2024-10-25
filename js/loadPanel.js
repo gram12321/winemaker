@@ -1,5 +1,7 @@
 // loadPanel.js
 import { loadTasks, saveTask, removeTask } from './database/adminFunctions.js';
+import { inventoryInstance } from './resource.js';
+import { grapeCrushing } from '/js/wineprocessing.js';
 
 // Function to initialize the task panel
 function initializePanel() {
@@ -31,6 +33,14 @@ export function executeTaskFunction(task) {
     } else {
         console.log("Task condition not yet fulfilled.");
     }
+}
+
+import { instantiatedTasks } from './database/adminFunctions.js'; // Import the instantiatedTasks array
+
+export function executeAllTasks() {
+    instantiatedTasks.forEach(task => {
+        executeTaskFunction(task); // Execute the task function for each instantiated task
+    });
 }
 
 // Task class definition with static property for task ID management

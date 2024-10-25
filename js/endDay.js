@@ -3,7 +3,7 @@ import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
 import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
 import { saveInventory } from './database/adminFunctions.js';
-// import { executeTaskFunction } from './loadPanel.js'
+import { executeAllTasks } from './loadPanel.js'
 
 
 
@@ -31,7 +31,8 @@ export function incrementDay() {
 
     addConsoleMessage(`Day increased to: ${currentDay}, Season: ${SEASONS[currentSeasonIndex]}, Year: ${currentYear}`);
     renderCompanyInfo();
-
+    
+    executeAllTasks();
 
     }
 

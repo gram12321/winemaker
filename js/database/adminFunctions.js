@@ -2,6 +2,7 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { inventoryInstance } from '../resource.js';
 import { Task } from '../loadPanel.js'
 import { grapeCrushing } from '/js/wineprocessing.js';
+import { addConsoleMessage } from '../console.js';
 
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -162,29 +163,38 @@ export function saveTask(taskInfo) {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
+export const instantiatedTasks = []; // Exported array to hold task references
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     tasks.forEach(taskInfo => {
         const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
         if (resource) {
-            new Task(
+            const task = new Task(
                 taskInfo.taskName,
                 () => grapeCrushing(taskInfo.resourceName),
                 () => Math.random() > taskInfo.conditionProbability,
                 taskInfo.taskId // Ensure taskId is passed here
             );
+            instantiatedTasks.push(task); // Store reference to the created task
         } else {
             addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
         }
     });
 }
 
+// Existing removeTask function with additional code
 export function removeTask(taskId) {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const initialTaskCount = tasks.length;
 
     tasks = tasks.filter(task => task.taskId !== taskId);
     localStorage.setItem('tasks', JSON.stringify(tasks));
+
+    // Update instantiatedTasks to remove the corresponding task
+    const taskIndex = instantiatedTasks.findIndex(task => task.taskId === taskId);
+    if (taskIndex !== -1) {
+        instantiatedTasks.splice(taskIndex, 1); // Remove the task from instantiatedTasks
+    }
 
     // Debugging: Log whether a task was removed
     const tasksAfterRemoval = JSON.parse(localStorage.getItem('tasks'));
