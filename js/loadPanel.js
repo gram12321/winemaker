@@ -11,7 +11,7 @@ function initializePanel() {
 
             // Now the panel is initialized, and the task list should exist.
             // You can now safely create tasks
-            initializeTasks(); // Initialize tasks after the panel is setup
+
             loadTasks();
         });
 }
@@ -19,14 +19,6 @@ function initializePanel() {
 // Initialize the panel
 initializePanel();
 
-function initializeTasks() {
-    // Creating a new task after panel and task-list are available
-    const task = new Task(
-      'Sample Task',
-      () => console.log('Task function is running'), // Task function
-      () => Math.random() > 0.5 // Condition function
-    );
-}
 
 export class Task {
   constructor(taskName, taskFunction, conditionFunction) {
