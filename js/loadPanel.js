@@ -12,7 +12,7 @@ function initializePanel() {
             document.body.appendChild(panelContainer);
 
             // Now the panel is initialized, and the task list should exist.
-            loadTasks();
+            loadTasks(); // This ensures tasks are loaded freshly onto the panel
         });
 }
 

@@ -30,7 +30,11 @@ async function clearLocalStorage() {
   localStorage.removeItem('playerInventory');
   localStorage.removeItem('consoleMessages');
   localStorage.removeItem('tasks'); 
+  localStorage.removeItem('latestTaskId'); // Remove the latestTaskId from localStorage
   console.log("Local storage cleared.");
+
+  // Reset 'latestTaskId' in memory
+  Task.latestTaskId = 0;
 }
 
 async function storeCompanyName() {
@@ -63,20 +67,24 @@ async function checkCompanyExists(companyName) {
 }
 
 async function loadExistingCompanyData(companyName) {
-  const docRef = doc(db, "companies", companyName);
-  const docSnap = await getDoc(docRef);
+    const docRef = doc(db, "companies", companyName);
+    const docSnap = await getDoc(docRef);
 
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    localStorage.setItem('companyName', data.name);
-    localStorage.setItem('money', data.money);
-    localStorage.setItem('day', data.day);
-    localStorage.setItem('season', data.season);
-    localStorage.setItem('year', data.year);
-    localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
-    localStorage.setItem('playerInventory', data.playerInventory || '[]');
-    localStorage.setItem('tasks', data.tasks || '[]');  // Load tasks into localStorage
-  }
+    if (docSnap.exists()) {
+        const data = docSnap.data();
+        localStorage.setItem('companyName', data.name);
+        localStorage.setItem('money', data.money);
+        localStorage.setItem('day', data.day);
+        localStorage.setItem('season', data.season);
+        localStorage.setItem('year', data.year);
+        localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
+        localStorage.setItem('playerInventory', data.playerInventory || '[]');
+        localStorage.setItem('tasks', JSON.stringify(data.tasks || [])); // Load tasks into localStorage
+
+        // Restore latestTaskId from Firestore
+        Task.latestTaskId = data.latestTaskId || 0;
+        localStorage.setItem('latestTaskId', Task.latestTaskId.toString());
+    }
 }
 
 async function saveCompanyInfo() {
@@ -87,7 +95,7 @@ async function saveCompanyInfo() {
   const year = localStorage.getItem('year');
   const ownedFarmlands = localStorage.getItem('ownedFarmlands');
   const playerInventory = localStorage.getItem('playerInventory');
-  const tasks = localStorage.getItem('tasks');  // Get tasks from localStorage
+  const tasks = JSON.parse(localStorage.getItem('tasks')) || []; // Retrieve tasks as an array
 
   if (!companyName) {
     console.error("No company name found to save.");
@@ -104,7 +112,8 @@ async function saveCompanyInfo() {
       year,
       ownedFarmlands,
       playerInventory,
-      tasks  // Save tasks alongside other company data
+      tasks, // Store tasks directly in the company document
+      latestTaskId: Task.latestTaskId // Save the latestTaskId
     });
     console.log("Company info and tasks saved successfully.");
   } catch (error) {
@@ -149,27 +158,7 @@ function saveInventory() {
   localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
 }
 
-async function saveTasksToFirestore() {
-  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  const companyName = localStorage.getItem('companyName');
 
-  if (!companyName) {
-      console.error("No company name set, cannot save tasks to Firestore.");
-      return;
-  }
-  try {
-      const tasksCollectionRef = collection(db, "companies", companyName, "tasks");
-
-      const saveTasksPromises = tasks.map(taskInfo => {
-          const taskRef = doc(tasksCollectionRef, String(taskInfo.taskId));
-          return setDoc(taskRef, taskInfo); // Save each task individually
-      });
-      await Promise.all(saveTasksPromises); // Wait for all tasks to be saved
-      console.log("Tasks saved to Firestore successfully.");
-  } catch (error) {
-      console.error("Error saving tasks to Firestore:", error);
-  }
-}
 
 export function saveTask(taskInfo) {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -190,6 +179,18 @@ export function saveTask(taskInfo) {
 export const activeTasks = []; // Exported array to hold task references
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    // Load and set latestTaskId from localStorage
+    const storedTaskId = parseInt(localStorage.getItem('latestTaskId'), 10);
+    if (!isNaN(storedTaskId)) {
+        Task.latestTaskId = storedTaskId;
+    } else {
+        Task.latestTaskId = 0;
+    }
+
+    // Clear any existing tasks from activeTasks
+    activeTasks.length = 0; // Mutate the array to clear
+
     tasks.forEach(taskInfo => {
         const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
         if (resource) {
@@ -199,7 +200,7 @@ export function loadTasks() {
                 () => Math.random() > taskInfo.conditionProbability,
                 taskInfo.taskId // Ensure taskId is passed here
             );
-              activeTasks.push(task); // Store reference to the created task
+            activeTasks.push(task); // Store reference to the created task
         } else {
             addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
         }
