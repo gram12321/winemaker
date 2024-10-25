@@ -44,11 +44,14 @@
   
   <!-- Sidebar Initialization Script -->
   <script type="module" src="/js/database/loadSidebar.js"></script>
+  
 
   <!-- Custom JavaScript -->
   <script type="module">
     import { displayOwnedFarmland, buyLand, plantField } from '/js/farmland.js';
     import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { initializePanel } from '/js/loadPanel.js';
+    initializePanel();
 
     document.addEventListener('DOMContentLoaded', function () {
       // Initialize sidebar

@@ -42,6 +42,9 @@
       import { initializeSidebar } from '/js/database/loadSidebar.js';
       import { addMoney, incrementDay } from '/js/endDay.js';
       import { saveCompanyInfo } from '/js/database/adminFunctions.js';
+      import { initializePanel } from '/js/loadPanel.js';
+      initializePanel();
+      
       document.addEventListener('DOMContentLoaded', function() {
           fetch('/html/sidebar.html')
               .then(response => response.text())
@@ -50,7 +53,9 @@
                   initializeSidebar();
               });
 
-          document.getElementById('add-money-btn').addEventListener('click', addMoney);
+          document.getElementById('add-money-btn').addEventListener('click', function() {
+              addMoney(10000); // Pass the monetary value directly
+          });
           document.getElementById('increment-day-btn').addEventListener('click', incrementDay); // Link button
           document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
       });

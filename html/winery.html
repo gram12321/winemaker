@@ -112,6 +112,8 @@
     import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
     import { Task } from '/js/loadPanel.js';  // Import the spawnTask function
     import { loadTasks, saveTask } from '/js/database/adminFunctions.js';
+    import { initializePanel } from '/js/loadPanel.js';
+    initializePanel();
 
     const totalProcesses = 2; 
     let completedProcesses = 0;

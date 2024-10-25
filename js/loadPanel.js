@@ -103,5 +103,3 @@ export class Task {
 
 export { initializePanel };
 
-// Initialize the panel
-initializePanel();
