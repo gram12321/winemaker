@@ -1,7 +1,6 @@
 // loadPanel.js
-import { loadTasks, saveTask, removeTask } from './database/adminFunctions.js';
-import { inventoryInstance } from './resource.js';
-import { grapeCrushing } from '/js/wineprocessing.js';
+import { loadTasks, removeTask } from './database/adminFunctions.js';
+import { activeTasks } from './database/adminFunctions.js'; // Import the instantiatedTasks array
 
 // Function to initialize the task panel
 function initializePanel() {
@@ -35,10 +34,10 @@ export function executeTaskFunction(task) {
     }
 }
 
-import { instantiatedTasks } from './database/adminFunctions.js'; // Import the instantiatedTasks array
+
 
 export function executeAllTasks() {
-    instantiatedTasks.forEach(task => {
+        activeTasks.forEach(task => {
         executeTaskFunction(task); // Execute the task function for each instantiated task
     });
 }

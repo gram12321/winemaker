@@ -163,7 +163,7 @@ export function saveTask(taskInfo) {
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
-export const instantiatedTasks = []; // Exported array to hold task references
+export const activeTasks = []; // Exported array to hold task references
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     tasks.forEach(taskInfo => {
@@ -175,7 +175,7 @@ export function loadTasks() {
                 () => Math.random() > taskInfo.conditionProbability,
                 taskInfo.taskId // Ensure taskId is passed here
             );
-            instantiatedTasks.push(task); // Store reference to the created task
+              activeTasks.push(task); // Store reference to the created task
         } else {
             addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
         }
@@ -190,10 +190,10 @@ export function removeTask(taskId) {
     tasks = tasks.filter(task => task.taskId !== taskId);
     localStorage.setItem('tasks', JSON.stringify(tasks));
 
-    // Update instantiatedTasks to remove the corresponding task
-    const taskIndex = instantiatedTasks.findIndex(task => task.taskId === taskId);
+    // Update activeTasks to remove the corresponding task
+    const taskIndex = activeTasks.findIndex(task => task.taskId === taskId);
     if (taskIndex !== -1) {
-        instantiatedTasks.splice(taskIndex, 1); // Remove the task from instantiatedTasks
+          activeTasks.splice(taskIndex, 1); // Remove the task from activeTasks
     }
 
     // Debugging: Log whether a task was removed
