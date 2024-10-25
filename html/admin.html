@@ -25,16 +25,12 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
   <script type="module">
-    import { initializeSidebar } from '/js/database/loadSidebar.js';
+    
     import { clearLocalStorage, clearFirestore } from '/js/database/adminFunctions.js'; // Import functions from adminFunctions.js
-
+    import { initializeSidebar } from '/js/database/loadSidebar.js'; // Ensure the correct path
     document.addEventListener('DOMContentLoaded', function() {
-      fetch('/html/sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('sidebar-wrapper').innerHTML = data;
-          initializeSidebar();
-        });
+      // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
+      initializeSidebar();
 
       // Attach event listeners
       document.getElementById('clear-storage-btn').addEventListener('click', clearLocalStorage);

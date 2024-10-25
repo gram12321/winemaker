@@ -87,12 +87,8 @@
     initializePanel();
 
     document.addEventListener('DOMContentLoaded', function() {
-      fetch('/html/sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('sidebar-wrapper').innerHTML = data;
-          initializeSidebar();
-        });
+      // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
+      initializeSidebar();
 
       // Show the inventory
       displayInventory(inventoryInstance);

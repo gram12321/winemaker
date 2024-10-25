@@ -1,16 +1,31 @@
 import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
-function initializeSidebar() {
-    renderCompanyInfo();
-    // Attach logout event handler
-    const logoutLink = document.getElementById('logout-link');
-    if (logoutLink) {
-        logoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            saveCompanyInfo();
-            clearLocalStorage();
-            window.location.href = '../index.html';
-        });
-    }
+// Define a function to load and initialize the sidebar
+export function initializeSidebar() {
+    fetch('/html/sidebar.html')
+        .then(response => response.text())
+        .then(data => {
+            const sidebarWrapper = document.getElementById('sidebar-wrapper');
+            if (sidebarWrapper) {
+                sidebarWrapper.innerHTML = data;
+
+                // Render company information
+                renderCompanyInfo();
+
+                // Attach logout event handler
+                const logoutLink = document.getElementById('logout-link');
+                if (logoutLink) {
+                    logoutLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        saveCompanyInfo();
+                        clearLocalStorage();
+                        window.location.href = '../index.html';
+                    });
+                }
+            } else {
+                console.error("Sidebar wrapper element not found.");
+            }
+        })
+        .catch(error => console.error('Error loading sidebar:', error));
 }
 
 
@@ -38,6 +53,3 @@ export function renderCompanyInfo() {
         dropdownToggle.textContent = companyName;
     }
 }
-
-
-export { initializeSidebar };

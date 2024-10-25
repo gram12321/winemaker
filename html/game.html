@@ -39,19 +39,16 @@
   <script type="module" src="/js/endDay.js"></script> <!-- Link to the endDay script -->
   <script type="module" src="/js/loadPanel.js"></script>
   <script type="module">
-      import { initializeSidebar } from '/js/database/loadSidebar.js';
+
       import { addMoney, incrementDay } from '/js/endDay.js';
       import { saveCompanyInfo } from '/js/database/adminFunctions.js';
       import { initializePanel } from '/js/loadPanel.js';
       initializePanel();
       
+      import { initializeSidebar } from '/js/database/loadSidebar.js'; // Ensure the correct path
       document.addEventListener('DOMContentLoaded', function() {
-          fetch('/html/sidebar.html')
-              .then(response => response.text())
-              .then(data => {
-                  document.getElementById('sidebar-wrapper').innerHTML = data;
-                  initializeSidebar();
-              });
+        // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
+        initializeSidebar();
 
           document.getElementById('add-money-btn').addEventListener('click', function() {
               addMoney(10000); // Pass the monetary value directly

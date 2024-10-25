@@ -187,12 +187,9 @@
       populateResourceSelect();
       populateFermentResourceSelect();
       
-      fetch('/html/sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('sidebar-wrapper').innerHTML = data;
-          initializeSidebar();
-        });
+      
+        // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
+        initializeSidebar();
 
       document.getElementById('crush-grapes-btn').addEventListener('click', function() {
         const selectedResource = document.getElementById('crush-resource-select').value;

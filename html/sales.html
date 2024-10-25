@@ -51,13 +51,9 @@
     import { initializePanel } from '/js/loadPanel.js';
     initializePanel();
 
-    document.addEventListener('DOMContentLoaded', function () {
-      // Load and initialize the sidebar
-      fetch('/html/sidebar.html')
-        .then(response => response.text())
-        .then(data => {
-          document.getElementById('sidebar-wrapper').innerHTML = data;
-          initializeSidebar();
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
+      initializeSidebar();
 
           // Display only the Wine Cellar Inventory with Sell buttons
           displayInventory(inventoryInstance, ['winecellar-table-body'], true);
