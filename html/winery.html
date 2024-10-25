@@ -199,41 +199,37 @@
           // Log the initiation of the task
           addConsoleMessage(`Crushing task started for ${selectedResource}.`);
 
-          // Generate a unique task ID
-          const taskId = `CrushingGrapes-${Date.now()}`;
-
           // Directly create and add the task
+          const task = new Task(
+            "Crushing Grapes",
+            () => grapeCrushing(selectedResource),
+            () => {
+              const isConditionMet = Math.random() > 0.9; // Use the condition probability
+              if (isConditionMet) {
+                addConsoleMessage(`Crushing task completed for ${selectedResource}.`);
+              } else {
+                addConsoleMessage(`Crushing task not yet fulfilled for ${selectedResource}.`);
+              }
+              return isConditionMet;
+            }
+          );
+
+          // Create task info object with the assigned taskId from the Task instance
           const taskInfo = {
-            taskName: "Crushing Grapes",
+            taskName: task.taskName,
             resourceName: selectedResource,
-            conditionProbability: 0.9, // You can adjust this if needed
-            taskId: taskId // Add taskId to the taskInfo
+            conditionProbability: 0.9, // Maintain the condition probability info
+            taskId: task.taskId, // Use the taskId from the Task instance
           };
 
           // Save the task including the taskId
           saveTask(taskInfo);
 
-          // Create a new Task instance with the taskId
-          const task = new Task(
-            taskInfo.taskName,
-            () => grapeCrushing(taskInfo.resourceName),
-            () => {
-              const isConditionMet = Math.random() > taskInfo.conditionProbability;
-              if (isConditionMet) {
-                addConsoleMessage(`Crushing task completed for ${taskInfo.resourceName}.`);
-              } else {
-                addConsoleMessage(`Crushing task not yet fulfilled for ${taskInfo.resourceName}.`);
-              }
-              return isConditionMet;
-            },
-            taskId // Pass the taskId to the Task constructor
-          );
-
           // Update the UI elements (Not relevant after task is done in task panel)
-          //populateCrushInventoryList();
-          //populateResourceSelect();
-          //populateFermentationInventoryList();
-          //populateFermentResourceSelect();
+          // populateCrushInventoryList();
+          // populateResourceSelect();
+          // populateFermentationInventoryList();
+          // populateFermentResourceSelect();
         } else {
           addConsoleMessage('No resource selected for crushing.');
         }
