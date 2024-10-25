@@ -29,33 +29,35 @@ export class Task {
     this.createTaskBox();
   }
 
-  createTaskBox() {
-    // Get the task list element
-    const taskList = document.getElementById('task-list');
-    if (!taskList) {
-      console.error("Element 'task-list' not found");
-      return;
+    createTaskBox() {
+      // Get the task list element
+      const taskList = document.getElementById('task-list');
+      if (!taskList) {
+        console.error("Element 'task-list' not found");
+        return;
+      }
+
+      // Create task box element
+      const taskBox = document.createElement('div');
+      taskBox.className = 'task-box bg-light p-2 mb-2';
+      taskBox.innerHTML = `<strong>${this.taskName}</strong>`;
+
+      // Button to execute the task
+      const executeButton = document.createElement('button');
+      executeButton.className = 'btn btn-primary btn-sm ml-2';
+      executeButton.textContent = 'Execute';
+      executeButton.onclick = () => this.executeTask();
+
+      taskBox.appendChild(executeButton);
+
+
+
+      // Append task box to task list
+      taskList.appendChild(taskBox);
+
+      // Store reference to task box for removal later
+      this.taskBox = taskBox;
     }
-
-    // Create task box element
-    const taskBox = document.createElement('div');
-    taskBox.className = 'task-box bg-light p-2 mb-2';
-    taskBox.innerHTML = `<strong>${this.taskName}</strong>`;
-
-    // Button to execute the task
-    const executeButton = document.createElement('button');
-    executeButton.className = 'btn btn-primary btn-sm ml-2';
-    executeButton.textContent = 'Execute';
-    executeButton.onclick = () => this.executeTask();
-
-    taskBox.appendChild(executeButton);
-
-    // Append task box to task list
-    taskList.appendChild(taskBox);
-
-    // Store reference to task box for removal later
-    this.taskBox = taskBox;
-  }
 
     executeTask() {
       // Run the task function

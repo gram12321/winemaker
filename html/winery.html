@@ -197,20 +197,36 @@
         const selectedResource = document.getElementById('crush-resource-select').value;
 
         if (selectedResource) {
-          // Run the grapeCrushing immediately
-          grapeCrushing(selectedResource);
+          // Log the initiation of the task
+          addConsoleMessage(`Crushing task started for ${selectedResource}.`);
 
-          // Optionally log the immediate task execution
-          addConsoleMessage(`Started crushing ${selectedResource} immediately.`);
+          // Directly create and add the task
+          const taskInfo = {
+            taskName: "Crushing Grapes",
+            resourceName: selectedResource,
+            conditionProbability: 0.9 // You can adjust this if needed
+          };
+          saveTask(taskInfo);
 
-          // Add the task to the task panel for visibility or tracking purpose
-          spawnTask("Crushing Grapes", () => grapeCrushing(selectedResource), () => true); // Assuming condition is true for immediate execution
-          // Update the UI elements
-          // These might involve refreshing lists or any other UI components
-          populateCrushInventoryList();
-          populateResourceSelect();
-          populateFermentationInventoryList();
-          populateFermentResourceSelect();
+          const task = new Task(
+            taskInfo.taskName,
+            () => grapeCrushing(taskInfo.resourceName),
+            () => {
+              const isConditionMet = Math.random() > taskInfo.conditionProbability;
+              if (isConditionMet) {
+                addConsoleMessage(`Crushing task completed for ${taskInfo.resourceName}.`);
+              } else {
+                addConsoleMessage(`Crushing task not yet fulfilled for ${taskInfo.resourceName}.`);
+              }
+              return isConditionMet;
+            }
+          );
+
+          // Update the UI elements Not relevant after task i done in taskpanel
+          //populateCrushInventoryList();
+          //populateResourceSelect();
+          //populateFermentationInventoryList();
+          //populateFermentResourceSelect();
         } else {
           addConsoleMessage('No resource selected for crushing.');
         }
