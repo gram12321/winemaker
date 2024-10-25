@@ -19,16 +19,20 @@ async function clearFirestore() {
     }
 }
 
+
+
 async function clearLocalStorage() {
-    localStorage.removeItem('companyName');
-    localStorage.removeItem('money');
-    localStorage.removeItem('day'); // Clear day
-    localStorage.removeItem('season'); // Clear season
-    localStorage.removeItem('year'); // Clear year
-    localStorage.removeItem('ownedFarmlands'); // Clear land-related data
-    localStorage.removeItem('playerInventory'); // Clear inventory data
-    localStorage.removeItem('consoleMessages'); // Clear console messages
-    localStorage.removeItem('tasks'); // Clear tasks
+  await saveTasksToFirestore();  // Save tasks before clearing
+  localStorage.removeItem('companyName');
+  localStorage.removeItem('money');
+  localStorage.removeItem('day'); 
+  localStorage.removeItem('season'); 
+  localStorage.removeItem('year'); 
+  localStorage.removeItem('ownedFarmlands'); 
+  localStorage.removeItem('playerInventory');
+  localStorage.removeItem('consoleMessages');
+  localStorage.removeItem('tasks'); 
+  console.log("Local storage cleared.");
 }
 
 async function storeCompanyName() {
@@ -65,28 +69,27 @@ async function loadExistingCompanyData(companyName) {
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    // Load existing data into local storage
     const data = docSnap.data();
     localStorage.setItem('companyName', data.name);
     localStorage.setItem('money', data.money);
-    localStorage.setItem('day', data.day); // Load day
-    localStorage.setItem('season', data.season); // Load season
-    localStorage.setItem('year', data.year); // Load year
-    localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]'); // Load owned farmlands
-    localStorage.setItem('playerInventory', data.playerInventory || '[]'); // Load player inventory
+    localStorage.setItem('day', data.day);
+    localStorage.setItem('season', data.season);
+    localStorage.setItem('year', data.year);
+    localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
+    localStorage.setItem('playerInventory', data.playerInventory || '[]');
+    localStorage.setItem('tasks', data.tasks || '[]');  // Load tasks into localStorage
   }
 }
 
 async function saveCompanyInfo() {
   const companyName = localStorage.getItem('companyName');
   const money = localStorage.getItem('money');
-  const day = localStorage.getItem('day'); // Get the day
-  const season = localStorage.getItem('season'); // Get the season
-  const year = localStorage.getItem('year'); // Get the year
-  const ownedFarmlands = localStorage.getItem('ownedFarmlands'); // Get owned farmlands
-
-  // Retrieve the player inventory
-  const playerInventory = localStorage.getItem('playerInventory'); // Get the inventory
+  const day = localStorage.getItem('day');
+  const season = localStorage.getItem('season');
+  const year = localStorage.getItem('year');
+  const ownedFarmlands = localStorage.getItem('ownedFarmlands');
+  const playerInventory = localStorage.getItem('playerInventory');
+  const tasks = localStorage.getItem('tasks');  // Get tasks from localStorage
 
   if (!companyName) {
     console.error("No company name found to save.");
@@ -94,17 +97,18 @@ async function saveCompanyInfo() {
   }
 
   try {
-    const docRef = doc(db, "companies", companyName); // Reference a document named after the company
+    const docRef = doc(db, "companies", companyName);
     await setDoc(docRef, { 
       name: companyName,
-      money: money,
-      day: day,
-      season: season,
-      year: year,
-      ownedFarmlands: ownedFarmlands,
-      playerInventory: playerInventory // Save inventory
+      money,
+      day,
+      season,
+      year,
+      ownedFarmlands,
+      playerInventory,
+      tasks  // Save tasks alongside other company data
     });
-    console.log("Company info saved successfully");
+    console.log("Company info and tasks saved successfully.");
   } catch (error) {
     console.error("Error saving company info: ", error);
   }
@@ -145,6 +149,28 @@ loadInventory();
 // Function to save inventory to localStorage
 function saveInventory() {
   localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
+}
+
+async function saveTasksToFirestore() {
+  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  const companyName = localStorage.getItem('companyName');
+
+  if (!companyName) {
+      console.error("No company name set, cannot save tasks to Firestore.");
+      return;
+  }
+  try {
+      const tasksCollectionRef = collection(db, "companies", companyName, "tasks");
+
+      const saveTasksPromises = tasks.map(taskInfo => {
+          const taskRef = doc(tasksCollectionRef, String(taskInfo.taskId));
+          return setDoc(taskRef, taskInfo); // Save each task individually
+      });
+      await Promise.all(saveTasksPromises); // Wait for all tasks to be saved
+      console.log("Tasks saved to Firestore successfully.");
+  } catch (error) {
+      console.error("Error saving tasks to Firestore:", error);
+  }
 }
 
 export function saveTask(taskInfo) {
