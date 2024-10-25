@@ -101,19 +101,18 @@ export class Task {
 // Note: Ensure the executeTaskFunction is updated to increment workProgress like below:
 
 export function executeTaskFunction(task) {
-    // Run the task function
-    if (task.taskFunction) {
-        task.taskFunction();
-        task.workProgress++; // Assume progress increment per execution
+    const increment = task.taskFunction(); // Let the task function return the increment done
+
+    if (increment) {
+        task.workProgress += increment; // Add the returned increment
         task.updateProgressBar(); // Update the progress bar
     }
 
     // Check the progress
-    if (task.workProgress >= task.workTotal) { // Evaluate progress instead of using conditionFunction
-        // Task is complete
+    if (task.workProgress >= task.workTotal) {
         task.removeTaskBox();
-        console.log(`Executing removeTask for ID: ${task.taskId}`); // Debugging output
-        removeTask(task.taskId); // Use taskId for removal
+        console.log(`Executing removeTask for ID: ${task.taskId}`);
+        removeTask(task.taskId);
     } else {
         console.log(`Task condition not yet fulfilled. Progress: ${task.workProgress}/${task.workTotal}`);
     }

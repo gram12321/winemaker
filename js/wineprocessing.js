@@ -4,23 +4,33 @@ import { inventoryInstance } from './resource.js'; // Import saveInventory
 import { saveInventory } from './database/adminFunctions.js'; // Import saveInventory
 
 export function grapeCrushing(selectedResource) {
-    // Find the selected resource
+    const incrementAmount = 10; // Standard increment amount
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
 
-    if (resource && resource.amount >= 1) {
-        // Remove one unit from the resource
-        inventoryInstance.removeResource(resource.resource.name, 1, resource.state, resource.vintage, resource.quality);
+    if (resource) {
+        // Calculate the actual processing amount based on availability
+        const actualIncrement = Math.min(incrementAmount, resource.amount);
 
-        // Add one unit of the "must" with the same attributes
-        inventoryInstance.addResource(resource.resource.name, 1, 'Must', resource.vintage, resource.quality);
+        if (actualIncrement > 0) {
+            // Remove the actual increment amount from the resource
+            inventoryInstance.removeResource(resource.resource.name, actualIncrement, resource.state, resource.vintage, resource.quality);
 
-        // Save the updated inventory to localStorage
-        saveInventory();
+            // Add the equivalent amount of "must"
+            inventoryInstance.addResource(resource.resource.name, actualIncrement, 'Must', resource.vintage, resource.quality);
 
-        addConsoleMessage(`One unit of ${selectedResource} has been crushed into must.`);
+            // Save the updated inventory to localStorage
+            saveInventory();
+
+            addConsoleMessage(`${actualIncrement} units of ${selectedResource} have been crushed into must.`);
+            return actualIncrement; // Return the amount of work processed
+        } else {
+            addConsoleMessage(`No units of ${selectedResource} available to process.`);
+        }
     } else {
-        addConsoleMessage(`Unable to process ${selectedResource}. Make sure there is sufficient quantity.`);
+        addConsoleMessage(`Unable to process ${selectedResource}. Ensure it is available.`);
     }
+
+    return 0; // Return zero if no processing was done
 }
 
 export function fermentMust(selectedResource) {
