@@ -168,4 +168,5 @@ export function loadTasks() {
   });
 }
 
+
 export { storeCompanyName, saveCompanyInfo, clearLocalStorage, clearFirestore, loadInventory, saveInventory };
