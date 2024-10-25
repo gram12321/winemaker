@@ -21,13 +21,15 @@ initializePanel();
 
 
 export class Task {
-  constructor(taskName, taskFunction, conditionFunction) {
+  constructor(taskName, taskFunction, conditionFunction, taskId) {
     this.taskName = taskName;
     this.taskFunction = taskFunction;
     this.conditionFunction = conditionFunction;
-
+    this.taskId = taskId; // store taskId
     this.createTaskBox();
+    console.log(`Task created with ID: ${this.taskId}`); // Debugging output
   }
+
 
     createTaskBox() {
       // Get the task list element
@@ -60,19 +62,15 @@ export class Task {
     }
 
     executeTask() {
-      // Run the task function
-      this.taskFunction();
-
-      // Check the condition
-      if (this.conditionFunction()) {
-        // Task condition is fulfilled, remove task box
-        this.removeTaskBox();
-        // Remove the task from localStorage
-        removeTask(this.taskName);
-      } else {
-        console.log("Task condition not yet fulfilled.");
+        this.taskFunction();
+        if (this.conditionFunction()) {
+          this.removeTaskBox();
+          console.log(`Executing removeTask for ID: ${this.taskId}`); // Debugging output
+          removeTask(this.taskId); // Use taskId for removal
+        } else {
+          console.log("Task condition not yet fulfilled.");
+        }
       }
-    }
 
   removeTaskBox() {
     if (this.taskBox) {

@@ -3,6 +3,7 @@ import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
 import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
 import { saveInventory } from './database/adminFunctions.js';
+// import { executeTaskFunction } from './loadPanel.js'
 
 
 
@@ -31,17 +32,6 @@ export function incrementDay() {
     addConsoleMessage(`Day increased to: ${currentDay}, Season: ${SEASONS[currentSeasonIndex]}, Year: ${currentYear}`);
     renderCompanyInfo();
 
-    // Execute tasks on each day increment
-    tasks.forEach((task, index) => {
-        const taskFunc = new Function(`return ${task.taskFunction}`)();
-        const conditionFunc = new Function(`return ${task.conditionFunction}`)();
-        taskFunc();
-        if (conditionFunc()) {
-            console.log(`${task.taskName} completed`);
-            task.taskBox.remove();
-            tasks.splice(index, 1);
-        }
-    });
 
     }
 

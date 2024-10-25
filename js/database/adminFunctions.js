@@ -147,41 +147,54 @@ function saveInventory() {
 }
 
 export function saveTask(taskInfo) {
-  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  const existingTaskIndex = tasks.findIndex(task => task.taskName === taskInfo.taskName);
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-  if (existingTaskIndex === -1) {
-    // Only add the task if it doesn't already exist
-    tasks.push(taskInfo);
-  } else {
-    // Update the existing task with new info if it already exists
-    tasks[existingTaskIndex] = taskInfo;
-  }
+    // Find if the task already exists based on taskId
+    const existingTaskIndex = tasks.findIndex(task => task.taskId === taskInfo.taskId);
 
-  localStorage.setItem('tasks', JSON.stringify(tasks));
-}
-
-export function removeTask(taskName) {
-  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  tasks = tasks.filter(task => task.taskName !== taskName);
-  localStorage.setItem('tasks', JSON.stringify(tasks));
+    if (existingTaskIndex === -1) {
+        // Add new task, ensure the taskId is already included in taskInfo
+        tasks.push(taskInfo);
+    } else {
+        // Update the existing task
+        tasks[existingTaskIndex] = taskInfo;
+    }
+    localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 export function loadTasks() {
-  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  tasks.forEach(taskInfo => {
-      const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
-      if (resource) {
-          new Task(
-              taskInfo.taskName,
-              () => grapeCrushing(taskInfo.resourceName),
-              () => Math.random() > taskInfo.conditionProbability
-          );
-      } else {
-          addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
-      }
-  });
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.forEach(taskInfo => {
+        const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+        if (resource) {
+            new Task(
+                taskInfo.taskName,
+                () => grapeCrushing(taskInfo.resourceName),
+                () => Math.random() > taskInfo.conditionProbability,
+                taskInfo.taskId // Ensure taskId is passed here
+            );
+        } else {
+            addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+        }
+    });
 }
+
+export function removeTask(taskId) {
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const initialTaskCount = tasks.length;
+
+    tasks = tasks.filter(task => task.taskId !== taskId);
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+
+    // Debugging: Log whether a task was removed
+    const tasksAfterRemoval = JSON.parse(localStorage.getItem('tasks'));
+    if (initialTaskCount === tasksAfterRemoval.length) {
+        console.warn(`Task with ID ${taskId} was not found or removed. Check if the correct ID is being passed.`);
+    } else {
+        console.log(`Task with ID ${taskId} successfully removed.`);
+    }
+}
+
 
 
 export { storeCompanyName, saveCompanyInfo, clearLocalStorage, clearFirestore, loadInventory, saveInventory };
