@@ -17,36 +17,34 @@ function initializePanel() {
 }
 
 export function executeAllTasks() {
-        activeTasks.forEach(task => {
+    activeTasks.forEach(task => {
         executeTaskFunction(task); // Execute the task function for each instantiated task
     });
 }
 
 // Standalone function to execute a task
 export class Task {
-    // Initialize 'latestTaskId' from localStorage, or start at 0 if not set
     static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
 
-    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '') {
+    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '') {
         this.taskName = taskName;
         this.taskFunction = taskFunction;
         this.taskId = taskId || Task.generateTaskId();
         this.workTotal = workTotal;
         this.workProgress = 0;
-
-        // Store the additional properties
         this.resourceName = resourceName;
         this.resourceState = resourceState;
         this.vintage = vintage;
         this.quality = quality;
+        this.iconPath = iconPath; 
+        console.log(`Icon Path on Task creation: ${this.iconPath}`); // Log here for debugging
         this.createTaskBox();
         console.log(`Task created with ID: ${this.taskId}`);
     }
 
     static generateTaskId() {
         const newTaskId = ++Task.latestTaskId; // Increment the task ID
-        // Store the new task ID back in localStorage
-        localStorage.setItem('latestTaskId', newTaskId);
+        localStorage.setItem('latestTaskId', newTaskId); // Store the new task ID back in localStorage
         return newTaskId;
     }
 
@@ -60,38 +58,35 @@ export class Task {
         // Create the task box element
         const taskBox = document.createElement('div');
         taskBox.className = 'task-box bg-light p-2 mb-2';
-        taskBox.innerHTML = `<strong>${this.taskName}</strong>
-            <div class="task-details"><strong>${this.resourceName}, ${this.vintage}</strong> - ${this.quality}</div>`;
+        taskBox.innerHTML = `
+            <div class="d-flex align-items-center">
+                <img src="${this.iconPath}" alt="Task Icon" style="width: 24px; height: 24px; margin-right: 8px;" />
+                <strong>${this.taskName}</strong>
+            </div>
+            <div class="task-details">${this.resourceName}, <strong>${this.vintage}</strong> - ${this.quality}</div>
+        `;
 
-        // Create container for progress info
         const progressInfo = document.createElement('div');
         progressInfo.className = 'progress-info';
 
-        // From label
         const fromLabel = document.createElement('span');
         fromLabel.textContent = `From: ${this.workProgress}`;
 
-        // To label
         const toLabel = document.createElement('span');
         toLabel.textContent = `To: ${this.workTotal}`;
 
-        // Create the progress bar
         const progressBar = document.createElement('div');
         progressBar.className = 'progress mt-1';
         progressBar.innerHTML = `
             <div class="progress-bar" role="progressbar" style="width: ${this.workProgress / this.workTotal * 100}%" aria-valuenow="${this.workProgress}" aria-valuemin="0" aria-valuemax="${this.workTotal}"></div>
         `;
 
-        // Append from and to labels into the progressInfo container
         progressInfo.appendChild(fromLabel);
         progressInfo.appendChild(toLabel);
-
-        // Append elements to the task box
         taskBox.appendChild(progressInfo);
         taskBox.appendChild(progressBar);
         taskList.appendChild(taskBox);
 
-        // Store reference to task box for future updates
         this.taskBox = taskBox;
     }
 
@@ -110,8 +105,6 @@ export class Task {
         }
     }
 }
-
-// Note: Ensure the executeTaskFunction is updated to increment workProgress like below:
 
 export function executeTaskFunction(task) {
     const increment = task.taskFunction(); // Let the task function return the increment done
@@ -132,4 +125,3 @@ export function executeTaskFunction(task) {
 }
 
 export { initializePanel };
-

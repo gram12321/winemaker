@@ -6,6 +6,7 @@ import { saveInventory } from './database/adminFunctions.js'; // Import saveInve
 export function grapeCrushing(selectedResource) {
     const incrementAmount = 10; // Standard increment amount
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
+    const iconPath = '/assets/icon/icon_pressing.webp'; // Use the verified absolute path
 
     if (resource) {
         // Calculate the actual processing amount based on availability
@@ -21,7 +22,20 @@ export function grapeCrushing(selectedResource) {
             // Save the updated inventory to localStorage
             saveInventory();
 
-            addConsoleMessage(`${actualIncrement} units of<strong> ${selectedResource}, ${resource.vintage},</Strong> ${resource.quality} have been crushed into must.`);
+            // Create the task with the icon path included
+            const task = new Task(
+                "Crushing Grapes",
+                () => grapeCrushing(selectedResource),
+                undefined,
+                resource.amount,
+                selectedResource,
+                'Grapes',
+                resource.vintage,
+                resource.quality,
+                iconPath // Pass the icon path
+            );
+
+            addConsoleMessage(`${actualIncrement} units of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must.`);
             return actualIncrement; // Return the amount of work processed
         } else {
             addConsoleMessage(`No units of ${selectedResource} available to process.`);

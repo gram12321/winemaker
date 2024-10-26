@@ -75,6 +75,8 @@
                   <!-- Options will be populated dynamically -->
                 </select>
                 <button class="btn btn-primary mb-2" id="fermentation-btn">Start Fermentation</button>
+                <!-- Test Image -->
+                
               </div>
             </div>
           </div>
@@ -179,61 +181,64 @@
       // Update the event listener in winery.html
 
       document.getElementById('crush-grapes-btn').addEventListener('click', function() {
-        const selectedResource = document.getElementById('crush-resource-select').value;
+          const selectedResource = document.getElementById('crush-resource-select').value;
 
-        if (selectedResource) {
-          const resource = inventoryInstance.items.find(
-            item => item.resource.name === selectedResource && item.state === 'Grapes'
-          );
+          if (selectedResource) {
+              const resource = inventoryInstance.items.find(
+                  item => item.resource.name === selectedResource && item.state === 'Grapes'
+              );
 
-          if (resource) {
-            console.log(`Checking for existing tasks for resource: ${selectedResource}, state: Grapes, vintage: ${resource.vintage}, quality: ${resource.quality}`);
+              if (resource) {
+                  console.log(`Checking for existing tasks for resource: ${selectedResource}, state: Grapes, vintage: ${resource.vintage}, quality: ${resource.quality}`);
 
-            // Include other unique identifiers as necessary, such as vintage and quality
-            const isTaskAlreadyActive = activeTasks.some(task => {
-              console.log(`Active Task - Name: ${task.taskName}, Resource: ${task.resourceName}, State: ${task.resourceState}, Vintage: ${task.vintage}, Quality: ${task.quality}`);
-              return task.taskName === "Crushing Grapes" &&
-                     task.resourceName === selectedResource &&
-                     task.resourceState === 'Grapes' &&
-                     task.vintage === resource.vintage && // Assuming vintage is part of resource
-                     task.quality === resource.quality;   // Assuming quality is part of resource
-            });
+                  // Include other unique identifiers as necessary, such as vintage and quality
+                  const isTaskAlreadyActive = activeTasks.some(task => {
+                      console.log(`Active Task - Name: ${task.taskName}, Resource: ${task.resourceName}, State: ${task.resourceState}, Vintage: ${task.vintage}, Quality: ${task.quality}`);
+                      return task.taskName === "Crushing Grapes" &&
+                             task.resourceName === selectedResource &&
+                             task.resourceState === 'Grapes' &&
+                             task.vintage === resource.vintage &&
+                             task.quality === resource.quality;
+                  });
 
-            if (!isTaskAlreadyActive) {
-                const task = new Task(
-                    "Crushing Grapes",
-                    () => grapeCrushing(selectedResource),
-                    undefined,
-                    resource.amount,
-                    selectedResource, // resourceName
-                    'Grapes',         // resourceState
-                    resource.vintage, // vintage
-                    resource.quality  // quality
-                );
+                  if (!isTaskAlreadyActive) {
+                      const iconPath = '/assets/icon/icon_pressing.webp'; // Absolute path for the icon
 
-                const taskInfo = {
-                    taskName: task.taskName,
-                    resourceName: selectedResource,
-                    resourceState: 'Grapes',
-                    vintage: resource.vintage,
-                    quality: resource.quality,
-                    taskId: task.taskId,
-                    workTotal: resource.amount
-                };
+                      const task = new Task(
+                          "Crushing Grapes",
+                          () => grapeCrushing(selectedResource),
+                          undefined,
+                          resource.amount,
+                          selectedResource,
+                          'Grapes',
+                          resource.vintage,
+                          resource.quality,
+                          iconPath // Pass the icon path
+                      );
 
-                saveTask(taskInfo);
-                activeTasks.push(task);  // Add task to activeTasks array
-                addConsoleMessage(`Crushing task started for ${selectedResource}.`);
-            } else {
-              addConsoleMessage(`A Crushing task for ${selectedResource}, ${resource.vintage} is already active.`);
+                      const taskInfo = {
+                          taskName: task.taskName,
+                          resourceName: selectedResource,
+                          resourceState: 'Grapes',
+                          vintage: resource.vintage,
+                          quality: resource.quality,
+                          taskId: task.taskId,
+                          workTotal: resource.amount,
+                          iconPath: iconPath // Store the icon path
+                      };
 
-            }
+                      saveTask(taskInfo);
+                      activeTasks.push(task);  // Add task to activeTasks array
+                      addConsoleMessage(`Crushing task started for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality}.`);
+                  } else {
+                      addConsoleMessage(`A Crushing task for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality} is already active.`);
+                  }
+              } else {
+                  addConsoleMessage(`The resource ${selectedResource} is not available.`);
+              }
           } else {
-            addConsoleMessage(`The resource ${selectedResource} is not available.`);
+              addConsoleMessage('No resource selected for crushing.');
           }
-        } else {
-          addConsoleMessage('No resource selected for crushing.');
-        }
       });
       });
   </script>
