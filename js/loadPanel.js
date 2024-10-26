@@ -27,13 +27,18 @@ export class Task {
     // Initialize 'latestTaskId' from localStorage, or start at 0 if not set
     static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
 
-    constructor(taskName, taskFunction, taskId = null, workTotal = 0) {
+    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '') {
         this.taskName = taskName;
         this.taskFunction = taskFunction;
         this.taskId = taskId || Task.generateTaskId();
         this.workTotal = workTotal;
-        this.workProgress = 0; // Initialize progress to zero
+        this.workProgress = 0;
 
+        // Store the additional properties
+        this.resourceName = resourceName;
+        this.resourceState = resourceState;
+        this.vintage = vintage;
+        this.quality = quality;
         this.createTaskBox();
         console.log(`Task created with ID: ${this.taskId}`);
     }

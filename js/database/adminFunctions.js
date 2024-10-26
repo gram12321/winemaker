@@ -193,29 +193,30 @@ export function loadTasks() {
     // Clear any existing tasks from activeTasks
     activeTasks.length = 0; // Mutate the array to clear
 
-    tasks.forEach(taskInfo => {
-        const initialResourceTotal = taskInfo.workTotal; // Assume this was the initial total
-        const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+  tasks.forEach(taskInfo => {
+      const initialResourceTotal = taskInfo.workTotal;
+      const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
 
-        if (resource) {
-            // Calculate work already done based on initial total and current amount
-            const workAlreadyDone = initialResourceTotal - resource.amount;
+      if (resource) {
+          const workAlreadyDone = initialResourceTotal - resource.amount;
 
-            const task = new Task(
-                taskInfo.taskName,
-                () => grapeCrushing(taskInfo.resourceName),
-                taskInfo.taskId, // Pass stored taskId
-                initialResourceTotal // Pass initial total, which represents workTotal
-            );
+          const task = new Task(
+              taskInfo.taskName,
+              () => grapeCrushing(taskInfo.resourceName),
+              taskInfo.taskId,
+              initialResourceTotal,
+              taskInfo.resourceName,
+              taskInfo.resourceState,
+              taskInfo.vintage,
+              taskInfo.quality
+          );
 
-            // Set workProgress based on the calculated work already done
-            task.workProgress = workAlreadyDone;
-
-            activeTasks.push(task); // Store reference to the created task
-        } else {
-            addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
-        }
-    });
+          task.workProgress = workAlreadyDone;
+          activeTasks.push(task);  // Add task to activeTasks array
+      } else {
+          addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+      }
+  });
 }
 
 // Existing removeTask function with additional code

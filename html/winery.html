@@ -111,7 +111,7 @@
     import { inventoryInstance } from '/js/resource.js';
     import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
     import { Task } from '/js/loadPanel.js';  // Import the spawnTask function
-    import { loadTasks, saveTask } from '/js/database/adminFunctions.js';
+    import { loadTasks, saveTask, activeTasks } from '/js/database/adminFunctions.js';
     import { initializePanel } from '/js/loadPanel.js';
     initializePanel();
 
@@ -191,41 +191,58 @@
         // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
         initializeSidebar();
 
+      // Update the event listener in winery.html
+
       document.getElementById('crush-grapes-btn').addEventListener('click', function() {
         const selectedResource = document.getElementById('crush-resource-select').value;
 
         if (selectedResource) {
-          // Get the initial amount of the selected resource
-          const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
+          const resource = inventoryInstance.items.find(
+            item => item.resource.name === selectedResource && item.state === 'Grapes'
+          );
 
           if (resource) {
-            // Log the initiation of the task
-            addConsoleMessage(`Crushing task started for ${selectedResource}.`);
+            console.log(`Checking for existing tasks for resource: ${selectedResource}, state: Grapes, vintage: ${resource.vintage}, quality: ${resource.quality}`);
 
-            // Create and add the task with workTotal set to the amount of the resource
-            const task = new Task(
-              "Crushing Grapes",
-              () => grapeCrushing(selectedResource),
-              undefined, // Let it auto-generate the taskId
-              resource.amount // Set initial workTotal based on the amount of resource
-            );
+            // Include other unique identifiers as necessary, such as vintage and quality
+            const isTaskAlreadyActive = activeTasks.some(task => {
+              console.log(`Active Task - Name: ${task.taskName}, Resource: ${task.resourceName}, State: ${task.resourceState}, Vintage: ${task.vintage}, Quality: ${task.quality}`);
+              return task.taskName === "Crushing Grapes" &&
+                     task.resourceName === selectedResource &&
+                     task.resourceState === 'Grapes' &&
+                     task.vintage === resource.vintage && // Assuming vintage is part of resource
+                     task.quality === resource.quality;   // Assuming quality is part of resource
+            });
 
-            // Create task info object with the assigned taskId from the Task instance
-            const taskInfo = {
-              taskName: task.taskName,
-              resourceName: selectedResource,
-              taskId: task.taskId, // Use the taskId from the Task instance
-              workTotal: resource.amount // Save workTotal as part of taskInfo if needed
-            };
+            if (!isTaskAlreadyActive) {
+                const task = new Task(
+                    "Crushing Grapes",
+                    () => grapeCrushing(selectedResource),
+                    undefined,
+                    resource.amount,
+                    selectedResource, // resourceName
+                    'Grapes',         // resourceState
+                    resource.vintage, // vintage
+                    resource.quality  // quality
+                );
 
-            // Save the task including the taskId
-            saveTask(taskInfo);
+                const taskInfo = {
+                    taskName: task.taskName,
+                    resourceName: selectedResource,
+                    resourceState: 'Grapes',
+                    vintage: resource.vintage,
+                    quality: resource.quality,
+                    taskId: task.taskId,
+                    workTotal: resource.amount
+                };
 
-            // Optionally update UI elements
-            // populateCrushInventoryList();
-            // populateResourceSelect();
-            // populateFermentationInventoryList();
-            // populateFermentResourceSelect();
+                saveTask(taskInfo);
+                activeTasks.push(task);  // Add task to activeTasks array
+                addConsoleMessage(`Crushing task started for ${selectedResource}.`);
+            } else {
+              addConsoleMessage(`A task for ${selectedResource}, ${resource.vintage} is already active.`);
+
+            }
           } else {
             addConsoleMessage(`The resource ${selectedResource} is not available.`);
           }
