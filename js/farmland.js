@@ -1,4 +1,4 @@
-import { addConsoleMessage } from '/js/console.js';
+import { addConsoleMessage, getIconHtml } from '/js/console.js';
 import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import names
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory } from '/js/database/adminFunctions.js';
@@ -38,8 +38,7 @@ function buyLand() {
 
   farmlands.push(newFarmland);
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-  addConsoleMessage(`Successfully purchased new farmland: ID = ${newFarmland.id}, Name = ${newFarmland.name}, Country = ${newFarmland.country}, Region = ${newFarmland.region}, Acres = ${newFarmland.acres}`);
+  addConsoleMessage(`Purchased new farmland: "<strong>${newFarmland.name}"</Strong> in <strong>${newFarmland.country}, ${newFarmland.region}</strong>, with total <strong>${newFarmland.acres} </strong>Acres`);
 
   displayOwnedFarmland();
 }
@@ -96,7 +95,7 @@ function plantField(index, resourceName) {
   if (farmlands[index]) {
     farmlands[index].plantedResourceName = resourceName;
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-    addConsoleMessage(`Field ID ${farmlands[index].id} has been planted with ${resourceName}.`);
+    addConsoleMessage(`${getIconHtml('planting.png')}<strong>${farmlands[index].name}</strong> has been planted with <strong>${resourceName}</strong>, total of <strong>${farmlands[index].acres}</strong> acres has been planted.`);
     displayOwnedFarmland(); // Refresh the table display
   }
 }

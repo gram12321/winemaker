@@ -35,10 +35,17 @@ function attachSummaryClickEvent() {
     });
 }
 
+export function getIconHtml(iconName) {
+    const basePath = '/assets/icon/small/';
+    return `<img src="${basePath}${iconName}" alt="${iconName.split('.')[0]} Icon" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 5px;">`;
+}
+
 // Load console messages when the DOM content is loaded
 document.addEventListener('DOMContentLoaded', function() {
     updateConsoleOutputs();
     attachSummaryClickEvent(); // Attach any existing messages on load
 });
+
+
 
 export { addConsoleMessage };
