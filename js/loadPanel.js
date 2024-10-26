@@ -47,11 +47,11 @@ export class Task {
     }
 
     createTaskBox() {
-        const taskList = document.getElementById('task-list');
-        if (!taskList) {
-            console.error("Element 'task-list' not found");
-            return;
-        }
+    const taskList = document.getElementById('task-list');
+    if (!taskList) {
+        console.error("Element 'task-list' not found");
+        return;
+    }
 
         // Create the task box element
         const taskBox = document.createElement('div');
@@ -94,7 +94,7 @@ export class Task {
             const progressBar = this.taskBox.querySelector('.progress-bar');
             const progress = (this.workProgress / this.workTotal) * 100;
             progressBar.style.width = `${progress}%`;
-            progressBar.setAttribute('aria-valuenow', progress);
+            progressBar.setAttribute('aria-valuenow', this.workProgress);
         }
     }
 
@@ -106,11 +106,10 @@ export class Task {
 }
 
 export function executeTaskFunction(task) {
-    const increment = task.taskFunction(); // Let the task function return the increment done
-
+    const increment = task.taskFunction(); // Function should return progress amount
     if (increment) {
-        task.workProgress += increment; // Add the returned increment
-        task.updateProgressBar(); // Update the progress bar
+        task.workProgress += increment; 
+        task.updateProgressBar(); // Ensure this is called
     }
 
     // Check the progress

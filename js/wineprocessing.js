@@ -22,19 +22,6 @@ export function grapeCrushing(selectedResource) {
             // Save the updated inventory to localStorage
             saveInventory();
 
-            // Create the task with the icon path included
-            const task = new Task(
-                "Crushing Grapes",
-                () => grapeCrushing(selectedResource),
-                undefined,
-                resource.amount,
-                selectedResource,
-                'Grapes',
-                resource.vintage,
-                resource.quality,
-                iconPath // Pass the icon path
-            );
-
             addConsoleMessage(`${actualIncrement} units of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must.`);
             return actualIncrement; // Return the amount of work processed
         } else {
