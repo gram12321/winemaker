@@ -204,9 +204,7 @@ export function loadTasks() {
                 task.workProgress = taskInfo.workTotal - resource.amount;
                 task.updateProgressBar(); // Ensure progress bar is correctly updated
                 activeTasks.push(task);
-                addConsoleMessage(`Loaded task: ${taskInfo.taskName} for resource: ${taskInfo.resourceName}.`);
-            } else {
-                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource ${taskInfo.resourceName} not available.`);
+                
             }
         } else if (taskInfo.taskName === "Planting") {
             const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -230,10 +228,7 @@ export function loadTasks() {
                 task.workProgress = field.currentAcresPlanted || 0;
                 task.updateProgressBar(); // Ensure progress bar is correctly updated
                 activeTasks.push(task);
-                addConsoleMessage(`Loaded planting task for field ID: ${taskInfo.fieldId}`);
-            } else {
-                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: field ID ${taskInfo.fieldId} not available.`);
-            }
+            } 
         }
     });
 

@@ -106,8 +106,6 @@ export class Task {
     }
 }
 
-
-
 export function executeTaskFunction(task) {
     const increment = task.taskFunction(); // Function should return progress amount
     if (increment) {
@@ -121,11 +119,16 @@ export function executeTaskFunction(task) {
         console.log(`Executing removeTask for ID: ${task.taskId}`);
         removeTask(task.taskId);
 
-        // Add a console message indicating task completion
-        addConsoleMessage(`${task.taskName} task completed for <Strong>${task.resourceName}, ${task.vintage}, ${task.quality}.</Strong>`);
-    } else {
-        console.log(`Task condition not yet fulfilled. Progress: ${task.workProgress}/${task.workTotal}`);
-    }
+        // Add a console message indicating task completion with conditional logic for different tasks
+        if (task.taskName === "Planting") {
+            addConsoleMessage(`Planting task completed for field <strong>${task.fieldId}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
+        } else if (task.taskName === "Crushing Grapes") {
+            addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
+        } else {
+            // Default message for any other tasks
+            addConsoleMessage(`${task.taskName} task completed for <strong>${task.resourceName}, ${task.vintage}, ${task.quality}.</strong>`);
+        }
+    } 
 }
 
 export { initializePanel };

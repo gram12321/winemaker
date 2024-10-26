@@ -94,22 +94,11 @@ function handlePlantingTask(index, resourceName, totalAcres) {
   const field = farmlands[index];
   const fieldName = field?.name || `Field ${index}`;
   const fieldRegion = field?.region || 'Unknown Region';
+  const gameYear = parseInt(localStorage.getItem('year'), 10); // Retrieve the current game year
 
-  // Log current field state
-  console.log(`Checking field ${fieldName}, ${fieldRegion}: currentAcresPlanted=${field.currentAcresPlanted}, totalAcres=${field.acres}`);
-
-  // Check if a task is already active for this field
-  const isTaskAlreadyActive = activeTasks.some(task => {
-    const isActive = task.taskName === "Planting" && task.fieldId === index;
-    console.log(`Task check for field ID ${index}: current task - taskName=${task.taskName}, fieldId=${task.fieldId}, isActive=${isActive}`);
-    return isActive;
-  });
+  const isTaskAlreadyActive = activeTasks.some(task => task.taskName === "Planting" && task.fieldId === index);
 
   if (!isTaskAlreadyActive && (!field.currentAcresPlanted || field.currentAcresPlanted === 0)) {
-    // Log task creation
-    console.log(`Creating planting task for field ${fieldName}, ${fieldRegion}`);
-
-    // Proceed with task creation
     const iconPath = '/assets/icon/icon_planting.webp';
 
     const task = new Task(
@@ -119,7 +108,7 @@ function handlePlantingTask(index, resourceName, totalAcres) {
       totalAcres,
       resourceName,
       '',
-      '',
+      gameYear,  // Set the game year as vintage
       '',
       iconPath
     );
@@ -127,24 +116,20 @@ function handlePlantingTask(index, resourceName, totalAcres) {
     task.fieldId = index; // Properly assign the fieldId here
 
     const taskInfo = {
-        taskName: task.taskName,
-        fieldId: index,  // Ensure this is included
-        resourceName: resourceName,
-        taskId: task.taskId,
-        workTotal: totalAcres,
-        iconPath: iconPath
+      taskName: task.taskName,
+      fieldId: index,
+      resourceName: resourceName,
+      taskId: task.taskId,
+      workTotal: totalAcres,
+      vintage: gameYear, // Include the vintage in the task info
+      iconPath: iconPath
     };
 
     saveTask(taskInfo);
     activeTasks.push(task);
-    addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}.</strong>`);
+    addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
   } else {
-    if (isTaskAlreadyActive) {
-      console.log(`A planting task is already active for field ${fieldName}, ${fieldRegion}.`);
-    } else {
-      console.log(`Field ${fieldName}, ${fieldRegion} is already planted with ${field.currentAcresPlanted} acres.`);
-    }
-    addConsoleMessage(`A Planting task is already active or incomplete for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
+    addConsoleMessage(`A Planting task is already active for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
   }
 }
 
@@ -176,7 +161,7 @@ export function plantAcres(index, resourceName) {
       field.currentAcresPlanted = field.acres;
       addConsoleMessage(`Field <strong>${fieldName}</strong>, ${fieldRegion} fully planted with <strong>${resourceName}.</strong>`);
     } else {
-      addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>, ${fieldRegion}.`);
+      addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>, ${fieldRegion}. Total planted: <strong>${field.currentAcresPlanted} out of ${field.acres}</strong> acres.`);
     }
 
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
