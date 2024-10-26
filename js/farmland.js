@@ -1,8 +1,8 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
 import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import names
 import { allResources, inventoryInstance } from '/js/resource.js';
-import { saveInventory } from '/js/database/adminFunctions.js';
-
+import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
+import { Task } from './loadPanel.js'; // Import the Task class used for tasks
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null) {
@@ -72,11 +72,11 @@ function displayOwnedFarmland() {
     `;
     farmlandTableBody.appendChild(row);
 
-    // Planted Resource Logic
+    // Planted Resource Task Logic
     row.querySelector('.plant-field-btn').addEventListener('click', () => {
       const resourceSelect = row.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
-      plantField(index, selectedResource);
+      handlePlantingTask(index, selectedResource, farmland.acres);
     });
 
     // Harvest Logic
@@ -85,19 +85,88 @@ function displayOwnedFarmland() {
       if (isPlanted) {
         harvestField(index);
       }
-      
     });
   });
 }
 
-function plantField(index, resourceName) {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  if (farmlands[index]) {
-    farmlands[index].plantedResourceName = resourceName;
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-    addConsoleMessage(`${getIconHtml('planting.png')}<strong>${farmlands[index].name}</strong> has been planted with <strong>${resourceName}</strong>, total of <strong>${farmlands[index].acres}</strong> acres has been planted.`);
-    displayOwnedFarmland(); // Refresh the table display
+function handlePlantingTask(index, resourceName, totalAcres) {
+
+  const isTaskAlreadyActive = activeTasks.some(task => {
+    const isMatch = task.taskName === "Planting" && task.fieldId === index;
+    if (isMatch) {
+
+    }
+    return isMatch;
+  });
+
+  if (!isTaskAlreadyActive) {
+    const iconPath = '/assets/icon/icon_planting.webp';
+
+    const task = new Task(
+      "Planting",
+      () => plantAcres(index, resourceName), 
+      undefined, // Let Task generate the ID
+      totalAcres,
+      resourceName,
+      '',
+      '',
+      '',
+      iconPath
+    );
+
+    task.fieldId = index; 
+
+    const taskInfo = {
+      taskName: task.taskName,
+      fieldId: index,
+      resourceName: resourceName,
+      taskId: task.taskId,
+      workTotal: totalAcres,
+      iconPath: iconPath
+    };
+
+    saveTask(taskInfo);
+    activeTasks.push(task);
+    addConsoleMessage(`Planting task started for field ID ${index} with ${resourceName}.`);
+  } else {
+    addConsoleMessage(`A Planting task is already active for field ID ${index}.`);
   }
+}
+
+export function plantAcres(index, resourceName) {
+  const increment = 10; // Define the work increment for planting
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const field = farmlands[index];
+
+  if (!field) {
+    addConsoleMessage(`Field ID ${index} does not exist.`);
+    return 0;
+  }
+
+  // Calculate how much work is needed to complete the planting
+  const workRemaining = field.acres - (field.currentAcresPlanted || 0);
+  const acresToPlant = Math.min(increment, workRemaining);
+
+  if (acresToPlant === 0) {
+    addConsoleMessage(`Field ID ${index} is already fully planted.`);
+    return 0;
+  }
+
+  // Update the number of planted acres
+  field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
+
+  if (field.currentAcresPlanted >= field.acres) {
+      field.plantedResourceName = resourceName; // Mark as fully planted when done
+      field.currentAcresPlanted = field.acres; // Ensure it doesn't exceed total
+      addConsoleMessage(`Field ID ${index} fully planted with ${resourceName}.`);
+  } else {
+      addConsoleMessage(`${acresToPlant} acres planted with ${resourceName} on field ID ${index}.`);
+  }
+
+  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+  // Return the increment value for task progress tracking
+  return acresToPlant;
 }
 
 function harvestField(index) {
@@ -120,4 +189,4 @@ function harvestField(index) {
   }
 }
 
-export { buyLand, Farmland, displayOwnedFarmland, plantField };
+export { buyLand, Farmland, displayOwnedFarmland, handlePlantingTask };

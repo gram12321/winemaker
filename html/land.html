@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Game Page</title>
+  <title>Game Page - Farmland</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/style.css" rel="stylesheet">
 </head>
@@ -9,13 +9,14 @@
   <div class="d-flex" id="wrapper">
     <!-- Sidebar -->
     <div id="sidebar-wrapper">
+      <!-- Sidebar content dynamically loaded here -->
     </div>
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Farmland</h1>
       <!-- Buy Land Button -->
       <button id="buy-land-btn" class="btn btn-success mt-3">Buy Land</button>
-      
+
       <!-- Table to display farmland instances -->
       <table id="farmland-table" class="table table-striped mt-4">
         <thead>
@@ -41,25 +42,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="/js/loadPanel.js"></script>
-  
+
   <!-- Sidebar Initialization Script -->
   <script type="module" src="/js/database/loadSidebar.js"></script>
-  
 
   <!-- Custom JavaScript -->
   <script type="module">
-    import { displayOwnedFarmland, buyLand, plantField } from '/js/farmland.js';
+    import { displayOwnedFarmland, buyLand, handlePlantingTask } from '/js/farmland.js';
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
-    initializePanel();
 
     document.addEventListener('DOMContentLoaded', function() {
+      initializePanel();
+
       // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
       initializeSidebar();
 
+      // Setup event listeners and initialize farmlands display
       const buyLandButton = document.getElementById('buy-land-btn');
-
-      // Call displayOwnedFarmland after the DOM is fully loaded
       displayOwnedFarmland(); 
 
       if (buyLandButton) {

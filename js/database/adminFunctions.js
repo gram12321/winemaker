@@ -2,6 +2,7 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { inventoryInstance } from '../resource.js';
 import { Task } from '../loadPanel.js'
 import { grapeCrushing } from '/js/wineprocessing.js';
+import { plantAcres } from '/js/farmland.js';
 import { addConsoleMessage } from '../console.js';
 
 async function clearFirestore() {
@@ -181,36 +182,54 @@ export const activeTasks = []; // Exported array to hold task references
 
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
     // Load and set the latestTaskId from localStorage
     Task.latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
-
     // Clear any existing tasks from activeTasks
     activeTasks.length = 0; // Mutate the array to clear
-
     tasks.forEach(taskInfo => {
-        const initialResourceTotal = taskInfo.workTotal;
-        const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+        if (taskInfo.taskName === "Grape Crushing") {
+            const initialResourceTotal = taskInfo.workTotal;
+            const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+            if (resource) {
+                const workAlreadyDone = initialResourceTotal - resource.amount;
+                const task = new Task(
+                    taskInfo.taskName,
+                    () => grapeCrushing(taskInfo.resourceName),
+                    taskInfo.taskId,
+                    initialResourceTotal,
+                    taskInfo.resourceName,
+                    taskInfo.resourceState,
+                    taskInfo.vintage,
+                    taskInfo.quality,
+                    taskInfo.iconPath // Restore the icon path
+                );
+                task.workProgress = workAlreadyDone;
+                activeTasks.push(task);  // Add task to activeTasks array
+            } else {
+                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+            }
+        } else if (taskInfo.taskName === "Planting") {
+            const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+            const field = farmlands[taskInfo.fieldId];
 
-        if (resource) {
-            const workAlreadyDone = initialResourceTotal - resource.amount;
-
-            const task = new Task(
-                taskInfo.taskName,
-                () => grapeCrushing(taskInfo.resourceName),
-                taskInfo.taskId,
-                initialResourceTotal,
-                taskInfo.resourceName,
-                taskInfo.resourceState,
-                taskInfo.vintage,
-                taskInfo.quality,
-                taskInfo.iconPath // Restore the icon path
-            );
-
-            task.workProgress = workAlreadyDone;
-            activeTasks.push(task);  // Add task to activeTasks array
-        } else {
-            addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+            if (field) {
+                const workAlreadyDone = taskInfo.workTotal - field.acres;
+                const task = new Task(
+                    taskInfo.taskName,
+                    () => plantAcres(taskInfo.fieldId, taskInfo.resourceName),
+                    taskInfo.taskId,
+                    taskInfo.workTotal,
+                    taskInfo.resourceName,
+                    taskInfo.resourceState,
+                    '',  // Planting tasks might not involve vintage or quality
+                    '',  // Consider this based on more relevant planting attributes
+                    taskInfo.iconPath // Restore the icon path
+                );
+                task.workProgress = workAlreadyDone;
+                activeTasks.push(task); // Add task to activeTasks array
+            } else {
+                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+            }
         }
     });
 }
