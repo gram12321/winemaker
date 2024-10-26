@@ -46,11 +46,12 @@ export function renderCompanyInfo() {
             <span class="info-label"><img src="/assets/icon/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;">Date:</span>
             <span class="info-content">${currentDay}, ${currentSeason}, ${currentYear}</span>
           </div>
-          <div class="styled-line"></div>
+          
           <div class="info-item">
             <span class="info-label"><img src="/assets/icon/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;">Money:</span>
             <span class="info-content">$${money}</span>
           </div>
+          <div class="styled-line"></div>
         `;
     }
 

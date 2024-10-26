@@ -93,8 +93,23 @@ body {
   width: 250px !important;
   height: 100% !important;
   z-index: 1000 !important;
-  background-color: #343a40 !important;
   overflow-y: auto !important;
+  background-color: #343a40 !important; /* Set the base background color */
+  /* Remove individual background image properties from here */
+}
+
+#panel-wrapper::before {
+  content: ''; /* Necessary to display the pseudo-element */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/assets/bg/bg_panel.webp');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.4; /* Only the image gets this opacity */
+  z-index: -1; /* Place the image behind the panel content */
 }
 /* Task box styles */
 #panel-wrapper .task-box {
