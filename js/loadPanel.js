@@ -58,10 +58,12 @@ export class Task {
         // Create the task box element
         const taskBox = document.createElement('div');
         taskBox.className = 'task-box bg-light p-2 mb-2';
+        taskBox.style.position = 'relative'; // Ensure the task box is positioned relatively to enable absolute positioning within
+
         taskBox.innerHTML = `
-            <div class="d-flex align-items-center">
-                <img src="${this.iconPath}" alt="Task Icon" style="width: 24px; height: 24px; margin-right: 8px;" />
+            <div class="d-flex align-items-center justify-content-between">
                 <strong>${this.taskName}</strong>
+                <img src="${this.iconPath}" alt="Task Icon" style="width: 24px; height: 24px; position: absolute; top: 8px; right: 8px;" />
             </div>
             <div class="task-details">${this.resourceName}, <strong>${this.vintage}</strong> - ${this.quality}</div>
         `;
