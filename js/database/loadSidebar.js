@@ -40,11 +40,17 @@ export function renderCompanyInfo() {
 
     if (companyInfoDiv) {
         companyInfoDiv.innerHTML = `
-          <p><strong>Company Info:</strong> ${companyName}</p>
-          <p><strong>Money:</strong> $${money}</p>
-          <p><strong>Day:</strong> ${currentDay}</p>
-          <p><strong>Season:</strong> ${currentSeason}</p>
-          <p><strong>Year:</strong> ${currentYear}</p>
+          <div class="company-name">${companyName}</div>
+          <div class="styled-line"></div>
+          <div class="info-item date-info">
+            <span class="info-label">Date:</span>
+            <span class="info-content">${currentDay}, ${currentSeason}, ${currentYear}</span>
+          </div>
+          <div class="styled-line"></div> <!-- Line for Date -->
+          <div class="info-item">
+            <span class="info-label">Money:</span>
+            <span class="info-content">$${money}</span>
+          </div>
         `;
     }
 

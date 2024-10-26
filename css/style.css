@@ -44,6 +44,47 @@ body {
   height: 100%;
 }
 
+/* Company Info Styles */
+#companyInfo {
+  font-family: Arial, sans-serif; 
+  font-size: 1rem; 
+  color: #ffffff; 
+  margin: 15px 0; 
+}
+
+#companyInfo .company-name {
+  font-family: 'Georgia', serif; 
+  font-size: 1.5rem; 
+  margin-bottom: 5px;
+  text-align: center; /* Center align company name */
+}
+
+#companyInfo .styled-line {
+  width: 60%; /* Line width */
+  height: 3px; /* Thicker line */
+  background-color: #94bde5; /* Line color */
+  border-radius: 5px; /* Rounded corners */
+  margin: 10px auto; /* Center the line */
+}
+
+#companyInfo .info-item {
+  padding: 5px 0; 
+}
+
+#companyInfo .info-label {
+  font-weight: bold; 
+}
+
+#companyInfo .info-content {
+  font-weight: normal; 
+  margin-left: 8px;
+}
+
+#companyInfo .date-info {
+  display: flex;
+  gap: 10px;
+}
+
 /* Panel */
 /* Task box styles */
 #panel-wrapper .task-box {
