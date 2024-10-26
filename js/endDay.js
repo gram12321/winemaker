@@ -29,7 +29,7 @@ export function incrementDay() {
     localStorage.setItem('season', SEASONS[currentSeasonIndex]);
     localStorage.setItem('year', currentYear); // Ensure the year is stored
 
-    addConsoleMessage(`Day increased to: ${currentDay}, Season: ${SEASONS[currentSeasonIndex]}, Year: ${currentYear}`);
+    addConsoleMessage(`Day increased to: <strong>${currentDay}, ${SEASONS[currentSeasonIndex]}, ${currentYear}</Strong>` );
     renderCompanyInfo();
     
     executeAllTasks();

@@ -51,26 +51,46 @@ export class Task {
     }
 
     createTaskBox() {
-        // Get the task list element
         const taskList = document.getElementById('task-list');
         if (!taskList) {
             console.error("Element 'task-list' not found");
             return;
         }
+
         // Create the task box element
         const taskBox = document.createElement('div');
         taskBox.className = 'task-box bg-light p-2 mb-2';
-        taskBox.innerHTML = `<strong>${this.taskName}</strong>`;
-        // Add the progress bar
+        taskBox.innerHTML = `<strong>${this.taskName}</strong>
+            <div class="task-details"><strong>${this.resourceName}, ${this.vintage}</strong> - ${this.quality}</div>`;
+
+        // Create container for progress info
+        const progressInfo = document.createElement('div');
+        progressInfo.className = 'progress-info';
+
+        // From label
+        const fromLabel = document.createElement('span');
+        fromLabel.textContent = `From: ${this.workProgress}`;
+
+        // To label
+        const toLabel = document.createElement('span');
+        toLabel.textContent = `To: ${this.workTotal}`;
+
+        // Create the progress bar
         const progressBar = document.createElement('div');
-        progressBar.className = 'progress mt-2';
+        progressBar.className = 'progress mt-1';
         progressBar.innerHTML = `
-            <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar" role="progressbar" style="width: ${this.workProgress / this.workTotal * 100}%" aria-valuenow="${this.workProgress}" aria-valuemin="0" aria-valuemax="${this.workTotal}"></div>
         `;
-        // Append the progress bar to the task box
+
+        // Append from and to labels into the progressInfo container
+        progressInfo.appendChild(fromLabel);
+        progressInfo.appendChild(toLabel);
+
+        // Append elements to the task box
+        taskBox.appendChild(progressInfo);
         taskBox.appendChild(progressBar);
-        // Append task box to task list
         taskList.appendChild(taskBox);
+
         // Store reference to task box for future updates
         this.taskBox = taskBox;
     }

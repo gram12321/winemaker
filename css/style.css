@@ -45,7 +45,7 @@ body {
 }
 
 /* Panel */
-
+/* Task box styles */
 #panel-wrapper .task-box {
   background-color: #214a73 !important; /* Light background */
   border: 1px solid #94bde5 !important; /* Slightly darker border */
@@ -68,6 +68,27 @@ body {
   z-index: 1000 !important;
   background-color: #343a40 !important;
   overflow-y: auto !important;
+}
+
+/* Progress info styles */
+.task-box .progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  color: #fff;
+  font-size: 0.8em;
+}
+
+/* Additional task details */
+.task-box .task-details {
+  font-size: 0.9em;
+  color: #fff;
+}
+
+/* Progress bar styles */
+.progress {
+  margin-top: 0;
 }
 
 /* Console */

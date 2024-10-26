@@ -21,7 +21,7 @@ export function grapeCrushing(selectedResource) {
             // Save the updated inventory to localStorage
             saveInventory();
 
-            addConsoleMessage(`${actualIncrement} units of ${selectedResource} have been crushed into must.`);
+            addConsoleMessage(`${actualIncrement} units of<strong> ${selectedResource}, ${resource.vintage},</Strong> ${resource.quality} have been crushed into must.`);
             return actualIncrement; // Return the amount of work processed
         } else {
             addConsoleMessage(`No units of ${selectedResource} available to process.`);

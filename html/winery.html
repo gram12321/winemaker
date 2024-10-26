@@ -83,13 +83,7 @@
 
 
 
-      <!-- Overall Progress Section -->
-      <div class="my-4">
-        <h3>Overall Progress</h3>
-        <div class="progress">
-          <div id="overall-progress" class="progress-bar bg-info" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-      </div>
+
 
       <!-- Console Output -->
       <div class="console-output border mt-3 p-2" style="height: 200px; overflow-y: auto;" id="console-output">
@@ -115,70 +109,61 @@
     import { initializePanel } from '/js/loadPanel.js';
     initializePanel();
 
-    const totalProcesses = 2; 
-    let completedProcesses = 0;
+
 
     function populateCrushInventoryList() {
-      const crushInventoryList = document.getElementById('crush-inventory-list');
-      crushInventoryList.innerHTML = ''; 
+        const crushInventoryList = document.getElementById('crush-inventory-list');
+        crushInventoryList.innerHTML = ''; 
 
-      inventoryInstance.items.forEach(item => {
-        if (item.state === 'Grapes') {
-          const listItem = document.createElement('li');
-          listItem.className = 'list-group-item';
-          listItem.textContent = `${item.resource.name}: ${item.amount} available`;
-          crushInventoryList.appendChild(listItem);
-        }
-      });
+        inventoryInstance.items.forEach(item => {
+            if (item.state === 'Grapes') {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${item.amount}`;
+                crushInventoryList.appendChild(listItem);
+            }
+        });
     }
 
     function populateFermentationInventoryList() {
-      const fermentationList = document.getElementById('fermentation-inventory-list');
-      fermentationList.innerHTML = ''; 
+        const fermentationList = document.getElementById('fermentation-inventory-list');
+        fermentationList.innerHTML = ''; 
 
-      inventoryInstance.items.forEach(item => {
-        if (item.state === 'Must') {
-          const listItem = document.createElement('li');
-          listItem.className = 'list-group-item';
-          listItem.textContent = `${item.resource.name}: ${item.amount} available`;
-          fermentationList.appendChild(listItem);
-        }
-      });
+        inventoryInstance.items.forEach(item => {
+            if (item.state === 'Must') {
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item';
+                listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${item.amount}`;
+                fermentationList.appendChild(listItem);
+            }
+        });
     }
 
     function populateFermentResourceSelect() {
-      const selectElement = document.getElementById('ferment-resource-select');
-      selectElement.innerHTML = ''; 
-      inventoryInstance.items.forEach(item => {
-        if (item.state === 'Must') {
-          const option = document.createElement('option');
-          option.value = item.resource.name;
-          option.textContent = `${item.resource.name} (${item.amount} available)`;
-          selectElement.appendChild(option);
-        }
-      });
+        const selectElement = document.getElementById('ferment-resource-select');
+        selectElement.innerHTML = ''; 
+        inventoryInstance.items.forEach(item => {
+            if (item.state === 'Must') {
+                const option = document.createElement('option');
+                option.value = item.resource.name;
+                option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${item.amount}`;
+                selectElement.appendChild(option);
+            }
+        });
     }
 
     function populateResourceSelect() {
-      const selectElement = document.getElementById('crush-resource-select');
-      selectElement.innerHTML = ''; 
+        const selectElement = document.getElementById('crush-resource-select');
+        selectElement.innerHTML = ''; 
 
-      inventoryInstance.items.forEach(item => {
-        if (item.state === 'Grapes') {
-          const option = document.createElement('option');
-          option.value = item.resource.name;
-          option.textContent = `${item.resource.name} (${item.amount} available)`;
-          selectElement.appendChild(option);
-        }
-      });
-    }
-
-    function updateOverallProgress() {
-      const progress = (completedProcesses / totalProcesses) * 100;
-      const progressBar = document.getElementById('overall-progress');
-      progressBar.style.width = `${progress}%`;
-      progressBar.setAttribute('aria-valuenow', progress);
-      addConsoleMessage(`Overall progress: ${progress.toFixed(2)}%`);
+        inventoryInstance.items.forEach(item => {
+            if (item.state === 'Grapes') {
+                const option = document.createElement('option');
+                option.value = item.resource.name;
+                option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${item.amount}`;
+                selectElement.appendChild(option);
+            }
+        });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -240,7 +225,7 @@
                 activeTasks.push(task);  // Add task to activeTasks array
                 addConsoleMessage(`Crushing task started for ${selectedResource}.`);
             } else {
-              addConsoleMessage(`A task for ${selectedResource}, ${resource.vintage} is already active.`);
+              addConsoleMessage(`A Crushing task for ${selectedResource}, ${resource.vintage} is already active.`);
 
             }
           } else {
