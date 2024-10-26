@@ -95,11 +95,21 @@ function handlePlantingTask(index, resourceName, totalAcres) {
   const fieldName = field?.name || `Field ${index}`;
   const fieldRegion = field?.region || 'Unknown Region';
 
+  // Log current field state
+  console.log(`Checking field ${fieldName}, ${fieldRegion}: currentAcresPlanted=${field.currentAcresPlanted}, totalAcres=${field.acres}`);
+
+  // Check if a task is already active for this field
   const isTaskAlreadyActive = activeTasks.some(task => {
-    return task.taskName === "Planting" && task.fieldId === index;
+    const isActive = task.taskName === "Planting" && task.fieldId === index;
+    console.log(`Task check for field ID ${index}: current task - taskName=${task.taskName}, fieldId=${task.fieldId}, isActive=${isActive}`);
+    return isActive;
   });
 
-  if (!isTaskAlreadyActive) {
+  if (!isTaskAlreadyActive && (!field.currentAcresPlanted || field.currentAcresPlanted === 0)) {
+    // Log task creation
+    console.log(`Creating planting task for field ${fieldName}, ${fieldRegion}`);
+
+    // Proceed with task creation
     const iconPath = '/assets/icon/icon_planting.webp';
 
     const task = new Task(
@@ -114,27 +124,32 @@ function handlePlantingTask(index, resourceName, totalAcres) {
       iconPath
     );
 
-    task.fieldId = index; 
+    task.fieldId = index; // Properly assign the fieldId here
 
     const taskInfo = {
-      taskName: task.taskName,
-      fieldId: index,
-      resourceName: resourceName,
-      taskId: task.taskId,
-      workTotal: totalAcres,
-      iconPath: iconPath
+        taskName: task.taskName,
+        fieldId: index,  // Ensure this is included
+        resourceName: resourceName,
+        taskId: task.taskId,
+        workTotal: totalAcres,
+        iconPath: iconPath
     };
 
     saveTask(taskInfo);
     activeTasks.push(task);
-    addConsoleMessage(`Planting task started for <strong>${fieldName},${fieldRegion}</strong> with <strong>${resourceName}.</strong>`);
+    addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}.</strong>`);
   } else {
-    addConsoleMessage(`A Planting task is already active for <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
+    if (isTaskAlreadyActive) {
+      console.log(`A planting task is already active for field ${fieldName}, ${fieldRegion}.`);
+    } else {
+      console.log(`Field ${fieldName}, ${fieldRegion} is already planted with ${field.currentAcresPlanted} acres.`);
+    }
+    addConsoleMessage(`A Planting task is already active or incomplete for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
   }
 }
 
 export function plantAcres(index, resourceName) {
-    const increment = 10; // Define the work increment for planting
+    const increment = 10; // Work increment for planting
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
     const fieldName = field?.name || `Field ${index}`;
@@ -145,6 +160,7 @@ export function plantAcres(index, resourceName) {
       return 0;
     }
 
+    // Calculate remaining work based on currentAcresPlanted
     const workRemaining = field.acres - (field.currentAcresPlanted || 0);
     const acresToPlant = Math.min(increment, workRemaining);
 
@@ -166,7 +182,7 @@ export function plantAcres(index, resourceName) {
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
     return acresToPlant;
-  }
+}
 
 function harvestField(index) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -174,15 +190,20 @@ function harvestField(index) {
     const resourceName = farmlands[index].plantedResourceName;
     const acres = farmlands[index].acres;
     const state = 'Grapes'; // Initial state of harvested resource
+
     // Use game year from localStorage for vintage
     const gameYear = parseInt(localStorage.getItem('year'), 10);
+
     // Add to the inventory using the inventory instance
     inventoryInstance.addResource(resourceName, acres, state, gameYear, 'High'); // Use arbitrary quality
     addConsoleMessage(`Harvested ${acres} of ${resourceName} in ${state} state from Field ID ${farmlands[index].id}, Vintage: ${gameYear}.`);
+
     // Save inventory to localStorage
     saveInventory();
+
     // Update farmland
     farmlands[index].plantedResourceName = null;
+    farmlands[index].currentAcresPlanted = 0; // Reset the currentAcresPlanted to zero
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     displayOwnedFarmland();
   }

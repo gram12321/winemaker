@@ -167,14 +167,11 @@ export function saveTask(taskInfo) {
     const existingTaskIndex = tasks.findIndex(task => task.taskId === taskInfo.taskId);
 
     if (existingTaskIndex === -1) {
-        // Add new task, ensure the taskId is already included in taskInfo
-        tasks.push(taskInfo);
+        tasks.push(taskInfo); // New task
     } else {
-        // Update the existing task
-        tasks[existingTaskIndex] = taskInfo;
+        tasks[existingTaskIndex] = taskInfo; // Update existing task
     }
 
-    // Store the updated tasks array in localStorage
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
@@ -227,6 +224,9 @@ export function loadTasks() {
                     '',  // Consider this based on more relevant planting attributes
                     taskInfo.iconPath
                 );
+
+                task.fieldId = taskInfo.fieldId; // Properly assign fieldId
+
                 task.workProgress = field.currentAcresPlanted || 0;
                 task.updateProgressBar(); // Ensure progress bar is correctly updated
                 activeTasks.push(task);
