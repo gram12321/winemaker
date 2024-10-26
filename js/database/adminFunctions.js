@@ -182,38 +182,40 @@ export const activeTasks = []; // Exported array to hold task references
 
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    // Load and set the latestTaskId from localStorage
     Task.latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
-    // Clear any existing tasks from activeTasks
-    activeTasks.length = 0; // Mutate the array to clear
+    activeTasks.length = 0; // Clear existing active tasks
+
     tasks.forEach(taskInfo => {
-        if (taskInfo.taskName === "Grape Crushing") {
-            const initialResourceTotal = taskInfo.workTotal;
+        // Log the taskInfo for debugging purposes
+        console.log("Attempting to load task:", taskInfo);
+
+        if (taskInfo.taskName === "Crushing Grapes") {
             const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+
             if (resource) {
-                const workAlreadyDone = initialResourceTotal - resource.amount;
                 const task = new Task(
                     taskInfo.taskName,
                     () => grapeCrushing(taskInfo.resourceName),
                     taskInfo.taskId,
-                    initialResourceTotal,
+                    taskInfo.workTotal,
                     taskInfo.resourceName,
                     taskInfo.resourceState,
                     taskInfo.vintage,
                     taskInfo.quality,
-                    taskInfo.iconPath // Restore the icon path
+                    taskInfo.iconPath
                 );
-                task.workProgress = workAlreadyDone;
-                activeTasks.push(task);  // Add task to activeTasks array
+                task.workProgress = taskInfo.workTotal - resource.amount;
+                task.updateProgressBar(); // Ensure progress bar is correctly updated
+                activeTasks.push(task);
+                addConsoleMessage(`Loaded task: ${taskInfo.taskName} for resource: ${taskInfo.resourceName}.`);
             } else {
-                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource ${taskInfo.resourceName} not available.`);
             }
         } else if (taskInfo.taskName === "Planting") {
             const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
             const field = farmlands[taskInfo.fieldId];
 
             if (field) {
-                const workAlreadyDone = taskInfo.workTotal - field.acres;
                 const task = new Task(
                     taskInfo.taskName,
                     () => plantAcres(taskInfo.fieldId, taskInfo.resourceName),
@@ -223,15 +225,20 @@ export function loadTasks() {
                     taskInfo.resourceState,
                     '',  // Planting tasks might not involve vintage or quality
                     '',  // Consider this based on more relevant planting attributes
-                    taskInfo.iconPath // Restore the icon path
+                    taskInfo.iconPath
                 );
-                task.workProgress = workAlreadyDone;
-                activeTasks.push(task); // Add task to activeTasks array
+                task.workProgress = field.currentAcresPlanted || 0;
+                task.updateProgressBar(); // Ensure progress bar is correctly updated
+                activeTasks.push(task);
+                addConsoleMessage(`Loaded planting task for field ID: ${taskInfo.fieldId}`);
             } else {
-                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: resource not available.`);
+                addConsoleMessage(`Task ${taskInfo.taskName} could not be recreated: field ID ${taskInfo.fieldId} not available.`);
             }
         }
     });
+
+    // Log the activeTasks array for debugging purposes
+    console.log("Active tasks after loading:", activeTasks);
 }
 
 // Existing removeTask function with additional code
