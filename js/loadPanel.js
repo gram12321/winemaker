@@ -110,25 +110,22 @@ export function executeTaskFunction(task) {
     const increment = task.taskFunction(); // Function should return progress amount
     if (increment) {
         task.workProgress += increment; 
-        task.updateProgressBar(); // Ensure this is called
+        task.updateProgressBar();
     }
 
-    // Check the progress
     if (task.workProgress >= task.workTotal) {
         task.removeTaskBox();
         console.log(`Executing removeTask for ID: ${task.taskId}`);
         removeTask(task.taskId);
 
-        // Add a console message indicating task completion with conditional logic for different tasks
+        // Add console message with task details
         if (task.taskName === "Planting") {
-            addConsoleMessage(`Planting task completed for field <strong>${task.fieldId}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
+            addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
         } else if (task.taskName === "Crushing Grapes") {
             addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
         } else {
-            // Default message for any other tasks
             addConsoleMessage(`${task.taskName} task completed for <strong>${task.resourceName}, ${task.vintage}, ${task.quality}.</strong>`);
         }
-    } 
+    }
 }
-
 export { initializePanel };

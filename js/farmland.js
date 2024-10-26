@@ -92,9 +92,9 @@ function displayOwnedFarmland() {
 function handlePlantingTask(index, resourceName, totalAcres) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const field = farmlands[index];
-  const fieldName = field?.name || `Field ${index}`;
+  const fieldName = field?.name || `Field ${index}`; // Consider setting a default name if unavailable
   const fieldRegion = field?.region || 'Unknown Region';
-  const gameYear = parseInt(localStorage.getItem('year'), 10); // Retrieve the current game year
+  const gameYear = parseInt(localStorage.getItem('year'), 10) || 'Unknown Vintage'; // Retrieve the current game year
 
   const isTaskAlreadyActive = activeTasks.some(task => task.taskName === "Planting" && task.fieldId === index);
 
@@ -113,15 +113,17 @@ function handlePlantingTask(index, resourceName, totalAcres) {
       iconPath
     );
 
-    task.fieldId = index; // Properly assign the fieldId here
+    task.fieldId = index;
+    task.fieldName = fieldName; // Ensure the fieldName is correctly assigned
 
     const taskInfo = {
       taskName: task.taskName,
       fieldId: index,
+      fieldName: fieldName, // Ensure the field name is included
       resourceName: resourceName,
       taskId: task.taskId,
       workTotal: totalAcres,
-      vintage: gameYear, // Include the vintage in the task info
+      vintage: gameYear,
       iconPath: iconPath
     };
 
@@ -129,7 +131,7 @@ function handlePlantingTask(index, resourceName, totalAcres) {
     activeTasks.push(task);
     addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
   } else {
-    addConsoleMessage(`A Planting task is already active for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
+    addConsoleMessage(`A Planting task is already active or incomplete for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
   }
 }
 

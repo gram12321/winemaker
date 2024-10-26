@@ -130,7 +130,6 @@ function loadInventory() {
     savedInventory = JSON.parse(savedInventory);
     // Ensure savedInventory is an array
     if (!Array.isArray(savedInventory)) {
-      console.log("playerInventory is not an array. Most likely nothing is in inventory");
       savedInventory = [];
     }
   } catch (error) {
@@ -183,12 +182,10 @@ export function loadTasks() {
     activeTasks.length = 0; // Clear existing active tasks
 
     tasks.forEach(taskInfo => {
-        // Log the taskInfo for debugging purposes
         console.log("Attempting to load task:", taskInfo);
 
         if (taskInfo.taskName === "Crushing Grapes") {
             const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
-
             if (resource) {
                 const task = new Task(
                     taskInfo.taskName,
@@ -202,9 +199,8 @@ export function loadTasks() {
                     taskInfo.iconPath
                 );
                 task.workProgress = taskInfo.workTotal - resource.amount;
-                task.updateProgressBar(); // Ensure progress bar is correctly updated
+                task.updateProgressBar();
                 activeTasks.push(task);
-                
             }
         } else if (taskInfo.taskName === "Planting") {
             const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -217,23 +213,24 @@ export function loadTasks() {
                     taskInfo.taskId,
                     taskInfo.workTotal,
                     taskInfo.resourceName,
-                    taskInfo.resourceState,
-                    '',  // Planting tasks might not involve vintage or quality
-                    '',  // Consider this based on more relevant planting attributes
+                    '', // Only if necessary, assign resource state
+                    taskInfo.vintage, // Use the stored vintage
+                    '', // Only if necessary, assign quality
                     taskInfo.iconPath
                 );
 
-                task.fieldId = taskInfo.fieldId; // Properly assign fieldId
+                task.fieldId = taskInfo.fieldId;
+                task.fieldName = taskInfo.fieldName; // Assign fieldName
+                task.vintage = taskInfo.vintage; // Assign vintage
 
                 task.workProgress = field.currentAcresPlanted || 0;
-                task.updateProgressBar(); // Ensure progress bar is correctly updated
+                task.updateProgressBar();
                 activeTasks.push(task);
-            } 
+            } else {
+                console.warn(`Field not found for task with fieldId: ${taskInfo.fieldId}`);
+            }
         }
     });
-
-    // Log the activeTasks array for debugging purposes
-    console.log("Active tasks after loading:", activeTasks);
 }
 
 // Existing removeTask function with additional code
@@ -253,10 +250,8 @@ export function removeTask(taskId) {
     // Debugging: Log whether a task was removed
     const tasksAfterRemoval = JSON.parse(localStorage.getItem('tasks'));
     if (initialTaskCount === tasksAfterRemoval.length) {
-        console.warn(`Task with ID ${taskId} was not found or removed. Check if the correct ID is being passed.`);
-    } else {
-        console.log(`Task with ID ${taskId} successfully removed.`);
-    }
+        
+    } 
 }
 
 
