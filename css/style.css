@@ -86,20 +86,6 @@ body {
 }
 
 /* Panel */
-/* Task box styles */
-#panel-wrapper .task-box {
-  background-color: #214a73 !important; /* Light background */
-  border: 1px solid #94bde5 !important; /* Slightly darker border */
-  border-radius: 4px !important; /* Rounded corners */
-  padding: 10px !important; /* Padding */
-  margin-bottom: 10px !important; /* Space between tasks */
-  transition: background-color 0.3s !important; /* Smooth hover effect */
-}
-
-#panel-wrapper .task-box:hover {
-  background-color: #94bde5 !important; /* Lighter hover effect */
-}
-
 #panel-wrapper {
   position: fixed !important;
   right: 0 !important;
@@ -110,8 +96,35 @@ body {
   background-color: #343a40 !important;
   overflow-y: auto !important;
 }
+/* Task box styles */
+#panel-wrapper .task-box {
+  background-color: #214a73;
+  border: 1px solid #94bde5;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+  position: relative; /* For absolute positioning of the icon */
+}
 
-/* Progress info styles */
+#panel-wrapper .task-box:hover {
+  background-color: #94bde5;
+}
+
+.task-box .task-icon {
+  width: 42px;
+  height: 42px;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border-radius: 50%;
+}
+
+.task-box .task-details {
+  font-size: 0.9em;
+  color: #fff;
+}
+
 .task-box .progress-info {
   display: flex;
   justify-content: space-between;
@@ -121,13 +134,6 @@ body {
   font-size: 0.8em;
 }
 
-/* Additional task details */
-.task-box .task-details {
-  font-size: 0.9em;
-  color: #fff;
-}
-
-/* Progress bar styles */
 .progress {
   margin-top: 0;
 }

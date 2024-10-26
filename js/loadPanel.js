@@ -37,9 +37,7 @@ export class Task {
         this.vintage = vintage;
         this.quality = quality;
         this.iconPath = iconPath; 
-        console.log(`Icon Path on Task creation: ${this.iconPath}`); // Log here for debugging
-        this.createTaskBox();
-        console.log(`Task created with ID: ${this.taskId}`);
+       this.createTaskBox();
     }
 
     static generateTaskId() {
@@ -57,13 +55,12 @@ export class Task {
 
         // Create the task box element
         const taskBox = document.createElement('div');
-        taskBox.className = 'task-box bg-light p-2 mb-2';
-        taskBox.style.position = 'relative'; // Ensure the task box is positioned relatively to enable absolute positioning within
+        taskBox.className = 'task-box';
 
         taskBox.innerHTML = `
             <div class="d-flex align-items-center justify-content-between">
                 <strong>${this.taskName}</strong>
-                <img src="${this.iconPath}" alt="Task Icon" style="width: 42px; height: 42px; position: absolute; top: 12px; right: 12px; border-radius: 50%;" />
+                <img src="${this.iconPath}" alt="Task Icon" class="task-icon" />
             </div>
             <div class="task-details"><strong>${this.resourceName}, ${this.vintage}</strong> - ${this.quality}</div>
         `;
