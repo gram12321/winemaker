@@ -52,32 +52,20 @@ export class Task {
             console.error("Element 'task-list' not found");
             return;
         }
-
         // Create the task box element
         const taskBox = document.createElement('div');
         taskBox.className = 'task-box bg-light p-2 mb-2';
         taskBox.innerHTML = `<strong>${this.taskName}</strong>`;
-
-        // Create the execute button
-        const executeButton = document.createElement('button');
-        executeButton.className = 'btn btn-primary btn-sm ml-2';
-        executeButton.textContent = 'Execute';
-        executeButton.onclick = () => executeTaskFunction(this);
-
         // Add the progress bar
         const progressBar = document.createElement('div');
         progressBar.className = 'progress mt-2';
         progressBar.innerHTML = `
             <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
         `;
-
-        // Append the button and progress bar to the task box
-        taskBox.appendChild(executeButton);
+        // Append the progress bar to the task box
         taskBox.appendChild(progressBar);
-
         // Append task box to task list
         taskList.appendChild(taskBox);
-
         // Store reference to task box for future updates
         this.taskBox = taskBox;
     }
