@@ -1,6 +1,7 @@
 // loadPanel.js
 import { loadTasks, removeTask } from './database/adminFunctions.js';
 import { activeTasks } from './database/adminFunctions.js'; // Import the instantiatedTasks array
+import { addConsoleMessage } from './console.js'; // Ensure this import is present to use addConsoleMessage
 
 // Function to initialize the task panel
 function initializePanel() {
@@ -105,6 +106,8 @@ export class Task {
     }
 }
 
+
+
 export function executeTaskFunction(task) {
     const increment = task.taskFunction(); // Function should return progress amount
     if (increment) {
@@ -117,6 +120,9 @@ export function executeTaskFunction(task) {
         task.removeTaskBox();
         console.log(`Executing removeTask for ID: ${task.taskId}`);
         removeTask(task.taskId);
+
+        // Add a console message indicating task completion
+        addConsoleMessage(`${task.taskName} task completed for <Strong>${task.resourceName}, ${task.vintage}, ${task.quality}.</Strong>`);
     } else {
         console.log(`Task condition not yet fulfilled. Progress: ${task.workProgress}/${task.workTotal}`);
     }
