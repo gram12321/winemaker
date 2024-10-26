@@ -63,19 +63,19 @@ export class Task {
         taskBox.innerHTML = `
             <div class="d-flex align-items-center justify-content-between">
                 <strong>${this.taskName}</strong>
-                <img src="${this.iconPath}" alt="Task Icon" style="width: 24px; height: 24px; position: absolute; top: 8px; right: 8px;" />
+                <img src="${this.iconPath}" alt="Task Icon" style="width: 42px; height: 42px; position: absolute; top: 12px; right: 12px; border-radius: 50%;" />
             </div>
-            <div class="task-details">${this.resourceName}, <strong>${this.vintage}</strong> - ${this.quality}</div>
+            <div class="task-details"><strong>${this.resourceName}, ${this.vintage}</strong> - ${this.quality}</div>
         `;
 
         const progressInfo = document.createElement('div');
         progressInfo.className = 'progress-info';
 
         const fromLabel = document.createElement('span');
-        fromLabel.textContent = `From: ${this.workProgress}`;
+        fromLabel.textContent = `Progress: ${this.workProgress}`;
 
         const toLabel = document.createElement('span');
-        toLabel.textContent = `To: ${this.workTotal}`;
+        toLabel.textContent = `Goal: ${this.workTotal}`;
 
         const progressBar = document.createElement('div');
         progressBar.className = 'progress mt-1';
