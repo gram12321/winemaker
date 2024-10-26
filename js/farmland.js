@@ -90,13 +90,13 @@ function displayOwnedFarmland() {
 }
 
 function handlePlantingTask(index, resourceName, totalAcres) {
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const field = farmlands[index];
+  const fieldName = field?.name || `Field ${index}`;
+  const fieldRegion = field?.region || 'Unknown Region';
 
   const isTaskAlreadyActive = activeTasks.some(task => {
-    const isMatch = task.taskName === "Planting" && task.fieldId === index;
-    if (isMatch) {
-
-    }
-    return isMatch;
+    return task.taskName === "Planting" && task.fieldId === index;
   });
 
   if (!isTaskAlreadyActive) {
@@ -127,47 +127,46 @@ function handlePlantingTask(index, resourceName, totalAcres) {
 
     saveTask(taskInfo);
     activeTasks.push(task);
-    addConsoleMessage(`Planting task started for field ID ${index} with ${resourceName}.`);
+    addConsoleMessage(`Planting task started for <strong>${fieldName},${fieldRegion}</strong> with <strong>${resourceName}.</strong>`);
   } else {
-    addConsoleMessage(`A Planting task is already active for field ID ${index}.`);
+    addConsoleMessage(`A Planting task is already active for <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
   }
 }
 
 export function plantAcres(index, resourceName) {
-  const increment = 10; // Define the work increment for planting
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const field = farmlands[index];
+    const increment = 10; // Define the work increment for planting
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const field = farmlands[index];
+    const fieldName = field?.name || `Field ${index}`;
+    const fieldRegion = field?.region || 'Unknown Region';
 
-  if (!field) {
-    addConsoleMessage(`Field ID ${index} does not exist.`);
-    return 0;
+    if (!field) {
+      addConsoleMessage(`Field <strong>${fieldName}</strong>, ${fieldRegion} does not exist.`);
+      return 0;
+    }
+
+    const workRemaining = field.acres - (field.currentAcresPlanted || 0);
+    const acresToPlant = Math.min(increment, workRemaining);
+
+    if (acresToPlant === 0) {
+      addConsoleMessage(`Field <strong>${fieldName}</strong>, Region: ${fieldRegion} is already fully planted.`);
+      return 0;
+    }
+
+    field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
+
+    if (field.currentAcresPlanted >= field.acres) {
+      field.plantedResourceName = resourceName;
+      field.currentAcresPlanted = field.acres;
+      addConsoleMessage(`Field <strong>${fieldName}</strong>, ${fieldRegion} fully planted with <strong>${resourceName}.</strong>`);
+    } else {
+      addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>, ${fieldRegion}.`);
+    }
+
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+    return acresToPlant;
   }
-
-  // Calculate how much work is needed to complete the planting
-  const workRemaining = field.acres - (field.currentAcresPlanted || 0);
-  const acresToPlant = Math.min(increment, workRemaining);
-
-  if (acresToPlant === 0) {
-    addConsoleMessage(`Field ID ${index} is already fully planted.`);
-    return 0;
-  }
-
-  // Update the number of planted acres
-  field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
-
-  if (field.currentAcresPlanted >= field.acres) {
-      field.plantedResourceName = resourceName; // Mark as fully planted when done
-      field.currentAcresPlanted = field.acres; // Ensure it doesn't exceed total
-      addConsoleMessage(`Field ID ${index} fully planted with ${resourceName}.`);
-  } else {
-      addConsoleMessage(`${acresToPlant} acres planted with ${resourceName} on field ID ${index}.`);
-  }
-
-  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-  // Return the increment value for task progress tracking
-  return acresToPlant;
-}
 
 function harvestField(index) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
