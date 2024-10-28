@@ -194,66 +194,50 @@ export function loadTasks() {
                     taskInfo.resourceState,
                     taskInfo.vintage,
                     taskInfo.quality,
-                    taskInfo.iconPath
+                    taskInfo.iconPath,
+                    taskInfo.fieldName // Add fieldName if needed
                 );
                 task.workProgress = taskInfo.workTotal - resource.amount;
                 task.updateProgressBar();
                 activeTasks.push(task);
             }
-        } else if (taskInfo.taskName === "Planting") {
+        } else if (taskInfo.taskName === "Planting" || taskInfo.taskName === "Harvesting") {
             const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
             const field = farmlands[taskInfo.fieldId];
 
             if (field) {
                 const task = new Task(
                     taskInfo.taskName,
-                    () => plantAcres(taskInfo.fieldId, taskInfo.resourceName),
-                    taskInfo.taskId,
-                    taskInfo.workTotal,
-                    taskInfo.resourceName,
-                    '', // Only if necessary, assign resource state
-                    taskInfo.vintage, // Use the stored vintage
-                    '', // Only if necessary, assign quality
-                    taskInfo.iconPath
-                );
-
-                task.fieldId = taskInfo.fieldId;
-                task.fieldName = taskInfo.fieldName; // Assign fieldName
-                task.vintage = taskInfo.vintage; // Assign vintage
-
-                task.workProgress = field.currentAcresPlanted || 0;
-                task.updateProgressBar();
-                activeTasks.push(task);
-            } else {
-                console.warn(`Field not found for task with fieldId: ${taskInfo.fieldId}`);
-            }
-        } else if (taskInfo.taskName === "Harvesting") {
-            // New section for handling harvesting tasks
-            const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-            const field = farmlands[taskInfo.fieldId];
-
-            if (field) {
-                const task = new Task(
-                    taskInfo.taskName,
-                    () => harvestAcres(taskInfo.fieldId),
+                    taskInfo.taskName === "Planting" ? 
+                        () => plantAcres(taskInfo.fieldId, taskInfo.resourceName) :
+                        () => harvestAcres(taskInfo.fieldId),
                     taskInfo.taskId,
                     taskInfo.workTotal,
                     taskInfo.resourceName,
                     taskInfo.resourceState,
                     taskInfo.vintage,
                     taskInfo.quality,
-                    taskInfo.iconPath
+                    taskInfo.iconPath,
+                    taskInfo.fieldName // Pass fieldName to the constructor
                 );
 
-                task.fieldId = taskInfo.fieldId;
-                task.fieldName = taskInfo.fieldName; // Assign fieldName
-                task.vintage = taskInfo.vintage; // Assign vintage
+                // Object.assign could be used for consistency
+                Object.assign(task, {
+                    fieldId: taskInfo.fieldId, // Ensure fieldId is set
+                    fieldName: taskInfo.fieldName, // Set fieldName
+                    vintage: taskInfo.vintage // Set vintage
+                });
 
-                task.workProgress = field.currentAcresHarvested || 0;
+                if (taskInfo.taskName === "Planting") {
+                    task.workProgress = field.currentAcresPlanted || 0; // Restore planting progress
+                } else if (taskInfo.taskName === "Harvesting") {
+                    task.workProgress = field.currentAcresHarvested || 0; // Restore harvesting progress
+                }
+
                 task.updateProgressBar();
                 activeTasks.push(task);
             } else {
-                console.warn(`Field not found for harvest task with fieldId: ${taskInfo.fieldId}`);
+                console.warn(`Field not found for task with fieldId: ${taskInfo.fieldId}`);
             }
         }
     });
