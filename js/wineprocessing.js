@@ -86,6 +86,65 @@ export function grapeCrushing(selectedResource) {
     return actualIncrement; // Return the actual work completed
 }
 
+export function handleFermentationTask(selectedResource) {
+    const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');
+
+    if (!resource) {
+        addConsoleMessage(`The resource ${selectedResource} is not available.`);
+        return;
+    }
+
+    const gameYear = localStorage.getItem('year') || ''; // Example of consistency if you use vintage
+    const isTaskAlreadyActive = activeTasks.some(task =>
+        task.taskName === "Fermenting" &&
+        task.resourceName === selectedResource &&
+        task.resourceState === 'Must' &&
+        task.vintage === resource.vintage &&
+        task.quality === resource.quality
+    );
+
+    if (!isTaskAlreadyActive) {
+        const iconPath = '/assets/icon/icon_fermentation.webp';
+
+        const task = new Task(
+            "Fermenting",
+            () => fermentMust(selectedResource),
+            undefined,
+            resource.amount,
+            selectedResource,
+            'Must',
+            resource.vintage,
+            resource.quality,
+            iconPath
+        );
+
+        // Assign any specific properties as needed
+        Object.assign(task, {
+            resourceName: selectedResource,
+            resourceState: 'Must',
+            vintage: resource.vintage,
+            quality: resource.quality
+        });
+
+        const taskInfo = {
+            taskName: task.taskName,
+            resourceName: selectedResource,
+            resourceState: 'Must',
+            vintage: resource.vintage,
+            quality: resource.quality,
+            taskId: task.taskId,
+            workTotal: resource.amount,
+            iconPath: iconPath
+        };
+
+        saveTask(taskInfo);
+        activeTasks.push(task);
+        addConsoleMessage(`Fermentation task started for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality}.`);
+    } else {
+        addConsoleMessage(`A Fermentation task for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality} is already active.`);
+    }
+}
+
 export function fermentMust(selectedResource) {
     const increment = 1; // Define the increment for fermentation
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');
@@ -105,7 +164,7 @@ export function fermentMust(selectedResource) {
     // Persist changes
     saveInventory();
 
-    addConsoleMessage(`${actualIncrement} unit(s) of ${selectedResource} has been fermented into a bottle.`);
+    addConsoleMessage(`${actualIncrement} unit(s) of ${selectedResource} has been fermented and bottled.`);
 
     return actualIncrement; // Return the actual work completed
 }

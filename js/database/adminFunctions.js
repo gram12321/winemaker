@@ -1,7 +1,7 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
 import { inventoryInstance } from '../resource.js';
 import { Task } from '../loadPanel.js'
-import { grapeCrushing } from '/js/wineprocessing.js';
+import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
 import { plantAcres, harvestAcres  } from '/js/farmland.js';
 import { addConsoleMessage } from '../console.js';
 
@@ -195,6 +195,11 @@ export function loadTasks() {
             if (resource) {
                 executeTaskFunction = () => grapeCrushing(taskInfo.resourceName);
             }
+        } else if (taskInfo.taskName === "Fermenting") {
+            resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Must');
+            if (resource) {
+                executeTaskFunction = () => fermentMust(taskInfo.resourceName);
+            }
         } else if (field && (taskInfo.taskName === "Planting" || taskInfo.taskName === "Harvesting")) {
             executeTaskFunction = taskInfo.taskName === "Planting"
                 ? () => plantAcres(taskInfo.fieldId, taskInfo.resourceName)
@@ -224,6 +229,8 @@ export function loadTasks() {
 
             // Handle task-specific progress
             if (taskInfo.taskName === "Crushing Grapes" && resource) {
+                task.workProgress = taskInfo.workTotal - resource.amount;
+            } else if (taskInfo.taskName === "Fermenting" && resource) {
                 task.workProgress = taskInfo.workTotal - resource.amount;
             } else if (taskInfo.taskName === "Planting") {
                 task.workProgress = field.currentAcresPlanted || 0;

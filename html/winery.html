@@ -134,18 +134,9 @@
     <script type="module">
       import { addConsoleMessage } from "/js/console.js";
       import { inventoryInstance } from "/js/resource.js";
-      import {
-        grapeCrushing,
-        fermentMust,
-        handleGrapeCrushingTask,
-      } from "/js/wineprocessing.js";
+      import { grapeCrushing, fermentMust, handleGrapeCrushingTask, handleFermentationTask, } from "/js/wineprocessing.js";
       import { Task } from "/js/loadPanel.js"; // Import the spawnTask function
-      import {
-        loadTasks,
-        saveTask,
-        activeTasks,
-      } from "/js/database/adminFunctions.js";
-
+      import { loadTasks, saveTask, activeTasks } from "/js/database/adminFunctions.js";
       import { initializeSidebar } from "/js/database/loadSidebar.js";
       import { initializePanel } from "/js/loadPanel.js";
       import { initializeConsole } from "/js/console.js"; // Import the console initializer
@@ -234,7 +225,7 @@
         document.getElementById("fermentation-btn").addEventListener("click", function () {
           const selectedResource = document.getElementById("ferment-resource-select").value;
           if (selectedResource) {
-            fermentMust(selectedResource);
+              handleFermentationTask(selectedResource);
           } else {
             addConsoleMessage("No resource selected for fermentation.");
           }
