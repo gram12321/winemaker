@@ -1,3 +1,5 @@
+// names.js
+
 // Array of Italian male names
 const italianMaleNames = [
   "Alessandro", "Andrea", "Antonio", "Carlo", "Claudio",
@@ -26,5 +28,14 @@ const italianFemaleNames = [
   "Sara", "Silvia", "Sofia", "Valentina", "Vanessa"
 ];
 
-// Export the arrays to make them available for import in other scripts
-export { italianMaleNames, italianFemaleNames };
+// Country to Region mapping
+const countryRegionMap = {
+  "Italy": ["Piedmont", "Tuscany", "Veneto", "Sicily", "Puglia"],
+  "France": ["Bordeaux", "Burgundy (Bourgogne)", "Champagne", "Loire Valley", "Rhone Valley"],
+  "Spain": ["Rioja", "Ribera del Duero", "Jumilla", "La Mancha", "Sherry (Jerez)"],
+  "United States": ["Napa Valley (California)", "Sonoma County (California)", "Willamette Valley (Oregon)", "Finger Lakes (New York)", "Central Coast (California)"],
+  "Germany": ["Mosel", "Rheingau", "Rheinhessen", "Pfalz", "Ahr"],
+};
+
+// Export the arrays and the map to make them available for import in other scripts
+export { italianMaleNames, italianFemaleNames, countryRegionMap };

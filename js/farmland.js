@@ -1,8 +1,8 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
-import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import names
+import { italianMaleNames, italianFemaleNames, countryRegionMap } from '/js/names.js'; // Import names and country-region map
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
-import { Task } from './loadPanel.js'; // Import the Task class used for tasks
+import { Task } from './loadPanel.js'; 
 import { getFlagIcon } from './utils.js';
 
 class Farmland {
@@ -15,28 +15,38 @@ class Farmland {
     this.plantedResourceName = plantedResourceName;
     this.vineAge = vineAge;
     this.grape = grape;
-    this.soil = soil;         // New attribute: soil type
-    this.altitude = altitude; // New attribute: altitude
-    this.aspect = aspect;     // New attribute: aspect
+    this.soil = soil;
+    this.altitude = altitude;
+    this.aspect = aspect;
     this.density = density;
   }
 }
-export function createFarmland(id, name, country, region, acres, soil = '', altitude = '', aspect = '') {
+
+export function createFarmland(id, name, acres, soil = '', altitude = '', aspect = '') {
+  const country = getRandomItem(Object.keys(countryRegionMap));
+  const region = getRandomItem(countryRegionMap[country]);
   return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
+
+function getRandomItem(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
 export function getLastId(farmlands) {
   if (farmlands.length === 0) return 0;
   return Math.max(...farmlands.map(farmland => farmland.id));
 }
+
 export function getRandomName() {
   const allNames = italianMaleNames.concat(italianFemaleNames);
-  return allNames[Math.floor(Math.random() * allNames.length)];
+  return getRandomItem(allNames);
 }
+
 function buyLand() {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const newId = getLastId(farmlands) + 1;
   const newName = getRandomName();
-  const newFarmland = createFarmland(newId, newName, "Italy", "Piedmont", 100);
+  const newFarmland = createFarmland(newId, newName, 100); // Removed hard-coded country and region
   farmlands.push(newFarmland);
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
   addConsoleMessage(`Purchased new farmland: "<strong>${newFarmland.name}</strong>" in <strong>${newFarmland.country}, ${newFarmland.region}</strong>, with total <strong>${newFarmland.acres} </strong>Acres`);

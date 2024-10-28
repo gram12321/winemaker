@@ -4,10 +4,12 @@ export function getFlagIcon(countryName) {
     "Italy": "it",
     "France": "fr",
     "Spain": "es",
-    // Add other countries as needed
+    "US": "us",  // Use 'us' for the United States
+    "Germany": "de",
   };
 
-  const flagCode = countryToFlagCode[countryName];
+  // Handle "United States" specifically
+  const flagCode = countryToFlagCode[countryName] || (countryName === "United States" ? "us" : null);
 
   // Return the HTML for the flag icon
   return flagCode 
