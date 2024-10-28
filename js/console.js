@@ -12,6 +12,7 @@ function getTimestamp() {
     };
     return new Date().toLocaleTimeString('en-GB', options);
 }
+
 function addConsoleMessage(message, isHTML = false) {
     const timestamp = getTimestamp();
     const messageHTML = isHTML ? `[${timestamp}] ${message}` : `[${timestamp}] ${message}`;
@@ -56,22 +57,23 @@ document.addEventListener('DOMContentLoaded', function() {
     attachSummaryClickEvent(); // Attach any existing messages on load
 });
 
-// loadConsole.js
+
 export function initializeConsole() {
-    return fetch('/html/consolePanel.html')
-        .then(response => response.text())
-        .then(data => {
-            const consoleContainer = document.createElement('div');
-            consoleContainer.innerHTML = data;
-            document.body.appendChild(consoleContainer);
+    const showConsole = localStorage.getItem('showConsole') !== 'false'; // Default to show if not set
 
-            // Initialize console to display initial messages
-            updateConsoleOutputs();
-        })
-        .catch(error => console.error('Error loading console panel:', error));
+    if (showConsole) {
+        return fetch('/html/consolePanel.html')
+            .then(response => response.text())
+            .then(data => {
+                const consoleContainer = document.createElement('div');
+                consoleContainer.innerHTML = data;
+                document.body.appendChild(consoleContainer);
+
+                // Initialize console to display initial messages
+                updateConsoleOutputs();
+            })
+            .catch(error => console.error('Error loading console panel:', error));
+    }
 }
-
-
-
 
 export { addConsoleMessage };
