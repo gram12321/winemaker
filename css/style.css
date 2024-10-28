@@ -206,3 +206,18 @@ body {
   padding: 20px 20px;
   border-radius: 60px;
 }
+
+/* Farmland.html */
+
+.owned-farmland-table td, .owned-farmland-table th {
+  white-space: nowrap; /* Ensure no line breaks in table cells */
+}
+
+#farmlandAccordion {
+  overflow-x: auto; /* Allow horizontal scrolling if necessary */
+}
+
+.card-body {
+  display: flex;
+  justify-content: center;
+}

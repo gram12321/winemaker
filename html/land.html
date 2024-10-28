@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Game Page - Farmland</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
 </head>
 <body>
   <div class="d-flex" id="wrapper">
@@ -17,23 +20,13 @@
       <!-- Buy Land Button -->
       <button id="buy-land-btn" class="btn btn-success mt-3">Buy Land</button>
 
-      <!-- Table to display farmland instances -->
-      <table id="farmland-table" class="table table-striped mt-4">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Country</th>
-            <th>Region</th>
-            <th>Acres</th>
-            <th>Planted</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="farmland-table-body">
-          <!-- Rows will be added dynamically here -->
-        </tbody>
-      </table>
+      <!-- Collapsible Farmland List -->
+      <div class="accordion mt-4" id="farmlandAccordion">
+        <!-- Each farmland entry will become a card here -->
+        <div id="farmland-entries">
+          <!-- Dynamic farmland entries will be populated here -->
+        </div>
+      </div>
     </div>
   </div>
 
@@ -48,23 +41,54 @@
 
   <!-- Custom JavaScript -->
   <script type="module">
-    import { displayOwnedFarmland, buyLand, handlePlantingTask } from '/js/farmland.js';
-      import { initializeSidebar } from '/js/database/loadSidebar.js';
-      import { initializePanel } from '/js/loadPanel.js';
-      import { initializeConsole } from '/js/console.js'; // Import the console initializer
-      document.addEventListener('DOMContentLoaded', function () {
-        initializePanel();
-        initializeSidebar();
-        initializeConsole();
+    import { displayOwnedFarmland, buyLand } from '/js/farmland.js';
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { initializePanel } from '/js/loadPanel.js';
+    import { initializeConsole } from '/js/console.js';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      initializePanel();
+      initializeSidebar();
+      initializeConsole();
 
       // Setup event listeners and initialize farmlands display
-      const buyLandButton = document.getElementById('buy-land-btn');
-      displayOwnedFarmland(); 
+      document.getElementById('buy-land-btn').addEventListener('click', buyLand);
 
-      if (buyLandButton) {
-        buyLandButton.addEventListener('click', buyLand);
-      }
+      displayOwnedFarmland(); // Adjust display logic for collapsible items
     });
+
+    function renderFarmlandEntries(farmlands) {
+      const farmlandEntries = document.getElementById("farmland-entries");
+      farmlandEntries.innerHTML = ""; // Clear any existing entries
+
+      farmlands.forEach((farmland, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <div class="card-header" id="heading${index}">
+            <h2 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
+                ${farmland.name} - ${farmland.region}
+              </button>
+            </h2>
+          </div>
+
+          <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
+            <div class="card-body">
+              <p><strong>ID:</strong> ${farmland.id}</p>
+              <p><strong>Country:</strong> ${farmland.country}</p>
+              <p><strong>Acres:</strong> ${farmland.acres}</p>
+              <p><strong>Planted:</strong> ${farmland.plantedResourceName || "Empty"}</p>
+              <button class="btn btn-warning plant-field-btn">Plant the Field</button>
+              <button class="btn btn-success harvest-field-btn">Harvest</button>
+            </div>
+          </div>
+        `;
+
+        farmlandEntries.appendChild(card);
+      });
+    }
   </script>
 </body>
 </html>

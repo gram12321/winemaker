@@ -3,6 +3,7 @@ import { italianMaleNames, italianFemaleNames } from '/js/names.js'; // Import n
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; // Import the Task class used for tasks
+import { getFlagIcon } from './utils.js';
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null) {
@@ -43,48 +44,81 @@ function buyLand() {
   displayOwnedFarmland();
 }
 
+
+
 function displayOwnedFarmland() {
-  const farmlandTableBody = document.querySelector('#farmland-table-body');
-  farmlandTableBody.innerHTML = ''; // Clear existing rows
+  const farmlandEntries = document.querySelector('#farmland-entries');
+  farmlandEntries.innerHTML = ''; // Clear existing entries
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 
   // Create options for each available resource
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
 
   farmlands.forEach((farmland, index) => {
-    const row = document.createElement('tr');
     const isPlanted = farmland.plantedResourceName != null;
     const harvestButtonState = isPlanted ? '' : 'disabled';
-    row.innerHTML = `
-      <td>${farmland.id}</td>
-      <td>${farmland.name}</td>
-      <td>${farmland.country}</td>
-      <td>${farmland.region}</td>
-      <td>${farmland.acres}</td>
-      <td>${farmland.plantedResourceName || 'Empty'}</td>
-      <td>
-        <select class="resource-select">
-          ${resourceOptions}
-        </select>
-        <button class="btn btn-warning plant-field-btn">Plant the Field</button>
-        <button class="btn btn-success harvest-field-btn" ${harvestButtonState}>Harvest</button>
-      </td>
+
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    card.innerHTML = `
+      <div class="card-header" id="heading${index}">
+        <h2 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
+            ${getFlagIcon(farmland.country)}
+            ${farmland.country}, ${farmland.region} - ${farmland.name}
+          </button>
+        </h2>
+      </div>
+
+      <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
+        <div class="card-body">
+          <table class="table table-bordered owned-farmland-table">
+            <thead>
+              <tr>
+                <th>Field Name</th>
+                <th>Size</th>
+                <th>Planted</th>
+                <th>Planting Options</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${farmland.name}</td>
+                <td>${farmland.acres} Acres</td>
+                <td>${farmland.plantedResourceName || 'Empty'}</td>
+                <td>
+                  <select class="resource-select">
+                    ${resourceOptions}
+                  </select>
+                </td>
+                <td>
+                  <button class="btn btn-warning plant-field-btn">Plant</button>
+                  <button class="btn btn-success harvest-field-btn" ${harvestButtonState}>Harvest</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     `;
-    farmlandTableBody.appendChild(row);
+
+    farmlandEntries.appendChild(card);
 
     // Planted Resource Task Logic
-    row.querySelector('.plant-field-btn').addEventListener('click', () => {
-      const resourceSelect = row.querySelector('.resource-select');
+    const plantButton = card.querySelector('.plant-field-btn');
+    plantButton.addEventListener('click', () => {
+      const resourceSelect = card.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
       handlePlantingTask(index, selectedResource, farmland.acres);
     });
 
     // Harvest Logic
-    // Harvest Logic
-    const harvestButton = row.querySelector('.harvest-field-btn');
+    const harvestButton = card.querySelector('.harvest-field-btn');
     harvestButton.addEventListener('click', () => {
       if (isPlanted) {
-          handleHarvestTask(index); // Create a harvesting task instead of direct harvesting
+        handleHarvestTask(index);
       }
     });
   });
