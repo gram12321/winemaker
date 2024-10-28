@@ -87,17 +87,25 @@ export function grapeCrushing(selectedResource) {
 }
 
 export function fermentMust(selectedResource) {
-    // Find the selected must resource
+    const increment = 1; // Define the increment for fermentation
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');
-    if (resource && resource.amount >= 1) {
-        // Remove one unit from the must resource
-        inventoryInstance.removeResource(resource.resource.name, 1, 'Must', resource.vintage, resource.quality);
-        // Add one unit of the "Bottle" with the same attributes
-        inventoryInstance.addResource(resource.resource.name, 1, 'Bottle', resource.vintage, resource.quality);
-        // Save the updated inventory to localStorage
-        saveInventory();
-        addConsoleMessage(`One unit of ${selectedResource} has been fermented into a bottle.`);
-    } else {
+
+    if (!resource || resource.amount < 1) {
         addConsoleMessage(`Unable to ferment ${selectedResource}. Ensure there is sufficient quantity of Must.`);
+        return 0; // Return 0 if no progress is made
     }
+
+    // Ferment only the defined increment or the amount available, whichever is smaller
+    const actualIncrement = Math.min(increment, resource.amount);
+
+    // Remove units from the must resource and add as bottles
+    inventoryInstance.removeResource(resource.resource.name, actualIncrement, 'Must', resource.vintage, resource.quality);
+    inventoryInstance.addResource(resource.resource.name, actualIncrement, 'Bottle', resource.vintage, resource.quality);
+
+    // Persist changes
+    saveInventory();
+
+    addConsoleMessage(`${actualIncrement} unit(s) of ${selectedResource} has been fermented into a bottle.`);
+
+    return actualIncrement; // Return the actual work completed
 }

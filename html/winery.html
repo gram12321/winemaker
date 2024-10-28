@@ -221,19 +221,25 @@
             }
           });
         }
-        document
-          .getElementById("crush-grapes-btn")
-          .addEventListener("click", function () {
-            const selectedResource = document.getElementById(
-              "crush-resource-select",
-            ).value;
-            if (selectedResource) {
-              handleGrapeCrushingTask(selectedResource); // Call the new function
-            } else {
-              addConsoleMessage("No resource selected for crushing.");
-            }
-          });
-      });
+        // Grape Crushing Task Button Listener
+        document.getElementById("crush-grapes-btn").addEventListener("click", function () {
+          const selectedResource = document.getElementById("crush-resource-select").value;
+          if (selectedResource) {
+            handleGrapeCrushingTask(selectedResource);
+          } else {
+            addConsoleMessage("No resource selected for crushing.");
+          }
+        });
+        // Fermentation Task Button Listener
+        document.getElementById("fermentation-btn").addEventListener("click", function () {
+          const selectedResource = document.getElementById("ferment-resource-select").value;
+          if (selectedResource) {
+            fermentMust(selectedResource);
+          } else {
+            addConsoleMessage("No resource selected for fermentation.");
+          }
+        });
+        });
     </script>
   </body>
 </html>
