@@ -42,17 +42,14 @@
 
       import { addMoney, incrementDay } from '/js/endDay.js';
       import { saveCompanyInfo } from '/js/database/adminFunctions.js';
-      import { initializePanel } from '/js/loadPanel.js';
-      initializePanel();
-      
-      import { initializeSidebar } from '/js/database/loadSidebar.js'; // Ensure the correct path
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
-        initializeSidebar();
-
-          document.getElementById('add-money-btn').addEventListener('click', function() {
-              addMoney(10000); // Pass the monetary value directly
-          });
+        import { initializeSidebar } from '/js/database/loadSidebar.js';
+        import { initializePanel } from '/js/loadPanel.js';
+        import { initializeConsole } from '/js/console.js'; // Import the console initializer
+        document.addEventListener('DOMContentLoaded', function () {
+          initializePanel();
+          initializeSidebar();
+          initializeConsole();
+          
           document.getElementById('increment-day-btn').addEventListener('click', incrementDay); // Link button
           document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
       });

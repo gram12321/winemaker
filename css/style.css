@@ -1,6 +1,7 @@
 /* General */
 body {
   display: flex;
+  margin-bottom: 220px; /* Ensure space for the fixed console */
 }
 
 #wrapper {
@@ -156,19 +157,35 @@ body {
 
 /*  - --- --   Mainview   - - - - - -*/
 /* Console */
-.console-output {
-    background-color: #888;  /* Lighter grey for better visibility */
-    color: #000;             /* Dark text color for better contrast */
-    border: 1px solid #333;  /* Subtle border */
-    border-radius: 4px;      /* Rounded corners */
-    padding: 10px;           /* Padding inside the console area */
-  /*margin: 10px auto;       /* Center horizontally */
-    font-family: monospace;  /* Monospace font for console feel */
-    white-space: pre-wrap;   /* Preserve whitespace and wrapping */
-  /*max-width: 930px;        /* Set max width to 2.5 times an action button width (250px) */
-    width: auto;             /* Ensure the width fits the content */
-    min-width: 630px;        
-    position: relative;      /* Add positioning context */
+#console-bar {
+  position: fixed;
+  bottom: 0;
+  left: 250px; /* Space for the sidebar */
+  right: 250px; /* Space for the task panel */
+  height: 150px; /* Adjust height as needed */
+  overflow-y: auto;
+  background-color: #888;  /* Use the lighter grey from original styles */
+  color: #000;             /* Dark text color for better contrast */
+  border: 1px solid #333;  /* Subtle border from original styles */
+  border-top: 2px solid #dee2e6; /* Top border for distinction */
+  border-radius: 4px;      /* Rounded corners */
+  padding: 10px;           /* Padding inside the console area */
+  z-index: 1000;           /* Ensure it stays on top of other elements */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  box-sizing: border-box;  /* Include padding and border in element's total width/height */
+  font-family: monospace;  /* Monospace font for console feel */
+  white-space: pre-wrap;   /* Preserve whitespace and wrapping */
+  width: auto;             /* Ensure the width fits the content */
+  min-width: 630px;        /* Minimum width */
+}
+
+/* Styles for text and content inside the console remain */
+#console-bar .console-output {
+  font-size: 10px; /* Ensure consistent font-size */
+}
+
+body {
+  margin-bottom: 220px; /* Space for the fixed console panel */
 }
 
 /* Centering the gamepages vertically and horizontally */

@@ -19,7 +19,7 @@ function updateConsoleOutputs() {
 
     consoleOutputs.forEach(consoleOutput => {
         consoleOutput.innerHTML = ''; // Clear current messages
-        consoleMessages.slice(-10).forEach(message => {
+        consoleMessages.slice(-5).forEach(message => {
             const messageElement = document.createElement('div');
             messageElement.innerHTML = message;
             consoleOutput.appendChild(messageElement);
@@ -45,6 +45,22 @@ document.addEventListener('DOMContentLoaded', function() {
     updateConsoleOutputs();
     attachSummaryClickEvent(); // Attach any existing messages on load
 });
+
+// loadConsole.js
+export function initializeConsole() {
+    return fetch('/html/consolePanel.html')
+        .then(response => response.text())
+        .then(data => {
+            const consoleContainer = document.createElement('div');
+            consoleContainer.innerHTML = data;
+            document.body.appendChild(consoleContainer);
+
+            // Initialize console to display initial messages
+            updateConsoleOutputs();
+        })
+        .catch(error => console.error('Error loading console panel:', error));
+}
+
 
 
 
