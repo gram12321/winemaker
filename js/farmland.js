@@ -13,16 +13,16 @@ class Farmland {
     this.region = region;
     this.acres = acres;
     this.plantedResourceName = plantedResourceName;
-    this.vineAge = vineAge; // Initially empty
-    this.soil = soil;
-    this.altitude = altitude;
-    this.aspect = aspect;
+    this.vineAge = vineAge;
+    this.grape = grape;
+    this.soil = soil;         // New attribute: soil type
+    this.altitude = altitude; // New attribute: altitude
+    this.aspect = aspect;     // New attribute: aspect
     this.density = density;
   }
 }
-function createFarmland(id, name, country, region, acres) {
-  // New attributes are retained but default values are kept empty for now
-  return new Farmland(id, name, country, region, acres);
+export function createFarmland(id, name, country, region, acres, soil = '', altitude = '', aspect = '') {
+  return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
 export function getLastId(farmlands) {
   if (farmlands.length === 0) return 0;
@@ -45,12 +45,12 @@ function buyLand() {
 
 
 
-function displayOwnedFarmland() {
+export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   farmlandEntries.innerHTML = ''; // Clear existing entries
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  // Create options for each available resource
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
+
   farmlands.forEach((farmland, index) => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -71,6 +71,9 @@ function displayOwnedFarmland() {
                 <th>Field Name</th>
                 <th>Size</th>
                 <th>Planted</th>
+                <th>Soil</th>
+                <th>Altitude</th>
+                <th>Aspect</th>
                 <th>Planting Options</th>
                 <th>Actions</th>
               </tr>
@@ -80,6 +83,9 @@ function displayOwnedFarmland() {
                 <td>${farmland.name}</td>
                 <td>${farmland.acres} Acres</td>
                 <td>${farmland.plantedResourceName || 'Empty'}</td>
+                <td>${farmland.soil}</td>
+                <td>${farmland.altitude}</td>
+                <td>${farmland.aspect}</td>
                 <td>
                   <select class="resource-select">
                     ${resourceOptions}
@@ -179,4 +185,4 @@ export function plantAcres(index, resourceName) {
 }
 
 
-export { buyLand, Farmland, displayOwnedFarmland, handlePlantingTask };
+export { buyLand, Farmland, handlePlantingTask };

@@ -59,14 +59,21 @@ body {
   z-index: 2000; /* High z-index to be above other elements */
 }
 
+/* Updated Overlay styles */
+/* Updated Overlay styles */
 .overlay-content {
   position: relative;
-  margin: 15% auto;
+  margin: 5% auto; /* Changed from 15% to provide more space vertically */
   padding: 20px;
-  width: 80%;
-  max-width: 600px;
+  width: 90%; /* Adjust width as necessary for your design */
+  max-width: 900px; /* Increased from 600px to fit more content */
   background: #fff;
   border-radius: 4px;
+}
+
+/* CSS for tables specifically within overlays */
+.overlay .table {
+  width: 100%; /* Ensure the table uses the full width of the container */
 }
 
 .close-btn {
