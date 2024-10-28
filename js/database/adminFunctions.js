@@ -182,7 +182,6 @@ export function loadTasks() {
     activeTasks.length = 0; // Clear existing active tasks
 
     tasks.forEach(taskInfo => {
-        console.log("Attempting to load task:", taskInfo);
 
         if (taskInfo.taskName === "Crushing Grapes") {
             const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
