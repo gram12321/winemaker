@@ -182,63 +182,57 @@ export function loadTasks() {
     activeTasks.length = 0; // Clear existing active tasks
 
     tasks.forEach(taskInfo => {
+        const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+        const field = farmlands[taskInfo.fieldId];
+
+        let executeTaskFunction;
+        let task;
+        let resource;
+
+        // General execution logic determination based on task type
         if (taskInfo.taskName === "Crushing Grapes") {
-            const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+            resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
             if (resource) {
-                const task = new Task(
-                    taskInfo.taskName,
-                    () => grapeCrushing(taskInfo.resourceName),
-                    taskInfo.taskId,
-                    taskInfo.workTotal,
-                    taskInfo.resourceName,
-                    taskInfo.resourceState,
-                    taskInfo.vintage,
-                    taskInfo.quality,
-                    taskInfo.iconPath,
-                    taskInfo.fieldName // Add fieldName if needed
-                );
+                executeTaskFunction = () => grapeCrushing(taskInfo.resourceName);
+            }
+        } else if (field && (taskInfo.taskName === "Planting" || taskInfo.taskName === "Harvesting")) {
+            executeTaskFunction = taskInfo.taskName === "Planting"
+                ? () => plantAcres(taskInfo.fieldId, taskInfo.resourceName)
+                : () => harvestAcres(taskInfo.fieldId);
+        }
+
+        if (executeTaskFunction) {
+            task = new Task(
+                taskInfo.taskName,
+                executeTaskFunction,
+                taskInfo.taskId,
+                taskInfo.workTotal,
+                taskInfo.resourceName,
+                taskInfo.resourceState,
+                taskInfo.vintage,
+                taskInfo.quality,
+                taskInfo.iconPath,
+                taskInfo.fieldName // Pass fieldName
+            );
+
+            // Assign common properties for all tasks
+            Object.assign(task, {
+                fieldId: taskInfo.fieldId, // Assign if applicable
+                fieldName: taskInfo.fieldName, // Assign if applicable
+                vintage: taskInfo.vintage // Assign vintage
+            });
+
+            // Handle task-specific progress
+            if (taskInfo.taskName === "Crushing Grapes" && resource) {
                 task.workProgress = taskInfo.workTotal - resource.amount;
-                task.updateProgressBar();
-                activeTasks.push(task);
+            } else if (taskInfo.taskName === "Planting") {
+                task.workProgress = field.currentAcresPlanted || 0;
+            } else if (taskInfo.taskName === "Harvesting") {
+                task.workProgress = field.currentAcresHarvested || 0;
             }
-        } else if (taskInfo.taskName === "Planting" || taskInfo.taskName === "Harvesting") {
-            const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-            const field = farmlands[taskInfo.fieldId];
 
-            if (field) {
-                const task = new Task(
-                    taskInfo.taskName,
-                    taskInfo.taskName === "Planting" ? 
-                        () => plantAcres(taskInfo.fieldId, taskInfo.resourceName) :
-                        () => harvestAcres(taskInfo.fieldId),
-                    taskInfo.taskId,
-                    taskInfo.workTotal,
-                    taskInfo.resourceName,
-                    taskInfo.resourceState,
-                    taskInfo.vintage,
-                    taskInfo.quality,
-                    taskInfo.iconPath,
-                    taskInfo.fieldName // Pass fieldName to the constructor
-                );
-
-                // Object.assign could be used for consistency
-                Object.assign(task, {
-                    fieldId: taskInfo.fieldId, // Ensure fieldId is set
-                    fieldName: taskInfo.fieldName, // Set fieldName
-                    vintage: taskInfo.vintage // Set vintage
-                });
-
-                if (taskInfo.taskName === "Planting") {
-                    task.workProgress = field.currentAcresPlanted || 0; // Restore planting progress
-                } else if (taskInfo.taskName === "Harvesting") {
-                    task.workProgress = field.currentAcresHarvested || 0; // Restore harvesting progress
-                }
-
-                task.updateProgressBar();
-                activeTasks.push(task);
-            } else {
-                console.warn(`Field not found for task with fieldId: ${taskInfo.fieldId}`);
-            }
+            task.updateProgressBar();
+            activeTasks.push(task);
         }
     });
 }
