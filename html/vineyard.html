@@ -6,6 +6,7 @@
   <title>Game Page - Vineyard</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
 </head>
 <body>
   <div class="d-flex" id="wrapper">
@@ -16,8 +17,15 @@
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Vineyard</h1>
-      <!-- Content specific to the vineyard page will be added here -->
       <p>Here you can manage your vineyards, check grape quality and more.</p>
+
+      <!-- Collapsible Vineyard List -->
+      <div class="accordion mt-4" id="vineyardAccordion">
+        <div id="vineyard-entries">
+          <!-- Each vineyard entry will become a card here -->
+        </div>
+      </div>
+      
     </div>
   </div>
 
@@ -31,16 +39,28 @@
   <script type="module" src="/js/database/loadSidebar.js"></script>
 
   <!-- Custom JavaScript -->
+  <script type="module" src="/js/vineyard.js"></script>
+  
+
   <script type="module">
+
+    import { displayVineyardEntries } from '/js/vineyard.js';
+    import { getFlagIcon } from '/js/utils.js';
+
+    
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
     import { initializeConsole } from '/js/console.js';
+
+
+
     document.addEventListener('DOMContentLoaded', function() {
       initializePanel();
       initializeSidebar();
       initializeConsole();
 
-      // Initialize any vineyard specific scripts here
+      // Initialize vineyard specific scripts
+      displayVineyardEntries(); // Call the function to display vineyards
     });
   </script>
 </body>

@@ -1,3 +1,4 @@
+<!-- land.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -56,39 +57,6 @@
 
       displayOwnedFarmland(); // Adjust display logic for collapsible items
     });
-
-    function renderFarmlandEntries(farmlands) {
-      const farmlandEntries = document.getElementById("farmland-entries");
-      farmlandEntries.innerHTML = ""; // Clear any existing entries
-
-      farmlands.forEach((farmland, index) => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-          <div class="card-header" id="heading${index}">
-            <h2 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
-                ${farmland.name} - ${farmland.region}
-              </button>
-            </h2>
-          </div>
-
-          <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
-            <div class="card-body">
-              <p><strong>ID:</strong> ${farmland.id}</p>
-              <p><strong>Country:</strong> ${farmland.country}</p>
-              <p><strong>Acres:</strong> ${farmland.acres}</p>
-              <p><strong>Planted:</strong> ${farmland.plantedResourceName || "Empty"}</p>
-              <button class="btn btn-warning plant-field-btn">Plant the Field</button>
-              <button class="btn btn-success harvest-field-btn">Harvest</button>
-            </div>
-          </div>
-        `;
-
-        farmlandEntries.appendChild(card);
-      });
-    }
   </script>
 </body>
 </html>

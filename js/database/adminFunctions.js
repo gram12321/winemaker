@@ -2,7 +2,8 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { inventoryInstance } from '../resource.js';
 import { Task } from '../loadPanel.js'
 import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
-import { plantAcres, harvestAcres  } from '/js/farmland.js';
+import { plantAcres } from '/js/farmland.js';
+import { harvestAcres} from '/js/vineyard.js';
 import { addConsoleMessage } from '../console.js';
 
 async function clearFirestore() {
