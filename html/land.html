@@ -23,13 +23,34 @@
 
       <!-- Collapsible Farmland List -->
       <div class="accordion mt-4" id="farmlandAccordion">
-        <!-- Each farmland entry will become a card here -->
         <div id="farmland-entries">
           <!-- Dynamic farmland entries will be populated here -->
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- Buy Land Overlay -->
+
+    <div id="buyLandOverlay" class="overlay" style="display: none;">
+      <div class="overlay-content">
+        <span id="closeOverlay" class="close-btn">&times;</span>
+        <h2>Available Farmlands</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Field Name</th>
+              <th>Country</th>
+              <th>Region</th>
+              <th>Size</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="farmland-options">
+            <!-- Dynamic farmland rows will be inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
 
   <!-- JavaScript libraries -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -40,22 +61,21 @@
   <!-- Sidebar Initialization Script -->
   <script type="module" src="/js/database/loadSidebar.js"></script>
 
+  <!-- Custom Overlay Script -->
+  <script type="module" src="/js/overlays/buyLandOverlay.js"></script>
+
   <!-- Custom JavaScript -->
   <script type="module">
     import { displayOwnedFarmland, buyLand } from '/js/farmland.js';
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
     import { initializeConsole } from '/js/console.js';
-    
+
     document.addEventListener('DOMContentLoaded', function() {
       initializePanel();
       initializeSidebar();
       initializeConsole();
-
-      // Setup event listeners and initialize farmlands display
-      document.getElementById('buy-land-btn').addEventListener('click', buyLand);
-
-      displayOwnedFarmland(); // Adjust display logic for collapsible items
+      displayOwnedFarmland();
     });
   </script>
 </body>

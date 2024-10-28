@@ -6,41 +6,40 @@ import { Task } from './loadPanel.js'; // Import the Task class used for tasks
 import { getFlagIcon } from './utils.js';
 
 class Farmland {
-  constructor(id, name, country, region, acres, plantedResourceName = null) {
+  constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
     this.id = id;
     this.name = name;
     this.country = country;
     this.region = region;
     this.acres = acres;
     this.plantedResourceName = plantedResourceName;
+    this.vineAge = vineAge; // Initially empty
+    this.soil = soil;
+    this.altitude = altitude;
+    this.aspect = aspect;
+    this.density = density;
   }
 }
-
 function createFarmland(id, name, country, region, acres) {
+  // New attributes are retained but default values are kept empty for now
   return new Farmland(id, name, country, region, acres);
 }
-
-function getLastId(farmlands) {
+export function getLastId(farmlands) {
   if (farmlands.length === 0) return 0;
   return Math.max(...farmlands.map(farmland => farmland.id));
 }
-
-function getRandomName() {
+export function getRandomName() {
   const allNames = italianMaleNames.concat(italianFemaleNames);
   return allNames[Math.floor(Math.random() * allNames.length)];
 }
-
 function buyLand() {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const newId = getLastId(farmlands) + 1;
   const newName = getRandomName();
-
   const newFarmland = createFarmland(newId, newName, "Italy", "Piedmont", 100);
-
   farmlands.push(newFarmland);
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-  addConsoleMessage(`Purchased new farmland: "<strong>${newFarmland.name}"</Strong> in <strong>${newFarmland.country}, ${newFarmland.region}</strong>, with total <strong>${newFarmland.acres} </strong>Acres`);
-
+  addConsoleMessage(`Purchased new farmland: "<strong>${newFarmland.name}</strong>" in <strong>${newFarmland.country}, ${newFarmland.region}</strong>, with total <strong>${newFarmland.acres} </strong>Acres`);
   displayOwnedFarmland();
 }
 
