@@ -45,19 +45,20 @@
 
   <!-- Custom JavaScript -->
   <script type="module">
-    import { initializeSidebar } from '/js/database/loadSidebar.js';
+
     import { inventoryInstance, displayInventory } from '/js/resource.js'; // import sellWines from resource.js
     import { sellWines} from '/js/endDay.js'; // import sellWines from endDay.js'
+
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
-    initializePanel();
-
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
+    import { initializeConsole } from '/js/console.js'; // Import the console initializer
+    document.addEventListener('DOMContentLoaded', function () {
+      initializePanel();
       initializeSidebar();
-
+      initializeConsole();
           // Display only the Wine Cellar Inventory with Sell buttons
           displayInventory(inventoryInstance, ['winecellar-table-body'], true);
-        });
+       
     });
   </script>
 </body>

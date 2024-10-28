@@ -81,14 +81,14 @@
   <script type="module" src="/js/database/loadSidebar.js"></script>
 
   <script type="module">
-    import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { inventoryInstance, displayInventory } from '/js/resource.js'; // Ensure proper import
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
-    initializePanel();
-
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
+    import { initializeConsole } from '/js/console.js'; // Import the console initializer
+    document.addEventListener('DOMContentLoaded', function () {
+      initializePanel();
       initializeSidebar();
+      initializeConsole();
 
       // Show the inventory
       displayInventory(inventoryInstance);

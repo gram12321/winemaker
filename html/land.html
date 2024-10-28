@@ -49,14 +49,13 @@
   <!-- Custom JavaScript -->
   <script type="module">
     import { displayOwnedFarmland, buyLand, handlePlantingTask } from '/js/farmland.js';
-    import { initializeSidebar } from '/js/database/loadSidebar.js';
-    import { initializePanel } from '/js/loadPanel.js';
-
-    document.addEventListener('DOMContentLoaded', function() {
-      initializePanel();
-
-      // Initialize the sidebar (this function will handle fetching and setting up the sidebar)
-      initializeSidebar();
+      import { initializeSidebar } from '/js/database/loadSidebar.js';
+      import { initializePanel } from '/js/loadPanel.js';
+      import { initializeConsole } from '/js/console.js'; // Import the console initializer
+      document.addEventListener('DOMContentLoaded', function () {
+        initializePanel();
+        initializeSidebar();
+        initializeConsole();
 
       // Setup event listeners and initialize farmlands display
       const buyLandButton = document.getElementById('buy-land-btn');
