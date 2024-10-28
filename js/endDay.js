@@ -9,32 +9,39 @@ import { executeAllTasks } from './loadPanel.js'
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
-export function incrementDay() {
-    let currentDay = parseInt(localStorage.getItem('day'), 10);
-    let currentSeasonIndex = SEASONS.indexOf(localStorage.getItem('season'));
-    let currentYear = parseInt(localStorage.getItem('year'), 10);
+// Define the new function incrementWeek
+export function incrementWeek() {
+    // Retrieve the current week, season, and year from localStorage
+    let currentWeek = parseInt(localStorage.getItem('week'), 10) || 1;
+    let currentSeasonIndex = SEASONS.indexOf(localStorage.getItem('season')) || 0;
+    let currentYear = parseInt(localStorage.getItem('year'), 10) || 2023;
 
-    currentDay += 1;
+    // Increment the week
+    currentWeek += 1;
 
-    if (currentDay > 3) { // If day exceeds 3, reset to 1
-        currentDay = 1;
-        currentSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length;
+    // Check if the week exceeds 12, which indicates a change of season
+    if (currentWeek > 12) {
+        currentWeek = 1; // Reset the week to 1
+        currentSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length; // Move to the next season
     }
 
-    if (currentSeasonIndex === 0 && currentDay === 1) { // Only increment year at the start of Spring
+    // Only increment the year if we are back to the first week of Spring
+    if (currentSeasonIndex === 0 && currentWeek === 1) {
         currentYear += 1;
     }
 
-    localStorage.setItem('day', currentDay);
+    // Update the local storage with the new values for week, season, and year
+    localStorage.setItem('week', currentWeek);
     localStorage.setItem('season', SEASONS[currentSeasonIndex]);
-    localStorage.setItem('year', currentYear); // Ensure the year is stored
+    localStorage.setItem('year', currentYear);
 
-    addConsoleMessage(`Day increased to: <strong>${currentDay}, ${SEASONS[currentSeasonIndex]}, ${currentYear}</Strong>` );
+    // Log the change to console and update any UI elements
+    addConsoleMessage(`Week increased to: <strong>Week ${currentWeek}, ${SEASONS[currentSeasonIndex]}, ${currentYear}</strong>`);
     renderCompanyInfo();
-    
-    executeAllTasks();
 
-    }
+    // Execute any pending tasks for the week
+    executeAllTasks();
+}
 
 export function sellWines(resourceName) {
     const resourceIndex = inventoryInstance.items.findIndex(item => item.resource.name === resourceName && item.state === 'Bottle');

@@ -14,10 +14,10 @@
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Welcome to the Game!</h1>
       <p>Start playing now.</p>
-      
+
       <div class="text-center mt-4">
           <button id="add-money-btn" class="btn btn-success">Add $10,000</button>
-          <button id="increment-day-btn" class="btn btn-info">Increment Day</button> <!-- New button -->
+          <button id="increment-week-btn" class="btn btn-info">Increment Week</button> <!-- Updated button -->
           <button id="save-company-info-btn" class="btn btn-primary">Save Company Info</button>
       </div>
     </div>
@@ -28,24 +28,26 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Ensure init.js handles sidebar loading and player info updates -->
-  <script type="module" src="/js/console.js"></script> <!-- Link to the console JS file -->
-  <script type="module" src="/js/database/loadSidebar.js"></script> <!-- Link to the new sidebar initialization script -->
-  <script type="module" src="/js/endDay.js"></script> <!-- Link to the endDay script -->
+  <!-- Import necessary modules -->
+  <script type="module" src="/js/console.js"></script>
+  <script type="module" src="/js/database/loadSidebar.js"></script>
+  <script type="module" src="/js/endDay.js"></script>
   <script type="module" src="/js/loadPanel.js"></script>
   <script type="module">
 
-      import { addMoney, incrementDay } from '/js/endDay.js';
+      import { addMoney, incrementWeek } from '/js/endDay.js'; // Updated import
       import { saveCompanyInfo } from '/js/database/adminFunctions.js';
-        import { initializeSidebar } from '/js/database/loadSidebar.js';
-        import { initializePanel } from '/js/loadPanel.js';
-        import { initializeConsole } from '/js/console.js'; // Import the console initializer
-        document.addEventListener('DOMContentLoaded', function () {
+      import { initializeSidebar } from '/js/database/loadSidebar.js';
+      import { initializePanel } from '/js/loadPanel.js';
+      import { initializeConsole } from '/js/console.js';
+      
+      document.addEventListener('DOMContentLoaded', function () {
           initializePanel();
           initializeSidebar();
           initializeConsole();
-          
-          document.getElementById('increment-day-btn').addEventListener('click', incrementDay); // Link button
+
+          document.getElementById('add-money-btn').addEventListener('click', () => addMoney(10000));
+          document.getElementById('increment-week-btn').addEventListener('click', incrementWeek);  // Updated event listener
           document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
       });
   </script>
