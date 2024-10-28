@@ -27,7 +27,7 @@ export function executeAllTasks() {
 export class Task {
     static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
 
-    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '') {
+    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '', fieldName = '') {
         this.taskName = taskName;
         this.taskFunction = taskFunction;
         this.taskId = taskId || Task.generateTaskId();
@@ -37,8 +37,9 @@ export class Task {
         this.resourceState = resourceState;
         this.vintage = vintage;
         this.quality = quality;
-        this.iconPath = iconPath; 
-       this.createTaskBox();
+        this.iconPath = iconPath;
+        this.fieldName = fieldName; // Add this line
+        this.createTaskBox();
     }
 
     static generateTaskId() {
@@ -48,22 +49,27 @@ export class Task {
     }
 
     createTaskBox() {
-    const taskList = document.getElementById('task-list');
-    if (!taskList) {
-        console.error("Element 'task-list' not found");
-        return;
-    }
+        const taskList = document.getElementById('task-list');
+        if (!taskList) {
+            console.error("Element 'task-list' not found");
+            return;
+        }
 
         // Create the task box element
         const taskBox = document.createElement('div');
         taskBox.className = 'task-box';
 
         taskBox.innerHTML = `
+            <div class="task-details">
+                <div><strong>Field: ${this.fieldName}</strong></div>
+            </div>
             <div class="d-flex align-items-center justify-content-between">
-                <strong>${this.taskName}</strong>
+                ${this.taskName}
                 <img src="${this.iconPath}" alt="Task Icon" class="task-icon" />
             </div>
-            <div class="task-details"><strong>${this.resourceName}, ${this.vintage}</strong> - ${this.quality}</div>
+            <div class="task-details">
+                ${this.resourceName}, ${this.vintage}
+            </div>
         `;
 
         const progressInfo = document.createElement('div');
@@ -123,8 +129,8 @@ export function executeTaskFunction(task) {
             addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
         } else if (task.taskName === "Crushing Grapes") {
             addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
-        } else {
-            addConsoleMessage(`${task.taskName} task completed for <strong>${task.resourceName}, ${task.vintage}, ${task.quality}.</strong>`);
+        } else if (task.taskName === "Harvesting") {
+            addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
         }
     }
 }

@@ -2,7 +2,7 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { inventoryInstance } from '../resource.js';
 import { Task } from '../loadPanel.js'
 import { grapeCrushing } from '/js/wineprocessing.js';
-import { plantAcres } from '/js/farmland.js';
+import { plantAcres, harvestAcres  } from '/js/farmland.js';
 import { addConsoleMessage } from '../console.js';
 
 async function clearFirestore() {
@@ -182,7 +182,6 @@ export function loadTasks() {
     activeTasks.length = 0; // Clear existing active tasks
 
     tasks.forEach(taskInfo => {
-
         if (taskInfo.taskName === "Crushing Grapes") {
             const resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
             if (resource) {
@@ -227,6 +226,34 @@ export function loadTasks() {
                 activeTasks.push(task);
             } else {
                 console.warn(`Field not found for task with fieldId: ${taskInfo.fieldId}`);
+            }
+        } else if (taskInfo.taskName === "Harvesting") {
+            // New section for handling harvesting tasks
+            const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+            const field = farmlands[taskInfo.fieldId];
+
+            if (field) {
+                const task = new Task(
+                    taskInfo.taskName,
+                    () => harvestAcres(taskInfo.fieldId),
+                    taskInfo.taskId,
+                    taskInfo.workTotal,
+                    taskInfo.resourceName,
+                    taskInfo.resourceState,
+                    taskInfo.vintage,
+                    taskInfo.quality,
+                    taskInfo.iconPath
+                );
+
+                task.fieldId = taskInfo.fieldId;
+                task.fieldName = taskInfo.fieldName; // Assign fieldName
+                task.vintage = taskInfo.vintage; // Assign vintage
+
+                task.workProgress = field.currentAcresHarvested || 0;
+                task.updateProgressBar();
+                activeTasks.push(task);
+            } else {
+                console.warn(`Field not found for harvest task with fieldId: ${taskInfo.fieldId}`);
             }
         }
     });
