@@ -2,8 +2,18 @@
 
 let consoleMessages = JSON.parse(localStorage.getItem('consoleMessages')) || [];
 
+function getTimestamp() {
+    const timeFormat = localStorage.getItem('timeFormat') || '24'; // Default to 24-hour if not set
+    const options = {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: timeFormat === '12'
+    };
+    return new Date().toLocaleTimeString('en-GB', options);
+}
 function addConsoleMessage(message, isHTML = false) {
-    const timestamp = new Date().toLocaleTimeString();
+    const timestamp = getTimestamp();
     const messageHTML = isHTML ? `[${timestamp}] ${message}` : `[${timestamp}] ${message}`;
 
     consoleMessages.push(messageHTML);
