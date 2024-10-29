@@ -48,7 +48,7 @@ export function renderCompanyInfo() {
 
           <div class="info-item">
             <span class="info-label"><img src="/assets/icon/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content">$${money}</span>
+            <span class="info-content">€ ${money}</span>
           </div>
           <div class="styled-line"></div>
         `;

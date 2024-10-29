@@ -55,6 +55,10 @@ function getRandomSoil(country, region) {
   return soils[Math.floor(Math.random() * soils.length)];
 }
 
+export function formatNumber(value, precision = 0) {
+    return value.toLocaleString('de-DE', { minimumFractionDigits: precision, maximumFractionDigits: precision });
+}
+
 // Export the function for use in other parts of the application
 export { getRandomSoil };
 

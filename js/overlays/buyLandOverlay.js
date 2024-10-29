@@ -4,6 +4,7 @@ import { displayOwnedFarmland } from '/js/farmland.js';
 import { getFlagIcon, getColorClass } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor  } from '../names.js';
 import { getUnit, convertToCurrentUnit } from '../settings.js';
+import { formatNumber } from '../utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const buyLandBtn = document.getElementById('buy-land-btn');
@@ -48,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <th>Altitude</th>
                         <th>Aspect</th>
                         <th>Land Value (per ${selectedUnit})</th>
+                        <th>Price</th> <!-- New column for total price -->
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -57,26 +59,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const flagIconHTML = getFlagIcon(farmland.country);
             const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
             const colorClass = getColorClass(aspectRating);
-
             // Calculate total land value per acre
             const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
-
             // Adjust for selected unit (hectares vs acres)
             const landValuePerUnit = priceFactorPerAcre * conversionFactor;
-
             // Convert size based on current unit
             const landSize = convertToCurrentUnit(farmland.acres);
-
+            // Calculate the total price of the land
+            const totalPrice = landSize * landValuePerUnit;
             tableHTML += `
                 <tr>
                     <td>${farmland.name}</td>
                     <td>${flagIconHTML} ${farmland.country}</td>
                     <td>${farmland.region}</td>
-                    <td>${landSize.toFixed(0)} ${selectedUnit}</td>
+                    <td>${formatNumber(landSize)} ${selectedUnit}</td>
                     <td>${farmland.soil}</td>
                     <td>${farmland.altitude}</td>
-                    <td class="${colorClass}">${farmland.aspect} (${aspectRating.toFixed(2)})</td>
-                    <td>${landValuePerUnit.toFixed(0)}</td>
+                    <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
+                    <td>${formatNumber(landValuePerUnit)}€</td>
+                    <td>${formatNumber(totalPrice)}€</td> <!-- Total Price -->
                     <td><button class="btn btn-primary buy-farmland-btn">Buy</button></td>
                 </tr>
             `;
