@@ -4,7 +4,7 @@ import { displayOwnedFarmland } from '/js/farmland.js';
 import { getFlagIcon, getColorClass } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor  } from '../names.js';
 import { getUnit, convertToCurrentUnit } from '../settings.js';
-import { formatNumber } from '../utils.js';
+import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { deductMoney } from '../endDay.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -103,20 +103,21 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'block';
     }
 
+    
+
     function buySelectedFarmland(farmland) {
         const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 
-        // Assume that farmland.totalPrice is the cost of the farmland
-        const totalPrice = farmland.totalPrice; // Make sure this property holds the correct price
+        const totalPrice = farmland.totalPrice; // Ensure this is correctly set
 
-        // Deduct money from the player's account
         deductMoney(totalPrice);
 
-        // Add the newly purchased farmland to the list of owned farmlands
         ownedFarmlands.push(farmland);
         localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
 
-    addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${farmland.country} total size of (${farmland.acres} Acres) for <strong>${formatNumber(totalPrice)}€</strong>.`);closeOverlay();
+        addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${farmland.acres} Acres) for <strong>${formatNumber(totalPrice)}€</strong>.`);
+
+        closeOverlay();
     }
 
     function closeOverlay() {

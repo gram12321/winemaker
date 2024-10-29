@@ -71,6 +71,10 @@ export function formatNumber(value, decimals = 0) {
     }
 }
 
+export function getFlagIconHTML(country) {
+    return getFlagIcon(country);
+}
+
 // Export the function for use in other parts of the application
 export { getRandomSoil };
 
