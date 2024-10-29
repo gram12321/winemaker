@@ -103,19 +103,22 @@ export function displayOwnedFarmland() {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
   const selectedUnit = getUnit(); // Get the current unit setting
-  const conversionFactor = (selectedUnit === 'hectares') ? 0.404686 : 1;
+  const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Correct conversion factor
   farmlands.forEach((farmland, index) => {
     const card = document.createElement('div');
     card.className = 'card';
     const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
     const colorClass = getColorClass(aspectRating);
-    // Calculate total land value
-    const totalLandValue = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
-    // Calculate per unit land value by using conversion factor properly
-    const landSizeInAcres = farmland.acres; // Always keep the base size in acres
-    // Convert size for display
-    const landSize = convertToCurrentUnit(landSizeInAcres);
-    const landValuePerUnit = (totalLandValue / landSizeInAcres) * conversionFactor; // Use conversion only in size
+
+    // Calculate total land value per acre
+    const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
+
+    // Adjust for selected unit (hectares vs acres)
+    const landValuePerUnit = priceFactorPerAcre * conversionFactor;
+
+    // Convert size for display based on current unit
+    const landSize = convertToCurrentUnit(farmland.acres);
+
     card.innerHTML = `
       <div class="card-header" id="heading${index}">
         <h2 class="mb-0">
@@ -165,6 +168,7 @@ export function displayOwnedFarmland() {
       </div>
     `;
     farmlandEntries.appendChild(card);
+
     // Planting Logic
     const plantButton = card.querySelector('.plant-field-btn');
     plantButton.addEventListener('click', () => {

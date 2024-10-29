@@ -315,10 +315,6 @@ export function normalizeAltitude(altitude, [minAltitude, maxAltitude]) {
   return 0.3 + ((altitude - minAltitude) / (maxAltitude - minAltitude)) * (0.7 - 0.3);
 }
 
-// Normalize function for a given altitude Used for normalizing value of altitudes - for a 0-1 pricefactor for altitude
-export function normalizeValue(value, min, max) {
-  return (value - min) / (max - min);
-}
 // Calculate and normalize price factor with real price range integration
 export function calculateAndNormalizePriceFactor(country, region, altitude, aspect) {
   const altitudeRange = regionAltitudeRanges[country][region];
@@ -330,48 +326,48 @@ export function calculateAndNormalizePriceFactor(country, region, altitude, aspe
   const aspectNormalized = regionAspectRatings[country][region][aspect];
 
   // Calculate raw price factor by multiplying normalized values
-  const rawPriceFactor = prestigeNormalized * aspectNormalized * altitudeNormalized;
-
-  // Normalize the raw price factor to a 0-1 range
-  const normalizedPriceFactor = rawPriceFactor; // Already considered 0-1
+  const rawPriceFactor = (prestigeNormalized + aspectNormalized + altitudeNormalized) / 3;
 
   // Integrate real price range
   const realPriceRange = regionRealPriceRanges[prestigeKey];
-  const realPriceFactor = (realPriceRange[0] + realPriceRange[1]) / 2; // Average or other measure
+ 
+  // Not in use. Use lower price range directly. And max value only for refference 
+    //const realPriceFactor = (realPriceRange[0] + realPriceRange[1]) / 2; // Average or other measure
 
   // Apply the real price factor (Multiply by 1000 to get € and by 0.4)
-  const finalPriceFactor = normalizedPriceFactor * realPriceFactor * 1000 * 0.4 ;
+  const finalPriceFactor = ( rawPriceFactor +1 ) * realPriceRange[0] ;
 
   return finalPriceFactor;
 }
 
 // Real price range for each region
 const regionRealPriceRanges = {
-  "Burgundy (Bourgogne), France": [7.15, 71.90],
-  "Champagne, France": [3.55, 14.35],
-  "Napa Valley (California), United States": [2.10, 7.15],
-  "Bordeaux, France": [0.70, 14.35],
-  "Tuscany, Italy": [0.55, 7.15],
-  "Piedmont, Italy": [0.30, 5.00],
-  "Sonoma County (California), United States": [0.70, 3.55],
-  "Rheingau, Germany": [0.30, 1.40],
-  "Mosel, Germany": [0.20, 1.05],
-  "Rioja, Spain": [0.20, 0.70],
-  "Willamette Valley (Oregon), United States": [0.30, 1.75],
-  "Ribera del Duero, Spain": [0.20, 0.55],
-  "Central Coast (California), United States": [0.10, 1.05],
-  "Loire Valley, France": [0.10, 0.55],
-  "Rhone Valley, France": [0.20, 0.85],
-  "Pfalz, Germany": [0.05, 0.40],
-  "Veneto, Italy": [0.10, 0.70],
-  "Sherry (Jerez), Spain": [0.05, 0.25],
-  "Finger Lakes (New York), United States": [0.05, 0.30],
-  "Sicily, Italy": [0.05, 0.40],
-  "La Mancha, Spain": [0.00, 0.20],
-  "Ahr, Germany": [0.10, 0.30],
-  "Jumilla, Spain": [0.00, 0.15],
-  "Rheinhessen, Germany": [0.05, 0.25],
-  "Puglia, Italy": [0.00, 0.20],
+  "Burgundy (Bourgogne), France": [1000000, 10000000],
+  "Champagne, France": [500000, 2000000],
+  "Napa Valley (California), United States": [300000, 1000000],
+  "Bordeaux, France": [100000, 2000000],
+  "Tuscany, Italy": [80000, 1000000],
+  "Piedmont, Italy": [50000, 700000],
+  "Sonoma County (California), United States": [100000, 500000],
+  "Rheingau, Germany": [50000, 200000],
+  "Mosel, Germany": [30000, 150000],
+  "Rioja, Spain": [30000, 100000],
+  "Willamette Valley (Oregon), United States": [50000, 250000],
+  "Ribera del Duero, Spain": [30000, 80000],
+  "Central Coast (California), United States": [20000, 150000],
+  "Loire Valley, France": [20000, 80000],
+  "Rhone Valley, France": [30000, 120000],
+  "Pfalz, Germany": [15000, 60000],
+  "Veneto, Italy": [20000, 100000],
+  "Sherry (Jerez), Spain": [10000, 40000],
+  "Finger Lakes (New York), United States": [10000, 50000],
+  "Sicily, Italy": [10000, 60000],
+  "La Mancha, Spain": [5000, 30000],
+  "Ahr, Germany": [20000, 50000],
+  "Jumilla, Spain": [5000, 25000],
+  "Rheinhessen, Germany": [10000, 40000],
+  "Puglia, Italy": [5000, 30000],
+
 };
 
 const regionPrestigeRankings = {
