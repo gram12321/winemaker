@@ -339,8 +339,8 @@ export function calculateAndNormalizePriceFactor(country, region, altitude, aspe
   const realPriceRange = regionRealPriceRanges[prestigeKey];
   const realPriceFactor = (realPriceRange[0] + realPriceRange[1]) / 2; // Average or other measure
 
-  // Apply the real price factor
-  const finalPriceFactor = normalizedPriceFactor * realPriceFactor;
+  // Apply the real price factor (Multiply by 1000 to get € and by 0.4)
+  const finalPriceFactor = normalizedPriceFactor * realPriceFactor * 1000 * 0.4 ;
 
   return finalPriceFactor;
 }

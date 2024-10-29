@@ -4,6 +4,7 @@ import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
 import { getFlagIcon, getColorClass } from './utils.js';
+import { getUnit, convertToCurrentUnit } from './settings.js';
 
 
 class Farmland {
@@ -101,12 +102,20 @@ export function displayOwnedFarmland() {
   farmlandEntries.innerHTML = ''; // Clear existing entries
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
+  const selectedUnit = getUnit(); // Get the current unit setting
+  const conversionFactor = (selectedUnit === 'hectares') ? 0.404686 : 1;
   farmlands.forEach((farmland, index) => {
     const card = document.createElement('div');
     card.className = 'card';
-    // Calculate the aspect rating
     const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
     const colorClass = getColorClass(aspectRating);
+    // Calculate total land value
+    const totalLandValue = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
+    // Calculate per unit land value by using conversion factor properly
+    const landSizeInAcres = farmland.acres; // Always keep the base size in acres
+    // Convert size for display
+    const landSize = convertToCurrentUnit(landSizeInAcres);
+    const landValuePerUnit = (totalLandValue / landSizeInAcres) * conversionFactor; // Use conversion only in size
     card.innerHTML = `
       <div class="card-header" id="heading${index}">
         <h2 class="mb-0">
@@ -127,6 +136,7 @@ export function displayOwnedFarmland() {
                 <th>Soil</th>
                 <th>Altitude</th>
                 <th>Aspect</th>
+                <th>Land Value (per ${selectedUnit})</th>
                 <th>Planting Options</th>
                 <th>Actions</th>
               </tr>
@@ -134,11 +144,12 @@ export function displayOwnedFarmland() {
             <tbody>
               <tr>
                 <td>${farmland.name}</td>
-                <td>${farmland.acres} Acres</td>
+                <td>${landSize.toFixed(2)} ${selectedUnit}</td>
                 <td>${farmland.plantedResourceName || 'Empty'}</td>
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
                 <td class="${colorClass}">${farmland.aspect} (${aspectRating.toFixed(2)})</td>
+                <td>${landValuePerUnit.toFixed(2)}</td>
                 <td>
                   <select class="resource-select">
                     ${resourceOptions}
