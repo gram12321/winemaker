@@ -4,6 +4,7 @@ import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
 import { getFlagIcon, getColorClass } from './utils.js';
+import { formatNumber } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
 
 
@@ -97,6 +98,8 @@ function buyLand() {
 
 
 
+
+
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   farmlandEntries.innerHTML = ''; // Clear existing entries
@@ -104,6 +107,7 @@ export function displayOwnedFarmland() {
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
   const selectedUnit = getUnit(); // Get the current unit setting
   const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Correct conversion factor
+
   farmlands.forEach((farmland, index) => {
     const card = document.createElement('div');
     card.className = 'card';
@@ -147,12 +151,12 @@ export function displayOwnedFarmland() {
             <tbody>
               <tr>
                 <td>${farmland.name}</td>
-                <td>${landSize.toFixed(2)} ${selectedUnit}</td>
+                <td>${formatNumber(landSize)} ${selectedUnit}</td>
                 <td>${farmland.plantedResourceName || 'Empty'}</td>
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
-                <td class="${colorClass}">${farmland.aspect} (${aspectRating.toFixed(2)})</td>
-                <td>${landValuePerUnit.toFixed(2)}</td>
+                <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
+                <td>${formatNumber(landValuePerUnit)}</td> 
                 <td>
                   <select class="resource-select">
                     ${resourceOptions}
