@@ -25,6 +25,7 @@ class Farmland {
 export function createFarmland(id, name, acres, soil = '', altitude = '', aspect = '') {
   const country = getRandomItem(Object.keys(countryRegionMap));
   const region = getRandomItem(countryRegionMap[country]);
+  aspect = aspect || getRandomAspect(); // Use provided aspect or pick a random one
   return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
 
@@ -40,6 +41,11 @@ export function getLastId(farmlands) {
 export function getRandomName() {
   const allNames = italianMaleNames.concat(italianFemaleNames);
   return getRandomItem(allNames);
+}
+
+function getRandomAspect() {
+  const aspects = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
+  return getRandomItem(aspects);
 }
 
 function buyLand() {

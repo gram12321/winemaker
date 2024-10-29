@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         while (newFarmlandOptions.length < numberOfOptions) {
             const id = getLastId(ownedFarmlands.concat(newFarmlandOptions)) + 1;
             const name = getRandomName();
-            const farmland = createFarmland(id, name, "Italy", "Piedmont", 100, 'Loam', '300m', 'South-facing');
+            const farmland = createFarmland(id, name, 100); // Create farmland with random country, region, and aspect
 
             // Check if the farmland is already owned
             const isOwned = ownedFarmlands.some(f => f.name === farmland.name);
