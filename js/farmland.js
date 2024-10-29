@@ -24,11 +24,11 @@ class Farmland {
 }
 
 
-export function createFarmland(id, name, acres, soil = '', altitude = '', aspect = '') {
+export function createFarmland(id, name, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
   const country = getRandomItem(Object.keys(countryRegionMap));
   const region = getRandomItem(countryRegionMap[country]);
   soil = soil || getRandomSoil(country, region);
-  altitude = altitude || getRandomAltitude(country, region); // Assign random altitude if not provided
+  altitude = altitude || getRandomAltitude(country, region);
   aspect = aspect || getRandomAspect();
   return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
@@ -41,6 +41,11 @@ function getRandomItem(array) {
 export function getLastId(farmlands) {
   if (farmlands.length === 0) return 0;
   return Math.max(...farmlands.map(farmland => farmland.id));
+}
+
+// Function to get a random number of acres between 1 and 200
+export function getRandomAcres() {
+  return Math.floor(Math.random() * 200) + 1;
 }
 
 // Function to get a random soil type for a given country and region

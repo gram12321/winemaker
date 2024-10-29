@@ -1,9 +1,8 @@
-import { createFarmland, getLastId, getRandomName } from '../farmland.js';
+import { createFarmland, getLastId, getRandomName, getRandomAcres } from '../farmland.js'; // Import getRandomAcres
 import { addConsoleMessage } from '/js/console.js';
 import { displayOwnedFarmland } from '/js/farmland.js';
-import { getFlagIcon } from '../utils.js';
-import { regionAspectRatings } from '../names.js'; // Import the aspect ratings
-import { getColorClass } from '../utils.js'; // Import the color class function
+import { getFlagIcon, getColorClass } from '../utils.js';
+import { regionAspectRatings } from '../names.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const buyLandBtn = document.getElementById('buy-land-btn');
@@ -27,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         while (newFarmlandOptions.length < numberOfOptions) {
             const id = getLastId(ownedFarmlands.concat(newFarmlandOptions)) + 1;
             const name = getRandomName();
-            const farmland = createFarmland(id, name, 100);
+            const acres = getRandomAcres(); // Use getRandomAcres for random acres
+            const farmland = createFarmland(id, name, acres);
 
             const isOwned = ownedFarmlands.some(f => f.name === farmland.name);
             if (!isOwned) {
