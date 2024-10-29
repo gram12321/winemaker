@@ -1,9 +1,9 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
-import { italianMaleNames, italianFemaleNames, countryRegionMap } from '/js/names.js'; // Import names and country-region map
+import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings } from '/js/names.js'; // Import names and country-region map
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
-import { getFlagIcon } from './utils.js';
+import { getFlagIcon, getColorClass } from './utils.js';
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
@@ -66,10 +66,12 @@ export function displayOwnedFarmland() {
   farmlandEntries.innerHTML = ''; // Clear existing entries
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
-
   farmlands.forEach((farmland, index) => {
     const card = document.createElement('div');
     card.className = 'card';
+    // Calculate the aspect rating
+    const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
+    const colorClass = getColorClass(aspectRating);
     card.innerHTML = `
       <div class="card-header" id="heading${index}">
         <h2 class="mb-0">
@@ -101,7 +103,7 @@ export function displayOwnedFarmland() {
                 <td>${farmland.plantedResourceName || 'Empty'}</td>
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
-                <td>${farmland.aspect}</td>
+                <td class="${colorClass}">${farmland.aspect} (${aspectRating.toFixed(2)})</td>
                 <td>
                   <select class="resource-select">
                     ${resourceOptions}
