@@ -1,4 +1,6 @@
-// utils.js
+import { convertToCurrentUnit, getUnit } from './settings.js';
+
+
 export function getFlagIcon(countryName) {
   const countryToFlagCode = {
     "Italy": "it",
@@ -73,6 +75,12 @@ export function formatNumber(value, decimals = 0) {
 
 export function getFlagIconHTML(country) {
     return getFlagIcon(country);
+}
+
+export function formatLandSizeWithUnit(acres) {
+    const selectedUnit = getUnit(); // 'acres' or 'hectares'
+    const convertedSize = convertToCurrentUnit(acres);
+    return `${formatNumber(convertedSize)} ${selectedUnit}`;
 }
 
 // Export the function for use in other parts of the application

@@ -4,7 +4,7 @@ import { displayOwnedFarmland } from '/js/farmland.js';
 import { getFlagIcon, getColorClass } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor  } from '../names.js';
 import { getUnit, convertToCurrentUnit } from '../settings.js';
-import { formatNumber, getFlagIconHTML } from '../utils.js';
+import { formatNumber, getFlagIconHTML, formatLandSizeWithUnit  } from '../utils.js';
 import { deductMoney } from '../endDay.js';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -111,10 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         deductMoney(totalPrice);
         ownedFarmlands.push(farmland);
         localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
-        // Convert the land size to the user's preferred unit
-        const selectedUnit = getUnit(); // 'acres' or 'hectares'
-        const convertedSize = convertToCurrentUnit(farmland.acres);
-        addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formatNumber(convertedSize)} ${selectedUnit}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
+        const formattedLandSize = formatLandSizeWithUnit(farmland.acres);
+       
+        addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formattedLandSize}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
         closeOverlay();
     }
 
