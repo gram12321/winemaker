@@ -1,5 +1,6 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
-import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
+import { countryRegionMap, regionAspectRatings, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
+import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames } from './names.js';
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
@@ -30,9 +31,10 @@ class Farmland {
 }
 
 
-export function createFarmland(id, name, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
+export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
   const country = getRandomItem(Object.keys(countryRegionMap));
   const region = getRandomItem(countryRegionMap[country]);
+  const name = getRandomName(country); // Call getRandomName with the country to generate the name
   soil = soil || getRandomSoil(country, region);
   altitude = altitude || getRandomAltitude(country, region);
   aspect = aspect || getRandomAspect();
@@ -75,11 +77,30 @@ function getRandomAltitude(country, region) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function getRandomName() {
-  const allNames = italianMaleNames.concat(italianFemaleNames);
-  return getRandomItem(allNames);
+export function getRandomName(country) {
+  let names = [];
+  switch (country) {
+    case 'Italy':
+      names = [...italianMaleNames, ...italianFemaleNames];
+      break;
+    case 'Germany':
+      names = [...germanMaleNames, ...germanFemaleNames];
+      break;
+    case 'Spain':
+      names = [...spanishMaleNames, ...spanishFemaleNames];
+      break;
+    case 'France':
+      names = [...frenchMaleNames, ...frenchFemaleNames];
+      break;
+    case 'United States':
+      names = [...usMaleNames, ...usFemaleNames];
+      break;
+    default:
+      names = ['Default Name'];
+  }
+  const randomIndex = Math.floor(Math.random() * names.length);
+  return names[randomIndex];
 }
-
 function getRandomAspect() {
   const aspects = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
   return getRandomItem(aspects);

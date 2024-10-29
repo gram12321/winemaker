@@ -26,9 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const newFarmlandOptions = [];
         while (newFarmlandOptions.length < numberOfOptions) {
             const id = getLastId(ownedFarmlands.concat(newFarmlandOptions)) + 1;
-            const name = getRandomName();
             const acres = getRandomAcres(); // Generates the size in acres
-            const farmland = createFarmland(id, name, acres);
+
+            // Create the farmland with the name generated based on its country
+            const farmland = createFarmland(id, acres);
             const isOwned = ownedFarmlands.some(f => f.name === farmland.name);
             if (!isOwned) {
                 newFarmlandOptions.push(farmland);
