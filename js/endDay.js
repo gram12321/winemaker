@@ -75,3 +75,12 @@ export function addMoney(amount) {
         renderCompanyInfo();
     }
 }
+
+export function deductMoney(amount) {
+    const currentMoney = localStorage.getItem('money');
+    if (currentMoney !== null) {
+        const newMoney = parseInt(currentMoney, 10) - amount;
+        localStorage.setItem('money', newMoney);
+        renderCompanyInfo();
+    }
+}

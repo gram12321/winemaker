@@ -49,7 +49,7 @@ async function storeCompanyName() {
         window.location.href = 'html/game.html'; // Forward to game.html directly
       } else {
         localStorage.setItem('companyName', companyName);
-        localStorage.setItem('money', 10000); // Initialize money with 10000
+        localStorage.setItem('money', 10000000); // Initialize money with 10000000
         localStorage.setItem('day', 1); // Initialize day
         localStorage.setItem('season', 'Spring'); // Initialize season
         localStorage.setItem('year', 2023); // Initialize year

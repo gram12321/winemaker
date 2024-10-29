@@ -16,7 +16,7 @@
       <p>Start playing now.</p>
 
       <div class="text-center mt-4">
-          <button id="add-money-btn" class="btn btn-success">Add $10,000</button>
+          <button id="add-money-btn" class="btn btn-success">Add $1.000.000 €</button>
           <button id="increment-week-btn" class="btn btn-info">Increment Week</button> <!-- Updated button -->
           <button id="save-company-info-btn" class="btn btn-primary">Save Company Info</button>
       </div>
@@ -46,7 +46,7 @@
           initializeSidebar();
           initializeConsole();
 
-          document.getElementById('add-money-btn').addEventListener('click', () => addMoney(10000));
+          document.getElementById('add-money-btn').addEventListener('click', () => addMoney(1000000));
           document.getElementById('increment-week-btn').addEventListener('click', incrementWeek);  // Updated event listener
           document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
       });
