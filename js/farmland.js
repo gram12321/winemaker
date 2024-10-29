@@ -1,5 +1,5 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
-import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings, regionSoilTypes } from '/js/names.js'; // Import names and country-region map
+import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings, regionSoilTypes, regionAltitudeRanges  } from '/js/names.js'; // Import names and country-region map
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
@@ -27,8 +27,9 @@ class Farmland {
 export function createFarmland(id, name, acres, soil = '', altitude = '', aspect = '') {
   const country = getRandomItem(Object.keys(countryRegionMap));
   const region = getRandomItem(countryRegionMap[country]);
-  soil = soil || getRandomSoil(country, region); // Assign random soil if not provided
-  aspect = aspect || getRandomAspect(); // Use provided aspect or pick a random one
+  soil = soil || getRandomSoil(country, region);
+  altitude = altitude || getRandomAltitude(country, region); // Assign random altitude if not provided
+  aspect = aspect || getRandomAspect();
   return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
 
@@ -55,6 +56,12 @@ function getRandomSoil(country, region) {
   }
 
   return Array.from(selectedSoils).join(', '); // Convert set to array and return as comma-separated string
+}
+
+// Function to get a random altitude within the range for a given country and region
+function getRandomAltitude(country, region) {
+  const [min, max] = regionAltitudeRanges[country][region];
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 export function getRandomName() {

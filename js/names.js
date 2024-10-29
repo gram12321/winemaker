@@ -270,6 +270,49 @@ const regionSoilTypes = {
   },
 };
 
+// names.js
+
+const regionAltitudeRanges = {
+  "Italy": {
+    "Piedmont": [150, 600],
+    "Tuscany": [100, 500],
+    "Veneto": [50, 500],
+    "Sicily": [200, 1000],
+    "Puglia": [50, 400]
+  },
+  "France": {
+    "Bordeaux": [5, 150],
+    "Burgundy (Bourgogne)": [200, 500],
+    "Champagne": [70, 300],
+    "Loire Valley": [10, 300],
+    "Rhone Valley": [100, 400]
+  },
+  "Spain": {
+    "Rioja": [300, 700],
+    "Ribera del Duero": [700, 1000],
+    "Jumilla": [400, 800],
+    "La Mancha": [500, 700],
+    "Sherry (Jerez)": [0, 100]
+  },
+  "United States": {
+    "Napa Valley (California)": [5, 800],
+    "Sonoma County (California)": [10, 700],
+    "Willamette Valley (Oregon)": [30, 300],
+    "Finger Lakes (New York)": [150, 300],
+    "Central Coast (California)": [5, 600]
+  },
+  "Germany": {
+    "Mosel": [100, 400],
+    "Rheingau": [80, 300],
+    "Rheinhessen": [100, 250],
+    "Pfalz": [100, 500],
+    "Ahr": [100, 300]
+  },
+};
+
+// Export the altitude ranges for use in other parts of the application
+export { regionAltitudeRanges };
+
 // Export the soil types for use in other parts of the application
 export { regionSoilTypes };
 
