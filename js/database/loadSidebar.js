@@ -1,4 +1,5 @@
 import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
+import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -31,7 +32,7 @@ export function initializeSidebar() {
 
 export function renderCompanyInfo() {
     const companyName = localStorage.getItem('companyName');
-    const money = localStorage.getItem('money');
+    const money = parseFloat(localStorage.getItem('money') || '0'); // Convert to a number
     const currentWeek = localStorage.getItem('week'); // Updated to week
     const currentSeason = localStorage.getItem('season');
     const currentYear = localStorage.getItem('year');
@@ -48,7 +49,7 @@ export function renderCompanyInfo() {
 
           <div class="info-item">
             <span class="info-label"><img src="/assets/icon/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content">€ ${money}</span>
+            <span class="info-content">€ ${formatNumber(money, 0)}</span> <!-- Specify 2 decimals -->
           </div>
           <div class="styled-line"></div>
         `;

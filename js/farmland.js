@@ -185,7 +185,7 @@ export function displayOwnedFarmland() {
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
                 <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
-                <td>${formatNumber(landValuePerUnit)}</td> 
+                <td>€ ${formatNumber(landValuePerUnit)}</td> 
                 <td>
                   <select class="resource-select">
                     ${resourceOptions}

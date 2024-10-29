@@ -107,16 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buySelectedFarmland(farmland) {
         const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-
         const totalPrice = farmland.totalPrice; // Ensure this is correctly set
-
+        const currentMoney = parseFloat(localStorage.getItem('money') || '0'); // Get current money
+        if (currentMoney < totalPrice) {
+            addConsoleMessage(`Insufficient funds to purchase: <strong>${farmland.name}</strong> in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country}. Total cost is <strong>${formatNumber(totalPrice)}€</strong>, but you only have <strong>${formatNumber(currentMoney)}€</strong>.`);
+            return; // Exit the function if there's not enough money
+        }
         deductMoney(totalPrice);
-
         ownedFarmlands.push(farmland);
         localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
-
         addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formatLandSizeWithUnit(farmland.acres)}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
-
         closeOverlay();
     }
 
