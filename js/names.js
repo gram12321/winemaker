@@ -310,26 +310,97 @@ const regionAltitudeRanges = {
   },
 };
 
-// Export the altitude ranges for use in other parts of the application
-export { regionAltitudeRanges };
+// Function to normalize an altitude
+export function normalizeAltitude(altitude, [minAltitude, maxAltitude]) {
+  return 0.3 + ((altitude - minAltitude) / (maxAltitude - minAltitude)) * (0.7 - 0.3);
+}
 
-// Export the soil types for use in other parts of the application
-export { regionSoilTypes };
+// Normalize function for a given altitude Used for normalizing value of altitudes - for a 0-1 pricefactor for altitude
+export function normalizeValue(value, min, max) {
+  return (value - min) / (max - min);
+}
+// Calculate and normalize price factor with real price range integration
+export function calculateAndNormalizePriceFactor(country, region, altitude, aspect) {
+  const altitudeRange = regionAltitudeRanges[country][region];
+  const altitudeNormalized = normalizeAltitude(altitude, altitudeRange);
 
-// Export the aspect ratings for use in other parts of the application
-export { regionAspectRatings };
+  const prestigeKey = `${region}, ${country}`;
+  const prestigeNormalized = regionPrestigeRankings[prestigeKey];
 
-// Export the arrays to make them available for import in other scripts
-export {
-  italianMaleNames,
-  italianFemaleNames,
-  frenchFemaleNames,
-  frenchMaleNames,
-  spanishFemaleNames,
-  spanishMaleNames,
-  usFemaleNames,
-  usMaleNames,
-  germanFemaleNames,
-  germanMaleNames,
-  countryRegionMap
+  const aspectNormalized = regionAspectRatings[country][region][aspect];
+
+  // Calculate raw price factor by multiplying normalized values
+  const rawPriceFactor = prestigeNormalized * aspectNormalized * altitudeNormalized;
+
+  // Normalize the raw price factor to a 0-1 range
+  const normalizedPriceFactor = rawPriceFactor; // Already considered 0-1
+
+  // Integrate real price range
+  const realPriceRange = regionRealPriceRanges[prestigeKey];
+  const realPriceFactor = (realPriceRange[0] + realPriceRange[1]) / 2; // Average or other measure
+
+  // Apply the real price factor
+  const finalPriceFactor = normalizedPriceFactor * realPriceFactor;
+
+  return finalPriceFactor;
+}
+
+// Real price range for each region
+const regionRealPriceRanges = {
+  "Burgundy (Bourgogne), France": [7.15, 71.90],
+  "Champagne, France": [3.55, 14.35],
+  "Napa Valley (California), United States": [2.10, 7.15],
+  "Bordeaux, France": [0.70, 14.35],
+  "Tuscany, Italy": [0.55, 7.15],
+  "Piedmont, Italy": [0.30, 5.00],
+  "Sonoma County (California), United States": [0.70, 3.55],
+  "Rheingau, Germany": [0.30, 1.40],
+  "Mosel, Germany": [0.20, 1.05],
+  "Rioja, Spain": [0.20, 0.70],
+  "Willamette Valley (Oregon), United States": [0.30, 1.75],
+  "Ribera del Duero, Spain": [0.20, 0.55],
+  "Central Coast (California), United States": [0.10, 1.05],
+  "Loire Valley, France": [0.10, 0.55],
+  "Rhone Valley, France": [0.20, 0.85],
+  "Pfalz, Germany": [0.05, 0.40],
+  "Veneto, Italy": [0.10, 0.70],
+  "Sherry (Jerez), Spain": [0.05, 0.25],
+  "Finger Lakes (New York), United States": [0.05, 0.30],
+  "Sicily, Italy": [0.05, 0.40],
+  "La Mancha, Spain": [0.00, 0.20],
+  "Ahr, Germany": [0.10, 0.30],
+  "Jumilla, Spain": [0.00, 0.15],
+  "Rheinhessen, Germany": [0.05, 0.25],
+  "Puglia, Italy": [0.00, 0.20],
 };
+
+const regionPrestigeRankings = {
+  "Burgundy (Bourgogne), France": 1.00,
+  "Champagne, France": 0.98,
+  "Napa Valley (California), United States": 0.90,
+  "Bordeaux, France": 0.87,
+  "Tuscany, Italy": 0.83,
+  "Piedmont, Italy": 0.80,
+  "Sonoma County (California), United States": 0.76,
+  "Rheingau, Germany": 0.73,
+  "Mosel, Germany": 0.72,
+  "Rioja, Spain": 0.70,
+  "Willamette Valley (Oregon), United States": 0.67,
+  "Ribera del Duero, Spain": 0.65,
+  "Central Coast (California), United States": 0.63,
+  "Loire Valley, France": 0.61,
+  "Rhone Valley, France": 0.60,
+  "Pfalz, Germany": 0.57,
+  "Veneto, Italy": 0.55,
+  "Sherry (Jerez), Spain": 0.51,
+  "Finger Lakes (New York), United States": 0.48,
+  "Sicily, Italy": 0.46,
+  "La Mancha, Spain": 0.42,
+  "Ahr, Germany": 0.41,
+  "Jumilla, Spain": 0.39,
+  "Rheinhessen, Germany": 0.37,
+  "Puglia, Italy": 0.35
+};
+
+// Export the altitude ranges for use in other parts of the application 
+export { regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap };

@@ -1,0 +1,10 @@
+Udregn værdi for farmland udfra attibutes, Region, Aspect, altitude. Multiply by acres. 
+Opdater ownedland to display soil and altitude
+
+
+Names, female for south male for north
+use country specific names. 
+
+Change the way planting works, to give age to vines -> make new year cycle for vineyard, with harvest, promming, trimming ect.
+
+Settings for acres/hectore/sq.m

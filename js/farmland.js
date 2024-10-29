@@ -1,5 +1,5 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
-import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings, regionSoilTypes, regionAltitudeRanges  } from '/js/names.js'; // Import names and country-region map
+import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
@@ -20,6 +20,10 @@ class Farmland {
     this.altitude = altitude;
     this.aspect = aspect;
     this.density = density;
+     this.landvalue = this.calculateLandvalue();
+  }
+  calculateLandvalue() {
+    return calculateAndNormalizePriceFactor(this.country, this.region, this.altitude, this.aspect);
   }
 }
 
