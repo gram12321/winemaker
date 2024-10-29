@@ -117,6 +117,29 @@ const germanMaleNames = [
 
 // Aspect ratings for each region
 const regionAspectRatings = {
+  "Italy": {
+    "Piedmont": {
+      "North": 0.25, "Northeast": 0.45, "East": 0.65, "Southeast": 1.00, "South": 0.90,
+      "Southwest": 0.80, "West": 0.60, "Northwest": 0.40
+    },
+    "Tuscany": {
+      "North": 0.30, "Northeast": 0.55, "East": 0.75, "Southeast": 1.00, "South": 0.90,
+      "Southwest": 0.85, "West": 0.70, "Northwest": 0.50
+    },
+    "Veneto": {
+      "North": 0.20, "Northeast": 0.40, "East": 0.60, "Southeast": 0.95, "South": 1.00,
+      "Southwest": 0.85, "West": 0.65, "Northwest": 0.35
+    },
+    "Sicily": {
+      "North": 0.45, "Northeast": 0.65, "East": 0.85, "Southeast": 1.00, "South": 0.90,
+      "Southwest": 0.80, "West": 0.70, "Northwest": 0.55
+    },
+    "Puglia": {
+      "North": 0.50, "Northeast": 0.65, "East": 0.85, "Southeast": 1.00, "South": 0.90,
+      "Southwest": 0.85, "West": 0.75, "Northwest": 0.55
+    },
+  },
+  
   "France": {
     "Bordeaux": {
       "North": 0.30, "Northeast": 0.40, "East": 0.60, "Southeast": 0.85, "South": 1.00,

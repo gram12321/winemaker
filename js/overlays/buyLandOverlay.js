@@ -1,9 +1,9 @@
-// js/overlays/buyLandOverlay.js
-
 import { createFarmland, getLastId, getRandomName } from '../farmland.js';
 import { addConsoleMessage } from '/js/console.js';
 import { displayOwnedFarmland } from '/js/farmland.js';
-import { getFlagIcon } from '../utils.js';  // Import the flag icon utility function
+import { getFlagIcon } from '../utils.js';
+import { regionAspectRatings } from '../names.js'; // Import the aspect ratings
+import { getColorClass } from '../utils.js'; // Import the color class function
 
 document.addEventListener('DOMContentLoaded', () => {
     const buyLandBtn = document.getElementById('buy-land-btn');
@@ -23,24 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const numberOfOptions = 5;
         const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 
-        // Generate new farmland options ensuring they do not duplicate existing owned ones
         const newFarmlandOptions = [];
         while (newFarmlandOptions.length < numberOfOptions) {
             const id = getLastId(ownedFarmlands.concat(newFarmlandOptions)) + 1;
             const name = getRandomName();
-            const farmland = createFarmland(id, name, 100); // Create farmland with random country, region, and aspect
+            const farmland = createFarmland(id, name, 100);
 
-            // Check if the farmland is already owned
             const isOwned = ownedFarmlands.some(f => f.name === farmland.name);
             if (!isOwned) {
                 newFarmlandOptions.push(farmland);
             }
         }
 
-        // Clear existing content, including headers
         farmlandTableContainer.innerHTML = '';
 
-        // Construct the table structure
         let tableHTML = `
           <table class="table">
             <thead>
@@ -59,7 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         newFarmlandOptions.forEach(farmland => {
-            const flagIconHTML = getFlagIcon(farmland.country); // Get the flag icon HTML
+            const flagIconHTML = getFlagIcon(farmland.country);
+
+            // Get aspect rating from aspectRatings
+            const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
+            const colorClass = getColorClass(aspectRating); // Get corresponding color class
+
             tableHTML += `
               <tr>
                 <td>${farmland.name}</td>
@@ -68,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${farmland.acres} Acres</td>
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
-                <td>${farmland.aspect}</td>
+                <td class="${colorClass}">${farmland.aspect} (${aspectRating.toFixed(2)})</td>
                 <td><button class="btn btn-primary buy-farmland-btn">Buy</button></td>
               </tr>
             `;
@@ -79,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </table>
         `;
 
-        // Set table HTML and attach event listeners
         farmlandTableContainer.innerHTML = tableHTML;
 
         const buyButtons = farmlandTableContainer.querySelectorAll('.buy-farmland-btn');
@@ -101,6 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeOverlay() {
         overlay.style.display = 'none';
-        displayOwnedFarmland(); // Refresh the owned farmlands display
+        displayOwnedFarmland();
     }
 });
