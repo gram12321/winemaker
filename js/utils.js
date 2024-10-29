@@ -55,8 +55,20 @@ function getRandomSoil(country, region) {
   return soils[Math.floor(Math.random() * soils.length)];
 }
 
-export function formatNumber(value, precision = 0) {
-    return value.toLocaleString('de-DE', { minimumFractionDigits: precision, maximumFractionDigits: precision });
+export function formatNumber(value, decimals = 0) {
+    if (value >= 1_000_000) {
+        // For values of one million or more
+        return `${(value / 1_000_000).toLocaleString('de-DE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })} Mio`;
+    } else {
+        // For smaller amounts
+        return value.toLocaleString('de-DE', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    }
 }
 
 // Export the function for use in other parts of the application
