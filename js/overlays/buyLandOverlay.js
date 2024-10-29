@@ -62,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         newFarmlandOptions.forEach(farmland => {
-            const flagIconHTML = getFlagIcon(farmland.country);
             const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
             const colorClass = getColorClass(aspectRating);
 
@@ -77,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tableHTML += `
                 <tr>
                     <td>${farmland.name}</td>
-                    <td>${flagIconHTML} ${farmland.country}</td>
+                    <td>${getFlagIconHTML(farmland.country)} ${farmland.country}</td>
                     <td>${farmland.region}</td>
                     <td>${formatNumber(landSize)} ${selectedUnit}</td>
                     <td>${farmland.soil}</td>
@@ -105,15 +104,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
 
+
     function buySelectedFarmland(farmland) {
         const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+
         const totalPrice = farmland.totalPrice; // Ensure this is correctly set
+
         deductMoney(totalPrice);
+
         ownedFarmlands.push(farmland);
         localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
-        const formattedLandSize = formatLandSizeWithUnit(farmland.acres);
-       
-        addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formattedLandSize}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
+
+        addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formatLandSizeWithUnit(farmland.acres)}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
+
         closeOverlay();
     }
 
