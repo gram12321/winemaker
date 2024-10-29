@@ -1,9 +1,10 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
-import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings } from '/js/names.js'; // Import names and country-region map
+import { italianMaleNames, italianFemaleNames, countryRegionMap, regionAspectRatings, regionSoilTypes } from '/js/names.js'; // Import names and country-region map
 import { allResources, inventoryInstance } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
 import { getFlagIcon, getColorClass } from './utils.js';
+
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
@@ -22,12 +23,15 @@ class Farmland {
   }
 }
 
+
 export function createFarmland(id, name, acres, soil = '', altitude = '', aspect = '') {
   const country = getRandomItem(Object.keys(countryRegionMap));
   const region = getRandomItem(countryRegionMap[country]);
+  soil = soil || getRandomSoil(country, region); // Assign random soil if not provided
   aspect = aspect || getRandomAspect(); // Use provided aspect or pick a random one
   return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
+
 
 function getRandomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
@@ -36,6 +40,21 @@ function getRandomItem(array) {
 export function getLastId(farmlands) {
   if (farmlands.length === 0) return 0;
   return Math.max(...farmlands.map(farmland => farmland.id));
+}
+
+// Function to get a random soil type for a given country and region
+// Function to select a random number of unique soil types from a given country's region
+function getRandomSoil(country, region) {
+  const soils = regionSoilTypes[country][region];
+  const numberOfSoils = Math.floor(Math.random() * 5) + 1; // Randomly choose between 1 and 5 soils
+  const selectedSoils = new Set();
+
+  while (selectedSoils.size < numberOfSoils) {
+    const soil = getRandomItem(soils);
+    selectedSoils.add(soil);
+  }
+
+  return Array.from(selectedSoils).join(', '); // Convert set to array and return as comma-separated string
 }
 
 export function getRandomName() {

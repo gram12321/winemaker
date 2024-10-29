@@ -229,6 +229,50 @@ const regionAspectRatings = {
     },
   },
 };
+
+// names.js
+
+const regionSoilTypes = {
+  "Italy": {
+    "Piedmont": ["Marl", "Clay", "Limestone", "Sandstone", "Silt"],
+    "Tuscany": ["Marl", "Clay", "Limestone", "Sand", "Gravel"],
+    "Veneto": ["Volcanic Soil", "Clay", "Limestone", "Alluvial Soil", "Gravel"],
+    "Sicily": ["Volcanic Soil", "Clay", "Limestone", "Sand", "Alluvial Soil"],
+    "Puglia": ["Limestone", "Clay", "Sand", "Silt", "Alluvial Soil"]
+  },
+  "France": {
+    "Bordeaux": ["Gravel", "Limestone", "Clay", "Sand", "Silt"],
+    "Burgundy (Bourgogne)": ["Limestone", "Marl", "Clay", "Gravel", "Silt"],
+    "Champagne": ["Chalk", "Limestone", "Marl", "Clay", "Sand"],
+    "Loire Valley": ["Limestone", "Clay", "Flint", "Gravel", "Alluvial Soil"],
+    "Rhone Valley": ["Granite", "Clay", "Pebbles", "Sand", "Schist"]
+  },
+  "Spain": {
+    "Rioja": ["Clay", "Limestone", "Alluvial Soil", "Sand", "Marl"],
+    "Ribera del Duero": ["Clay", "Limestone", "Alluvial Soil", "Sand", "Chalk"],
+    "Jumilla": ["Limestone", "Clay", "Sand", "Rocky Soil", "Alluvial Soil"],
+    "La Mancha": ["Limestone", "Clay", "Sand", "Gravel", "Alluvial Soil"],
+    "Sherry (Jerez)": ["Chalk", "Clay", "Sand", "Limestone", "Marl"]
+  },
+  "United States": {
+    "Napa Valley (California)": ["Volcanic Soil", "Alluvial Soil", "Gravel", "Clay", "Sand"],
+    "Sonoma County (California)": ["Sandstone", "Volcanic Soil", "Sandy Loam", "Clay", "Gravel"],
+    "Willamette Valley (Oregon)": ["Volcanic Soil", "Marine Sedimentary Soil", "Loess", "Clay", "Alluvial Soil"],
+    "Finger Lakes (New York)": ["Glacial Soil", "Shale", "Gravel", "Silt", "Clay"],
+    "Central Coast (California)": ["Limestone", "Clay", "Sand", "Shale", "Alluvial Soil"]
+  },
+  "Germany": {
+    "Mosel": ["Slate", "Quartzite", "Loess", "Limestone", "Clay"],
+    "Rheingau": ["Slate", "Loess", "Clay", "Quartzite", "Gravel"],
+    "Rheinhessen": ["Loess", "Limestone", "Clay", "Sand", "Marl"],
+    "Pfalz": ["Limestone", "Loess", "Clay", "Sandstone", "Gravel"],
+    "Ahr": ["Slate", "Loess", "Gravel", "Volcanic Soil", "Clay"]
+  },
+};
+
+// Export the soil types for use in other parts of the application
+export { regionSoilTypes };
+
 // Export the aspect ratings for use in other parts of the application
 export { regionAspectRatings };
 
