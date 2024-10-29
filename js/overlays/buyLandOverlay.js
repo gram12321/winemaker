@@ -107,16 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function buySelectedFarmland(farmland) {
         const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-
         const totalPrice = farmland.totalPrice; // Ensure this is correctly set
-
         deductMoney(totalPrice);
-
         ownedFarmlands.push(farmland);
         localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
-
-        addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${farmland.acres} Acres) for <strong>${formatNumber(totalPrice)}€</strong>.`);
-
+        // Convert the land size to the user's preferred unit
+        const selectedUnit = getUnit(); // 'acres' or 'hectares'
+        const convertedSize = convertToCurrentUnit(farmland.acres);
+        addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formatNumber(convertedSize)} ${selectedUnit}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
         closeOverlay();
     }
 
