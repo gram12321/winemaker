@@ -101,9 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.addEventListener('click', () => buySelectedFarmland(newFarmlandOptions[index]));
         });
         overlay.style.display = 'block';
-    }overlay.style.display = 'block';
     }
-
 
     function buySelectedFarmland(farmland) {
         const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -118,8 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ownedFarmlands.push(farmland);
         localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
 
-        addConsoleMessage(`Purchased: <strong>${farmland.name}</strong>, ${farmland.country} - ${farmland.region} (${farmland.acres} Acres)`);
-        closeOverlay();
+    addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${farmland.country} total size of (${farmland.acres} Acres) for <strong>${formatNumber(totalPrice)}€</strong>.`);closeOverlay();
     }
 
     function closeOverlay() {
