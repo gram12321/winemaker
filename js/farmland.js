@@ -34,10 +34,12 @@ class Farmland {
 export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
   const country = getRandomItem(Object.keys(countryRegionMap));
   const region = getRandomItem(countryRegionMap[country]);
-  const name = getRandomName(country); // Call getRandomName with the country to generate the name
+  aspect = aspect || getRandomAspect();
+  const name = getRandomName(country, aspect); // Pass both country and aspect to generate the name
+
   soil = soil || getRandomSoil(country, region);
   altitude = altitude || getRandomAltitude(country, region);
-  aspect = aspect || getRandomAspect();
+
   return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
 
@@ -77,30 +79,36 @@ function getRandomAltitude(country, region) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export function getRandomName(country) {
+export function getRandomName(country, aspect) {
   let names = [];
+
+  // Determine gender-based name list based on the aspect
+  const isFemaleAspect = ['East', 'Southeast', 'South', 'Southwest'].includes(aspect);
+
   switch (country) {
     case 'Italy':
-      names = [...italianMaleNames, ...italianFemaleNames];
+      names = isFemaleAspect ? italianFemaleNames : italianMaleNames;
       break;
     case 'Germany':
-      names = [...germanMaleNames, ...germanFemaleNames];
+      names = isFemaleAspect ? germanFemaleNames : germanMaleNames;
       break;
     case 'Spain':
-      names = [...spanishMaleNames, ...spanishFemaleNames];
+      names = isFemaleAspect ? spanishFemaleNames : spanishMaleNames;
       break;
     case 'France':
-      names = [...frenchMaleNames, ...frenchFemaleNames];
+      names = isFemaleAspect ? frenchFemaleNames : frenchMaleNames;
       break;
     case 'United States':
-      names = [...usMaleNames, ...usFemaleNames];
+      names = isFemaleAspect ? usFemaleNames : usMaleNames;
       break;
     default:
       names = ['Default Name'];
   }
+
   const randomIndex = Math.floor(Math.random() * names.length);
   return names[randomIndex];
 }
+
 function getRandomAspect() {
   const aspects = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
   return getRandomItem(aspects);
