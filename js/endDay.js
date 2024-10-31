@@ -41,6 +41,35 @@ export function incrementWeek() {
 
     // Execute any pending tasks for the week
     executeAllTasks();
+    // Update farm statuses according to the season and week
+    updateFieldStatuses();
+}
+
+export function updateFieldStatuses() {
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const currentWeek = parseInt(localStorage.getItem('week'), 10);
+    const currentSeason = localStorage.getItem('season');
+
+    farmlands.forEach(field => {
+        switch (currentSeason) {
+            case 'Winter':
+                if (currentWeek === 1) field.status = 'Dormancy';
+                break;
+            case 'Spring':
+                if (currentWeek === 1) field.status = 'Growing';
+                break;
+            case 'Summer':
+                if (currentWeek === 1) field.status = 'Ripening';
+                break;
+            case 'Fall':
+                if (currentWeek === 1) field.status = 'Ready for Harvest';
+                break;
+            default:
+                break;
+        }
+    });
+
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
 export function sellWines(resourceName) {

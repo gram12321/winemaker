@@ -32,6 +32,8 @@ export function displayVineyardEntries() {
                 <th>Field Name</th>
                 <th>Size</th>
                 <th>Vine Age</th>
+                <th>Crop</th>
+                <th>Status</th> <!-- New Status Column -->
                 <th>Actions</th>
               </tr>
             </thead>
@@ -40,6 +42,8 @@ export function displayVineyardEntries() {
                 <td>${vineyard.name}</td>
                 <td>${vineyard.acres} Acres</td>
                 <td>${vineyard.vineAge == null ? 'Not Planted' : vineyard.vineAge} years</td>
+                <td>${vineyard.plantedResourceName || 'None'}</td>
+                <td>${vineyard.status || 'Unknown'}</td> <!-- Display field status -->
                 <td>
                   <button class="btn btn-success harvest-field-btn" ${
                     vineyard.plantedResourceName ? '' : 'disabled'
@@ -137,9 +141,10 @@ export function harvestAcres(index) {
 
             // Check if field is completely harvested
             if (field.currentAcresHarvested >= totalAcres) {
-                addConsoleMessage(` ${field.name} fully harvested`);
+                addConsoleMessage(`${field.name} fully harvested`);
                 field.plantedResourceName = null;
                 field.currentAcresHarvested = 0;
+                field.status = 'Harvested'; // Set the status to Harvested
             }
 
             // Save inventory and farmland updates
@@ -148,10 +153,10 @@ export function harvestAcres(index) {
 
             return acresToHarvestNow; // Return the increment to update task progress
         } else {
-            addConsoleMessage(`Nothing to harvest.  ${field.name} is already fully harvested.`);
+            addConsoleMessage(`Nothing to harvest. ${field.name} is already fully harvested.`);
         }
     } else {
-        addConsoleMessage(`Invalid operation. No planted resource found for  ${farmlands[index]?.name || 'unknown'}.`);
+        addConsoleMessage(`Invalid operation. No planted resource found for ${farmlands[index]?.name || 'unknown'}.`);
     }
     return 0; // Default return if no acres were harvested
 }

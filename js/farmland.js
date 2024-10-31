@@ -24,6 +24,8 @@ class Farmland {
     this.aspect = aspect;
     this.density = density;
      this.landvalue = this.calculateLandvalue();
+    this.status = 'Dormancy'; // Initialize status
+    
   }
   calculateLandvalue() {
     return calculateAndNormalizePriceFactor(this.country, this.region, this.altitude, this.aspect);
@@ -168,6 +170,7 @@ export function displayOwnedFarmland() {
                     <th>Altitude</th>
                     <th>Aspect</th>
                     <th>Land Value (per ${selectedUnit})</th>
+                    <th>Crop</th> <!-- New Crop Column -->
                     <th>Planting Options</th>
                     <th>Actions</th>
                   </tr>
@@ -179,7 +182,8 @@ export function displayOwnedFarmland() {
                     <td>${farmland.soil}</td>
                     <td>${farmland.altitude}</td>
                     <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
-                    <td>€ ${formatNumber(landValuePerUnit)}</td> 
+                    <td>€ ${formatNumber(landValuePerUnit)}</td>
+                    <td>${farmland.plantedResourceName || 'None'}</td> <!-- Display planted resource -->
                     <td>
                       <select class="resource-select">
                         ${resourceOptions}
