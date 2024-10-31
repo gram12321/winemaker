@@ -64,7 +64,6 @@ export function displayVineyardEntries() {
   });
 }
 
-// Modify the planting task handler to update the statu
 
 export function handleHarvestTask(index) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];

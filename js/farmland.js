@@ -125,10 +125,6 @@ function buyLand() {
   displayOwnedFarmland();
 }
 
-
-
-
-
 export function displayOwnedFarmland() {
     const farmlandEntries = document.querySelector('#farmland-entries');
     farmlandEntries.innerHTML = ''; // Clear existing entries
