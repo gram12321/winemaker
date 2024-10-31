@@ -24,16 +24,15 @@ async function clearFirestore() {
 async function clearLocalStorage() {
   localStorage.removeItem('companyName');
   localStorage.removeItem('money');
-  localStorage.removeItem('day'); 
-  localStorage.removeItem('season'); 
-  localStorage.removeItem('year'); 
-  localStorage.removeItem('ownedFarmlands'); 
+  localStorage.removeItem('week'); // Replace 'day' with 'week'
+  localStorage.removeItem('season');
+  localStorage.removeItem('year');
+  localStorage.removeItem('ownedFarmlands');
   localStorage.removeItem('playerInventory');
   localStorage.removeItem('consoleMessages');
-  localStorage.removeItem('tasks'); 
-  localStorage.removeItem('latestTaskId'); // Remove the latestTaskId from localStorage
+  localStorage.removeItem('tasks');
+  localStorage.removeItem('latestTaskId');
   console.log("Local storage cleared.");
-
   // Reset 'latestTaskId' in memory
   Task.latestTaskId = 0;
 }
@@ -50,7 +49,7 @@ async function storeCompanyName() {
       } else {
         localStorage.setItem('companyName', companyName);
         localStorage.setItem('money', 10000000); // Initialize money with 10000000
-        localStorage.setItem('day', 1); // Initialize day
+        localStorage.setItem('week', 1); // Initialize day
         localStorage.setItem('season', 'Spring'); // Initialize season
         localStorage.setItem('year', 2023); // Initialize year
         saveCompanyInfo(); // Save company info to firestore
@@ -68,53 +67,49 @@ async function checkCompanyExists(companyName) {
 }
 
 async function loadExistingCompanyData(companyName) {
-    const docRef = doc(db, "companies", companyName);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        localStorage.setItem('companyName', data.name);
-        localStorage.setItem('money', data.money);
-        localStorage.setItem('day', data.day);
-        localStorage.setItem('season', data.season);
-        localStorage.setItem('year', data.year);
-        localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
-        localStorage.setItem('playerInventory', data.playerInventory || '[]');
-        localStorage.setItem('tasks', JSON.stringify(data.tasks || [])); // Load tasks into localStorage
-
-        // Restore latestTaskId from Firestore
-        Task.latestTaskId = data.latestTaskId || 0;
-        localStorage.setItem('latestTaskId', Task.latestTaskId.toString());
-    }
+  const docRef = doc(db, "companies", companyName);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    localStorage.setItem('companyName', data.name);
+    localStorage.setItem('money', data.money);
+    localStorage.setItem('week', data.week); // Update to 'week'
+    localStorage.setItem('season', data.season);
+    localStorage.setItem('year', data.year);
+    localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
+    localStorage.setItem('playerInventory', data.playerInventory || '[]');
+    localStorage.setItem('tasks', JSON.stringify(data.tasks || []));
+    // Restore latestTaskId from Firestore
+    Task.latestTaskId = data.latestTaskId || 0;
+    localStorage.setItem('latestTaskId', Task.latestTaskId.toString());
+  }
 }
 
 async function saveCompanyInfo() {
   const companyName = localStorage.getItem('companyName');
   const money = localStorage.getItem('money');
-  const day = localStorage.getItem('day');
+  const week = localStorage.getItem('week'); // Rename from 'day' to 'week'
   const season = localStorage.getItem('season');
   const year = localStorage.getItem('year');
   const ownedFarmlands = localStorage.getItem('ownedFarmlands');
   const playerInventory = localStorage.getItem('playerInventory');
-  const tasks = JSON.parse(localStorage.getItem('tasks')) || []; // Retrieve tasks as an array
-
+  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
   if (!companyName) {
     console.error("No company name found to save.");
     return;
   }
-
   try {
     const docRef = doc(db, "companies", companyName);
     await setDoc(docRef, { 
       name: companyName,
       money,
-      day,
+      week, // Update here to 'week'
       season,
       year,
       ownedFarmlands,
       playerInventory,
-      tasks, // Store tasks directly in the company document
-      latestTaskId: Task.latestTaskId // Save the latestTaskId
+      tasks,
+      latestTaskId: Task.latestTaskId
     });
     console.log("Company info and tasks saved successfully.");
   } catch (error) {
