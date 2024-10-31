@@ -121,16 +121,22 @@ export function executeTaskFunction(task) {
 
     if (task.workProgress >= task.workTotal) {
         task.removeTaskBox();
-        console.log(`Executing removeTask for ID: ${task.taskId}`);
+        console.log(`Task completed: ${task.taskName}, Removing task with ID: ${task.taskId}`);
         removeTask(task.taskId);
 
         // Add console message with task details
-        if (task.taskName === "Planting") {
-            addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
-        } else if (task.taskName === "Crushing Grapes") {
-            addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
-        } else if (task.taskName === "Harvesting") {
-            addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
+        switch (task.taskName) {
+            case "Planting":
+                addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
+                break;
+            case "Crushing Grapes":
+                addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
+                break;
+            case "Harvesting":
+                addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
+                break;
+            default:
+                console.warn(`No console message for task name: ${task.taskName}`);
         }
     }
 }

@@ -2,6 +2,7 @@ import { getFlagIcon } from './utils.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { addConsoleMessage } from '/js/console.js';
 import { Task } from './loadPanel.js'; // Import the Task class used for tasks
+import { allResources, inventoryInstance } from '/js/resource.js';
 
 
 export function displayVineyardEntries() {
