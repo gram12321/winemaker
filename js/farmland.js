@@ -130,86 +130,84 @@ function buyLand() {
 
 
 export function displayOwnedFarmland() {
-  const farmlandEntries = document.querySelector('#farmland-entries');
-  farmlandEntries.innerHTML = ''; // Clear existing entries
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
-  const selectedUnit = getUnit(); // Get the current unit setting
-  const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Correct conversion factor
+    const farmlandEntries = document.querySelector('#farmland-entries');
+    farmlandEntries.innerHTML = ''; // Clear existing entries
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
+    const selectedUnit = getUnit(); // Get the current unit setting
+    const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Correct conversion factor
 
-  farmlands.forEach((farmland, index) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
-    const colorClass = getColorClass(aspectRating);
+    farmlands.forEach((farmland, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
+        const colorClass = getColorClass(aspectRating);
 
-    // Calculate total land value per acre
-    const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
+        // Calculate total land value per acre
+        const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
 
-    // Adjust for selected unit (hectares vs acres)
-    const landValuePerUnit = priceFactorPerAcre * conversionFactor;
+        // Adjust for selected unit (hectares vs acres)
+        const landValuePerUnit = priceFactorPerAcre * conversionFactor;
 
-    // Convert size for display based on current unit
-    const landSize = convertToCurrentUnit(farmland.acres);
+        // Convert size for display based on current unit
+        const landSize = convertToCurrentUnit(farmland.acres);
 
-    card.innerHTML = `
-      <div class="card-header" id="heading${index}">
-        <h2 class="mb-0">
-          <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
-            ${getFlagIcon(farmland.country)}
-            ${farmland.country}, ${farmland.region} - ${farmland.name}
-          </button>
-        </h2>
-      </div>
-      <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
-        <div class="card-body">
-          <table class="table table-bordered owned-farmland-table">
-            <thead>
-              <tr>
-                <th>Field Name</th>
-                <th>Size</th>
-                <th>Planted</th>
-                <th>Soil</th>
-                <th>Altitude</th>
-                <th>Aspect</th>
-                <th>Land Value (per ${selectedUnit})</th>
-                <th>Planting Options</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>${farmland.name}</td>
-                <td>${formatNumber(landSize)} ${selectedUnit}</td>
-                <td>${farmland.plantedResourceName || 'Empty'}</td>
-                <td>${farmland.soil}</td>
-                <td>${farmland.altitude}</td>
-                <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
-                <td>€ ${formatNumber(landValuePerUnit)}</td> 
-                <td>
-                  <select class="resource-select">
-                    ${resourceOptions}
-                  </select>
-                </td>
-                <td>
-                  <button class="btn btn-warning plant-field-btn">Plant</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-    farmlandEntries.appendChild(card);
+        card.innerHTML = `
+          <div class="card-header" id="heading${index}">
+            <h2 class="mb-0">
+              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
+                ${getFlagIcon(farmland.country)}
+                ${farmland.country}, ${farmland.region} - ${farmland.name}
+              </button>
+            </h2>
+          </div>
+          <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
+            <div class="card-body">
+              <table class="table table-bordered owned-farmland-table">
+                <thead>
+                  <tr>
+                    <th>Field Name</th>
+                    <th>Size</th>
+                    <th>Soil</th>
+                    <th>Altitude</th>
+                    <th>Aspect</th>
+                    <th>Land Value (per ${selectedUnit})</th>
+                    <th>Planting Options</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>${farmland.name}</td>
+                    <td>${formatNumber(landSize)} ${selectedUnit}</td>
+                    <td>${farmland.soil}</td>
+                    <td>${farmland.altitude}</td>
+                    <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
+                    <td>€ ${formatNumber(landValuePerUnit)}</td> 
+                    <td>
+                      <select class="resource-select">
+                        ${resourceOptions}
+                      </select>
+                    </td>
+                    <td>
+                      <button class="btn btn-warning plant-field-btn">Plant</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+        farmlandEntries.appendChild(card);
 
-    // Planting Logic
-    const plantButton = card.querySelector('.plant-field-btn');
-    plantButton.addEventListener('click', () => {
-      const resourceSelect = card.querySelector('.resource-select');
-      const selectedResource = resourceSelect.value;
-      handlePlantingTask(index, selectedResource, farmland.acres);
+        // Planting Logic
+        const plantButton = card.querySelector('.plant-field-btn');
+        plantButton.addEventListener('click', () => {
+            const resourceSelect = card.querySelector('.resource-select');
+            const selectedResource = resourceSelect.value;
+            handlePlantingTask(index, selectedResource, farmland.acres);
+        });
     });
-  });
 }
 
 function handlePlantingTask(index, resourceName, totalAcres) {
@@ -219,6 +217,7 @@ function handlePlantingTask(index, resourceName, totalAcres) {
     const fieldRegion = field.region || '';
     const gameYear = localStorage.getItem('year') || '';
     const isTaskAlreadyActive = activeTasks.some(task => task.taskName === "Planting" && task.fieldId === index);
+
     if (!isTaskAlreadyActive && (!field.currentAcresPlanted || field.currentAcresPlanted === 0)) {
         const iconPath = '/assets/icon/icon_planting.webp';
         const task = new Task(
@@ -233,8 +232,13 @@ function handlePlantingTask(index, resourceName, totalAcres) {
             iconPath,
             fieldName
         );
+
         // Include fieldName in Object.assign
         Object.assign(task, { fieldId: index, fieldName });
+
+        // Update the field to indicate it's currently being planted
+        field.plantedResourceName = "Currently being planted";
+
         saveTask({
             taskName: task.taskName,
             fieldId: index,
@@ -245,8 +249,15 @@ function handlePlantingTask(index, resourceName, totalAcres) {
             vintage: gameYear,
             iconPath
         });
+
         activeTasks.push(task);
         addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
+
+        // Save the updated farmlands back to local storage
+        localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+        // Refresh display to show updated field status
+        displayOwnedFarmland();
     } else {
         addConsoleMessage(`A Planting task is already active or incomplete for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
     }
@@ -255,14 +266,8 @@ function handlePlantingTask(index, resourceName, totalAcres) {
 export function plantAcres(index, resourceName) {
     const increment = 10; // Work increment for planting
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const field = farmlands[index] || {};
+    const field = farmlands[index];
     const fieldName = field.name || `Field ${index}`;
-    const fieldRegion = field.region || '';
-
-    if (!field.acres) {
-        addConsoleMessage(`Field <strong>${fieldName}</strong>, does not exist.`);
-        return 0;
-    }
 
     const workRemaining = field.acres - (field.currentAcresPlanted || 0);
     const acresToPlant = Math.min(increment, workRemaining);
@@ -274,8 +279,10 @@ export function plantAcres(index, resourceName) {
 
     field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
 
+    // Check if planting is complete
     if (field.currentAcresPlanted >= field.acres) {
         field.plantedResourceName = resourceName;
+        field.vineAge = 0; // Set vineAge to 0 as planting is complete
         addConsoleMessage(`Field <strong>${fieldName}</strong> fully planted with <strong>${resourceName}.</strong>`);
     } else {
         addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>. Total planted: <strong>${field.currentAcresPlanted} out of ${field.acres}</strong> acres.`);
@@ -284,6 +291,5 @@ export function plantAcres(index, resourceName) {
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     return acresToPlant;
 }
-
 
 export { buyLand, Farmland, handlePlantingTask };

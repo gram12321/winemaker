@@ -3,10 +3,11 @@ import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunction
 import { addConsoleMessage } from '/js/console.js';
 import { Task } from './loadPanel.js'; // Import the Task class used for tasks
 
+
 export function displayVineyardEntries() {
   const vineyardEntries = document.querySelector('#vineyard-entries');
   vineyardEntries.innerHTML = ''; // Clear existing entries
-  const vineyards = JSON.parse(localStorage.getItem('ownedFarmlands')) || []; // Sample data
+  const vineyards = JSON.parse(localStorage.getItem('ownedFarmlands')) || []; // Load data
 
   vineyards.forEach((vineyard, index) => {
     const card = document.createElement('div');
@@ -29,7 +30,7 @@ export function displayVineyardEntries() {
               <tr>
                 <th>Field Name</th>
                 <th>Size</th>
-                <th>Planted</th>
+                <th>Vine Age</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -37,7 +38,7 @@ export function displayVineyardEntries() {
               <tr>
                 <td>${vineyard.name}</td>
                 <td>${vineyard.acres} Acres</td>
-                <td>${vineyard.plantedResourceName || 'Empty'}</td>
+                <td>${vineyard.vineAge == null ? 'Not Planted' : vineyard.vineAge} years</td>
                 <td>
                   <button class="btn btn-success harvest-field-btn" ${
                     vineyard.plantedResourceName ? '' : 'disabled'
@@ -60,6 +61,91 @@ export function displayVineyardEntries() {
       }
     });
   });
+}
+
+// Modify the planting task handler to update the status
+function handlePlantingTask(index, resourceName, totalAcres) {
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const field = farmlands[index] || {};
+    const fieldName = field.name || `Field ${index}`;
+    const fieldRegion = field.region || '';
+    const gameYear = localStorage.getItem('year') || '';
+    const isTaskAlreadyActive = activeTasks.some(task => task.taskName === "Planting" && task.fieldId === index);
+
+    if (!isTaskAlreadyActive && (!field.currentAcresPlanted || field.currentAcresPlanted === 0)) {
+        const iconPath = '/assets/icon/icon_planting.webp';
+        const task = new Task(
+            "Planting",
+            () => plantAcres(index, resourceName),
+            undefined,
+            totalAcres,
+            resourceName,
+            '',
+            gameYear,
+            '',
+            iconPath,
+            fieldName
+        );
+
+        // Include fieldName in Object.assign
+        Object.assign(task, { fieldId: index, fieldName });
+
+        // Update the field to indicate it's currently being planted
+        field.plantedResourceName = "Currently being planted";
+
+        saveTask({
+            taskName: task.taskName,
+            fieldId: index,
+            fieldName: task.fieldName,
+            resourceName,
+            taskId: task.taskId,
+            workTotal: totalAcres,
+            vintage: gameYear,
+            iconPath
+        });
+
+        activeTasks.push(task);
+        addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
+
+        // Save the updated farmlands back to local storage
+        localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+        // Refresh display to show updated field status
+        displayOwnedFarmland();
+    } else {
+        addConsoleMessage(`A Planting task is already active or incomplete for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
+    }
+}
+
+export function plantAcres(index, resourceName) {
+    const increment = 10; // Work increment for planting
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const field = farmlands[index];
+    const fieldName = field.name || `Field ${index}`;
+
+    const workRemaining = field.acres - (field.currentAcresPlanted || 0);
+    const acresToPlant = Math.min(increment, workRemaining);
+
+    if (acresToPlant <= 0) {
+        addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully planted.`);
+        return 0;
+    }
+
+    field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
+
+    // Check if planting is complete
+    if (field.currentAcresPlanted >= field.acres) {
+        field.plantedResourceName = resourceName;
+        field.vineAge = 0; // Set vineAge to 0 as planting is complete
+        addConsoleMessage(`Field <strong>${fieldName}</strong> fully planted with <strong>${resourceName}.</strong>`);
+        // Update display
+        displayOwnedFarmland();
+    } else {
+        addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>. Total planted: <strong>${field.currentAcresPlanted} out of ${field.acres}</strong> acres.`);
+    }
+
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    return acresToPlant;
 }
 
 export function handleHarvestTask(index) {
