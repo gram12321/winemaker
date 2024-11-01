@@ -53,16 +53,36 @@ export function updateFieldStatuses() {
     farmlands.forEach(field => {
         switch (currentSeason) {
             case 'Winter':
-                if (currentWeek === 1) field.status = 'Dormancy';
+                if (currentWeek === 1) {
+                    if (field.plantedResourceName) {
+                        const acresLeftToHarvest = field.acres - (field.currentAcresHarvested || 0);
+                        if (acresLeftToHarvest > 0) {
+                            addConsoleMessage(`<img src="/assets/icon/small/frost.png" width="15" height="15" style="vertical-align: middle; margin-right: 5px;"><strong>Frost warning:</strong> <span style="color: red;"><strong>${acresLeftToHarvest} acres</strong></span> of <strong>${field.plantedResourceName}</strong> were <strong>lost</strong> on field <strong>${field.name}</strong>.`);
+                        }
+                        field.currentAcresHarvested = field.acres;
+                    }
+                    field.status = 'Dormancy';
+                }
                 break;
             case 'Spring':
-                if (currentWeek === 1) field.status = 'Growing';
+                if (currentWeek === 1) {
+                    field.status = 'Growing';
+
+                    // Increase vine age by 1 if vineyard is planted
+                    if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
+                        field.vineAge += 1;
+                    }
+                }
                 break;
             case 'Summer':
-                if (currentWeek === 1) field.status = 'Ripening';
+                if (currentWeek === 1) {
+                    field.status = 'Ripening';
+                }
                 break;
             case 'Fall':
-                if (currentWeek === 1) field.status = 'Ready for Harvest';
+                if (currentWeek === 1) {
+                    field.status = 'Ready for Harvest';
+                }
                 break;
             default:
                 break;

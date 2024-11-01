@@ -33,7 +33,7 @@ export function displayVineyardEntries() {
                 <th>Size</th>
                 <th>Vine Age</th>
                 <th>Crop</th>
-                <th>Status</th> <!-- New Status Column -->
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -41,9 +41,9 @@ export function displayVineyardEntries() {
               <tr>
                 <td>${vineyard.name}</td>
                 <td>${vineyard.acres} Acres</td>
-                <td>${vineyard.vineAge == null ? 'Not Planted' : vineyard.vineAge} years</td>
+                <td>${vineyard.plantedResourceName && vineyard.vineAge != null ? `${vineyard.vineAge} years` : 'Not Planted'}</td>
                 <td>${vineyard.plantedResourceName || 'None'}</td>
-                <td>${vineyard.status || 'Unknown'}</td> <!-- Display field status -->
+                <td>${vineyard.status || 'Unknown'}</td>
                 <td>
                   <button class="btn btn-success harvest-field-btn" ${
                     vineyard.plantedResourceName ? '' : 'disabled'
@@ -58,7 +58,6 @@ export function displayVineyardEntries() {
 
     vineyardEntries.appendChild(card);
 
-    // Harvest Logic
     const harvestButton = card.querySelector('.harvest-field-btn');
     harvestButton.addEventListener('click', () => {
       if (vineyard.plantedResourceName) {
@@ -142,7 +141,6 @@ export function harvestAcres(index) {
             // Check if field is completely harvested
             if (field.currentAcresHarvested >= totalAcres) {
                 addConsoleMessage(`${field.name} fully harvested`);
-                field.plantedResourceName = null;
                 field.currentAcresHarvested = 0;
                 field.status = 'Harvested'; // Set the status to Harvested
             }
