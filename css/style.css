@@ -10,7 +10,6 @@ body {
 }
 
 /* Sidebar */
-
 #sidebar-wrapper {
   min-width: 250px;
   max-width: 250px;
@@ -43,45 +42,6 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-/* Overlay styles */
-.overlay {
-  position: fixed;
-  display: none;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Overlay black with opacity */
-  z-index: 2000; /* High z-index to be above other elements */
-}
-
-/* Updated Overlay styles */
-/* Updated Overlay styles */
-.overlay-content {
-  position: relative;
-  margin: 5% auto; /* Changed from 15% to provide more space vertically */
-  padding: 20px;
-  width: 90%; /* Adjust width as necessary for your design */
-  max-width: 900px; /* Increased from 600px to fit more content */
-  background: #fff;
-  border-radius: 4px;
-}
-
-/* CSS for tables specifically within overlays */
-.overlay .table {
-  width: 100%; /* Ensure the table uses the full width of the container */
-}
-
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  font-size: 24px;
-  cursor: pointer;
 }
 
 /* Define color classes for a gradient from red to green */
@@ -138,7 +98,7 @@ body {
   gap: 10px;
 }
 
-/* Panel */
+/*  - --- --   Panel styles   - - - - - -*/
 #panel-wrapper {
   position: fixed !important;
   right: 0 !important;
@@ -164,7 +124,9 @@ body {
   opacity: 0.4; /* Only the image gets this opacity */
   z-index: -1; /* Place the image behind the panel content */
 }
-/* Task box styles */
+
+/*  - --- --   Task box styles   - - - - - -*/
+
 #panel-wrapper .task-box {
   background-color: #214a73;
   border: 1px solid #94bde5;
@@ -232,8 +194,6 @@ body {
   min-width: 630px;        /* Minimum width */
 }
 
-
-
 body {
   margin-bottom: 220px; /* Space for the fixed console panel */
 }
@@ -273,3 +233,69 @@ body {
   display: flex;
   justify-content: center;
 }
+
+
+/*  - --- --   Overlay   - - - - - -*/
+
+/* Overlay styles */
+.overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Overlay black with opacity */
+  z-index: 2000; /* High z-index to be above other elements */
+}
+
+/* Overlay content styles */
+.overlay-content {
+  position: relative;
+  margin: 5% auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Table styles within overlays */
+.overlay .table {
+  margin: 0 auto; /* Center align the table */
+  width: auto; /* Allow natural width expansion */
+  color: #333;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+.overlay .table thead th {
+  background-color: #343a40;
+  color: #fff;
+}
+
+.overlay .table tbody tr:nth-child(even) {
+  background-color: #e9ecef;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #d1e7fd;
+}
+
+/* Header styling */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Close button styling */
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}
+/*  - --- --   Overlay Ends  - - - - - -*/

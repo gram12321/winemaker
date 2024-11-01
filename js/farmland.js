@@ -7,6 +7,7 @@ import { Task } from './loadPanel.js';
 import { getFlagIcon, getColorClass } from './utils.js';
 import { formatNumber } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
+import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 
 // In js/farmland.js
 
@@ -139,27 +140,24 @@ function buyLand() {
 }
 
 
+
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   farmlandEntries.innerHTML = ''; // Clear existing entries
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
   const selectedUnit = getUnit(); // Get the current unit setting
-  const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Correct conversion factor
+  const conversionFactor = selectedUnit === 'hectares' ? 2.47105 : 1;
 
   farmlands.forEach((farmland, index) => {
     const card = document.createElement('div');
     card.className = 'card';
+
     const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
     const colorClass = getColorClass(aspectRating);
 
-    // Calculate total land value per acre
     const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
-
-    // Adjust for selected unit (hectares vs acres)
     const landValuePerUnit = priceFactorPerAcre * conversionFactor;
-
-    // Convert size for display based on current unit
     const landSize = convertToCurrentUnit(farmland.acres);
 
     card.innerHTML = `
@@ -167,7 +165,7 @@ export function displayOwnedFarmland() {
         <h2 class="mb-0">
           <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
             ${getFlagIcon(farmland.country)}
-            ${farmland.country}, ${farmland.region} - ${farmland.name}
+            ${farmland.country}, ${farmland.region} - <span class="farmland-name clickable" data-index="${index}">${farmland.name}</span>
           </button>
         </h2>
       </div>
@@ -177,25 +175,25 @@ export function displayOwnedFarmland() {
             <thead>
               <tr>
                 <th>Field Name</th>
-                <th>Size</th>
+                <th>Size (${selectedUnit})</th>
                 <th>Soil</th>
                 <th>Altitude</th>
                 <th>Aspect</th>
-                <th>Land Value (per ${selectedUnit})</th>
-                <th>Crop</th> <!-- New Crop Column -->
+                <th>Land Value</th>
+                <th>Crop</th>
                 <th>Planting Options</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>${farmland.name}</td>
-                <td>${formatNumber(landSize)} ${selectedUnit}</td>
+                <td><span class="farmland-name clickable" data-index="${index}">${farmland.name}</span></td>
+                <td>${formatNumber(landSize)}</td>
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
                 <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
                 <td>€ ${formatNumber(landValuePerUnit)}</td>
-                <td>${farmland.plantedResourceName || 'None'}</td> <!-- Display planted resource -->
+                <td>${farmland.plantedResourceName || 'None'}</td>
                 <td>
                   <select class="resource-select">
                     ${resourceOptions}
@@ -218,6 +216,14 @@ export function displayOwnedFarmland() {
       const resourceSelect = card.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
       handlePlantingTask(index, selectedResource, farmland.acres);
+    });
+  });
+
+  // Add the event listener for the farmland name clicks
+  farmlandEntries.querySelectorAll('.farmland-name').forEach(nameEl => {
+    nameEl.addEventListener('click', (event) => {
+      const index = event.target.getAttribute('data-index');
+      showFarmlandOverlay(farmlands[index]); // Show overlay for clicked farmland
     });
   });
 }
