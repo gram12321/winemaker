@@ -1,4 +1,5 @@
 import { sellWines } from './endDay.js';
+import { formatNumber } from './utils.js';
 
 class Resource {
   constructor(name, naturalYield) {
@@ -86,6 +87,7 @@ class Inventory {
   }
 }
 
+
 function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fermentation-table-body', 'winecellar-table-body'], includeSellButton = false) {
     const warehouseTableBody = document.getElementById('warehouse-table-body');
     const fermentationTableBody = document.getElementById('fermentation-table-body');
@@ -105,7 +107,7 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
         const { resource, amount, state, quality, vintage } = item;
 
         let tableBodyId;
-        let displayAmount = amount;
+        let displayAmount = formatNumber(amount);
 
         if (state === 'Grapes' && tablesToShow.includes('warehouse-table-body')) {
             tableBodyId = 'warehouse-table-body';

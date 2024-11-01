@@ -134,12 +134,14 @@
     <script type="module">
       import { addConsoleMessage } from "/js/console.js";
       import { inventoryInstance } from "/js/resource.js";
-      import { grapeCrushing, fermentMust, handleGrapeCrushingTask, handleFermentationTask, } from "/js/wineprocessing.js";
-      import { Task } from "/js/loadPanel.js"; // Import the spawnTask function
+      import { grapeCrushing, fermentMust, handleGrapeCrushingTask, handleFermentationTask } from "/js/wineprocessing.js";
+      import { Task } from "/js/loadPanel.js";
       import { loadTasks, saveTask, activeTasks } from "/js/database/adminFunctions.js";
       import { initializeSidebar } from "/js/database/loadSidebar.js";
       import { initializePanel } from "/js/loadPanel.js";
-      import { initializeConsole } from "/js/console.js"; // Import the console initializer
+      import { initializeConsole } from "/js/console.js";
+      import { formatNumber } from "/js/utils.js"; // Import for formatting
+
       document.addEventListener("DOMContentLoaded", function () {
         initializePanel();
         initializeSidebar();
@@ -151,67 +153,61 @@
         populateFermentResourceSelect();
 
         function populateCrushInventoryList() {
-          const crushInventoryList = document.getElementById(
-            "crush-inventory-list",
-          );
+          const crushInventoryList = document.getElementById("crush-inventory-list");
           crushInventoryList.innerHTML = "";
 
           inventoryInstance.items.forEach((item) => {
             if (item.state === "Grapes") {
               const listItem = document.createElement("li");
               listItem.className = "list-group-item";
-              listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${item.amount}`;
+              listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${formatNumber(item.amount)} t`;
               crushInventoryList.appendChild(listItem);
             }
           });
         }
 
         function populateFermentationInventoryList() {
-          const fermentationList = document.getElementById(
-            "fermentation-inventory-list",
-          );
+          const fermentationList = document.getElementById("fermentation-inventory-list");
           fermentationList.innerHTML = "";
 
           inventoryInstance.items.forEach((item) => {
             if (item.state === "Must") {
               const listItem = document.createElement("li");
               listItem.className = "list-group-item";
-              listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${item.amount}`;
+              listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${formatNumber(item.amount)}`;
               fermentationList.appendChild(listItem);
             }
           });
         }
 
-        function populateFermentResourceSelect() {
-          const selectElement = document.getElementById(
-            "ferment-resource-select",
-          );
-          selectElement.innerHTML = "";
-          inventoryInstance.items.forEach((item) => {
-            if (item.state === "Must") {
-              const option = document.createElement("option");
-              option.value = item.resource.name;
-              option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${item.amount}`;
-              selectElement.appendChild(option);
-            }
-          });
-        }
-
         function populateResourceSelect() {
-          const selectElement = document.getElementById(
-            "crush-resource-select",
-          );
+          const selectElement = document.getElementById("crush-resource-select");
           selectElement.innerHTML = "";
 
           inventoryInstance.items.forEach((item) => {
             if (item.state === "Grapes") {
               const option = document.createElement("option");
               option.value = item.resource.name;
-              option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${item.amount}`;
+              option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${formatNumber(item.amount)}`;
               selectElement.appendChild(option);
             }
           });
         }
+
+        function populateFermentResourceSelect() {
+          const selectElement = document.getElementById("ferment-resource-select");
+          selectElement.innerHTML = "";
+
+          inventoryInstance.items.forEach((item) => {
+            if (item.state === "Must") {
+              const option = document.createElement("option");
+              option.value = item.resource.name;
+              option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${formatNumber(item.amount)}`;
+              selectElement.appendChild(option);
+            }
+          });
+        }
+
         // Grape Crushing Task Button Listener
         document.getElementById("crush-grapes-btn").addEventListener("click", function () {
           const selectedResource = document.getElementById("crush-resource-select").value;
@@ -221,16 +217,17 @@
             addConsoleMessage("No resource selected for crushing.");
           }
         });
+
         // Fermentation Task Button Listener
         document.getElementById("fermentation-btn").addEventListener("click", function () {
           const selectedResource = document.getElementById("ferment-resource-select").value;
           if (selectedResource) {
-              handleFermentationTask(selectedResource);
+            handleFermentationTask(selectedResource);
           } else {
             addConsoleMessage("No resource selected for fermentation.");
           }
         });
-        });
+      });
     </script>
   </body>
 </html>

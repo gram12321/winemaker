@@ -3,6 +3,7 @@ import { addConsoleMessage } from './console.js';
 import { inventoryInstance } from './resource.js';
 import { saveInventory, saveTask, activeTasks } from './database/adminFunctions.js';
 import { Task } from './loadPanel.js';
+import { formatNumber } from './utils.js';
 
 export function handleGrapeCrushingTask(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
@@ -66,24 +67,24 @@ export function handleGrapeCrushingTask(selectedResource) {
 export function grapeCrushing(selectedResource) {
     const increment = 10; // Define the increment for crushing
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
-
-    if (!resource || resource.amount <= 0) {
-        addConsoleMessage(`Unable to process ${selectedResource}. Ensure it is available.`);
-        return 0; // Return 0 if no progress is made
-    }
-
     const actualIncrement = Math.min(increment, resource.amount);
+
+    // Define a ratio for crushing, e.g., how much Must is produced from Grapes
+    const crushingYieldRatio = 600; // 600 liters of Must per ton of Grapes
+
+    // Calculate actual must produced
+    const mustProduced = actualIncrement * crushingYieldRatio;
 
     // Update inventory to reflect the crushing process
     inventoryInstance.removeResource(resource.resource.name, actualIncrement, resource.state, resource.vintage, resource.quality);
-    inventoryInstance.addResource(resource.resource.name, actualIncrement, 'Must', resource.vintage, resource.quality);
+    inventoryInstance.addResource(resource.resource.name, mustProduced, 'Must', resource.vintage, resource.quality);
 
     // Persist changes
     saveInventory();
 
-    addConsoleMessage(`${actualIncrement} units of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must.`);
+    addConsoleMessage(`${formatNumber(mustProduced)} units of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must.`);
 
-    return actualIncrement; // Return the actual work completed
+    return actualIncrement; // Return the actual work completed (Return work for task process)
 }
 
 export function handleFermentationTask(selectedResource) {

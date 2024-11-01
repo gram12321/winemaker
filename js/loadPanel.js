@@ -2,7 +2,7 @@
 import { loadTasks, removeTask } from './database/adminFunctions.js';
 import { activeTasks } from './database/adminFunctions.js'; // Import the instantiatedTasks array
 import { addConsoleMessage } from './console.js'; // Ensure this import is present to use addConsoleMessage
-
+import { formatNumber } from './utils.js'; // Ensure this import is present to use formatNumbers
 // Function to initialize the task panel
 function initializePanel() {
     return fetch('/html/panel.html')
@@ -76,15 +76,15 @@ export class Task {
         progressInfo.className = 'progress-info';
 
         const fromLabel = document.createElement('span');
-        fromLabel.textContent = `Progress: ${this.workProgress}`;
+        fromLabel.textContent = `Progress: ${formatNumber(this.workProgress)}`;
 
         const toLabel = document.createElement('span');
-        toLabel.textContent = `Goal: ${this.workTotal}`;
+        toLabel.textContent = `Goal: ${formatNumber(this.workTotal)}`;
 
         const progressBar = document.createElement('div');
         progressBar.className = 'progress mt-1';
         progressBar.innerHTML = `
-            <div class="progress-bar" role="progressbar" style="width: ${this.workProgress / this.workTotal * 100}%" aria-valuenow="${this.workProgress}" aria-valuemin="0" aria-valuemax="${this.workTotal}"></div>
+            <div class="progress-bar" role="progressbar" style="width: ${(this.workProgress / this.workTotal) * 100}%" aria-valuenow="${this.workProgress}" aria-valuemin="0" aria-valuemax="${this.workTotal}"></div>
         `;
 
         progressInfo.appendChild(fromLabel);
