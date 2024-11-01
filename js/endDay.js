@@ -54,21 +54,16 @@ export function updateFieldStatuses() {
         switch (currentSeason) {
             case 'Winter':
                 if (currentWeek === 1) {
-                    if (field.plantedResourceName) {
-                        const acresLeftToHarvest = field.acres - (field.currentAcresHarvested || 0);
-                        if (acresLeftToHarvest > 0) {
-                            addConsoleMessage(`<img src="/assets/icon/small/frost.png" width="15" height="15" style="vertical-align: middle; margin-right: 5px;"><strong>Frost warning:</strong> <span style="color: red;"><strong>${acresLeftToHarvest} acres</strong></span> of <strong>${field.plantedResourceName}</strong> were <strong>lost</strong> on field <strong>${field.name}</strong>.`);
-                        }
-                        field.currentAcresHarvested = field.acres;
-                    }
                     field.status = 'Dormancy';
                 }
                 break;
             case 'Spring':
                 if (currentWeek === 1) {
-                    field.status = 'Growing';
+                    // Transition from "No yield in first season" to "Growing"
+                    if (field.status === "No yield in first season") {
+                        field.status = 'Growing';
+                    }
 
-                    // Increase vine age by 1 if vineyard is planted
                     if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
                         field.vineAge += 1;
                     }

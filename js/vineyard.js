@@ -14,6 +14,10 @@ export function displayVineyardEntries() {
     const card = document.createElement('div');
     card.className = 'card';
 
+    const isPlanted = vineyard.plantedResourceName && vineyard.vineAge != null;
+    const vineAgeDisplay = isPlanted ? `${vineyard.vineAge} years` : 'Not Planted';
+    const statusDisplay = vineyard.plantedResourceName ? vineyard.status || 'Unknown' : 'Not Planted';
+
     card.innerHTML = `
       <div class="card-header" id="heading${index}">
         <h2 class="mb-0">
@@ -41,9 +45,9 @@ export function displayVineyardEntries() {
               <tr>
                 <td>${vineyard.name}</td>
                 <td>${vineyard.acres} Acres</td>
-                <td>${vineyard.plantedResourceName && vineyard.vineAge != null ? `${vineyard.vineAge} years` : 'Not Planted'}</td>
+                <td>${vineAgeDisplay}</td>
                 <td>${vineyard.plantedResourceName || 'None'}</td>
-                <td>${vineyard.status || 'Unknown'}</td>
+                <td>${statusDisplay}</td>
                 <td>
                   <button class="btn btn-success harvest-field-btn" ${
                     vineyard.plantedResourceName ? '' : 'disabled'

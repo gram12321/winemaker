@@ -233,11 +233,10 @@ function handlePlantingTask(index, resourceName, totalAcres) {
             fieldName
         );
 
-        // Include fieldName in Object.assign
         Object.assign(task, { fieldId: index, fieldName });
 
-        // Update the field to indicate it's currently being planted
         field.plantedResourceName = "Currently being planted";
+        field.status = "No yield in first season"; // Set initial status
 
         saveTask({
             taskName: task.taskName,
@@ -252,11 +251,7 @@ function handlePlantingTask(index, resourceName, totalAcres) {
 
         activeTasks.push(task);
         addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
-
-        // Save the updated farmlands back to local storage
         localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-        // Refresh display to show updated field status
         displayOwnedFarmland();
     } else {
         addConsoleMessage(`A Planting task is already active or incomplete for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
