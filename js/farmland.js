@@ -25,6 +25,7 @@ class Farmland {
     this.density = density;
      this.landvalue = this.calculateLandvalue();
     this.status = 'Dormancy'; // Initialize status
+    this.ripeness = 0; // Initialize ripeness
     
   }
   calculateLandvalue() {

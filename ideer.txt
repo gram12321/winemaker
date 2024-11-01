@@ -8,3 +8,6 @@
 Change the way planting works, to give age to vines -> make new year cycle for vineyard, with harvest, promming, trimming ect.
 
 Settings for acres/hectore/sq.m
+
+
+Ripeness more in south aspect

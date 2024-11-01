@@ -43,6 +43,9 @@ export function incrementWeek() {
     executeAllTasks();
     // Update farm statuses according to the season and week
     updateFieldStatuses();
+
+    // Update ripeness for each field
+    updateRipeness();
 }
 
 export function updateFieldStatuses() {
@@ -77,6 +80,37 @@ export function updateFieldStatuses() {
             case 'Fall':
                 if (currentWeek === 1) {
                     field.status = 'Ready for Harvest';
+                }
+                break;
+            default:
+                break;
+        }
+    });
+
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+}
+
+function updateRipeness() {
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const currentWeek = parseInt(localStorage.getItem('week'), 10);
+    const currentSeason = localStorage.getItem('season');
+
+    farmlands.forEach(field => {
+        if (!field.plantedResourceName) return;
+
+        switch (currentSeason) {
+            case 'Spring':
+                field.ripeness += 0.01; // Add +1 each week of spring
+                break;
+            case 'Summer':
+                field.ripeness += 0.02; // Add +2 each week of summer
+                break;
+            case 'Fall':
+                field.ripeness += 0.05; // Add +3 each week of fall
+                break;
+            case 'Winter':
+                if (currentWeek === 1) {
+                    field.ripeness = 0; // Reset ripeness on first week of winter
                 }
                 break;
             default:
