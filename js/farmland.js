@@ -138,7 +138,6 @@ function buyLand() {
   displayOwnedFarmland();
 }
 
-// In js/farmland.js (Update as necessary to use getYield)
 
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
@@ -163,9 +162,6 @@ export function displayOwnedFarmland() {
     // Convert size for display based on current unit
     const landSize = convertToCurrentUnit(farmland.acres);
 
-    // Calculate yield using the standalone function
-    const yieldValue = farmlandYield(farmland);
-
     card.innerHTML = `
       <div class="card-header" id="heading${index}">
         <h2 class="mb-0">
@@ -187,7 +183,6 @@ export function displayOwnedFarmland() {
                 <th>Aspect</th>
                 <th>Land Value (per ${selectedUnit})</th>
                 <th>Crop</th> <!-- New Crop Column -->
-                <th>Yield</th>  <!-- New Yield Column -->
                 <th>Planting Options</th>
                 <th>Actions</th>
               </tr>
@@ -201,7 +196,6 @@ export function displayOwnedFarmland() {
                 <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
                 <td>€ ${formatNumber(landValuePerUnit)}</td>
                 <td>${farmland.plantedResourceName || 'None'}</td> <!-- Display planted resource -->
-                <td>${formatNumber(yieldValue, 2)}</td> <!-- Display the Yield Value -->
                 <td>
                   <select class="resource-select">
                     ${resourceOptions}
