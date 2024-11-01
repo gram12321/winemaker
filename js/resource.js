@@ -1,18 +1,20 @@
 import { sellWines } from './endDay.js';
 
 class Resource {
-  constructor(name) {
+  constructor(name, naturalYield) {
     this.name = name;
+    this.naturalYield = naturalYield;
   }
 }
 
+
 const allResources = [
-  new Resource('Barbera'),
-  new Resource('Chardonnay'),
+  new Resource('Barbera', 1), // Add naturalYield for each resource
+  new Resource('Chardonnay', 0.9),
   // Add more resources as needed
 ];
 
-function getResourceByName(name) {
+export function getResourceByName(name) {
   return allResources.find(resource => resource.name === name);
 }
 

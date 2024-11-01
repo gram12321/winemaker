@@ -1,13 +1,14 @@
 import { addConsoleMessage, getIconHtml } from '/js/console.js';
 import { countryRegionMap, regionAspectRatings, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames } from './names.js';
-import { allResources, inventoryInstance } from '/js/resource.js';
+import { allResources, inventoryInstance, getResourceByName  } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
 import { getFlagIcon, getColorClass } from './utils.js';
 import { formatNumber } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
 
+// In js/farmland.js
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
@@ -23,16 +24,25 @@ class Farmland {
     this.altitude = altitude;
     this.aspect = aspect;
     this.density = density;
-     this.landvalue = this.calculateLandvalue();
+    this.landvalue = this.calculateLandvalue();
     this.status = 'Dormancy'; // Initialize status
-    this.ripeness = 0; // Initialize ripeness
-    
+    this.ripeness = 0.1; // Initialize ripeness
   }
+
   calculateLandvalue() {
     return calculateAndNormalizePriceFactor(this.country, this.region, this.altitude, this.aspect);
   }
 }
 
+export function farmlandYield(farmland) {
+  if (farmland.plantedResourceName) {
+    const resource = getResourceByName(farmland.plantedResourceName);
+    if (resource) {
+      return farmland.ripeness * resource.naturalYield;
+    }
+  }
+  return 0; // No yield if nothing is planted
+}
 
 export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
   const country = getRandomItem(Object.keys(countryRegionMap));
@@ -128,87 +138,94 @@ function buyLand() {
   displayOwnedFarmland();
 }
 
+// In js/farmland.js (Update as necessary to use getYield)
+
 export function displayOwnedFarmland() {
-    const farmlandEntries = document.querySelector('#farmland-entries');
-    farmlandEntries.innerHTML = ''; // Clear existing entries
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
-    const selectedUnit = getUnit(); // Get the current unit setting
-    const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Correct conversion factor
+  const farmlandEntries = document.querySelector('#farmland-entries');
+  farmlandEntries.innerHTML = ''; // Clear existing entries
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
+  const selectedUnit = getUnit(); // Get the current unit setting
+  const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Correct conversion factor
 
-    farmlands.forEach((farmland, index) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
-        const colorClass = getColorClass(aspectRating);
+  farmlands.forEach((farmland, index) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
+    const colorClass = getColorClass(aspectRating);
 
-        // Calculate total land value per acre
-        const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
+    // Calculate total land value per acre
+    const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
 
-        // Adjust for selected unit (hectares vs acres)
-        const landValuePerUnit = priceFactorPerAcre * conversionFactor;
+    // Adjust for selected unit (hectares vs acres)
+    const landValuePerUnit = priceFactorPerAcre * conversionFactor;
 
-        // Convert size for display based on current unit
-        const landSize = convertToCurrentUnit(farmland.acres);
+    // Convert size for display based on current unit
+    const landSize = convertToCurrentUnit(farmland.acres);
 
-        card.innerHTML = `
-          <div class="card-header" id="heading${index}">
-            <h2 class="mb-0">
-              <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
-                ${getFlagIcon(farmland.country)}
-                ${farmland.country}, ${farmland.region} - ${farmland.name}
-              </button>
-            </h2>
-          </div>
-          <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
-            <div class="card-body">
-              <table class="table table-bordered owned-farmland-table">
-                <thead>
-                  <tr>
-                    <th>Field Name</th>
-                    <th>Size</th>
-                    <th>Soil</th>
-                    <th>Altitude</th>
-                    <th>Aspect</th>
-                    <th>Land Value (per ${selectedUnit})</th>
-                    <th>Crop</th> <!-- New Crop Column -->
-                    <th>Planting Options</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>${farmland.name}</td>
-                    <td>${formatNumber(landSize)} ${selectedUnit}</td>
-                    <td>${farmland.soil}</td>
-                    <td>${farmland.altitude}</td>
-                    <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
-                    <td>€ ${formatNumber(landValuePerUnit)}</td>
-                    <td>${farmland.plantedResourceName || 'None'}</td> <!-- Display planted resource -->
-                    <td>
-                      <select class="resource-select">
-                        ${resourceOptions}
-                      </select>
-                    </td>
-                    <td>
-                      <button class="btn btn-warning plant-field-btn">Plant</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
-        farmlandEntries.appendChild(card);
+    // Calculate yield using the standalone function
+    const yieldValue = farmlandYield(farmland);
 
-        // Planting Logic
-        const plantButton = card.querySelector('.plant-field-btn');
-        plantButton.addEventListener('click', () => {
-            const resourceSelect = card.querySelector('.resource-select');
-            const selectedResource = resourceSelect.value;
-            handlePlantingTask(index, selectedResource, farmland.acres);
-        });
+    card.innerHTML = `
+      <div class="card-header" id="heading${index}">
+        <h2 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
+            ${getFlagIcon(farmland.country)}
+            ${farmland.country}, ${farmland.region} - ${farmland.name}
+          </button>
+        </h2>
+      </div>
+      <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
+        <div class="card-body">
+          <table class="table table-bordered owned-farmland-table">
+            <thead>
+              <tr>
+                <th>Field Name</th>
+                <th>Size</th>
+                <th>Soil</th>
+                <th>Altitude</th>
+                <th>Aspect</th>
+                <th>Land Value (per ${selectedUnit})</th>
+                <th>Crop</th> <!-- New Crop Column -->
+                <th>Yield</th>  <!-- New Yield Column -->
+                <th>Planting Options</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${farmland.name}</td>
+                <td>${formatNumber(landSize)} ${selectedUnit}</td>
+                <td>${farmland.soil}</td>
+                <td>${farmland.altitude}</td>
+                <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
+                <td>€ ${formatNumber(landValuePerUnit)}</td>
+                <td>${farmland.plantedResourceName || 'None'}</td> <!-- Display planted resource -->
+                <td>${formatNumber(yieldValue, 2)}</td> <!-- Display the Yield Value -->
+                <td>
+                  <select class="resource-select">
+                    ${resourceOptions}
+                  </select>
+                </td>
+                <td>
+                  <button class="btn btn-warning plant-field-btn">Plant</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+    farmlandEntries.appendChild(card);
+
+    // Planting Logic
+    const plantButton = card.querySelector('.plant-field-btn');
+    plantButton.addEventListener('click', () => {
+      const resourceSelect = card.querySelector('.resource-select');
+      const selectedResource = resourceSelect.value;
+      handlePlantingTask(index, selectedResource, farmland.acres);
     });
+  });
 }
 
 function handlePlantingTask(index, resourceName, totalAcres) {
