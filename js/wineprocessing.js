@@ -82,7 +82,8 @@ export function grapeCrushing(selectedResource) {
     // Persist changes
     saveInventory();
 
-    addConsoleMessage(`${formatNumber(mustProduced)} units of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must.`);
+    // Format the addConsoleMessage with the additional information
+    addConsoleMessage(`${formatNumber(mustProduced)} units of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must. ${formatNumber(remainingGrapes)} tons of <strong>${selectedResource}, ${resource.vintage},</strong> still remain in the warehouse.`);
 
     return actualIncrement; // Return the actual work completed (Return work for task process)
 }
