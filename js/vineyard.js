@@ -1,4 +1,4 @@
-import { getFlagIcon } from './utils.js';
+import { getFlagIcon, formatLandSizeWithUnit } from './utils.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { addConsoleMessage } from '/js/console.js';
 import { Task } from './loadPanel.js'; // Import the Task class used for tasks
@@ -127,6 +127,8 @@ export function handleHarvestTask(index) {
   }
 }
 
+
+
 export function harvestAcres(index) {
     const increment = 10; // Define the increment for harvesting
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -146,13 +148,16 @@ export function harvestAcres(index) {
             const acresHarvested = Math.min(increment, acresLeftToHarvest);
 
             // Calculate the total grapes harvested
-            // Direct calculation using farmlandYield if it includes per-acre yield
             const grapesHarvested = farmlandYield(field) * acresHarvested;
 
             // Add to the inventory using the inventory instance
             inventoryInstance.addResource(resourceName, grapesHarvested, state, gameYear, 'High');
 
-            addConsoleMessage(`Harvested ${grapesHarvested} tons of ${resourceName} from ${field.name} across ${acresHarvested} acres. Remaining: ${acresLeftToHarvest - acresHarvested} acres`);
+            // Format the land size with unit settings
+            const harvestedFormatted = formatLandSizeWithUnit(acresHarvested);
+            const remainingFormatted = formatLandSizeWithUnit(acresLeftToHarvest - acresHarvested);
+
+            addConsoleMessage(`Harvested ${grapesHarvested} tons of ${resourceName} from ${field.name} across ${harvestedFormatted}. Remaining: ${remainingFormatted}`);
 
             // Update the acres already harvested
             field.currentAcresHarvested = (field.currentAcresHarvested || 0) + acresHarvested;
