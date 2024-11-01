@@ -92,51 +92,54 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
     const wineCellarTableBody = document.getElementById('winecellar-table-body');
 
     if (tablesToShow.includes('warehouse-table-body') && warehouseTableBody) {
-      warehouseTableBody.innerHTML = '';
+        warehouseTableBody.innerHTML = '';
     }
     if (tablesToShow.includes('fermentation-table-body') && fermentationTableBody) {
-      fermentationTableBody.innerHTML = '';
+        fermentationTableBody.innerHTML = '';
     }
     if (tablesToShow.includes('winecellar-table-body') && wineCellarTableBody) {
-      wineCellarTableBody.innerHTML = '';
+        wineCellarTableBody.innerHTML = '';
     }
 
     inventory.items.forEach(item => {
-      const { resource, amount, state, quality, vintage } = item;
+        const { resource, amount, state, quality, vintage } = item;
 
-      let tableBodyId;
-      if (state === 'Grapes' && tablesToShow.includes('warehouse-table-body')) {
-        tableBodyId = 'warehouse-table-body';
-      } else if (state === 'Must' && tablesToShow.includes('fermentation-table-body')) {
-        tableBodyId = 'fermentation-table-body';
-      } else if (state === 'Bottle' && tablesToShow.includes('winecellar-table-body')) {
-        tableBodyId = 'winecellar-table-body';
-      } else {
-        return;
-      }
+        let tableBodyId;
+        let displayAmount = amount;
 
-      const inventoryTableBody = document.getElementById(tableBodyId);
-      if (inventoryTableBody) {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${resource.name}, ${vintage || 'Unknown'}</td>
-          <td>${amount}</td>
-          <td>${quality}</td>
-          <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
-          ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
-        `;
-        inventoryTableBody.appendChild(row);
-
-        // Add event listener to sell button if it exists
-        if (includeSellButton) {
-          const sellButton = row.querySelector('.sell-btn');
-          sellButton.addEventListener('click', () => {
-            sellWines(resource.name);
-          });
+        if (state === 'Grapes' && tablesToShow.includes('warehouse-table-body')) {
+            tableBodyId = 'warehouse-table-body';
+            displayAmount += ' t'; // Append 't' for tons to the display amount
+        } else if (state === 'Must' && tablesToShow.includes('fermentation-table-body')) {
+            tableBodyId = 'fermentation-table-body';
+        } else if (state === 'Bottle' && tablesToShow.includes('winecellar-table-body')) {
+            tableBodyId = 'winecellar-table-body';
+        } else {
+            return;
         }
-      }
+
+        const inventoryTableBody = document.getElementById(tableBodyId);
+        if (inventoryTableBody) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${resource.name}, ${vintage || 'Unknown'}</td>
+                <td>${displayAmount}</td>
+                <td>${quality}</td>
+                <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
+                ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
+            `;
+            inventoryTableBody.appendChild(row);
+
+            // Add event listener to sell button if it exists
+            if (includeSellButton) {
+                const sellButton = row.querySelector('.sell-btn');
+                sellButton.addEventListener('click', () => {
+                    sellWines(resource.name);
+                });
+            }
+        }
     });
-  }
+}
 
 // Inventory instance
 const inventoryInstance = new Inventory();
