@@ -10,8 +10,6 @@ export function showFarmlandOverlay(farmland) {
     details.innerHTML = `
       <div class="overlay-content">
         <h2 class="text-center mb-3">${farmland.name}</h2>
-        <!-- Make sure this id is correctly used after creating the HTML -->
-        <span class="close-btn" id="closeFarmlandOverlay">&times;</span>
         <table class="table table-bordered table-hover">
           <thead class="thead-dark">
             <tr>
@@ -37,15 +35,7 @@ export function showFarmlandOverlay(farmland) {
     // Ensure overlay is displayed
     overlay.style.display = 'block';
 
-    // Attach event listener to the close button
-    const closeBtn = document.getElementById('closeFarmlandOverlay');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            overlay.style.display = 'none';
-        });
-    } else {
-        console.error('Close button not found');
-    }
+    
   }
 }
 
