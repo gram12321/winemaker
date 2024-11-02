@@ -7,7 +7,6 @@ export function showFarmlandOverlay(farmland) {
 
   details.innerHTML = `
     <div class="overlay-content">
-      <span class="close-btn" id="closeOverlay">&times;</span>
       <h2 class="text-center mb-3">${farmland.name}</h2>
       <table class="table table-bordered table-hover">
         <thead class="thead-dark">
@@ -33,16 +32,19 @@ export function showFarmlandOverlay(farmland) {
 
   overlay.style.display = 'block'; // Show the overlay
 
-  // Close overlay on clicking the close button
-  document.getElementById('closeOverlay').onclick = function() {
+  // Add event listener to close the overlay on clicking the close button
+  document.getElementById('closeOverlay').addEventListener('click', function() {
     overlay.style.display = 'none';
-  };
+  });
 }
 
-// Event listener for closing overlay by clicking outside the content
-window.addEventListener('click', (event) => {
-  const overlay = document.getElementById('farmlandOverlay');
-  if (event.target === overlay) {
-    overlay.style.display = 'none';
-  }
+// Ensure this is executed after page load
+document.addEventListener('DOMContentLoaded', () => {
+  // Add event listener for outside click
+  window.addEventListener('click', (event) => {
+    const overlay = document.getElementById('farmlandOverlay');
+    if (event.target === overlay) {
+      overlay.style.display = 'none';
+    }
+  });
 });
