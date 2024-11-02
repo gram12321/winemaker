@@ -1,20 +1,20 @@
-import { createFarmland, getLastId, getRandomName, getRandomAcres } from '../farmland.js'; // Import getRandomAcres
+import { createFarmland, getLastId, getRandomAcres } from '../farmland.js';
 import { addConsoleMessage } from '/js/console.js';
 import { displayOwnedFarmland } from '/js/farmland.js';
-import { getFlagIcon, getColorClass } from '../utils.js';
-import { regionAspectRatings, calculateAndNormalizePriceFactor  } from '../names.js';
+import { getFlagIcon, getColorClass, formatNumber, getFlagIconHTML, formatLandSizeWithUnit } from '../utils.js';
+import { regionAspectRatings, calculateAndNormalizePriceFactor } from '../names.js';
 import { getUnit, convertToCurrentUnit } from '../settings.js';
-import { formatNumber, getFlagIconHTML, formatLandSizeWithUnit  } from '../utils.js';
 import { deductMoney } from '../endDay.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const buyLandBtn = document.getElementById('buy-land-btn');
     const overlay = document.getElementById('buyLandOverlay');
-    const closeOverlayBtn = document.getElementById('closeOverlay');
+    const closeOverlayBtn = document.getElementById('closeBuyLandOverlay'); // Ensure this matches your HTML ID
     const farmlandTableContainer = document.getElementById('farmland-table-container');
 
-    buyLandBtn.addEventListener('click', displayFarmlandOptions);
-    closeOverlayBtn.addEventListener('click', closeOverlay);
+    if (buyLandBtn) buyLandBtn.addEventListener('click', displayFarmlandOptions);
+    if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlay);
+
     window.addEventListener('click', (event) => {
         if (event.target === overlay) {
             closeOverlay();
@@ -39,8 +39,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const selectedUnit = getUnit(); // Get the current land unit setting
-        const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1; // Conversion factor
+        const selectedUnit = getUnit();
+        const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1;
         farmlandTableContainer.innerHTML = '';
         let tableHTML = `
             <table class="table">
@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const landSize = parseFloat(convertToCurrentUnit(farmland.acres));
             const totalPrice = landSize * landValuePerUnit;
 
-            // Storing the totalPrice in the farmland object for easy access
             farmland.totalPrice = totalPrice;
 
             tableHTML += `
@@ -102,16 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'block';
     }
 
-    
-
-
     function buySelectedFarmland(farmland) {
         const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-        const totalPrice = farmland.totalPrice; // Ensure this is correctly set
-        const currentMoney = parseFloat(localStorage.getItem('money') || '0'); // Get current money
+        const totalPrice = farmland.totalPrice;
+        const currentMoney = parseFloat(localStorage.getItem('money') || '0');
         if (currentMoney < totalPrice) {
             addConsoleMessage(`Insufficient funds to purchase: <strong>${farmland.name}</strong> in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country}. Total cost is <strong>${formatNumber(totalPrice)}€</strong>, but you only have <strong>${formatNumber(currentMoney)}€</strong>.`);
-            return; // Exit the function if there's not enough money
+            return;
         }
         deductMoney(totalPrice);
         ownedFarmlands.push(farmland);

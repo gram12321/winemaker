@@ -240,31 +240,32 @@ body {
 /* Overlay styles */
 .overlay {
   position: fixed;
-  display: none;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Overlay black with opacity */
-  z-index: 2000; /* High z-index to be above other elements */
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 2000;
+  display: flex; /* Use flex to ensure child can be centered easily */
 }
 
-/* Overlay content styles */
 .overlay-content {
-  position: relative;
-  margin: 5% auto;
+  position: absolute; /* Allow using top, left, transform for centering */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-block; /* Natural width based on child content */
   padding: 30px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
-
 /* Table styles within overlays */
 .overlay .table {
+  
   margin: 0 auto; /* Center align the table */
   width: auto; /* Allow natural width expansion */
+  min-width: 400px; /* Minimum width */
   color: #333;
   text-align: center;
   background-color: #f9f9f9;
