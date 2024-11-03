@@ -152,6 +152,11 @@ export function displayOwnedFarmland() {
     const landSize = convertToCurrentUnit(farmland.acres);
     const row = document.createElement('tr');
 
+    // Check if there's an active task on this field
+    const isTaskActiveOnField = activeTasks.some(task => task.fieldId === index);
+    const canPlant = !isTaskActiveOnField && !farmland.plantedResourceName;
+    const canUproot = !isTaskActiveOnField && farmland.plantedResourceName;
+
     row.innerHTML = `
       <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
       <td>${farmland.name}</td>
@@ -167,8 +172,8 @@ export function displayOwnedFarmland() {
         </select>
       </td>
       <td>
-        <button class="btn btn-warning plant-field-btn mt-2">Plant</button>
-        <button class="btn btn-danger uproot-field-btn mt-2">Uproot</button>
+        <button class="btn btn-warning plant-field-btn mt-2 ${canPlant ? '' : 'disabled-btn'}" ${canPlant ? '' : 'disabled'}>Plant</button>
+        <button class="btn btn-danger uproot-field-btn mt-2 ${canUproot ? '' : 'disabled-btn'}" ${canUproot ? '' : 'disabled'}>Uproot</button>
       </td>
     `;
 
@@ -176,7 +181,6 @@ export function displayOwnedFarmland() {
 
     // Add event listener to open overlay on row click
     row.addEventListener('click', (event) => {
-      // Prevent triggering overlay when clicking the dropdown or button
       const isDropdownOrButton = event.target.classList.contains('resource-select') || event.target.classList.contains('plant-field-btn') || event.target.classList.contains('uproot-field-btn');
       if (!isDropdownOrButton) {
         showFarmlandOverlay(farmland);
@@ -186,19 +190,23 @@ export function displayOwnedFarmland() {
     // Planting Logic
     const plantButton = row.querySelector('.plant-field-btn');
     plantButton.addEventListener('click', (event) => {
-      event.stopPropagation(); // Prevent row click event
-      const resourceSelect = row.querySelector('.resource-select');
-      const selectedResource = resourceSelect.value;
-      handlePlantingTask(index, selectedResource, farmland.acres);
-      displayOwnedFarmland();
+      if (!plantButton.disabled) {
+        event.stopPropagation(); // Prevent row click event
+        const resourceSelect = row.querySelector('.resource-select');
+        const selectedResource = resourceSelect.value;
+        handlePlantingTask(index, selectedResource, farmland.acres);
+        displayOwnedFarmland();
+      }
     });
 
     // Uprooting Logic
     const uprootButton = row.querySelector('.uproot-field-btn');
     uprootButton.addEventListener('click', (event) => {
-      event.stopPropagation(); // Prevent row click event
-      handleUprootTask(index);
-      displayOwnedFarmland();
+      if (!uprootButton.disabled) {
+        event.stopPropagation(); // Prevent row click event
+        handleUprootTask(index);
+        displayOwnedFarmland();
+      }
     });
   });
 }
