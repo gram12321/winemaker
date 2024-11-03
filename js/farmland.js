@@ -190,6 +190,7 @@ export function displayOwnedFarmland() {
       const resourceSelect = row.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
       handlePlantingTask(index, selectedResource, farmland.acres);
+      displayOwnedFarmland();
     });
 
     // Uprooting Logic
@@ -197,6 +198,7 @@ export function displayOwnedFarmland() {
     uprootButton.addEventListener('click', (event) => {
       event.stopPropagation(); // Prevent row click event
       handleUprootTask(index);
+      displayOwnedFarmland();
     });
   });
 }
@@ -283,41 +285,52 @@ function handleUprootTask(index) {
   const field = farmlands[index];
   const fieldName = field.name || `Field ${index}`;
 
-  const isTaskAlreadyActive = activeTasks.some(task => task.taskName === "Uprooting" && task.fieldId === index);
+  // Check if another task is active on the same field
+  const isTaskAlreadyActiveOnField = activeTasks.some(task => task.fieldId === index);
 
-  if (!isTaskAlreadyActive) {
-    const iconPath = '/assets/icon/icon_uprooting.webp';  // Use an appropriate icon path
-    const task = new Task(
-      "Uprooting",
-      () => uproot(index),
-      undefined,
-      field.acres,
-      field.plantedResourceName,
-      '',
-      localStorage.getItem('year') || '',
-      '',
-      iconPath,
-      fieldName
-    );
-
-    Object.assign(task, { fieldId: index, fieldName });
-
-    saveTask({
-      taskName: task.taskName,
-      fieldId: index,
-      fieldName: task.fieldName,
-      resourceName: task.resourceName,
-      taskId: task.taskId,
-      workTotal: field.acres,
-      vintage: task.vintage,
-      iconPath: task.iconPath
-    });
-
-    activeTasks.push(task);
-    addConsoleMessage(`Uprooting task started for <strong>${fieldName}</strong>.`);
-  } else {
-    addConsoleMessage(`An Uprooting task is already active for <strong>${fieldName}</strong>.`);
+  if (isTaskAlreadyActiveOnField) {
+    addConsoleMessage(`Another task is already active for <strong>${fieldName}</strong>. Uprooting cannot be done until all tasks are completed.`);
+    return;
   }
+
+  // Deny uprooting under specific conditions
+  const isFieldUnplanted = !field.plantedResourceName;
+  const isBeingPlanted = field.status === "Currently being planted";
+
+  if (isFieldUnplanted || isBeingPlanted || field.vineAge == null) {
+    addConsoleMessage(`Uprooting is not allowed for <strong>${fieldName}</strong> as it is either unplanted, not fully planted, or currently being planted.`);
+    return;
+  }
+
+  const iconPath = '/assets/icon/icon_uprooting.webp';  // Use an appropriate icon path
+  const task = new Task(
+    "Uprooting",
+    () => uproot(index),
+    undefined,
+    field.acres,
+    field.plantedResourceName,
+    '',
+    localStorage.getItem('year') || '',
+    '',
+    iconPath,
+    fieldName
+  );
+
+  Object.assign(task, { fieldId: index, fieldName });
+
+  saveTask({
+    taskName: task.taskName,
+    fieldId: index,
+    fieldName: task.fieldName,
+    resourceName: task.resourceName,
+    taskId: task.taskId,
+    workTotal: field.acres,
+    vintage: task.vintage,
+    iconPath: task.iconPath
+  });
+
+  activeTasks.push(task);
+  addConsoleMessage(`Uprooting task started for <strong>${fieldName}</strong>.`);
 }
 
 // Ensure that uproot is exported
@@ -337,8 +350,9 @@ export function uproot(index) {
     field.currentAcresUprooted = (field.currentAcresUprooted || 0) + acresToUproot;
 
     if (field.currentAcresUprooted >= field.acres) {
-        field.plantedResourceName = null; // Remove the crop
+        field.plantedResourceName = null; // Reset the crop
         field.vineAge = null; // Reset vine age
+        field.currentAcresPlanted = 0; // Reset planting progress
         addConsoleMessage(`Field <strong>${field.name}</strong> fully uprooted.`);
     } else {
         addConsoleMessage(`Uprooted ${acresToUproot} acres from field <strong>${field.name}</strong>. Total uprooted: <strong>${field.currentAcresUprooted} out of ${field.acres}</strong> acres.`);
