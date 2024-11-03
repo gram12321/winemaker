@@ -21,12 +21,27 @@
       <!-- Buy Land Button -->
       <button id="buy-land-btn" class="btn btn-success mt-3">Buy Land</button>
 
-      <!-- Collapsible Farmland List -->
-      <div class="accordion mt-4" id="farmlandAccordion">
-        <div id="farmland-entries">
+      <!-- Farmland Table -->
+      <table class="table mt-4">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Farmland</th>
+            <th scope="col">Field Name</th>
+            <th scope="col">Country/Region</th>
+            <th scope="col">Size</th>
+            <th scope="col">Soil</th>
+            <th scope="col">Altitude</th>
+            <th scope="col">Aspect</th>
+            <th scope="col">Value</th>
+            <th scope="col">Crop</th>
+            <th scope="col">Planting Options</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody id="farmland-entries">
           <!-- Dynamic farmland entries will be populated here -->
-        </div>
-      </div>
+        </tbody>
+      </table>
     </div>
 
     <!-- Buy Land Overlay -->

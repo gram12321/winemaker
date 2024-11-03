@@ -4,8 +4,8 @@ import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleName
 import { allResources, inventoryInstance, getResourceByName  } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
-import { getFlagIcon, getColorClass } from './utils.js';
-import { formatNumber } from './utils.js';
+import { getFlagIcon, getColorClass, formatLandSizeWithUnit, formatNumber } from './utils.js';
+
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 
@@ -141,6 +141,7 @@ function buyLand() {
 
 
 
+
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   farmlandEntries.innerHTML = ''; // Clear existing entries
@@ -148,82 +149,51 @@ export function displayOwnedFarmland() {
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
   const selectedUnit = getUnit(); // Get the current unit setting
   const conversionFactor = selectedUnit === 'hectares' ? 2.47105 : 1;
-
   farmlands.forEach((farmland, index) => {
-    const card = document.createElement('div');
-    card.className = 'card';
-
     const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
     const colorClass = getColorClass(aspectRating);
-
     const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
     const landValuePerUnit = priceFactorPerAcre * conversionFactor;
     const landSize = convertToCurrentUnit(farmland.acres);
-
-    card.innerHTML = `
-      <div class="card-header" id="heading${index}">
-        <h2 class="mb-0">
-          <button class="btn btn-link" data-toggle="collapse" data-target="#collapse${index}" aria-expanded="true" aria-controls="collapse${index}">
-            ${getFlagIcon(farmland.country)}
-            ${farmland.country}, ${farmland.region} - <span class="farmland-name clickable" data-index="${index}">${farmland.name}</span>
-          </button>
-        </h2>
-      </div>
-      <div id="collapse${index}" class="collapse" aria-labelledby="heading${index}" data-parent="#farmlandAccordion">
-        <div class="card-body">
-          <table class="table table-bordered owned-farmland-table">
-            <thead>
-              <tr>
-                <th>Field Name</th>
-                <th>Size (${selectedUnit})</th>
-                <th>Soil</th>
-                <th>Altitude</th>
-                <th>Aspect</th>
-                <th>Land Value</th>
-                <th>Crop</th>
-                <th>Planting Options</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="farmland-name clickable" data-index="${index}">${farmland.name}</span></td>
-                <td>${formatNumber(landSize)}</td>
-                <td>${farmland.soil}</td>
-                <td>${farmland.altitude}</td>
-                <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
-                <td>€ ${formatNumber(landValuePerUnit)}</td>
-                <td>${farmland.plantedResourceName || 'None'}</td>
-                <td>
-                  <select class="resource-select">
-                    ${resourceOptions}
-                  </select>
-                </td>
-                <td>
-                  <button class="btn btn-warning plant-field-btn">Plant</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
+      <td>${farmland.name}</td>
+      <td>
+        ${getFlagIcon(farmland.country)}
+        ${farmland.country}, ${farmland.region}
+      </td>
+      <td>${formatNumber(landSize)} ${selectedUnit}</td>
+      <td>${farmland.soil}</td>
+      <td>${farmland.altitude}</td>
+      <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
+      <td>€ ${formatNumber(landValuePerUnit)}</td>
+      <td>${farmland.plantedResourceName || 'None'}</td>
+      <td class="planting-options-column">
+        <select class="form-control resource-select">
+          ${resourceOptions}
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-warning plant-field-btn mt-2">Plant</button>
+      </td>
     `;
-    farmlandEntries.appendChild(card);
-
+    farmlandEntries.appendChild(row);
+    // Add event listener to open overlay on row click
+    row.addEventListener('click', (event) => {
+      // Prevent triggering overlay when clicking the dropdown or button
+      const isDropdownOrButton = event.target.classList.contains('resource-select') || event.target.classList.contains('plant-field-btn');
+      if (!isDropdownOrButton) {
+        showFarmlandOverlay(farmland);
+      }
+    });
     // Planting Logic
-    const plantButton = card.querySelector('.plant-field-btn');
-    plantButton.addEventListener('click', () => {
-      const resourceSelect = card.querySelector('.resource-select');
+    const plantButton = row.querySelector('.plant-field-btn');
+    plantButton.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevent row click event
+      const resourceSelect = row.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
       handlePlantingTask(index, selectedResource, farmland.acres);
-    });
-  });
-
-  // Add the event listener for the farmland name clicks
-  farmlandEntries.querySelectorAll('.farmland-name').forEach(nameEl => {
-    nameEl.addEventListener('click', (event) => {
-      const index = event.target.getAttribute('data-index');
-      showFarmlandOverlay(farmlands[index]); // Show overlay for clicked farmland
     });
   });
 }
