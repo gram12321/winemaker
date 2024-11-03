@@ -95,15 +95,36 @@ function calculateTotalStaffWages() {
     const staffMembers = loadStaff();
     return staffMembers.reduce((total, staff) => total + staff.wage, 0);
 }
-// Setup the staff wages as a recurring transaction
-// Setup or update staff wages as a recurring transaction
+
+function updateWagesAndRecurringTransaction() {
+    const totalWages = calculateTotalStaffWages();
+    const frequencyInWeeks = 1; // Weekly frequency
+    const description = 'Weekly Staff Wages';
+
+    addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
+    console.log(`Updated recurring transaction for staff wages: €${totalWages} every ${frequencyInWeeks} week(s).`);
+}
+
+// Initial wage setup. Use updateWagesAndRecurringTransaction to update wage and recurring transaction
+
 function setupStaffWagesRecurringTransaction() {
     const totalWages = calculateTotalStaffWages();
-    const frequencyInWeeks = 1; // Every week
+    const frequencyInWeeks = 1;
     const description = 'Weekly Staff Wages';
-    // Use the addRecurringTransaction function to handle the transaction
-    addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
-    console.log(`Setup or updated recurring transaction for staff wages: €${totalWages} every ${frequencyInWeeks} week(s).`);
+
+    // Load existing recurring transactions
+    let recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
+
+    // Check if the transaction already exists and is up-to-date
+    const existingTransaction = recurringTransactions.find(transaction =>
+        transaction.type === 'Expense' && transaction.description === description
+    );
+
+    if (!existingTransaction || existingTransaction.amount !== -totalWages) {
+        // Add or update the transaction only if it doesn't exist or is outdated
+        addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
+        console.log(`Setup or updated recurring transaction for staff wages: €${totalWages} every ${frequencyInWeeks} week(s).`);
+    }
 }
 // Call this function during initialization of the game or after adding staff
 setupStaffWagesRecurringTransaction();

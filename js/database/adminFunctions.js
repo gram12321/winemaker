@@ -213,6 +213,7 @@ export function loadTasks() {
     Task.latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
     activeTasks.length = 0; // Clear existing active tasks
 
+
     tasks.forEach(taskInfo => {
         const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
         const field = farmlands[taskInfo.fieldId];
@@ -341,7 +342,6 @@ export function loadStaff() {
                 staff.workforce = item.workforce;
                 return staff;
             });
-            console.log("Staff data loaded successfully.");
         } catch (error) {
             console.error("Failed to parse staff data from localStorage.", error);
         }
