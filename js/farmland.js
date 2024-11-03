@@ -141,14 +141,12 @@ function buyLand() {
 
 
 
-
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   farmlandEntries.innerHTML = ''; // Clear existing entries
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
   const selectedUnit = getUnit(); // Get the current unit setting
-  const conversionFactor = selectedUnit === 'hectares' ? 2.47105 : 1;
 
   farmlands.forEach((farmland, index) => {
     const landSize = convertToCurrentUnit(farmland.acres);
@@ -170,6 +168,7 @@ export function displayOwnedFarmland() {
       </td>
       <td>
         <button class="btn btn-warning plant-field-btn mt-2">Plant</button>
+        <button class="btn btn-danger uproot-field-btn mt-2">Uproot</button>
       </td>
     `;
 
@@ -178,7 +177,7 @@ export function displayOwnedFarmland() {
     // Add event listener to open overlay on row click
     row.addEventListener('click', (event) => {
       // Prevent triggering overlay when clicking the dropdown or button
-      const isDropdownOrButton = event.target.classList.contains('resource-select') || event.target.classList.contains('plant-field-btn');
+      const isDropdownOrButton = event.target.classList.contains('resource-select') || event.target.classList.contains('plant-field-btn') || event.target.classList.contains('uproot-field-btn');
       if (!isDropdownOrButton) {
         showFarmlandOverlay(farmland);
       }
@@ -191,6 +190,13 @@ export function displayOwnedFarmland() {
       const resourceSelect = row.querySelector('.resource-select');
       const selectedResource = resourceSelect.value;
       handlePlantingTask(index, selectedResource, farmland.acres);
+    });
+
+    // Uprooting Logic
+    const uprootButton = row.querySelector('.uproot-field-btn');
+    uprootButton.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevent row click event
+      handleUprootTask(index);
     });
   });
 }
@@ -270,6 +276,77 @@ export function plantAcres(index, resourceName) {
 
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     return acresToPlant;
+}
+
+function handleUprootTask(index) {
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const field = farmlands[index];
+  const fieldName = field.name || `Field ${index}`;
+
+  const isTaskAlreadyActive = activeTasks.some(task => task.taskName === "Uprooting" && task.fieldId === index);
+
+  if (!isTaskAlreadyActive) {
+    const iconPath = '/assets/icon/icon_uprooting.webp';  // Use an appropriate icon path
+    const task = new Task(
+      "Uprooting",
+      () => uproot(index),
+      undefined,
+      field.acres,
+      field.plantedResourceName,
+      '',
+      localStorage.getItem('year') || '',
+      '',
+      iconPath,
+      fieldName
+    );
+
+    Object.assign(task, { fieldId: index, fieldName });
+
+    saveTask({
+      taskName: task.taskName,
+      fieldId: index,
+      fieldName: task.fieldName,
+      resourceName: task.resourceName,
+      taskId: task.taskId,
+      workTotal: field.acres,
+      vintage: task.vintage,
+      iconPath: task.iconPath
+    });
+
+    activeTasks.push(task);
+    addConsoleMessage(`Uprooting task started for <strong>${fieldName}</strong>.`);
+  } else {
+    addConsoleMessage(`An Uprooting task is already active for <strong>${fieldName}</strong>.`);
+  }
+}
+
+// Ensure that uproot is exported
+export function uproot(index) {
+    const increment = 10;  // Work increment for uprooting
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const field = farmlands[index];
+
+    const workRemaining = field.acres - (field.currentAcresUprooted || 0);
+    const acresToUproot = Math.min(increment, workRemaining);
+
+    if (acresToUproot <= 0) {
+        addConsoleMessage(`Field <strong>${field.name}</strong> is already fully uprooted.`);
+        return 0;
+    }
+
+    field.currentAcresUprooted = (field.currentAcresUprooted || 0) + acresToUproot;
+
+    if (field.currentAcresUprooted >= field.acres) {
+        field.plantedResourceName = null; // Remove the crop
+        field.vineAge = null; // Reset vine age
+        addConsoleMessage(`Field <strong>${field.name}</strong> fully uprooted.`);
+    } else {
+        addConsoleMessage(`Uprooted ${acresToUproot} acres from field <strong>${field.name}</strong>. Total uprooted: <strong>${field.currentAcresUprooted} out of ${field.acres}</strong> acres.`);
+    }
+
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    saveInventory();
+    return acresToUproot;
 }
 
 export { buyLand, Farmland, handlePlantingTask };

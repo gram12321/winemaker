@@ -2,7 +2,7 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { inventoryInstance } from '../resource.js';
 import { Task } from '../loadPanel.js'
 import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
-import { plantAcres } from '/js/farmland.js';
+import { plantAcres, uproot } from '/js/farmland.js';
 import { harvestAcres} from '/js/vineyard.js';
 import { addConsoleMessage } from '../console.js';
 
@@ -185,7 +185,7 @@ export function loadTasks() {
         let task;
         let resource;
 
-        // General execution logic determination based on task type
+        // Determine the function to execute based on task type
         if (taskInfo.taskName === "Crushing Grapes") {
             resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
             if (resource) {
@@ -196,10 +196,20 @@ export function loadTasks() {
             if (resource) {
                 executeTaskFunction = () => fermentMust(taskInfo.resourceName);
             }
-        } else if (field && (taskInfo.taskName === "Planting" || taskInfo.taskName === "Harvesting")) {
-            executeTaskFunction = taskInfo.taskName === "Planting"
-                ? () => plantAcres(taskInfo.fieldId, taskInfo.resourceName)
-                : () => harvestAcres(taskInfo.fieldId);
+        } else if (field) {
+            switch (taskInfo.taskName) {
+                case "Planting":
+                    executeTaskFunction = () => plantAcres(taskInfo.fieldId, taskInfo.resourceName);
+                    break;
+                case "Harvesting":
+                    executeTaskFunction = () => harvestAcres(taskInfo.fieldId);
+                    break;
+                case "Uprooting":
+                    executeTaskFunction = () => uproot(taskInfo.fieldId);
+                    break;
+                default:
+                    console.warn(`Unknown task name: ${taskInfo.taskName}`);
+            }
         }
 
         if (executeTaskFunction) {
@@ -232,6 +242,8 @@ export function loadTasks() {
                 task.workProgress = field.currentAcresPlanted || 0;
             } else if (taskInfo.taskName === "Harvesting") {
                 task.workProgress = field.currentAcresHarvested || 0;
+            } else if (taskInfo.taskName === "Uprooting") {
+                task.workProgress = field.currentAcresUprooted || 0;
             }
 
             task.updateProgressBar();

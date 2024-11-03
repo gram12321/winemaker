@@ -113,18 +113,18 @@ export class Task {
 }
 
 export function executeTaskFunction(task) {
-    const increment = task.taskFunction(); // Function should return progress amount
+    const increment = task.taskFunction(); // Function should return the amount of incremental work done.
     if (increment) {
         task.workProgress += increment; 
-        task.updateProgressBar();
+        task.updateProgressBar(); // Update the visual progress bar with the new progress.
     }
 
     if (task.workProgress >= task.workTotal) {
-        task.removeTaskBox();
+        task.removeTaskBox(); // Remove the task box from the UI when the task is completed.
         console.log(`Task completed: ${task.taskName}, Removing task with ID: ${task.taskId}`);
-        removeTask(task.taskId);
+        removeTask(task.taskId); // Remove the task from the active tasks list.
 
-        // Add console message with task details
+        // Add a console message with task details based on task type.
         switch (task.taskName) {
             case "Planting":
                 addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
@@ -135,9 +135,13 @@ export function executeTaskFunction(task) {
             case "Harvesting":
                 addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
                 break;
+            case "Uprooting":
+                addConsoleMessage(`Uprooting task completed for field <strong>${task.fieldName || 'Unknown'}</strong>.`);
+                break;
             default:
                 console.warn(`No console message for task name: ${task.taskName}`);
         }
     }
 }
+
 export { initializePanel };
