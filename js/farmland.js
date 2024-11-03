@@ -149,13 +149,11 @@ export function displayOwnedFarmland() {
   const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
   const selectedUnit = getUnit(); // Get the current unit setting
   const conversionFactor = selectedUnit === 'hectares' ? 2.47105 : 1;
+
   farmlands.forEach((farmland, index) => {
-    const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
-    const colorClass = getColorClass(aspectRating);
-    const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
-    const landValuePerUnit = priceFactorPerAcre * conversionFactor;
     const landSize = convertToCurrentUnit(farmland.acres);
     const row = document.createElement('tr');
+
     row.innerHTML = `
       <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
       <td>${farmland.name}</td>
@@ -164,10 +162,6 @@ export function displayOwnedFarmland() {
         ${farmland.country}, ${farmland.region}
       </td>
       <td>${formatNumber(landSize)} ${selectedUnit}</td>
-      <td>${farmland.soil}</td>
-      <td>${farmland.altitude}</td>
-      <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
-      <td>€ ${formatNumber(landValuePerUnit)}</td>
       <td>${farmland.plantedResourceName || 'None'}</td>
       <td class="planting-options-column">
         <select class="form-control resource-select">
@@ -178,7 +172,9 @@ export function displayOwnedFarmland() {
         <button class="btn btn-warning plant-field-btn mt-2">Plant</button>
       </td>
     `;
+
     farmlandEntries.appendChild(row);
+
     // Add event listener to open overlay on row click
     row.addEventListener('click', (event) => {
       // Prevent triggering overlay when clicking the dropdown or button
@@ -187,6 +183,7 @@ export function displayOwnedFarmland() {
         showFarmlandOverlay(farmland);
       }
     });
+
     // Planting Logic
     const plantButton = row.querySelector('.plant-field-btn');
     plantButton.addEventListener('click', (event) => {
