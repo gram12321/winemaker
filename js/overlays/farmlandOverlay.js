@@ -1,5 +1,5 @@
 // Import necessary utility functions and classes
-import { formatNumber, getColorClass } from '../utils.js';
+import { formatNumber, getColorClass, getFlagIcon } from '../utils.js'; // Make sure to include getFlagIcon
 import { regionAspectRatings } from '/js/names.js';
 import { Farmland } from '/js/farmland.js';
 
@@ -27,6 +27,7 @@ export function showFarmlandOverlay(farmlandData) {
     const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
     const colorClass = getColorClass(aspectRating);
     const landValue = farmland.calculateLandvalue();
+    const flagIcon = getFlagIcon(farmland.country); // Get the flag icon HTML
 
     details.innerHTML = `
       <div class="overlay-content">
@@ -39,7 +40,10 @@ export function showFarmlandOverlay(farmlandData) {
             </tr>
           </thead>
           <tbody>
-            <tr><td>Country</td><td>${farmland.country}</td></tr>
+            <tr>
+              <td>Country</td>
+              <td>${flagIcon} ${farmland.country}</td> <!-- Include the flag icon here -->
+            </tr>
             <tr><td>Region</td><td>${farmland.region}</td></tr>
             <tr><td>Acres</td><td>${farmland.acres}</td></tr>
             <tr><td>Status</td><td>${farmland.status}</td></tr>
@@ -61,7 +65,6 @@ export function showFarmlandOverlay(farmlandData) {
       </div>
     `;
 
-    // Ensure overlay is displayed
     overlay.style.display = 'block';
   }
 }
