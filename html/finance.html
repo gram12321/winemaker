@@ -1,0 +1,59 @@
+<!-- finance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Page - Finance Management</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+</head>
+<body>
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+      <!-- Sidebar content dynamically loaded here -->
+    </div>
+    <!-- Main Content -->
+    <div class="container text-center flex-grow-1" id="page-content-wrapper">
+      <h1>Finance Management</h1>
+      <!-- Insert Finance Related Content Here -->
+    </div>
+
+    <!-- Panel -->
+    <div id="panel-wrapper">
+      <!-- Panel content dynamically loaded here -->
+    </div>
+
+    <!-- Console -->
+    <div id="console-bar">
+      <!-- Console content dynamically loaded here -->
+    </div>
+  </div>
+
+  <!-- JavaScript libraries -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Module scripts for functionality -->
+  <script type="module" src="/js/loadPanel.js"></script>
+  <script type="module" src="/js/database/loadSidebar.js"></script>
+  <script type="module" src="/js/settings.js"></script>
+  <script type="module" src="/js/console.js"></script>
+
+  <!-- Custom JavaScript -->
+  <script type="module">
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { initializePanel } from '/js/loadPanel.js';
+    import { initializeConsole } from '/js/console.js';
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initializePanel();
+      initializeSidebar();
+      initializeConsole();
+    });
+  </script>
+</body>
+</html>
