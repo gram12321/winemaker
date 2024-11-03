@@ -128,16 +128,7 @@ function getRandomAspect() {
   return getRandomItem(aspects);
 }
 
-function buyLand() {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const newId = getLastId(farmlands) + 1;
-  const newName = getRandomName();
-  const newFarmland = createFarmland(newId, newName, 100); // Removed hard-coded country and region
-  farmlands.push(newFarmland);
-  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-  addConsoleMessage(`Purchased new farmland: "<strong>${newFarmland.name}</strong>" in <strong>${newFarmland.country}, ${newFarmland.region}</strong>, with total <strong>${newFarmland.acres} </strong>Acres`);
-  displayOwnedFarmland();
-}
+
 
 
 
@@ -371,4 +362,4 @@ export function uproot(index) {
     return acresToUproot;
 }
 
-export { buyLand, Farmland, handlePlantingTask };
+export { Farmland, handlePlantingTask };
