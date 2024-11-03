@@ -5,6 +5,7 @@ import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
 import { plantAcres, uproot } from '/js/farmland.js';
 import { harvestAcres} from '/js/vineyard.js';
 import { Staff } from '/js/staff.js'; // Adjust the import path if necessary
+import { addTransaction } from '/js/finance.js'; // Adjust the import path if necessary
 
 
 async function clearFirestore() {
@@ -34,10 +35,12 @@ async function clearLocalStorage() {
   localStorage.removeItem('consoleMessages');
   localStorage.removeItem('tasks');
   localStorage.removeItem('latestTaskId');
-  localStorage.removeItem('staffData'); // Clear staff data
+  localStorage.removeItem('staffData');
+  localStorage.removeItem('transactions'); // Clear transactions data
   console.log("Local storage cleared.");
   Task.latestTaskId = 0; // Reset in memory
 }
+
 
 async function storeCompanyName() {
   const companyNameInput = document.getElementById('company-name');
@@ -51,9 +54,14 @@ async function storeCompanyName() {
       } else {
         localStorage.setItem('companyName', companyName);
         localStorage.setItem('money', 10000000); // Initialize money with 10000000
+
+        // Set initial date values before logging the transaction
         localStorage.setItem('week', 1); // Initialize day
         localStorage.setItem('season', 'Spring'); // Initialize season
         localStorage.setItem('year', 2023); // Initialize year
+
+        // Log the income transaction after setting the date
+        addTransaction('Income', 'Initial Company Setup', 10000000);
 
         // Create two staff members with the same nationality
         const staff1 = new Staff();
@@ -99,8 +107,9 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('year', data.year);
     localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
     localStorage.setItem('playerInventory', data.playerInventory || '[]');
-    localStorage.setItem('staffData', data.staffData || '[]'); // Restore staff data
+    localStorage.setItem('staffData', data.staffData || '[]');
     localStorage.setItem('tasks', JSON.stringify(data.tasks || []));
+    localStorage.setItem('transactions', JSON.stringify(data.transactions || [])); // Load transactions
     Task.latestTaskId = data.latestTaskId || 0;
     localStorage.setItem('latestTaskId', Task.latestTaskId.toString());
   }
@@ -114,8 +123,9 @@ async function saveCompanyInfo() {
   const year = localStorage.getItem('year');
   const ownedFarmlands = localStorage.getItem('ownedFarmlands');
   const playerInventory = localStorage.getItem('playerInventory');
-  const staffData = localStorage.getItem('staffData'); // Retrieve staff data
+  const staffData = localStorage.getItem('staffData');
   const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  const transactions = JSON.parse(localStorage.getItem('transactions')) || []; // Retrieve transactions
 
   if (!companyName) {
     console.error("No company name found to save.");
@@ -132,8 +142,9 @@ async function saveCompanyInfo() {
       year,
       ownedFarmlands,
       playerInventory,
-      staffData, // Save staff data
+      staffData,
       tasks,
+      transactions, // Save transactions
       latestTaskId: Task.latestTaskId
     });
     console.log("Company info and tasks saved successfully.");
