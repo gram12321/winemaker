@@ -1,4 +1,4 @@
-// finance.js
+import { formatNumber } from './utils.js';  // Ensure correct path
 
 // Function to initialize the finance management page
 function initializeFinance() {
@@ -21,12 +21,14 @@ function loadCashFlow() {
     const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
     transactions.forEach(transaction => {
+        const formattedAmount = formatNumber(Math.abs(transaction.amount));
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${transaction.date}</td>
             <td>${transaction.type}</td>
             <td>${transaction.description}</td>
-            <td>${transaction.amount < 0 ? '€' + (transaction.amount * -1) : '€' + transaction.amount}</td>
+            <td>€${formattedAmount}</td>
         `;
         cashFlowTableBody.appendChild(row);
     });
@@ -41,9 +43,9 @@ function updateIncomeStatement() {
     const weeklyExpenses = transactions.filter(t => t.type === 'Expense').reduce((sum, i) => sum + Math.abs(i.amount), 0);
     const netIncome = weeklyIncome - weeklyExpenses;
 
-    document.getElementById('weekly-income').textContent = weeklyIncome;
-    document.getElementById('weekly-expenses').textContent = weeklyExpenses;
-    document.getElementById('net-income').textContent = netIncome;
+    document.getElementById('weekly-income').textContent = `€${formatNumber(weeklyIncome)}`;
+    document.getElementById('weekly-expenses').textContent = `€${formatNumber(weeklyExpenses)}`;
+    document.getElementById('net-income').textContent = `€${formatNumber(netIncome)}`;
 }
 
 // Function to add a transaction entry with a specific date format
