@@ -35,18 +35,21 @@
   <script type="module" src="/js/loadPanel.js"></script>
   <script type="module">
 
-      import { addMoney, incrementWeek } from '/js/endDay.js'; // Updated import
+      import { incrementWeek } from '/js/endDay.js'; // Updated import
       import { saveCompanyInfo } from '/js/database/adminFunctions.js';
       import { initializeSidebar } from '/js/database/loadSidebar.js';
       import { initializePanel } from '/js/loadPanel.js';
       import { initializeConsole } from '/js/console.js';
+    import { addTransaction} from '/js/finance.js';
       
       document.addEventListener('DOMContentLoaded', function () {
           initializePanel();
           initializeSidebar();
           initializeConsole();
 
-          document.getElementById('add-money-btn').addEventListener('click', () => addMoney(1000000));
+        document.getElementById('add-money-btn').addEventListener('click', () => {
+            addTransaction('Income', 'Manual Money Addition', 1000000);
+        });
           document.getElementById('increment-week-btn').addEventListener('click', incrementWeek);  // Updated event listener
           document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
       });

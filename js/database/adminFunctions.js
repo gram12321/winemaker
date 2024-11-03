@@ -53,7 +53,7 @@ async function storeCompanyName() {
         window.location.href = 'html/game.html'; // Forward to game.html directly
       } else {
         localStorage.setItem('companyName', companyName);
-        localStorage.setItem('money', 10000000); // Initialize money with 10000000
+        localStorage.setItem('money', 0); // Initialize money with 10000000
 
         // Set initial date values before logging the transaction
         localStorage.setItem('week', 1); // Initialize day
