@@ -16,12 +16,13 @@ export function displayVineyardEntries() {
     const card = document.createElement('div');
     card.className = 'card';
 
-    const isPlanted = vineyard.plantedResourceName && vineyard.vineAge != null;
-    const vineAgeDisplay = isPlanted ? `${vineyard.vineAge} years` : 'Not Planted';
+    // Determine vine age display based on status
+    const vineAgeDisplay = vineyard.status === 'No yield in first season' ? 'Not Planted' : `${vineyard.vineAge} years`;
+
     const statusDisplay = vineyard.plantedResourceName ? vineyard.status || 'Unknown' : 'Not Planted';
     const ripenessDisplay = vineyard.ripeness ? vineyard.ripeness.toFixed(2) : 'N/A'; // Format ripeness to 2 decimals
 
-    // Calculate yield using the getYield function
+    // Calculate yield using the farmlandYield function
     const yieldValue = farmlandYield(vineyard);
 
     card.innerHTML = `
@@ -44,8 +45,8 @@ export function displayVineyardEntries() {
                 <th>Vine Age</th>
                 <th>Crop</th>
                 <th>Status</th>
-                <th>Ripeness</th> <!-- New Ripeness Column -->
-                <th>Yield</th> <!-- New Yield Column -->
+                <th>Ripeness</th>
+                <th>Yield</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -56,8 +57,8 @@ export function displayVineyardEntries() {
                 <td>${vineAgeDisplay}</td>
                 <td>${vineyard.plantedResourceName || 'None'}</td>
                 <td>${statusDisplay}</td>
-                <td>${ripenessDisplay}</td> <!-- Display the Ripeness Value -->
-                <td>${yieldValue.toFixed(2)}</td> <!-- Display the Yield Value -->
+                <td>${ripenessDisplay}</td>
+                <td>${yieldValue.toFixed(2)}</td>
                 <td>
                   <button class="btn btn-success harvest-field-btn" ${
                     vineyard.plantedResourceName ? '' : 'disabled'
