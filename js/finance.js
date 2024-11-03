@@ -71,5 +71,49 @@ export function addTransaction(type, description, amount) {
     localStorage.setItem('transactions', JSON.stringify(transactions));
 }
 
+// Add a recurring transaction with frequency in weeks
+export function addRecurringTransaction(type, description, amount, frequencyInWeeks) {
+    let recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
+    const currentWeek = parseInt(localStorage.getItem('week'), 10) || 1;
+    // Check if the transaction already exists
+    const transactionIndex = recurringTransactions.findIndex(transaction =>
+        transaction.type === type && transaction.description === description
+    );
+    if (transactionIndex !== -1) {
+        // Update the existing transaction
+        recurringTransactions[transactionIndex].amount = amount;
+        recurringTransactions[transactionIndex].frequencyInWeeks = frequencyInWeeks;
+        recurringTransactions[transactionIndex].nextDueWeek = currentWeek + frequencyInWeeks;
+        console.log(`Updated recurring transaction: ${description}`);
+    } else {
+        // Add the new recurring transaction if it doesn't exist
+        recurringTransactions.push({
+            type,
+            description,
+            amount,
+            frequencyInWeeks,
+            nextDueWeek: currentWeek + frequencyInWeeks
+        });
+        console.log(`Added new recurring transaction: ${description}`);
+    }
+    // Save the transactions back to localStorage
+    localStorage.setItem('recurringTransactions', JSON.stringify(recurringTransactions));
+}
+
+
+// Function to process recurring transactions
+export function processRecurringTransactions(currentWeek) {
+    let recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
+    recurringTransactions.forEach(transaction => {
+        if (currentWeek >= transaction.nextDueWeek) {
+            // Record the transaction
+            addTransaction(transaction.type, transaction.description, transaction.amount);
+            // Schedule the next occurrence
+            transaction.nextDueWeek += transaction.frequencyInWeeks;
+        }
+    });
+    localStorage.setItem('recurringTransactions', JSON.stringify(recurringTransactions));
+}
+
 // Initialize finance management when the document is ready
 document.addEventListener('DOMContentLoaded', initializeFinance);

@@ -4,6 +4,7 @@ import { renderCompanyInfo } from './database/loadSidebar.js';
 import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
 import { saveInventory } from './database/adminFunctions.js';
 import { executeAllTasks } from './loadPanel.js'
+import { processRecurringTransactions } from './finance.js';
 
 
 
@@ -41,11 +42,10 @@ export function incrementWeek() {
 
     // Execute any pending tasks for the week
     executeAllTasks();
-    // Update farm statuses according to the season and week
     updateFieldStatuses();
-
-    // Update ripeness for each field
     updateRipeness();
+    // Process recurring transactions based on updated week
+    processRecurringTransactions(currentWeek);
 }
 
 export function updateFieldStatuses() {

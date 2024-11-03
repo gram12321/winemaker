@@ -7,11 +7,11 @@ import {
   countryRegionMap 
 } from './names.js'; // Adjust import path if necessary
 
-// staff.js
+import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
+import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 
 export class Staff {
     static latestId = 0; // Tracks the latest ID assigned
-
     constructor() {
         this.id = ++Staff.latestId; // Auto-increment ID
         this.nationality = this.selectNationality();
@@ -19,13 +19,11 @@ export class Staff {
         this.workforce = 50; // Fixed workforce size
         this.wage = 600; // Default wage in Euros per week
     }
-
     // Method to randomly select a nationality from the countryRegionMap keys
     selectNationality() {
         const countries = Object.keys(countryRegionMap);
         return countries[Math.floor(Math.random() * countries.length)];
     }
-
     // Method to get a name for the selected nationality
     getNameForNationality(nationality) {
         const nameMap = {
@@ -35,7 +33,6 @@ export class Staff {
             'United States': usMaleNames.concat(usFemaleNames),
             'Germany': germanMaleNames.concat(germanFemaleNames)
         };
-
         const namesList = nameMap[nationality];
         if (namesList && namesList.length > 0) {
             return namesList[Math.floor(Math.random() * namesList.length)];
@@ -45,8 +42,6 @@ export class Staff {
 }
 
 
-// Function to display staff in the table on the staff management page
-// staff.js
 
 // Function to display staff in the table on the staff management page
 export function displayStaff() {
@@ -94,3 +89,21 @@ export function displayStaff() {
   table.appendChild(tbody);
   staffContainer.appendChild(table);
 }
+
+// Function to calculate total staff wages
+function calculateTotalStaffWages() {
+    const staffMembers = loadStaff();
+    return staffMembers.reduce((total, staff) => total + staff.wage, 0);
+}
+// Setup the staff wages as a recurring transaction
+// Setup or update staff wages as a recurring transaction
+function setupStaffWagesRecurringTransaction() {
+    const totalWages = calculateTotalStaffWages();
+    const frequencyInWeeks = 1; // Every week
+    const description = 'Weekly Staff Wages';
+    // Use the addRecurringTransaction function to handle the transaction
+    addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
+    console.log(`Setup or updated recurring transaction for staff wages: €${totalWages} every ${frequencyInWeeks} week(s).`);
+}
+// Call this function during initialization of the game or after adding staff
+setupStaffWagesRecurringTransaction();
