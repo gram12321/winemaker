@@ -11,3 +11,13 @@ Settings for acres/hectore/sq.m
 
 
 Ripeness more in south aspect
+
+
+Salleries
+
+                                  Hourly Low  Hourly High  Weekly Low   Weekly High  Monthly Low  Monthly High  
+Vineyard Workers                       13.27        19.90      530.77      796.15      2300.00       3450.00   
+Cellar Workers                         15.48        23.00      619.23      920.00      2683.33       3986.67   
+Assistant Winemaker                    24.33        37.60      973.08     1503.85      4216.67       6516.67
+Cellar Master                          22.12        35.38      884.62     1415.38      3833.33       6133.33   
+Viticulturist (Vineyard Manager)       26.54        44.23     1061.54     1769.23      4600.00       7666.67   

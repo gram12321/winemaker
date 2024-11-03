@@ -54,20 +54,24 @@ async function storeCompanyName() {
         localStorage.setItem('week', 1); // Initialize day
         localStorage.setItem('season', 'Spring'); // Initialize season
         localStorage.setItem('year', 2023); // Initialize year
-        
-          // Create two staff members with the same nationality
+
+        // Create two staff members with the same nationality
         const staff1 = new Staff();
         const staff2 = new Staff();
         staff2.nationality = staff1.nationality; // Ensure same nationality
+
         // Add staff to an array
         const staff = [staff1, staff2];
+
         // Store staff data in localStorage
         localStorage.setItem('staffData', JSON.stringify(staff.map(staff => ({
           id: staff.id,
           nationality: staff.nationality,
           name: staff.name,
-          workforce: staff.workforce
+          workforce: staff.workforce,
+          wage: staff.wage // Add wage to the stored data
         }))));
+
         saveCompanyInfo(); // Save company info to firestore
         window.location.href = 'html/game.html'; // Redirect to game.html
       }

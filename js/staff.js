@@ -7,6 +7,8 @@ import {
   countryRegionMap 
 } from './names.js'; // Adjust import path if necessary
 
+// staff.js
+
 export class Staff {
     static latestId = 0; // Tracks the latest ID assigned
 
@@ -15,6 +17,7 @@ export class Staff {
         this.nationality = this.selectNationality();
         this.name = this.getNameForNationality(this.nationality);
         this.workforce = 50; // Fixed workforce size
+        this.wage = 600; // Default wage in Euros per week
     }
 
     // Method to randomly select a nationality from the countryRegionMap keys
@@ -41,13 +44,34 @@ export class Staff {
     }
 }
 
+
+// Function to display staff in the table on the staff management page
 // staff.js
 
 // Function to display staff in the table on the staff management page
 export function displayStaff() {
   // Get the element where we will insert staff data
-  const staffEntries = document.getElementById('staff-entries');
-  staffEntries.innerHTML = ''; // Clear any existing entries
+  const staffContainer = document.getElementById('staff-container');
+  staffContainer.innerHTML = ''; // Clear any existing content
+
+  // Table structure creation
+  const table = document.createElement('table');
+  table.className = 'table mt-4';
+
+  const thead = document.createElement('thead');
+  thead.className = 'thead-light';
+  thead.innerHTML = `
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Name</th>
+      <th scope="col">Nationality</th>
+      <th scope="col">Workforce</th>
+      <th scope="col">Wage (€)</th>
+    </tr>
+  `;
+
+  const tbody = document.createElement('tbody');
+  tbody.id = 'staff-entries';
 
   // Retrieve staff data from localStorage
   const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
@@ -55,15 +79,18 @@ export function displayStaff() {
   // Iterate through each staff member to create table rows
   staffData.forEach(staff => {
     const row = document.createElement('tr');
-
     row.innerHTML = `
       <td>${staff.id}</td>
       <td>${staff.name}</td>
       <td>${staff.nationality}</td>
       <td>${staff.workforce}</td>
+      <td>€${staff.wage}</td>
     `;
-
-    // Append the newly created row to the table
-    staffEntries.appendChild(row);
+    tbody.appendChild(row);
   });
+
+  // Assemble the table
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  staffContainer.appendChild(table);
 }
