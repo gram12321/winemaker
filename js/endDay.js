@@ -130,7 +130,8 @@ export function sellWines(resourceName) {
         if (resource.amount > 0) {
             resource.amount -= 1; // Reduce the inventory by 1
 
-            addMoney(100); // Add $100 for each wine sold
+            // Log the sale transaction and update the balance
+            addTransaction('Income', 'Wine Sale', 100);
 
             if (resource.amount === 0) {
                 // Optionally remove the item if the amount reaches zero
@@ -142,23 +143,5 @@ export function sellWines(resourceName) {
             // Optionally, refresh the inventory display if your UI supports it
             displayInventory(inventoryInstance, ['winecellar-table-body'], true);
         }
-    }
-}
-
-export function addMoney(amount) {
-    const currentMoney = localStorage.getItem('money');
-    if (currentMoney !== null) {
-        const newMoney = parseInt(currentMoney, 10) + amount;
-        localStorage.setItem('money', newMoney);
-        renderCompanyInfo();
-    }
-}
-
-export function deductMoney(amount) {
-    const currentMoney = localStorage.getItem('money');
-    if (currentMoney !== null) {
-        const newMoney = parseInt(currentMoney, 10) - amount;
-        localStorage.setItem('money', newMoney);
-        renderCompanyInfo();
     }
 }

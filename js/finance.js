@@ -1,4 +1,5 @@
 import { formatNumber } from './utils.js';  // Ensure correct path
+import { renderCompanyInfo } from './database/loadSidebar.js';
 
 // Function to initialize the finance management page
 function initializeFinance() {
@@ -69,6 +70,14 @@ export function addTransaction(type, description, amount) {
 
     // Store the updated transactions back to local storage
     localStorage.setItem('transactions', JSON.stringify(transactions));
+
+    // Update the player's balance
+    const currentMoney = parseInt(localStorage.getItem('money'), 10) || 0;
+    const newMoney = currentMoney + amount;
+    localStorage.setItem('money', newMoney);
+
+    // Optionally update any related UI directly here
+    renderCompanyInfo();
 }
 
 // Add a recurring transaction with frequency in weeks
