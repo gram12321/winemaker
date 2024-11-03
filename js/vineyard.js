@@ -16,14 +16,18 @@ export function displayVineyardEntries() {
     const card = document.createElement('div');
     card.className = 'card';
 
-    // Determine vine age display based on status
-    const vineAgeDisplay = vineyard.status === 'No yield in first season' ? 'Not Planted' : `${vineyard.vineAge} years`;
-
+    // Determine vine age display based on status and crop
+    const isNotPlanted = !vineyard.plantedResourceName || vineyard.plantedResourceName === 'None';
+    const vineAgeDisplay = isNotPlanted ? 'Not Planted' : (vineyard.status === 'No yield in first season' ? 'Not Planted or First Season' : `${vineyard.vineAge} years`);
     const statusDisplay = vineyard.plantedResourceName ? vineyard.status || 'Unknown' : 'Not Planted';
     const ripenessDisplay = vineyard.ripeness ? vineyard.ripeness.toFixed(2) : 'N/A'; // Format ripeness to 2 decimals
 
     // Calculate yield using the farmlandYield function
     const yieldValue = farmlandYield(vineyard);
+
+    // Check for active tasks on this vineyard field
+    const isTaskActiveOnField = activeTasks.some(task => task.fieldId === index);
+    const canHarvest = !isTaskActiveOnField && vineyard.status === 'Ready for Harvest';
 
     card.innerHTML = `
       <div class="card-header" id="heading${index}">
@@ -61,7 +65,7 @@ export function displayVineyardEntries() {
                 <td>${yieldValue.toFixed(2)}</td>
                 <td>
                   <button class="btn btn-success harvest-field-btn" ${
-                    vineyard.plantedResourceName ? '' : 'disabled'
+                    canHarvest ? '' : 'disabled'
                   }>Harvest</button>
                 </td>
               </tr>
@@ -75,7 +79,7 @@ export function displayVineyardEntries() {
 
     const harvestButton = card.querySelector('.harvest-field-btn');
     harvestButton.addEventListener('click', () => {
-      if (vineyard.plantedResourceName) {
+      if (canHarvest) {
         handleHarvestTask(index);
       }
     });
