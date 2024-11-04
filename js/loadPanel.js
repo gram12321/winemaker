@@ -164,13 +164,21 @@ export class Task {
             const namesContainer = document.createElement('span');
             namesContainer.style.fontSize = '0.8em'; // Smaller font size, can adjust if needed
 
-            // Add each staff name to the names container
-            staff.forEach(staffId => {
+            // Limit to first 6 staff names
+            const maxVisibleStaff = 6;
+            staff.slice(0, maxVisibleStaff).forEach(staffId => {
                 const staffName = this.getStaffNameById(staffId);
                 const staffLabel = document.createElement('span');
                 staffLabel.textContent = `${staffName} `;
                 namesContainer.appendChild(staffLabel);
             });
+
+            // Add [...] if there are more staff
+            if (staff.length > maxVisibleStaff) {
+                const moreLabel = document.createElement('span');
+                moreLabel.textContent = '[...]';
+                namesContainer.appendChild(moreLabel);
+            }
 
             // Add the namesContainer to the staffLine
             staffLine.appendChild(namesContainer);
