@@ -102,9 +102,15 @@ export class Task {
     openAddStaffOverlay() {
         const overlay = document.createElement('div');
         overlay.className = 'overlay';
+
         const overlayContent = document.createElement('div');
         overlayContent.className = 'overlay-content';
-        const staffData = loadStaff();
+        const staffData = loadStaff().map(staff => ({
+            ...staff,
+            isAssigned: this.staff.includes(staff.id.toString())
+        }));
+
+        // Building UI for staff selection
         overlayContent.innerHTML = `
             <h2>Select Staff</h2>
             <table class="table">
@@ -116,38 +122,56 @@ export class Task {
                     </tr>
                 </thead>
                 <tbody>
-                    ${staffData.map(staff => `
+                    ${staffData.map(({ id, name, nationality, isAssigned }) => `
                         <tr>
-                            <td>${staff.name}</td>
-                            <td>${staff.nationality}</td>
-                            <td><button class="select-staff" data-id="${staff.id}" data-name="${staff.name}">Select</button></td>
+                            <td>${name}</td>
+                            <td>${nationality}</td>
+                            <td>
+                                <button class="select-staff" data-id="${id}">
+                                    ${isAssigned ? 'Remove' : 'Select'}
+                                </button>
+                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
-            </table>
-            <span class="close-btn">Close</span>
-        `;
+                <span class="close-btn">Close</span>
+            `;
         overlay.appendChild(overlayContent);
         document.body.appendChild(overlay);
+
+        // Close button functionality
         overlay.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
+
+        // Handle staff selection and removal
         overlay.querySelectorAll('.select-staff').forEach(button => {
-            button.addEventListener('click', (event) => {
-                const staffId = event.target.getAttribute('data-id');
-                const staffName = event.target.getAttribute('data-name');
-                this.staff.push(staffId);
+            button.addEventListener('click', ({ currentTarget }) => {
+                const staffId = currentTarget.getAttribute('data-id');
+                const isAssigned = this.staff.includes(staffId);
+
+                if (isAssigned) {
+                    // Remove staff from task
+                    this.staff = this.staff.filter(id => id !== staffId);
+                    currentTarget.textContent = 'Select'; // Toggle button label
+                } else {
+                    // Add staff to task
+                    this.staff.push(staffId);
+                    currentTarget.textContent = 'Remove'; // Toggle button label
+                }
+
+                // Update the task box to reflect changes
                 this.updateTaskBoxWithStaff(this.staff);
-                // Retrieve current tasks and update the specific task
+
+                // Update the specific task data
                 let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
                 const taskIndex = tasks.findIndex(task => task.taskId === this.taskId);
                 if (taskIndex !== -1) {
-                    // Update only the staff and other necessary parts of the existing task
                     tasks[taskIndex].staff = this.staff;
                     saveTask(tasks[taskIndex]);
                 }
-                overlay.remove();
             });
         });
     }
+    
     updateTaskBoxWithStaff(staff, staffContainer = this.taskBox.querySelector('.staff-container')) {
         if (staffContainer) {
             staffContainer.innerHTML = '';  // Clear the container first
