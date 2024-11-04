@@ -67,10 +67,7 @@ export class Task {
             <div class="task-details">
                 ${this.resourceName}, ${this.vintage}
             </div>
-            <button class="add-staff-btn">Add Staff</button>
         `;
-        const addStaffBtn = taskBox.querySelector('.add-staff-btn');
-        addStaffBtn.addEventListener('click', () => this.openAddStaffOverlay());
         const progressInfo = document.createElement('div');
         progressInfo.className = 'progress-info';
         const fromLabel = document.createElement('span');
@@ -86,6 +83,14 @@ export class Task {
         progressInfo.appendChild(toLabel);
         taskBox.appendChild(progressInfo);
         taskBox.appendChild(progressBar);
+
+        // Create and append staff button after progress bar
+        const addStaffBtn = document.createElement('button');
+        addStaffBtn.className = 'add-staff-btn';
+        addStaffBtn.textContent = 'Add Staff';
+        addStaffBtn.addEventListener('click', () => this.openAddStaffOverlay());
+        taskBox.appendChild(addStaffBtn);
+
         // Add a container to display selected staff
         const staffContainer = document.createElement('div');
         staffContainer.className = 'staff-container';
@@ -149,20 +154,18 @@ export class Task {
 
             // Create a container for icon and names
             const staffLine = document.createElement('div');
-            staffLine.style.display = 'flex';
-            staffLine.style.alignItems = 'center'; // Vertically center the items
+            staffLine.className = 'staff-line';
 
             // Add the staff icon
             const icon = document.createElement('img');
             icon.src = '/assets/icon/small/staff.png';
             icon.alt = 'Staff Icon';
-            icon.style.width = '15px'; // Set the icon size to 15px
-            icon.style.marginRight = '5px'; // Add some margin for spacing
+            icon.className = 'staff-icon';
             staffLine.appendChild(icon);
 
-            // Create a container for the staff names with smaller font
+            // Create a container for the staff names
             const namesContainer = document.createElement('span');
-            namesContainer.style.fontSize = '0.8em'; // Smaller font size, can adjust if needed
+            namesContainer.className = 'staff-names';
 
             // Limit to first 6 staff names
             const maxVisibleStaff = 6;
@@ -175,8 +178,13 @@ export class Task {
 
             // Add [...] if there are more staff
             if (staff.length > maxVisibleStaff) {
+                const remainingStaff = staff.slice(maxVisibleStaff);
+                const remainingNames = remainingStaff.map(id => this.getStaffNameById(id)).join(', ');
                 const moreLabel = document.createElement('span');
                 moreLabel.textContent = '[...]';
+                moreLabel.style.cursor = 'pointer';
+                moreLabel.setAttribute('data-toggle', 'tooltip');
+                moreLabel.setAttribute('title', remainingNames);
                 namesContainer.appendChild(moreLabel);
             }
 
@@ -185,6 +193,14 @@ export class Task {
 
             // Append the whole line to the staffContainer
             staffContainer.appendChild(staffLine);
+
+            // Initialize Bootstrap tooltips
+            $(staffContainer).find('[data-toggle="tooltip"]').tooltip({
+                container: 'body',
+                placement: 'top',
+                trigger: 'hover',
+                customClass: 'custom-tooltip'
+            });
         }
     }
     getStaffNameById(staffId) {

@@ -135,6 +135,8 @@ button.disabled{
 
 /*  - --- --   Task box styles   - - - - - -*/
 
+/* Updated Task box styles */
+
 #panel-wrapper .task-box {
   background-color: #214a73;
   border: 1px solid #94bde5;
@@ -174,6 +176,43 @@ button.disabled{
 
 .progress {
   margin-top: 0;
+}
+
+/* New styles for staff display */
+.staff-line {
+  display: flex;
+  align-items: center;
+}
+
+.staff-icon {
+  width: 15px;
+  margin-right: 5px;
+}
+
+.staff-names {
+  font-size: 0.8em;
+}
+
+/* Tooltip customization */
+.custom-tooltip .tooltip-inner {
+  background-color: #214a73;
+  color: #fff;
+}
+
+.add-staff-btn {
+  background-color: #4178be; /* Shade of blue */
+  color: #fff;              /* White text color */
+  border: none;             /* No border */
+  border-radius: 4px;       /* Rounded corners */
+  padding: 5px 10px;        /* Smaller padding */
+  font-size: 0.8em;         /* Smaller font size */
+  transition: background-color 0.3s; /* Smooth transition on hover */
+  margin-top: 10px; /* Add some space above the button */
+}
+
+.add-staff-btn:hover {
+  background-color: #3069ac; /* Darker shade on hover */
+  cursor: pointer;           /* Pointer cursor on hover */
 }
 
 
