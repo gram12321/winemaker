@@ -1,49 +1,53 @@
-<!-- staff.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Page - Staff Management</title>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/css/style.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
   <div class="d-flex" id="wrapper">
-
     <!-- Sidebar -->
     <div id="sidebar-wrapper">
-      <!-- Sidebar content dynamically loaded here -->
+      <!-- Sidebar content, e.g., navigation menu -->
     </div>
 
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Staff Management</h1>
-
-      <!-- Staff Table Container -->
-      <div id="staff-container"></div>
+      <div id="staff-container" class="mt-4">
+        <!-- This is where the staff table or information will appear -->
+      </div>
     </div>
+  </div>
 
-    <!-- Panel and Console JS -->
-    <script type="module" src="/js/loadPanel.js"></script>
-    <script type="module" src="/js/settings.js"></script>
+  <!-- Properly order JS dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Sidebar Initialization Script -->
-    <script type="module" src="/js/database/loadSidebar.js"></script>
+  <!-- Import necessary modules -->
+  <script type="module" src="/js/console.js"></script>
+  <script type="module" src="/js/database/loadSidebar.js"></script>
+  <script type="module" src="/js/loadPanel.js"></script>
+  <script type="module" src="/js/staff.js"></script>
+  <script type="module">
+    import { initializeSidebar } from '/js/database/loadSidebar.js';
+    import { initializePanel } from '/js/loadPanel.js';
+    import { displayStaff } from '/js/staff.js';
+    import { initializeConsole } from '/js/console.js';
 
-    <!-- Custom JavaScript -->
-    <script type="module">
-      import { displayStaff } from '/js/staff.js';
-      import { initializeSidebar } from '/js/database/loadSidebar.js';
-      import { initializePanel } from '/js/loadPanel.js';
-      import { initializeConsole } from '/js/console.js';
+    document.addEventListener('DOMContentLoaded', function () {
+      initializeSidebar();
+      initializePanel();
+      initializeConsole();
+      displayStaff();
 
-      document.addEventListener('DOMContentLoaded', function() {
-        initializePanel();
-        initializeSidebar();
-        initializeConsole();
-        displayStaff();
-      });
-    </script>
-  </body>
+      
+    });
+  </script>
+</body>
 </html>

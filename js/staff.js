@@ -1,12 +1,8 @@
 // staff.js
 
 // Import the necessary data from names.js
-import { 
-  italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames,
-  italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames,
-  countryRegionMap 
-} from './names.js'; // Adjust import path if necessary
-
+import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames, italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames, countryRegionMap } from './names.js'; // Adjust import path if necessary
+import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 
@@ -45,45 +41,35 @@ export class Staff {
 
 // Function to display staff in the table on the staff management page
 export function displayStaff() {
-  // Get the element where we will insert staff data
   const staffContainer = document.getElementById('staff-container');
   staffContainer.innerHTML = ''; // Clear any existing content
-
   // Table structure creation
   const table = document.createElement('table');
   table.className = 'table mt-4';
-
   const thead = document.createElement('thead');
   thead.className = 'thead-light';
   thead.innerHTML = `
     <tr>
-      <th scope="col">ID</th>
       <th scope="col">Name</th>
       <th scope="col">Nationality</th>
       <th scope="col">Workforce</th>
       <th scope="col">Wage (€)</th>
     </tr>
   `;
-
   const tbody = document.createElement('tbody');
   tbody.id = 'staff-entries';
-
   // Retrieve staff data from localStorage
   const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-
-  // Iterate through each staff member to create table rows
   staffData.forEach(staff => {
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td>${staff.id}</td>
       <td>${staff.name}</td>
-      <td>${staff.nationality}</td>
+      <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td> <!-- Use getFlagIconHTML correctly -->
       <td>${staff.workforce}</td>
       <td>€${staff.wage}</td>
     `;
     tbody.appendChild(row);
   });
-
   // Assemble the table
   table.appendChild(thead);
   table.appendChild(tbody);
