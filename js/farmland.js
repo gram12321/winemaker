@@ -1,15 +1,14 @@
-import { addConsoleMessage, getIconHtml } from '/js/console.js';
-import { countryRegionMap, regionAspectRatings, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
+import { addConsoleMessage  } from '/js/console.js';
+import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames } from './names.js';
-import { allResources, inventoryInstance, getResourceByName  } from '/js/resource.js';
+import { allResources, getResourceByName  } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
-import { getFlagIcon, getColorClass, formatLandSizeWithUnit, formatNumber } from './utils.js';
-
+import { getFlagIcon, formatNumber, calculateWorkApplied } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 
-// In js/farmland.js
+
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
@@ -250,6 +249,8 @@ function handlePlantingTask(index, resourceName, totalAcres) {
     }
 }
 
+
+
 export function plantAcres(index, resourceName) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
@@ -257,17 +258,8 @@ export function plantAcres(index, resourceName) {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Planting" && task.fieldId === index);
 
-    // Calculate workApplied based on assigned staff workforce
-    let workApplied = 0;
-    if (currentTask && currentTask.staff) {
-        const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-        currentTask.staff.forEach(staffId => {
-            const staffMember = staffData.find(staff => staff.id.toString() === staffId);
-            if (staffMember) {
-                workApplied += staffMember.workforce;
-            }
-        });
-    }
+    // Use the reusable function to calculate work applied
+    const workApplied = calculateWorkApplied(currentTask?.staff || []);
 
     const workRemaining = field.acres - (field.currentAcresPlanted || 0);
     const acresToPlant = Math.min(workApplied, workRemaining);
