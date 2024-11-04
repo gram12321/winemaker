@@ -15,24 +15,38 @@ function initializeFinance() {
 
 // Function to load cash flow data dynamically into the table
 function loadCashFlow() {
-    const cashFlowTableBody = document.getElementById('cash-flow-table').querySelector('tbody');
-    cashFlowTableBody.innerHTML = '';  // Clear existing entries
+  const cashFlowTableBody = document.getElementById('cash-flow-table').querySelector('tbody');
+  cashFlowTableBody.innerHTML = '';  // Clear existing entries
 
-    // Retrieve transactions from localStorage
-    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+  // Retrieve transactions from localStorage
+  const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-    transactions.forEach(transaction => {
-        const formattedAmount = formatNumber(Math.abs(transaction.amount));
+  let runningBalance = 0; // Assume starting balance, can be initialized from stored initial if needed
 
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${transaction.date}</td>
-            <td>${transaction.type}</td>
-            <td>${transaction.description}</td>
-            <td>€${formattedAmount}</td>
-        `;
-        cashFlowTableBody.appendChild(row);
-    });
+  // Compute each transaction's impact on the balance in original order first
+  const balanceAfterTransactions = transactions.map(transaction => {
+    runningBalance += (transaction.type === 'Income' ? transaction.amount : -transaction.amount);
+    return runningBalance;  // Keep the balance after each transaction
+  });
+
+  // Reverse to display transactions in reverse order (newest first)
+  for (let i = transactions.length - 1; i >= 0; i--) {
+    const transaction = transactions[i];
+    const formattedAmount = formatNumber(Math.abs(transaction.amount));
+    const row = document.createElement('tr');
+
+    const amountClass = transaction.type === 'Income' ? 'transaction-income' : 'transaction-expense';
+
+    row.innerHTML = `
+      <td>${transaction.date}</td>
+      <td>${transaction.type}</td>
+      <td>${transaction.description}</td>
+      <td class="${amountClass}">€${formattedAmount}</td>
+      <td>€${formatNumber(balanceAfterTransactions[i])}</td> <!-- Use precomputed balance -->
+    `;
+
+    cashFlowTableBody.appendChild(row);
+  }
 }
 
 // Function to update the income statement

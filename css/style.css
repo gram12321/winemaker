@@ -202,6 +202,34 @@ button.disabled{
   min-width: 630px;        /* Minimum width */
 }
 
+/* CSS for limiting cash flow table height and enabling scroll */
+#cash-flow-table {
+  max-height: 300px; /* Set the maximum height */
+  overflow-y: auto;  /* Enable vertical scrolling */
+  display: block;    /* Display as block element to apply max-height */
+  margin-bottom: 20px; /* Optional: add spacing below the table */
+  background-color: #888;  /* Use the lighter grey similar to the console */
+  color: #000;             /* Dark text color for better contrast */
+  border: 1px solid #333;  /* Subtle border from console styles */
+  border-top: 2px solid #dee2e6; /* Top border for distinction */
+  border-radius: 4px;      /* Rounded corners like the console */
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  font-family: monospace;  /* Monospace font for consistency */
+  white-space: nowrap;     /* Preserve whitespace */
+  width: auto;             /* Ensure the width fits the content */
+  font-size: 10px;         /* Ensure consistent font-size */
+  z-index: 1000;           /* Ensure it stays on top of other elements if necessary */
+  box-sizing: border-box;  /* Include padding and border in element's total width/height */
+  
+}
+/* CSS for coloring the text based on transaction type */
+.transaction-income {
+  color: #008f00; /* Green for income */
+}
+
+.transaction-expense {
+  color: #ff0000; /* Red for expenses */
+}
 body {
   margin-bottom: 220px; /* Space for the fixed console panel */
 }
