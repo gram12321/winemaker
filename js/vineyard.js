@@ -108,7 +108,8 @@ export function handleHarvestTask(index) {
               gameYear,
               'High', // Use arbitrary quality
               iconPath,
-              fieldName // Pass the field name here
+            fieldName,
+              'Field'  // Specify the type of the task
           );
           // Include fieldName in Object.assign
           Object.assign(task, { fieldId: index, fieldName });
@@ -120,7 +121,9 @@ export function handleHarvestTask(index) {
               taskId: task.taskId,
               workTotal: totalAcres,
               vintage: gameYear,
-              iconPath
+              iconPath, 
+            type: 'Field', // Explicitly pass in type
+              staff: task.staff
           });
           activeTasks.push(task);
           addConsoleMessage(`Harvesting task started for <strong>${task.fieldName}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);

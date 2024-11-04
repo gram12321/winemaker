@@ -211,7 +211,8 @@ function handlePlantingTask(index, resourceName, totalAcres) {
             gameYear,
             '',
             iconPath,
-            fieldName
+          fieldName,
+            'Field'  // Specify the type of the task
         );
 
         Object.assign(task, { fieldId: index, fieldName });
@@ -219,16 +220,18 @@ function handlePlantingTask(index, resourceName, totalAcres) {
         field.plantedResourceName = "Currently being planted";
         field.status = "No yield in first season"; // Set initial status
 
-        saveTask({
-            taskName: task.taskName,
-            fieldId: index,
-            fieldName: task.fieldName,
-            resourceName,
-            taskId: task.taskId,
-            workTotal: totalAcres,
-            vintage: gameYear,
-            iconPath
-        });
+      saveTask({
+          taskName: task.taskName,
+          fieldId: index,
+          fieldName: task.fieldName,
+          resourceName,
+          taskId: task.taskId,
+          workTotal: totalAcres,
+          vintage: gameYear,
+          iconPath,
+          type: 'Field', // Explicitly pass in type
+          staff: task.staff
+      });
 
         activeTasks.push(task);
         addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
@@ -305,20 +308,23 @@ function handleUprootTask(index) {
     localStorage.getItem('year') || '',
     '',
     iconPath,
-    fieldName
+    fieldName,
+      'Field'  // Specify the type of the task
   );
 
   Object.assign(task, { fieldId: index, fieldName });
 
   saveTask({
-    taskName: task.taskName,
-    fieldId: index,
-    fieldName: task.fieldName,
-    resourceName: task.resourceName,
-    taskId: task.taskId,
-    workTotal: field.acres,
-    vintage: task.vintage,
-    iconPath: task.iconPath
+      taskName: task.taskName,
+      fieldId: index,
+      fieldName: task.fieldName,
+      resourceName,
+      taskId: task.taskId,
+      workTotal: totalAcres,
+      vintage: gameYear,
+      iconPath,
+      type: 'Field',  // Ensure type is saved
+      staff: task.staff // Also save staff if needed
   });
 
   activeTasks.push(task);

@@ -13,7 +13,7 @@ export function handleGrapeCrushingTask(selectedResource) {
         return;
     }
 
-    const gameYear = localStorage.getItem('year') || ''; // Example of consistency if you use vintage
+    const gameYear = localStorage.getItem('year') || ''; // Consistent use of game year
     const isTaskAlreadyActive = activeTasks.some(task => 
         task.taskName === "Crushing Grapes" &&
         task.resourceName === selectedResource &&
@@ -34,7 +34,9 @@ export function handleGrapeCrushingTask(selectedResource) {
             'Grapes',
             resource.vintage,
             resource.quality,
-            iconPath
+            iconPath,
+            '',  // fieldName is empty because it's not field-specific
+            'Winery'  // Specify the type of the task as "Winery"
         );
 
         // Assign any specific properties as needed, similar to other tasks
@@ -53,7 +55,8 @@ export function handleGrapeCrushingTask(selectedResource) {
             quality: resource.quality,
             taskId: task.taskId,
             workTotal: resource.amount,
-            iconPath: iconPath
+            iconPath: iconPath,
+            type: 'Winery'  // Include type in the saved task information
         };
 
         saveTask(taskInfo);
@@ -63,7 +66,6 @@ export function handleGrapeCrushingTask(selectedResource) {
         addConsoleMessage(`A Crushing task for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality} is already active.`);
     }
 }
-
 export function grapeCrushing(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
 
@@ -132,7 +134,9 @@ export function handleFermentationTask(selectedResource) {
             'Must',
             resource.vintage,
             resource.quality,
-            iconPath
+            iconPath,
+            '',  // fieldName is empty because it's not field-specific
+            'Winery'  // Specify the type of the task as "Winery"
         );
 
         // Assign any specific properties as needed
@@ -151,7 +155,9 @@ export function handleFermentationTask(selectedResource) {
             quality: resource.quality,
             taskId: task.taskId,
             workTotal: resource.amount,
-            iconPath: iconPath
+            iconPath: iconPath,
+             type: 'Winery', // Explicitly pass in type
+                staff: task.staff
         };
 
         saveTask(taskInfo);

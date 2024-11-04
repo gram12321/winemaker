@@ -178,6 +178,22 @@ button.disabled{
   margin-top: 0;
 }
 
+.field-task {
+  background-color: #F0E68C; /* Field tasks - Khaki */
+}
+
+.winery-task {
+  background-color: #8B4513; /* Winery tasks - Brownish */
+}
+
+.administration-task {
+  background-color: #F5F5F5; /* Administration tasks - White/Light */
+}
+
+.sales-task {
+  background-color: #98FB98; /* Sales tasks - Greenish */
+}
+
 /* New styles for staff display */
 .staff-line {
   display: flex;

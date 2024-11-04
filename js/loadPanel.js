@@ -27,8 +27,8 @@ export function executeAllTasks() {
 // Task class definition
 export class Task {
     static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
-    staff = [];  // Initialized as an empty array
-    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '', fieldName = '') {
+
+    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '', fieldName = '', type = 'Administration') {
         this.taskName = taskName;
         this.taskFunction = taskFunction;
         this.taskId = taskId || Task.generateTaskId();
@@ -40,7 +40,8 @@ export class Task {
         this.quality = quality;
         this.iconPath = iconPath;
         this.fieldName = fieldName;
-        this.staff = [];  // Ensure it's an array
+        this.staff = [];
+        this.type = type;  // New property to define task type
         this.createTaskBox();
     }
     static generateTaskId() {
@@ -56,6 +57,28 @@ export class Task {
         }
         const taskBox = document.createElement('div');
         taskBox.className = 'task-box';
+
+        // Log the task type for debugging
+        console.log(`Creating task box for task type: ${this.type}`);
+
+        // Apply color class based on task type
+        switch (this.type) {
+            case 'Field':
+                taskBox.classList.add('field-task');
+                break;
+            case 'Winery':
+                taskBox.classList.add('winery-task');
+                break;
+            case 'Administration':
+                taskBox.classList.add('administration-task');
+                break;
+            case 'Sales':
+                taskBox.classList.add('sales-task');
+                break;
+            default:
+                console.warn(`Unknown task type: ${this.type}`);
+        }
+
         taskBox.innerHTML = `
             <div class="task-details">
                 <div><strong>Field: ${this.fieldName}</strong></div>
