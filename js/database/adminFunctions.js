@@ -261,7 +261,8 @@ export function loadTasks() {
                 taskInfo.vintage,
                 taskInfo.quality,
                 taskInfo.iconPath,
-                taskInfo.fieldName
+                taskInfo.fieldName,
+                taskInfo.type // Load the type
             );
 
             // Ensure staff is managed as an array
