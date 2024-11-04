@@ -5,6 +5,7 @@ import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames,
 import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
+import { loadTasks } from './database/adminFunctions.js'; // Import the function to load tasks
 
 export class Staff {
     static latestId = 0; // Tracks the latest ID assigned
@@ -39,13 +40,15 @@ export class Staff {
 
 
 
-// Function to display staff in the table on the staff management page
+
 export function displayStaff() {
   const staffContainer = document.getElementById('staff-container');
   staffContainer.innerHTML = ''; // Clear any existing content
-  // Table structure creation
+
+  // Create table for displaying staff
   const table = document.createElement('table');
   table.className = 'table mt-4';
+
   const thead = document.createElement('thead');
   thead.className = 'thead-light';
   thead.innerHTML = `
@@ -54,23 +57,42 @@ export function displayStaff() {
       <th scope="col">Nationality</th>
       <th scope="col">Workforce</th>
       <th scope="col">Wage (€)</th>
+      <th scope="col">Assigned Task</th> <!-- New Column -->
     </tr>
   `;
+
   const tbody = document.createElement('tbody');
   tbody.id = 'staff-entries';
+
   // Retrieve staff data from localStorage
   const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+
+  // Load tasks to check task assignments
+  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+  // Create table rows for each staff member
   staffData.forEach(staff => {
+    // Find the task assigned to this staff
+    let assignedTaskDetail = 'None'; // Default value if no task is assigned
+    tasks.forEach(task => {
+      if(task.staff && task.staff.includes(staff.id.toString())) {
+        // Combine task name and field name for the assigned task detail
+        assignedTaskDetail = `${task.taskName}, ${task.fieldName || 'Unknown'}`;
+      }
+    });
+
     const row = document.createElement('tr');
     row.innerHTML = `
       <td>${staff.name}</td>
-      <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td> <!-- Use getFlagIconHTML correctly -->
+      <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
       <td>${staff.workforce}</td>
       <td>€${staff.wage}</td>
+      <td>${assignedTaskDetail}</td> <!-- Display the assigned task and field -->
     `;
     tbody.appendChild(row);
   });
-  // Assemble the table
+
+  // Append the table head and body to the table
   table.appendChild(thead);
   table.appendChild(tbody);
   staffContainer.appendChild(table);
