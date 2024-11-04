@@ -144,15 +144,39 @@ export class Task {
         });
     }
     updateTaskBoxWithStaff(staff, staffContainer = this.taskBox.querySelector('.staff-container')) {
-        // Checking if staff is an array
         if (staffContainer) {
             staffContainer.innerHTML = '';  // Clear the container first
+
+            // Create a container for icon and names
+            const staffLine = document.createElement('div');
+            staffLine.style.display = 'flex';
+            staffLine.style.alignItems = 'center'; // Vertically center the items
+
+            // Add the staff icon
+            const icon = document.createElement('img');
+            icon.src = '/assets/icon/small/staff.png';
+            icon.alt = 'Staff Icon';
+            icon.style.width = '15px'; // Set the icon size to 15px
+            icon.style.marginRight = '5px'; // Add some margin for spacing
+            staffLine.appendChild(icon);
+
+            // Create a container for the staff names with smaller font
+            const namesContainer = document.createElement('span');
+            namesContainer.style.fontSize = '0.8em'; // Smaller font size, can adjust if needed
+
+            // Add each staff name to the names container
             staff.forEach(staffId => {
                 const staffName = this.getStaffNameById(staffId);
-                const staffLabel = document.createElement('div');
-                staffLabel.textContent = `Assigned Staff: ${staffName}`;
-                staffContainer.appendChild(staffLabel);
+                const staffLabel = document.createElement('span');
+                staffLabel.textContent = `${staffName} `;
+                namesContainer.appendChild(staffLabel);
             });
+
+            // Add the namesContainer to the staffLine
+            staffLine.appendChild(namesContainer);
+
+            // Append the whole line to the staffContainer
+            staffContainer.appendChild(staffLine);
         }
     }
     getStaffNameById(staffId) {
