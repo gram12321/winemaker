@@ -198,21 +198,22 @@ export function saveTask(taskInfo) {
     const existingTaskIndex = tasks.findIndex(task => task.taskId === taskInfo.taskId);
 
     if (existingTaskIndex === -1) {
-        tasks.push(taskInfo); // New task
+        tasks.push(taskInfo); // Add new task
     } else {
         tasks[existingTaskIndex] = taskInfo; // Update existing task
     }
 
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem('tasks', JSON.stringify(tasks)); // Save back to localStorage
+    
 }
 
 export const activeTasks = []; // Exported array to hold task references
 
+// Function to load tasks from localStorage and initialize them as Task instances
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     Task.latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
     activeTasks.length = 0; // Clear existing active tasks
-
 
     tasks.forEach(taskInfo => {
         const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -260,10 +261,13 @@ export function loadTasks() {
                 taskInfo.vintage,
                 taskInfo.quality,
                 taskInfo.iconPath,
-                taskInfo.fieldName // Pass fieldName
+                taskInfo.fieldName
             );
 
-            // Assign common properties for all tasks
+            // Ensure staff is managed as an array
+            task.staff = Array.isArray(taskInfo.staff) ? taskInfo.staff : [];
+
+            // Assign task-specific properties
             Object.assign(task, {
                 fieldId: taskInfo.fieldId, // Assign if applicable
                 fieldName: taskInfo.fieldName, // Assign if applicable
@@ -283,8 +287,11 @@ export function loadTasks() {
                 task.workProgress = field.currentAcresUprooted || 0;
             }
 
-            task.updateProgressBar();
-            activeTasks.push(task);
+            // Update the task box with staff information
+            task.updateTaskBoxWithStaff(task.staff);
+
+            task.updateProgressBar(); // Update progress bar initially
+            activeTasks.push(task); // Add task to activeTasks array
         }
     });
 }

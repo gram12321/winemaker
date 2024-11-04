@@ -1,6 +1,5 @@
 // loadPanel.js
-import { loadTasks, removeTask } from './database/adminFunctions.js';
-import { loadStaff } from './database/adminFunctions.js';
+import { loadTasks, removeTask, saveTask, loadStaff} from './database/adminFunctions.js';
 import { activeTasks } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
 import { formatNumber } from './utils.js';
@@ -28,8 +27,7 @@ export function executeAllTasks() {
 // Task class definition
 export class Task {
     static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
-    staff = []; // Array for staff IDs
-
+    staff = [];  // Initialized as an empty array
     constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '', fieldName = '') {
         this.taskName = taskName;
         this.taskFunction = taskFunction;
@@ -42,16 +40,14 @@ export class Task {
         this.quality = quality;
         this.iconPath = iconPath;
         this.fieldName = fieldName;
-        this.staff = []; // Initialize staff array
+        this.staff = [];  // Ensure it's an array
         this.createTaskBox();
     }
-
     static generateTaskId() {
         const newTaskId = ++Task.latestTaskId;
         localStorage.setItem('latestTaskId', newTaskId);
         return newTaskId;
     }
-
     createTaskBox() {
         const taskList = document.getElementById('task-list');
         if (!taskList) {
@@ -75,7 +71,6 @@ export class Task {
         `;
         const addStaffBtn = taskBox.querySelector('.add-staff-btn');
         addStaffBtn.addEventListener('click', () => this.openAddStaffOverlay());
-
         const progressInfo = document.createElement('div');
         progressInfo.className = 'progress-info';
         const fromLabel = document.createElement('span');
@@ -91,35 +86,20 @@ export class Task {
         progressInfo.appendChild(toLabel);
         taskBox.appendChild(progressInfo);
         taskBox.appendChild(progressBar);
+        // Add a container to display selected staff
+        const staffContainer = document.createElement('div');
+        staffContainer.className = 'staff-container';
+        this.updateTaskBoxWithStaff(this.staff, staffContainer);
+        taskBox.appendChild(staffContainer);
         taskList.appendChild(taskBox);
-
         this.taskBox = taskBox;
     }
-
-    updateProgressBar() {
-        if (this.taskBox) {
-            const progressBar = this.taskBox.querySelector('.progress-bar');
-            const progress = (this.workProgress / this.workTotal) * 100;
-            progressBar.style.width = `${progress}%`;
-            progressBar.setAttribute('aria-valuenow', this.workProgress);
-        }
-    }
-
-    removeTaskBox() {
-        if (this.taskBox) {
-            this.taskBox.remove();
-        }
-    }
-
     openAddStaffOverlay() {
         const overlay = document.createElement('div');
         overlay.className = 'overlay';
-
         const overlayContent = document.createElement('div');
         overlayContent.className = 'overlay-content';
-
         const staffData = loadStaff();
-
         overlayContent.innerHTML = `
             <h2>Select Staff</h2>
             <table class="table">
@@ -135,7 +115,7 @@ export class Task {
                         <tr>
                             <td>${staff.name}</td>
                             <td>${staff.nationality}</td>
-                            <td><button class="select-staff" data-id="${staff.id}">Select</button></td>
+                            <td><button class="select-staff" data-id="${staff.id}" data-name="${staff.name}">Select</button></td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -144,17 +124,57 @@ export class Task {
         `;
         overlay.appendChild(overlayContent);
         document.body.appendChild(overlay);
-
         overlay.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
         overlay.querySelectorAll('.select-staff').forEach(button => {
             button.addEventListener('click', (event) => {
                 const staffId = event.target.getAttribute('data-id');
+                const staffName = event.target.getAttribute('data-name');
                 this.staff.push(staffId);
+                this.updateTaskBoxWithStaff(this.staff);
+                // Retrieve current tasks and update the specific task
+                let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                const taskIndex = tasks.findIndex(task => task.taskId === this.taskId);
+                if (taskIndex !== -1) {
+                    // Update only the staff and other necessary parts of the existing task
+                    tasks[taskIndex].staff = this.staff;
+                    saveTask(tasks[taskIndex]);
+                }
                 overlay.remove();
             });
         });
     }
+    updateTaskBoxWithStaff(staff, staffContainer = this.taskBox.querySelector('.staff-container')) {
+        // Checking if staff is an array
+        if (staffContainer) {
+            staffContainer.innerHTML = '';  // Clear the container first
+            staff.forEach(staffId => {
+                const staffName = this.getStaffNameById(staffId);
+                const staffLabel = document.createElement('div');
+                staffLabel.textContent = `Assigned Staff: ${staffName}`;
+                staffContainer.appendChild(staffLabel);
+            });
+        }
+    }
+    getStaffNameById(staffId) {
+        const staffData = loadStaff();
+        const staffMember = staffData.find(staff => staff.id.toString() === staffId.toString());
+        return staffMember ? staffMember.name : 'Unknown';
+    }
+    updateProgressBar() {
+        if (this.taskBox) {
+            const progressBar = this.taskBox.querySelector('.progress-bar');
+            const progress = (this.workProgress / this.workTotal) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressBar.setAttribute('aria-valuenow', this.workProgress);
+        }
+    }
+    removeTaskBox() {
+        if (this.taskBox) {
+            this.taskBox.remove();
+        }
+    }
 }
+
 
 // Execute task function
 export function executeTaskFunction(task) {
