@@ -251,13 +251,26 @@ function handlePlantingTask(index, resourceName, totalAcres) {
 }
 
 export function plantAcres(index, resourceName) {
-    const increment = 10; // Work increment for planting
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
     const fieldName = field.name || `Field ${index}`;
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const currentTask = tasks.find(task => task.taskName === "Planting" && task.fieldId === index);
+
+    // Calculate workApplied based on assigned staff workforce
+    let workApplied = 0;
+    if (currentTask && currentTask.staff) {
+        const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+        currentTask.staff.forEach(staffId => {
+            const staffMember = staffData.find(staff => staff.id.toString() === staffId);
+            if (staffMember) {
+                workApplied += staffMember.workforce;
+            }
+        });
+    }
 
     const workRemaining = field.acres - (field.currentAcresPlanted || 0);
-    const acresToPlant = Math.min(increment, workRemaining);
+    const acresToPlant = Math.min(workApplied, workRemaining);
 
     if (acresToPlant <= 0) {
         addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully planted.`);
