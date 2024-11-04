@@ -75,9 +75,25 @@ export function displayStaff() {
     // Find the task assigned to this staff
     let assignedTaskDetail = 'None'; // Default value if no task is assigned
     tasks.forEach(task => {
-      if(task.staff && task.staff.includes(staff.id.toString())) {
-        // Combine task name and field name for the assigned task detail
-        assignedTaskDetail = `${task.taskName}, ${task.fieldName || 'Unknown'}`;
+      if (task.staff && task.staff.includes(staff.id.toString())) {
+        // Custom message based on task type
+        let locationLabel = 'Unknown'; 
+        switch (task.type) {
+          case 'Winery':
+            locationLabel = 'Winery';
+            break;
+          case 'Administration':
+            locationLabel = 'Administration';
+            break;
+          case 'Sales':
+            locationLabel = 'Sales';
+            break;
+          default:
+            locationLabel = task.fieldName || 'Unknown'; // Fallback to fieldName for Field tasks
+        }
+
+        // Combine task name with appropriate location label
+        assignedTaskDetail = `${task.taskName}, ${locationLabel}`;
       }
     });
 
@@ -87,7 +103,7 @@ export function displayStaff() {
       <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
       <td>${staff.workforce}</td>
       <td>€${staff.wage}</td>
-      <td>${assignedTaskDetail}</td> <!-- Display the assigned task and field -->
+      <td>${assignedTaskDetail}</td> <!-- Display the assigned task and location -->
     `;
     tbody.appendChild(row);
   });
