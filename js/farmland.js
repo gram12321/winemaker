@@ -8,8 +8,6 @@ import { getFlagIcon, formatNumber, calculateWorkApplied } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 
-
-
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
     this.id = id;
@@ -66,13 +64,10 @@ export function getLastId(farmlands) {
   return Math.max(...farmlands.map(farmland => farmland.id));
 }
 
-// Function to get a random number of acres between 1 and 200
 export function getRandomAcres() {
   return Math.floor(Math.random() * 200) + 1;
 }
 
-// Function to get a random soil type for a given country and region
-// Function to select a random number of unique soil types from a given country's region
 function getRandomSoil(country, region) {
   const soils = regionSoilTypes[country][region];
   const numberOfSoils = Math.floor(Math.random() * 5) + 1; // Randomly choose between 1 and 5 soils
@@ -86,7 +81,6 @@ function getRandomSoil(country, region) {
   return Array.from(selectedSoils).join(', '); // Convert set to array and return as comma-separated string
 }
 
-// Function to get a random altitude within the range for a given country and region
 function getRandomAltitude(country, region) {
   const [min, max] = regionAltitudeRanges[country][region];
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -126,10 +120,6 @@ function getRandomAspect() {
   const aspects = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
   return getRandomItem(aspects);
 }
-
-
-
-
 
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
@@ -249,8 +239,6 @@ function handlePlantingTask(index, resourceName, totalAcres) {
     }
 }
 
-
-
 export function plantAcres(index, resourceName) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
@@ -337,17 +325,22 @@ function handleUprootTask(index) {
   addConsoleMessage(`Uprooting task started for <strong>${fieldName}</strong>.`);
 }
 
-// Ensure that uproot is exported
+
 export function uproot(index) {
-    const increment = 10;  // Work increment for uprooting
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
+    const fieldName = field.name || `Field ${index}`;
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const currentTask = tasks.find(task => task.taskName === "Uprooting" && task.fieldId === index);
+
+    // Calculate the work applied using staff assignments
+    const workApplied = calculateWorkApplied(currentTask?.staff || []);
 
     const workRemaining = field.acres - (field.currentAcresUprooted || 0);
-    const acresToUproot = Math.min(increment, workRemaining);
+    const acresToUproot = Math.min(workApplied, workRemaining);
 
     if (acresToUproot <= 0) {
-        addConsoleMessage(`Field <strong>${field.name}</strong> is already fully uprooted.`);
+        addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully uprooted.`);
         return 0;
     }
 
@@ -357,9 +350,9 @@ export function uproot(index) {
         field.plantedResourceName = null; // Reset the crop
         field.vineAge = null; // Reset vine age
         field.currentAcresPlanted = 0; // Reset planting progress
-        addConsoleMessage(`Field <strong>${field.name}</strong> fully uprooted.`);
+        addConsoleMessage(`Field <strong>${fieldName}</strong> fully uprooted.`);
     } else {
-        addConsoleMessage(`Uprooted ${acresToUproot} acres from field <strong>${field.name}</strong>. Total uprooted: <strong>${field.currentAcresUprooted} out of ${field.acres}</strong> acres.`);
+        addConsoleMessage(`Uprooted ${acresToUproot} acres from field <strong>${fieldName}</strong>. Total uprooted: <strong>${field.currentAcresUprooted} out of ${field.acres}</strong> acres.`);
     }
 
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));

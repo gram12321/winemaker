@@ -3,7 +3,7 @@ import { addConsoleMessage } from './console.js';
 import { inventoryInstance } from './resource.js';
 import { saveInventory, saveTask, activeTasks } from './database/adminFunctions.js';
 import { Task } from './loadPanel.js';
-import { formatNumber } from './utils.js';
+import { formatNumber, calculateWorkApplied } from './utils.js';
 
 export function handleGrapeCrushingTask(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
@@ -65,9 +65,20 @@ export function handleGrapeCrushingTask(selectedResource) {
 }
 
 export function grapeCrushing(selectedResource) {
-    const increment = 10; // Define the increment for crushing
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
-    const actualIncrement = Math.min(increment, resource.amount);
+
+    if (!resource) {
+      addConsoleMessage(`No resource found for <strong>${selectedResource}</strong>.`);
+      return 0;
+    }
+
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const currentTask = tasks.find(task => task.taskName === "Crushing Grapes" && task.resourceName === selectedResource);
+
+    // Calculate work applied using staff assignments
+    const workApplied = calculateWorkApplied(currentTask?.staff || 1); // Fallback to 1 to avoid multiplying by 0
+
+    const actualIncrement = Math.min(workApplied, resource.amount);
 
     // Define a ratio for crushing, e.g., how much Must is produced from Grapes
     const crushingYieldRatio = 600; // 600 liters of Must per ton of Grapes
@@ -82,8 +93,12 @@ export function grapeCrushing(selectedResource) {
     // Persist changes
     saveInventory();
 
+    const remainingGrapes = resource.amount - actualIncrement;
+
     // Format the addConsoleMessage with the additional information
-    addConsoleMessage(`${formatNumber(mustProduced)} units of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must. ${formatNumber(remainingGrapes)} tons of <strong>${selectedResource}, ${resource.vintage},</strong> still remain in the warehouse.`);
+    addConsoleMessage(
+        `${formatNumber(mustProduced)} tons of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must. ${formatNumber(remainingGrapes)} tons of <strong>${selectedResource}, ${resource.vintage},</strong> still remain in the warehouse.`
+    );
 
     return actualIncrement; // Return the actual work completed (Return work for task process)
 }
@@ -147,8 +162,8 @@ export function handleFermentationTask(selectedResource) {
     }
 }
 
+
 export function fermentMust(selectedResource) {
-    const increment = 1; // Define the increment for fermentation
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');
 
     if (!resource || resource.amount < 1) {
@@ -156,8 +171,14 @@ export function fermentMust(selectedResource) {
         return 0; // Return 0 if no progress is made
     }
 
-    // Ferment only the defined increment or the amount available, whichever is smaller
-    const actualIncrement = Math.min(increment, resource.amount);
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const currentTask = tasks.find(task => task.taskName === "Fermenting" && task.resourceName === selectedResource);
+
+    // Calculate work applied using staff assignments
+    const workApplied = calculateWorkApplied(currentTask?.staff || 1); // Fallback to 1 to avoid multiplying by 0
+
+    // Ferment only the work that can be applied or the amount available, whichever is smaller
+    const actualIncrement = Math.min(workApplied, resource.amount);
 
     // Remove units from the must resource and add as bottles
     inventoryInstance.removeResource(resource.resource.name, actualIncrement, 'Must', resource.vintage, resource.quality);
