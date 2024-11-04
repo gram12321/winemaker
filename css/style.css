@@ -178,20 +178,21 @@ button.disabled{
   margin-top: 0;
 }
 
-.field-task {
-  background-color: #F0E68C; /* Field tasks - Khaki */
+/* Increase specificity by including #panel-wrapper */
+#panel-wrapper .task-box.field-task {
+  background-color: #545a16; /* light green for field tasks */
 }
 
-.winery-task {
-  background-color: #8B4513; /* Winery tasks - Brownish */
+#panel-wrapper .task-box.winery-task {
+  background-color: #214a73; /* light orange for winery tasks */
 }
 
-.administration-task {
-  background-color: #F5F5F5; /* Administration tasks - White/Light */
+#panel-wrapper .task-box.administration-task {
+  background-color: #23143e; /* light purple for administration tasks */
 }
 
-.sales-task {
-  background-color: #98FB98; /* Sales tasks - Greenish */
+#panel-wrapper .task-box.sales-task {
+  background-color: #491809; /* light pink for sales tasks */
 }
 
 /* New styles for staff display */

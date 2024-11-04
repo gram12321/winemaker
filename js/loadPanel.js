@@ -58,10 +58,6 @@ export class Task {
         const taskBox = document.createElement('div');
         taskBox.className = 'task-box';
 
-        // Log the task type for debugging
-        console.log(`Creating task box for task type: ${this.type}`);
-
-        // Apply color class based on task type
         switch (this.type) {
             case 'Field':
                 taskBox.classList.add('field-task');

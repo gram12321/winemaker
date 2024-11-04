@@ -251,7 +251,7 @@ export function loadTasks() {
         }
 
         if (executeTaskFunction) {
-            console.log(`Loading task with type: ${taskInfo.type}`); // Debugging log
+
 
             task = new Task(
                 taskInfo.taskName,
