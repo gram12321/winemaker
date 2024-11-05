@@ -38,9 +38,6 @@ export class Staff {
     }
 }
 
-
-
-
 export function displayStaff() {
   const staffContainer = document.getElementById('staff-container');
   staffContainer.innerHTML = ''; // Clear any existing content
