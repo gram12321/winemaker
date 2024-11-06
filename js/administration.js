@@ -26,7 +26,7 @@ export function handleBookkeepingTask() {
 
         if (activeTask) {
             // Update the workTotal by adding the new count
-            activeTask.workTotal += previousSeasonTransactionsCount;
+            activeTask.workTotal += (previousSeasonTransactionsCount)*1.1;
 
             // Save the updated task back to localStorage
             let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -36,7 +36,7 @@ export function handleBookkeepingTask() {
                 localStorage.setItem('tasks', JSON.stringify(tasks));
             }
         }
-        console.log(`Updated workTotal for active Bookkeeping task: ${activeTask.workTotal}`);
+        addConsoleMessage(`<span style="color: red;">Bookkeeping for previous season <strong>not</strong> completed. </span> More work has been added to the task: ${activeTask.workTotal}`);
     } else {
         const iconPath = '/assets/icon/icon_bookkeeping.webp';
 
