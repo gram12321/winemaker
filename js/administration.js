@@ -5,8 +5,6 @@ import { saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { addConsoleMessage } from '/js/console.js';
 import { calculateWorkApplied, getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
 
-
-
 export function handleBookkeepingTask() {
     const isTaskAlreadyActive = activeTasks.some(task => task.taskName.startsWith("Bookkeeping"));
 
@@ -19,15 +17,12 @@ export function handleBookkeepingTask() {
 
         const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-        console.log(`Transactions Data: `, transactions);
-
         // Filter transactions by extracting date components
         const previousSeasonTransactionsCount = transactions.filter(transaction => {
             const { season, year } = extractSeasonAndYear(transaction.date);
             return season === previousSeason && year === previousYear;
         }).length;
 
-        console.log(`Calculated workTotal for Bookkeeping task: ${previousSeasonTransactionsCount}`);
 
         const taskName = `Bookkeeping, ${currentSeason} ${currentYear}`;
 
@@ -63,11 +58,6 @@ export function handleBookkeepingTask() {
     }
 }
 export function bookkeepingTaskFunction(task) {
-    if (!task) {
-        console.error("Task object is undefined in bookkeepingTaskFunction");
-        return 0;
-    }
-
     // Calculate work applied based on assigned staff
     const workApplied = calculateWorkApplied(task.staff || []);
 
