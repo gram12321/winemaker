@@ -4,7 +4,7 @@ import { renderCompanyInfo } from './database/loadSidebar.js';
 import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
 import { saveInventory } from './database/adminFunctions.js';
 import { executeAllTasks } from './loadPanel.js'
-import { processRecurringTransactions } from './finance.js';
+import { processRecurringTransactions, addTransaction } from './finance.js';
 import { handleBookkeepingTask  } from './administration.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];

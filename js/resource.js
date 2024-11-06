@@ -112,14 +112,20 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
 
         let tableBodyId;
         let displayAmount = formatNumber(amount);
+        let statusIconPath;
 
         if (state === 'Grapes' && tablesToShow.includes('warehouse-table-body')) {
             tableBodyId = 'warehouse-table-body';
-            displayAmount += ' t'; // Append 't' for tons to the display amount
+            displayAmount += ' t';
+            statusIconPath = '/assets/pic/grapes_dalle.webp';
         } else if (state === 'Must' && tablesToShow.includes('fermentation-table-body')) {
             tableBodyId = 'fermentation-table-body';
+          displayAmount += ' l';
+            statusIconPath = '/assets/pic/must_dalle.webp';
         } else if (state === 'Bottle' && tablesToShow.includes('winecellar-table-body')) {
             tableBodyId = 'winecellar-table-body';
+          displayAmount += ' bottles';
+            statusIconPath = '/assets/pic/bottles_dalle.webp';
         } else {
             return;
         }
@@ -128,23 +134,20 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
         if (inventoryTableBody) {
             const row = document.createElement('tr');
 
-            // Get quality description and color class using utility functions
             const qualityDescription = getWineQualityCategory(quality);
             const colorClass = getColorClass(quality);
 
-            // Combine quality description and actual value
-            const qualityText = `${qualityDescription} (${quality.toFixed(2)})`;
+            const qualityText = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
 
             row.innerHTML = `
-                <td>${fieldName}, ${resource.name}, ${vintage || 'Unknown'}</td>
+                <td><strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}</td>
                 <td>${displayAmount}</td>
-                <td class="${colorClass}">${qualityText}</td>
-                <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
+                <td>${qualityText}</td>
+                <td><img src="${statusIconPath}" alt="${state}" class="status-image"></td>
                 ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
             `;
             inventoryTableBody.appendChild(row);
 
-            // Add event listener to sell button if it exists
             if (includeSellButton) {
                 const sellButton = row.querySelector('.sell-btn');
                 sellButton.addEventListener('click', () => {

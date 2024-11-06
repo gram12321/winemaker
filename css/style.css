@@ -345,6 +345,13 @@ body {
   border-radius: 60px;
 }
 
+.status-image {
+  max-width: 100px;
+  height: auto;
+  padding: 10px;
+  border-radius: 30px;
+}
+
 /* Farmland.html */
 
 .owned-farmland-table td, .owned-farmland-table th {
