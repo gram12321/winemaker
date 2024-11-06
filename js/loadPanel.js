@@ -313,21 +313,23 @@ export function executeTaskFunction(task) {
         removeTask(task.taskId);
 
         // Log a completion message based on the task type
-        switch (task.taskName) {
-            case "Planting":
+        switch (true) {
+            case task.taskName.startsWith("Bookkeeping"):
+                const bookkeepingDetails = task.taskName.split(", ");
+                const bookkeepingSeasonYear = bookkeepingDetails[1] || "Unknown Season/Year";
+                addConsoleMessage(`Bookkeeping task completed for ${bookkeepingSeasonYear}.`);
+                break;
+            case task.taskName === "Planting":
                 addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
                 break;
-            case "Crushing Grapes":
+            case task.taskName === "Crushing Grapes":
                 addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
                 break;
-            case "Harvesting":
+            case task.taskName === "Harvesting":
                 addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
                 break;
-            case "Uprooting":
+            case task.taskName === "Uprooting":
                 addConsoleMessage(`Uprooting task completed for field <strong>${task.fieldName || 'Unknown'}</strong>.`);
-                break;
-            case "Bookkeeping":
-                addConsoleMessage(`Bookkeeping task completed.`);
                 break;
             default:
                 console.warn(`No console message for task name: ${task.taskName}`);

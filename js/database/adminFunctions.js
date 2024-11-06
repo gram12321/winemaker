@@ -227,25 +227,25 @@ export function loadTasks() {
         let resource;
 
         // Determine the function to execute based on task type
-        switch (taskInfo.taskName) {
-            case "Crushing Grapes":
+        switch (true) {
+            case taskInfo.taskName.startsWith("Bookkeeping"):
+                executeTaskFunction = bookkeepingTaskFunction;
+                break;
+            case taskInfo.taskName === "Crushing Grapes":
                 resource = inventoryResources.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
                 executeTaskFunction = resource ? () => grapeCrushing(taskInfo.resourceName) : null;
                 break;
-            case "Fermenting":
+            case taskInfo.taskName === "Fermenting":
                 resource = inventoryResources.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Must');
                 executeTaskFunction = resource ? () => fermentMust(taskInfo.resourceName) : null;
                 break;
-            case "Bookkeeping":
-                executeTaskFunction = bookkeepingTaskFunction;
-                break;
-            case "Planting":
+            case taskInfo.taskName === "Planting":
                 if (field) executeTaskFunction = () => plantAcres(taskInfo.fieldId, taskInfo.resourceName);
                 break;
-            case "Harvesting":
+            case taskInfo.taskName === "Harvesting":
                 if (field) executeTaskFunction = () => harvestAcres(taskInfo.fieldId);
                 break;
-            case "Uprooting":
+            case taskInfo.taskName === "Uprooting":
                 if (field) executeTaskFunction = () => uproot(taskInfo.fieldId);
                 break;
             default:
