@@ -17,13 +17,6 @@ function initializePanel() {
         });
 }
 
-// Execute all tasks
-export function executeAllTasks() {
-    activeTasks.forEach(task => {
-        executeTaskFunction(task);
-    });
-}
-
 // Task class definition
 export class Task {
     static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
@@ -204,7 +197,7 @@ export class Task {
             });
         });
     }
-    
+
     updateTaskBoxWithStaff(staff, staffContainer = this.taskBox.querySelector('.staff-container')) {
         if (staffContainer) {
             staffContainer.innerHTML = '';  // Clear the container first
@@ -280,6 +273,12 @@ export class Task {
     }
 }
 
+// Execute all tasks
+export function executeAllTasks() {
+    activeTasks.forEach(task => {
+        executeTaskFunction(task);
+    });
+}
 
 // Execute task function
 export function executeTaskFunction(task) {
