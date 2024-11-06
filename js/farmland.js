@@ -1,7 +1,7 @@
 import { addConsoleMessage  } from '/js/console.js';
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames } from './names.js';
-import { allResources, getResourceByName  } from '/js/resource.js';
+import { allResources, getResourceByName, inventoryInstance  } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
 import { getFlagIcon, formatNumber, calculateWorkApplied } from './utils.js';
