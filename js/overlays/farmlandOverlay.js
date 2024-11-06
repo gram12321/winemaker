@@ -7,7 +7,7 @@ export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');
   const details = document.getElementById('farmland-details');
 
-  // Convert farmlandData into a Farmland instance
+  // Construct a Farmland instance using the existing farmlandData
   const farmland = new Farmland(
     farmlandData.id,
     farmlandData.name,
@@ -23,12 +23,16 @@ export function showFarmlandOverlay(farmlandData) {
     farmlandData.density
   );
 
+  // Manually set ripeness if farmlandData includes an updated value
+  farmland.ripeness = farmlandData.ripeness ?? farmland.ripeness;
+
   if (details) {
     const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
     const colorClass = getColorClass(aspectRating);
     const landValue = farmland.calculateLandvalue();
-    const flagIcon = getFlagIcon(farmland.country); // Get the flag icon HTML
+    const flagIcon = getFlagIcon(farmland.country);
 
+    // Update details utilizing farmland object, including the ripeness value
     details.innerHTML = `
       <div class="overlay-content">
         <h2 class="text-center mb-3">${farmland.name}</h2>
@@ -42,14 +46,14 @@ export function showFarmlandOverlay(farmlandData) {
           <tbody>
             <tr>
               <td>Country</td>
-              <td>${flagIcon} ${farmland.country}</td> <!-- Include the flag icon here -->
+              <td>${flagIcon} ${farmland.country}</td>
             </tr>
             <tr><td>Region</td><td>${farmland.region}</td></tr>
             <tr><td>Acres</td><td>${farmland.acres}</td></tr>
             <tr><td>Status</td><td>${farmland.status}</td></tr>
-            <tr><td>Ripeness</td><td>${farmland.ripeness}</td></tr>
+            <tr><td>Ripeness</td><td>${formatNumber(farmland.ripeness, 2)}</td></tr>
             <tr><td>Soil</td><td>${farmland.soil}</td></tr>
-            <tr><td>Altitude</td><td>${farmland.altitude}</td></tr>
+            <tr><td>Altitude</td><td>${farmland.altitude}m</td></tr>
             <tr>
               <td>Aspect</td>
               <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
