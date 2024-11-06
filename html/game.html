@@ -48,7 +48,7 @@
           initializePanel();
           initializeSidebar();
           initializeConsole();
-        // Call this function during initialization of the game or after adding staff
+        // Setop initial staff wage. Hereafter use updateWagesAndRecurringTransaction (in staff.js) to make any change to staff wagesCall this function during initialization of the game or after adding staff
         setupStaffWagesRecurringTransaction();
 
         document.getElementById('add-money-btn').addEventListener('click', () => {
