@@ -207,16 +207,32 @@ button.disabled{
   background-color: #545a16;
 }
 
+.task-box.field-task:hover {
+  background-color: #6a7220; /* Lighter version for hover */
+}
+
 .task-box.winery-task {
   background-color: #214a73;
+}
+
+.task-box.winery-task:hover {
+  background-color: #2d5aab; /* Lighter version for hover */
 }
 
 .task-box.administration-task {
   background-color: #23143e;
 }
 
+.task-box.administration-task:hover {
+  background-color: #36214f; /* Lighter version for hover */
+}
+
 .task-box.sales-task {
   background-color: #491809;
+}
+
+.task-box.sales-task:hover {
+  background-color: #6f2814; /* Lighter version for hover */
 }
 
 .add-staff-btn {
