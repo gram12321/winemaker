@@ -90,3 +90,33 @@ export function calculateWorkApplied(taskStaff) {
 
     return workApplied;
 }
+
+export function extractSeasonAndYear(dateString) {
+    const [week, season, year] = dateString.split(', ');
+    return { season, year: parseInt(year) };
+}
+export function getPreviousSeasonAndYear(currentSeason, currentYear) {
+    let previousSeason;
+    let previousYear = currentYear;
+
+    switch (currentSeason) {
+        case "Spring":
+            previousSeason = "Winter";
+            previousYear -= 1;
+            break;
+        case "Summer":
+            previousSeason = "Spring";
+            break;
+        case "Fall":
+            previousSeason = "Summer";
+            break;
+        case "Winter":
+            previousSeason = "Fall";
+            break;
+        default:
+            console.error("Unknown current season");
+            previousSeason = "Unknown Season";
+    }
+
+    return { previousSeason, previousYear };
+}

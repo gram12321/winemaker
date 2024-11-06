@@ -3,7 +3,9 @@
 import { Task } from './loadPanel.js'; 
 import { saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { addConsoleMessage } from '/js/console.js';
-import { calculateWorkApplied } from './utils.js'; // Import the function
+import { calculateWorkApplied, getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
+
+
 
 export function handleBookkeepingTask() {
     const isTaskAlreadyActive = activeTasks.some(task => task.taskName.startsWith("Bookkeeping"));
@@ -11,18 +13,29 @@ export function handleBookkeepingTask() {
     if (!isTaskAlreadyActive) {
         const iconPath = '/assets/icon/icon_bookkeeping.webp';
 
-        // Get the current season and year from localStorage
-        const season = localStorage.getItem('season') || 'Unknown Season';
-        const year = localStorage.getItem('year') || 'Unknown Year';
+        const currentSeason = localStorage.getItem('season') || 'Unknown Season';
+        const currentYear = parseInt(localStorage.getItem('year'), 10) || new Date().getFullYear();
+        const { previousSeason, previousYear } = getPreviousSeasonAndYear(currentSeason, currentYear);
 
-        // Construct the task name with season and year
-        const taskName = `Bookkeeping, ${season} ${year}`;
+        const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+        console.log(`Transactions Data: `, transactions);
+
+        // Filter transactions by extracting date components
+        const previousSeasonTransactionsCount = transactions.filter(transaction => {
+            const { season, year } = extractSeasonAndYear(transaction.date);
+            return season === previousSeason && year === previousYear;
+        }).length;
+
+        console.log(`Calculated workTotal for Bookkeeping task: ${previousSeasonTransactionsCount}`);
+
+        const taskName = `Bookkeeping, ${currentSeason} ${currentYear}`;
 
         const task = new Task(
             taskName,
             bookkeepingTaskFunction,
             undefined, 
-            300, 
+            previousSeasonTransactionsCount, 
             '', 
             '', 
             '', 
@@ -35,7 +48,6 @@ export function handleBookkeepingTask() {
         task.staff = [];
         task.workProgress = 0;
 
-        // Save task state
         saveTask({
             taskName: task.taskName,
             taskId: task.taskId,
@@ -47,7 +59,7 @@ export function handleBookkeepingTask() {
         });
 
         activeTasks.push(task);
-        addConsoleMessage(`Bookkeeping task started for the ${season} ${year}.`);
+        addConsoleMessage(`Bookkeeping task started for the ${currentSeason} ${currentYear}.`);
     }
 }
 export function bookkeepingTaskFunction(task) {
