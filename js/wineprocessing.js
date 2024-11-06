@@ -66,13 +66,24 @@ export function handleGrapeCrushingTask(selectedResource) {
         addConsoleMessage(`A Crushing task for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality} is already active.`);
     }
 }
+
 export function grapeCrushing(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
 
     if (!resource) {
-      addConsoleMessage(`No resource found for <strong>${selectedResource}</strong>.`);
-      return 0;
+        addConsoleMessage(`No resource found for <strong>${selectedResource}</strong>.`);
+        return 0;
     }
+
+    // Log the resource details, including the fieldName
+    console.log(`Resource for crushing:`, {
+        name: resource.resource.name,
+        amount: resource.amount,
+        state: resource.state,
+        vintage: resource.vintage,
+        quality: resource.quality,
+        fieldName: resource.fieldName, // Log fieldName
+    });
 
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Crushing Grapes" && task.resourceName === selectedResource);
@@ -88,9 +99,9 @@ export function grapeCrushing(selectedResource) {
     // Calculate actual must produced
     const mustProduced = actualIncrement * crushingYieldRatio;
 
-    // Update inventory to reflect the crushing process
-    inventoryInstance.removeResource(resource.resource.name, actualIncrement, resource.state, resource.vintage, resource.quality);
-    inventoryInstance.addResource(resource.resource.name, mustProduced, 'Must', resource.vintage, resource.quality);
+    // Update inventory to reflect the crushing process, include fieldName
+    inventoryInstance.removeResource(resource.resource.name, actualIncrement, resource.state, resource.vintage, resource.quality, resource.fieldName);
+    inventoryInstance.addResource(resource.resource.name, mustProduced, 'Must', resource.vintage, resource.quality, resource.fieldName);
 
     // Persist changes
     saveInventory();
@@ -99,10 +110,10 @@ export function grapeCrushing(selectedResource) {
 
     // Format the addConsoleMessage with the additional information
     addConsoleMessage(
-        `${formatNumber(mustProduced)} tons of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must. ${formatNumber(remainingGrapes)} tons of <strong>${selectedResource}, ${resource.vintage},</strong> still remain in the warehouse.`
+        `${formatNumber(mustProduced)} liters of <strong>${selectedResource}, ${resource.vintage},</strong> ${resource.quality} have been crushed into must. ${formatNumber(remainingGrapes)} tons of <strong>${selectedResource}, ${resource.vintage},</strong> still remain in the warehouse.`
     );
 
-    return actualIncrement; // Return the actual work completed (Return work for task process)
+    return actualIncrement; // Return the actual work completed
 }
 
 export function handleFermentationTask(selectedResource) {
