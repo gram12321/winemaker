@@ -54,7 +54,7 @@ export function displayStaff() {
       <th scope="col">Nationality</th>
       <th scope="col">Workforce</th>
       <th scope="col">Wage (€)</th>
-      <th scope="col">Assigned Task</th> <!-- New Column -->
+      <th scope="col">Assigned Tasks</th>
     </tr>
   `;
 
@@ -69,11 +69,10 @@ export function displayStaff() {
 
   // Create table rows for each staff member
   staffData.forEach(staff => {
-    // Find the task assigned to this staff
-    let assignedTaskDetail = 'None'; // Default value if no task is assigned
+    const assignedTasks = []; // Array to hold task details
+
     tasks.forEach(task => {
       if (task.staff && task.staff.includes(staff.id.toString())) {
-        // Custom message based on task type
         let locationLabel = 'Unknown'; 
         switch (task.type) {
           case 'Winery':
@@ -86,13 +85,13 @@ export function displayStaff() {
             locationLabel = 'Sales';
             break;
           default:
-            locationLabel = task.fieldName || 'Unknown'; // Fallback to fieldName for Field tasks
+            locationLabel = task.fieldName || 'Unknown';
         }
-
-        // Combine task name with appropriate location label
-        assignedTaskDetail = `${task.taskName}, ${locationLabel}`;
+        assignedTasks.push(`<strong>${task.taskName}</strong>, ${locationLabel}`);
       }
     });
+
+    const assignedTaskDetail = assignedTasks.length > 0 ? assignedTasks.join('<br>') : 'None';
 
     const row = document.createElement('tr');
     row.innerHTML = `
@@ -100,7 +99,7 @@ export function displayStaff() {
       <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
       <td>${staff.workforce}</td>
       <td>€${staff.wage}</td>
-      <td>${assignedTaskDetail}</td> <!-- Display the assigned task and location -->
+      <td>${assignedTaskDetail}</td>
     `;
     tbody.appendChild(row);
   });

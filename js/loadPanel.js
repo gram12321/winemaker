@@ -294,9 +294,6 @@ export function executeTaskFunction(task) {
         task.workProgress += increment;
         task.updateProgressBar();
 
-        // Debug: checking task details
-        console.log(`Task ID: ${task.taskId}, Name: ${task.taskName}, New Progress: ${task.workProgress}/${task.workTotal}`);
-
         // Retrieve all tasks from localStorage, update only the specific task's progress
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const taskIndex = tasks.findIndex(t => t.taskId === task.taskId);
@@ -305,9 +302,6 @@ export function executeTaskFunction(task) {
             // Update just the workProgress field for the specific task
             tasks[taskIndex].workProgress = task.workProgress;
             localStorage.setItem('tasks', JSON.stringify(tasks));
-
-            // Debug: confirm save
-            console.log(`Progress saved for task ID: ${task.taskId}`);
         }
     }
 
