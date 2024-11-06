@@ -170,7 +170,6 @@ function loadInventory() {
     console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
     savedInventory = [];
   }
-
   // Populate the inventory instance
   savedInventory.forEach(item => {
     inventoryInstance.addResource(
@@ -178,7 +177,8 @@ function loadInventory() {
       item.amount,
       item.state,
       item.vintage,
-      item.quality
+      item.quality,
+      item.fieldName // Ensure fieldName is loaded
     );
   });
 }

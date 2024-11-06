@@ -140,7 +140,7 @@
       import { initializeSidebar } from "/js/database/loadSidebar.js";
       import { initializePanel } from "/js/loadPanel.js";
       import { initializeConsole } from "/js/console.js";
-      import { formatNumber } from "/js/utils.js"; // Import for formatting
+      import { formatNumber, getWineQualityCategory, getColorClass } from "/js/utils.js";
 
       document.addEventListener("DOMContentLoaded", function () {
         initializePanel();
@@ -158,9 +158,17 @@
 
           inventoryInstance.items.forEach((item) => {
             if (item.state === "Grapes") {
+              const colorClass = getColorClass(item.quality);
               const listItem = document.createElement("li");
-              listItem.className = "list-group-item";
-              listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${formatNumber(item.amount)} t`;
+              listItem.className = 'list-group-item';
+
+              listItem.innerHTML = `
+                <strong>${item.fieldName}</strong>, 
+                ${item.resource.name}, 
+                ${item.vintage}, 
+                <span class="${colorClass}">(${(item.quality * 100).toFixed(0)}%)</span>, 
+                ${formatNumber(item.amount)}t`;
+
               crushInventoryList.appendChild(listItem);
             }
           });
@@ -172,9 +180,17 @@
 
           inventoryInstance.items.forEach((item) => {
             if (item.state === "Must") {
+              const colorClass = getColorClass(item.quality);
               const listItem = document.createElement("li");
-              listItem.className = "list-group-item";
-              listItem.innerHTML = `<strong>${item.resource.name}, ${item.vintage}</strong> - ${item.quality}, ${formatNumber(item.amount)}`;
+              listItem.className = 'list-group-item';
+
+              listItem.innerHTML = `
+                <strong>${item.fieldName}</strong>, 
+                ${item.resource.name}, 
+                ${item.vintage}, 
+                <span class="${colorClass}">(${(item.quality * 100).toFixed(0)}%)</span>, 
+                ${formatNumber(item.amount)}t`;
+
               fermentationList.appendChild(listItem);
             }
           });
@@ -186,9 +202,17 @@
 
           inventoryInstance.items.forEach((item) => {
             if (item.state === "Grapes") {
+              const colorClass = getColorClass(item.quality);
               const option = document.createElement("option");
               option.value = item.resource.name;
-              option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${formatNumber(item.amount)}`;
+
+              option.innerHTML = `
+                <strong>${item.fieldName}</strong>, 
+                ${item.resource.name}, 
+                ${item.vintage}, 
+                <span class="${colorClass}">(${(item.quality * 100).toFixed(0)}%)</span>, 
+                ${formatNumber(item.amount)}t`;
+
               selectElement.appendChild(option);
             }
           });
@@ -200,9 +224,17 @@
 
           inventoryInstance.items.forEach((item) => {
             if (item.state === "Must") {
+              const colorClass = getColorClass(item.quality);
               const option = document.createElement("option");
               option.value = item.resource.name;
-              option.textContent = `${item.resource.name}, ${item.vintage} - ${item.quality}, ${formatNumber(item.amount)}`;
+
+              option.innerHTML = `
+                <strong>${item.fieldName}</strong>, 
+                ${item.resource.name}, 
+                ${item.vintage}, 
+                <span class="${colorClass}">(${(item.quality * 100).toFixed(0)}%)</span>, 
+                ${formatNumber(item.amount)}t`;
+
               selectElement.appendChild(option);
             }
           });

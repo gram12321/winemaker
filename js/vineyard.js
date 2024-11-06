@@ -145,12 +145,12 @@ export function handleHarvestTask(index) {
     }
 }
 
-
 export function harvestAcres(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
 
     if (field && field.plantedResourceName) {
+        console.log('Field Name:', field.name); // Log to verify field name is being retrieved
         const resourceName = field.plantedResourceName;
         const state = 'Grapes';
         const gameYear = parseInt(localStorage.getItem('year'), 10);
@@ -158,49 +158,47 @@ export function harvestAcres(index) {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const currentTask = tasks.find(task => task.taskName === "Harvesting" && task.fieldId === index);
 
-        // Calculate work applied using staff assignments
         const workApplied = calculateWorkApplied(currentTask?.staff || []);
-
-        // Calculate remaining acres to harvest
         let acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
         const acresHarvested = Math.min(workApplied, acresLeftToHarvest);
 
         if (acresHarvested > 0) {
-            // Calculate the total grapes harvested (Placeholder for tons of grape yield per year/acre)
             const grapesHarvested = farmlandYield(field) * acresHarvested * 5;
+            const quality = Math.random().toFixed(2); // Random quality placeholder
 
-            // Determine quality as a numeric value between 0 and 1
-            const quality = Math.random().toFixed(2); // For example, a random quality; replace with your logic
+            console.log('Adding resource with field name:', field.name); // Log before adding resource
+            // Add the harvested grapes to the inventory, including the field name
+            inventoryInstance.addResource(
+                resourceName,
+                grapesHarvested,
+                state,
+                gameYear,
+                quality,
+                field.name // Pass the field's name to the addResource method
+            );
 
-            // Add to the inventory using the inventory instance
-            inventoryInstance.addResource(resourceName, grapesHarvested, state, gameYear, quality);
+            const harvestedFormatted = `${acresHarvested} acres`; // Format harvested info
+            const remainingFormatted = `${totalAcres - field.currentAcresHarvested} acres`; // Format remaining info
 
-            // Format the land size with unit settings
-            const harvestedFormatted = formatLandSizeWithUnit(acresHarvested);
-            const remainingFormatted = formatLandSizeWithUnit(acresLeftToHarvest - acresHarvested);
+            addConsoleMessage(`Harvested <strong>${formatNumber(grapesHarvested)} tons</strong> of ${resourceName} with quality ${quality} from ${field.name} across <strong>${harvestedFormatted}</strong>. Remaining: ${remainingFormatted}`);
 
-            addConsoleMessage(`Harvested <strong>${formatNumber(grapesHarvested)} tons </strong>of ${resourceName} with quality ${quality} from ${field.name} across <strong>${harvestedFormatted}. </strong> Remaining: ${remainingFormatted}`);
-
-            // Update the acres already harvested
             field.currentAcresHarvested = (field.currentAcresHarvested || 0) + acresHarvested;
 
-            // Check if field is completely harvested
             if (field.currentAcresHarvested >= totalAcres) {
                 addConsoleMessage(`${field.name} fully harvested`);
                 field.currentAcresHarvested = 0;
-                field.status = 'Harvested'; // Set the status to Harvested
+                field.status = 'Harvested';
             }
 
-            // Save inventory and farmland updates
             saveInventory();
             localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
-            return acresHarvested; // Return the increment to update task progress
+            return acresHarvested;
         } else {
             addConsoleMessage(`Nothing to harvest. ${field.name} is already fully harvested.`);
         }
     } else {
         addConsoleMessage(`Invalid operation. No planted resource found for ${farmlands[index]?.name || 'unknown'}.`);
     }
-    return 0; // Default return if no acres were harvested
+    return 0;
 }

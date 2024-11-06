@@ -24,7 +24,7 @@ class Inventory {
     this.items = [];
   }
 
-  addResource(name, amount, state, vintage, quality) {
+  addResource(name, amount, state, vintage, quality, fieldName) { // Include fieldName
     const resource = getResourceByName(name);
     if (!resource) {
       throw new Error('Resource not found');
@@ -35,29 +35,32 @@ class Inventory {
       item.resource.name === name &&
       item.state === state &&
       item.vintage === vintage &&
-      item.quality === quality
+      item.quality === parseFloat(quality) && // Convert quality to float
+      item.fieldName === fieldName // Ensure it's the same field
     );
-    
+
     if (existingItem) {
       existingItem.amount += amount;
     } else {
       // Add a new item if not found
-        this.items.push({
+      this.items.push({
         resource: resource,
         amount: amount,
         state: state,
         vintage: vintage,
-        quality: parseFloat(quality) // Ensure quality is stored as a number
+        quality: parseFloat(quality), // Ensure quality is stored as a float
+        fieldName  // Store fieldName
       });
     }
   }
 
-  removeResource(name, amount, state, vintage, quality) {
+  removeResource(name, amount, state, vintage, quality, fieldName) { // Include fieldName
     const itemIndex = this.items.findIndex(item =>
       item.resource.name === name &&
       item.state === state &&
       item.vintage === vintage &&
-      item.quality === quality
+      item.quality === parseFloat(quality) && // Convert quality to float
+      item.fieldName === fieldName // Match the fieldName as well
     );
 
     if (itemIndex !== -1) {
@@ -72,13 +75,14 @@ class Inventory {
     }
   }
 
-  getTotalAmount(name, state = null, vintage = null, quality = null) {
+  getTotalAmount(name, state = null, vintage = null, quality = null, fieldName = null) { // Include fieldName
     return this.items.reduce((total, item) => {
       if (
         item.resource.name === name &&
         (state === null || item.state === state) &&
         (vintage === null || item.vintage === vintage) &&
-        (quality === null || item.quality === quality)
+        (quality === null || item.quality === parseFloat(quality)) && // Convert quality to float
+        (fieldName === null || item.fieldName === fieldName) // Match the fieldName if provided
       ) {
         return total + item.amount;
       }
@@ -86,8 +90,6 @@ class Inventory {
     }, 0);
   }
 }
-
-
 
 
 function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fermentation-table-body', 'winecellar-table-body'], includeSellButton = false) {
@@ -106,7 +108,7 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
     }
 
     inventory.items.forEach(item => {
-        const { resource, amount, state, quality, vintage } = item;
+        const { resource, amount, state, quality, vintage, fieldName } = item;
 
         let tableBodyId;
         let displayAmount = formatNumber(amount);
@@ -134,7 +136,7 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
             const qualityText = `${qualityDescription} (${quality.toFixed(2)})`;
 
             row.innerHTML = `
-                <td>${resource.name}, ${vintage || 'Unknown'}</td>
+                <td>${fieldName}, ${resource.name}, ${vintage || 'Unknown'}</td>
                 <td>${displayAmount}</td>
                 <td class="${colorClass}">${qualityText}</td>
                 <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
