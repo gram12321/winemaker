@@ -269,17 +269,42 @@ export class Task {
 
 // Execute task function
 export function executeTaskFunction(task) {
-    const increment = task.taskFunction();
-    if (increment) {
-        task.workProgress += increment;
-        task.updateProgressBar();
+    if (!task || typeof task.taskFunction !== 'function') {
+        console.error("Invalid task or task function:", task);
+        return;
     }
 
+    // Execute the task function and get the work increment
+    const increment = task.taskFunction(task);
+    if (increment > 0) {
+        // Apply the work progress increment
+        task.workProgress += increment;
+        task.updateProgressBar();
+
+        // Debug: checking task details
+        console.log(`Task ID: ${task.taskId}, Name: ${task.taskName}, New Progress: ${task.workProgress}/${task.workTotal}`);
+
+        // Retrieve all tasks from localStorage, update only the specific task's progress
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const taskIndex = tasks.findIndex(t => t.taskId === task.taskId);
+
+        if (taskIndex !== -1) {
+            // Update just the workProgress field for the specific task
+            tasks[taskIndex].workProgress = task.workProgress;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+
+            // Debug: confirm save
+            console.log(`Progress saved for task ID: ${task.taskId}`);
+        }
+    }
+
+    // Check if the task is complete
     if (task.workProgress >= task.workTotal) {
         task.removeTaskBox();
         console.log(`Task completed: ${task.taskName}, Removing task with ID: ${task.taskId}`);
         removeTask(task.taskId);
 
+        // Log a completion message based on the task type
         switch (task.taskName) {
             case "Planting":
                 addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
@@ -292,6 +317,9 @@ export function executeTaskFunction(task) {
                 break;
             case "Uprooting":
                 addConsoleMessage(`Uprooting task completed for field <strong>${task.fieldName || 'Unknown'}</strong>.`);
+                break;
+            case "Bookkeeping":
+                addConsoleMessage(`Bookkeeping task completed.`);
                 break;
             default:
                 console.warn(`No console message for task name: ${task.taskName}`);

@@ -5,8 +5,7 @@ import { inventoryInstance, displayInventory } from './resource.js'; // Import n
 import { saveInventory } from './database/adminFunctions.js';
 import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions } from './finance.js';
-
-
+import { bookkeepingTaskFunction, handleBookkeepingTask  } from './administration.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -29,6 +28,11 @@ export function incrementWeek() {
     // Only increment the year if we are back to the first week of Spring
     if (currentSeasonIndex === 0 && currentWeek === 1) {
         currentYear += 1;
+    }
+
+    // Check if it's the start of a new season
+    if (currentWeek === 1) {
+        handleBookkeepingTask(); // Initialize the bookkeeping task
     }
 
     // Update the local storage with the new values for week, season, and year

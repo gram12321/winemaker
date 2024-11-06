@@ -6,6 +6,7 @@ import { plantAcres, uproot } from '/js/farmland.js';
 import { harvestAcres} from '/js/vineyard.js';
 import { Staff } from '/js/staff.js'; // Adjust the import path if necessary
 import { addTransaction } from '/js/finance.js'; // Adjust the import path if necessary
+import { bookkeepingTaskFunction } from '/js/administration.js';
 
 
 async function clearFirestore() {
@@ -215,44 +216,42 @@ export function loadTasks() {
     Task.latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
     activeTasks.length = 0; // Clear existing active tasks
 
-    tasks.forEach(taskInfo => {
-        const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-        const field = farmlands[taskInfo.fieldId];
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const inventoryResources = inventoryInstance.items;
 
+    tasks.forEach(taskInfo => {
+        const field = farmlands[taskInfo.fieldId];
         let executeTaskFunction;
         let task;
         let resource;
 
         // Determine the function to execute based on task type
-        if (taskInfo.taskName === "Crushing Grapes") {
-            resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
-            if (resource) {
-                executeTaskFunction = () => grapeCrushing(taskInfo.resourceName);
-            }
-        } else if (taskInfo.taskName === "Fermenting") {
-            resource = inventoryInstance.items.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Must');
-            if (resource) {
-                executeTaskFunction = () => fermentMust(taskInfo.resourceName);
-            }
-        } else if (field) {
-            switch (taskInfo.taskName) {
-                case "Planting":
-                    executeTaskFunction = () => plantAcres(taskInfo.fieldId, taskInfo.resourceName);
-                    break;
-                case "Harvesting":
-                    executeTaskFunction = () => harvestAcres(taskInfo.fieldId);
-                    break;
-                case "Uprooting":
-                    executeTaskFunction = () => uproot(taskInfo.fieldId);
-                    break;
-                default:
-                    console.warn(`Unknown task name: ${taskInfo.taskName}`);
-            }
+        switch (taskInfo.taskName) {
+            case "Crushing Grapes":
+                resource = inventoryResources.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
+                executeTaskFunction = resource ? () => grapeCrushing(taskInfo.resourceName) : null;
+                break;
+            case "Fermenting":
+                resource = inventoryResources.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Must');
+                executeTaskFunction = resource ? () => fermentMust(taskInfo.resourceName) : null;
+                break;
+            case "Bookkeeping":
+                executeTaskFunction = bookkeepingTaskFunction;
+                break;
+            case "Planting":
+                if (field) executeTaskFunction = () => plantAcres(taskInfo.fieldId, taskInfo.resourceName);
+                break;
+            case "Harvesting":
+                if (field) executeTaskFunction = () => harvestAcres(taskInfo.fieldId);
+                break;
+            case "Uprooting":
+                if (field) executeTaskFunction = () => uproot(taskInfo.fieldId);
+                break;
+            default:
+                console.warn(`Unknown task name: ${taskInfo.taskName}`);
         }
 
         if (executeTaskFunction) {
-
-
             task = new Task(
                 taskInfo.taskName,
                 executeTaskFunction,
@@ -264,35 +263,24 @@ export function loadTasks() {
                 taskInfo.quality,
                 taskInfo.iconPath,
                 taskInfo.fieldName,
-                taskInfo.type // Load the type
+                taskInfo.type
             );
+
+            // Load the work progress directly from taskInfo
+            task.workProgress = taskInfo.workProgress || 0;
 
             // Ensure staff is managed as an array
             task.staff = Array.isArray(taskInfo.staff) ? taskInfo.staff : [];
 
-            // Assign task-specific properties
+            // Assign task-specific properties if applicable
             Object.assign(task, {
-                fieldId: taskInfo.fieldId, // Assign if applicable
-                fieldName: taskInfo.fieldName, // Assign if applicable
-                vintage: taskInfo.vintage // Assign vintage
+                fieldId: taskInfo.fieldId,
+                fieldName: taskInfo.fieldName,
+                vintage: taskInfo.vintage
             });
 
-            // Handle task-specific progress
-            if (taskInfo.taskName === "Crushing Grapes" && resource) {
-                task.workProgress = taskInfo.workTotal - resource.amount;
-            } else if (taskInfo.taskName === "Fermenting" && resource) {
-                task.workProgress = taskInfo.workTotal - resource.amount;
-            } else if (taskInfo.taskName === "Planting") {
-                task.workProgress = field.currentAcresPlanted || 0;
-            } else if (taskInfo.taskName === "Harvesting") {
-                task.workProgress = field.currentAcresHarvested || 0;
-            } else if (taskInfo.taskName === "Uprooting") {
-                task.workProgress = field.currentAcresUprooted || 0;
-            }
-
-            // Update the task box with staff information
+            // Initialize the task box with staff information and update visuals
             task.updateTaskBoxWithStaff(task.staff);
-
             task.updateProgressBar(); // Update progress bar initially
             activeTasks.push(task); // Add task to activeTasks array
         }

@@ -309,22 +309,22 @@ function handleUprootTask(index) {
     '',
     iconPath,
     fieldName,
-      'Field'  // Specify the type of the task
+    'Field'  // Specify the type of the task
   );
 
   Object.assign(task, { fieldId: index, fieldName });
 
   saveTask({
-      taskName: task.taskName,
-      fieldId: index,
-      fieldName: task.fieldName,
-      resourceName,
-      taskId: task.taskId,
-      workTotal: totalAcres,
-      vintage: gameYear,
-      iconPath,
-      type: 'Field',  // Ensure type is saved
-      staff: task.staff // Also save staff if needed
+    taskName: task.taskName,
+    fieldId: index,
+    fieldName: task.fieldName,
+    resourceName: field.plantedResourceName, // Fix: Get resourceName from field
+    taskId: task.taskId,
+    workTotal: field.acres,
+    vintage: localStorage.getItem('year') || '',
+    iconPath,
+    type: 'Field',  // Ensure type is saved
+    staff: task.staff  // Also save staff if needed
   });
 
   activeTasks.push(task);
