@@ -1,6 +1,7 @@
 import { formatNumber } from './utils.js';  // Ensure correct path
 import { renderCompanyInfo } from './database/loadSidebar.js';
 
+
 // Function to initialize the finance management page
 function initializeFinance() {
     const cashFlowTable = document.getElementById('cash-flow-table');
@@ -10,6 +11,7 @@ function initializeFinance() {
     if (cashFlowTable && weeklyIncomeElement) {
         loadCashFlow();
         updateIncomeStatement();
+        
     }
 }
 
@@ -122,15 +124,25 @@ export function addRecurringTransaction(type, description, amount, frequencyInWe
 
 // Function to process recurring transactions
 export function processRecurringTransactions(currentWeek) {
-    let recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
+    const recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
+
     recurringTransactions.forEach(transaction => {
+        console.log(`Processing transaction: ${transaction.description}, Current Week: ${currentWeek}, Next Due Week: ${transaction.nextDueWeek}`);  // Debug log
+
         if (currentWeek >= transaction.nextDueWeek) {
             // Record the transaction
             addTransaction(transaction.type, transaction.description, transaction.amount);
+
             // Schedule the next occurrence
             transaction.nextDueWeek += transaction.frequencyInWeeks;
+
+            // Wrap `nextDueWeek` if it goes beyond week 12
+            if (transaction.nextDueWeek > 12) {
+                transaction.nextDueWeek -= 12;
+            }
         }
     });
+
     localStorage.setItem('recurringTransactions', JSON.stringify(recurringTransactions));
 }
 

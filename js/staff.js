@@ -128,7 +128,7 @@ function updateWagesAndRecurringTransaction() {
 
 // Initial wage setup. Use updateWagesAndRecurringTransaction to update wage and recurring transaction
 
-function setupStaffWagesRecurringTransaction() {
+export function setupStaffWagesRecurringTransaction() {
     const totalWages = calculateTotalStaffWages();
     const frequencyInWeeks = 1;
     const description = 'Weekly Staff Wages';
@@ -147,5 +147,3 @@ function setupStaffWagesRecurringTransaction() {
         console.log(`Setup or updated recurring transaction for staff wages: €${totalWages} every ${frequencyInWeeks} week(s).`);
     }
 }
-// Call this function during initialization of the game or after adding staff
-setupStaffWagesRecurringTransaction();

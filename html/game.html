@@ -33,6 +33,7 @@
   <script type="module" src="/js/database/loadSidebar.js"></script>
   <script type="module" src="/js/endDay.js"></script>
   <script type="module" src="/js/loadPanel.js"></script>
+  
   <script type="module">
 
       import { incrementWeek } from '/js/endDay.js'; // Updated import
@@ -41,11 +42,14 @@
       import { initializePanel } from '/js/loadPanel.js';
       import { initializeConsole } from '/js/console.js';
     import { addTransaction} from '/js/finance.js';
+    import {setupStaffWagesRecurringTransaction} from '/js/staff.js';
       
       document.addEventListener('DOMContentLoaded', function () {
           initializePanel();
           initializeSidebar();
           initializeConsole();
+        // Call this function during initialization of the game or after adding staff
+        setupStaffWagesRecurringTransaction();
 
         document.getElementById('add-money-btn').addEventListener('click', () => {
             addTransaction('Income', 'Manual Money Addition', 1000000);

@@ -38,6 +38,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('latestTaskId');
   localStorage.removeItem('staffData');
   localStorage.removeItem('transactions'); // Clear transactions data
+  localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
   console.log("Local storage cleared.");
   Task.latestTaskId = 0; // Reset in memory
 }
