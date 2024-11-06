@@ -8,21 +8,37 @@ import { calculateWorkApplied, getPreviousSeasonAndYear , extractSeasonAndYear }
 export function handleBookkeepingTask() {
     const isTaskAlreadyActive = activeTasks.some(task => task.taskName.startsWith("Bookkeeping"));
 
-    if (!isTaskAlreadyActive) {
+    const currentSeason = localStorage.getItem('season') || 'Unknown Season';
+    const currentYear = parseInt(localStorage.getItem('year'), 10) || new Date().getFullYear();
+    const { previousSeason, previousYear } = getPreviousSeasonAndYear(currentSeason, currentYear);
+
+    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+
+    // Filter transactions by extracting date components
+    const previousSeasonTransactionsCount = transactions.filter(transaction => {
+        const { season, year } = extractSeasonAndYear(transaction.date);
+        return season === previousSeason && year === previousYear;
+    }).length;
+
+    if (isTaskAlreadyActive) {
+        // Find the active task
+        const activeTask = activeTasks.find(task => task.taskName.startsWith("Bookkeeping"));
+
+        if (activeTask) {
+            // Update the workTotal by adding the new count
+            activeTask.workTotal += previousSeasonTransactionsCount;
+
+            // Save the updated task back to localStorage
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskIndex = tasks.findIndex(task => task.taskId === activeTask.taskId);
+            if (taskIndex !== -1) {
+                tasks[taskIndex].workTotal = activeTask.workTotal;
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+        }
+        console.log(`Updated workTotal for active Bookkeeping task: ${activeTask.workTotal}`);
+    } else {
         const iconPath = '/assets/icon/icon_bookkeeping.webp';
-
-        const currentSeason = localStorage.getItem('season') || 'Unknown Season';
-        const currentYear = parseInt(localStorage.getItem('year'), 10) || new Date().getFullYear();
-        const { previousSeason, previousYear } = getPreviousSeasonAndYear(currentSeason, currentYear);
-
-        const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-
-        // Filter transactions by extracting date components
-        const previousSeasonTransactionsCount = transactions.filter(transaction => {
-            const { season, year } = extractSeasonAndYear(transaction.date);
-            return season === previousSeason && year === previousYear;
-        }).length;
-
 
         const taskName = `Bookkeeping, ${currentSeason} ${currentYear}`;
 
