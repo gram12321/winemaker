@@ -37,17 +37,17 @@ class Inventory {
       item.vintage === vintage &&
       item.quality === quality
     );
-
+    
     if (existingItem) {
       existingItem.amount += amount;
     } else {
       // Add a new item if not found
-      this.items.push({
+        this.items.push({
         resource: resource,
         amount: amount,
         state: state,
         vintage: vintage,
-        quality: quality
+        quality: parseFloat(quality) // Ensure quality is stored as a number
       });
     }
   }
@@ -123,10 +123,14 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
         const inventoryTableBody = document.getElementById(tableBodyId);
         if (inventoryTableBody) {
             const row = document.createElement('tr');
+
+            // Format quality as a percentage
+            const formattedQuality = (quality * 100).toFixed(1) + '%';
+
             row.innerHTML = `
                 <td>${resource.name}, ${vintage || 'Unknown'}</td>
                 <td>${displayAmount}</td>
-                <td>${quality}</td>
+                <td>${formattedQuality}</td>
                 <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
                 ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
             `;

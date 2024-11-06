@@ -169,14 +169,17 @@ export function harvestAcres(index) {
             // Calculate the total grapes harvested (Placeholder for tons of grape yield per year/acre)
             const grapesHarvested = farmlandYield(field) * acresHarvested * 5;
 
+            // Determine quality as a numeric value between 0 and 1
+            const quality = Math.random().toFixed(2); // For example, a random quality; replace with your logic
+
             // Add to the inventory using the inventory instance
-            inventoryInstance.addResource(resourceName, grapesHarvested, state, gameYear, 'High');
+            inventoryInstance.addResource(resourceName, grapesHarvested, state, gameYear, quality);
 
             // Format the land size with unit settings
             const harvestedFormatted = formatLandSizeWithUnit(acresHarvested);
             const remainingFormatted = formatLandSizeWithUnit(acresLeftToHarvest - acresHarvested);
 
-            addConsoleMessage(`Harvested <strong>${formatNumber(grapesHarvested)} tons </strong>of ${resourceName} from ${field.name} across <strong>${harvestedFormatted}. </strong> Remaining: ${remainingFormatted}`);
+            addConsoleMessage(`Harvested <strong>${formatNumber(grapesHarvested)} tons </strong>of ${resourceName} with quality ${quality} from ${field.name} across <strong>${harvestedFormatted}. </strong> Remaining: ${remainingFormatted}`);
 
             // Update the acres already harvested
             field.currentAcresHarvested = (field.currentAcresHarvested || 0) + acresHarvested;
