@@ -1,5 +1,5 @@
 import { sellWines } from './endDay.js';
-import { formatNumber } from './utils.js';
+import { formatNumber, getWineQualityCategory, getColorClass  } from './utils.js';
 
 class Resource {
   constructor(name, naturalYield) {
@@ -88,6 +88,8 @@ class Inventory {
 }
 
 
+
+
 function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fermentation-table-body', 'winecellar-table-body'], includeSellButton = false) {
     const warehouseTableBody = document.getElementById('warehouse-table-body');
     const fermentationTableBody = document.getElementById('fermentation-table-body');
@@ -124,13 +126,17 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
         if (inventoryTableBody) {
             const row = document.createElement('tr');
 
-            // Format quality as a percentage
-            const formattedQuality = (quality * 100).toFixed(1) + '%';
+            // Get quality description and color class using utility functions
+            const qualityDescription = getWineQualityCategory(quality);
+            const colorClass = getColorClass(quality);
+
+            // Combine quality description and actual value
+            const qualityText = `${qualityDescription} (${quality.toFixed(2)})`;
 
             row.innerHTML = `
                 <td>${resource.name}, ${vintage || 'Unknown'}</td>
                 <td>${displayAmount}</td>
-                <td>${formattedQuality}</td>
+                <td class="${colorClass}">${qualityText}</td>
                 <td>${state.charAt(0).toUpperCase() + state.slice(1)}</td>
                 ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
             `;

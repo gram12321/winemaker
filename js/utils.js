@@ -33,6 +33,18 @@ export function getColorClass(value) {
   return 'color-class-0'; // This handles 0 as well
 }
 
+export function getWineQualityCategory(quality) {
+  if (quality < 0.1) return "undrinkable";
+  if (quality < 0.2) return "Vinegar Surprise";
+  if (quality < 0.3) return "House Pour";
+  if (quality < 0.4) return "Everyday Sipper";
+  if (quality < 0.5) return "Solid Bottle";
+  if (quality < 0.6) return "Well-Balanced";
+  if (quality < 0.7) return "Sommelier's Choice";
+  if (quality < 0.8) return "Cellar Reserve";
+  if (quality < 0.9) return "Connoisseur's Pick";
+  return "Vintage Perfection";
+}
 
 export function getRandomSoil(country, region) {
   const soils = regionSoilTypes[country][region];
