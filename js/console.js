@@ -30,7 +30,7 @@ function updateConsoleOutputs() {
 
     consoleOutputs.forEach(consoleOutput => {
         consoleOutput.innerHTML = ''; // Clear current messages
-        consoleMessages.slice(-5).forEach(message => {
+        consoleMessages.slice(-10).forEach(message => {
             const messageElement = document.createElement('div');
             messageElement.innerHTML = message;
             consoleOutput.appendChild(messageElement);

@@ -41,7 +41,7 @@ export function incrementWeek() {
     localStorage.setItem('year', currentYear);
 
     // Log the change to console and update any UI elements
-    addConsoleMessage(`Week increased to: <strong>Week ${currentWeek}, ${SEASONS[currentSeasonIndex]}, ${currentYear}</strong>`);
+    addConsoleMessage(`New week: <strong>Week ${currentWeek}, ${SEASONS[currentSeasonIndex]}, ${currentYear}</strong>`);
     renderCompanyInfo();
 
     // Execute any pending tasks for the week

@@ -274,7 +274,8 @@ button.disabled{
   left: 250px; /* Space for the sidebar */
   right: 250px; /* Space for the task panel */
   height: 100px; /* Adjust height as needed */
-  overflow-y: auto;
+  overflow-y: scroll;  /* Ensure vertical scroll is visible when needed */
+  overflow-x: hidden;  /* Hide horizontal scroll to maintain layout integrity */
   background-color: #888;  /* Use the lighter grey from original styles */
   color: #000;             /* Dark text color for better contrast */
   border: 1px solid #333;  /* Subtle border from original styles */
