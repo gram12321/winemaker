@@ -6,6 +6,7 @@ import { saveInventory } from './database/adminFunctions.js';
 import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions, addTransaction } from './finance.js';
 import { handleBookkeepingTask  } from './administration.js';
+import { Farmland } from './farmland.js';  // Ensure the correct relative path is used
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -53,50 +54,62 @@ export function incrementWeek() {
 }
 
 function updateNewYear(field) {
-  if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
-    field.vineAge += 1;
+  // Log the current vine age and calculated prestige before updating
+  console.log(`Before update: ${field.name} - Vine Age: ${field.vineAge}, Prestige: ${field.farmlandPrestige}`);
+
+  if (field.plantedResourceName && field.vineAge != null) {
+    field.vineAge += 1; // Increment vine age
   }
+
+  // Recalculate and log prestige after updating the vine age
+  console.log(`After update: ${field.name} - Vine Age: ${field.vineAge}, Prestige: ${field.farmlandPrestige}`);
 }
 
-export function updateFieldStatuses() {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+// Usage within your existing seasonal cycle logic
+function updateFieldStatuses() {
+  const farmlandsData = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const currentWeek = parseInt(localStorage.getItem('week'), 10);
   const currentSeason = localStorage.getItem('season');
 
-  farmlands.forEach(field => {
-    switch (currentSeason) {
-      case 'Winter':
-        if (currentWeek === 1) {
-          field.status = 'Dormancy';
-        }
-        break;
-      case 'Spring':
-        if (currentWeek === 1) {
-          // Transition from "No yield in first season" to "Growing"
-          if (field.status === "No yield in first season") {
-            field.status = 'Growing';
-          }
+  const farmlands = farmlandsData.map(data => new Farmland(
+    data.id,
+    data.name,
+    data.country,
+    data.region,
+    data.acres,
+    data.plantedResourceName,
+    data.vineAge,
+    data.grape,
+    data.soil,
+    data.altitude,
+    data.aspect,
+    data.density
+  ));
 
-          // Update vine age using the new function
-          updateNewYear(field);
-        }
-        break;
-      case 'Summer':
-        if (currentWeek === 1) {
-          field.status = 'Ripening';
-        }
-        break;
-      case 'Fall':
-        if (currentWeek === 1) {
-          field.status = 'Ready for Harvest';
-        }
-        break;
-      default:
-        break;
+  farmlands.forEach(field => {
+    if (currentSeason === 'Spring' && currentWeek === 1) {
+      updateNewYear(field);
     }
+    // Existing status updates
   });
 
-  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+  // Store updates back to localStorage
+  const updatedData = farmlands.map(f => ({
+    id: f.id,
+    name: f.name,
+    country: f.country,
+    region: f.region,
+    acres: f.acres,
+    plantedResourceName: f.plantedResourceName,
+    vineAge: f.vineAge,
+    grape: f.grape,
+    soil: f.soil,
+    altitude: f.altitude,
+    aspect: f.aspect,
+    density: f.density
+  }));
+
+  localStorage.setItem('ownedFarmlands', JSON.stringify(updatedData));
 }
 
 function updateRipeness() {

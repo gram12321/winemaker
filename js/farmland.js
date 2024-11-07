@@ -24,7 +24,6 @@ class Farmland {
     this.aspect = aspect;
     this.density = density;
     this.landvalue = this.calculateLandvalue();
-    this.farmlandPrestige = this.calculateFarmlandPrestige(); // Initialize prestige
     this.status = 'Dormancy'; // Initialize status
     this.ripeness = 0.1; // Initialize ripeness
   }
@@ -57,6 +56,10 @@ class Farmland {
     const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
 
     return finalPrestige;
+  }
+
+  get farmlandPrestige() {
+    return this.calculateFarmlandPrestige();
   }
 }
 
