@@ -52,46 +52,51 @@ export function incrementWeek() {
     processRecurringTransactions(currentWeek);
 }
 
+function updateNewYear(field) {
+  if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
+    field.vineAge += 1;
+  }
+}
+
 export function updateFieldStatuses() {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const currentWeek = parseInt(localStorage.getItem('week'), 10);
-    const currentSeason = localStorage.getItem('season');
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const currentWeek = parseInt(localStorage.getItem('week'), 10);
+  const currentSeason = localStorage.getItem('season');
 
-    farmlands.forEach(field => {
-        switch (currentSeason) {
-            case 'Winter':
-                if (currentWeek === 1) {
-                    field.status = 'Dormancy';
-                }
-                break;
-            case 'Spring':
-                if (currentWeek === 1) {
-                    // Transition from "No yield in first season" to "Growing"
-                    if (field.status === "No yield in first season") {
-                        field.status = 'Growing';
-                    }
-
-                    if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
-                        field.vineAge += 1;
-                    }
-                }
-                break;
-            case 'Summer':
-                if (currentWeek === 1) {
-                    field.status = 'Ripening';
-                }
-                break;
-            case 'Fall':
-                if (currentWeek === 1) {
-                    field.status = 'Ready for Harvest';
-                }
-                break;
-            default:
-                break;
+  farmlands.forEach(field => {
+    switch (currentSeason) {
+      case 'Winter':
+        if (currentWeek === 1) {
+          field.status = 'Dormancy';
         }
-    });
+        break;
+      case 'Spring':
+        if (currentWeek === 1) {
+          // Transition from "No yield in first season" to "Growing"
+          if (field.status === "No yield in first season") {
+            field.status = 'Growing';
+          }
 
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+          // Update vine age using the new function
+          updateNewYear(field);
+        }
+        break;
+      case 'Summer':
+        if (currentWeek === 1) {
+          field.status = 'Ripening';
+        }
+        break;
+      case 'Fall':
+        if (currentWeek === 1) {
+          field.status = 'Ready for Harvest';
+        }
+        break;
+      default:
+        break;
+    }
+  });
+
+  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
 function updateRipeness() {
