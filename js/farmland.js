@@ -35,25 +35,26 @@ class Farmland {
 
   farmlandAgePrestigeModifier() {
     const age = parseFloat(this.vineAge);
-
-    if (age < 0) {
+    if (isNaN(age) || age < 0) {
       return 0;
     } else if (age <= 3) {
-      return (Math.max(age, 0) * Math.max(age, 0)) / 100 + 0.01;
+      return (age * age) / 100 + 0.01;
     } else if (age <= 25) {
       return 0.1 + (age - 3) * (0.4 / 22);
+    } else if (age <= 100) {
+      return 0.5 + (Math.atan((age - 25) / 20) / Math.PI) * (0.95 - 0.5);
     } else {
-      return 0.5 + (Math.atan((age - 25) / 20) / Math.PI) * 0.9;
+      return 0.95;
     }
   }
 
   calculateFarmlandPrestige() {
     const ageModifier = this.farmlandAgePrestigeModifier();
-    const landvalueNormalized = this.landvalue / 100; // Normalize land value
+    const landvalueNormalized = this.landvalue / 100; // Normalize to a range of 0-1
     const prestigeRanking = regionPrestigeRankings[`${this.region}, ${this.country}`] || 0;
 
-    // Calculate final prestige using all factors
-    const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3;
+    // Avoid division by zero by ensuring the denominator is not zero
+    const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
 
     return finalPrestige;
   }
