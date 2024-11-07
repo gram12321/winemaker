@@ -1,5 +1,5 @@
 import { addConsoleMessage  } from '/js/console.js';
-import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor  } from '/js/names.js'; // Import names and country-region map
+import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames } from './names.js';
 import { allResources, getResourceByName, inventoryInstance  } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
@@ -7,6 +7,7 @@ import { Task } from './loadPanel.js';
 import { getFlagIcon, formatNumber, calculateWorkApplied } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
+
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
@@ -23,6 +24,7 @@ class Farmland {
     this.aspect = aspect;
     this.density = density;
     this.landvalue = this.calculateLandvalue();
+    this.farmlandPrestige = this.calculateFarmlandPrestige(); // Initialize prestige
     this.status = 'Dormancy'; // Initialize status
     this.ripeness = 0.1; // Initialize ripeness
   }
@@ -30,7 +32,33 @@ class Farmland {
   calculateLandvalue() {
     return calculateAndNormalizePriceFactor(this.country, this.region, this.altitude, this.aspect);
   }
+
+  farmlandAgePrestigeModifier() {
+    const age = parseFloat(this.vineAge);
+
+    if (age < 0) {
+      return 0;
+    } else if (age <= 3) {
+      return (Math.max(age, 0) * Math.max(age, 0)) / 100 + 0.01;
+    } else if (age <= 25) {
+      return 0.1 + (age - 3) * (0.4 / 22);
+    } else {
+      return 0.5 + (Math.atan((age - 25) / 20) / Math.PI) * 0.9;
+    }
+  }
+
+  calculateFarmlandPrestige() {
+    const ageModifier = this.farmlandAgePrestigeModifier();
+    const landvalueNormalized = this.landvalue / 100; // Normalize land value
+    const prestigeRanking = regionPrestigeRankings[`${this.region}, ${this.country}`] || 0;
+
+    // Calculate final prestige using all factors
+    const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3;
+
+    return finalPrestige;
+  }
 }
+
 
 export function farmlandYield(farmland) {
   if (farmland.plantedResourceName) {

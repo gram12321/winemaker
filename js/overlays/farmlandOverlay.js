@@ -1,5 +1,5 @@
 // Import necessary utility functions and classes
-import { formatNumber, getColorClass, getFlagIcon } from '../utils.js'; // Make sure to include getFlagIcon
+import { formatNumber, getColorClass, getFlagIcon } from '../utils.js';
 import { regionAspectRatings } from '/js/names.js';
 import { Farmland } from '/js/farmland.js';
 
@@ -32,6 +32,9 @@ export function showFarmlandOverlay(farmlandData) {
     const landValue = farmland.calculateLandvalue();
     const flagIcon = getFlagIcon(farmland.country);
 
+    // Calculate the farmland prestige using the Farmland instance method
+    const farmlandPrestige = farmland.calculateFarmlandPrestige();
+
     // Update details utilizing farmland object, including the ripeness value
     details.innerHTML = `
       <div class="overlay-content">
@@ -63,6 +66,10 @@ export function showFarmlandOverlay(farmlandData) {
             <tr>
               <td>Planted Resource</td>
               <td>${farmland.plantedResourceName || 'None'}</td>
+            </tr>
+            <tr>
+              <td>Farmland Prestige</td>
+              <td>${formatNumber(farmlandPrestige, 2)}</td>
             </tr>
           </tbody>
         </table>
