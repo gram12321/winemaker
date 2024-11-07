@@ -49,10 +49,16 @@ class Farmland {
 
   calculateFarmlandPrestige() {
     const ageModifier = this.farmlandAgePrestigeModifier();
-    const landvalueNormalized = this.landvalue / 100; // Normalize to a range of 0-1
+
+    // Normalize using the new theoretical maximum of finalPriceFactor
+    const landvalueNormalized = (this.landvalue / 190000) || 0;
+
     const prestigeRanking = regionPrestigeRankings[`${this.region}, ${this.country}`] || 0;
 
-    // Avoid division by zero by ensuring the denominator is not zero
+    console.log('Age Modifier:', ageModifier);
+    console.log('Land Value Normalized:', landvalueNormalized);
+    console.log('Prestige Ranking:', prestigeRanking);
+
     const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
 
     return finalPrestige;
