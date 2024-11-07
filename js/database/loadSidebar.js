@@ -1,5 +1,6 @@
 import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
 import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
+import { Farmland } from '../farmland.js'; // Ensure the correct path
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -30,15 +31,40 @@ export function initializeSidebar() {
         .catch(error => console.error('Error loading sidebar:', error));
 }
 
+
 export function calculateCompanyPrestige() {
-    
     // Get money from localStorage to use in calculate prestige
     const money = parseFloat(localStorage.getItem('money') || '0');
 
-    // Function for calculation of prestige
-    const companyPrestige = money/1000000;
+    // Calculate the prestige based on money
+    const moneyPrestige = money / 10000000;
 
-    // Update localStorage with calcuated prestige
+    // Retrieve owned farmlands from localStorage
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+
+    // Calculate total farmland prestige
+    const totalFarmlandPrestige = farmlands.reduce((total, farmlandData) => {
+        const farmland = new Farmland(
+            farmlandData.id, 
+            farmlandData.name, 
+            farmlandData.country, 
+            farmlandData.region, 
+            farmlandData.acres, 
+            farmlandData.plantedResourceName, 
+            farmlandData.vineAge, 
+            farmlandData.grape, 
+            farmlandData.soil, 
+            farmlandData.altitude, 
+            farmlandData.aspect, 
+            farmlandData.density
+        );
+        return total + farmland.farmlandPrestige;
+    }, 0);
+
+    // Combine money prestige and farmland prestige
+    const companyPrestige = moneyPrestige + totalFarmlandPrestige;
+
+    // Update localStorage with the calculated prestige
     localStorage.setItem('companyPrestige', companyPrestige.toString());
 
     return companyPrestige;
@@ -69,7 +95,7 @@ export function renderCompanyInfo() {
           </div>
           <div class="info-item">
             <span class="info-label"><img src="/assets/icon/small/prestige.png" alt="Prestige Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content"> ${formatNumber(companyPrestige.toFixed(0), 0)}</span>
+            <span class="info-content"> ${formatNumber(companyPrestige.toFixed(2), 0)}</span>
           </div>
           <div class="styled-line"></div>
         `;
