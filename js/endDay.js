@@ -7,6 +7,7 @@ import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions, addTransaction } from './finance.js';
 import { handleBookkeepingTask  } from './administration.js';
 import { Farmland } from './farmland.js';  // Ensure the correct relative path is used
+import { applyPrestigeHit } from './database/loadSidebar.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -143,6 +144,9 @@ function updateRipeness() {
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
+
+
+
 export function sellWines(resourceName) {
     const resourceIndex = inventoryInstance.items.findIndex(item => item.resource.name === resourceName && item.state === 'Bottle');
 
@@ -152,8 +156,14 @@ export function sellWines(resourceName) {
         if (resource.amount > 0) {
             resource.amount -= 1; // Reduce the inventory by 1
 
+            const sellingPrice = 100; // Assume a fixed selling price for now. Adjust if dynamic pricing is used.
+
             // Log the sale transaction and update the balance
-            addTransaction('Income', 'Wine Sale', 100);
+            addTransaction('Income', 'Wine Sale', sellingPrice);
+
+            // Calculate the prestige hit and apply it
+            const prestigeHit = sellingPrice / 100;
+            applyPrestigeHit(prestigeHit);
 
             if (resource.amount === 0) {
                 // Optionally remove the item if the amount reaches zero

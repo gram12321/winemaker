@@ -31,18 +31,34 @@ export function initializeSidebar() {
         .catch(error => console.error('Error loading sidebar:', error));
 }
 
+export function applyPrestigeHit(amount) {
+    // Retrieve the current prestige hit from localStorage
+    let currentPrestigeHit = parseFloat(localStorage.getItem('currentPrestigeHit') || '0');
+
+    // Add the specified amount to the current prestige hit
+    currentPrestigeHit += amount;
+
+    // Store the updated prestige hit back in localStorage
+    localStorage.setItem('currentPrestigeHit', currentPrestigeHit.toString());
+}
+
+export function decayPrestigeHit() {
+    // Retrieve the current prestige hit from localStorage
+    let currentPrestigeHit = parseFloat(localStorage.getItem('currentPrestigeHit') || '0');
+
+    // Decay the prestige hit by 10%
+    currentPrestigeHit *= 0.9; // Apply the 10% decay factor
+
+    // Store the updated prestige hit back in localStorage
+    localStorage.setItem('currentPrestigeHit', currentPrestigeHit.toString());
+}
+
 
 export function calculateCompanyPrestige() {
-    // Get money from localStorage to use in calculate prestige
     const money = parseFloat(localStorage.getItem('money') || '0');
-
-    // Calculate the prestige based on money
     const moneyPrestige = money / 10000000;
-
-    // Retrieve owned farmlands from localStorage
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 
-    // Calculate total farmland prestige
     const totalFarmlandPrestige = farmlands.reduce((total, farmlandData) => {
         const farmland = new Farmland(
             farmlandData.id, 
@@ -61,10 +77,10 @@ export function calculateCompanyPrestige() {
         return total + farmland.farmlandPrestige;
     }, 0);
 
-    // Combine money prestige and farmland prestige
-    const companyPrestige = moneyPrestige + totalFarmlandPrestige;
+    const currentPrestigeHit = parseFloat(localStorage.getItem('currentPrestigeHit') || '0');
 
-    // Update localStorage with the calculated prestige
+    const companyPrestige = moneyPrestige + totalFarmlandPrestige + currentPrestigeHit;
+
     localStorage.setItem('companyPrestige', companyPrestige.toString());
 
     return companyPrestige;
