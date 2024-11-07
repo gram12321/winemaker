@@ -50,7 +50,7 @@ class Farmland {
   calculateFarmlandPrestige() {
     const ageModifier = this.farmlandAgePrestigeModifier();
 
-    // Normalize using the new theoretical maximum of finalPriceFactor
+    // Normalize using the new theoretical maximum of finalPriceFactor. Devide by 190000. Normalizing all landvalues below top 3 regions to 0-1 values. (IE allowing >1 normalized for Burgogne, Champagne, and Napa Vallay )
     const landvalueNormalized = (this.landvalue / 190000) || 0;
 
     const prestigeRanking = regionPrestigeRankings[`${this.region}, ${this.country}`] || 0;
