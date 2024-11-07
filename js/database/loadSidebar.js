@@ -30,12 +30,29 @@ export function initializeSidebar() {
         .catch(error => console.error('Error loading sidebar:', error));
 }
 
+export function calculateCompanyPrestige() {
+    
+    // Get money from localStorage to use in calculate prestige
+    const money = parseFloat(localStorage.getItem('money') || '0');
+
+    // Function for calculation of prestige
+    const companyPrestige = money/1000000;
+
+    // Update localStorage with calcuated prestige
+    localStorage.setItem('companyPrestige', companyPrestige.toString());
+
+    return companyPrestige;
+}
+
 export function renderCompanyInfo() {
+    // Calculate companyPrestige based on current money
+    calculateCompanyPrestige();
     const companyName = localStorage.getItem('companyName');
-    const money = parseFloat(localStorage.getItem('money') || '0'); // Convert to a number
-    const currentWeek = localStorage.getItem('week'); // Updated to week
+    const money = parseFloat(localStorage.getItem('money') || '0');
+    const currentWeek = localStorage.getItem('week');
     const currentSeason = localStorage.getItem('season');
     const currentYear = localStorage.getItem('year');
+    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige') || '0');
     const companyInfoDiv = document.getElementById('companyInfo');
 
     if (companyInfoDiv) {
@@ -43,13 +60,16 @@ export function renderCompanyInfo() {
           <div class="company-name">${companyName}</div>
           <div class="styled-line"></div>
           <div class="info-item date-info">
-            <span class="info-label"><img src="/assets/icon/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content">Week ${currentWeek}, ${currentSeason}, ${currentYear}</span> <!-- Updated text -->
+            <span class="info-label"><img src="/assets/icon/small/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
+            <span class="info-content">Week ${currentWeek}, ${currentSeason}, ${currentYear}</span>
           </div>
-
           <div class="info-item">
-            <span class="info-label"><img src="/assets/icon/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content">€ ${formatNumber(money, 0)}</span> <!-- Specify 2 decimals -->
+            <span class="info-label"><img src="/assets/icon/small/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
+            <span class="info-content">€ ${formatNumber(money, 0)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><img src="/assets/icon/small/prestige.png" alt="Prestige Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
+            <span class="info-content"> ${formatNumber(companyPrestige.toFixed(0), 0)}</span>
           </div>
           <div class="styled-line"></div>
         `;

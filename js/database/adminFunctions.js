@@ -31,6 +31,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('week');
   localStorage.removeItem('season');
   localStorage.removeItem('year');
+  localStorage.removeItem('companyPrestige');
   localStorage.removeItem('ownedFarmlands');
   localStorage.removeItem('playerInventory');
   localStorage.removeItem('consoleMessages');
@@ -56,6 +57,7 @@ async function storeCompanyName() {
       } else {
         localStorage.setItem('companyName', companyName);
         localStorage.setItem('money', 0); // Initialize money with 10000000
+        localStorage.setItem('companyPrestige', 0);
 
         // Set initial date values before logging the transaction
         localStorage.setItem('week', 1); // Initialize day
@@ -107,6 +109,7 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('week', data.week);
     localStorage.setItem('season', data.season);
     localStorage.setItem('year', data.year);
+      localStorage.setItem('companyPrestige', data.companyPrestige);
     localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
     localStorage.setItem('playerInventory', data.playerInventory || '[]');
     localStorage.setItem('staffData', data.staffData || '[]');
@@ -123,6 +126,7 @@ async function saveCompanyInfo() {
   const week = localStorage.getItem('week');
   const season = localStorage.getItem('season');
   const year = localStorage.getItem('year');
+    const companyPrestige = localStorage.getItem('companyPrestige');
   const ownedFarmlands = localStorage.getItem('ownedFarmlands');
   const playerInventory = localStorage.getItem('playerInventory');
   const staffData = localStorage.getItem('staffData');
@@ -142,6 +146,7 @@ async function saveCompanyInfo() {
       week,
       season,
       year,
+        companyPrestige,
       ownedFarmlands,
       playerInventory,
       staffData,
