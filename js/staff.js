@@ -143,6 +143,5 @@ export function setupStaffWagesRecurringTransaction() {
     if (!existingTransaction || existingTransaction.amount !== -totalWages) {
         // Add or update the transaction only if it doesn't exist or is outdated
         addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
-        console.log(`Setup or updated recurring transaction for staff wages: €${totalWages} every ${frequencyInWeeks} week(s).`);
     }
 }

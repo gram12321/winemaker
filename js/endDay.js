@@ -54,29 +54,13 @@ export function incrementWeek() {
     processRecurringTransactions(currentWeek);
 }
 
-// Function to handle logic that occurs at the start of a new year
-function startOfNewYear() {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-
-    // Loop through each farmland and update vine age
-    farmlands.forEach(field => {
-        if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
-            field.vineAge += 1; // Increment the vine age
-        }
-    });
-
-    // Update the farmlands in local storage
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-}
 
 export function updateFieldStatuses() {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const currentWeek = parseInt(localStorage.getItem('week'), 10);
     const currentSeason = localStorage.getItem('season');
 
-    if (currentSeason === 'Spring' && currentWeek === 1) {
-        startOfNewYear(); // Call the startOfNewYear function at the beginning of spring
-    }
+    
 
     farmlands.forEach(field => {
         switch (currentSeason) {
@@ -87,9 +71,21 @@ export function updateFieldStatuses() {
                 break;
             case 'Spring':
                 if (currentWeek === 1) {
+                    
+                    // Set field to Growing if its second season for a crop
+                    
                     if (field.status === "No yield in first season") {
                         field.status = 'Growing';
                     }
+
+                    // Incrent vinage +1 for everyfield on first week of spring
+                    
+                    farmlands.forEach(field => {
+                        if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
+                            field.vineAge += 1; // Increment the vine age
+                        }
+                    });
+                
                 }
                 break;
             case 'Summer':

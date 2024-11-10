@@ -115,7 +115,6 @@ export function addRecurringTransaction(type, description, amount, frequencyInWe
             frequencyInWeeks,
             nextDueWeek: currentWeek + frequencyInWeeks
         });
-        console.log(`Added new recurring transaction: ${description}`);
     }
     // Save the transactions back to localStorage
     localStorage.setItem('recurringTransactions', JSON.stringify(recurringTransactions));

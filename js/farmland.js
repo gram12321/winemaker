@@ -55,10 +55,6 @@ class Farmland {
 
     const prestigeRanking = regionPrestigeRankings[`${this.region}, ${this.country}`] || 0;
 
-    console.log('Age Modifier:', ageModifier);
-    console.log('Land Value Normalized:', landvalueNormalized);
-    console.log('Prestige Ranking:', prestigeRanking);
-
     const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
 
     return finalPrestige;
