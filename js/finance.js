@@ -126,7 +126,6 @@ export function processRecurringTransactions(currentWeek) {
     const recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
 
     recurringTransactions.forEach(transaction => {
-        console.log(`Processing transaction: ${transaction.description}, Current Week: ${currentWeek}, Next Due Week: ${transaction.nextDueWeek}`);  // Debug log
 
         if (currentWeek >= transaction.nextDueWeek) {
             // Record the transaction
