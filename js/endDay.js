@@ -5,8 +5,8 @@ import { inventoryInstance, displayInventory } from './resource.js'; // Import n
 import { saveInventory } from './database/adminFunctions.js';
 import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions, addTransaction } from './finance.js';
-import { handleBookkeepingTask  } from './administration.js';
-import { Farmland } from './farmland.js';  // Ensure the correct relative path is used
+import { handleBookkeepingTask } from './administration.js';
+import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { applyPrestigeHit } from './database/loadSidebar.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
@@ -54,63 +54,60 @@ export function incrementWeek() {
     processRecurringTransactions(currentWeek);
 }
 
-function updateNewYear(field) {
-  // Log the current vine age and calculated prestige before updating
-  console.log(`Before update: ${field.name} - Vine Age: ${field.vineAge}, Prestige: ${field.farmlandPrestige}`);
+// Function to handle logic that occurs at the start of a new year
+function startOfNewYear() {
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 
-  if (field.plantedResourceName && field.vineAge != null) {
-    field.vineAge += 1; // Increment vine age
-  }
+    // Loop through each farmland and update vine age
+    farmlands.forEach(field => {
+        if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
+            field.vineAge += 1; // Increment the vine age
+        }
+    });
 
-  // Recalculate and log prestige after updating the vine age
-  console.log(`After update: ${field.name} - Vine Age: ${field.vineAge}, Prestige: ${field.farmlandPrestige}`);
+    // Update the farmlands in local storage
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
-// Usage within your existing seasonal cycle logic
-function updateFieldStatuses() {
-  const farmlandsData = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const currentWeek = parseInt(localStorage.getItem('week'), 10);
-  const currentSeason = localStorage.getItem('season');
+export function updateFieldStatuses() {
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const currentWeek = parseInt(localStorage.getItem('week'), 10);
+    const currentSeason = localStorage.getItem('season');
 
-  const farmlands = farmlandsData.map(data => new Farmland(
-    data.id,
-    data.name,
-    data.country,
-    data.region,
-    data.acres,
-    data.plantedResourceName,
-    data.vineAge,
-    data.grape,
-    data.soil,
-    data.altitude,
-    data.aspect,
-    data.density
-  ));
-
-  farmlands.forEach(field => {
     if (currentSeason === 'Spring' && currentWeek === 1) {
-      updateNewYear(field);
+        startOfNewYear(); // Call the startOfNewYear function at the beginning of spring
     }
-    // Existing status updates
-  });
 
-  // Store updates back to localStorage
-  const updatedData = farmlands.map(f => ({
-    id: f.id,
-    name: f.name,
-    country: f.country,
-    region: f.region,
-    acres: f.acres,
-    plantedResourceName: f.plantedResourceName,
-    vineAge: f.vineAge,
-    grape: f.grape,
-    soil: f.soil,
-    altitude: f.altitude,
-    aspect: f.aspect,
-    density: f.density
-  }));
+    farmlands.forEach(field => {
+        switch (currentSeason) {
+            case 'Winter':
+                if (currentWeek === 1) {
+                    field.status = 'Dormancy';
+                }
+                break;
+            case 'Spring':
+                if (currentWeek === 1) {
+                    if (field.status === "No yield in first season") {
+                        field.status = 'Growing';
+                    }
+                }
+                break;
+            case 'Summer':
+                if (currentWeek === 1) {
+                    field.status = 'Ripening';
+                }
+                break;
+            case 'Fall':
+                if (currentWeek === 1) {
+                    field.status = 'Ready for Harvest';
+                }
+                break;
+            default:
+                break;
+        }
+    });
 
-  localStorage.setItem('ownedFarmlands', JSON.stringify(updatedData));
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
 function updateRipeness() {
@@ -144,9 +141,6 @@ function updateRipeness() {
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
-
-
-
 export function sellWines(resourceName) {
     const resourceIndex = inventoryInstance.items.findIndex(item => item.resource.name === resourceName && item.state === 'Bottle');
 
@@ -156,12 +150,12 @@ export function sellWines(resourceName) {
         if (resource.amount > 0) {
             resource.amount -= 1; // Reduce the inventory by 1
 
-            const sellingPrice = 100; // Assume a fixed selling price for now. Adjust if dynamic pricing is used.
+            const sellingPrice = 100; // Assume a fixed selling price for now
 
             // Log the sale transaction and update the balance
             addTransaction('Income', 'Wine Sale', sellingPrice);
 
-            // Calculate the prestige hit and apply it
+            // Optionally handle prestige effects if used
             const prestigeHit = sellingPrice / 100;
             applyPrestigeHit(prestigeHit);
 
