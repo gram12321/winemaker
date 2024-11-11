@@ -9,6 +9,19 @@ import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 
 
+// Standalone function to calculate farmland prestige
+function calculateFarmlandPrestige(farmland) {
+  const ageModifier = farmland.farmlandAgePrestigeModifier();
+
+  // Normalize using the theoretical maximum. Divide by 190000. 
+  const landvalueNormalized = (farmland.landvalue / 190000) || 0;
+  const prestigeRanking = regionPrestigeRankings[`${farmland.region}, ${farmland.country}`] || 0;
+
+  const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
+
+  return finalPrestige;
+}
+
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
     this.id = id;
@@ -26,6 +39,7 @@ class Farmland {
     this.landvalue = this.calculateLandvalue();
     this.status = 'Dormancy'; // Initialize status
     this.ripeness = 0.1; // Initialize ripeness
+    this.farmlandPrestige = calculateFarmlandPrestige(this); // Initialize with the calculated prestige
   }
 
   calculateLandvalue() {
@@ -45,23 +59,6 @@ class Farmland {
     } else {
       return 0.95;
     }
-  }
-
-  calculateFarmlandPrestige() {
-    const ageModifier = this.farmlandAgePrestigeModifier();
-
-    // Normalize using the new theoretical maximum of finalPriceFactor. Devide by 190000. Normalizing all landvalues below top 3 regions to 0-1 values. (IE allowing >1 normalized for Burgogne, Champagne, and Napa Vallay )
-    const landvalueNormalized = (this.landvalue / 190000) || 0;
-
-    const prestigeRanking = regionPrestigeRankings[`${this.region}, ${this.country}`] || 0;
-
-    const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
-
-    return finalPrestige;
-  }
-
-  get farmlandPrestige() {
-    return this.calculateFarmlandPrestige();
   }
 }
 

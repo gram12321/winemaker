@@ -32,8 +32,8 @@ export function showFarmlandOverlay(farmlandData) {
     const landValue = farmland.calculateLandvalue();
     const flagIcon = getFlagIcon(farmland.country);
 
-    // Calculate the farmland prestige using the Farmland instance method
-    const farmlandPrestige = farmland.calculateFarmlandPrestige();
+    // Use the farmlandPrestige property instead of calling the method
+    const farmlandPrestige = farmland.farmlandPrestige;
 
     // Update details utilizing farmland object, including the ripeness value
     details.innerHTML = `
