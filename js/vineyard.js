@@ -149,6 +149,8 @@ export function harvestAcres(index) {
 
     if (field && field.plantedResourceName) {
         console.log('Field Name:', field.name); // Log to verify field name is being retrieved
+        console.log('Field Prestige:', field.farmlandPrestige); // Log to verify field prestige
+
         const resourceName = field.plantedResourceName;
         const state = 'Grapes';
         const gameYear = parseInt(localStorage.getItem('year'), 10);
@@ -157,22 +159,26 @@ export function harvestAcres(index) {
         const currentTask = tasks.find(task => task.taskName === "Harvesting" && task.fieldId === index);
 
         const workApplied = calculateWorkApplied(currentTask?.staff || []);
-        let acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
+        const acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
         const acresHarvested = Math.min(workApplied, acresLeftToHarvest);
 
         if (acresHarvested > 0) {
             const grapesHarvested = farmlandYield(field) * acresHarvested * 5;
             const quality = Math.random().toFixed(2); // Random quality placeholder
 
-            console.log('Adding resource with field name:', field.name); // Log before adding resource
-            // Add the harvested grapes to the inventory, including the field name
+            // Log before adding resource
+            console.log('Adding resource with field name:', field.name);
+            console.log('Adding resource with field prestige:', field.farmlandPrestige);
+
+            // Add the harvested grapes to the inventory, including the field name and prestige
             inventoryInstance.addResource(
                 resourceName,
                 grapesHarvested,
                 state,
                 gameYear,
                 quality,
-                field.name // Pass the field's name to the addResource method
+                field.name, // Pass the field's name to the addResource method
+                field.farmlandPrestige // Pass the field's prestige to the addResource method
             );
 
             const harvestedFormatted = `${acresHarvested} acres`; // Format harvested info
@@ -180,6 +186,7 @@ export function harvestAcres(index) {
 
             addConsoleMessage(`Harvested <strong>${formatNumber(grapesHarvested)} tons</strong> of ${resourceName} with quality ${quality} from ${field.name} across <strong>${harvestedFormatted}</strong>. Remaining: ${remainingFormatted}`);
 
+            // Update field's harvested state
             field.currentAcresHarvested = (field.currentAcresHarvested || 0) + acresHarvested;
 
             if (field.currentAcresHarvested >= totalAcres) {
@@ -188,6 +195,7 @@ export function harvestAcres(index) {
                 field.status = 'Harvested';
             }
 
+            // Save updated inventory and farmland status
             saveInventory();
             localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 

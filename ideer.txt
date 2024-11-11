@@ -27,6 +27,7 @@ Viticulturist (Vineyard Manager)       26.54        44.23     1061.54     1769.2
 Known Bugs:
 -Save load Owned land and staff (Safe to firestore, but dont restore from localstorage)
 Allow winery-task on same field,grape,vintage if different entry (IE different quality)
+Possible a bug in AmountWork. That calculates workforce of staff without taking care if workers split their workforce to several task
 
 
 QoL Improvement
