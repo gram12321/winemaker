@@ -179,7 +179,6 @@ export function handleFermentationTask(selectedResource) {
     }
 }
 
-
 export function fermentMust(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');
 
@@ -187,16 +186,6 @@ export function fermentMust(selectedResource) {
         addConsoleMessage(`Unable to ferment ${selectedResource}. Ensure there is sufficient quantity of Must.`);
         return 0; // Return 0 if no progress is made
     }
-
-    // Log the current resource details before fermentation
-    console.log(`Resource for fermentation:`, {
-        name: resource.resource.name,
-        amount: resource.amount,
-        state: resource.state,
-        vintage: resource.vintage,
-        quality: resource.quality,
-        fieldName: resource.fieldName, // Log fieldName
-    });
 
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Fermenting" && task.resourceName === selectedResource);
@@ -207,22 +196,9 @@ export function fermentMust(selectedResource) {
     // Ferment only the work that can be applied or the amount available, whichever is smaller
     const actualIncrement = Math.min(workApplied, resource.amount);
 
-    // Log fermentation details
-    console.log(`Fermentation details:`, { actualIncrement, fieldName: resource.fieldName });
-
     // Remove units from the must resource and add as bottles, include fieldName
     inventoryInstance.removeResource(resource.resource.name, actualIncrement, 'Must', resource.vintage, resource.quality, resource.fieldName);
     inventoryInstance.addResource(resource.resource.name, actualIncrement, 'Bottle', resource.vintage, resource.quality, resource.fieldName);
-
-    // Log updated inventory
-    console.log(`Updated inventory with bottled resource:`, {
-        name: resource.resource.name,
-        amount: actualIncrement,
-        state: 'Bottle',
-        vintage: resource.vintage,
-        quality: resource.quality,
-        fieldName: resource.fieldName,
-    });
 
     // Persist changes
     saveInventory();

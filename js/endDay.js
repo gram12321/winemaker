@@ -7,7 +7,7 @@ import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions, addTransaction } from './finance.js';
 import { handleBookkeepingTask } from './administration.js';
 import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
-import { applyPrestigeHit } from './database/loadSidebar.js';
+import { applyPrestigeHit, decayPrestigeHit } from './database/loadSidebar.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -50,17 +50,25 @@ export function incrementWeek() {
     executeAllTasks();
     updateFieldStatuses();
     updateRipeness();
+    decayPrestigeHit()
     // Process recurring transactions based on updated week
     processRecurringTransactions(currentWeek);
 }
 
+// Define the new function to increment the vine age
+export function updateNewYear(farmlands) {
+    farmlands.forEach(field => {
+        if (field.plantedResourceName) { // Check that there is something plantet on the field
+            field.vineAge += 1; // Increment the vine age
+        }
+    });
+}
 
+// Updated updateFieldStatuses function
 export function updateFieldStatuses() {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const currentWeek = parseInt(localStorage.getItem('week'), 10);
     const currentSeason = localStorage.getItem('season');
-
-    
 
     farmlands.forEach(field => {
         switch (currentSeason) {
@@ -71,21 +79,13 @@ export function updateFieldStatuses() {
                 break;
             case 'Spring':
                 if (currentWeek === 1) {
-                    
-                    // Set field to Growing if its second season for a crop
-                    
+                    // Set field to Growing if it's the second season for a crop
                     if (field.status === "No yield in first season") {
                         field.status = 'Growing';
                     }
 
-                    // Incrent vinage +1 for everyfield on first week of spring
-                    
-                    farmlands.forEach(field => {
-                        if (field.plantedResourceName && field.vineAge !== null && field.vineAge !== undefined) {
-                            field.vineAge += 1; // Increment the vine age
-                        }
-                    });
-                
+                    // Increment vine age for every field on the first week of spring
+                    updateNewYear(farmlands);
                 }
                 break;
             case 'Summer':
@@ -152,7 +152,7 @@ export function sellWines(resourceName) {
             addTransaction('Income', 'Wine Sale', sellingPrice);
 
             // Optionally handle prestige effects if used
-            const prestigeHit = sellingPrice / 100;
+            const prestigeHit = sellingPrice / 1000;
             applyPrestigeHit(prestigeHit);
 
             if (resource.amount === 0) {
