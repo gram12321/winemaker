@@ -5,8 +5,6 @@ import { Task } from './loadPanel.js'; // Import the Task class used for tasks
 import { inventoryInstance } from '/js/resource.js';
 import { farmlandYield } from '/js/farmland.js';
 
-
-
 export function displayVineyardEntries() {
   const vineyardEntries = document.querySelector('#vineyard-entries');
   vineyardEntries.innerHTML = ''; // Clear existing entries
