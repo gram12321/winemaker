@@ -65,14 +65,14 @@ export class Staff {
   }
 }
 
-function getLastNameForNationality(nationality) {
+export function getLastNameForNationality(nationality) {
   const lastNamesList = lastNamesByCountry[nationality];
   return lastNamesList ? lastNamesList[Math.floor(Math.random() * lastNamesList.length)] : 'Unknown';
 }
 function randomizeSkills() {
   return Math.random().toFixed(2);
 }
-function createNewStaff() {
+export function createNewStaff() {
   const nationality = Staff.prototype.selectNationality();
   const firstName = Staff.prototype.getNameForNationality(nationality);
   const lastName = getLastNameForNationality(nationality);

@@ -4,9 +4,10 @@ import { Task } from '../loadPanel.js'
 import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
 import { plantAcres, uproot } from '/js/farmland.js';
 import { harvestAcres} from '/js/vineyard.js';
-import { Staff } from '/js/staff.js'; // Adjust the import path if necessary
+import { Staff, createNewStaff, getLastNameForNationality  } from '/js/staff.js'; // Adjust the import path if necessary
 import { addTransaction } from '/js/finance.js'; // Adjust the import path if necessary
 import { bookkeepingTaskFunction } from '/js/administration.js';
+
 
 
 async function clearFirestore() {
@@ -61,37 +62,34 @@ async function storeCompanyName() {
         localStorage.setItem('companyPrestige', 0);
 
         // Set initial date values before logging the transaction
-        localStorage.setItem('week', 1); // Initialize day
+        localStorage.setItem('week', 1); // Initialize week
         localStorage.setItem('season', 'Spring'); // Initialize season
         localStorage.setItem('year', 2023); // Initialize year
 
-        // Log the income transaction after setting the date
+        // Log the initial income transaction
         addTransaction('Income', 'Initial Company Setup', 10000000);
 
-        // Create two staff members with the same nationality
-        const staff1 = new Staff();
-        const staff2 = new Staff();
-        staff2.nationality = staff1.nationality; // Ensure same nationality
+        // Create the first staff member
+        const staff1 = createNewStaff();
+
+        // Create the second staff member and ensure the same nationality
+        const staff2 = createNewStaff();
+        staff2.nationality = staff1.nationality;
+        staff2.name = staff2.getNameForNationality(staff2.nationality);
+        staff2.lastName = getLastNameForNationality(staff2.nationality);
 
         // Add staff to an array
         const staff = [staff1, staff2];
 
-        // Store staff data in localStorage
-        localStorage.setItem('staffData', JSON.stringify(staff.map(staff => ({
-          id: staff.id,
-          nationality: staff.nationality,
-          name: staff.name,
-          workforce: staff.workforce,
-          wage: staff.wage // Add wage to the stored data
-        }))));
+        // Save staff data using saveStaff
+        saveStaff(staff);
 
-        saveCompanyInfo(); // Save company info to firestore
+        saveCompanyInfo(); // Save company info to Firestore
         window.location.href = 'html/game.html'; // Redirect to game.html
       }
     }
   }
 }
-
 async function checkCompanyExists(companyName) {
   const docRef = doc(db, "companies", companyName);
   const docSnap = await getDoc(docRef);
@@ -322,42 +320,49 @@ export function removeTask(taskId) {
 
 
 // Function to save the list of staff members to localStorage
+// Function to save the list of staff members to localStorage
 export function saveStaff(staffMembers) {
-    if (Array.isArray(staffMembers)) {
-        localStorage.setItem('staffData', JSON.stringify(staffMembers.map(staff => ({
-            id: staff.id,
-            nationality: staff.nationality,
-            name: staff.name,
-            workforce: staff.workforce
-        }))));
-        console.log("Staff data saved successfully.");
-    } else {
-        console.error("Failed to save staff: input is not an array.");
-    }
+  if (Array.isArray(staffMembers)) {
+    localStorage.setItem('staffData', JSON.stringify(staffMembers.map(staff => ({
+      id: staff.id,
+      nationality: staff.nationality,
+      name: staff.name,
+      lastName: staff.lastName,
+      workforce: staff.workforce,
+      wage: staff.wage,
+      skills: staff.skills // Include skills in the saved data
+    }))));
+    console.log("Staff data saved successfully.");
+  } else {
+    console.error("Failed to save staff: input is not an array.");
+  }
 }
 
 // Function to load staff members from localStorage
 export function loadStaff() {
-    let staffMembers = [];
-    let savedStaffData = localStorage.getItem('staffData');
+  let staffMembers = [];
+  let savedStaffData = localStorage.getItem('staffData');
 
-    if (savedStaffData) {
-        try {
-            const parsedData = JSON.parse(savedStaffData);
-            staffMembers = parsedData.map(item => {
-                const staff = new Staff();
-                staff.id = item.id;
-                staff.nationality = item.nationality;
-                staff.name = item.name;
-                staff.workforce = item.workforce;
-                return staff;
-            });
-        } catch (error) {
-            console.error("Failed to parse staff data from localStorage.", error);
-        }
+  if (savedStaffData) {
+    try {
+      const parsedData = JSON.parse(savedStaffData);
+      staffMembers = parsedData.map(item => {
+        const staff = new Staff();
+        staff.id = item.id;
+        staff.nationality = item.nationality;
+        staff.name = item.name;
+        staff.lastName = item.lastName;
+        staff.workforce = item.workforce;
+        staff.wage = item.wage;
+        staff.skills = item.skills; // Load skills from parsed data
+        return staff;
+      });
+    } catch (error) {
+      console.error("Failed to parse staff data from localStorage.", error);
     }
+  }
 
-    return staffMembers;
+  return staffMembers;
 }
 
 
