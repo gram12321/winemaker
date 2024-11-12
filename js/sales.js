@@ -4,6 +4,8 @@ import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
 import { applyPrestigeHit } from './database/loadSidebar.js';
 import { saveInventory } from './database/adminFunctions.js';
+import { loadWineOrders, saveWineOrders } from './database/adminFunctions.js';
+
 
 // Modify sellWines function to use landValue from Farmland
 export function sellWines(resourceName) {
@@ -73,11 +75,13 @@ export function calculateWinePrice(quality, landValue, fieldPrestige) {
     return finalPrice;
 }
 
-export function generateWineOrder() {
-    // Filter items that are in "Bottle" state
-    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottle');
 
-    // Check if any bottled wines exist
+export function generateWineOrder() {
+    // Load existing wine orders from local storage
+    const wineOrders = loadWineOrders();
+
+    // Filter items that are in the "Bottle" state
+    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottle');
     if (bottledWines.length === 0) {
         addConsoleMessage("No bottled wine available for order.");
         return;
@@ -86,19 +90,29 @@ export function generateWineOrder() {
     // Randomly select one bottled wine
     const randomIndex = Math.floor(Math.random() * bottledWines.length);
     const selectedWine = bottledWines[randomIndex];
+    selectedWine.amount -= 1; // Decrease the amount in the inventory
 
-    // Create an order for one item (assuming one bottle)
-    selectedWine.amount -= 1; // Reduce the amount in inventory
-
-    // Log the order creation in the console
-    addConsoleMessage(`Created order for 1 bottle of ${selectedWine.resource.name}, Vintage ${selectedWine.vintage}, Quality ${selectedWine.quality.toFixed(2)}.`);
-
-    // Check if the amount is zero and remove the item from inventory
+    // Create an order for the selected wine
+    const newOrder = {
+        resourceName: selectedWine.resource.name,
+        vintage: selectedWine.vintage,
+        quality: selectedWine.quality,
+        quantity: 1,
+    };
+    
+    // Remove the item from inventory if the amount is zero
     if (selectedWine.amount === 0) {
         const index = inventoryInstance.items.indexOf(selectedWine);
         inventoryInstance.items.splice(index, 1);
     }
 
-    // Save the updated inventory
+    // Add the new order to the wine orders array
+    wineOrders.push(newOrder);
+
+    // Log the order creation to the console
+    addConsoleMessage(`Created order for 1 bottle of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}.`);
+
+    // Save the updated list of wine orders back to local storage and update inventory
+    saveWineOrders(wineOrders);
     saveInventory();
 }

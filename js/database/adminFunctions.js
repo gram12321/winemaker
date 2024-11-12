@@ -361,4 +361,25 @@ export function loadStaff() {
 }
 
 
+export function saveWineOrders(wineOrders) {
+    localStorage.setItem('wineOrders', JSON.stringify(wineOrders));
+    console.log("Wine orders saved successfully.");
+    
+}
+
+export function loadWineOrders() {
+    let wineOrders = [];
+    const savedWineOrders = localStorage.getItem('wineOrders');
+    
+    if (savedWineOrders) {
+        try {
+            wineOrders = JSON.parse(savedWineOrders);
+        } catch (error) {
+            console.error("Failed to parse wine orders from localStorage.", error);
+        }
+    }
+    
+    return wineOrders;
+}
+
 export { storeCompanyName, saveCompanyInfo, clearLocalStorage, clearFirestore, loadInventory, saveInventory };
