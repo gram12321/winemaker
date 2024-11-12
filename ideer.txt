@@ -32,13 +32,15 @@ Bookeeping task dosn't update "Goal", when more task is added to unfinished task
 Make sure to clean localstorage on login, in case game was closed without clearing
 Fermenting task has correct value in workprogress, but dont update "Progress" on taskbox info
 Wineorders not saved to firestore, just to localstorage
-Fermantation task dont get removed once there is no more must instead error msg is showed  (addConsoleMessage(`Unable to ferment ${selectedResource}. Ensure there is sufficient quantity of Must.`); From (frementMust())
+Fermantation task dont get removed once there is no more must instead error msg is showed  (addConsoleMessage(`Unable to ferment {selectedResource}. Ensure there is sufficient quantity of Must.`); From (frementMust())
+last order in wineordertable causes [15:00:29] Invalid wine order index. Can refresh page to make right 
 
 
 QoL Improvement
  - Hover over info on "Statuspic" on sales.html
  - Default selected staff for new task
   - group orders by field, grape ect. or somekind of filter on orders
+  group similiar entries in cashflow
 
  New/Better mechanics
   - Let quantity of generateWineOrder() be depending on a asking price. Asking price could be set in sales.html instead of the Normal selling buttom

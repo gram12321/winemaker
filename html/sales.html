@@ -103,7 +103,7 @@
         row.innerHTML = `
           <td><strong>${order.fieldName || 'Unknown Field'}</strong>, ${order.resourceName}, ${order.vintage || 'Unknown'}</td> <!-- Combine field name, resource name, and vintage -->
           <td>${qualityText}</td> <!-- Use formatted quality text -->
-          <td>${order.amount}</td> <!-- Changed "quantity" to "amount" -->
+          <td>${order.amount} Bottles </td> <!-- Changed "quantity" to "amount" -->
           <td>€${formatNumber(order.wineOrderPrice, 2)}</td> <!-- Format the wine order price -->
           <td><button class="btn btn-success sell-order-btn">Sell</button></td>
         `;
