@@ -102,7 +102,7 @@ export function generateWineOrder() {
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
         quantity: 1,
-        wineOrderPrice: calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige) // Calculate price for the order
+        wineOrderPrice: (0.5 +(Math.random() * 1.5 )) * calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige) // Calculate price for the order. add random factor of 50% to 200% of the calculatedprice
     };
 
     // Remove the item from inventory if the amount is zero
