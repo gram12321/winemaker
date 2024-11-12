@@ -86,6 +86,13 @@ export function generateWineOrder() {
         return;
     }
 
+    // Define order types with their multipliers for amount and price
+    const orderTypes = {
+        "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
+        "Engross Order": { amountMultiplier: 10, priceMultiplier: 0.85 }
+        // Add other order types here if needed
+    };
+
     // Randomly select one bottled wine
     const randomIndex = Math.floor(Math.random() * bottledWines.length);
     const selectedWine = bottledWines[randomIndex];
@@ -95,21 +102,32 @@ export function generateWineOrder() {
     const farmland = farmlands.find(field => field.name === selectedWine.fieldName);
     const landValue = farmland.landvalue;
 
-    // Create an order for the selected wine
+    // Randomly select an order type
+    const orderTypeKeys = Object.keys(orderTypes);
+    const selectedOrderTypeKey = orderTypeKeys[
+        Math.floor(Math.random() * orderTypeKeys.length)
+    ];
+    const selectedOrderType = orderTypes[selectedOrderTypeKey];
+
+    // Calculate order amount and price with multipliers
+    const baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
+    const basePrice = (0.5 + Math.random() * 1.5) * calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige);
+
     const newOrder = {
+        type: selectedOrderTypeKey,
         resourceName: selectedWine.resource.name,
         fieldName: selectedWine.fieldName,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
-        amount: Math.round((0.5 + (Math.random() * 1.5)) * (1 + 2 * selectedWine.fieldPrestige)),
-        wineOrderPrice: (0.5 +(Math.random() * 1.5 )) * calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige)
+        amount: baseAmount * selectedOrderType.amountMultiplier,
+        wineOrderPrice: basePrice * selectedOrderType.priceMultiplier
     };
 
     // Add the new order to the wine orders array
     wineOrders.push(newOrder);
 
-    // Log the order creation to the console
-    addConsoleMessage(`Created order for ${newOrder.amount} bottles of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.wineOrderPrice.toFixed(2)}.`);
+    // Log the order creation to the console with the order type
+    addConsoleMessage(`Created ${newOrder.type} for ${newOrder.amount} bottles of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.wineOrderPrice.toFixed(2)}.`);
 
     // Save the updated list of wine orders back to local storage
     saveWineOrders(wineOrders);
