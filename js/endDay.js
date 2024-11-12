@@ -158,7 +158,7 @@ export function sellWines(resourceName) {
 
             const landValue = farmland.landvalue;
 
-            const sellingPrice = calculateWinePrice(resource.quality, landValue);
+            const sellingPrice = calculateWinePrice(resource.quality, landValue, resource.fieldPrestige);
 
             // Add console message to notify user of the sale
             addConsoleMessage(`Sold 1 bottle of ${resource.resource.name}, Vintage ${resource.vintage}, Quality ${resource.quality.toFixed(2)} for €${sellingPrice.toFixed(2)}.`);
@@ -185,14 +185,25 @@ export function sellWines(resourceName) {
 
 
 // New function to calculate wine price using average moderation
-export function calculateWinePrice(quality, landValue) {
-    const baseValue = 10; // Base value in Euros
-    const normalizedLandValue = normalizeLandValue(landValue); // Takes value per acre, and Normalize the land value to 0-1
+export function calculateWinePrice(quality, landValue, fieldPrestige) {
+    const baseValue = 1; // Base value in Euros
+    const normalizedLandValue = normalizeLandValue(landValue); // Normalize the land value to 0-1
 
-    // Calculate the average of quality and normalized land value
-    const wineValueModifier = (quality + normalizedLandValue) / 2;
+    // Log the starting parameters and normalized land value
+    console.log(`Calculating Wine Price:`);
+    console.log(`Quality: ${quality}`);
+    console.log(`Land Value: ${landValue}, Normalized Land Value: ${normalizedLandValue.toFixed(2)}`);
+    console.log(`Field Prestige: ${fieldPrestige}`);
 
-    // Calculate and return the final wine price
+    // Calculate the average of quality, normalized land value, and field prestige
+    let wineValueModifier = (quality * 100 + normalizedLandValue * 100 + fieldPrestige * 100) / 3;
+
+    // Log the wine value modifier after including prestige
+    console.log(`Wine Value Modifier: ${wineValueModifier.toFixed(2)}`);
+
+    // Calculate and log the final wine price
     const finalPrice = baseValue * wineValueModifier;
+    console.log(`Final Wine Price: €${finalPrice.toFixed(2)}`);
+
     return finalPrice;
 }
