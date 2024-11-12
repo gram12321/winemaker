@@ -89,7 +89,6 @@ export function generateWineOrder() {
     // Randomly select one bottled wine
     const randomIndex = Math.floor(Math.random() * bottledWines.length);
     const selectedWine = bottledWines[randomIndex];
-    selectedWine.amount -= 1; // Decrease the amount in the inventory
 
     // Obtain the corresponding farmland using the field name
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -101,23 +100,17 @@ export function generateWineOrder() {
         resourceName: selectedWine.resource.name,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
-        quantity: Math.round((0.5 + (Math.random() * 1.5)) * (1 + 10 * selectedWine.fieldPrestige)),
-        wineOrderPrice: (0.5 +(Math.random() * 1.5 )) * calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige) // Calculate price for the order. add random factor of 50% to 200% of the calculatedprice
+        quantity: Math.round((0.5 + (Math.random() * 1.5)) * (1 + 2 * selectedWine.fieldPrestige)),
+        wineOrderPrice: (0.5 +(Math.random() * 1.5 )) * calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige)
     };
-
-    // Remove the item from inventory if the amount is zero
-    if (selectedWine.amount === 0) {
-        const index = inventoryInstance.items.indexOf(selectedWine);
-        inventoryInstance.items.splice(index, 1);
-    }
 
     // Add the new order to the wine orders array
     wineOrders.push(newOrder);
 
     // Log the order creation to the console
-    addConsoleMessage(`Created order for 1 bottle of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.wineOrderPrice.toFixed(2)}.`);
+    addConsoleMessage(`Created order for ${newOrder.quantity} bottles of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.wineOrderPrice.toFixed(2)}.`);
 
-    // Save the updated list of wine orders back to local storage and update inventory
+    // Save the updated list of wine orders back to local storage
     saveWineOrders(wineOrders);
     saveInventory();
 }
@@ -128,11 +121,9 @@ export function sellOrderWine(orderIndex) {
   if (orderIndex >= 0 && orderIndex < wineOrders.length) {
     const order = wineOrders[orderIndex];
     const quantity = order.quantity;
-
-    // Use the wineOrderPrice for the sale and multiply by quantity
     const totalSellingPrice = order.wineOrderPrice * quantity;
 
-    // Add console message to notify user of the sale
+    // Add console message to notify the user of the sale
     addConsoleMessage(`Sold ${quantity} bottles of ${order.resourceName}, Vintage ${order.vintage}, Quality ${order.quality.toFixed(2)} for a total of €${totalSellingPrice.toFixed(2)}.`);
 
     // Log the sale transaction and update the balance
@@ -141,6 +132,36 @@ export function sellOrderWine(orderIndex) {
     // Optionally handle prestige effects
     const prestigeHit = totalSellingPrice / 1000;
     applyPrestigeHit(prestigeHit);
+
+    // Deduct the quantity from inventory
+    const inventoryItems = inventoryInstance.items;
+    const resourceIndex = inventoryItems.findIndex(item =>
+      item.resource.name === order.resourceName &&
+      item.state === 'Bottle' &&
+      item.vintage === order.vintage &&
+      item.quality === order.quality
+    );
+
+    if (resourceIndex !== -1) {
+      const resource = inventoryItems[resourceIndex];
+
+      if (resource.amount >= quantity) {
+        resource.amount -= quantity;
+        if (resource.amount === 0) {
+          // Remove the item if the amount reaches zero
+          inventoryItems.splice(resourceIndex, 1);
+        }
+      } else {
+        addConsoleMessage('Insufficient inventory to complete this order.');
+        return;
+      }
+    } else {
+      addConsoleMessage('Wine not found in inventory.');
+      return;
+    }
+
+    // Save the updated inventory
+    saveInventory();
 
     // Remove the sold order from the list
     wineOrders.splice(orderIndex, 1);
@@ -152,6 +173,9 @@ export function sellOrderWine(orderIndex) {
     if (orderRow) {
       wineOrdersTableBody.removeChild(orderRow);
     }
+
+    // Refresh the inventory display if your UI supports it
+    displayInventory(inventoryInstance, ['winecellar-table-body'], true);
 
   } else {
     addConsoleMessage('Invalid wine order index.');
