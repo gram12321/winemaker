@@ -70,7 +70,7 @@ function getLastNameForNationality(nationality) {
   return lastNamesList ? lastNamesList[Math.floor(Math.random() * lastNamesList.length)] : 'Unknown';
 }
 function randomizeSkills() {
-  return Math.random();
+  return Math.random().toFixed(2);
 }
 function createNewStaff() {
   const nationality = Staff.prototype.selectNationality();
