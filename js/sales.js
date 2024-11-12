@@ -72,3 +72,33 @@ export function calculateWinePrice(quality, landValue, fieldPrestige) {
 
     return finalPrice;
 }
+
+export function generateWineOrder() {
+    // Filter items that are in "Bottle" state
+    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottle');
+
+    // Check if any bottled wines exist
+    if (bottledWines.length === 0) {
+        addConsoleMessage("No bottled wine available for order.");
+        return;
+    }
+
+    // Randomly select one bottled wine
+    const randomIndex = Math.floor(Math.random() * bottledWines.length);
+    const selectedWine = bottledWines[randomIndex];
+
+    // Create an order for one item (assuming one bottle)
+    selectedWine.amount -= 1; // Reduce the amount in inventory
+
+    // Log the order creation in the console
+    addConsoleMessage(`Created order for 1 bottle of ${selectedWine.resource.name}, Vintage ${selectedWine.vintage}, Quality ${selectedWine.quality.toFixed(2)}.`);
+
+    // Check if the amount is zero and remove the item from inventory
+    if (selectedWine.amount === 0) {
+        const index = inventoryInstance.items.indexOf(selectedWine);
+        inventoryInstance.items.splice(index, 1);
+    }
+
+    // Save the updated inventory
+    saveInventory();
+}

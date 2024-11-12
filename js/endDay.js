@@ -7,8 +7,7 @@ import { processRecurringTransactions } from './finance.js';
 import { handleBookkeepingTask } from './administration.js';
 import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { decayPrestigeHit } from './database/loadSidebar.js';
-
-import { sellWines } from './sales.js';
+import { generateWineOrder } from './sales.js';
 
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
@@ -53,6 +52,7 @@ export function incrementWeek() {
     updateFieldStatuses();
     updateRipeness();
     decayPrestigeHit()
+    generateWineOrder()
     // Process recurring transactions based on updated week
     processRecurringTransactions(currentWeek);
 }
