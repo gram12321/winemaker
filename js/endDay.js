@@ -8,6 +8,8 @@ import { processRecurringTransactions, addTransaction } from './finance.js';
 import { handleBookkeepingTask } from './administration.js';
 import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { applyPrestigeHit, decayPrestigeHit } from './database/loadSidebar.js';
+import { normalizeLandValue } from './names.js'; // Ensure you import normalizeLandValue
+
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -137,6 +139,7 @@ function updateRipeness() {
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
+
 export function sellWines(resourceName) {
     const resourceIndex = inventoryInstance.items.findIndex(item => item.resource.name === resourceName && item.state === 'Bottle');
 
@@ -146,7 +149,10 @@ export function sellWines(resourceName) {
         if (resource.amount > 0) {
             resource.amount -= 1; // Reduce the inventory by 1
 
-            const sellingPrice = calculateWinePrice(resource.quality); // Use the new function
+            const sellingPrice = calculateWinePrice(resource.quality, resource.fieldPrestige); // Adjusted to pass the normalized land value calculation
+
+            // Add console message to notify user of the sale
+            addConsoleMessage(`Sold 1 bottle of ${resource.resource.name}, Vintage ${resource.vintage}, Quality ${resource.quality.toFixed(2)} for €${sellingPrice.toFixed(2)}.`);
 
             // Log the sale transaction and update the balance
             addTransaction('Income', 'Wine Sale', sellingPrice);
@@ -169,8 +175,12 @@ export function sellWines(resourceName) {
 }
 
 
-// New function to calculate wine price
-export function calculateWinePrice(quality) {
+// New function to calculate wine price using average moderation
+export function calculateWinePrice(quality, landValue) {
     const baseValue = 10; // Base value in Euros
-    return baseValue * quality;
+    const normalizedLandValue = normalizeLandValue(landValue); // Normalize the land value
+    // Calculate the average of quality and normalized land value
+    const wineValueModifier = (quality + normalizedLandValue) / 2;
+    // Calculate and return the final wine price
+    return baseValue * wineValueModifier;
 }
