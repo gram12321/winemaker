@@ -7,12 +7,15 @@ import { processRecurringTransactions } from './finance.js';
 import { handleBookkeepingTask } from './administration.js';
 import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { decayPrestigeHit } from './database/loadSidebar.js';
-import { generateWineOrder } from './sales.js';
+import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
 
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
 // Define the new function incrementWeek
+
+
+// Updated incrementWeek function
 export function incrementWeek() {
     // Retrieve the current week, season, and year from localStorage
     let currentWeek = parseInt(localStorage.getItem('week'), 10) || 1;
@@ -51,8 +54,13 @@ export function incrementWeek() {
     executeAllTasks();
     updateFieldStatuses();
     updateRipeness();
-    decayPrestigeHit()
-    generateWineOrder()
+    decayPrestigeHit();
+
+    // Conditionally generate wine order based on company prestige
+    if (shouldGenerateWineOrder()) {
+        generateWineOrder();
+    }
+
     // Process recurring transactions based on updated week
     processRecurringTransactions(currentWeek);
 }

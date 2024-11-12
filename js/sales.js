@@ -109,7 +109,7 @@ export function generateWineOrder() {
     wineOrders.push(newOrder);
 
     // Log the order creation to the console
-    addConsoleMessage(`Created order for ${newOrder.quantity} bottles of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.wineOrderPrice.toFixed(2)}.`);
+    addConsoleMessage(`Created order for ${newOrder.amount} bottles of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.wineOrderPrice.toFixed(2)}.`);
 
     // Save the updated list of wine orders back to local storage
     saveWineOrders(wineOrders);
@@ -181,4 +181,24 @@ export function sellOrderWine(orderIndex) {
   } else {
     addConsoleMessage('Invalid wine order index.');
   }
+}
+
+export function shouldGenerateWineOrder() {
+    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
+
+    let chance;
+
+    if (companyPrestige <= 100) {
+        // Use a linear scaling for lower prestige values
+        chance = 0.2 + (companyPrestige / 100) * (0.5 - 0.2);
+    } else {
+        // Use a non-linear curve to handle higher prestige values (Prestige: 0-100 liniar 0=20%, 100=50%,, then 500=0,67, 2000=0,87 5000=0,94. Never gets above 99%.))
+        chance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
+    }
+
+    // Ensure that chance never exceeds maxChance
+    const finalChance = Math.min(chance, 0.99);
+
+    // Use Math.random() to decide if a wine order should be generated
+    return Math.random() < finalChance;
 }
