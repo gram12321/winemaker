@@ -45,6 +45,7 @@
               <th>Vintage</th>
               <th>Quality</th>
               <th>Quantity</th>
+              <th>Price</th>
             </tr>
           </thead>
           <tbody id="wine-orders-table-body">
@@ -69,10 +70,12 @@
 
     import { inventoryInstance, displayInventory } from '/js/resource.js'; // import sellWines from resource.js
     import { sellWines} from '/js/sales.js'; // import sellWines from endDay.js'
-
+    import { formatNumber } from '/js/utils.js';
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
     import { initializeConsole } from '/js/console.js'; // Import the console initializer
+
+    
     document.addEventListener('DOMContentLoaded', function () {
       initializePanel();
       initializeSidebar();
@@ -99,6 +102,7 @@
           <td>${order.vintage}</td>
           <td>${qualityText}</td>
           <td>${order.quantity}</td>
+          <td>€${formatNumber(order.wineOrderPrice, 2)}</td> <!-- Use formatNumber to display the price -->
         `;
 
         wineOrdersTableBody.appendChild(row);

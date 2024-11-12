@@ -102,7 +102,7 @@ export function generateWineOrder() {
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
         quantity: 1,
-        price: calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige) // Calculate price for the order
+        wineOrderPrice: calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige) // Calculate price for the order
     };
 
     // Remove the item from inventory if the amount is zero
@@ -115,7 +115,7 @@ export function generateWineOrder() {
     wineOrders.push(newOrder);
 
     // Log the order creation to the console
-    addConsoleMessage(`Created order for 1 bottle of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.price.toFixed(2)}.`);
+    addConsoleMessage(`Created order for 1 bottle of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.wineOrderPrice.toFixed(2)}.`);
 
     // Save the updated list of wine orders back to local storage and update inventory
     saveWineOrders(wineOrders);
