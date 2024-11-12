@@ -75,9 +75,8 @@ export function handleBookkeepingTask() {
     }
 }
 export function bookkeepingTaskFunction(task) {
-    // Calculate work applied based on assigned staff
-    const workApplied = calculateWorkApplied(task.staff || [], 'bookkeeping');
-
+    // Use the correct function name as defined in Task.taskTypes
+    const workApplied = calculateWorkApplied(task.staff || [], 'bookkeepingTaskFunction');
     // Return the calculated work
     return workApplied;
 }

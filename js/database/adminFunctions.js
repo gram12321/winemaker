@@ -311,15 +311,9 @@ export function removeTask(taskId) {
           activeTasks.splice(taskIndex, 1); // Remove the task from activeTasks
     }
 
-    // Debugging: Log whether a task was removed
-    const tasksAfterRemoval = JSON.parse(localStorage.getItem('tasks'));
-    if (initialTaskCount === tasksAfterRemoval.length) {
-        
-    } 
+    
 }
 
-
-// Function to save the list of staff members to localStorage
 // Function to save the list of staff members to localStorage
 export function saveStaff(staffMembers) {
   if (Array.isArray(staffMembers)) {
@@ -367,9 +361,7 @@ export function loadStaff() {
 
 
 export function saveWineOrders(wineOrders) {
-    localStorage.setItem('wineOrders', JSON.stringify(wineOrders));
-    console.log("Wine orders saved successfully.");
-    
+    localStorage.setItem('wineOrders', JSON.stringify(wineOrders)); 
 }
 
 export function loadWineOrders() {
@@ -383,7 +375,6 @@ export function loadWineOrders() {
             console.error("Failed to parse wine orders from localStorage.", error);
         }
     }
-    
     return wineOrders;
 }
 

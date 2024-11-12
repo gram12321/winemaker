@@ -20,7 +20,29 @@ function initializePanel() {
 // Task class definition
 export class Task {
     static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
-
+    // Define task types with associated processing functions and skill keys
+    static taskTypes = {
+        'Administration': {
+            processPerWorkApplied: 6,
+            processingFunctions: ['bookkeepingTaskFunction'],
+            skillKey: 'administration'
+        },
+        'Field': {
+            processPerWorkApplied: 1,
+            processingFunctions: ['plantAcres', 'uproot', 'harvestAcres'],
+            skillKey: 'field'
+        },
+        'Winery': {
+            processPerWorkApplied: 10,
+            processingFunctions: ['grapeCrushing', 'fermentMust'],
+            skillKey: 'winery'
+        },
+        'Sales': {
+            processPerWorkApplied: 2,
+            processingFunctions: ['Sales'], // Adjust with specific function if necessary
+            skillKey: 'sales'
+        }
+    };
     constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '', fieldName = '', type = 'Administration') {
         this.taskName = taskName;
         this.taskFunction = taskFunction;
@@ -34,7 +56,7 @@ export class Task {
         this.iconPath = iconPath;
         this.fieldName = fieldName;
         this.staff = [];
-        this.type = type;  // New property to define task type
+        this.type = type; // Define task type
         this.createTaskBox();
     }
     static generateTaskId() {
@@ -306,10 +328,8 @@ export function executeTaskFunction(task) {
     }
 
     // Check if the task is complete
-    // Check if the task is complete
     if (task.workProgress >= task.workTotal) {
         task.removeTaskBox();
-        console.log(`Task completed: ${task.taskName}, Removing task with ID: ${task.taskId}`);
         removeTask(task.taskId);
 
         // Log a completion message based on the task type

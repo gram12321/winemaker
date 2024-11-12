@@ -56,22 +56,11 @@ export function calculateWinePrice(quality, landValue, fieldPrestige) {
     const baseValue = 1; // Base value in Euros
     const normalizedLandValue = normalizeLandValue(landValue); // Takes value per acre, and Normalize the land value to 0-1
 
-    // Log the starting parameters and normalized land value
-    console.log(`Calculating Wine Price:`);
-    console.log(`Quality: ${quality}`);
-    console.log(`Land Value: ${landValue}, Normalized Land Value: ${normalizedLandValue.toFixed(2)}`);
-    console.log(`Field Prestige: ${fieldPrestige}`);
-
     // Calculate the average of quality, normalized land value, and field prestige
     let wineValueModifier = (quality * 100 + normalizedLandValue * 100 + fieldPrestige * 100) / 3;
 
-    // Log the wine value modifier after including prestige
-    console.log(`Wine Value Modifier: ${wineValueModifier.toFixed(2)}`);
-
     // Calculate and log the final wine price
     const finalPrice = baseValue * wineValueModifier;
-    console.log(`Final Wine Price: €${finalPrice.toFixed(2)}`);
-
     return finalPrice;
 }
 

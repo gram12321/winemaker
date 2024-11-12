@@ -6,6 +6,7 @@ import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { loadTasks } from './database/adminFunctions.js'; // Import the function to load tasks
+import { Task } from './loadPanel.js';  // Adjust the path based on your file structure
 
 class FieldSkills {
   constructor(field) {
@@ -198,40 +199,52 @@ export function setupStaffWagesRecurringTransaction() {
     }
 }
 
-export function calculateWorkApplied(taskStaff, taskType) {
+export function calculateWorkApplied(taskStaff, processingFunction) {
     let workApplied = 0;
     const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || []; // Load all tasks to count assignments
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-    // Define processPerWorkApplied for different task types
-    const processPerWorkAppliedValues = {
-        fermentMust: 100,
-        crushingGrape: 80, // Example value, adjust as necessary
-        harvestAcres: 150, // Example value
-        plantAcres: 1, // Example value
-        uproot: 50, // Example value
-        bookkeepingTaskFunction: 60 // Example value
-    };
+    console.log(`Calculating work applied for processing function: ${processingFunction}`);
 
-    const processPerWorkApplied = processPerWorkAppliedValues[taskType] || 100; // Default to 100 if unspecified
+    // Look up the relevant task type using processingFunction
+    const taskTypeEntry = Object.values(Task.taskTypes).find(entry => 
+        entry.processingFunctions.includes(processingFunction)
+    );
+
+    if (!taskTypeEntry) {
+        console.warn(`Unknown processing function: ${processingFunction}`);
+        return workApplied;
+    }
+
+    const { processPerWorkApplied, skillKey } = taskTypeEntry;
 
     taskStaff.forEach(staffId => {
         const staffMember = staffData.find(staff => staff.id.toString() === staffId);
         if (staffMember) {
-            // Count how many tasks this staff member is assigned to
             const taskCount = tasks.reduce((count, task) => {
-                if (task.staff && task.staff.includes(staffId.toString())) {
-                    return count + 1;
-                }
-                return count;
+                return (task.staff && task.staff.includes(staffId.toString())) ? count + 1 : count;
             }, 0);
 
-            // Calculate the work applied, dividing by the number of tasks
-            if (taskCount > 0) {
-                workApplied += staffMember.workforce / taskCount;
+            let skillLevel = 0;
+
+            if (skillKey && staffMember.skills[skillKey]) {
+                skillLevel = parseFloat(staffMember.skills[skillKey][skillKey]);
+                console.log(`Staff ID: ${staffId}, Skill Level: ${skillLevel}`);
+            } else {
+                console.warn(`Unknown skill key: ${skillKey} for Staff ID: ${staffId}`);
             }
+
+            if (taskCount > 0 && skillLevel > 0) {
+                const workFromStaff = (staffMember.workforce / taskCount) * skillLevel;
+                console.log(`Staff ID: ${staffId}, Task Count: ${taskCount}, Workforce Share: ${staffMember.workforce / taskCount}, Applied Work: ${workFromStaff}`);
+                workApplied += workFromStaff;
+            }
+        } else {
+            console.warn(`Staff ID: ${staffId} not found in staff data.`);
         }
     });
 
-    return workApplied * processPerWorkApplied;
+    const totalWorkApplied = workApplied * processPerWorkApplied;
+    console.log(`Total work applied for ${processingFunction}: ${totalWorkApplied}, using Process Per Work Applied: ${processPerWorkApplied}`);
+    return totalWorkApplied;
 }
