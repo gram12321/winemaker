@@ -82,7 +82,7 @@ export function generateWineOrder() {
     // Filter items that are in the "Bottle" state
     const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottle');
     if (bottledWines.length === 0) {
-        addConsoleMessage("No bottled wine available for order.");
+        addConsoleMessage("A customer want to buy wine, but there is no bottles in the winecellar.");
         return;
     }
 

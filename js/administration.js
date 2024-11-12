@@ -3,7 +3,8 @@
 import { Task } from './loadPanel.js'; 
 import { saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { addConsoleMessage } from '/js/console.js';
-import { calculateWorkApplied, getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
+import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
+import {calculateWorkApplied } from './staff.js';
 
 export function handleBookkeepingTask() {
     const isTaskAlreadyActive = activeTasks.some(task => task.taskName.startsWith("Bookkeeping"));

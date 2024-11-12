@@ -4,9 +4,10 @@ import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleName
 import { allResources, getResourceByName, inventoryInstance  } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
-import { getFlagIcon, formatNumber, calculateWorkApplied } from './utils.js';
+import { getFlagIcon, formatNumber } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
+import {calculateWorkApplied } from './staff.js';
 
 
 

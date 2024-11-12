@@ -77,43 +77,7 @@ export function formatLandSizeWithUnit(acres) {
     return `${formatNumber(convertedSize)} ${selectedUnit}`;
 }
 
-export function calculateWorkApplied(taskStaff, taskType) {
-    let workApplied = 0;
-    const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || []; // Load all tasks to count assignments
 
-    // Define processPerWorkApplied for different task types
-    const processPerWorkAppliedValues = {
-        fermentMust: 100,
-        crushingGrape: 80, // Example value, adjust as necessary
-        harvestAcres: 150, // Example value
-        plantAcres: 1, // Example value
-        uproot: 50, // Example value
-        bookkeepingTaskFunction: 60 // Example value
-    };
-
-    const processPerWorkApplied = processPerWorkAppliedValues[taskType] || 100; // Default to 100 if unspecified
-
-    taskStaff.forEach(staffId => {
-        const staffMember = staffData.find(staff => staff.id.toString() === staffId);
-        if (staffMember) {
-            // Count how many tasks this staff member is assigned to
-            const taskCount = tasks.reduce((count, task) => {
-                if (task.staff && task.staff.includes(staffId.toString())) {
-                    return count + 1;
-                }
-                return count;
-            }, 0);
-
-            // Calculate the work applied, dividing by the number of tasks
-            if (taskCount > 0) {
-                workApplied += staffMember.workforce / taskCount;
-            }
-        }
-    });
-
-    return workApplied * processPerWorkApplied;
-}
 
 export function extractSeasonAndYear(dateString) {
     const [week, season, year] = dateString.split(', ');

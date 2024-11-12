@@ -1,9 +1,10 @@
-import { getFlagIcon, formatLandSizeWithUnit, formatNumber, calculateWorkApplied } from './utils.js';
+import { getFlagIcon, formatLandSizeWithUnit, formatNumber } from './utils.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { addConsoleMessage } from '/js/console.js';
 import { Task } from './loadPanel.js'; // Import the Task class used for tasks
 import { inventoryInstance } from '/js/resource.js';
 import { farmlandYield } from '/js/farmland.js';
+import {calculateWorkApplied } from './staff.js';
 
 export function displayVineyardEntries() {
   const vineyardEntries = document.querySelector('#vineyard-entries');

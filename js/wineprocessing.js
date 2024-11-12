@@ -3,7 +3,8 @@ import { addConsoleMessage } from './console.js';
 import { inventoryInstance } from './resource.js';
 import { saveInventory, saveTask, activeTasks } from './database/adminFunctions.js';
 import { Task } from './loadPanel.js';
-import { formatNumber, calculateWorkApplied } from './utils.js';
+import { formatNumber,  } from './utils.js';
+import {calculateWorkApplied } from './staff.js';
 
 export function handleGrapeCrushingTask(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
@@ -271,7 +272,7 @@ export function fermentMust(selectedResource) {
     // Persist changes
     saveInventory();
 
-    addConsoleMessage(`${actualIncrement} unit(s) of ${selectedResource} has been fermented and bottled.`);
+    addConsoleMessage(`${actualIncrement} liters of ${selectedResource} has been fermented and bottled.`);
 
     return actualIncrement; // Return the actual work completed
 }
