@@ -146,7 +146,7 @@ export function sellWines(resourceName) {
         if (resource.amount > 0) {
             resource.amount -= 1; // Reduce the inventory by 1
 
-            const sellingPrice = 100; // Assume a fixed selling price for now
+            const sellingPrice = calculateWinePrice(resource.quality); // Use the new function
 
             // Log the sale transaction and update the balance
             addTransaction('Income', 'Wine Sale', sellingPrice);
@@ -166,4 +166,11 @@ export function sellWines(resourceName) {
             displayInventory(inventoryInstance, ['winecellar-table-body'], true);
         }
     }
+}
+
+
+// New function to calculate wine price
+export function calculateWinePrice(quality) {
+    const baseValue = 10; // Base value in Euros
+    return baseValue * quality;
 }
