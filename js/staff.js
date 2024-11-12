@@ -1,42 +1,94 @@
 // staff.js
 
 // Import the necessary data from names.js
-import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames, italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames, countryRegionMap } from './names.js'; // Adjust import path if necessary
+import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames, italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry  } from './names.js'; // Adjust import path if necessary
 import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { loadTasks } from './database/adminFunctions.js'; // Import the function to load tasks
 
-export class Staff {
-    static latestId = 0; // Tracks the latest ID assigned
-    constructor() {
-        this.id = ++Staff.latestId; // Auto-increment ID
-        this.nationality = this.selectNationality();
-        this.name = this.getNameForNationality(this.nationality);
-        this.workforce = 50; // Fixed workforce size
-        this.wage = 600; // Default wage in Euros per week
-    }
-    // Method to randomly select a nationality from the countryRegionMap keys
-    selectNationality() {
-        const countries = Object.keys(countryRegionMap);
-        return countries[Math.floor(Math.random() * countries.length)];
-    }
-    // Method to get a name for the selected nationality
-    getNameForNationality(nationality) {
-        const nameMap = {
-            'Italy': italianMaleNames.concat(italianFemaleNames),
-            'France': frenchMaleNames.concat(frenchFemaleNames),
-            'Spain': spanishMaleNames.concat(spanishFemaleNames),
-            'United States': usMaleNames.concat(usFemaleNames),
-            'Germany': germanMaleNames.concat(germanFemaleNames)
-        };
-        const namesList = nameMap[nationality];
-        if (namesList && namesList.length > 0) {
-            return namesList[Math.floor(Math.random() * namesList.length)];
-        }
-        return 'Unknown'; // Fallback name if no list is found
-    }
+class FieldSkills {
+  constructor(field) {
+      this.field = field.field || 0;
+  }
 }
+class WinerySkills {
+  constructor(winery) {
+      this.winery = winery.winery || 0;
+  }
+}
+class AdministrationSkills {
+  constructor(administration) {
+      this.administration = administration.administration || 0;
+  }
+}
+class SalesSkills {
+  constructor(sales) {
+      this.sales = sales.sales || 0;
+  }
+}
+class Skills {
+  constructor(skills) {
+      this.field = new FieldSkills(skills.field || {});
+      this.winery = new WinerySkills(skills.winery || {});
+      this.administration = new AdministrationSkills(skills.administration || {});
+      this.sales = new SalesSkills(skills.sales || {});
+  }
+}
+// Main Staff class
+export class Staff {
+  static latestId = 0;
+  constructor(firstName, lastName, skills = {}) {
+      this.id = ++Staff.latestId;
+      this.firstName = firstName;
+      this.lastName = lastName;
+      this.nationality = this.selectNationality();
+      this.name = this.getNameForNationality(this.nationality);
+      this.workforce = 50;
+      this.wage = 600;
+      this.skills = new Skills(skills);
+  }
+  selectNationality() {
+      const countries = Object.keys(countryRegionMap);
+      return countries[Math.floor(Math.random() * countries.length)];
+  }
+  getNameForNationality(nationality) {
+      const nameMap = {
+          'Italy': italianMaleNames.concat(italianFemaleNames),
+          'France': frenchMaleNames.concat(frenchFemaleNames),
+          'Spain': spanishMaleNames.concat(spanishFemaleNames),
+          'United States': usMaleNames.concat(usFemaleNames),
+          'Germany': germanMaleNames.concat(germanFemaleNames),
+      };
+      const namesList = nameMap[nationality];
+      return namesList ? namesList[Math.floor(Math.random() * namesList.length)] : 'Unknown';
+  }
+}
+
+function getLastNameForNationality(nationality) {
+  const lastNamesList = lastNamesByCountry[nationality];
+  return lastNamesList ? lastNamesList[Math.floor(Math.random() * lastNamesList.length)] : 'Unknown';
+}
+function randomizeSkills() {
+  return Math.random();
+}
+function createNewStaff() {
+  const nationality = Staff.prototype.selectNationality();
+  const firstName = Staff.prototype.getNameForNationality(nationality);
+  const lastName = getLastNameForNationality(nationality);
+  const skills = {
+      field: { field: randomizeSkills() },
+      winery: { winery: randomizeSkills() },
+      administration: { administration: randomizeSkills() },
+      sales: { sales: randomizeSkills() }
+  };
+  const newStaff = new Staff(firstName, lastName, skills);
+  newStaff.workforce = 50;
+  newStaff.wage = 600;
+  return newStaff;
+}
+
+
 
 export function displayStaff() {
   const staffContainer = document.getElementById('staff-container');

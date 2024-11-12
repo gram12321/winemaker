@@ -405,5 +405,43 @@ const regionPrestigeRankings = {
   "Puglia, Italy": 0.35
 };
 
+const lastNamesByCountry = {
+  "Italy": [
+    "Rossi", "Bianchi", "Romano", "Colombo", "Ricci", "Conti", "Greco", "Gallo", "Ferrara", "Rizzo",
+    "Caruso", "Moretti", "Lombardi", "Esposito", "Marchetti", "Gentile", "Barbieri", "Benedetti", "Leone", "De Luca",
+    "Mancini", "Costa", "Monti", "Fontana", "De Santis", "Mariani", "Pellegrini", "Ferraro", "Fabbri", "Rinaldi",
+    "Bianco", "Vitale", "Martino", "Silvestri", "Guerra", "De Angelis", "Palmieri", "Donati", "Sanna", "Farina",
+    "Longo", "Gatti", "Serra", "Neri", "D’Amico", "Orlando", "Giordano", "Piras", "Valentini", "Coppola"
+  ],
+  "Germany": [
+    "Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner", "Becker", "Schulz", "Hoffmann",
+    "Schäfer", "Koch", "Bauer", "Richter", "Klein", "Wolf", "Schröder", "Neumann", "Schwarz", "Zimmermann",
+    "Braun", "Krüger", "Hofmann", "Lange", "Weiß", "Köhler", "Peters", "Maier", "Jung", "Lehmann",
+    "Keller", "Herrmann", "Kaiser", "Fuchs", "Lang", "Schröter", "Frank", "Berger", "Dietrich", "Schmitt",
+    "Engel", "Brandt", "König", "Lorenz", "Schuster", "Hauser", "Sauer", "Marx", "Arnold", "Busch"
+  ],
+  "France": [
+    "Martin", "Bernard", "Dubois", "Thomas", "Robert", "Richard", "Petit", "Durand", "Leroy", "Moreau",
+    "Simon", "Laurent", "Lefèvre", "Michel", "Garcia", "David", "Bertrand", "Roux", "Vincent", "Fontaine",
+    "Rousseau", "Blanchard", "Dumont", "Fournier", "Girard", "Bonnet", "Dupont", "Lambert", "Lefevre", "Perrin",
+    "Rolland", "Leclerc", "Gauthier", "Barbier", "Chevalier", "Morin", "Maillard", "Marchand", "Marion", "Gaillard",
+    "Masson", "Renard", "Garnier", "Louis", "Picard", "Loiseau", "Julien", "Olivier", "Albert", "Caron"
+  ],
+  "Spain": [
+    "García", "Martínez", "Rodríguez", "Fernández", "López", "González", "Pérez", "Sánchez", "Ramírez", "Torres",
+    "Castro", "Ramos", "Delgado", "Morales", "Ortiz", "Reyes", "Herrera", "Muñoz", "Navarro", "Domínguez",
+    "Gil", "Serrano", "Vázquez", "Blanco", "Molina", "Ruiz", "Guerrero", "Prieto", "Carmona", "Méndez",
+    "Cabrera", "Sanz", "Nieto", "León", "Martín", "Jiménez", "Romero", "Cruz", "Medina", "Marín",
+    "Peña", "Vega", "Suárez", "Herrero", "Ibáñez", "Soler", "Esteban", "Pardo", "Santos", "Robles"
+  ],
+  "United States": [
+    "Smith", "Johnson", "Williams", "Jones", "Brown", "Davis", "Miller", "Wilson", "Moore", "Taylor",
+    "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia", "Martinez", "Robinson",
+    "Clark", "Rodriguez", "Lewis", "Lee", "Walker", "Hall", "Allen", "Young", "Hernandez", "King",
+    "Wright", "Lopez", "Hill", "Scott", "Green", "Adams", "Baker", "Gonzalez", "Nelson", "Carter",
+    "Mitchell", "Perez", "Roberts", "Turner", "Phillips", "Campbell", "Parker", "Evans", "Edwards", "Collins"
+  ]
+};
+
 // Export the altitude ranges for use in other parts of the application 
-export { regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap };
+export { regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};
