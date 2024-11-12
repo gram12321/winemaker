@@ -37,3 +37,6 @@ Wineorders not saved to firestore, just to localstorage
 QoL Improvement
  - Hover over info on "Statuspic" on sales.html
  - Default selected staff for new task
+
+ New/Better mechanics
+  - Let quantity of generateWineOrder() be depending on a asking price. Asking price could be set in sales.html instead of the Normal selling buttom

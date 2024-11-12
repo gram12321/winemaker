@@ -101,7 +101,7 @@ export function generateWineOrder() {
         resourceName: selectedWine.resource.name,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
-        quantity: 1,
+        quantity: Math.round((0.5 + (Math.random() * 1.5)) * (1 + 10 * selectedWine.fieldPrestige)),
         wineOrderPrice: (0.5 +(Math.random() * 1.5 )) * calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige) // Calculate price for the order. add random factor of 50% to 200% of the calculatedprice
     };
 
@@ -120,4 +120,40 @@ export function generateWineOrder() {
     // Save the updated list of wine orders back to local storage and update inventory
     saveWineOrders(wineOrders);
     saveInventory();
+}
+
+export function sellOrderWine(orderIndex) {
+  const wineOrders = loadWineOrders();
+
+  if (orderIndex >= 0 && orderIndex < wineOrders.length) {
+    const order = wineOrders[orderIndex];
+    const quantity = order.quantity;
+
+    // Use the wineOrderPrice for the sale and multiply by quantity
+    const totalSellingPrice = order.wineOrderPrice * quantity;
+
+    // Add console message to notify user of the sale
+    addConsoleMessage(`Sold ${quantity} bottles of ${order.resourceName}, Vintage ${order.vintage}, Quality ${order.quality.toFixed(2)} for a total of €${totalSellingPrice.toFixed(2)}.`);
+
+    // Log the sale transaction and update the balance
+    addTransaction('Income', 'Wine Sale', totalSellingPrice);
+
+    // Optionally handle prestige effects
+    const prestigeHit = totalSellingPrice / 1000;
+    applyPrestigeHit(prestigeHit);
+
+    // Remove the sold order from the list
+    wineOrders.splice(orderIndex, 1);
+    saveWineOrders(wineOrders);
+
+    // Directly remove the row from the table
+    const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
+    const orderRow = wineOrdersTableBody.children[orderIndex];
+    if (orderRow) {
+      wineOrdersTableBody.removeChild(orderRow);
+    }
+
+  } else {
+    addConsoleMessage('Invalid wine order index.');
+  }
 }
