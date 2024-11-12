@@ -179,8 +179,17 @@ export function sellWines(resourceName) {
 export function calculateWinePrice(quality, landValue) {
     const baseValue = 10; // Base value in Euros
     const normalizedLandValue = normalizeLandValue(landValue); // Normalize the land value
+
+    console.log(`Quality: ${quality}`); // Log the quality
+    console.log(`Land Value: ${landValue}`); // Log the original land value
+    console.log(`Normalized Land Value: ${normalizedLandValue}`); // Log the normalized land value
+
     // Calculate the average of quality and normalized land value
     const wineValueModifier = (quality + normalizedLandValue) / 2;
+    console.log(`Wine Value Modifier: ${wineValueModifier}`); // Log the wine value modifier
+
     // Calculate and return the final wine price
-    return baseValue * wineValueModifier;
+    const finalPrice = baseValue * wineValueModifier;
+    console.log(`Final Wine Price: €${finalPrice}`); // Log the final wine price
+    return finalPrice;
 }
