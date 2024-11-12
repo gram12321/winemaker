@@ -23,7 +23,7 @@ export class Task {
     // Define task types with associated processing functions and skill keys
     static taskTypes = {
         'Administration': {
-            processPerWorkApplied: 6,
+            processPerWorkApplied: 0.6,
             processingFunctions: ['bookkeepingTaskFunction'],
             skillKey: 'administration'
         },

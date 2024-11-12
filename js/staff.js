@@ -1,6 +1,3 @@
-// staff.js
-
-// Import the necessary data from names.js
 import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames, italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry  } from './names.js'; // Adjust import path if necessary
 import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
