@@ -216,6 +216,17 @@ export function fermentMust(selectedResource) {
         return 0; // Return 0 if no progress is made
     }
 
+    // Log the resource details before processing
+    console.log(`Starting fermentation for:`, {
+        name: resource.resource.name,
+        amount: resource.amount,
+        state: resource.state,
+        vintage: resource.vintage,
+        quality: resource.quality,
+        fieldName: resource.fieldName,
+        fieldPrestige: resource.fieldPrestige // Log fieldPrestige
+    });
+
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Fermenting" && task.resourceName === selectedResource);
 
@@ -225,9 +236,37 @@ export function fermentMust(selectedResource) {
     // Ferment only the work that can be applied or the amount available, whichever is smaller
     const actualIncrement = Math.min(workApplied, resource.amount);
 
-    // Remove units from the must resource and add as bottles, include fieldName
-    inventoryInstance.removeResource(resource.resource.name, actualIncrement, 'Must', resource.vintage, resource.quality, resource.fieldName);
-    inventoryInstance.addResource(resource.resource.name, actualIncrement, 'Bottle', resource.vintage, resource.quality, resource.fieldName);
+    // Remove units from the must resource and add as bottles, include fieldName and fieldPrestige
+    inventoryInstance.removeResource(
+        resource.resource.name,
+        actualIncrement,
+        'Must',
+        resource.vintage,
+        resource.quality,
+        resource.fieldName,
+        resource.fieldPrestige // Include fieldPrestige
+    );
+
+    inventoryInstance.addResource(
+        resource.resource.name,
+        actualIncrement,
+        'Bottle',
+        resource.vintage,
+        resource.quality,
+        resource.fieldName,
+        resource.fieldPrestige // Include fieldPrestige
+    );
+
+    // Log after adding Bottle to confirm fieldPrestige is passed
+    console.log(`Bottle added to inventory:`, {
+        name: resource.resource.name,
+        amount: actualIncrement,
+        state: 'Bottle',
+        vintage: resource.vintage,
+        quality: resource.quality,
+        fieldName: resource.fieldName,
+        fieldPrestige: resource.fieldPrestige // Verify this is passed along
+    });
 
     // Persist changes
     saveInventory();
