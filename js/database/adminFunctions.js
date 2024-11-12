@@ -188,7 +188,8 @@ function loadInventory() {
       item.state,
       item.vintage,
       item.quality,
-      item.fieldName // Ensure fieldName is loaded
+      item.fieldName, // Ensure fieldName is loaded
+        item.fieldPrestige
     );
   });
 }

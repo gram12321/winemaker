@@ -24,19 +24,20 @@ class Inventory {
     this.items = [];
   }
 
-  addResource(name, amount, state, vintage, quality, fieldName) { // Include fieldName
+  addResource(name, amount, state, vintage, quality, fieldName, fieldPrestige) {
     const resource = getResourceByName(name);
     if (!resource) {
       throw new Error('Resource not found');
     }
 
-    // Check if the item with these characteristics already exists
+    // Check if the item with these characteristics already exists, including fieldPrestige
     let existingItem = this.items.find(item =>
       item.resource.name === name &&
       item.state === state &&
       item.vintage === vintage &&
-      item.quality === parseFloat(quality) && // Convert quality to float
-      item.fieldName === fieldName // Ensure it's the same field
+      item.quality === parseFloat(quality) &&
+      item.fieldName === fieldName &&
+      item.fieldPrestige === fieldPrestige // Include fieldPrestige in the comparison
     );
 
     if (existingItem) {
@@ -48,19 +49,21 @@ class Inventory {
         amount: amount,
         state: state,
         vintage: vintage,
-        quality: parseFloat(quality), // Ensure quality is stored as a float
-        fieldName  // Store fieldName
+        quality: parseFloat(quality),
+        fieldName: fieldName,
+        fieldPrestige: fieldPrestige // Store fieldPrestige
       });
     }
   }
 
-  removeResource(name, amount, state, vintage, quality, fieldName) { // Include fieldName
+  removeResource(name, amount, state, vintage, quality, fieldName, fieldPrestige) { // Include fieldPrestige
     const itemIndex = this.items.findIndex(item =>
       item.resource.name === name &&
       item.state === state &&
       item.vintage === vintage &&
-      item.quality === parseFloat(quality) && // Convert quality to float
-      item.fieldName === fieldName // Match the fieldName as well
+      item.quality === parseFloat(quality) &&
+      item.fieldName === fieldName &&
+      item.fieldPrestige === fieldPrestige // Match the fieldPrestige as well
     );
 
     if (itemIndex !== -1) {
@@ -75,14 +78,15 @@ class Inventory {
     }
   }
 
-  getTotalAmount(name, state = null, vintage = null, quality = null, fieldName = null) { // Include fieldName
+  getTotalAmount(name, state = null, vintage = null, quality = null, fieldName = null, fieldPrestige = null) { // Include fieldPrestige
     return this.items.reduce((total, item) => {
       if (
         item.resource.name === name &&
         (state === null || item.state === state) &&
         (vintage === null || item.vintage === vintage) &&
-        (quality === null || item.quality === parseFloat(quality)) && // Convert quality to float
-        (fieldName === null || item.fieldName === fieldName) // Match the fieldName if provided
+        (quality === null || item.quality === parseFloat(quality)) &&
+        (fieldName === null || item.fieldName === fieldName) &&
+        (fieldPrestige === null || item.fieldPrestige === fieldPrestige) // Match the fieldPrestige if provided
       ) {
         return total + item.amount;
       }

@@ -75,7 +75,7 @@ export function grapeCrushing(selectedResource) {
         return 0;
     }
 
-    // Log the resource details, including the fieldName
+    // Log the resource details, including the fieldName and fieldPrestige
     console.log(`Resource for crushing:`, {
         name: resource.resource.name,
         amount: resource.amount,
@@ -83,6 +83,7 @@ export function grapeCrushing(selectedResource) {
         vintage: resource.vintage,
         quality: resource.quality,
         fieldName: resource.fieldName, // Log fieldName
+        fieldPrestige: resource.fieldPrestige // Add fieldPrestige
     });
 
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
@@ -99,9 +100,37 @@ export function grapeCrushing(selectedResource) {
     // Calculate actual must produced
     const mustProduced = actualIncrement * crushingYieldRatio;
 
-    // Update inventory to reflect the crushing process, include fieldName
-    inventoryInstance.removeResource(resource.resource.name, actualIncrement, resource.state, resource.vintage, resource.quality, resource.fieldName);
-    inventoryInstance.addResource(resource.resource.name, mustProduced, 'Must', resource.vintage, resource.quality, resource.fieldName);
+    // Update inventory to reflect the crushing process, include fieldName and fieldPrestige
+    inventoryInstance.removeResource(
+        resource.resource.name,
+        actualIncrement,
+        resource.state,
+        resource.vintage,
+        resource.quality,
+        resource.fieldName,
+        resource.fieldPrestige // Pass the field's prestige along
+    );
+
+    inventoryInstance.addResource(
+        resource.resource.name,
+        mustProduced,
+        'Must',
+        resource.vintage,
+        resource.quality,
+        resource.fieldName,
+        resource.fieldPrestige // Pass the field's prestige along
+    );
+
+    // Log after adding Must to confirm fieldPrestige is passed
+    console.log(`Must added to inventory:`, {
+        name: resource.resource.name,
+        amount: mustProduced,
+        state: 'Must',
+        vintage: resource.vintage,
+        quality: resource.quality,
+        fieldName: resource.fieldName,
+        fieldPrestige: resource.fieldPrestige // Verify this is passed along
+    });
 
     // Persist changes
     saveInventory();
