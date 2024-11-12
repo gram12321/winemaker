@@ -186,10 +186,10 @@
 
               listItem.innerHTML = `
                 <strong>${item.fieldName}</strong>, 
-                ${item.resource.name}, 
+                ${item.resource.name} must, 
                 ${item.vintage}, 
                 <span class="${colorClass}">(${(item.quality * 100).toFixed(0)}%)</span>, 
-                ${formatNumber(item.amount)}t`;
+                ${formatNumber(item.amount)}l`;
 
               fermentationList.appendChild(listItem);
             }
@@ -230,10 +230,10 @@
 
               option.innerHTML = `
                 <strong>${item.fieldName}</strong>, 
-                ${item.resource.name}, 
+                ${item.resource.name} must, 
                 ${item.vintage}, 
                 <span class="${colorClass}">(${(item.quality * 100).toFixed(0)}%)</span>, 
-                ${formatNumber(item.amount)}t`;
+                ${formatNumber(item.amount)}l`;
 
               selectElement.appendChild(option);
             }
