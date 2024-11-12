@@ -41,9 +41,10 @@
         <table class="table table-bordered">
           <thead>
             <tr>
+              <th>Type</th>
               <th>Resource</th>
               <th>Quality</th>
-              <th>Quantity</th>
+              <th>Amount</th>
               <th>Offered Price</th>
             </tr>
           </thead>
@@ -100,11 +101,30 @@
         const colorClass = getColorClass(order.quality);
         const qualityText = `${qualityDescription} <span class="${colorClass}">(${order.quality.toFixed(2)})</span>`;
 
+        // Determine icon path based on order type
+        let iconPath;
+        switch (order.type) {
+          case "Private Order":
+            iconPath = '/assets/icon/icon_privateorder.webp';
+            break;
+          case "Engross Order":
+            iconPath = '/assets/icon/icon_engrossorder.webp';
+            break;
+        }
+
+        const typeInfo = iconPath 
+          ? `<img src="${iconPath}" alt="${order.type}" class="status-image">`
+          : '';
+
+        // Format amount
+        const displayAmount = `${order.amount} Bottles`;
+
         row.innerHTML = `
-          <td><strong>${order.fieldName || 'Unknown Field'}</strong>, ${order.resourceName}, ${order.vintage || 'Unknown'}</td> <!-- Combine field name, resource name, and vintage -->
-          <td>${qualityText}</td> <!-- Use formatted quality text -->
-          <td>${order.amount} Bottles </td> <!-- Changed "quantity" to "amount" -->
-          <td>€${formatNumber(order.wineOrderPrice, 2)}</td> <!-- Format the wine order price -->
+          <td>${typeInfo}</td>
+          <td><strong>${order.fieldName || ''}</strong>, ${order.resourceName || ''}, ${order.vintage || ''}</td>
+          <td>${qualityText}</td>
+          <td>${displayAmount}</td>
+          <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
           <td><button class="btn btn-success sell-order-btn">Sell</button></td>
         `;
 
@@ -116,10 +136,11 @@
         wineOrdersTableBody.appendChild(row);
       });
     }
-      document.addEventListener('DOMContentLoaded', function() {
-        displayWineOrders(); // Display wine orders on page load
-      });
-  </script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+      displayWineOrders(); // Display wine orders on page load
+    });
+     </script>
   
 </body>
 </html>
