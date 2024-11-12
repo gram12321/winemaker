@@ -31,6 +31,7 @@ Possible a bug in AmountWork. That calculates workforce of staff without taking 
 Bookeeping task dosn't update "Goal", when more task is added to unfinished task
 Make sure to clean localstorage on login, in case game was closed without clearing
 Fermenting task has correct value in workprogress, but dont update "Progress" on taskbox info
+Wineorders not saved to firestore, just to localstorage
 
 
 QoL Improvement

@@ -75,7 +75,6 @@ export function calculateWinePrice(quality, landValue, fieldPrestige) {
     return finalPrice;
 }
 
-
 export function generateWineOrder() {
     // Load existing wine orders from local storage
     const wineOrders = loadWineOrders();
@@ -92,14 +91,20 @@ export function generateWineOrder() {
     const selectedWine = bottledWines[randomIndex];
     selectedWine.amount -= 1; // Decrease the amount in the inventory
 
+    // Obtain the corresponding farmland using the field name
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmland = farmlands.find(field => field.name === selectedWine.fieldName);
+    const landValue = farmland.landvalue;
+
     // Create an order for the selected wine
     const newOrder = {
         resourceName: selectedWine.resource.name,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
         quantity: 1,
+        price: calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige) // Calculate price for the order
     };
-    
+
     // Remove the item from inventory if the amount is zero
     if (selectedWine.amount === 0) {
         const index = inventoryInstance.items.indexOf(selectedWine);
@@ -110,7 +115,7 @@ export function generateWineOrder() {
     wineOrders.push(newOrder);
 
     // Log the order creation to the console
-    addConsoleMessage(`Created order for 1 bottle of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}.`);
+    addConsoleMessage(`Created order for 1 bottle of ${newOrder.resourceName}, Vintage ${newOrder.vintage}, Quality ${newOrder.quality.toFixed(2)}, Price €${newOrder.price.toFixed(2)}.`);
 
     // Save the updated list of wine orders back to local storage and update inventory
     saveWineOrders(wineOrders);

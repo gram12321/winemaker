@@ -34,9 +34,30 @@
           </tbody>
         </table>
       </section>
+
+      <!-- Wine Orders Section -->
+      <section class="my-4">
+        <h3>Wine Orders</h3>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Resource</th>
+              <th>Vintage</th>
+              <th>Quality</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody id="wine-orders-table-body">
+            <!-- Wine orders will be dynamically populated here -->
+          </tbody>
+        </table>
+      </section>
+      
     </div>
   </div>
 
+
+  
   <!-- JavaScript libraries -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
@@ -60,6 +81,36 @@
           displayInventory(inventoryInstance, ['winecellar-table-body'], true);
        
     });
+
+    import { loadWineOrders } from '/js/database/adminFunctions.js'; // Ensure correct import path
+
+    function displayWineOrders() {
+      const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
+      wineOrdersTableBody.innerHTML = ''; // Clear existing rows
+
+      const wineOrders = loadWineOrders();
+
+      wineOrders.forEach(order => {
+        const row = document.createElement('tr');
+        const qualityText = `${order.quality.toFixed(2)}`; // Format quality to display if needed
+
+        row.innerHTML = `
+          <td>${order.resourceName}</td>
+          <td>${order.vintage}</td>
+          <td>${qualityText}</td>
+          <td>${order.quantity}</td>
+        `;
+
+        wineOrdersTableBody.appendChild(row);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize other components as required
+      displayWineOrders(); // Call the function to display wine orders
+    });
+    
   </script>
+  
 </body>
 </html>
