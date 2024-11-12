@@ -52,7 +52,7 @@ export function sellWines(resourceName) {
 // New function to calculate wine price using average moderation
 export function calculateWinePrice(quality, landValue, fieldPrestige) {
     const baseValue = 1; // Base value in Euros
-    const normalizedLandValue = normalizeLandValue(landValue); // Normalize the land value to 0-1
+    const normalizedLandValue = normalizeLandValue(landValue); // Takes value per acre, and Normalize the land value to 0-1
 
     // Log the starting parameters and normalized land value
     console.log(`Calculating Wine Price:`);
