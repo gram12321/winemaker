@@ -315,6 +315,13 @@ export function normalizeAltitude(altitude, [minAltitude, maxAltitude]) {
   return 0.3 + ((altitude - minAltitude) / (maxAltitude - minAltitude)) * (0.7 - 0.3);
 }
 
+// New function to normalize the land value
+export function normalizeLandValue(landvalue) {
+  // Normalize using the theoretical maximum. Divide by 190000. Allowing +1,00 value for top 3 regions (Bogongne, Champagne, Napa Valley))
+  return (landvalue / 190000) || 0;
+}
+
+
 // Calculate and normalize price factor with real price range integration
 export function calculateAndNormalizePriceFactor(country, region, altitude, aspect) {
   const altitudeRange = regionAltitudeRanges[country][region];

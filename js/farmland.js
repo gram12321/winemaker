@@ -1,6 +1,6 @@
 import { addConsoleMessage  } from '/js/console.js';
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
-import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames } from './names.js';
+import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
 import { allResources, getResourceByName, inventoryInstance  } from '/js/resource.js';
 import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
 import { Task } from './loadPanel.js'; 
@@ -9,12 +9,11 @@ import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 
 
-// Standalone function to calculate farmland prestige
+
+// Refactored calculateFarmlandPrestige function
 function calculateFarmlandPrestige(farmland) {
   const ageModifier = farmland.farmlandAgePrestigeModifier();
-
-  // Normalize using the theoretical maximum. Divide by 190000. 
-  const landvalueNormalized = (farmland.landvalue / 190000) || 0;
+  const landvalueNormalized = normalizeLandValue(farmland.landvalue);
   const prestigeRanking = regionPrestigeRankings[`${farmland.region}, ${farmland.country}`] || 0;
 
   const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
