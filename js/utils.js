@@ -34,7 +34,7 @@ export function getColorClass(value) {
 }
 
 export function getWineQualityCategory(quality) {
-  if (quality < 0.1) return "undrinkable";
+  if (quality < 0.1) return "Undrinkable";
   if (quality < 0.2) return "Vinegar Surprise";
   if (quality < 0.3) return "House Pour";
   if (quality < 0.4) return "Everyday Sipper";

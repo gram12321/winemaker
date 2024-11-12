@@ -42,7 +42,6 @@
           <thead>
             <tr>
               <th>Resource</th>
-              <th>Vintage</th>
               <th>Quality</th>
               <th>Quantity</th>
               <th>Offered Price</th>
@@ -70,10 +69,11 @@
 
     import { inventoryInstance, displayInventory } from '/js/resource.js'; // import sellWines from resource.js
     import { sellWines, sellOrderWine } from '/js/sales.js'; // import sellWines from endDay.js'
-    import { formatNumber } from '/js/utils.js';
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
     import { initializeConsole } from '/js/console.js'; // Import the console initializer
+    import { loadWineOrders } from '/js/database/adminFunctions.js'; // Ensure correct import path
+    import { getWineQualityCategory, getColorClass, formatNumber } from '/js/utils.js'; // Ensure necessary imports
 
     
     document.addEventListener('DOMContentLoaded', function () {
@@ -85,30 +85,37 @@
        
     });
 
-    import { loadWineOrders } from '/js/database/adminFunctions.js'; // Ensure correct import path
+   
 
     function displayWineOrders() {
-        const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
-        wineOrdersTableBody.innerHTML = ''; // Clear existing rows
-        const wineOrders = loadWineOrders();
-        wineOrders.forEach((order, index) => {
-          const row = document.createElement('tr');
-          const qualityText = `${order.quality.toFixed(2)}`;
-          row.innerHTML = `
-            <td>${order.resourceName}</td>
-            <td>${order.vintage}</td>
-            <td>${qualityText}</td>
-            <td>${order.quantity}</td>
-            <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
-            <td><button class="btn btn-success sell-order-btn">Sell</button></td>
-          `;
-          const sellButton = row.querySelector('.sell-order-btn');
-          sellButton.addEventListener('click', () => {
-            sellOrderWine(index);
-          });
-          wineOrdersTableBody.appendChild(row);
+      const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
+      wineOrdersTableBody.innerHTML = ''; // Clear existing rows
+      const wineOrders = loadWineOrders();
+
+      wineOrders.forEach((order, index) => {
+        const row = document.createElement('tr');
+
+        // Get quality description and color class
+        const qualityDescription = getWineQualityCategory(order.quality);
+        const colorClass = getColorClass(order.quality);
+        const qualityText = `${qualityDescription} <span class="${colorClass}">(${order.quality.toFixed(2)})</span>`;
+
+        row.innerHTML = `
+          <td><strong>${order.fieldName || 'Unknown Field'}</strong>, ${order.resourceName}, ${order.vintage || 'Unknown'}</td> <!-- Combine field name, resource name, and vintage -->
+          <td>${qualityText}</td> <!-- Use formatted quality text -->
+          <td>${order.amount}</td> <!-- Changed "quantity" to "amount" -->
+          <td>€${formatNumber(order.wineOrderPrice, 2)}</td> <!-- Format the wine order price -->
+          <td><button class="btn btn-success sell-order-btn">Sell</button></td>
+        `;
+
+        const sellButton = row.querySelector('.sell-order-btn');
+        sellButton.addEventListener('click', () => {
+          sellOrderWine(index);
         });
-      }
+
+        wineOrdersTableBody.appendChild(row);
+      });
+    }
       document.addEventListener('DOMContentLoaded', function() {
         displayWineOrders(); // Display wine orders on page load
       });

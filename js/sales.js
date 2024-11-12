@@ -98,9 +98,10 @@ export function generateWineOrder() {
     // Create an order for the selected wine
     const newOrder = {
         resourceName: selectedWine.resource.name,
+        fieldName: selectedWine.fieldName,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
-        quantity: Math.round((0.5 + (Math.random() * 1.5)) * (1 + 2 * selectedWine.fieldPrestige)),
+        amount: Math.round((0.5 + (Math.random() * 1.5)) * (1 + 2 * selectedWine.fieldPrestige)),
         wineOrderPrice: (0.5 +(Math.random() * 1.5 )) * calculateWinePrice(selectedWine.quality, landValue, selectedWine.fieldPrestige)
     };
 
@@ -120,11 +121,11 @@ export function sellOrderWine(orderIndex) {
 
   if (orderIndex >= 0 && orderIndex < wineOrders.length) {
     const order = wineOrders[orderIndex];
-    const quantity = order.quantity;
-    const totalSellingPrice = order.wineOrderPrice * quantity;
+    const amount = order.amount;
+    const totalSellingPrice = order.wineOrderPrice * amount;
 
     // Add console message to notify the user of the sale
-    addConsoleMessage(`Sold ${quantity} bottles of ${order.resourceName}, Vintage ${order.vintage}, Quality ${order.quality.toFixed(2)} for a total of €${totalSellingPrice.toFixed(2)}.`);
+    addConsoleMessage(`Sold ${amount} bottles of ${order.resourceName}, Vintage ${order.vintage}, Quality ${order.quality.toFixed(2)} for a total of €${totalSellingPrice.toFixed(2)}.`);
 
     // Log the sale transaction and update the balance
     addTransaction('Income', 'Wine Sale', totalSellingPrice);
@@ -145,8 +146,8 @@ export function sellOrderWine(orderIndex) {
     if (resourceIndex !== -1) {
       const resource = inventoryItems[resourceIndex];
 
-      if (resource.amount >= quantity) {
-        resource.amount -= quantity;
+      if (resource.amount >= amount) {
+        resource.amount -= amount;
         if (resource.amount === 0) {
           // Remove the item if the amount reaches zero
           inventoryItems.splice(resourceIndex, 1);
