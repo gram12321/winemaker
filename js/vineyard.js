@@ -144,12 +144,17 @@ export function handleHarvestTask(index) {
 }
 
 export function harvestAcres(index) {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const field = farmlands[index];
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const field = farmlands[index];
+  if (field && field.plantedResourceName) {
+    console.log('Harvesting field details:');
 
-    if (field && field.plantedResourceName) {
-        console.log('Field Name:', field.name); // Log to verify field name is being retrieved
-        console.log('Field Prestige:', field.farmlandPrestige); // Log to verify field prestige
+    // Log all properties of the field object
+    for (const [key, value] of Object.entries(field)) {
+      console.log(`${key}: ${value}`);
+    }
+
+      
 
         const resourceName = field.plantedResourceName;
         const state = 'Grapes';

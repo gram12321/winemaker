@@ -140,6 +140,7 @@ function updateRipeness() {
 }
 
 
+// Modify sellWines function to use landValue from Farmland
 export function sellWines(resourceName) {
     const resourceIndex = inventoryInstance.items.findIndex(item => item.resource.name === resourceName && item.state === 'Bottle');
 
@@ -149,7 +150,15 @@ export function sellWines(resourceName) {
         if (resource.amount > 0) {
             resource.amount -= 1; // Reduce the inventory by 1
 
-            const sellingPrice = calculateWinePrice(resource.quality, resource.fieldPrestige); // Adjusted to pass the normalized land value calculation
+            // Obtain the corresponding farmland using the field name
+            const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+
+            // Match the resource field name against the correct property in farmland
+            const farmland = farmlands.find(field => field.name === resource.fieldName);
+
+            const landValue = farmland.landvalue;
+
+            const sellingPrice = calculateWinePrice(resource.quality, landValue);
 
             // Add console message to notify user of the sale
             addConsoleMessage(`Sold 1 bottle of ${resource.resource.name}, Vintage ${resource.vintage}, Quality ${resource.quality.toFixed(2)} for €${sellingPrice.toFixed(2)}.`);
