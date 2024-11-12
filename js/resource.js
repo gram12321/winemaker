@@ -1,4 +1,4 @@
-import { sellWines } from './endDay.js';
+import { sellWines } from './sales.js';
 import { formatNumber, getWineQualityCategory, getColorClass  } from './utils.js';
 
 class Resource {
