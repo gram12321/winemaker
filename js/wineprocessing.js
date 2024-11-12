@@ -90,7 +90,7 @@ export function grapeCrushing(selectedResource) {
     const currentTask = tasks.find(task => task.taskName === "Crushing Grapes" && task.resourceName === selectedResource);
 
     // Calculate work applied using staff assignments
-    const workApplied = calculateWorkApplied(currentTask?.staff || 1); // Fallback to 1 to avoid multiplying by 0
+    const workApplied = calculateWorkApplied(currentTask?.staff || [], 'grapeCrushing');
 
     const actualIncrement = Math.min(workApplied, resource.amount);
 
@@ -231,8 +231,7 @@ export function fermentMust(selectedResource) {
     const currentTask = tasks.find(task => task.taskName === "Fermenting" && task.resourceName === selectedResource);
 
     // Calculate work applied using staff assignments
-    const processPerWprkApplied = 100 // Each worker can process 50*100 = 5000 liter per week
-    const workApplied = processPerWprkApplied * (calculateWorkApplied(currentTask?.staff)); // Fallback to 1 to avoid multiplying by 0
+    const workApplied = calculateWorkApplied(currentTask?.staff, 'fermentMust');
 
     // Ferment only the work that can be applied or the amount available, whichever is smaller
     const actualIncrement = Math.min(workApplied, resource.amount);

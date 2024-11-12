@@ -279,8 +279,11 @@ export function plantAcres(index, resourceName) {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Planting" && task.fieldId === index);
 
-    // Use the reusable function to calculate work applied
-    const workApplied = calculateWorkApplied(currentTask?.staff || []);
+    // Calculate work applied specifically for planting
+    const workApplied = calculateWorkApplied(currentTask?.staff || [], 'plantAcres');
+
+    // Log the work applied for the current planting task
+    console.log(`Work applied for planting on ${fieldName}: ${workApplied}`);
 
     const workRemaining = field.acres - (field.currentAcresPlanted || 0);
     const acresToPlant = Math.min(workApplied, workRemaining);
@@ -369,8 +372,9 @@ export function uproot(index) {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Uprooting" && task.fieldId === index);
 
-    // Calculate the work applied using staff assignments
-    const workApplied = calculateWorkApplied(currentTask?.staff || []);
+
+  // Calculate the work applied specifically for uprooting
+  const workApplied = calculateWorkApplied(currentTask?.staff || [], 'uproot');
 
     const workRemaining = field.acres - (field.currentAcresUprooted || 0);
     const acresToUproot = Math.min(workApplied, workRemaining);

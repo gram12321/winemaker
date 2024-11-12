@@ -144,18 +144,9 @@ export function handleHarvestTask(index) {
 }
 
 export function harvestAcres(index) {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const field = farmlands[index];
-  if (field && field.plantedResourceName) {
-    console.log('Harvesting field details:');
-
-    // Log all properties of the field object
-    for (const [key, value] of Object.entries(field)) {
-      console.log(`${key}: ${value}`);
-    }
-
-      
-
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const field = farmlands[index];
+    if (field && field.plantedResourceName) {
         const resourceName = field.plantedResourceName;
         const state = 'Grapes';
         const gameYear = parseInt(localStorage.getItem('year'), 10);
@@ -163,17 +154,22 @@ export function harvestAcres(index) {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const currentTask = tasks.find(task => task.taskName === "Harvesting" && task.fieldId === index);
 
-        const workApplied = calculateWorkApplied(currentTask?.staff || []);
+        if (!currentTask) {
+            addConsoleMessage(`No harvesting task found for ${field.name}.`);
+            return 0;
+        }
+
+        const workApplied = calculateWorkApplied(currentTask.staff || [], 'harvestAcres');
+
+        // Log the work applied for this harvest task
+        console.log(`Work applied for harvesting task with ID ${currentTask.taskId}: ${workApplied}`);
+
         const acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
         const acresHarvested = Math.min(workApplied, acresLeftToHarvest);
 
         if (acresHarvested > 0) {
             const grapesHarvested = farmlandYield(field) * acresHarvested * 5;
             const quality = Math.random().toFixed(2); // Random quality placeholder
-
-            // Log before adding resource
-            console.log('Adding resource with field name:', field.name);
-            console.log('Adding resource with field prestige:', field.farmlandPrestige);
 
             // Add the harvested grapes to the inventory, including the field name and prestige
             inventoryInstance.addResource(
@@ -182,12 +178,12 @@ export function harvestAcres(index) {
                 state,
                 gameYear,
                 quality,
-                field.name, // Pass the field's name to the addResource method
-                field.farmlandPrestige // Pass the field's prestige to the addResource method
+                field.name, // Pass the field's name
+                field.farmlandPrestige // Pass the field's prestige
             );
 
-            const harvestedFormatted = `${acresHarvested} acres`; // Format harvested info
-            const remainingFormatted = `${totalAcres - field.currentAcresHarvested} acres`; // Format remaining info
+            const harvestedFormatted = `${acresHarvested} acres`; 
+            const remainingFormatted = `${totalAcres - field.currentAcresHarvested} acres`;
 
             addConsoleMessage(`Harvested <strong>${formatNumber(grapesHarvested)} tons</strong> of ${resourceName} with quality ${quality} from ${field.name} across <strong>${harvestedFormatted}</strong>. Remaining: ${remainingFormatted}`);
 
