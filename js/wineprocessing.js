@@ -76,17 +76,6 @@ export function grapeCrushing(selectedResource) {
         return 0;
     }
 
-    // Log the resource details, including the fieldName and fieldPrestige
-    console.log(`Resource for crushing:`, {
-        name: resource.resource.name,
-        amount: resource.amount,
-        state: resource.state,
-        vintage: resource.vintage,
-        quality: resource.quality,
-        fieldName: resource.fieldName, // Log fieldName
-        fieldPrestige: resource.fieldPrestige // Add fieldPrestige
-    });
-
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Crushing Grapes" && task.resourceName === selectedResource);
 
@@ -121,17 +110,6 @@ export function grapeCrushing(selectedResource) {
         resource.fieldName,
         resource.fieldPrestige // Pass the field's prestige along
     );
-
-    // Log after adding Must to confirm fieldPrestige is passed
-    console.log(`Must added to inventory:`, {
-        name: resource.resource.name,
-        amount: mustProduced,
-        state: 'Must',
-        vintage: resource.vintage,
-        quality: resource.quality,
-        fieldName: resource.fieldName,
-        fieldPrestige: resource.fieldPrestige // Verify this is passed along
-    });
 
     // Persist changes
     saveInventory();
@@ -217,17 +195,6 @@ export function fermentMust(selectedResource) {
         return 0; // Return 0 if no progress is made
     }
 
-    // Log the resource details before processing
-    console.log(`Starting fermentation for:`, {
-        name: resource.resource.name,
-        amount: resource.amount,
-        state: resource.state,
-        vintage: resource.vintage,
-        quality: resource.quality,
-        fieldName: resource.fieldName,
-        fieldPrestige: resource.fieldPrestige // Log fieldPrestige
-    });
-
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Fermenting" && task.resourceName === selectedResource);
 
@@ -257,17 +224,6 @@ export function fermentMust(selectedResource) {
         resource.fieldName,
         resource.fieldPrestige // Include fieldPrestige
     );
-
-    // Log after adding Bottle to confirm fieldPrestige is passed
-    console.log(`Bottle added to inventory:`, {
-        name: resource.resource.name,
-        amount: actualIncrement,
-        state: 'Bottle',
-        vintage: resource.vintage,
-        quality: resource.quality,
-        fieldName: resource.fieldName,
-        fieldPrestige: resource.fieldPrestige // Verify this is passed along
-    });
 
     // Persist changes
     saveInventory();
