@@ -306,6 +306,7 @@ export function executeTaskFunction(task) {
     }
 
     // Check if the task is complete
+    // Check if the task is complete
     if (task.workProgress >= task.workTotal) {
         task.removeTaskBox();
         console.log(`Task completed: ${task.taskName}, Removing task with ID: ${task.taskId}`);
@@ -323,6 +324,9 @@ export function executeTaskFunction(task) {
                 break;
             case task.taskName === "Crushing Grapes":
                 addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
+                break;
+            case task.taskName === "Fermenting":
+                addConsoleMessage(`Fermenting task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
                 break;
             case task.taskName === "Harvesting":
                 addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
