@@ -1,5 +1,7 @@
-import { createNewStaff } from '../staff.js';
+import { createNewStaff, displayStaff } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
+import { saveStaff } from '../database/adminFunctions.js'; // Ensure saveStaff is imported
+import { addConsoleMessage } from '../console.js'; // Import addConsoleMessage
 
 document.addEventListener('DOMContentLoaded', () => {
     const hireStaffBtn = document.getElementById('hire-staff-btn');
@@ -81,14 +83,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    
+
     function hireSelectedStaff(staff) {
-        // Implement the hiring logic - e.g., save to localStorage or a database
-        console.log(`Hired staff member: ${staff.firstName} ${staff.lastName}, Nationality: ${staff.nationality}`);
+        // Retrieve existing staff data or initialize with an empty array
+        let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+        // Add the new staff to the array
+        staffData.push(staff);
+        // Save the updated staff data
+        saveStaff(staffData);
+        // Update the staff table display
+        displayStaff();
+        // Add a console message for the hired staff, including the flag icon
+        const flagIconHTML = getFlagIconHTML(staff.nationality);
+        addConsoleMessage(`Hired staff member: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} `, true);
+        // Close the overlay
         closeOverlay();
     }
-
     function closeOverlay() {
-        overlay.style.display = 'none';
+        const overlay = document.getElementById('hireStaffOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
     }
 
     // Helper function to determine skill level class
