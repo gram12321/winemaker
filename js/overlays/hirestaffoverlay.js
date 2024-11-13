@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <td>Nationality</td>
                                 <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
                             </tr>
+                            <tr>
+                                <td>Wage</td>
+                                <td>€${staff.wage}</td>
+                            </tr>
                         </tbody>
                     </table>
                     <h4>Skills</h4>

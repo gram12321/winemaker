@@ -69,9 +69,11 @@ export function getLastNameForNationality(nationality) {
   const lastNamesList = lastNamesByCountry[nationality];
   return lastNamesList ? lastNamesList[Math.floor(Math.random() * lastNamesList.length)] : 'Unknown';
 }
+
 function randomizeSkills() {
   return Math.random().toFixed(2);
 }
+
 export function createNewStaff() {
   const nationality = Staff.prototype.selectNationality();
   const firstName = Staff.prototype.getNameForNationality(nationality);
@@ -82,9 +84,20 @@ export function createNewStaff() {
       administration: { administration: randomizeSkills() },
       sales: { sales: randomizeSkills() }
   };
+
+  const skillMultiplier = 100;
+
+  // Calculate wage based on skills
+  const calculateWage = (skills) => (
+    skills.field.field * skillMultiplier +
+    skills.winery.winery * skillMultiplier +
+    skills.administration.administration * skillMultiplier +
+    skills.sales.sales * skillMultiplier
+  );
+
   const newStaff = new Staff(firstName, lastName, skills);
   newStaff.workforce = 50;
-  newStaff.wage = 600;
+  newStaff.wage = (0.75 + Math.random() * 1.25) * calculateWage(skills);
   return newStaff;
 }
 
