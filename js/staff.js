@@ -35,34 +35,37 @@ class Skills {
       this.sales = new SalesSkills(skills.sales || {});
   }
 }
-// Main Staff class
+
+
 export class Staff {
-  static latestId = 0;
-  constructor(firstName, lastName, skills = {}) {
-      this.id = ++Staff.latestId;
-      this.firstName = firstName;
-      this.lastName = lastName;
-      this.nationality = this.selectNationality();
-      this.name = this.getNameForNationality(this.nationality);
-      this.workforce = 50;
-      this.wage = 600;
-      this.skills = new Skills(skills);
-  }
-  selectNationality() {
-      const countries = Object.keys(countryRegionMap);
-      return countries[Math.floor(Math.random() * countries.length)];
-  }
-  getNameForNationality(nationality) {
-      const nameMap = {
-          'Italy': italianMaleNames.concat(italianFemaleNames),
-          'France': frenchMaleNames.concat(frenchFemaleNames),
-          'Spain': spanishMaleNames.concat(spanishFemaleNames),
-          'United States': usMaleNames.concat(usFemaleNames),
-          'Germany': germanMaleNames.concat(germanFemaleNames),
-      };
-      const namesList = nameMap[nationality];
-      return namesList ? namesList[Math.floor(Math.random() * namesList.length)] : 'Unknown';
-  }
+static latestId = parseInt(localStorage.getItem('latestStaffId'), 10) || 0;
+constructor(firstName, lastName, skills = {}) {
+    this.id = ++Staff.latestId; localStorage.setItem('latestStaffId', Staff.latestId);
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.nationality = this.selectNationality();
+    this.name = this.getNameForNationality(this.nationality);
+    this.workforce = 50;
+    this.wage = 600;
+    this.skills = new Skills(skills);
+}
+
+    selectNationality() {
+        const countries = Object.keys(countryRegionMap);
+        return countries[Math.floor(Math.random() * countries.length)];
+    }
+
+    getNameForNationality(nationality) {
+        const nameMap = {
+            'Italy': italianMaleNames.concat(italianFemaleNames),
+            'France': frenchMaleNames.concat(frenchFemaleNames),
+            'Spain': spanishMaleNames.concat(spanishFemaleNames),
+            'United States': usMaleNames.concat(usFemaleNames),
+            'Germany': germanMaleNames.concat(germanFemaleNames),
+        };
+        const namesList = nameMap[nationality];
+        return namesList ? namesList[Math.floor(Math.random() * namesList.length)] : 'Unknown';
+    }
 }
 
 export function getLastNameForNationality(nationality) {

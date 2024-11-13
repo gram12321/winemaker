@@ -40,6 +40,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('tasks');
   localStorage.removeItem('latestTaskId');
   localStorage.removeItem('staffData');
+  localStorage.removeItem('latestStaffId');
   localStorage.removeItem('transactions'); // Clear transactions data
   localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
   console.log("Local storage cleared.");
@@ -326,10 +327,7 @@ export function saveStaff(staffMembers) {
       wage: staff.wage,
       skills: staff.skills // Include skills in the saved data
     }))));
-    console.log("Staff data saved successfully.");
-  } else {
-    console.error("Failed to save staff: input is not an array.");
-  }
+  } 
 }
 
 // Function to load staff members from localStorage
