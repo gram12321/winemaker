@@ -370,7 +370,7 @@ body {
 
 /*  - --- --   Overlay   - - - - - -*/
 
-/* Overlay styles */
+/* General Overlay Styles */
 .overlay {
   position: fixed;
   width: 100%;
@@ -393,9 +393,9 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
 /* Table styles within overlays */
 .overlay .table {
-  
   margin: 0 auto; /* Center align the table */
   width: auto; /* Allow natural width expansion */
   min-width: 400px; /* Minimum width */
@@ -414,7 +414,31 @@ body {
 }
 
 .table-hover tbody tr:hover {
-  background-color: #d1e7fd;
+  background-color: #d1e7fd; /* Light blue highlight */
+}
+
+/* Skills Table Styles */
+.skills-table {
+  width: auto; /* Adjust table width to fit content */
+  table-layout: auto; /* Let the table size be determined by its content */
+  border-collapse: collapse;
+  margin: 15px auto; /* Center align table */
+  font-size: 0.9em; /* Reduced font size */
+}
+
+.skills-table th,
+.skills-table td {
+  padding: 8px 12px; /* Reduced padding */
+  border: 1px solid #dddddd;
+  text-align: left;
+}
+
+.skills-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.skills-table tr:hover {
+  background-color: #d1e7fd; /* Light blue highlight */
 }
 
 /* Header styling */
@@ -431,6 +455,30 @@ h2 {
   font-size: 24px;
   cursor: pointer;
   color: #333;
+}
+
+/* Skill Level Classes */
+.high {
+  color: green;
+  font-weight: bold;
+}
+
+.medium {
+  color: orange;
+  font-weight: bold;
+}
+
+.low {
+  color: red;
+  font-weight: bold;
+}
+
+/* Player Image styling */
+.player-image {
+  width: 100px;
+  height: auto;
+  border-radius: 50%;
+  margin: 20px;
 }
 /*  - --- --   Overlay Ends  - - - - - -*/
 

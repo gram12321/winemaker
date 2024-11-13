@@ -4,6 +4,8 @@ import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { loadTasks } from './database/adminFunctions.js'; // Import the function to load tasks
 import { Task } from './loadPanel.js';  // Adjust the path based on your file structure
+import { showStaffOverlay } from './overlays/staffoverlay.js'; // Ensure the correct path
+
 
 class FieldSkills {
   constructor(field) {
@@ -86,8 +88,6 @@ export function createNewStaff() {
   return newStaff;
 }
 
-
-
 export function displayStaff() {
     const staffContainer = document.getElementById('staff-container');
     staffContainer.innerHTML = ''; // Clear any existing content
@@ -104,7 +104,7 @@ export function displayStaff() {
         <th scope="col">Workforce</th>
         <th scope="col">Wage (€)</th>
         <th scope="col">Assigned Tasks</th>
-        <th scope="col" class="skills-column">Skills</th> <!-- Move Skills to the end -->
+        <th scope="col" class="skills-column" style="min-width: 200px;">Skills</th> <!-- Ensure min-width -->
       </tr>
     `;
 
@@ -137,25 +137,30 @@ export function displayStaff() {
         });
 
         const assignedTaskDetail = assignedTasks.length > 0 ? assignedTasks.join('<br>') : 'None';
-      const skillsHTML = `
-        <div class="skill-bar-container">
-          <div class="skill-bar" style="width: ${parseFloat(staff.skills.field.field) * 100}%; background-color: #ffcc00;" title="Field Skill: ${staff.skills.field.field}">F</div>
-          <div class="skill-bar" style="width: ${parseFloat(staff.skills.winery.winery) * 100}%; background-color: #2179ff;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
-          <div class="skill-bar" style="width: ${parseFloat(staff.skills.administration.administration) * 100}%; background-color: #6c757d;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
-          <div class="skill-bar" style="width: ${parseFloat(staff.skills.sales.sales) * 100}%; background-color: #28a745;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
-        </div>
-      `;
+        const skillsHTML = `
+          <div class="skill-bar-container">
+            <div class="skill-bar" style="width: ${parseFloat(staff.skills.field.field) * 100}%; background-color: #ffcc00; height: 20px;" title="Field Skill: ${staff.skills.field.field}">F</div>
+            <div class="skill-bar" style="width: ${parseFloat(staff.skills.winery.winery) * 100}%; background-color: #2179ff; height: 20px;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
+            <div class="skill-bar" style="width: ${parseFloat(staff.skills.administration.administration) * 100}%; background-color: #6c757d; height: 20px;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
+            <div class="skill-bar" style="width: ${parseFloat(staff.skills.sales.sales) * 100}%; background-color: #28a745; height: 20px;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
+          </div>
+        `;
 
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td>${staff.name}</td>
+          <td class="staff-name">${staff.name}</td>
           <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
           <td>${staff.workforce}</td>
           <td>€${staff.wage}</td>
           <td>${assignedTaskDetail}</td>
-          <td>${skillsHTML}</td> <!-- Move Skills to the end -->
+          <td>${skillsHTML}</td>
         `;
         tbody.appendChild(row);
+
+        // Add event listener to open overlay on staff name click
+        row.querySelector('.staff-name').addEventListener('click', () => {
+            showStaffOverlay(staff);
+        });
     });
 
     table.appendChild(thead);
