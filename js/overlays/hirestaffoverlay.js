@@ -1,4 +1,5 @@
-import { createNewStaff } from '../staff.js'; // Ensure the path is correct for your project structure
+import { createNewStaff } from '../staff.js';
+import { getFlagIconHTML } from '../utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const hireStaffBtn = document.getElementById('hire-staff-btn');
@@ -18,7 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const staffContainer = overlay.querySelector('.overlay-content');
 
         // Clear existing content except the close button and header
-        staffContainer.innerHTML = `<span id="closeHireStaffOverlay" class="close-btn">&times;</span><h3>Hire Staff</h3>`;
+        staffContainer.innerHTML = `
+            <span id="closeHireStaffOverlay" class="close-btn">&times;</span>
+            <h3>Hire Staff</h3>
+        `;
 
         const numberOfOptions = 5; // Generate this number of staff options
         const createdStaffOptions = [];
@@ -28,22 +32,37 @@ document.addEventListener('DOMContentLoaded', () => {
             createdStaffOptions.push(newStaff);
         }
 
-        let staffHTML = '<div class="staff-options-container">';
+        let staffHTML = '<div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; overflow-y: auto; max-height: 80vh;">';
 
         createdStaffOptions.forEach(staff => {
             staffHTML += `
-                <div class="staff-option">
-                    <p><strong>Name:</strong> ${staff.firstName} ${staff.lastName}</p>
-                    <p><strong>Nationality:</strong> ${staff.nationality}</p>
-                    <div class="skill-bar-container">
-                        <div class="skill-bar" style="width: ${parseFloat(staff.skills.field.field) * 100}%; background-color: #ffcc00;" title="Field: ${staff.skills.field.field}">F</div>
-                        <div class="skill-bar" style="width: ${parseFloat(staff.skills.winery.winery) * 100}%; background-color: #2179ff;" title="Winery: ${staff.skills.winery.winery}">W</div>
-                        <div class="skill-bar" style="width: ${parseFloat(staff.skills.administration.administration) * 100}%; background-color: #6c757d;" title="Administration: ${staff.skills.administration.administration}">A</div>
-                        <div class="skill-bar" style="width: ${parseFloat(staff.skills.sales.sales) * 100}%; background-color: #28a745;" title="Sales: ${staff.skills.sales.sales}">S</div>
-                    </div>
-                    <button class="btn btn-primary hire-staff-button">Hire</button>
+                <div class="staff-option" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <h4>${staff.firstName} ${staff.lastName}</h4>
+                    <table class="table table-bordered" style="width: 100%;">
+                        <tbody>
+                            <tr>
+                                <td>Nationality</td>
+                                <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <h4>Skills</h4>
+                    <table class="skills-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Skill</th>
+                                <th>Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Field</td><td class="${getSkillLevelClass(staff.skills.field.field)}">${staff.skills.field.field}</td></tr>
+                            <tr><td>Winery</td><td class="${getSkillLevelClass(staff.skills.winery.winery)}">${staff.skills.winery.winery}</td></tr>
+                            <tr><td>Administration</td><td class="${getSkillLevelClass(staff.skills.administration.administration)}">${staff.skills.administration.administration}</td></tr>
+                            <tr><td>Sales</td><td class="${getSkillLevelClass(staff.skills.sales.sales)}">${staff.skills.sales.sales}</td></tr>
+                        </tbody>
+                    </table>
+                    <button class="btn btn-primary hire-staff-button" style="margin-top: 10px;">Hire</button>
                 </div>
-                <hr>
             `;
         });
 
@@ -66,5 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeOverlay() {
         overlay.style.display = 'none';
+    }
+
+    // Helper function to determine skill level class
+    function getSkillLevelClass(skillValue) {
+        return skillValue > 0.75 ? 'high' : skillValue > 0.5 ? 'medium' : 'low';
     }
 });
