@@ -97,7 +97,7 @@ export function createNewStaff() {
 
   const newStaff = new Staff(firstName, lastName, skills);
   newStaff.workforce = 50;
-  newStaff.wage = (0.75 + Math.random() * 1.25) * calculateWage(skills);
+  newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
   return newStaff;
 }
 

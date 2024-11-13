@@ -2,6 +2,7 @@ import { createNewStaff, displayStaff } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
 import { saveStaff } from '../database/adminFunctions.js'; // Ensure saveStaff is imported
 import { addConsoleMessage } from '../console.js'; // Import addConsoleMessage
+import { addTransaction } from '../finance.js'; // Import addTransaction for recording expenses
 
 document.addEventListener('DOMContentLoaded', () => {
     const hireStaffBtn = document.getElementById('hire-staff-btn');
@@ -81,9 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.querySelectorAll('.hire-staff-button').forEach((button, index) => {
             button.addEventListener('click', () => hireSelectedStaff(createdStaffOptions[index]));
         });
-    }
-
-    
+    }  
 
     function hireSelectedStaff(staff) {
         // Retrieve existing staff data or initialize with an empty array
@@ -94,9 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
         saveStaff(staffData);
         // Update the staff table display
         displayStaff();
+        // Calculate the hiring expense based on 12 times the wage
+        const hiringExpense = staff.wage * 12;
+        // Record the hiring expense as a one-time transaction
+        addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
         // Add a console message for the hired staff, including the flag icon
         const flagIconHTML = getFlagIconHTML(staff.nationality);
-        addConsoleMessage(`Hired staff member: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} `, true);
+        addConsoleMessage(`Hired new staff: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, One-time hiring cost: €${hiringExpense}`, true);
         // Close the overlay
         closeOverlay();
     }
