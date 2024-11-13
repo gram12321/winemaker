@@ -89,75 +89,78 @@ export function createNewStaff() {
 
 
 export function displayStaff() {
-  const staffContainer = document.getElementById('staff-container');
-  staffContainer.innerHTML = ''; // Clear any existing content
+    const staffContainer = document.getElementById('staff-container');
+    staffContainer.innerHTML = ''; // Clear any existing content
 
-  // Create table for displaying staff
-  const table = document.createElement('table');
-  table.className = 'table mt-4';
+    const table = document.createElement('table');
+    table.className = 'table mt-4';
 
-  const thead = document.createElement('thead');
-  thead.className = 'thead-light';
-  thead.innerHTML = `
-    <tr>
-      <th scope="col">Name</th>
-      <th scope="col">Nationality</th>
-      <th scope="col">Workforce</th>
-      <th scope="col">Wage (€)</th>
-      <th scope="col">Assigned Tasks</th>
-    </tr>
-  `;
+    const thead = document.createElement('thead');
+    thead.className = 'thead-light';
+    thead.innerHTML = `
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Nationality</th>
+        <th scope="col">Workforce</th>
+        <th scope="col">Wage (€)</th>
+        <th scope="col">Assigned Tasks</th>
+        <th scope="col" class="skills-column">Skills</th> <!-- Move Skills to the end -->
+      </tr>
+    `;
 
-  const tbody = document.createElement('tbody');
-  tbody.id = 'staff-entries';
+    const tbody = document.createElement('tbody');
+    tbody.id = 'staff-entries';
 
-  // Retrieve staff data from localStorage
-  const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+    const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-  // Load tasks to check task assignments
-  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    staffData.forEach(staff => {
+        const assignedTasks = [];
+        tasks.forEach(task => {
+            if (task.staff && task.staff.includes(staff.id.toString())) {
+                let locationLabel = 'Unknown';
+                switch (task.type) {
+                    case 'Winery':
+                        locationLabel = 'Winery';
+                        break;
+                    case 'Administration':
+                        locationLabel = 'Administration';
+                        break;
+                    case 'Sales':
+                        locationLabel = 'Sales';
+                        break;
+                    default:
+                        locationLabel = task.fieldName || 'Unknown';
+                }
+                assignedTasks.push(`<strong>${task.taskName}</strong>, ${locationLabel}`);
+            }
+        });
 
-  // Create table rows for each staff member
-  staffData.forEach(staff => {
-    const assignedTasks = []; // Array to hold task details
+        const assignedTaskDetail = assignedTasks.length > 0 ? assignedTasks.join('<br>') : 'None';
+      const skillsHTML = `
+        <div class="skill-bar-container">
+          <div class="skill-bar" style="width: ${parseFloat(staff.skills.field.field) * 100}%; background-color: #ffcc00;" title="Field Skill: ${staff.skills.field.field}">F</div>
+          <div class="skill-bar" style="width: ${parseFloat(staff.skills.winery.winery) * 100}%; background-color: #2179ff;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
+          <div class="skill-bar" style="width: ${parseFloat(staff.skills.administration.administration) * 100}%; background-color: #6c757d;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
+          <div class="skill-bar" style="width: ${parseFloat(staff.skills.sales.sales) * 100}%; background-color: #28a745;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
+        </div>
+      `;
 
-    tasks.forEach(task => {
-      if (task.staff && task.staff.includes(staff.id.toString())) {
-        let locationLabel = 'Unknown'; 
-        switch (task.type) {
-          case 'Winery':
-            locationLabel = 'Winery';
-            break;
-          case 'Administration':
-            locationLabel = 'Administration';
-            break;
-          case 'Sales':
-            locationLabel = 'Sales';
-            break;
-          default:
-            locationLabel = task.fieldName || 'Unknown';
-        }
-        assignedTasks.push(`<strong>${task.taskName}</strong>, ${locationLabel}`);
-      }
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${staff.name}</td>
+          <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
+          <td>${staff.workforce}</td>
+          <td>€${staff.wage}</td>
+          <td>${assignedTaskDetail}</td>
+          <td>${skillsHTML}</td> <!-- Move Skills to the end -->
+        `;
+        tbody.appendChild(row);
     });
 
-    const assignedTaskDetail = assignedTasks.length > 0 ? assignedTasks.join('<br>') : 'None';
-
-    const row = document.createElement('tr');
-    row.innerHTML = `
-      <td>${staff.name}</td>
-      <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
-      <td>${staff.workforce}</td>
-      <td>€${staff.wage}</td>
-      <td>${assignedTaskDetail}</td>
-    `;
-    tbody.appendChild(row);
-  });
-
-  // Append the table head and body to the table
-  table.appendChild(thead);
-  table.appendChild(tbody);
-  staffContainer.appendChild(table);
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    staffContainer.appendChild(table);
 }
 
 // Function to calculate total staff wages

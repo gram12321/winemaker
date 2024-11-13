@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Staff Management</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
@@ -18,9 +18,20 @@
     <!-- Main Content -->
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Staff Management</h1>
+      <!-- Hire Staff Button -->
+      <button id="hire-staff-btn" class="btn btn-primary mt-3">Hire Staff</button>
       <div id="staff-container" class="mt-4">
         <!-- This is where the staff table or information will appear -->
       </div>
+    </div>
+  </div>
+
+  <!-- Hire Staff Overlay -->
+  <div id="hireStaffOverlay" class="overlay" style="display: none;">
+    <div class="overlay-content text-center">
+      <span id="closeHireStaffOverlay" class="close-btn">&times;</span>
+      <h3>Hire Staff</h3>
+      <!-- Additional content for hiring staff will go here -->
     </div>
   </div>
 
@@ -34,6 +45,7 @@
   <script type="module" src="/js/database/loadSidebar.js"></script>
   <script type="module" src="/js/loadPanel.js"></script>
   <script type="module" src="/js/staff.js"></script>
+  <script type="module" src="/js/overlays/hirestaffoverlay.js"></script>
   <script type="module">
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
@@ -45,8 +57,6 @@
       initializePanel();
       initializeConsole();
       displayStaff();
-
-      
     });
   </script>
 </body>

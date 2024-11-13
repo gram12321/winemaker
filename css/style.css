@@ -434,3 +434,24 @@ h2 {
 }
 /*  - --- --   Overlay Ends  - - - - - -*/
 
+/*  - --- --   staff.html - - - - - -*/
+
+.skill-bar-container {
+  display: flex; 
+  gap: 5px; /* Space between skill bars */
+}
+
+.skill-bar {
+    height: 20px;  /* Increased height of each skill bar */
+    flex-grow: 1;  /* Flex property to allow growth based on width value */
+    border-radius: 3px;
+    margin-top: 3px; /* Space above bars */
+    color: #fff; /* Text color */
+    font-weight: bold; /* Bold text */
+    display: flex; /* Use flexbox to center the text */
+    align-items: center; /* Vertically center text */
+    justify-content: center; /* Horizontally center text */
+}
+.skills-column {
+    min-width: 150px; /* Set the minimum width for the skills column */
+}
