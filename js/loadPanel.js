@@ -24,7 +24,7 @@ export class Task {
     static taskTypes = {
         'Administration': {
             processPerWorkApplied: 0.6,
-            processingFunctions: ['bookkeepingTaskFunction'],
+            processingFunctions: ['bookkeepingTaskFunction', 'hiringTaskFunction'], // Include new function
             skillKey: 'administration'
         },
         'Field': {
@@ -353,6 +353,9 @@ export function executeTaskFunction(task) {
                 break;
             case task.taskName === "Uprooting":
                 addConsoleMessage(`Uprooting task completed for field <strong>${task.fieldName || 'Unknown'}</strong>.`);
+                break;
+            case task.taskName.startsWith("Hiring"):
+                addConsoleMessage(`Hiring task completed: ${task.taskName}.`);
                 break;
             default:
                 console.warn(`No console message for task name: ${task.taskName}`);

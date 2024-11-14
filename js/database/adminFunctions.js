@@ -6,7 +6,7 @@ import { plantAcres, uproot } from '/js/farmland.js';
 import { harvestAcres} from '/js/vineyard.js';
 import { Staff, createNewStaff, getLastNameForNationality  } from '/js/staff.js'; // Adjust the import path if necessary
 import { addTransaction } from '/js/finance.js'; // Adjust the import path if necessary
-import { bookkeepingTaskFunction } from '/js/administration.js';
+import { bookkeepingTaskFunction, hiringTaskFunction  } from '/js/administration.js';
 
 
 
@@ -257,6 +257,9 @@ export function loadTasks() {
                 break;
             case taskInfo.taskName === "Uprooting":
                 if (field) executeTaskFunction = () => uproot(taskInfo.fieldId);
+                break;
+            case taskInfo.taskName.startsWith("Hiring"):
+                executeTaskFunction = hiringTaskFunction;
                 break;
             default:
                 console.warn(`Unknown task name: ${taskInfo.taskName}`);

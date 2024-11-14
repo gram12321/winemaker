@@ -3,6 +3,7 @@ import { getFlagIconHTML } from '../utils.js';
 import { saveStaff } from '../database/adminFunctions.js'; // Ensure saveStaff is imported
 import { addConsoleMessage } from '../console.js'; // Import addConsoleMessage
 import { addTransaction } from '../finance.js'; // Import addTransaction for recording expenses
+import { handleHiringTask } from '../administration.js'; // Import handleHiringTask
 
 document.addEventListener('DOMContentLoaded', () => {
     const hireStaffBtn = document.getElementById('hire-staff-btn');
@@ -100,9 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add a console message for the hired staff, including the flag icon
         const flagIconHTML = getFlagIconHTML(staff.nationality);
         addConsoleMessage(`Hired new staff: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, One-time hiring cost: €${hiringExpense}`, true);
+
+        // Create and manage a hiring task
+        handleHiringTask();
+
         // Close the overlay
         closeOverlay();
     }
+
     function closeOverlay() {
         const overlay = document.getElementById('hireStaffOverlay');
         if (overlay) {
