@@ -6,14 +6,6 @@ import { addConsoleMessage } from '/js/console.js';
 import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
 import {calculateWorkApplied } from './staff.js';
 
-export function triggerBookkeepingTask() {
-    handleGenericTask('Bookkeeping', bookkeepingTaskFunction);
-}
-
-export function triggerHiringTask() {
-    handleGenericTask('Hiring', hiringTaskFunction);
-}
-
 export function handleGenericTask  (taskType, taskFunction) {
   const isTaskAlreadyActive = activeTasks.some(task => task.taskName.startsWith(taskType));
 
@@ -111,7 +103,7 @@ export function bookkeepingTaskFunction(task, mode) {
 export function hiringTaskFunction(task, mode) {
     if (mode === 'initialize') {
         const taskName = `Hiring Task`;
-        const workTotal = 10; // Example work total, adjust as needed
+        const workTotal = 100; // Example work total, adjust as needed
         const iconPath = '/assets/icon/icon_hiring.webp'; // An icon specific to the hiring task
         return {
             taskName,
@@ -120,7 +112,7 @@ export function hiringTaskFunction(task, mode) {
             taskType: 'Administration'
         };
     } else if (mode === 'update') {
-        const additionalWork = 2; // Example additional work, adjust as needed
+        const additionalWork = 80; // Example additional work, adjust as needed
         return additionalWork;
     }
 

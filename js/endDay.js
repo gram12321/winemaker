@@ -4,7 +4,7 @@ import { renderCompanyInfo } from './database/loadSidebar.js';
 import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
 import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions } from './finance.js';
-import { triggerBookkeepingTask  } from './administration.js';
+import { handleGenericTask, bookkeepingTaskFunction  } from './administration.js';
 import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { decayPrestigeHit } from './database/loadSidebar.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
@@ -38,7 +38,7 @@ export function incrementWeek() {
 
     // Check if it's the start of a new season
     if (currentWeek === 1) {
-                triggerBookkeepingTask(); // Initialize the bookkeeping task
+        handleGenericTask('Bookkeeping', bookkeepingTaskFunction);
     }
 
     // Update the local storage with the new values for week, season, and year
