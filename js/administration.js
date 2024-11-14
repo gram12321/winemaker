@@ -30,22 +30,22 @@ export function handleGenericTask  (taskType, taskFunction) {
     const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize');
 
     const task = new Task(
-      taskName,
-      taskFunction,
-      undefined, 
-      workTotal, 
-      '', 
-      '', 
-      '', 
-      '', 
-      iconPath,
-      '',
-      taskType
+      taskName,           // The name of the task (e.g., 'Bookkeeping, Spring 2023')
+      taskFunction,       // The function to execute for this task (e.g., bookkeepingTaskFunction)
+      undefined,          // Task ID, left undefined to let the constructor generate a new ID
+      workTotal,          // Total amount of work needed to complete the task, serving as the goal
+      '',                 // resourceName, here left as an empty string since it's not applicable
+      '',                 // resourceState, here left as an empty string since it's not applicable
+      '',                 // vintage, here left as an empty string since it's not applicable
+      '',                 // quality, here left as an empty string since it's not applicable
+      iconPath,           // Path to the icon image representing the task
+      '',                 // fieldName, left as an empty string since it's not applicable
+      taskType,           // Type of task (e.g., 'Administration'), categorizing the task
+      0,                  // workProgress, initialized to 0, representing the current progress
+      []                  // staff, initialized as an empty array to later hold staff members assigned to the task
     );
 
-    task.staff = [];
-    task.workProgress = 0;
-
+    // SaveTask can remain unchanged since workProgress and staff are part of the task object now
     saveTask({
       taskName: task.taskName,
       taskId: task.taskId,

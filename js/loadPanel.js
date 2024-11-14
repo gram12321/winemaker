@@ -43,21 +43,36 @@ export class Task {
             skillKey: 'sales'
         }
     };
-    constructor(taskName, taskFunction, taskId = null, workTotal = 0, resourceName = '', resourceState = '', vintage = '', quality = '', iconPath = '', fieldName = '', type = 'Administration') {
-        this.taskName = taskName;
-        this.taskFunction = taskFunction;
-        this.taskId = taskId || Task.generateTaskId();
-        this.workTotal = workTotal;
-        this.workProgress = 0;
-        this.resourceName = resourceName;
-        this.resourceState = resourceState;
-        this.vintage = vintage;
-        this.quality = quality;
-        this.iconPath = iconPath;
-        this.fieldName = fieldName;
-        this.staff = [];
-        this.type = type; // Define task type
-        this.createTaskBox();
+        constructor(
+            taskName,
+            taskFunction,
+            taskId = null,
+            workTotal = 0,
+            resourceName = '',
+            resourceState = '',
+            vintage = '',
+            quality = '',
+            iconPath = '',
+            fieldName = '',
+            type = 'Administration',
+            workProgress = 0,  // Add workProgress here
+            staff = []         // Add staff here
+          ) {
+            this.taskName = taskName;
+            this.taskFunction = taskFunction;
+            this.taskId = taskId || Task.generateTaskId();
+            this.workTotal = workTotal;
+            this.workProgress = workProgress; // Initialize with constructor
+            this.resourceName = resourceName;
+            this.resourceState = resourceState;
+            this.vintage = vintage;
+            this.quality = quality;
+            this.iconPath = iconPath;
+            this.fieldName = fieldName;
+            this.staff = staff; // Initialize with constructor
+            this.type = type;
+            this.createTaskBox();
+          
     }
     static generateTaskId() {
         const newTaskId = ++Task.latestTaskId;
