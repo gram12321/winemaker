@@ -6,17 +6,24 @@ import { addConsoleMessage } from '/js/console.js';
 import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
 import {calculateWorkApplied } from './staff.js';
 
-export function handleGenericTask  (taskType, taskFunction) {
-  const isTaskAlreadyActive = activeTasks.some(task => task.taskName.startsWith(taskType));
+export function handleGenericTask(taskType, taskFunction, additionalTaskParams = {}) {
+  const { fieldId, resourceName } = additionalTaskParams;
+
+  const isTaskAlreadyActive = activeTasks.some(task =>
+    task.taskName.startsWith(taskType) &&
+    (fieldId === undefined || task.fieldId === fieldId)
+  );
 
   if (isTaskAlreadyActive) {
-    const activeTask = activeTasks.find(task => task.taskName.startsWith(taskType));
+    const activeTask = activeTasks.find(task =>
+      task.taskName.startsWith(taskType) &&
+      (fieldId === undefined || task.fieldId === fieldId)
+    );
 
     if (activeTask) {
       const extraWork = taskFunction(activeTask, 'update');
       activeTask.workTotal += extraWork;
 
-      // Save the updated task back to localStorage
       let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
       const taskIndex = tasks.findIndex(task => task.taskId === activeTask.taskId);
       if (taskIndex !== -1) {
@@ -27,25 +34,21 @@ export function handleGenericTask  (taskType, taskFunction) {
       addConsoleMessage(`${taskType} task not completed. More work added: ${activeTask.workTotal}`);
     }
   } else {
-    const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize');
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const field = farmlands[fieldId] || {};
+    const fieldName = field.name || `Field ${fieldId}`;
+    const vintage = field.vintage || localStorage.getItem('year') || '';
+    const plantedResourceName = field.plantedResourceName || resourceName;
 
-    const task = new Task(
-      taskName,           // The name of the task (e.g., 'Bookkeeping, Spring 2023')
-      taskFunction,       // The function to execute for this task (e.g., bookkeepingTaskFunction)
-      undefined,          // Task ID, left undefined to let the constructor generate a new ID
-      workTotal,          // Total amount of work needed to complete the task, serving as the goal
-      '',                 // resourceName, here left as an empty string since it's not applicable
-      '',                 // resourceState, here left as an empty string since it's not applicable
-      '',                 // vintage, here left as an empty string since it's not applicable
-      '',                 // quality, here left as an empty string since it's not applicable
-      iconPath,           // Path to the icon image representing the task
-      '',                 // fieldName, left as an empty string since it's not applicable
-      taskType,           // Type of task (e.g., 'Administration'), categorizing the task
-      0,                  // workProgress, initialized to 0, representing the current progress
-      []                  // staff, initialized as an empty array to later hold staff members assigned to the task
-    );
+    // Destructure additional details from the taskFunction output
+    const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize', { fieldId, resourceName });
 
-    // SaveTask can remain unchanged since workProgress and staff are part of the task object now
+    // Ensure the task is initialized with all relevant information
+    const task = new Task(taskName, taskFunction, undefined, workTotal, plantedResourceName,
+                          '', vintage, '', iconPath, fieldName, taskType, 0, []);
+
+    Object.assign(task, { fieldId, resourceName, fieldName, vintage });
+
     saveTask({
       taskName: task.taskName,
       taskId: task.taskId,
@@ -54,10 +57,14 @@ export function handleGenericTask  (taskType, taskFunction) {
       iconPath,
       type: task.type,
       staff: task.staff,
+      fieldId,
+      resourceName: plantedResourceName,
+      fieldName,
+      vintage
     });
 
     activeTasks.push(task);
-    addConsoleMessage(`${taskType} task started.`);
+    addConsoleMessage(`${taskType} task started for ${fieldName} with ${plantedResourceName}, Vintage ${vintage}.`);
   }
 }
 

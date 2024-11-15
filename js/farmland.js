@@ -8,6 +8,7 @@ import { getFlagIcon, formatNumber } from './utils.js';
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 import {calculateWorkApplied } from './staff.js';
+import { handleGenericTask } from './administration.js';
 
 
 
@@ -215,7 +216,7 @@ export function displayOwnedFarmland() {
     uprootButton.addEventListener('click', (event) => {
       if (!uprootButton.disabled) {
         event.stopPropagation(); // Prevent row click event
-        handleUprootTask(index);
+        handleGenericTask('Uprooting', uprootTaskFunction, { fieldId: index }); // Use handleGenericTask
         displayOwnedFarmland();
       }
     });
@@ -309,62 +310,29 @@ export function plantAcres(index, resourceName) {
     return acresToPlant;
 }
 
-function handleUprootTask(index) {
+export function uprootTaskFunction(task, mode, { fieldId, resourceName }) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const field = farmlands[index];
-  const fieldName = field.name || `Field ${index}`;
+  const field = farmlands[fieldId];
+  const fieldName = field.name || `Field ${fieldId}`;
+  const vintage = field.vintage || '';  // Assume vintage is stored in field, adjust as needed
 
-  // Check if another task is active on the same field
-  const isTaskAlreadyActiveOnField = activeTasks.some(task => task.fieldId === index);
-
-  if (isTaskAlreadyActiveOnField) {
-    addConsoleMessage(`Another task is already active for <strong>${fieldName}</strong>. Uprooting cannot be done until all tasks are completed.`);
-    return;
+  if (mode === 'initialize') {
+    return {
+      taskName: "Uprooting",
+      workTotal: field.acres,
+      iconPath: '/assets/icon/icon_uprooting.webp',
+      taskType: 'Field',
+      fieldName: fieldName,
+      resourceName: resourceName || '', // Use provided resourceName or set default
+      vintage: vintage // Include vintage if applicable
+    };
+  } else if (mode === 'update') {
+    // Invoke the uproot logic for calculating specific work done
+    return uproot(fieldId);
   }
 
-  // Deny uprooting under specific conditions
-  const isFieldUnplanted = !field.plantedResourceName;
-  const isBeingPlanted = field.status === "Currently being planted";
-
-  if (isFieldUnplanted || isBeingPlanted || field.vineAge == null) {
-    addConsoleMessage(`Uprooting is not allowed for <strong>${fieldName}</strong> as it is either unplanted, not fully planted, or currently being planted.`);
-    return;
-  }
-
-  const iconPath = '/assets/icon/icon_uprooting.webp';  // Use an appropriate icon path
-  const task = new Task(
-    "Uprooting",
-    () => uproot(index),
-    undefined,
-    field.acres,
-    field.plantedResourceName,
-    '',
-    localStorage.getItem('year') || '',
-    '',
-    iconPath,
-    fieldName,
-    'Field'  // Specify the type of the task
-  );
-
-  Object.assign(task, { fieldId: index, fieldName });
-
-  saveTask({
-    taskName: task.taskName,
-    fieldId: index,
-    fieldName: task.fieldName,
-    resourceName: field.plantedResourceName, // Fix: Get resourceName from field
-    taskId: task.taskId,
-    workTotal: field.acres,
-    vintage: localStorage.getItem('year') || '',
-    iconPath,
-    type: 'Field',  // Ensure type is saved
-    staff: task.staff  // Also save staff if needed
-  });
-
-  activeTasks.push(task);
-  addConsoleMessage(`Uprooting task started for <strong>${fieldName}</strong>.`);
+  return 0;
 }
-
 
 export function uproot(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -401,4 +369,4 @@ export function uproot(index) {
     return acresToUproot;
 }
 
-export { Farmland, handlePlantingTask };
+export { Farmland };
