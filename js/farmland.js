@@ -199,60 +199,75 @@ export function displayOwnedFarmland() {
       }
     });
 
-    // Planting Logic
-    // Planting Logic
+
+    // Updated Planting Logic
     const plantButton = row.querySelector('.plant-field-btn');
     plantButton.addEventListener('click', (event) => {
       if (!plantButton.disabled) {
-        event.stopPropagation(); // Prevent row click event
+        event.stopPropagation();
         const resourceSelect = row.querySelector('.resource-select');
         const selectedResource = resourceSelect.value;
-
         const additionalTaskParams = { fieldId: index, resourceName: selectedResource };
-        handleGenericTask("Planting", plantingTaskFunction, additionalTaskParams);
-
+        handleGenericTask("Planting", (task, mode) => fieldTaskFunction(task, mode, "Planting", additionalTaskParams), additionalTaskParams);
         displayOwnedFarmland();
       }
     });
-
-    // Uprooting Logic
+    // Updated Uprooting Logic
     const uprootButton = row.querySelector('.uproot-field-btn');
     uprootButton.addEventListener('click', (event) => {
       if (!uprootButton.disabled) {
-        event.stopPropagation(); // Prevent row click event
-        handleGenericTask('Uprooting', uprootTaskFunction, { fieldId: index }); // Use handleGenericTask
+        event.stopPropagation();
+        handleGenericTask('Uprooting', (task, mode) => fieldTaskFunction(task, mode, "Uprooting", { fieldId: index }), { fieldId: index });
         displayOwnedFarmland();
       }
     });
   });
 }
 
-export function plantingTaskFunction(task, mode, { fieldId, resourceName }) {
+export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName } = {}) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const field = farmlands[fieldId];
   const fieldName = field.name || `Field ${fieldId}`;
   const gameYear = localStorage.getItem('year') || '';
+  const vintage = field.vintage || ''; 
 
   if (mode === 'initialize') {
-    field.plantedResourceName = "Currently being planted";
-    field.status = "No yield in first season"; // Set initial status
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    if (taskType === "Planting") {
+      field.plantedResourceName = "Currently being planted";
+      field.status = "No yield in first season";
+      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
-    return {
-      taskName: "Planting",
-      workTotal: field.acres,
-      iconPath: '/assets/icon/icon_planting.webp',
-      taskType: 'Field',
-      fieldName: fieldName,
-      resourceName: resourceName,
-      vintage: gameYear
-    };
+      return {
+        taskName: "Planting",
+        workTotal: field.acres,
+        iconPath: '/assets/icon/icon_planting.webp',
+        taskType: 'Field',
+        fieldName,
+        resourceName,
+        vintage: gameYear
+      };
+    } else if (taskType === "Uprooting") {
+      return {
+        taskName: "Uprooting",
+        workTotal: field.acres,
+        iconPath: '/assets/icon/icon_uprooting.webp',
+        taskType: 'Field',
+        fieldName,
+        resourceName: resourceName || '',
+        vintage
+      };
+    }
   } else if (mode === 'update') {
-    return plantAcres(fieldId, resourceName);
+    if (taskType === "Planting") {
+      return plantAcres(fieldId, resourceName);
+    } else if (taskType === "Uprooting") {
+      return uproot(fieldId);
+    }
   }
 
-  return 0; // Default return value if no mode matches
+  return 0;
 }
+
 
 export function plantAcres(index, resourceName) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -288,29 +303,7 @@ export function plantAcres(index, resourceName) {
   return acresToPlant;
 }
 
-export function uprootTaskFunction(task, mode, { fieldId, resourceName }) {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const field = farmlands[fieldId];
-  const fieldName = field.name || `Field ${fieldId}`;
-  const vintage = field.vintage || '';  // Assume vintage is stored in field, adjust as needed
 
-  if (mode === 'initialize') {
-    return {
-      taskName: "Uprooting",
-      workTotal: field.acres,
-      iconPath: '/assets/icon/icon_uprooting.webp',
-      taskType: 'Field',
-      fieldName: fieldName,
-      resourceName: resourceName || '', // Use provided resourceName or set default
-      vintage: vintage // Include vintage if applicable
-    };
-  } else if (mode === 'update') {
-    // Invoke the uproot logic for calculating specific work done
-    return uproot(fieldId);
-  }
-
-  return 0;
-}
 
 export function uproot(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
