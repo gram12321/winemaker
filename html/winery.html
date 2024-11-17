@@ -134,7 +134,7 @@
     <script type="module">
       import { addConsoleMessage } from "/js/console.js";
       import { inventoryInstance } from "/js/resource.js";
-      import { grapeCrushing, fermentMust, handleGrapeCrushingTask, handleFermentationTask } from "/js/wineprocessing.js";
+      import { grapeCrushing, fermentMust, handleWineryTask } from "/js/wineprocessing.js";
       import { Task } from "/js/loadPanel.js";
       import { loadTasks, saveTask, activeTasks } from "/js/database/adminFunctions.js";
       import { initializeSidebar } from "/js/database/loadSidebar.js";
@@ -244,7 +244,7 @@
         document.getElementById("crush-grapes-btn").addEventListener("click", function () {
           const selectedResource = document.getElementById("crush-resource-select").value;
           if (selectedResource) {
-            handleGrapeCrushingTask(selectedResource);
+            handleWineryTask(selectedResource, "Crushing", "Grapes");
           } else {
             addConsoleMessage("No resource selected for crushing.");
           }
@@ -254,7 +254,7 @@
         document.getElementById("fermentation-btn").addEventListener("click", function () {
           const selectedResource = document.getElementById("ferment-resource-select").value;
           if (selectedResource) {
-            handleFermentationTask(selectedResource);
+            handleWineryTask(selectedResource, "Fermenting", "Must");
           } else {
             addConsoleMessage("No resource selected for fermentation.");
           }

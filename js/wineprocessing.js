@@ -6,44 +6,46 @@ import { Task } from './loadPanel.js';
 import { formatNumber,  } from './utils.js';
 import {calculateWorkApplied } from './staff.js';
 
-export function handleGrapeCrushingTask(selectedResource) {
-    const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Grapes');
+export function handleWineryTask(selectedResource, taskType, resourceState) {
+    const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === resourceState);
 
     if (!resource) {
-        addConsoleMessage(`The resource ${selectedResource} is not available.`);
+        addConsoleMessage(`The resource ${selectedResource} is not available in the form of ${resourceState}.`);
         return;
     }
 
-    const gameYear = localStorage.getItem('year') || ''; // Consistent use of game year
-    const isTaskAlreadyActive = activeTasks.some(task => 
-        task.taskName === "Crushing Grapes" &&
+    const gameYear = localStorage.getItem('year') || '';
+    const taskName = taskType === "Crushing" ? "Crushing Grapes" : "Fermenting";
+    const iconPath = taskType === "Crushing" ? '/assets/icon/icon_pressing.webp' : '/assets/icon/icon_fermentation.webp';
+
+    const isTaskAlreadyActive = activeTasks.some(task =>
+        task.taskName === taskName &&
         task.resourceName === selectedResource &&
-        task.resourceState === 'Grapes' &&
+        task.resourceState === resourceState &&
         task.vintage === resource.vintage &&
         task.quality === resource.quality
     );
 
     if (!isTaskAlreadyActive) {
-        const iconPath = '/assets/icon/icon_pressing.webp';
+        const taskFunction = taskType === "Crushing" ? () => grapeCrushing(selectedResource) : () => fermentMust(selectedResource);
 
         const task = new Task(
-            "Crushing Grapes",
-            () => grapeCrushing(selectedResource),
+            taskName,
+            taskFunction,
             undefined,
             resource.amount,
             selectedResource,
-            'Grapes',
+            resourceState,
             resource.vintage,
             resource.quality,
             iconPath,
-            '',  // fieldName is empty because it's not field-specific
-            'Winery'  // Specify the type of the task as "Winery"
+            '',
+            'Winery'
         );
 
-        // Assign any specific properties as needed, similar to other tasks
         Object.assign(task, {
             resourceName: selectedResource,
-            resourceState: 'Grapes',
+            resourceState: resourceState,
             vintage: resource.vintage,
             quality: resource.quality
         });
@@ -51,20 +53,20 @@ export function handleGrapeCrushingTask(selectedResource) {
         const taskInfo = {
             taskName: task.taskName,
             resourceName: selectedResource,
-            resourceState: 'Grapes',
+            resourceState: resourceState,
             vintage: resource.vintage,
             quality: resource.quality,
             taskId: task.taskId,
             workTotal: resource.amount,
             iconPath: iconPath,
-            type: 'Winery'  // Include type in the saved task information
+            type: 'Winery'
         };
 
         saveTask(taskInfo);
         activeTasks.push(task);
-        addConsoleMessage(`Crushing task started for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality}.`);
+        addConsoleMessage(`${taskType} task started for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality}.`);
     } else {
-        addConsoleMessage(`A Crushing task for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality} is already active.`);
+        addConsoleMessage(`A ${taskType} task for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality} is already active.`);
     }
 }
 
@@ -124,68 +126,6 @@ export function grapeCrushing(selectedResource) {
     return actualIncrement; // Return the actual work completed
 }
 
-export function handleFermentationTask(selectedResource) {
-    const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');
-
-    if (!resource) {
-        addConsoleMessage(`The resource ${selectedResource} is not available.`);
-        return;
-    }
-
-    const gameYear = localStorage.getItem('year') || ''; // Example of consistency if you use vintage
-    const isTaskAlreadyActive = activeTasks.some(task =>
-        task.taskName === "Fermenting" &&
-        task.resourceName === selectedResource &&
-        task.resourceState === 'Must' &&
-        task.vintage === resource.vintage &&
-        task.quality === resource.quality
-    );
-
-    if (!isTaskAlreadyActive) {
-        const iconPath = '/assets/icon/icon_fermentation.webp';
-
-        const task = new Task(
-            "Fermenting",
-            () => fermentMust(selectedResource),
-            undefined,
-            resource.amount,
-            selectedResource,
-            'Must',
-            resource.vintage,
-            resource.quality,
-            iconPath,
-            '',  // fieldName is empty because it's not field-specific
-            'Winery'  // Specify the type of the task as "Winery"
-        );
-
-        // Assign any specific properties as needed
-        Object.assign(task, {
-            resourceName: selectedResource,
-            resourceState: 'Must',
-            vintage: resource.vintage,
-            quality: resource.quality
-        });
-
-        const taskInfo = {
-            taskName: task.taskName,
-            resourceName: selectedResource,
-            resourceState: 'Must',
-            vintage: resource.vintage,
-            quality: resource.quality,
-            taskId: task.taskId,
-            workTotal: resource.amount,
-            iconPath: iconPath,
-             type: 'Winery', // Explicitly pass in type
-                staff: task.staff
-        };
-
-        saveTask(taskInfo);
-        activeTasks.push(task);
-        addConsoleMessage(`Fermentation task started for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality}.`);
-    } else {
-        addConsoleMessage(`A Fermentation task for ${selectedResource}, Vintage ${resource.vintage}, Quality ${resource.quality} is already active.`);
-    }
-}
 
 export function fermentMust(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');

@@ -88,8 +88,6 @@ export function displayVineyardEntries() {
   });
 }
 
-
-
 export function harvestAcres(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
