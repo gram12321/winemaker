@@ -180,7 +180,7 @@ export function displayOwnedFarmland() {
     const isTaskActiveOnField = activeTasks.some(task => task.fieldId === index);
     const canPlant = !isTaskActiveOnField && !farmland.plantedResourceName;
     const canUproot = !isTaskActiveOnField && farmland.plantedResourceName;
-    const canClear = !isTaskActiveOnField && !farmland.plantedResourceName;
+    const canClear = !isTaskActiveOnField && !farmland.plantedResourceName && farmland.canBeCleared !== 'Cleared';
 
     row.innerHTML = `
       <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
