@@ -5,10 +5,10 @@ import { inventoryInstance, displayInventory } from './resource.js'; // Import n
 import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions } from './finance.js';
 import { handleGenericTask, bookkeepingTaskFunction  } from './administration.js';
-import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
+import { Farmland, calculateLandvalue, calculateFarmlandPrestige} from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { decayPrestigeHit } from './database/loadSidebar.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
-import { calculateLandvalue, farmlandAgePrestigeModifier, calculateFarmlandPrestige } from './farmland.js'; // Adjust import path
+
 
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
