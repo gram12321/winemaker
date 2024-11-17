@@ -1,44 +1,25 @@
 // Import necessary utility functions and classes
 import { formatNumber, getColorClass, getFlagIcon } from '../utils.js';
-import { regionAspectRatings } from '/js/names.js';
+import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names.js';
 import { Farmland } from '/js/farmland.js';
 
 export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');
   const details = document.getElementById('farmland-details');
+  details.innerHTML = ''; // Clear existing details
 
-  // Construct a Farmland instance using the existing farmlandData
-  const farmland = new Farmland(
-    farmlandData.id,
-    farmlandData.name,
-    farmlandData.country,
-    farmlandData.region,
-    farmlandData.acres,
-    farmlandData.plantedResourceName,
-    farmlandData.vineAge,
-    farmlandData.grape,
-    farmlandData.soil,
-    farmlandData.altitude,
-    farmlandData.aspect,
-    farmlandData.density
-  );
+  // Calculate additional values needed for display
+  const aspectRating = regionAspectRatings[farmlandData.country][farmlandData.region][farmlandData.aspect];
+  const colorClass = getColorClass(aspectRating);
+  const landValue = calculateAndNormalizePriceFactor(farmlandData.country, farmlandData.region, farmlandData.altitude, farmlandData.aspect);
+  const flagIcon = getFlagIcon(farmlandData.country);
+  const farmlandPrestige = farmlandData.farmlandPrestige || 0;
 
-  // Manually set ripeness if farmlandData includes an updated value
-  farmland.ripeness = farmlandData.ripeness ?? farmland.ripeness;
-
+  // Render the specific farmland data
   if (details) {
-    const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
-    const colorClass = getColorClass(aspectRating);
-    const landValue = farmland.calculateLandvalue();
-    const flagIcon = getFlagIcon(farmland.country);
-
-    // Use the farmlandPrestige property instead of calling the method
-    const farmlandPrestige = farmland.farmlandPrestige;
-
-    // Update details utilizing farmland object, including the ripeness value
     details.innerHTML = `
       <div class="overlay-content">
-        <h2 class="text-center mb-3">${farmland.name}</h2>
+        <h2 class="text-center mb-3">${farmlandData.name}</h2>
         <table class="table table-bordered table-hover">
           <thead class="thead-dark">
             <tr>
@@ -47,39 +28,26 @@ export function showFarmlandOverlay(farmlandData) {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Country</td>
-              <td>${flagIcon} ${farmland.country}</td>
-            </tr>
-            <tr><td>Region</td><td>${farmland.region}</td></tr>
-            <tr><td>Acres</td><td>${farmland.acres}</td></tr>
-            <tr><td>Status</td><td>${farmland.status}</td></tr>
-            <tr><td>Ripeness</td><td>${formatNumber(farmland.ripeness, 2)}</td></tr>
-            <tr><td>Soil</td><td>${farmland.soil}</td></tr>
-            <tr><td>Altitude</td><td>${farmland.altitude}m</td></tr>
-            <tr>
-              <td>Aspect</td>
-              <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
-            </tr>
+            <tr><td>Country</td><td>${flagIcon} ${farmlandData.country}</td></tr>
+            <tr><td>Region</td><td>${farmlandData.region}</td></tr>
+            <tr><td>Acres</td><td>${farmlandData.acres}</td></tr>
+            <tr><td>Status</td><td>${farmlandData.status}</td></tr>
+            <tr><td>Ripeness</td><td>${formatNumber(farmlandData.ripeness ?? 0, 2)}</td></tr>
+            <tr><td>Soil</td><td>${farmlandData.soil}</td></tr>
+            <tr><td>Altitude</td><td>${farmlandData.altitude}m</td></tr>
+            <tr><td>Aspect</td><td class="${colorClass}">${farmlandData.aspect} (${formatNumber(aspectRating, 2)})</td></tr>
             <tr><td>Land Value</td><td>€ ${formatNumber(landValue)}</td></tr>
-            <tr><td>Density</td><td>${farmland.density}</td></tr>
-            <tr>
-              <td>Planted Resource</td>
-              <td>${farmland.plantedResourceName || 'None'}</td>
-            </tr>
-            <tr>
-              <td>Farmland Prestige</td>
-              <td>${formatNumber(farmlandPrestige, 2)}</td>
-            </tr>
-            <tr>
-              <td>Farmland Health</td>
-              <td>${farmlandData.farmlandHealth || 'Unknown'}</td> <!-- New row for farmland health -->
-            </tr>
+            <tr><td>Density</td><td>${farmlandData.density}</td></tr>
+            <tr><td>Planted Resource</td><td>${farmlandData.plantedResourceName || 'None'}</td></tr>
+            <tr><td>Farmland Prestige</td><td>${formatNumber(farmlandPrestige, 2)}</td></tr>
+            <tr><td>Farmland Health</td><td>${farmlandData.farmlandHealth || 'Unknown'}</td></tr>
           </tbody>
         </table>
       </div>
     `;
+  }
 
+  if (overlay) {
     overlay.style.display = 'block';
   }
 }

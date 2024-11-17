@@ -202,11 +202,15 @@ export function displayOwnedFarmland() {
 
     farmlandEntries.appendChild(row);
 
-    // Add event listener to open overlay on row click
+    // Add event listener to open overlay on non-interactive element click
     row.addEventListener('click', (event) => {
-      const isDropdownOrButton = event.target.classList.contains('resource-select') || event.target.classList.contains('plant-field-btn') || event.target.classList.contains('uproot-field-btn') || event.target.classList.contains('clear-field-btn');
-      if (!isDropdownOrButton) {
-        showFarmlandOverlay(farmland);
+      const isInteractiveElement = event.target.classList.contains('resource-select')
+        || event.target.classList.contains('plant-field-btn')
+        || event.target.classList.contains('uproot-field-btn')
+        || event.target.classList.contains('clear-field-btn');
+
+      if (!isInteractiveElement) {
+        showFarmlandOverlay(farmland); // Pass only the current farmland's data
       }
     });
 
