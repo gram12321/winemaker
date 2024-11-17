@@ -200,13 +200,17 @@ export function displayOwnedFarmland() {
     });
 
     // Planting Logic
+    // Planting Logic
     const plantButton = row.querySelector('.plant-field-btn');
     plantButton.addEventListener('click', (event) => {
       if (!plantButton.disabled) {
         event.stopPropagation(); // Prevent row click event
         const resourceSelect = row.querySelector('.resource-select');
         const selectedResource = resourceSelect.value;
-        handlePlantingTask(index, selectedResource, farmland.acres);
+
+        const additionalTaskParams = { fieldId: index, resourceName: selectedResource };
+        handleGenericTask("Planting", plantingTaskFunction, additionalTaskParams);
+
         displayOwnedFarmland();
       }
     });
@@ -223,91 +227,65 @@ export function displayOwnedFarmland() {
   });
 }
 
-function handlePlantingTask(index, resourceName, totalAcres) {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const field = farmlands[index] || {};
-    const fieldName = field.name || `Field ${index}`;
-    const fieldRegion = field.region || '';
-    const gameYear = localStorage.getItem('year') || '';
-    const isTaskAlreadyActive = activeTasks.some(task => task.taskName === "Planting" && task.fieldId === index);
+export function plantingTaskFunction(task, mode, { fieldId, resourceName }) {
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const field = farmlands[fieldId];
+  const fieldName = field.name || `Field ${fieldId}`;
+  const gameYear = localStorage.getItem('year') || '';
 
-    if (!isTaskAlreadyActive && (!field.currentAcresPlanted || field.currentAcresPlanted === 0)) {
-        const iconPath = '/assets/icon/icon_planting.webp';
-        const task = new Task(
-            "Planting",
-            () => plantAcres(index, resourceName),
-            undefined,
-            totalAcres,
-            resourceName,
-            '',
-            gameYear,
-            '',
-            iconPath,
-          fieldName,
-            'Field'  // Specify the type of the task
-        );
+  if (mode === 'initialize') {
+    field.plantedResourceName = "Currently being planted";
+    field.status = "No yield in first season"; // Set initial status
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
-        Object.assign(task, { fieldId: index, fieldName });
+    return {
+      taskName: "Planting",
+      workTotal: field.acres,
+      iconPath: '/assets/icon/icon_planting.webp',
+      taskType: 'Field',
+      fieldName: fieldName,
+      resourceName: resourceName,
+      vintage: gameYear
+    };
+  } else if (mode === 'update') {
+    return plantAcres(fieldId, resourceName);
+  }
 
-        field.plantedResourceName = "Currently being planted";
-        field.status = "No yield in first season"; // Set initial status
-
-      saveTask({
-          taskName: task.taskName,
-          fieldId: index,
-          fieldName: task.fieldName,
-          resourceName,
-          taskId: task.taskId,
-          workTotal: totalAcres,
-          vintage: gameYear,
-          iconPath,
-          type: 'Field', // Explicitly pass in type
-          staff: task.staff
-      });
-
-        activeTasks.push(task);
-        addConsoleMessage(`Planting task started for <strong>${fieldName}, ${fieldRegion}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
-        localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-        displayOwnedFarmland();
-    } else {
-        addConsoleMessage(`A Planting task is already active or incomplete for field <strong>${fieldName}</strong>, Region: ${fieldRegion}.`);
-    }
+  return 0; // Default return value if no mode matches
 }
 
 export function plantAcres(index, resourceName) {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const field = farmlands[index];
-    const fieldName = field.name || `Field ${index}`;
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    const currentTask = tasks.find(task => task.taskName === "Planting" && task.fieldId === index);
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const field = farmlands[index];
+  const fieldName = field.name || `Field ${index}`;
+  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  const currentTask = tasks.find(task => task.taskName === "Planting" && task.fieldId === index);
 
-    // Calculate work applied specifically for planting
-    const workApplied = calculateWorkApplied(currentTask?.staff || [], 'plantAcres');
+  // Calculate work applied specifically for planting
+  const workApplied = calculateWorkApplied(currentTask?.staff || [], 'plantAcres');
 
-    // Log the work applied for the current planting task
-    console.log(`Work applied for planting on ${fieldName}: ${workApplied}`);
+  console.log(`Work applied for planting on ${fieldName}: ${workApplied}`);
 
-    const workRemaining = field.acres - (field.currentAcresPlanted || 0);
-    const acresToPlant = Math.min(workApplied, workRemaining);
+  const workRemaining = field.acres - (field.currentAcresPlanted || 0);
+  const acresToPlant = Math.min(workApplied, workRemaining);
 
-    if (acresToPlant <= 0) {
-        addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully planted.`);
-        return 0;
-    }
+  if (acresToPlant <= 0) {
+    addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully planted.`);
+    return 0;
+  }
 
-    field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
+  field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
 
-    // Check if planting is complete
-    if (field.currentAcresPlanted >= field.acres) {
-        field.plantedResourceName = resourceName;
-        field.vineAge = 0; // Set vineAge to 0 as planting is complete
-        addConsoleMessage(`Field <strong>${fieldName}</strong> fully planted with <strong>${resourceName}.</strong>`);
-    } else {
-        addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>. Total planted: <strong>${field.currentAcresPlanted} out of ${field.acres}</strong> acres.`);
-    }
+  if (field.currentAcresPlanted >= field.acres) {
+    field.plantedResourceName = resourceName;
+    field.vineAge = 0;
+    addConsoleMessage(`Field <strong>${fieldName}</strong> fully planted with <strong>${resourceName}.</strong>`);
+  } else {
+    addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>. Total planted: <strong>${field.currentAcresPlanted} out of ${field.acres}</strong> acres.`);
+  }
 
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-    return acresToPlant;
+  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+  return acresToPlant;
 }
 
 export function uprootTaskFunction(task, mode, { fieldId, resourceName }) {
