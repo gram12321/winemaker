@@ -71,6 +71,10 @@ export function showFarmlandOverlay(farmlandData) {
               <td>Farmland Prestige</td>
               <td>${formatNumber(farmlandPrestige, 2)}</td>
             </tr>
+            <tr>
+              <td>Farmland Health</td>
+              <td>${farmlandData.farmlandHealth || 'Unknown'}</td> <!-- New row for farmland health -->
+            </tr>
           </tbody>
         </table>
       </div>

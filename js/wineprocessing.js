@@ -126,7 +126,6 @@ export function grapeCrushing(selectedResource) {
     return actualIncrement; // Return the actual work completed
 }
 
-
 export function fermentMust(selectedResource) {
     const resource = inventoryInstance.items.find(item => item.resource.name === selectedResource && item.state === 'Must');
 

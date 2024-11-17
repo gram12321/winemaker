@@ -24,7 +24,7 @@ function calculateFarmlandPrestige(farmland) {
 }
 
 class Farmland {
-  constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '') {
+  constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '', farmlandHealth = 0.5 ) {
     this.id = id;
     this.name = name;
     this.country = country;
@@ -37,6 +37,7 @@ class Farmland {
     this.altitude = altitude;
     this.aspect = aspect;
     this.density = density;
+    this.farmlandHealth = farmlandHealth;
     this.landvalue = this.calculateLandvalue();
     this.status = 'Dormancy'; // Initialize status
     this.ripeness = 0.1; // Initialize ripeness
