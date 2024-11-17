@@ -2,7 +2,7 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { inventoryInstance } from '../resource.js';
 import { Task } from '../loadPanel.js'
 import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
-import { plantAcres, uproot } from '/js/farmland.js';
+import { plantAcres, uproot, clearing  } from '/js/farmland.js';
 import { harvestAcres} from '/js/vineyard.js';
 import { Staff, createNewStaff, getLastNameForNationality  } from '/js/staff.js'; // Adjust the import path if necessary
 import { addTransaction } from '/js/finance.js'; // Adjust the import path if necessary
@@ -257,6 +257,9 @@ export function loadTasks() {
                 break;
             case taskInfo.taskName === "Uprooting":
                 if (field) executeTaskFunction = () => uproot(taskInfo.fieldId);
+                break;
+            case taskInfo.taskName === "Clearing": // Add handling for the "Clearing" task
+                if (field) executeTaskFunction = () => clearing(taskInfo.fieldId);
                 break;
             case taskInfo.taskName.startsWith("Hiring"):
                 executeTaskFunction = hiringTaskFunction;

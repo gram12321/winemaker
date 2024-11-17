@@ -169,6 +169,7 @@ export function displayOwnedFarmland() {
     const isTaskActiveOnField = activeTasks.some(task => task.fieldId === index);
     const canPlant = !isTaskActiveOnField && !farmland.plantedResourceName;
     const canUproot = !isTaskActiveOnField && farmland.plantedResourceName;
+    const canClear = !isTaskActiveOnField && !farmland.plantedResourceName;
 
     row.innerHTML = `
       <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
@@ -187,6 +188,7 @@ export function displayOwnedFarmland() {
       <td>
         <button class="btn btn-warning plant-field-btn mt-2 ${canPlant ? '' : 'disabled-btn'}" ${canPlant ? '' : 'disabled'}>Plant</button>
         <button class="btn btn-danger uproot-field-btn mt-2 ${canUproot ? '' : 'disabled-btn'}" ${canUproot ? '' : 'disabled'}>Uproot</button>
+        <button class="btn btn-info clear-field-btn mt-2 ${canClear ? '' : 'disabled-btn'}" ${canClear ? '' : 'disabled'}>Clear</button>
       </td>
     `;
 
@@ -194,12 +196,11 @@ export function displayOwnedFarmland() {
 
     // Add event listener to open overlay on row click
     row.addEventListener('click', (event) => {
-      const isDropdownOrButton = event.target.classList.contains('resource-select') || event.target.classList.contains('plant-field-btn') || event.target.classList.contains('uproot-field-btn');
+      const isDropdownOrButton = event.target.classList.contains('resource-select') || event.target.classList.contains('plant-field-btn') || event.target.classList.contains('uproot-field-btn') || event.target.classList.contains('clear-field-btn');
       if (!isDropdownOrButton) {
         showFarmlandOverlay(farmland);
       }
     });
-
 
     // Updated Planting Logic
     const plantButton = row.querySelector('.plant-field-btn');
@@ -213,12 +214,23 @@ export function displayOwnedFarmland() {
         displayOwnedFarmland();
       }
     });
+
     // Updated Uprooting Logic
     const uprootButton = row.querySelector('.uproot-field-btn');
     uprootButton.addEventListener('click', (event) => {
       if (!uprootButton.disabled) {
         event.stopPropagation();
         handleGenericTask('Uprooting', (task, mode) => fieldTaskFunction(task, mode, "Uprooting", { fieldId: index }), { fieldId: index });
+        displayOwnedFarmland();
+      }
+    });
+
+    // Clear field button logic
+    const clearButton = row.querySelector('.clear-field-btn');
+    clearButton.addEventListener('click', (event) => {
+      if (!clearButton.disabled) {
+        event.stopPropagation();
+        handleGenericTask('Clearing', (task, mode) => fieldTaskFunction(task, mode, "Clearing", { fieldId: index }), { fieldId: index });
         displayOwnedFarmland();
       }
     });
@@ -301,6 +313,24 @@ export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName 
         resourceName: field.plantedResourceName,
         vintage: gameYear
       };
+    } else if (taskType === "Clearing") {
+      if (isAnyTaskActiveOnField) {
+        addConsoleMessage(`Another task is already active on field <strong>${fieldName}</strong>.`);
+        return null;
+      }
+
+      if (field.plantedResourceName) {
+        addConsoleMessage(`Cannot start clearing on field <strong>${fieldName}</strong> as it is not empty.`);
+        return null;
+      }
+
+      return {
+        taskName: "Clearing",
+        workTotal: field.acres,
+        iconPath: '/assets/icon/icon_clearing.webp',
+        taskType: 'Field',
+        fieldName,
+      };
     }
   } else if (mode === 'update') {
     if (taskType === "Planting") {
@@ -313,6 +343,8 @@ export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName 
       return uproot(fieldId);
     } else if (taskType === "Harvesting") {
       return harvestAcres(fieldId);
+    } else if (taskType === "Clearing") {
+      return clearing(fieldId);
     }
   }
 
@@ -386,6 +418,45 @@ export function uproot(index) {
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     saveInventory();
     return acresToUproot;
+}
+
+export function clearing(index) {
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const field = farmlands[index];
+    const fieldName = field.name || `Field ${index}`;
+    
+    // Check if field is empty
+    if (field.plantedResourceName && field.plantedResourceName !== 0) {
+        addConsoleMessage(`Cannot clear field <strong>${fieldName}</strong> as it is not empty.`);
+        return 0;
+    }
+
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const currentTask = tasks.find(task => task.taskName === "Clearing" && task.fieldId === index);
+
+    // Calculate the work applied specifically for clearing
+    const workApplied = calculateWorkApplied(currentTask?.staff || [], 'clearing');
+
+    const workRemaining = field.acres - (field.currentAcresCleared || 0);
+    const acresToClear = Math.min(workApplied, workRemaining);
+
+    if (acresToClear <= 0) {
+        addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully cleared.`);
+        return 0;
+    }
+
+    field.currentAcresCleared = (field.currentAcresCleared || 0) + acresToClear;
+
+    if (field.currentAcresCleared >= field.acres) {
+        field.farmlandHealth = Math.min(field.farmlandHealth + 0.25, 1.0); // Heal field
+        field.currentAcresCleared = 0; // Reset progress
+        addConsoleMessage(`Field <strong>${fieldName}</strong> fully cleared and health improved.`);
+    } else {
+        addConsoleMessage(`Cleared ${acresToClear} acres from field <strong>${fieldName}</strong>. Total cleared: <strong>${field.currentAcresCleared} out of ${field.acres}</strong> acres.`);
+    }
+
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    return acresToClear;
 }
 
 export { Farmland };

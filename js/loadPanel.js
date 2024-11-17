@@ -29,7 +29,7 @@ export class Task {
         },
         'Field': {
             processPerWorkApplied: 1,
-            processingFunctions: ['plantAcres', 'uproot', 'harvestAcres'],
+            processingFunctions: ['plantAcres', 'uproot', 'harvestAcres', 'clearing', ],
             skillKey: 'field'
         },
         'Winery': {
@@ -116,8 +116,11 @@ export class Task {
         } else if (this.type === 'Winery' || this.type === 'Sales') {
             taskDetailsContent = `<div><strong>${companyName}</strong></div>
                                   <div>${this.resourceName}, ${this.vintage}</div>`;
+        } else if (this.taskName === 'Clearing') {
+            // Only show field name for Clearing tasks
+            taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
         } else {
-            // Default for Field tasks or other types not specified
+            // Default for other Field tasks
             taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>
                                   <div>${this.resourceName}, ${this.vintage}</div>`;
         }
@@ -368,6 +371,9 @@ export function executeTaskFunction(task) {
                 break;
             case task.taskName === "Uprooting":
                 addConsoleMessage(`Uprooting task completed for field <strong>${task.fieldName || 'Unknown'}</strong>.`);
+                break;
+            case task.taskName === "Clearing":
+                addConsoleMessage(`Clearing task completed for field <strong>${task.fieldName || 'Unknown'}</strong>. Field health improved.`);
                 break;
             case task.taskName.startsWith("Hiring"):
                 addConsoleMessage(`Hiring task completed: ${task.taskName}.`);
