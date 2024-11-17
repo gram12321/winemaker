@@ -384,6 +384,7 @@ export function plantAcres(index, resourceName) {
   if (field.currentAcresPlanted >= field.acres) {
     field.plantedResourceName = resourceName;
     field.vineAge = 0;
+    field.currentAcresUprooted = 0; // Reset uprooted acres on planting completion
     addConsoleMessage(`Field <strong>${fieldName}</strong> fully planted with <strong>${resourceName}.</strong>`);
   } else {
     addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>. Total planted: <strong>${field.currentAcresPlanted} out of ${field.acres}</strong> acres.`);
