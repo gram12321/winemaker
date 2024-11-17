@@ -8,6 +8,7 @@ import { handleGenericTask, bookkeepingTaskFunction  } from './administration.js
 import { Farmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { decayPrestigeHit } from './database/loadSidebar.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
+import { calculateLandvalue, farmlandAgePrestigeModifier, calculateFarmlandPrestige } from './farmland.js'; // Adjust import path
 
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
@@ -71,9 +72,12 @@ export function updateNewYear(farmlands) {
         if (field.plantedResourceName) {
             field.vineAge += 1; // Increment the vine age
         }
-
+        // Recalculate the land value
+        field.landvalue = calculateLandvalue(field.country, field.region, field.altitude, field.aspect);
+        // Recalculate the farmland prestige
+        field.farmlandPrestige = calculateFarmlandPrestige(field);
         // Reset the annual yield factor for the new year
-        field.annualYieldFactor = Math.random();
+        field.annualYieldFactor = (0.5 + Math.random()) * 1.5; // reapply the original formula
     });
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands)); // Update the local storage
 }

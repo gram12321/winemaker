@@ -12,9 +12,30 @@ import { handleGenericTask } from './administration.js';
 
 
 
-// Refactored calculateFarmlandPrestige function
-function calculateFarmlandPrestige(farmland) {
-  const ageModifier = farmland.farmlandAgePrestigeModifier();
+// Refactored standalone function for land value calculation
+export function calculateLandvalue(country, region, altitude, aspect) {
+  return calculateAndNormalizePriceFactor(country, region, altitude, aspect);
+}
+
+// Refactored standalone function for farmland age prestige modifier
+export function farmlandAgePrestigeModifier(vineAge) {
+  const age = parseFloat(vineAge);
+  if (isNaN(age) || age < 0) {
+    return 0;
+  } else if (age <= 3) {
+    return (age * age) / 100 + 0.01;
+  } else if (age <= 25) {
+    return 0.1 + (age - 3) * (0.4 / 22);
+  } else if (age <= 100) {
+    return 0.5 + (Math.atan((age - 25) / 20) / Math.PI) * (0.95 - 0.5);
+  } else {
+    return 0.95;
+  }
+}
+
+// Refactored calculateFarmlandPrestige function using standalone prestige modifier
+export function calculateFarmlandPrestige(farmland) {
+  const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge); // Use standalone function
   const landvalueNormalized = normalizeLandValue(farmland.landvalue);
   const prestigeRanking = regionPrestigeRankings[`${farmland.region}, ${farmland.country}`] || 0;
 
@@ -38,33 +59,15 @@ class Farmland {
     this.aspect = aspect;
     this.density = density;
     this.farmlandHealth = farmlandHealth;
-    this.landvalue = this.calculateLandvalue();
+    this.landvalue = calculateLandvalue(this.country, this.region, this.altitude, this.aspect); // Use the refactored function
     this.status = 'Dormancy'; // Initialize status
     this.ripeness = 0.1; // Initialize ripeness
     this.farmlandPrestige = calculateFarmlandPrestige(this); // Initialize with the calculated prestige
     this.canBeCleared = 'Ready to be cleared'; // Default state allowing clearing
-    this.annualYieldFactor = 0.5 + Math.random() * 1.5; // Initialize with the given random factor calculation
-  }
-
-  calculateLandvalue() {
-    return calculateAndNormalizePriceFactor(this.country, this.region, this.altitude, this.aspect);
-  }
-
-  farmlandAgePrestigeModifier() {
-    const age = parseFloat(this.vineAge);
-    if (isNaN(age) || age < 0) {
-      return 0;
-    } else if (age <= 3) {
-      return (age * age) / 100 + 0.01;
-    } else if (age <= 25) {
-      return 0.1 + (age - 3) * (0.4 / 22);
-    } else if (age <= 100) {
-      return 0.5 + (Math.atan((age - 25) / 20) / Math.PI) * (0.95 - 0.5);
-    } else {
-      return 0.95;
-    }
+    this.annualYieldFactor = (0.5 + Math.random()) * 1.5; // Initialize with the given random factor calculation
   }
 }
+
 
 
 export function farmlandYield(farmland) {

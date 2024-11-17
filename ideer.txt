@@ -35,6 +35,7 @@ Wineorders not saved to firestore, just to localstorage
 last order in wineordertable causes [15:00:29] Invalid wine order index. Can refresh page to make right 
 Possible a crash if 0.000something is left in a task (IE 0.00004 must left will leave fermantation task open, but not possible to finih)
 Close by clicking X on hirering overlay dont work
+There might be an issue where annualYieldFactor  is producing values below 0.5 which is not intentinally. 
 
 
 QoL Improvement
