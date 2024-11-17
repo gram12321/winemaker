@@ -70,7 +70,7 @@ export function farmlandYield(farmland) {
   if (farmland.plantedResourceName) {
     const resource = getResourceByName(farmland.plantedResourceName);
     if (resource) {
-      return farmland.ripeness * resource.naturalYield;
+      return (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
     }
   }
   return 0; // No yield if nothing is planted
