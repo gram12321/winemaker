@@ -229,10 +229,21 @@ export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName 
   const field = farmlands[fieldId];
   const fieldName = field.name || `Field ${fieldId}`;
   const gameYear = localStorage.getItem('year') || '';
-  const vintage = field.vintage || ''; 
+  const vintage = field.vintage || '';
+
+  // Check if any task is already active on this field
+  const isAnyTaskActiveOnField = activeTasks.some(task => task.fieldId === fieldId);
+
+  // Check specifically if a harvest task is active on this field
+  const isHarvestTaskActive = activeTasks.some(task => task.fieldId === fieldId && task.taskName === "Harvesting");
 
   if (mode === 'initialize') {
     if (taskType === "Planting") {
+      if (isAnyTaskActiveOnField) {
+        addConsoleMessage(`Another task is already active on field <strong>${fieldName}</strong>.`);
+        return null;
+      }
+
       field.plantedResourceName = "Currently being planted";
       field.status = "No yield in first season";
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
@@ -247,6 +258,11 @@ export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName 
         vintage: gameYear
       };
     } else if (taskType === "Uprooting") {
+      if (isAnyTaskActiveOnField) {
+        addConsoleMessage(`Another task is already active on field <strong>${fieldName}</strong>.`);
+        return null;
+      }
+
       return {
         taskName: "Uprooting",
         workTotal: field.acres,
@@ -256,12 +272,46 @@ export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName 
         resourceName: resourceName || '',
         vintage
       };
+    } else if (taskType === "Harvesting") {
+      if (isAnyTaskActiveOnField || field.currentAcresHarvested >= field.acres) {
+        const message = isAnyTaskActiveOnField 
+          ? `Another task is already active on field <strong>${fieldName}</strong>.`
+          : `The field is already fully harvested for <strong>${fieldName}</strong>.`;
+        addConsoleMessage(message);
+        return null;
+      }
+
+      if (!field.plantedResourceName) {
+        addConsoleMessage(`No planted resource found for Field ID ${field.id || 'unknown'}.`);
+        return null;
+      }
+
+      field.status = "Being harvested";
+      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+      addConsoleMessage(`Harvesting task started for <strong>${fieldName}</strong> with <strong>${field.plantedResourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
+
+      return {
+        taskName: "Harvesting",
+        workTotal: field.acres,
+        iconPath: '/assets/icon/icon_harvesting.webp',
+        taskType: 'Field',
+        fieldName,
+        resourceName: field.plantedResourceName,
+        vintage: gameYear
+      };
     }
   } else if (mode === 'update') {
     if (taskType === "Planting") {
       return plantAcres(fieldId, resourceName);
     } else if (taskType === "Uprooting") {
+      if (isHarvestTaskActive) {
+        addConsoleMessage(`Cannot uproot while a harvesting task is active on field <strong>${fieldName}</strong>.`);
+        return 0;
+      }
       return uproot(fieldId);
+    } else if (taskType === "Harvesting") {
+      return harvestAcres(fieldId);
     }
   }
 

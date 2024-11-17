@@ -6,6 +6,9 @@ import { inventoryInstance } from '/js/resource.js';
 import { farmlandYield } from '/js/farmland.js';
 import {calculateWorkApplied } from './staff.js';
 
+import { handleGenericTask } from './administration.js';
+import { fieldTaskFunction } from  './farmland.js'
+
 export function displayVineyardEntries() {
   const vineyardEntries = document.querySelector('#vineyard-entries');
   vineyardEntries.innerHTML = ''; // Clear existing entries
@@ -79,70 +82,13 @@ export function displayVineyardEntries() {
     const harvestButton = card.querySelector('.harvest-field-btn');
     harvestButton.addEventListener('click', () => {
       if (canHarvest) {
-        handleHarvestTask(index);
+        handleGenericTask('Harvesting', (task, mode) => fieldTaskFunction(task, mode, "Harvesting", { fieldId: index }), { fieldId: index });
       }
     });
   });
 }
 
-export function handleHarvestTask(index) {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const field = farmlands[index];
 
-    if (field && field.plantedResourceName) {
-        const resourceName = field.plantedResourceName;
-        const state = 'Grapes';
-        const gameYear = parseInt(localStorage.getItem('year'), 10);
-        const totalAcres = field.acres;
-        const fieldName = field.name || `Field ${index}`;
-
-        // Check if any task is already active on this field
-        const isAnyTaskActiveOnField = activeTasks.some(task => task.fieldId === index);
-
-        if (!isAnyTaskActiveOnField && (!field.currentAcresHarvested || field.currentAcresHarvested < totalAcres)) {
-            const iconPath = '/assets/icon/icon_harvesting.webp'; // Define the icon path for harvesting
-            const task = new Task(
-                "Harvesting",
-                () => harvestAcres(index),
-                undefined,
-                totalAcres,
-                resourceName,
-                state,
-                gameYear,
-                'High', // Use arbitrary quality
-                iconPath,
-                fieldName,
-                'Field'  // Specify the type of the task
-            );
-
-            // Include fieldName in Object.assign
-            Object.assign(task, { fieldId: index, fieldName });
-
-            saveTask({
-                taskName: task.taskName,
-                fieldId: index,
-                fieldName: task.fieldName,
-                resourceName,
-                taskId: task.taskId,
-                workTotal: totalAcres,
-                vintage: gameYear,
-                iconPath,
-                type: 'Field', // Explicitly pass in type
-                staff: task.staff
-            });
-
-            activeTasks.push(task);
-            addConsoleMessage(`Harvesting task started for <strong>${task.fieldName}</strong> with <strong>${resourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
-        } else {
-            const message = isAnyTaskActiveOnField 
-                ? `Another task is already active on field <strong>${fieldName}</strong>.`
-                : `A Harvesting task is already active or the field is fully harvested for <strong>${field.name || `Field ${index}`}</strong>.`;
-            addConsoleMessage(message);
-        }
-    } else {
-        addConsoleMessage(`No planted resource found for Field ID ${farmlands[index]?.id || 'unknown'}.`);
-    }
-}
 
 export function harvestAcres(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
