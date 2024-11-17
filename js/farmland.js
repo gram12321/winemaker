@@ -43,6 +43,7 @@ class Farmland {
     this.ripeness = 0.1; // Initialize ripeness
     this.farmlandPrestige = calculateFarmlandPrestige(this); // Initialize with the calculated prestige
     this.canBeCleared = 'Ready to be cleared'; // Default state allowing clearing
+    this.annualYieldFactor = 0.5 + Math.random() * 1.5; // Initialize with the given random factor calculation
   }
 
   calculateLandvalue() {
@@ -70,7 +71,13 @@ export function farmlandYield(farmland) {
   if (farmland.plantedResourceName) {
     const resource = getResourceByName(farmland.plantedResourceName);
     if (resource) {
-      return (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
+      // Calculate the theoretical yield
+      const theoreticalYield = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
+
+      // Use the existing annualYieldFactor
+      const expectedYield = theoreticalYield * farmland.annualYieldFactor;
+
+      return expectedYield;
     }
   }
   return 0; // No yield if nothing is planted

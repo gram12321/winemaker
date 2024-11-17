@@ -52,7 +52,7 @@ export function displayVineyardEntries() {
                 <th>Crop</th>
                 <th>Status</th>
                 <th>Ripeness</th>
-                <th>Yield</th>
+                <th>Expected Yield</th>
                 <th>Actions</th>
               </tr>
             </thead>

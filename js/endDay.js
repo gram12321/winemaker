@@ -68,10 +68,14 @@ export function incrementWeek() {
 // Define the new function to increment the vine age
 export function updateNewYear(farmlands) {
     farmlands.forEach(field => {
-        if (field.plantedResourceName) { // Check that there is something plantet on the field
+        if (field.plantedResourceName) {
             field.vineAge += 1; // Increment the vine age
         }
+
+        // Reset the annual yield factor for the new year
+        field.annualYieldFactor = Math.random();
     });
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands)); // Update the local storage
 }
 
 // Updated updateFieldStatuses function
