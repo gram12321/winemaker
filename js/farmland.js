@@ -268,7 +268,6 @@ export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName 
   return 0;
 }
 
-
 export function plantAcres(index, resourceName) {
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const field = farmlands[index];
@@ -302,8 +301,6 @@ export function plantAcres(index, resourceName) {
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
   return acresToPlant;
 }
-
-
 
 export function uproot(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
