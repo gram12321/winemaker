@@ -42,6 +42,7 @@ class Farmland {
     this.status = 'Dormancy'; // Initialize status
     this.ripeness = 0.1; // Initialize ripeness
     this.farmlandPrestige = calculateFarmlandPrestige(this); // Initialize with the calculated prestige
+    this.canBeCleared = true; // Allow clearing by default
   }
 
   calculateLandvalue() {
@@ -392,9 +393,7 @@ export function uproot(index) {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Uprooting" && task.fieldId === index);
 
-
-  // Calculate the work applied specifically for uprooting
-  const workApplied = calculateWorkApplied(currentTask?.staff || [], 'uproot');
+    const workApplied = calculateWorkApplied(currentTask?.staff || [], 'uproot');
 
     const workRemaining = field.acres - (field.currentAcresUprooted || 0);
     const acresToUproot = Math.min(workApplied, workRemaining);
@@ -407,9 +406,10 @@ export function uproot(index) {
     field.currentAcresUprooted = (field.currentAcresUprooted || 0) + acresToUproot;
 
     if (field.currentAcresUprooted >= field.acres) {
-        field.plantedResourceName = null; // Reset the crop
-        field.vineAge = null; // Reset vine age
-        field.currentAcresPlanted = 0; // Reset planting progress
+        field.plantedResourceName = null; 
+        field.vineAge = null; 
+        field.currentAcresPlanted = 0; 
+        field.canBeCleared = true; // Reset to allow clearing
         addConsoleMessage(`Field <strong>${fieldName}</strong> fully uprooted.`);
     } else {
         addConsoleMessage(`Uprooted ${acresToUproot} acres from field <strong>${fieldName}</strong>. Total uprooted: <strong>${field.currentAcresUprooted} out of ${field.acres}</strong> acres.`);
@@ -424,8 +424,12 @@ export function clearing(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
     const fieldName = field.name || `Field ${index}`;
-    
-    // Check if field is empty
+
+    if (!field.canBeCleared) {
+        addConsoleMessage(`Field <strong>${fieldName}</strong> cannot be cleared. It needs to be uprooted first.`);
+        return 0;
+    }
+
     if (field.plantedResourceName && field.plantedResourceName !== 0) {
         addConsoleMessage(`Cannot clear field <strong>${fieldName}</strong> as it is not empty.`);
         return 0;
@@ -434,7 +438,6 @@ export function clearing(index) {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     const currentTask = tasks.find(task => task.taskName === "Clearing" && task.fieldId === index);
 
-    // Calculate the work applied specifically for clearing
     const workApplied = calculateWorkApplied(currentTask?.staff || [], 'clearing');
 
     const workRemaining = field.acres - (field.currentAcresCleared || 0);
@@ -448,8 +451,9 @@ export function clearing(index) {
     field.currentAcresCleared = (field.currentAcresCleared || 0) + acresToClear;
 
     if (field.currentAcresCleared >= field.acres) {
-        field.farmlandHealth = Math.min(field.farmlandHealth + 0.25, 1.0); // Heal field
-        field.currentAcresCleared = 0; // Reset progress
+        field.farmlandHealth = Math.min(field.farmlandHealth + 0.25, 1.0);
+        field.currentAcresCleared = 0; 
+        field.canBeCleared = false; // Disable further clearing until uproot
         addConsoleMessage(`Field <strong>${fieldName}</strong> fully cleared and health improved.`);
     } else {
         addConsoleMessage(`Cleared ${acresToClear} acres from field <strong>${fieldName}</strong>. Total cleared: <strong>${field.currentAcresCleared} out of ${field.acres}</strong> acres.`);
