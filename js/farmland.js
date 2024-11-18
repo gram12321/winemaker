@@ -46,26 +46,26 @@ export function calculateFarmlandPrestige(farmland) {
 }
 
 class Farmland {
-  constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = '', farmlandHealth = 0.5 ) {
-    this.id = id;
-    this.name = name;
-    this.country = country;
-    this.region = region;
-    this.acres = acres;
-    this.plantedResourceName = plantedResourceName;
-    this.vineAge = vineAge;
-    this.grape = grape;
-    this.soil = soil;
-    this.altitude = altitude;
-    this.aspect = aspect;
-    this.density = density;
-    this.farmlandHealth = farmlandHealth;
-    this.landvalue = calculateLandvalue(this.country, this.region, this.altitude, this.aspect); // Use the refactored function
-    this.status = 'Dormancy'; // Initialize status
-    this.ripeness = 0.1; // Initialize ripeness
-    this.farmlandPrestige = calculateFarmlandPrestige(this); // Initialize with the calculated prestige
-    this.canBeCleared = 'Ready to be cleared'; // Default state allowing clearing
-    this.annualYieldFactor = (0.5 + Math.random()) * 1.5; // Initialize with the given random factor calculation
+  constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = 5000, farmlandHealth = 0.5) {
+    this.id = id; // Unique identifier for the farmland
+    this.name = name; // Name of the farmland
+    this.country = country; // Country where the farmland is located
+    this.region = region; // Region within the country
+    this.acres = acres; // Size in acres
+    this.plantedResourceName = plantedResourceName; // Type of crop/resource planted
+    this.vineAge = vineAge; // Age of the vines (if applicable)
+    this.grape = grape; // Type of grape (if specific to vineyards)
+    this.soil = soil; // Soil type
+    this.altitude = altitude; // Altitude of the location
+    this.aspect = aspect; // Aspect (slope direction)
+    this.density = density; // Planting density
+    this.farmlandHealth = farmlandHealth; // Current health state of the farmland
+    this.landvalue = calculateLandvalue(this.country, this.region, this.altitude, this.aspect); // Calculate and set land value
+    this.status = 'Dormancy'; // Initial status, assuming starting in a dormant state
+    this.ripeness = 0.1; // Initial ripeness level
+    this.farmlandPrestige = calculateFarmlandPrestige(this); // Calculate and set farmland prestige
+    this.canBeCleared = 'Ready to be cleared'; // State regarding field clearing
+    this.annualYieldFactor = (0.5 + Math.random()) * 1.5; // Random yield factor calculation
   }
 }
 
