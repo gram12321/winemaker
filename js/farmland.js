@@ -9,6 +9,7 @@ import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 import {calculateWorkApplied } from './staff.js';
 import { handleGenericTask } from './administration.js';
+import { showPlantingOverlay } from './overlays/plantingOverlay.js';
 
 
 
@@ -165,6 +166,10 @@ function getRandomAspect() {
   return getRandomItem(aspects);
 }
 
+// In js/farmland.js
+
+
+
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   farmlandEntries.innerHTML = ''; // Clear existing entries
@@ -217,16 +222,20 @@ export function displayOwnedFarmland() {
       }
     });
 
-    // Updated Planting Logic
+    // Adjusted Planting Logic to show the planting overlay
     const plantButton = row.querySelector('.plant-field-btn');
     plantButton.addEventListener('click', (event) => {
       if (!plantButton.disabled) {
         event.stopPropagation();
-        const resourceSelect = row.querySelector('.resource-select');
-        const selectedResource = resourceSelect.value;
-        const additionalTaskParams = { fieldId: index, resourceName: selectedResource };
-        handleGenericTask("Planting", (task, mode) => fieldTaskFunction(task, mode, "Planting", additionalTaskParams), additionalTaskParams);
-        displayOwnedFarmland();
+
+        // Open the planting overlay
+        showPlantingOverlay(farmland, () => {
+          const resourceSelect = row.querySelector('.resource-select');
+          const selectedResource = resourceSelect.value;
+          const additionalTaskParams = { fieldId: index, resourceName: selectedResource };
+          handleGenericTask("Planting", (task, mode) => fieldTaskFunction(task, mode, "Planting", additionalTaskParams), additionalTaskParams);
+          displayOwnedFarmland();
+        });
       }
     });
 
