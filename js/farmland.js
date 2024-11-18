@@ -79,7 +79,7 @@ export function farmlandYield(farmland) {
       const theoreticalYield = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
 
       // Use the existing annualYieldFactor
-      const expectedYield = theoreticalYield * farmland.annualYieldFactor;
+      const expectedYield = theoreticalYield * farmland.annualYieldFactor * (farmland.density / 1000);
 
       return expectedYield;
     }
