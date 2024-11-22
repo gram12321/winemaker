@@ -114,13 +114,13 @@ export function harvestAcres(index) {
         const acresHarvested = Math.min(workApplied, acresLeftToHarvest);
 
         if (acresHarvested > 0) {
-            const grapesHarvested = farmlandYield(field) * acresHarvested * 5;
+            const grapesHarvested = farmlandYield(field) * acresHarvested * 5; // needs to be a more realistic amount.
           
           // Get the altitude range for normalization
           const altitudeRange = regionAltitudeRanges[field.country][field.region];
           const normalizedAltitude = normalizeAltitude(field.altitude, altitudeRange);
           const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
-          const quality = ((Math.random() + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Should use a saved random number same as annualYieldFactor. Needs other factors, as ripeness, sugar, acidity, terrorar ect. 
+          const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Should use a saved random number same as annualYieldFactor. Needs other factors, as ripeness, sugar, acidity, terrorar ect. 
 
             // Add the harvested grapes to the inventory, including the field name and prestige
             inventoryInstance.addResource(

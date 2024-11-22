@@ -66,6 +66,7 @@ class Farmland {
     this.farmlandPrestige = calculateFarmlandPrestige(this); // Calculate and set farmland prestige
     this.canBeCleared = 'Ready to be cleared'; // State regarding field clearing
     this.annualYieldFactor = (0.5 + Math.random()) * 1.5; // Random yield factor calculation
+    this.annualQualityFactor = Math.random(); // Random quality factor calculation
   }
 }
 

@@ -45,6 +45,9 @@ QoL Improvement
   - group orders by field, grape ect. or somekind of filter on orders
   group similiar entries in cashflow
   hover over info on icons. IE (Status icon, wineordertype icon ect. )
+  Planting expense needs a consolemsg
+  Clicking field name in Vineyard should open the farmlandoverlay
+  Clicking staff name in Select staff overlay should open staffoverlay
 
  New/Better mechanics
   - Let quantity of generateWineOrder() be depending on a asking price. Asking price could be set in sales.html instead of the Normal selling buttom
