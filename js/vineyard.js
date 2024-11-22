@@ -107,9 +107,6 @@ export function harvestAcres(index) {
 
         const workApplied = calculateWorkApplied(currentTask.staff || [], 'harvestAcres');
 
-        // Log the work applied for this harvest task
-        console.log(`Work applied for harvesting task with ID ${currentTask.taskId}: ${workApplied}`);
-
         const acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
         const acresHarvested = Math.min(workApplied, acresLeftToHarvest);
 
@@ -120,7 +117,7 @@ export function harvestAcres(index) {
           const altitudeRange = regionAltitudeRanges[field.country][field.region];
           const normalizedAltitude = normalizeAltitude(field.altitude, altitudeRange);
           const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
-          const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Should use a saved random number same as annualYieldFactor. Needs other factors, as ripeness, sugar, acidity, terrorar ect. 
+          const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Needs other factors, as ripeness, sugar, acidity, terrorar ect. 
 
             // Add the harvested grapes to the inventory, including the field name and prestige
             inventoryInstance.addResource(
