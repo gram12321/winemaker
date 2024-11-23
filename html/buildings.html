@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Page - Buildings</title>
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="/css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="d-flex" id="wrapper">
+      <!-- Sidebar -->
+      <div id="sidebar-wrapper"></div>
+
+      <!-- Main Content -->
+      <div class="container text-center flex-grow-1" id="page-content-wrapper">
+        <h3>Buildings</h3>
+
+        <!-- Placeholder for Buildings content, like task panel -->
+        <!-- Add more elements specific to buildings here -->
+      </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/js/loadPanel.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script type="module">
+      import { initializeSidebar } from "/js/database/loadSidebar.js";
+      import { initializePanel } from "/js/loadPanel.js";
+      import { initializeConsole } from "/js/console.js";
+
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeSidebar();
+        initializePanel();
+        initializeConsole();
+      });
+    </script>
+  </body>
+</html>
