@@ -19,8 +19,15 @@
       <div class="container text-center flex-grow-1" id="page-content-wrapper">
         <h3>Buildings</h3>
 
-        <!-- Placeholder for Buildings content, like task panel -->
-        <!-- Add more elements specific to buildings here -->
+        <div id="tool-shed-section">
+          <h4>Tool Shed</h4>
+          <p>Current Capacity: <span id="tool-shed-capacity"></span></p>
+          <p>Tools: <span id="tool-shed-contents"></span></p>
+          <button id="upgrade-tool-shed-btn" class="btn btn-primary">Upgrade Tool Shed</button>
+          <button id="add-tractor-btn" class="btn btn-secondary">Add Tractor</button>
+          <button id="add-trimmer-btn" class="btn btn-secondary">Add Trimmer</button>
+        </div>
+
       </div>
     </div>
 
@@ -29,17 +36,60 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script type="module" src="/js/loadPanel.js"></script>
+    <script type="module" src="/js/buildings.js"></script>
 
     <!-- Custom JavaScript -->
     <script type="module">
       import { initializeSidebar } from "/js/database/loadSidebar.js";
       import { initializePanel } from "/js/loadPanel.js";
       import { initializeConsole } from "/js/console.js";
+      import { Building, Tool, saveBuildingsToLocalStorage, loadBuildingsFromLocalStorage } from '/js/buildings.js';
 
       document.addEventListener("DOMContentLoaded", function () {
         initializeSidebar();
         initializePanel();
         initializeConsole();
+
+        // Load or initialize buildings
+        let buildings = loadBuildingsFromLocalStorage();
+        
+        let toolShed = buildings.find(b => b.name === 'Tool Shed');
+        if (!toolShed) {
+          toolShed = new Building('Tool Shed', 5);
+          buildings.push(toolShed);
+          saveBuildingsToLocalStorage(buildings);
+        }
+
+        const capacityElement = document.getElementById('tool-shed-capacity');
+        const contentsElement = document.getElementById('tool-shed-contents');
+        
+        const updateDisplay = () => {
+          capacityElement.innerHTML = `${toolShed.capacity} tools`;
+          contentsElement.innerHTML = toolShed.listContents();
+        };
+
+        document.getElementById('upgrade-tool-shed-btn').addEventListener('click', () => {
+          toolShed.upgradeCapacity(5);
+          saveBuildingsToLocalStorage(buildings);
+          updateDisplay();
+        });
+
+        document.getElementById('add-tractor-btn').addEventListener('click', () => {
+          if (toolShed.addContent(new Tool('Tractor'))) {
+            saveBuildingsToLocalStorage(buildings);
+            updateDisplay();
+          }
+        });
+
+        document.getElementById('add-trimmer-btn').addEventListener('click', () => {
+          if (toolShed.addContent(new Tool('Trimmer'))) {
+            saveBuildingsToLocalStorage(buildings);
+            updateDisplay();
+          }
+        });
+
+        // Initial display update
+        updateDisplay();
       });
     </script>
   </body>
