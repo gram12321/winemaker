@@ -107,7 +107,7 @@ export const getBuildingTools = () => ToolManager.getTools();
 
 function buildBuilding(name) {
   if (!buildings.find(building => building.name === name)) { // Check if the building is not already built
-    const newBuilding = new Building(name, 10); // Customize the capacity further if needed
+    const newBuilding = new Building(name, 1); // Customize the capacity further if needed
     buildings.push(newBuilding);
     console.log(`Built a new ${name}:`, newBuilding);
 

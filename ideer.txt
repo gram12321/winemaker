@@ -48,6 +48,10 @@ QoL Improvement
   Planting expense needs a consolemsg
   Clicking field name in Vineyard should open the farmlandoverlay
   Clicking staff name in Select staff overlay should open staffoverlay
+  add error consolemsg when clicking a building that is not build
+  add error when trying to build a building that allreadu excist
+  
 
  New/Better mechanics
   - Let quantity of generateWineOrder() be depending on a asking price. Asking price could be set in sales.html instead of the Normal selling buttom
+  add cost, adminstrationtask and msg for building buildings and tools
