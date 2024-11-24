@@ -1,4 +1,4 @@
-// js/buildings.js
+// buildings.js
 
 export class Building {
   constructor(name, capacity) {
@@ -76,3 +76,35 @@ export function loadBuildingsFromLocalStorage() {
   const serializedBuildings = JSON.parse(localStorage.getItem('buildings') || '[]');
   return serializedBuildings.map(Building.fromJSON);
 }
+
+let builtBuildings = {
+  toolShed: null,
+  warehouse: null
+};
+
+export function buildToolShed() {
+  if (!builtBuildings.toolShed) {
+    builtBuildings.toolShed = new Building('Tool Shed', 10);
+    console.log('Tool Shed built!');
+    updateUI();
+  } else {
+    console.log('Tool Shed has already been built!');
+  }
+}
+
+function updateUI() {
+  const toolShedCard = document.getElementById('tool-shed-card');
+  if (builtBuildings.toolShed) {
+    toolShedCard.classList.remove('unbuilt-card');
+    toolShedCard.querySelector('.btn').disabled = true;
+    toolShedCard.addEventListener('click', () => {
+      import('./overlays/buildingOverlay.js').then(module => {
+        module.showBuildingOverlay('Tool Shed');
+      });
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  updateUI(); // Ensure UI is updated on page load
+});

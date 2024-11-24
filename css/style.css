@@ -1,10 +1,11 @@
 /* General */
 body {
   display: flex;
-  margin-bottom: 220px; /* Ensure space for the fixed console */
+  margin-bottom: 220px;
+  /* Ensure space for the fixed console */
 }
 
-button.disabled{
+button.disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -53,51 +54,93 @@ button.disabled{
 }
 
 /* Define color classes for a gradient from red to green */
-.color-class-0 { color: #ff0000; } /* Red */
-.color-class-1 { color: #ff3300; } 
-.color-class-2 { color: #ff6600; }
-.color-class-3 { color: #ff9900; }
-.color-class-4 { color: #ffcc00; } 
-.color-class-5 { color: #ffff00; } /* Yellow */
-.color-class-6 { color: #ccff00; }
-.color-class-7 { color: #99ff00; }
-.color-class-8 { color: #66ff00; }
-.color-class-9 { color: #27c200; }
-.color-class-10 { color: #008f00; } /* Green */
+.color-class-0 {
+  color: #ff0000;
+}
+
+/* Red */
+.color-class-1 {
+  color: #ff3300;
+}
+
+.color-class-2 {
+  color: #ff6600;
+}
+
+.color-class-3 {
+  color: #ff9900;
+}
+
+.color-class-4 {
+  color: #ffcc00;
+}
+
+.color-class-5 {
+  color: #ffff00;
+}
+
+/* Yellow */
+.color-class-6 {
+  color: #ccff00;
+}
+
+.color-class-7 {
+  color: #99ff00;
+}
+
+.color-class-8 {
+  color: #66ff00;
+}
+
+.color-class-9 {
+  color: #27c200;
+}
+
+.color-class-10 {
+  color: #008f00;
+}
+
+/* Green */
 
 /* Company Info Styles */
 #companyInfo {
-  font-family: Arial, sans-serif; 
-  font-size: 1rem; 
-  color: #ffffff; 
-  margin: 15px 0; 
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  color: #ffffff;
+  margin: 15px 0;
 }
 
 #companyInfo .company-name {
-  font-family: 'Georgia', serif; 
-  font-size: 1.5rem; 
+  font-family: 'Georgia', serif;
+  font-size: 1.5rem;
   margin-bottom: 5px;
-  text-align: center; /* Center align company name */
+  text-align: center;
+  /* Center align company name */
 }
 
 #companyInfo .styled-line {
-  width: 60%; /* Line width */
-  height: 3px; /* Thicker line */
-  background-color: #94bde5; /* Line color */
-  border-radius: 5px; /* Rounded corners */
-  margin: 10px auto; /* Center the line */
+  width: 60%;
+  /* Line width */
+  height: 3px;
+  /* Thicker line */
+  background-color: #94bde5;
+  /* Line color */
+  border-radius: 5px;
+  /* Rounded corners */
+  margin: 10px auto;
+  /* Center the line */
 }
 
 #companyInfo .info-item {
-  padding: 5px 0; 
+  padding: 5px 0;
 }
 
 #companyInfo .info-label {
-  font-weight: bold; 
+  font-weight: bold;
 }
 
 #companyInfo .info-content {
-  font-weight: normal; 
+  font-weight: normal;
   margin-left: 8px;
 }
 
@@ -115,12 +158,14 @@ button.disabled{
   height: 100% !important;
   z-index: 1000 !important;
   overflow-y: auto !important;
-  background-color: #343a40 !important; /* Set the base background color */
+  background-color: #343a40 !important;
+  /* Set the base background color */
   /* Remove individual background image properties from here */
 }
 
 #panel-wrapper::before {
-  content: ''; /* Necessary to display the pseudo-element */
+  content: '';
+  /* Necessary to display the pseudo-element */
   position: absolute;
   top: 0;
   left: 0;
@@ -129,8 +174,10 @@ button.disabled{
   background-image: url('/assets/bg/bg_panel.webp');
   background-size: cover;
   background-position: center;
-  opacity: 0.4; /* Only the image gets this opacity */
-  z-index: -1; /* Place the image behind the panel content */
+  opacity: 0.4;
+  /* Only the image gets this opacity */
+  z-index: -1;
+  /* Place the image behind the panel content */
 }
 
 /*  - --- --   Task Panel styles   - - - - - -*/
@@ -145,6 +192,7 @@ button.disabled{
   transition: background-color 0.3s;
   position: relative;
 }
+
 /* Hover not in use after bg-color per type */
 .task-box:hover {
   background-color: #94bde5;
@@ -208,7 +256,8 @@ button.disabled{
 }
 
 .task-box.field-task:hover {
-  background-color: #6a7220; /* Lighter version for hover */
+  background-color: #6a7220;
+  /* Lighter version for hover */
 }
 
 .task-box.winery-task {
@@ -216,7 +265,8 @@ button.disabled{
 }
 
 .task-box.winery-task:hover {
-  background-color: #2d5aab; /* Lighter version for hover */
+  background-color: #2d5aab;
+  /* Lighter version for hover */
 }
 
 .task-box.administration-task {
@@ -224,7 +274,8 @@ button.disabled{
 }
 
 .task-box.administration-task:hover {
-  background-color: #36214f; /* Lighter version for hover */
+  background-color: #36214f;
+  /* Lighter version for hover */
 }
 
 .task-box.sales-task {
@@ -232,7 +283,8 @@ button.disabled{
 }
 
 .task-box.sales-task:hover {
-  background-color: #6f2814; /* Lighter version for hover */
+  background-color: #6f2814;
+  /* Lighter version for hover */
 }
 
 .add-staff-btn {
@@ -271,69 +323,114 @@ button.disabled{
 #console-bar {
   position: fixed;
   bottom: 0;
-  left: 250px; /* Space for the sidebar */
-  right: 250px; /* Space for the task panel */
-  height: 100px; /* Adjust height as needed */
-  overflow-y: scroll;  /* Ensure vertical scroll is visible when needed */
-  overflow-x: hidden;  /* Hide horizontal scroll to maintain layout integrity */
-  background-color: #888;  /* Use the lighter grey from original styles */
-  color: #000;             /* Dark text color for better contrast */
-  border: 1px solid #333;  /* Subtle border from original styles */
-  border-top: 2px solid #dee2e6; /* Top border for distinction */
-  border-radius: 4px;      /* Rounded corners */
-  padding: 10px;           /* Padding inside the console area */
-  z-index: 1000;           /* Ensure it stays on top of other elements */
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  box-sizing: border-box;  /* Include padding and border in element's total width/height */
-  font-family: monospace;  /* Monospace font for console feel */
-  white-space: pre-wrap;   /* Preserve whitespace and wrapping */
-  width: auto;             /* Ensure the width fits the content */
-  font-size: 10px; /* Ensure consistent font-size */
-  min-width: 630px;        /* Minimum width */
+  left: 250px;
+  /* Space for the sidebar */
+  right: 250px;
+  /* Space for the task panel */
+  height: 100px;
+  /* Adjust height as needed */
+  overflow-y: scroll;
+  /* Ensure vertical scroll is visible when needed */
+  overflow-x: hidden;
+  /* Hide horizontal scroll to maintain layout integrity */
+  background-color: #888;
+  /* Use the lighter grey from original styles */
+  color: #000;
+  /* Dark text color for better contrast */
+  border: 1px solid #333;
+  /* Subtle border from original styles */
+  border-top: 2px solid #dee2e6;
+  /* Top border for distinction */
+  border-radius: 4px;
+  /* Rounded corners */
+  padding: 10px;
+  /* Padding inside the console area */
+  z-index: 1000;
+  /* Ensure it stays on top of other elements */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for depth */
+  box-sizing: border-box;
+  /* Include padding and border in element's total width/height */
+  font-family: monospace;
+  /* Monospace font for console feel */
+  white-space: pre-wrap;
+  /* Preserve whitespace and wrapping */
+  width: auto;
+  /* Ensure the width fits the content */
+  font-size: 10px;
+  /* Ensure consistent font-size */
+  min-width: 630px;
+  /* Minimum width */
 }
 
 /* CSS for limiting cash flow table height and enabling scroll */
 #cash-flow-table {
-  max-height: 300px; /* Set the maximum height */
-  overflow-y: auto;  /* Enable vertical scrolling */
-  display: block;    /* Display as block element to apply max-height */
-  margin-bottom: 20px; /* Optional: add spacing below the table */
-  background-color: #888;  /* Use the lighter grey similar to the console */
-  color: #000;             /* Dark text color for better contrast */
-  border: 1px solid #333;  /* Subtle border from console styles */
-  border-top: 2px solid #dee2e6; /* Top border for distinction */
-  border-radius: 4px;      /* Rounded corners like the console */
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  font-family: monospace;  /* Monospace font for consistency */
-  white-space: nowrap;     /* Preserve whitespace */
-  width: auto;             /* Ensure the width fits the content */
-  font-size: 10px;         /* Ensure consistent font-size */
-  z-index: 1000;           /* Ensure it stays on top of other elements if necessary */
-  box-sizing: border-box;  /* Include padding and border in element's total width/height */
-  
+  max-height: 300px;
+  /* Set the maximum height */
+  overflow-y: auto;
+  /* Enable vertical scrolling */
+  display: block;
+  /* Display as block element to apply max-height */
+  margin-bottom: 20px;
+  /* Optional: add spacing below the table */
+  background-color: #888;
+  /* Use the lighter grey similar to the console */
+  color: #000;
+  /* Dark text color for better contrast */
+  border: 1px solid #333;
+  /* Subtle border from console styles */
+  border-top: 2px solid #dee2e6;
+  /* Top border for distinction */
+  border-radius: 4px;
+  /* Rounded corners like the console */
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for depth */
+  font-family: monospace;
+  /* Monospace font for consistency */
+  white-space: nowrap;
+  /* Preserve whitespace */
+  width: auto;
+  /* Ensure the width fits the content */
+  font-size: 10px;
+  /* Ensure consistent font-size */
+  z-index: 1000;
+  /* Ensure it stays on top of other elements if necessary */
+  box-sizing: border-box;
+  /* Include padding and border in element's total width/height */
+
 }
+
 /* CSS for coloring the text based on transaction type */
 .transaction-income {
-  color: #008f00; /* Green for income */
+  color: #008f00;
+  /* Green for income */
 }
 
 .transaction-expense {
-  color: #ff0000; /* Red for expenses */
+  color: #ff0000;
+  /* Red for expenses */
 }
+
 body {
-  margin-bottom: 220px; /* Space for the fixed console panel */
+  margin-bottom: 220px;
+  /* Space for the fixed console panel */
 }
 
 /* Centering the gamepages vertically and horizontally */
 #page-content-wrapper {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    align-items: center; /* Center content vertically */
-    flex-direction: column; /* Stack elements vertically */
-    min-height: 100vh; /* Take at least the full viewport height to center correctly */
-    margin-left: 250px; /* Account for sidebar width */
-    margin-right: 450px; /* Account for panel width */
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  /* Center content vertically */
+  flex-direction: column;
+  /* Stack elements vertically */
+  min-height: 100vh;
+  /* Take at least the full viewport height to center correctly */
+  margin-left: 250px;
+  /* Account for sidebar width */
+  margin-right: 450px;
+  /* Account for panel width */
 }
 
 /* Pictures in main view */
@@ -354,12 +451,15 @@ body {
 
 /* Farmland.html */
 
-.owned-farmland-table td, .owned-farmland-table th {
-  white-space: nowrap; /* Ensure no line breaks in table cells */
+.owned-farmland-table td,
+.owned-farmland-table th {
+  white-space: nowrap;
+  /* Ensure no line breaks in table cells */
 }
 
 #farmlandAccordion {
-  overflow-x: auto; /* Allow horizontal scrolling if necessary */
+  overflow-x: auto;
+  /* Allow horizontal scrolling if necessary */
 }
 
 .card-body {
@@ -377,17 +477,21 @@ body {
   height: 100%;
   top: 0;
   left: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent background */
   z-index: 2000;
-  display: flex; /* Use flex to ensure child can be centered easily */
+  display: flex;
+  /* Use flex to ensure child can be centered easily */
 }
 
 .overlay-content {
-  position: absolute; /* Allow using top, left, transform for centering */
+  position: absolute;
+  /* Allow using top, left, transform for centering */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  display: inline-block; /* Natural width based on child content */
+  display: inline-block;
+  /* Natural width based on child content */
   padding: 30px;
   background: #fff;
   border-radius: 8px;
@@ -396,9 +500,12 @@ body {
 
 /* Table styles within overlays */
 .overlay .table {
-  margin: 0 auto; /* Center align the table */
-  width: auto; /* Allow natural width expansion */
-  min-width: 400px; /* Minimum width */
+  margin: 0 auto;
+  /* Center align the table */
+  width: auto;
+  /* Allow natural width expansion */
+  min-width: 400px;
+  /* Minimum width */
   color: #333;
   text-align: center;
   background-color: #f9f9f9;
@@ -414,21 +521,34 @@ body {
 }
 
 .table-hover tbody tr:hover {
-  background-color: #d1e7fd; /* Light blue highlight */
+  background-color: #d1e7fd;
+  /* Light blue highlight */
 }
+
+/* Buildings overlay */
+.unbuilt-card {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 
 /* Skills Table Styles */
 .skills-table {
-  width: auto; /* Adjust table width to fit content */
-  table-layout: auto; /* Let the table size be determined by its content */
+  width: auto;
+  /* Adjust table width to fit content */
+  table-layout: auto;
+  /* Let the table size be determined by its content */
   border-collapse: collapse;
-  margin: 15px auto; /* Center align table */
-  font-size: 0.9em; /* Reduced font size */
+  margin: 15px auto;
+  /* Center align table */
+  font-size: 0.9em;
+  /* Reduced font size */
 }
 
 .skills-table th,
 .skills-table td {
-  padding: 8px 12px; /* Reduced padding */
+  padding: 8px 12px;
+  /* Reduced padding */
   border: 1px solid #dddddd;
   text-align: left;
 }
@@ -438,7 +558,8 @@ body {
 }
 
 .skills-table tr:hover {
-  background-color: #d1e7fd; /* Light blue highlight */
+  background-color: #d1e7fd;
+  /* Light blue highlight */
 }
 
 /* Header styling */
@@ -484,63 +605,63 @@ h2 {
 
 /* Fullscreen overlay specific for hire staff */
 #hireStaffOverlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    z-index: 1100;
-    overflow-y: hidden;
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1100;
+  overflow-y: hidden;
 }
 
 /* Content area inside the hire staff overlay */
 .hire-staff-content {
-    background-color: #fff;
-    padding: 20px;
-    margin: 60px auto;
-    width: 90%;
-    max-width: 1000px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    position: relative;
-    max-height: 80vh;
-    overflow-y: auto;
+  background-color: #fff;
+  padding: 20px;
+  margin: 60px auto;
+  width: 90%;
+  max-width: 1000px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .hire-staff-content h3 {
-    margin-top: 20px;
-    margin-bottom: 40px;
+  margin-top: 20px;
+  margin-bottom: 40px;
 }
 
 .hire-staff-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .hire-staff-option {
-    flex: 0 0 48%;
-    margin-bottom: 40px;
-    margin-top: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    background: #f9f9f9;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  flex: 0 0 48%;
+  margin-bottom: 40px;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  background: #f9f9f9;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 1.5em;
-    cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 1.5em;
+  cursor: pointer;
 }
 
 .table.table-bordered {
-    width: 100%;
+  width: 100%;
 }
 
 /* /* Add CSS styles for the planting overlay */
@@ -557,21 +678,32 @@ h2 {
 /*  - --- --   staff.html - - - - - -*/
 
 .skill-bar-container {
-  display: flex; 
-  gap: 5px; /* Space between skill bars */
+  display: flex;
+  gap: 5px;
+  /* Space between skill bars */
 }
 
 .skill-bar {
-    height: 20px;  /* Increased height of each skill bar */
-    flex-grow: 1;  /* Flex property to allow growth based on width value */
-    border-radius: 3px;
-    margin-top: 3px; /* Space above bars */
-    color: #fff; /* Text color */
-    font-weight: bold; /* Bold text */
-    display: flex; /* Use flexbox to center the text */
-    align-items: center; /* Vertically center text */
-    justify-content: center; /* Horizontally center text */
+  height: 20px;
+  /* Increased height of each skill bar */
+  flex-grow: 1;
+  /* Flex property to allow growth based on width value */
+  border-radius: 3px;
+  margin-top: 3px;
+  /* Space above bars */
+  color: #fff;
+  /* Text color */
+  font-weight: bold;
+  /* Bold text */
+  display: flex;
+  /* Use flexbox to center the text */
+  align-items: center;
+  /* Vertically center text */
+  justify-content: center;
+  /* Horizontally center text */
 }
+
 .skills-column {
-    min-width: 150px; /* Set the minimum width for the skills column */
+  min-width: 150px;
+  /* Set the minimum width for the skills column */
 }

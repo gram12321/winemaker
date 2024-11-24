@@ -1,96 +1,102 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game Page - Buildings</title>
-    <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link href="/css/style.css" rel="stylesheet" />
-  </head>
-  <body>
-    <div class="d-flex" id="wrapper">
-      <!-- Sidebar -->
-      <div id="sidebar-wrapper"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Page - Buildings</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="/css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper"></div>
 
-      <!-- Main Content -->
-      <div class="container text-center flex-grow-1" id="page-content-wrapper">
-        <h3>Buildings</h3>
+    <!-- Main Content -->
+    <div class="container text-center flex-grow-1" id="page-content-wrapper">
+      <h3>Buildings</h3>
+      <div class="card-deck">
 
-        <div id="tool-shed-section">
-          <h4>Tool Shed</h4>
-          <p>Current Capacity: <span id="tool-shed-capacity"></span></p>
-          <p>Tools: <span id="tool-shed-contents"></span></p>
-          <button id="upgrade-tool-shed-btn" class="btn btn-primary">Upgrade Tool Shed</button>
-          <button id="add-tractor-btn" class="btn btn-secondary">Add Tractor</button>
-          <button id="add-trimmer-btn" class="btn btn-secondary">Add Trimmer</button>
+        <!-- Tool Shed Card -->
+        <div class="card mb-4 shadow-sm unbuilt-card" id="tool-shed-card">
+          <div class="card-header">
+            <h4 class="my-0 font-weight-normal">Tool Shed (Level 1)</h4>
+          </div>
+          <div class="card-body">
+            <div style="margin-bottom: 10px;">
+              <!-- Icon placed above other details -->
+              <img src="/assets/icon/menu/toolshed.webp" alt="Tool Shed Icon" class="card-img-top" style="width: 50px; height: auto; display: block; margin: 0 auto;">
+            </div>
+            <ul class="list-unstyled mt-3 mb-4 text-left">
+              <li><strong>Upgrade Cost:</strong> 1000€</li>
+              <li><strong>Capacity per Level:</strong> 10</li>
+              <li><strong>Building Effects:</strong> No special effects</li>
+            </ul>
+            <button class="btn btn-success" id="build-tool-shed-btn">Build Tool Shed</button>
+          </div>
+        </div>
+
+        <!-- Warehouse Card -->
+        <div class="card mb-4 shadow-sm unbuilt-card" id="warehouse-card">
+          <div class="card-header">
+            <h4 class="my-0 font-weight-normal">Warehouse (Level 1)</h4>
+          </div>
+          <div class="card-body">
+            <div style="margin-bottom: 10px;">
+              <img src="/assets/icon/menu/warehouse.webp" alt="Warehouse Icon" class="card-img-top" style="width: 50px; height: auto; display: block; margin: 0 auto;">
+            </div>
+            <ul class="list-unstyled mt-3 mb-4 text-left">
+              <li><strong>Upgrade Cost:</strong> 1500€</li>
+              <li><strong>Storage per Level:</strong> 10</li>
+              <li><strong>Building Effects:</strong> No special effects</li>
+            </ul>
+          </div>
         </div>
 
       </div>
     </div>
+  </div>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="/js/loadPanel.js"></script>
-    <script type="module" src="/js/buildings.js"></script>
+  <!-- Overlay for buildings -->
+  <div id="buildingOverlay" class="overlay" style="display: none;">
+    <div class="overlay-content">
+      <span class="close-btn" onclick="hideBuildingOverlay()">&times;</span>
+      <div id="building-details"></div>
+    </div>
+  </div>
 
-    <!-- Custom JavaScript -->
-    <script type="module">
-      import { initializeSidebar } from "/js/database/loadSidebar.js";
-      import { initializePanel } from "/js/loadPanel.js";
-      import { initializeConsole } from "/js/console.js";
-      import { Building, Tool, saveBuildingsToLocalStorage, loadBuildingsFromLocalStorage } from '/js/buildings.js';
+  <!-- JavaScript Libraries -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-      document.addEventListener("DOMContentLoaded", function () {
-        initializeSidebar();
-        initializePanel();
-        initializeConsole();
+  <!-- Custom JavaScript -->
+  <script type="module">
+    import { initializeSidebar } from "/js/database/loadSidebar.js";
+    import { initializePanel } from "/js/loadPanel.js";
+    import { initializeConsole } from "/js/console.js";
 
-        // Load or initialize buildings
-        let buildings = loadBuildingsFromLocalStorage();
-        
-        let toolShed = buildings.find(b => b.name === 'Tool Shed');
-        if (!toolShed) {
-          toolShed = new Building('Tool Shed', 5);
-          buildings.push(toolShed);
-          saveBuildingsToLocalStorage(buildings);
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeSidebar();
+      initializePanel();
+      initializeConsole();
 
-        const capacityElement = document.getElementById('tool-shed-capacity');
-        const contentsElement = document.getElementById('tool-shed-contents');
-        
-        const updateDisplay = () => {
-          capacityElement.innerHTML = `${toolShed.capacity} tools`;
-          contentsElement.innerHTML = toolShed.listContents();
-        };
-
-        document.getElementById('upgrade-tool-shed-btn').addEventListener('click', () => {
-          toolShed.upgradeCapacity(5);
-          saveBuildingsToLocalStorage(buildings);
-          updateDisplay();
+      document.getElementById('build-tool-shed-btn').addEventListener('click', function() {
+        import('/js/buildings.js').then(module => {
+          module.buildToolShed();
         });
-
-        document.getElementById('add-tractor-btn').addEventListener('click', () => {
-          if (toolShed.addContent(new Tool('Tractor'))) {
-            saveBuildingsToLocalStorage(buildings);
-            updateDisplay();
-          }
-        });
-
-        document.getElementById('add-trimmer-btn').addEventListener('click', () => {
-          if (toolShed.addContent(new Tool('Trimmer'))) {
-            saveBuildingsToLocalStorage(buildings);
-            updateDisplay();
-          }
-        });
-
-        // Initial display update
-        updateDisplay();
       });
-    </script>
-  </body>
+
+      // Initial UI update
+      import('/js/buildings.js').then(module => {
+        module.updateUI();
+      });
+    });
+
+    function hideBuildingOverlay() {
+      const overlay = document.getElementById('buildingOverlay');
+      overlay.style.display = 'none';
+    }
+  </script>
+</body>
 </html>
