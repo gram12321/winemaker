@@ -33,14 +33,16 @@ async function clearLocalStorage() {
   localStorage.removeItem('season');
   localStorage.removeItem('year');
   localStorage.removeItem('companyPrestige');
-    localStorage.removeItem('currentPrestigeHit');
+  localStorage.removeItem('currentPrestigeHit');
   localStorage.removeItem('ownedFarmlands');
+  localStorage.removeItem('buildings');
   localStorage.removeItem('playerInventory');
   localStorage.removeItem('consoleMessages');
   localStorage.removeItem('tasks');
   localStorage.removeItem('latestTaskId');
   localStorage.removeItem('staffData');
   localStorage.removeItem('latestStaffId');
+  localStorage.removeItem('wineOrders');
   localStorage.removeItem('transactions'); // Clear transactions data
   localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
   console.log("Local storage cleared.");
@@ -109,11 +111,11 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('week', data.week);
     localStorage.setItem('season', data.season);
     localStorage.setItem('year', data.year);
-      localStorage.setItem('companyPrestige', data.companyPrestige);
-        localStorage.setItem('currentPrestigeHit'), data.currentPrestigeHit;
+    localStorage.setItem('companyPrestige', data.companyPrestige);
+    localStorage.setItem('currentPrestigeHit'), data.currentPrestigeHit;
     localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
     localStorage.setItem('playerInventory', data.playerInventory || '[]');
-
+    localStorage.setItem('buildings', data.buildings || '[]');
     localStorage.setItem('staffData', data.staffData || '[]');
     localStorage.setItem('tasks', JSON.stringify(data.tasks || []));
     localStorage.setItem('transactions', JSON.stringify(data.transactions || [])); // Load transactions
@@ -128,8 +130,8 @@ async function saveCompanyInfo() {
   const week = localStorage.getItem('week');
   const season = localStorage.getItem('season');
   const year = localStorage.getItem('year');
-    const companyPrestige = localStorage.getItem('companyPrestige');
-    const currentPrestigeHit = localStorage.getItem('companyPrestige');
+  const companyPrestige = localStorage.getItem('companyPrestige');
+  const currentPrestigeHit = localStorage.getItem('companyPrestige');
   const ownedFarmlands = localStorage.getItem('ownedFarmlands');
   const playerInventory = localStorage.getItem('playerInventory');
   const staffData = localStorage.getItem('staffData');

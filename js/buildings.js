@@ -1,4 +1,4 @@
-// buildings.js
+// js/buildings.js
 
 export class Building {
   constructor(name, capacity) {
@@ -65,46 +65,44 @@ export class Tool {
   }
 }
 
-// Save buildings to localStorage
-export function saveBuildingsToLocalStorage(buildings) {
-  const serializedBuildings = buildings.map(building => building.toJSON());
-  localStorage.setItem('buildings', JSON.stringify(serializedBuildings));
+// Functions to save and load buildings from localStorage
+
+function storeBuildings(buildings) {
+  const buildingsJSON = buildings.map(building => building.toJSON());
+  localStorage.setItem('buildings', JSON.stringify(buildingsJSON));
 }
 
-// Load buildings from localStorage
-export function loadBuildingsFromLocalStorage() {
-  const serializedBuildings = JSON.parse(localStorage.getItem('buildings') || '[]');
-  return serializedBuildings.map(Building.fromJSON);
-}
-
-let builtBuildings = {
-  toolShed: null,
-  warehouse: null
-};
-
-export function buildToolShed() {
-  if (!builtBuildings.toolShed) {
-    builtBuildings.toolShed = new Building('Tool Shed', 10);
-    console.log('Tool Shed built!');
-    updateUI();
-  } else {
-    console.log('Tool Shed has already been built!');
+function loadBuildings() {
+  const buildingsJSON = localStorage.getItem('buildings');
+  if (buildingsJSON) {
+    const buildingsArray = JSON.parse(buildingsJSON);
+    return buildingsArray.map(data => Building.fromJSON(data));
   }
+  return [];
 }
 
-function updateUI() {
-  const toolShedCard = document.getElementById('tool-shed-card');
-  if (builtBuildings.toolShed) {
-    toolShedCard.classList.remove('unbuilt-card');
-    toolShedCard.querySelector('.btn').disabled = true;
-    toolShedCard.addEventListener('click', () => {
-      import('./overlays/buildingOverlay.js').then(module => {
-        module.showBuildingOverlay('Tool Shed');
-      });
+// Initialize buildings array from localStorage
+let buildings = loadBuildings();
+
+function buildBuilding(name) {
+  const newBuilding = new Building(name, 10); // Customize the capacity further if needed
+  buildings.push(newBuilding);
+  console.log(`Built a new ${name}:`, newBuilding);
+
+  // Store updated buildings array into localStorage
+  storeBuildings(buildings);
+
+  // Optionally, update the UI to reflect the new building
+}
+
+// Event Listener for build buttons
+document.addEventListener("DOMContentLoaded", function () {
+  const buildButtons = document.querySelectorAll('.build-button');
+
+  buildButtons.forEach(button => {
+    button.addEventListener('click', function () {
+      const buildingName = this.getAttribute('data-building-name');
+      buildBuilding(buildingName);
     });
-  }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  updateUI(); // Ensure UI is updated on page load
+  });
 });
