@@ -1,4 +1,5 @@
 // js/buildings.js
+import { buildings, storeBuildings } from '/js/database/adminFunctions.js';
 
 export class Building {
   constructor(name, capacity) {
@@ -65,24 +66,7 @@ export class Tool {
   }
 }
 
-// Functions to save and load buildings from localStorage
 
-function storeBuildings(buildings) {
-  const buildingsJSON = buildings.map(building => building.toJSON());
-  localStorage.setItem('buildings', JSON.stringify(buildingsJSON));
-}
-
-function loadBuildings() {
-  const buildingsJSON = localStorage.getItem('buildings');
-  if (buildingsJSON) {
-    const buildingsArray = JSON.parse(buildingsJSON);
-    return buildingsArray.map(data => Building.fromJSON(data));
-  }
-  return [];
-}
-
-// Initialize buildings array from localStorage
-let buildings = loadBuildings();
 
 function buildBuilding(name) {
   const newBuilding = new Building(name, 10); // Customize the capacity further if needed

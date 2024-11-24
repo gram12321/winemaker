@@ -7,6 +7,7 @@ import { harvestAcres} from '/js/vineyard.js';
 import { Staff, createNewStaff, getLastNameForNationality  } from '/js/staff.js'; // Adjust the import path if necessary
 import { addTransaction } from '/js/finance.js'; // Adjust the import path if necessary
 import { bookkeepingTaskFunction, hiringTaskFunction  } from '/js/administration.js';
+import { Building } from '/js/buildings.js';
 
 
 
@@ -383,5 +384,24 @@ export function loadWineOrders() {
     }
     return wineOrders;
 }
+
+// Functions to save and load buildings from localStorage
+
+export function storeBuildings(buildings) {
+  const buildingsJSON = buildings.map(building => building.toJSON());
+  localStorage.setItem('buildings', JSON.stringify(buildingsJSON));
+}
+
+export function loadBuildings() {
+  const buildingsJSON = localStorage.getItem('buildings');
+  if (buildingsJSON) {
+    const buildingsArray = JSON.parse(buildingsJSON);
+    return buildingsArray.map(data => Building.fromJSON(data));
+  }
+  return [];
+}
+
+// Initialize buildings array from localStorage
+export let buildings = loadBuildings();
 
 export { storeCompanyName, saveCompanyInfo, clearLocalStorage, clearFirestore, loadInventory, saveInventory };

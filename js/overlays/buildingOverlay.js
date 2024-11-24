@@ -1,5 +1,6 @@
 // js/overlays/buildingOverlay.js
 
+
 export function showBuildingOverlay(buildingName) {
   const overlay = document.getElementById('buildingOverlay');
   const details = document.getElementById('building-details');
