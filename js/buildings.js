@@ -4,10 +4,15 @@ import { showBuildingOverlay } from './overlays/buildingOverlay.js'; // Import t
 
 
 export class Building {
-  constructor(name, capacity) {
+  constructor(name, level = 1) {
     this.name = name;
-    this.capacity = capacity;
+    this.level = level;
+    this.capacity = this.calculateCapacity();
     this.contents = [];
+  }
+
+  calculateCapacity() {
+    return this.level * 2;
   }
 
   addContent(item) {
@@ -30,9 +35,10 @@ export class Building {
     }
   }
 
-  upgradeCapacity(increaseBy) {
-    this.capacity += increaseBy;
-    console.log(`${this.name} upgraded! New capacity is ${this.capacity}.`);
+  upgrade() {
+    this.level += 1;
+    this.capacity = this.calculateCapacity();
+    console.log(`${this.name} upgraded! New level is ${this.level} and capacity is ${this.capacity}.`);
   }
 
   listContents() {
@@ -42,31 +48,62 @@ export class Building {
   toJSON() {
     return {
       name: this.name,
+      level: this.level,
       capacity: this.capacity,
       contents: this.contents.map(content => content.toJSON())
     };
   }
 
   static fromJSON(json) {
-    const building = new Building(json.name, json.capacity);
+    const building = new Building(json.name, json.level);
     building.contents = (json.contents || []).map(Tool.fromJSON);
     return building;
   }
 }
 
 export class Tool {
-  constructor(name) {
+  constructor(name, buildingType) {
     this.name = name;
+    this.buildingType = buildingType;
   }
 
   toJSON() {
-    return { name: this.name };
+    return {
+      name: this.name,
+      buildingType: this.buildingType
+    };
   }
 
   static fromJSON(json) {
-    return new Tool(json.name);
+    return new Tool(json.name, json.buildingType);
   }
 }
+
+
+// Singleton pattern for tool initialization
+const ToolManager = (() => {
+  let toolsInitialized = false;
+  let tools = [];
+
+  function initializeTools() {
+    if (!toolsInitialized) {
+      const tractor = new Tool('Tractor', 'Tool Shed');
+      const trimmer = new Tool('Trimmer', 'Tool Shed');
+      const forklift = new Tool('Forklift', 'Warehouse'); // Example warehouse tools
+      const palletJack = new Tool('Pallet Jack', 'Warehouse');
+      tools = [tractor, trimmer, forklift, palletJack];
+      toolsInitialized = true;
+    }
+    return tools;
+  }
+
+  return {
+    getTools: initializeTools
+  };
+})();
+
+// Export the more generalized function
+export const getBuildingTools = () => ToolManager.getTools();
 
 function buildBuilding(name) {
   if (!buildings.find(building => building.name === name)) { // Check if the building is not already built

@@ -28,7 +28,6 @@
               <div class="influences">Building Influences:</div>
             </div>
           </div>
-          <!-- Move the build button outside and below the building card -->
           <button class="btn btn-success build-button" data-building-name="Tool Shed">Build</button>
         </div>
 
@@ -43,7 +42,6 @@
               <div class="influences">Building Influences:</div>
             </div>
           </div>
-          <!-- Move the build button outside and below the building card -->
           <button class="btn btn-success build-button" data-building-name="Warehouse">Build</button>
         </div>
       </div>
@@ -75,6 +73,14 @@
       initializeSidebar();
       initializePanel();
       initializeConsole();
+
+      // Add event listener to hide overlay when clicking outside
+      const overlay = document.getElementById('buildingOverlay');
+      overlay.addEventListener('click', function (event) {
+        if (event.target === overlay) {
+          hideBuildingOverlay();
+        }
+      });
     });
   </script>
 </body>
