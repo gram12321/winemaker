@@ -484,6 +484,10 @@ body {
   font-size: 1.2em;
 }
 
+.building-card {
+  margin-bottom: 10px; /* Add space between card and button */
+}
+
 .building-card:hover {
   background-color: #d0d0d0; /* Slightly darker grey on hover */
 }
@@ -511,6 +515,12 @@ body {
 .building-card .influences {
   margin-top: 5px;
   font-size: 0.9em;
+}
+
+/* Buildings overlay */
+.unbuilt-card {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 /*  - --- --   Overlay   - - - - - -*/
@@ -570,11 +580,7 @@ body {
   /* Light blue highlight */
 }
 
-/* Buildings overlay */
-.unbuilt-card {
-  opacity: 0.5;
-  pointer-events: none;
-}
+
 
 
 /* Skills Table Styles */

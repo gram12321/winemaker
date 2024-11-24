@@ -66,22 +66,52 @@ export class Tool {
   }
 }
 
-
-
 function buildBuilding(name) {
-  const newBuilding = new Building(name, 10); // Customize the capacity further if needed
-  buildings.push(newBuilding);
-  console.log(`Built a new ${name}:`, newBuilding);
+  if (!buildings.find(building => building.name === name)) { // Check if the building is not already built
+    const newBuilding = new Building(name, 10); // Customize the capacity further if needed
+    buildings.push(newBuilding);
+    console.log(`Built a new ${name}:`, newBuilding);
 
-  // Store updated buildings array into localStorage
-  storeBuildings(buildings);
+    // Store updated buildings array into localStorage
+    storeBuildings(buildings);
 
-  // Optionally, update the UI to reflect the new building
+    // Update the UI to reflect the new building
+    updateBuildingUI(name);
+  } else {
+    console.log(`Building ${name} already exists.`);
+  }
+}
+
+function updateBuildingUI(buildingName) {
+  const button = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
+  if (button) {
+    const buildingCard = button.previousElementSibling; // Get the building card related to the button
+    buildingCard.classList.remove('unbuilt-card'); // Remove the grey out styling
+    button.disabled = true; // Disable the build button
+  }
 }
 
 // Event Listener for build buttons
+// js/buildings.js
 document.addEventListener("DOMContentLoaded", function () {
   const buildButtons = document.querySelectorAll('.build-button');
+
+  function initializeBuildingCards() {
+    buildButtons.forEach(button => {
+      const buildingName = button.getAttribute('data-building-name');
+      const buildingCard = button.previousElementSibling; // Adjust to select the building card
+
+      if (buildings.find(building => building.name === buildingName)) {
+        // If the building is already built, enable the card and disable the button
+        buildingCard.classList.remove('unbuilt-card');
+        button.disabled = true;
+      } else {
+        // Ensure the card is greyed out and button is enabled until the building is built
+        buildingCard.classList.add('unbuilt-card');
+        button.disabled = false;
+      }
+    });
+  }
 
   buildButtons.forEach(button => {
     button.addEventListener('click', function () {
@@ -89,4 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
       buildBuilding(buildingName);
     });
   });
+
+  initializeBuildingCards(); // Initialize the UI on page load
 });
