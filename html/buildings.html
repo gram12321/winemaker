@@ -1,77 +1,81 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Game Page - Buildings</title>
-    <link
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link href="/css/style.css" rel="stylesheet" />
-  </head>
-  <body>
-    <div class="d-flex" id="wrapper">
-      <!-- Sidebar -->
-      <div id="sidebar-wrapper"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Game Page - Buildings</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="/css/style.css" rel="stylesheet" />
+</head>
+<body>
+  <div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper"></div>
 
-      <!-- Main Content -->
-      <div class="container text-center flex-grow-1" id="page-content-wrapper">
-        <h3>Buildings</h3>
-        <div class="row">
-          <!-- Building Cards -->
-          <div class="col-md-6">
-            <div class="building-card">
-              <div class="icon" style="background-image: url('/assets/icon/menu/toolshed.webp');"></div>
-              <div class="details">
-                <h4>Tool Shed (Level 1)</h4>
-                <div class="upgrade">Upgrade</div>
-                <div class="cost">Cost:</div>
-                <div class="effects">Building Effects: No special effects</div>
-                <div class="influences">Building Influences:</div>
-              </div>
+    <!-- Main Content -->
+    <div class="container text-center flex-grow-1" id="page-content-wrapper">
+      <h3>Buildings</h3>
+      <div class="row">
+        <!-- Building Cards -->
+        <div class="col-md-6">
+          <div class="building-card">
+            <div class="icon" style="background-image: url('/assets/icon/menu/toolshed.webp');"></div>
+            <div class="details">
+              <h4>Tool Shed (Level 1)</h4>
+              <div class="upgrade">Upgrade</div>
+              <div class="cost">Cost:</div>
+              <div class="effects">Building Effects: No special effects</div>
+              <div class="influences">Building Influences:</div>
             </div>
-            <!-- Move the build button outside and below the building card -->
-            <button class="btn btn-success build-button" data-building-name="Tool Shed">Build</button>
           </div>
+          <!-- Move the build button outside and below the building card -->
+          <button class="btn btn-success build-button" data-building-name="Tool Shed">Build</button>
+        </div>
 
-          <div class="col-md-6">
-            <div class="building-card">
-              <div class="icon" style="background-image: url('/assets/icon/menu/warehouse.webp');"></div>
-              <div class="details">
-                <h4>Warehouse (Level 1)</h4>
-                <div class="upgrade">Upgrade</div>
-                <div class="cost">Cost:</div>
-                <div class="effects">Building Effects: No special effects</div>
-                <div class="influences">Building Influences:</div>
-              </div>
+        <div class="col-md-6">
+          <div class="building-card">
+            <div class="icon" style="background-image: url('/assets/icon/menu/warehouse.webp');"></div>
+            <div class="details">
+              <h4>Warehouse (Level 1)</h4>
+              <div class="upgrade">Upgrade</div>
+              <div class="cost">Cost:</div>
+              <div class="effects">Building Effects: No special effects</div>
+              <div class="influences">Building Influences:</div>
             </div>
-            <!-- Move the build button outside and below the building card -->
-            <button class="btn btn-success build-button" data-building-name="Warehouse">Build</button>
           </div>
+          <!-- Move the build button outside and below the building card -->
+          <button class="btn btn-success build-button" data-building-name="Warehouse">Build</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="/js/loadPanel.js"></script>
+  <!-- Building Overlay -->
+  <div id="buildingOverlay" class="overlay" style="display: none;">
+    <div class="overlay-content">
+      <span class="close-btn" onclick="hideBuildingOverlay()">×</span>
+      <div id="building-details"></div>
+    </div>
+  </div>
 
-    <!-- Custom JavaScript -->
-    <script type="module">
-      import { initializeSidebar } from "/js/database/loadSidebar.js";
-      import { initializePanel } from "/js/loadPanel.js";
-      import { initializeConsole } from "/js/console.js";
-      import { Building } from "/js/buildings.js";
+  <!-- JavaScript Libraries -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <script type="module">
+    import { initializeSidebar } from "/js/database/loadSidebar.js";
+    import { initializePanel } from "/js/loadPanel.js";
+    import { initializeConsole } from "/js/console.js";
+    import { hideBuildingOverlay } from "/js/overlays/buildingOverlay.js";
+    import { Building } from "/js/buildings.js";
 
-      document.addEventListener("DOMContentLoaded", function () {
-        initializeSidebar();
-        initializePanel();
-        initializeConsole();
-      });
-      
-    </script>
-  </body>
+    window.hideBuildingOverlay = hideBuildingOverlay;
+
+    document.addEventListener("DOMContentLoaded", function () {
+      initializeSidebar();
+      initializePanel();
+      initializeConsole();
+    });
+  </script>
+</body>
 </html>

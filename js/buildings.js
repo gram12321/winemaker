@@ -1,5 +1,7 @@
 // js/buildings.js
 import { buildings, storeBuildings } from '/js/database/adminFunctions.js';
+import { showBuildingOverlay } from './overlays/buildingOverlay.js'; // Import the showBuildingOverlay function
+
 
 export class Building {
   constructor(name, capacity) {
@@ -91,22 +93,22 @@ function updateBuildingUI(buildingName) {
   }
 }
 
-// Event Listener for build buttons
-// js/buildings.js
+
 document.addEventListener("DOMContentLoaded", function () {
   const buildButtons = document.querySelectorAll('.build-button');
+  const buildingCards = document.querySelectorAll('.building-card');
 
   function initializeBuildingCards() {
     buildButtons.forEach(button => {
       const buildingName = button.getAttribute('data-building-name');
-      const buildingCard = button.previousElementSibling; // Adjust to select the building card
+      const buildingCard = button.previousElementSibling;
 
-      if (buildings.find(building => building.name === buildingName)) {
-        // If the building is already built, enable the card and disable the button
+      const buildingExists = buildings.some(building => building.name === buildingName);
+
+      if (buildingExists) {
         buildingCard.classList.remove('unbuilt-card');
         button.disabled = true;
       } else {
-        // Ensure the card is greyed out and button is enabled until the building is built
         buildingCard.classList.add('unbuilt-card');
         button.disabled = false;
       }
@@ -117,8 +119,19 @@ document.addEventListener("DOMContentLoaded", function () {
     button.addEventListener('click', function () {
       const buildingName = this.getAttribute('data-building-name');
       buildBuilding(buildingName);
+      initializeBuildingCards(); // Re-initialize after building
     });
   });
 
-  initializeBuildingCards(); // Initialize the UI on page load
+  buildingCards.forEach(card => {
+    card.addEventListener('click', function () {
+      const buildingName = card.querySelector('.details h4').textContent.split(' (')[0];
+      const building = buildings.find(b => b.name === buildingName);
+      if (building) {
+        showBuildingOverlay(building);
+      }
+    });
+  });
+
+  initializeBuildingCards();
 });
