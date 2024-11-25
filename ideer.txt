@@ -56,3 +56,4 @@ QoL Improvement
  New/Better mechanics
   - Let quantity of generateWineOrder() be depending on a asking price. Asking price could be set in sales.html instead of the Normal selling buttom
   add cost, adminstrationtask and msg for building buildings and tools
+   - Tools bonus can be applied more than once, but max once per worker

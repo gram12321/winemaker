@@ -6,6 +6,8 @@ import { loadTasks } from './database/adminFunctions.js'; // Import the function
 import { Task } from './loadPanel.js';  // Adjust the path based on your file structure
 import { showStaffOverlay } from './overlays/staffoverlay.js'; // Ensure the correct path
 
+import { getBuildingTools } from './buildings.js'; // Ensure you're importing the tools 
+
 
 class FieldSkills {
   constructor(field) {
@@ -239,6 +241,7 @@ export function calculateWorkApplied(taskStaff, processingFunction) {
 
     const { processPerWorkApplied, skillKey } = taskTypeEntry;
 
+    // Calculate work applied per staff member
     taskStaff.forEach(staffId => {
         const staffMember = staffData.find(staff => staff.id.toString() === staffId);
         if (staffMember) {
@@ -265,7 +268,30 @@ export function calculateWorkApplied(taskStaff, processingFunction) {
         }
     });
 
-    const totalWorkApplied = workApplied * processPerWorkApplied;
-    console.log(`Total work applied for ${processingFunction}: ${totalWorkApplied}, using Process Per Work Applied: ${processPerWorkApplied}`);
+    let totalWorkApplied = workApplied * processPerWorkApplied;
+    console.log(`Initial Total work applied: ${totalWorkApplied}`);
+
+    // Apply speed bonus only to field tasks
+    if (skillKey === 'field') {
+        const tools = getBuildingTools();
+        let maxSpeedBonus = 1.0;
+
+        console.log(`Evaluating tools for speed bonus:`, tools);
+
+        // Find the maximum speedBonus of the tools applicable to field tasks
+        tools.forEach(tool => {
+            if (tool.buildingType === 'Tool Shed') {
+                console.log(`Evaluating Tool: ${tool.name}, Speed Bonus: ${tool.speedBonus}`);
+                maxSpeedBonus = Math.max(maxSpeedBonus, tool.speedBonus);
+            }
+        });
+
+        console.log(`Max Speed Bonus found: ${maxSpeedBonus}`);
+
+        totalWorkApplied *= maxSpeedBonus;
+        console.log(`Speed Bonus Applied for Field Tasks: ${maxSpeedBonus}. Total work applied now is: ${totalWorkApplied}`);
+    }
+
+    console.log(`Final Total work applied for ${processingFunction}: ${totalWorkApplied}, using Process Per Work Applied: ${processPerWorkApplied}`);
     return totalWorkApplied;
 }

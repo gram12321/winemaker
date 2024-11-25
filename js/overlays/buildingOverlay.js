@@ -2,6 +2,9 @@
 import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '/js/console.js';
 
+import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
+
+
 export function showBuildingOverlay(building) {
   const overlay = document.getElementById('buildingOverlay');
   const details = document.getElementById('building-details');
@@ -28,6 +31,12 @@ export function showBuildingOverlay(building) {
         button.addEventListener('click', () => {
           if (building.addContent(tool)) {
             addConsoleMessage(`${tool.name} added to ${building.name}.`);
+
+            // Load current buildings list, update the relevant building, and store the updated list
+            const buildings = loadBuildings();
+            const updatedBuildings = buildings.map(b => b.name === building.name ? building : b);
+            storeBuildings(updatedBuildings);
+
             showBuildingOverlay(building);
           } else {
             addConsoleMessage(`Cannot add ${tool.name}. ${building.name} is full!`);

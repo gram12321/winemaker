@@ -60,20 +60,22 @@ export class Building {
 }
 
 export class Tool {
-  constructor(name, buildingType) {
+  constructor(name, buildingType, speedBonus = 1.0) {
     this.name = name;
     this.buildingType = buildingType;
+    this.speedBonus = speedBonus;
   }
 
   toJSON() {
     return {
       name: this.name,
-      buildingType: this.buildingType
+      buildingType: this.buildingType,
+      speedBonus: this.speedBonus
     };
   }
 
   static fromJSON(json) {
-    return new Tool(json.name, json.buildingType);
+    return new Tool(json.name, json.buildingType, json.speedBonus);
   }
 }
 
@@ -84,10 +86,10 @@ const ToolManager = (() => {
 
   function initializeTools() {
     if (!toolsInitialized) {
-      const tractor = new Tool('Tractor', 'Tool Shed');
-      const trimmer = new Tool('Trimmer', 'Tool Shed');
-      const forklift = new Tool('Forklift', 'Warehouse'); // Example warehouse tools
-      const palletJack = new Tool('Pallet Jack', 'Warehouse');
+      const tractor = new Tool('Tractor', 'Tool Shed', 1.2);
+      const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1);
+      const forklift = new Tool('Forklift', 'Warehouse', 1.0); // Assuming no bonus
+      const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0); // Assuming no bonus
       tools = [tractor, trimmer, forklift, palletJack];
       toolsInitialized = true;
     }
@@ -98,7 +100,6 @@ const ToolManager = (() => {
     getTools: initializeTools
   };
 })();
-
 // Export the more generalized function
 export const getBuildingTools = () => ToolManager.getTools();
 
