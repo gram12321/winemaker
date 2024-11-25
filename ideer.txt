@@ -37,6 +37,7 @@ Possible a crash if 0.000something is left in a task (IE 0.00004 must left will 
 Close by clicking X on hirering overlay dont work
 There might be an issue where annualYieldFactor  is producing values below 0.5 which is not intentinally. 
 Plant buttom is not disabled when active clearing task, but we dont allow planting task when active clearing task
+Imidiatly on building a building the headline (name of the building) disapears. reshows on pageupdate
 
 
 QoL Improvement

@@ -167,9 +167,6 @@ function getRandomAspect() {
   return getRandomItem(aspects);
 }
 
-// In js/farmland.js
-
-
 
 export function displayOwnedFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');

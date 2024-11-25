@@ -1,7 +1,5 @@
-// js/buildings.js
 import { buildings, storeBuildings } from '/js/database/adminFunctions.js';
 import { showBuildingOverlay } from './overlays/buildingOverlay.js'; // Import the showBuildingOverlay function
-
 
 export class Building {
   constructor(name, level = 1) {
@@ -79,7 +77,6 @@ export class Tool {
   }
 }
 
-
 // Singleton pattern for tool initialization
 const ToolManager = (() => {
   let toolsInitialized = false;
@@ -107,7 +104,7 @@ export const getBuildingTools = () => ToolManager.getTools();
 
 function buildBuilding(name) {
   if (!buildings.find(building => building.name === name)) { // Check if the building is not already built
-    const newBuilding = new Building(name, 1); // Customize the capacity further if needed
+    const newBuilding = new Building(name, 10); // Customize the capacity further if needed
     buildings.push(newBuilding);
     console.log(`Built a new ${name}:`, newBuilding);
 
@@ -122,14 +119,37 @@ function buildBuilding(name) {
 }
 
 function updateBuildingUI(buildingName) {
+  const building = buildings.find(b => b.name === buildingName);
   const button = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
-  if (button) {
-    const buildingCard = button.previousElementSibling; // Get the building card related to the button
-    buildingCard.classList.remove('unbuilt-card'); // Remove the grey out styling
-    button.disabled = true; // Disable the build button
+  const buildingCard = button?.previousElementSibling;
+
+  if (buildingCard) {
+    buildingCard.querySelector('h4').innerHTML = `
+      <div class="icon" style="background-image: url('/assets/icon/menu/${buildingName.toLowerCase().split(' ').join('')}.webp');"></div>
+      ${buildingName}  <!-- Always show the building name -->
+    `;
+
+    if (building) {
+      buildingCard.querySelector('.details').innerHTML = `
+        <p>Status: Operational</p>
+        <p>Level: ${building.level}</p>
+        <p>Upgrade Cost: $10</p> <!-- Dummy value for upgrade cost -->
+        <p>Capacity: ${building.capacity}</p>
+        <p>Content: ${building.listContents()}</p>
+      `;
+    } else {
+      buildingCard.querySelector('.details').innerHTML = `
+        <p>Status: Not Built</p>
+        <p>Level: 0</p>
+        <p>Upgrade Cost: $10</p> <!-- Dummy value for upgrade cost -->
+        <p>Capacity: None</p>
+        <p>Content: None</p>
+      `;
+    }
+    buildingCard.classList.toggle('unbuilt-card', !building);
+    button.disabled = !!building;
   }
 }
-
 
 document.addEventListener("DOMContentLoaded", function () {
   const buildButtons = document.querySelectorAll('.build-button');
@@ -162,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   buildingCards.forEach(card => {
     card.addEventListener('click', function () {
-      const buildingName = card.querySelector('.details h4').textContent.split(' (')[0];
+      const buildingName = card.querySelector('.details h4').textContent;
       const building = buildings.find(b => b.name === buildingName);
       if (building) {
         showBuildingOverlay(building);
