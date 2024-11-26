@@ -55,67 +55,54 @@
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-  <script type="module">
-    import { initializeSidebar } from "/js/database/loadSidebar.js";
-    import { initializePanel } from "/js/loadPanel.js";
-    import { initializeConsole } from "/js/console.js";
-    import { hideBuildingOverlay } from "/js/overlays/buildingOverlay.js";
-    import { buildBuilding, updateBuildingCards, upgradeBuilding } from "/js/buildings.js";
-    import { loadBuildings } from '/js/database/adminFunctions.js';
+    <script type="module">
+      import { initializeSidebar } from "/js/database/loadSidebar.js";
+      import { initializePanel } from "/js/loadPanel.js";
+      import { initializeConsole } from "/js/console.js";
+      import { hideBuildingOverlay } from "/js/overlays/buildingOverlay.js";
+      import { buildBuilding, updateBuildingCards } from "/js/buildings.js";
+      import { loadBuildings } from '/js/database/adminFunctions.js';
 
-    window.hideBuildingOverlay = hideBuildingOverlay;
+      window.hideBuildingOverlay = hideBuildingOverlay;
 
-    document.addEventListener("DOMContentLoaded", function () {
-      initializeSidebar();
-      initializePanel();
-      initializeConsole();
+      document.addEventListener("DOMContentLoaded", function () {
+        initializeSidebar();
+        initializePanel();
+        initializeConsole();
 
-      const overlay = document.getElementById('buildingOverlay');
-      overlay.addEventListener('click', function (event) {
-        if (event.target === overlay) {
-          hideBuildingOverlay();
-        }
-      });
+        const overlay = document.getElementById('buildingOverlay');
+        overlay.addEventListener('click', function (event) {
+          if (event.target === overlay) {
+            hideBuildingOverlay();
+          }
+        });
 
-      // Load buildings and initialize button states
-      const buildings = loadBuildings();
-      const buildButtons = document.querySelectorAll('.build-button');
-      const upgradeButtons = document.querySelectorAll('.upgrade-button');
+        // Load buildings and initialize button states
+        const buildings = loadBuildings();
+        const buildButtons = document.querySelectorAll('.build-button');
+        const upgradeButtons = document.querySelectorAll('.upgrade-button');
 
-      buildButtons.forEach((button, index) => {
-        const buildingName = button.getAttribute('data-building-name');
-        const upgradeButton = upgradeButtons[index];
-        const existingBuilding = buildings.find(b => b.name === buildingName);
+        buildButtons.forEach((button, index) => {
+          const buildingName = button.getAttribute('data-building-name');
+          const upgradeButton = upgradeButtons[index];
+          const existingBuilding = buildings.find(b => b.name === buildingName);
 
-        if (existingBuilding) {
-          button.disabled = true;
-          button.textContent = "Built";
-          upgradeButton.disabled = false;
-          upgradeButton.textContent = "Upgrade";
-
-          upgradeButton.addEventListener('click', () => {
-            upgradeBuilding(buildingName);
-            updateBuildingCards();
-          });
-
-        } else {
-          button.disabled = false;
-          button.textContent = "Build";
-          upgradeButton.disabled = true;
-          upgradeButton.textContent = "Upgrade";
-
-          button.addEventListener('click', () => {
-            buildBuilding(buildingName);
-            updateBuildingCards();
+          if (existingBuilding) {
             button.disabled = true;
             button.textContent = "Built";
             upgradeButton.disabled = false;
-          });
-        }
-      });
+          } else {
+            button.disabled = false;
 
-      updateBuildingCards(); // Initial call to set the correct state
-    });
+            button.addEventListener('click', () => {
+              buildBuilding(buildingName);
+            });
+          }
+        });
+
+        updateBuildingCards(); // Initial call to set the correct state
+      });
+    </script>
   </script>
 </body>
 </html>

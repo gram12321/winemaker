@@ -120,6 +120,7 @@ export const getBuildingTools = () => ToolManager.getTools();
 
 
 // Function to handle building construction
+// buildings.js
 export function buildBuilding(buildingName) {
   // Load existing buildings and check if the building already exists
   const buildings = loadBuildings();
@@ -135,8 +136,28 @@ export function buildBuilding(buildingName) {
   buildings.push(newBuilding);
   storeBuildings(buildings);
 
+  // Update UI for building buttons dynamically
+  updateBuildingCards();
+  updateButtonStates(buildingName);
+
   // Console message or update UI accordingly
   addConsoleMessage(`${buildingName} has been built successfully!`);
+}
+
+function updateButtonStates(buildingName) {
+  const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
+  const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
+
+  if (buildButton && upgradeButton) {
+    buildButton.disabled = true;
+    buildButton.textContent = "Built";
+    upgradeButton.disabled = false;
+
+    upgradeButton.addEventListener('click', function () {
+      upgradeBuilding(buildingName);
+      updateBuildingCards();
+    });
+  }
 }
 
 export function upgradeBuilding(buildingName) {
