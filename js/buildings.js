@@ -136,7 +136,8 @@ export function buildBuilding(buildingName) {
 
 
 export function updateBuildingCards() {
-  document.querySelectorAll('.building-details').forEach(detailDiv => {
+  document.querySelectorAll('.building-card').forEach(cardDiv => {
+    const detailDiv = cardDiv.querySelector('.building-details');
     const buildingName = detailDiv.getAttribute('data-building-name');
     const buildings = loadBuildings();
     const building = buildings.find(b => b.name === buildingName);
@@ -146,6 +147,13 @@ export function updateBuildingCards() {
     const capacity = building ? building.capacity : 0;
     const upgradeCost = building ? building.getUpgradeCost() : "N/A";
     const content = building ? building.getContentDescription() : "No items stored.";
+
+    // Apply the unbuilt-card class if status is "Unbuilt"
+    if (status === "Unbuilt") {
+      cardDiv.classList.add('unbuilt-card');
+    } else {
+      cardDiv.classList.remove('unbuilt-card');
+    }
 
     detailDiv.innerHTML = `
       <p>Status: ${status}</p>
