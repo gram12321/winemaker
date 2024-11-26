@@ -155,18 +155,25 @@ export function buildBuilding(buildingName) {
   updateBuildingCards();
 }
 
-export function upgradeBuilding(buildingName) {
-  const buildings = loadBuildings();
-  const building = buildings.find(b => b.name === buildingName);
 
-  if (building) {
-    building.upgrade();
-    storeBuildings(buildings);
-    addConsoleMessage(`${buildingName} upgraded to level ${building.level}!`);
-  }
+// Function to upgrade a building including updating eventlisteners
+document.addEventListener('DOMContentLoaded', function () {
+  updateBuildingCards(); // Update UI when the page is initially loaded
+  attachUpgradeButtonListeners(); // Attach listeners to buttons
+});
+
+function attachUpgradeButtonListeners() {
+  document.querySelectorAll('.upgrade-button').forEach(button => {
+    button.addEventListener('click', function () {
+      const buildingName = this.getAttribute('data-building-name');
+      if (buildingName) {
+        upgradeBuilding(buildingName);
+        updateBuildingCards(); // Ensure cards are updated to reflect new state
+      }
+    });
+  });
 }
 
-// buildings.js
 export function updateBuildingCards() {
   document.querySelectorAll('.building-card').forEach(cardDiv => {
     const detailDiv = cardDiv.querySelector('.building-details');
@@ -194,12 +201,18 @@ export function updateBuildingCards() {
       <p>Capacity: ${capacity}</p>
       <p>Content: ${content}</p>
     `;
-
-    // Add event listener for opening the building overlay
-    cardDiv.addEventListener('click', () => {
-      if (building) {
-        showBuildingOverlay(building);
-      }
-    });
   });
+}
+
+export function upgradeBuilding(buildingName) {
+  const buildings = loadBuildings();
+  const building = buildings.find(b => b.name === buildingName);
+
+  if (building) {
+    building.upgrade();
+    storeBuildings(buildings);
+    addConsoleMessage(`${buildingName} upgraded to level ${building.level}!`);
+  } else {
+    console.error(`Building ${buildingName} not found.`);
+  }
 }
