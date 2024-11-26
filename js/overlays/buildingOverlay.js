@@ -5,6 +5,8 @@ import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import 
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 
 
+// Updated showBuildingOverlay function in js/overlays/buildingOverlay.js
+
 export function showBuildingOverlay(building) {
   const overlay = document.getElementById('buildingOverlay');
   const details = document.getElementById('building-details');
@@ -21,9 +23,15 @@ export function showBuildingOverlay(building) {
       <p>Capacity: ${building.capacity}</p>
       <p>Contents: ${building.listContents()}</p>
       ${toolButtons}
+      <div class="building-simulator">
+        <div id="capacity-grid" class="capacity-grid"></div>
+      </div>
     `;
 
     details.innerHTML = buildingDetails;
+
+    // Call the function to render capacity visual
+    renderCapacityVisual(building);
 
     tools.forEach(tool => {
       const button = document.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
@@ -37,6 +45,9 @@ export function showBuildingOverlay(building) {
             const updatedBuildings = buildings.map(b => b.name === building.name ? building : b);
             storeBuildings(updatedBuildings);
 
+            // Refresh the capacity visual
+            renderCapacityVisual(building);
+
             showBuildingOverlay(building);
           } else {
             addConsoleMessage(`Cannot add ${tool.name}. ${building.name} is full!`);
@@ -46,6 +57,28 @@ export function showBuildingOverlay(building) {
     });
 
     overlay.style.display = 'flex';
+  }
+}
+
+// Function to render the visual representation of capacity
+function renderCapacityVisual(building) {
+  const capacityGrid = document.getElementById('capacity-grid');
+  if (!capacityGrid) return;
+
+  const totalCapacity = building.capacity;
+  const usedCapacity = building.contents.length; // Assuming contents is an array
+
+  // Clear existing grid
+  capacityGrid.innerHTML = '';
+
+  // Create grid squares
+  for (let i = 0; i < totalCapacity; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'capacity-cell';
+    if (i < usedCapacity) {
+      cell.classList.add('filled'); // Add class if this capacity is used
+    }
+    capacityGrid.appendChild(cell);
   }
 }
 

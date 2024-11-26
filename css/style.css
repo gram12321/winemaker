@@ -511,6 +511,35 @@ body {
   pointer-events: none;
 }
 
+/* Building simulator container */
+.building-simulator {
+  border: 2px solid #333; /* Dark border to simulate building outline */
+  padding: 10px;          /* Inside padding for aesthetics */
+  margin-top: 10px;       /* Space from other content */
+  background-color: #fff; /* Background color for the building */
+  position: relative;     /* Position context for internal elements */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Shadow effect for 3D feel */
+}
+
+/* Capacity grid within the building */
+.capacity-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Adjust number of columns based on layout */
+  gap: 5px; /* Space between cells */
+}
+
+/* Square cell styles */
+.capacity-cell {
+  width: 40px; /* Size of each square */
+  height: 40px;
+  border: 1px solid #ddd; /* Border for visual separation */
+  background-color: #f5f5f5; /* Default background – empty capacity */
+}
+
+.capacity-cell.filled {
+  background-color: #2179ff; /* Color to indicate filled capacity */
+}
+
 /*  - --- --   Overlay   - - - - - -*/
 
 /* General Overlay Styles */
