@@ -162,18 +162,6 @@ document.addEventListener('DOMContentLoaded', function () {
   attachUpgradeButtonListeners(); // Attach listeners to buttons
 });
 
-function attachUpgradeButtonListeners() {
-  document.querySelectorAll('.upgrade-button').forEach(button => {
-    button.addEventListener('click', function () {
-      const buildingName = this.getAttribute('data-building-name');
-      if (buildingName) {
-        upgradeBuilding(buildingName);
-        updateBuildingCards(); // Ensure cards are updated to reflect new state
-      }
-    });
-  });
-}
-
 export function updateBuildingCards() {
   document.querySelectorAll('.building-card').forEach(cardDiv => {
     const detailDiv = cardDiv.querySelector('.building-details');
@@ -201,6 +189,26 @@ export function updateBuildingCards() {
       <p>Capacity: ${capacity}</p>
       <p>Content: ${content}</p>
     `;
+
+    // Add event listener to open building overlay on card click
+    cardDiv.addEventListener('click', () => {
+      if (building) {
+        showBuildingOverlay(building);
+      }
+    });
+  });
+}
+
+function attachUpgradeButtonListeners() {
+  document.querySelectorAll('.upgrade-button').forEach(button => {
+    button.addEventListener('click', function (event) {
+      event.stopPropagation(); // Prevent the click from bubbling up to the card
+      const buildingName = this.getAttribute('data-building-name');
+      if (buildingName) {
+        upgradeBuilding(buildingName);
+        updateBuildingCards(); // Ensure cards are updated to reflect the new state
+      }
+    });
   });
 }
 

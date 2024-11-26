@@ -38,7 +38,6 @@ Close by clicking X on hirering overlay dont work
 There might be an issue where annualYieldFactor  is producing values below 0.5 which is not intentinally. 
 Plant buttom is not disabled when active clearing task, but we dont allow planting task when active clearing task
 Imidiatly on building a building the headline (name of the building) disapears. reshows on pageupdate
-Upgrade buttom in the building.html only works imidiatly on building, after reload it stops working
 
 
 QoL Improvement
