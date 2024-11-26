@@ -28,7 +28,7 @@ Known Bugs:
 -Save load Owned land and staff (Safe to firestore, but dont restore from localstorage)
 Allow winery-task on same field,grape,vintage if different entry (IE different quality)
 Possible a bug in AmountWork. That calculates workforce of staff without taking care if workers split their workforce to several task
-Bookeeping task dosn't update "Goal", when more task is added to unfinished task
+Bookeeping task dosn't update "Goal", when more task is added to unfinished task (It does, but does not update UI, so need page refresh to show rightly)
 Make sure to clean localstorage on login, in case game was closed without clearing
 Fermenting task has correct value in workprogress, but dont update "Progress" on taskbox info
 Wineorders not saved to firestore, just to localstorage

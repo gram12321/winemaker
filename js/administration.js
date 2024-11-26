@@ -72,36 +72,38 @@ export function bookkeepingTaskFunction(task, mode) {
   if (mode === 'initialize') {
     const currentSeason = localStorage.getItem('season') || 'Unknown Season';
     const currentYear = parseInt(localStorage.getItem('year'), 10) || new Date().getFullYear();
-    const { previousSeason, previousYear } = getPreviousSeasonAndYear(currentSeason, currentYear);
 
     const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    const previousSeasonTransactionsCount = transactions.filter(transaction => {
+    const currentSeasonTransactionsCount = transactions.filter(transaction => {
+      // Validate to ensure parsing is correct
       const { season, year } = extractSeasonAndYear(transaction.date);
-      return season === previousSeason && year === previousYear;
+      console.log(`Checking Transaction: ${transaction} -> Season: ${season}, Year: ${year}`);
+      return season === currentSeason && year === currentYear;
     }).length;
+
+    console.log(`Bookkeeping Task for ${currentSeason} ${currentYear}: ${currentSeasonTransactionsCount} transactions found.`);
 
     return {
       taskName: `Bookkeeping, ${currentSeason} ${currentYear}`,
-      workTotal: previousSeasonTransactionsCount,
+      workTotal: currentSeasonTransactionsCount,
       iconPath: '/assets/icon/icon_bookkeeping.webp',
       taskType: 'Administration'
     };
   } else if (mode === 'update') {
     const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    const { previousSeason, previousYear } = getPreviousSeasonAndYear(
-      localStorage.getItem('season'),
-      parseInt(localStorage.getItem('year'), 10)
-    );
+    const currentSeason = localStorage.getItem('season');
+    const currentYear = parseInt(localStorage.getItem('year'), 10);
 
-    const previousSeasonTransactionsCount = transactions.filter(transaction => {
+    const currentSeasonTransactionsCount = transactions.filter(transaction => {
       const { season, year } = extractSeasonAndYear(transaction.date);
-      return season === previousSeason && year === previousYear;
+      console.log(`Update Checking: Season: ${season}, Year: ${year}`);
+      return season === currentSeason && year === currentYear;
     }).length;
 
-    return previousSeasonTransactionsCount * 1.1;
+    console.log(`Bookkeeping Update for ${currentSeason} ${currentYear}: ${currentSeasonTransactionsCount} transactions processed.`);
+    return currentSeasonTransactionsCount * 1.1;
   }
 
-  // Work application logic for task execution
   const workApplied = calculateWorkApplied(task.staff || [], 'bookkeepingTaskFunction');
   return workApplied;
 }
