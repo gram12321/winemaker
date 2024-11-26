@@ -166,6 +166,7 @@ export function upgradeBuilding(buildingName) {
   }
 }
 
+// buildings.js
 export function updateBuildingCards() {
   document.querySelectorAll('.building-card').forEach(cardDiv => {
     const detailDiv = cardDiv.querySelector('.building-details');
@@ -193,5 +194,12 @@ export function updateBuildingCards() {
       <p>Capacity: ${capacity}</p>
       <p>Content: ${content}</p>
     `;
+
+    // Add event listener for opening the building overlay
+    cardDiv.addEventListener('click', () => {
+      if (building) {
+        showBuildingOverlay(building);
+      }
+    });
   });
 }

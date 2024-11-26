@@ -1,7 +1,7 @@
 
 import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '/js/console.js';
-
+import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import path is correct
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 
 
@@ -49,9 +49,13 @@ export function showBuildingOverlay(building) {
   }
 }
 
+
 export function hideBuildingOverlay() {
   const overlay = document.getElementById('buildingOverlay');
   if (overlay) {
     overlay.style.display = 'none'; // Hide the overlay
+
+    // Update building cards when overlay is closed
+    updateBuildingCards();
   }
 }
