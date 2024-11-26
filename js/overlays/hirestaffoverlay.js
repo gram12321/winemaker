@@ -86,23 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }  
 
     function hireSelectedStaff(staff) {
-        // Retrieve existing staff data or initialize with an empty array
-        let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-        // Add the new staff to the array
-        staffData.push(staff);
-        // Save the updated staff data
-        saveStaff(staffData);
-        // Update the staff table display
-        displayStaff();
-        // Calculate the hiring expense based on 12 times the wage
-        const hiringExpense = staff.wage * 12;
-        // Record the hiring expense as a one-time transaction
-        addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
-        // Add a console message for the hired staff, including the flag icon
-        const flagIconHTML = getFlagIconHTML(staff.nationality);
-        addConsoleMessage(`Hired new staff: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, One-time hiring cost: €${hiringExpense}`, true);
+        // Save pending hire in localStorage without adding to staff list
+        let pendingHires = JSON.parse(localStorage.getItem('pendingHires')) || [];
+        pendingHires.push(staff);
+        localStorage.setItem('pendingHires', JSON.stringify(pendingHires));
 
-        // Create and manage a hiring task
+        // Immediately deduct the hiring expense as a one-time transaction
+        const hiringExpense = staff.wage * 12;
+        addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+
+        // Show console message with hiring details
+        const flagIconHTML = getFlagIconHTML(staff.nationality);
+        addConsoleMessage(`Started hiring process for: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, One-time hiring cost: €${hiringExpense}`, true);
+
+        // Create the hiring task
         handleGenericTask('Hiring', hiringTaskFunction);
 
         // Close the overlay

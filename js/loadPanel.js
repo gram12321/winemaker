@@ -1,8 +1,9 @@
 // loadPanel.js
 import { loadTasks, removeTask, saveTask, loadStaff} from './database/adminFunctions.js';
-import { activeTasks } from './database/adminFunctions.js';
+import { activeTasks, saveStaff } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
 import { formatNumber } from './utils.js';
+import { displayStaff} from './staff.js';
 
 // Initialize Task Panel
 function initializePanel() {
@@ -350,7 +351,7 @@ export function executeTaskFunction(task) {
         task.removeTaskBox();
         removeTask(task.taskId);
 
-        // Log a completion message based on the task type
+        // Perform actions based on task type
         switch (true) {
             case task.taskName.startsWith("Bookkeeping"):
                 const bookkeepingDetails = task.taskName.split(", ");
@@ -376,7 +377,20 @@ export function executeTaskFunction(task) {
                 addConsoleMessage(`Clearing task completed for field <strong>${task.fieldName || 'Unknown'}</strong>. Field health improved.`);
                 break;
             case task.taskName.startsWith("Hiring"):
-                addConsoleMessage(`Hiring task completed: ${task.taskName}.`);
+                const pendingHires = JSON.parse(localStorage.getItem('pendingHires')) || [];
+                if (pendingHires.length > 0) {
+                    let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+
+                    // Add pending hires to the active staff list
+                    staffData = staffData.concat(pendingHires);
+                    saveStaff(staffData);
+
+
+                    // Clear pending hires
+                    localStorage.removeItem('pendingHires');
+
+                    addConsoleMessage(`Hiring task completed. ${pendingHires.length} new staff members added.`);
+                }
                 break;
             default:
                 console.warn(`No console message for task name: ${task.taskName}`);
