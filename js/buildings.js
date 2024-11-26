@@ -41,8 +41,25 @@ export class Building {
   }
 
   listContents() {
-    return this.contents.map(item => item.name).join(', ') || "No items stored.";
+    if (this.contents.length === 0) {
+      return "No items stored.";
+    }
+    const itemCounts = this.contents.reduce((acc, item) => {
+      acc[item.name] = (acc[item.name] || 0) + 1;
+      return acc;
+    }, {});
+    // Generate HTML with icons and counts
+    return Object.entries(itemCounts)
+      .map(([name, count]) => {
+        const iconPath = `/assets/icon/buildings/${name.toLowerCase()}.png`;
+        return `<div>
+                  <img src="${iconPath}" alt="${name}" style="width: 24px; height: 24px; vertical-align: middle;" />
+                  ${count} 
+                </div>`;
+      })
+      .join('<br>');
   }
+  
 
   toJSON() {
     return {
@@ -187,7 +204,7 @@ export function updateBuildingCards() {
       <p>Level: ${level}</p>
       <p>Upgrade Cost: ${upgradeCost}</p>
       <p>Capacity: ${capacity}</p>
-      <p>Content: ${content}</p>
+      <p>Content: <br> ${content}</p>
     `;
 
     // Add event listener to open building overlay on card click
