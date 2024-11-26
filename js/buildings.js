@@ -121,11 +121,17 @@ export const getBuildingTools = () => ToolManager.getTools();
 
 // Function to handle building construction
 export function buildBuilding(buildingName) {
-  // Create a new building instance
-  const newBuilding = new Building(buildingName);
-
-  // Load existing buildings, add the new building, and store back
+  // Load existing buildings and check if the building already exists
   const buildings = loadBuildings();
+  const existingBuilding = buildings.find(b => b.name === buildingName);
+
+  if (existingBuilding) {
+    addConsoleMessage(`${buildingName} already exists and cannot be built again.`);
+    return; // Exit the function early if the building exists
+  }
+
+  // Create a new building instance if it doesn't exist
+  const newBuilding = new Building(buildingName);
   buildings.push(newBuilding);
   storeBuildings(buildings);
 
@@ -133,7 +139,16 @@ export function buildBuilding(buildingName) {
   addConsoleMessage(`${buildingName} has been built successfully!`);
 }
 
+export function upgradeBuilding(buildingName) {
+  const buildings = loadBuildings();
+  const building = buildings.find(b => b.name === buildingName);
 
+  if (building) {
+    building.upgrade();
+    storeBuildings(buildings);
+    addConsoleMessage(`${buildingName} upgraded to level ${building.level}!`);
+  }
+}
 
 export function updateBuildingCards() {
   document.querySelectorAll('.building-card').forEach(cardDiv => {
