@@ -118,9 +118,6 @@ const ToolManager = (() => {
 export const getBuildingTools = () => ToolManager.getTools();
 
 
-
-// Function to handle building construction
-// buildings.js
 export function buildBuilding(buildingName) {
   // Load existing buildings and check if the building already exists
   const buildings = loadBuildings();
@@ -136,15 +133,7 @@ export function buildBuilding(buildingName) {
   buildings.push(newBuilding);
   storeBuildings(buildings);
 
-  // Update UI for building buttons dynamically
-  updateBuildingCards();
-  updateButtonStates(buildingName);
-
-  // Console message or update UI accordingly
-  addConsoleMessage(`${buildingName} has been built successfully!`);
-}
-
-function updateButtonStates(buildingName) {
+  // Handle UI updates directly within the function
   const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
   const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
 
@@ -158,6 +147,12 @@ function updateButtonStates(buildingName) {
       updateBuildingCards();
     });
   }
+
+  // Console message to indicate the building process is complete
+  addConsoleMessage(`${buildingName} has been built successfully!`);
+
+  // Update the building cards
+  updateBuildingCards();
 }
 
 export function upgradeBuilding(buildingName) {
