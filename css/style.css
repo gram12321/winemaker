@@ -505,18 +505,6 @@ body {
   margin-left: 70px;
 }
 
-.building-card .upgrade {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.building-card .cost,
-.building-card .effects,
-.building-card .influences {
-  margin-top: 5px;
-  font-size: 0.9em;
-}
-
 /* Buildings overlay */
 .unbuilt-card {
   opacity: 0.5;
