@@ -9,6 +9,12 @@ import { showStaffOverlay } from './overlays/staffoverlay.js'; // Ensure the cor
 import { getBuildingTools } from './buildings.js'; // Ensure you're importing the tools 
 
 
+class MaintenanceSkills {
+  constructor(maintenance) {
+    this.maintenance = maintenance.maintenance || 0;
+  }
+}
+
 class FieldSkills {
   constructor(field) {
       this.field = field.field || 0;
@@ -29,20 +35,23 @@ class SalesSkills {
       this.sales = sales.sales || 0;
   }
 }
+
 class Skills {
   constructor(skills) {
-      this.field = new FieldSkills(skills.field || {});
-      this.winery = new WinerySkills(skills.winery || {});
-      this.administration = new AdministrationSkills(skills.administration || {});
-      this.sales = new SalesSkills(skills.sales || {});
+    this.field = new FieldSkills(skills.field || {});
+    this.winery = new WinerySkills(skills.winery || {});
+    this.administration = new AdministrationSkills(skills.administration || {});
+    this.sales = new SalesSkills(skills.sales || {});
+    this.maintenance = new MaintenanceSkills(skills.maintenance || {});
   }
 }
 
-
 export class Staff {
-static latestId = parseInt(localStorage.getItem('latestStaffId'), 10) || 0;
-constructor(firstName, lastName, skills = {}) {
-    this.id = ++Staff.latestId; localStorage.setItem('latestStaffId', Staff.latestId);
+  static latestId = parseInt(localStorage.getItem('latestStaffId'), 10) || 0;
+
+  constructor(firstName, lastName, skills = {}) {
+    this.id = ++Staff.latestId; 
+    localStorage.setItem('latestStaffId', Staff.latestId);
     this.firstName = firstName;
     this.lastName = lastName;
     this.nationality = this.selectNationality();
@@ -50,29 +59,24 @@ constructor(firstName, lastName, skills = {}) {
     this.workforce = 50;
     this.wage = 600;
     this.skills = new Skills(skills);
-}
+  }
 
-    selectNationality() {
-        const countries = Object.keys(countryRegionMap);
-        return countries[Math.floor(Math.random() * countries.length)];
-    }
+  selectNationality() {
+    const countries = Object.keys(countryRegionMap);
+    return countries[Math.floor(Math.random() * countries.length)];
+  }
 
-    getNameForNationality(nationality) {
-        const nameMap = {
-            'Italy': italianMaleNames.concat(italianFemaleNames),
-            'France': frenchMaleNames.concat(frenchFemaleNames),
-            'Spain': spanishMaleNames.concat(spanishFemaleNames),
-            'United States': usMaleNames.concat(usFemaleNames),
-            'Germany': germanMaleNames.concat(germanFemaleNames),
-        };
-        const namesList = nameMap[nationality];
-        return namesList ? namesList[Math.floor(Math.random() * namesList.length)] : 'Unknown';
-    }
-}
-
-export function getLastNameForNationality(nationality) {
-  const lastNamesList = lastNamesByCountry[nationality];
-  return lastNamesList ? lastNamesList[Math.floor(Math.random() * lastNamesList.length)] : 'Unknown';
+  getNameForNationality(nationality) {
+    const nameMap = {
+      'Italy': italianMaleNames.concat(italianFemaleNames),
+      'France': frenchMaleNames.concat(frenchFemaleNames),
+      'Spain': spanishMaleNames.concat(spanishFemaleNames),
+      'United States': usMaleNames.concat(usFemaleNames),
+      'Germany': germanMaleNames.concat(germanFemaleNames),
+    };
+    const namesList = nameMap[nationality];
+    return namesList ? namesList[Math.floor(Math.random() * namesList.length)] : 'Unknown';
+  }
 }
 
 function randomizeSkills() {
@@ -84,10 +88,11 @@ export function createNewStaff() {
   const firstName = Staff.prototype.getNameForNationality(nationality);
   const lastName = getLastNameForNationality(nationality);
   const skills = {
-      field: { field: randomizeSkills() },
-      winery: { winery: randomizeSkills() },
-      administration: { administration: randomizeSkills() },
-      sales: { sales: randomizeSkills() }
+    field: { field: randomizeSkills() },
+    winery: { winery: randomizeSkills() },
+    administration: { administration: randomizeSkills() },
+    sales: { sales: randomizeSkills() },
+    maintenance: { maintenance: randomizeSkills() }
   };
 
   const skillMultiplier = 100;
@@ -97,7 +102,8 @@ export function createNewStaff() {
     skills.field.field * skillMultiplier +
     skills.winery.winery * skillMultiplier +
     skills.administration.administration * skillMultiplier +
-    skills.sales.sales * skillMultiplier
+    skills.sales.sales * skillMultiplier +
+    skills.maintenance.maintenance * skillMultiplier
   );
 
   const newStaff = new Staff(firstName, lastName, skills);
@@ -105,6 +111,12 @@ export function createNewStaff() {
   newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
   return newStaff;
 }
+
+export function getLastNameForNationality(nationality) {
+  const lastNamesList = lastNamesByCountry[nationality];
+  return lastNamesList ? lastNamesList[Math.floor(Math.random() * lastNamesList.length)] : 'Unknown';
+}
+
 
 export function displayStaff() {
     const staffContainer = document.getElementById('staff-container');
@@ -122,7 +134,7 @@ export function displayStaff() {
         <th scope="col">Workforce</th>
         <th scope="col">Wage (€)</th>
         <th scope="col">Assigned Tasks</th>
-        <th scope="col" class="skills-column" style="min-width: 200px;">Skills</th> <!-- Ensure min-width -->
+        <th scope="col" class="skills-column" style="min-width: 250px;">Skills</th> <!-- Ensure min-width -->
       </tr>
     `;
 
@@ -161,6 +173,7 @@ export function displayStaff() {
             <div class="skill-bar" style="width: ${parseFloat(staff.skills.winery.winery) * 100}%; background-color: #2179ff; height: 20px;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
             <div class="skill-bar" style="width: ${parseFloat(staff.skills.administration.administration) * 100}%; background-color: #6c757d; height: 20px;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
             <div class="skill-bar" style="width: ${parseFloat(staff.skills.sales.sales) * 100}%; background-color: #28a745; height: 20px;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
+            <div class="skill-bar" style="width: ${parseFloat(staff.skills.maintenance.maintenance) * 100}%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: ${staff.skills.maintenance.maintenance}">M</div>
           </div>
         `;
 

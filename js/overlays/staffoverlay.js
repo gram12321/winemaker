@@ -35,6 +35,7 @@ export function showStaffOverlay(staffData) {
         <tr><td>Winery</td><td class="${getSkillLevelClass(staffData.skills.winery.winery)}">${staffData.skills.winery.winery}</td></tr>
         <tr><td>Administration</td><td class="${getSkillLevelClass(staffData.skills.administration.administration)}">${staffData.skills.administration.administration}</td></tr>
         <tr><td>Sales</td><td class="${getSkillLevelClass(staffData.skills.sales.sales)}">${staffData.skills.sales.sales}</td></tr>
+        <tr><td>Maintenance</td><td class="${getSkillLevelClass(staffData.skills.maintenance.maintenance)}">${staffData.skills.maintenance.maintenance}</td></tr>
       </tbody>
     </table>
   `;
