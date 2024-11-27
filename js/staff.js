@@ -273,26 +273,27 @@ export function calculateWorkApplied(taskStaff, processingFunction) {
 
     // Apply speed bonus only to field tasks
     if (skillKey === 'field') {
-        const tools = getBuildingTools().filter(tool => tool.buildingType === 'Tool Shed');
-        const availableToolsCount = tools.length;
+        // Get tools specific to field tasks, sorted by speed bonus descending
+        const tools = getBuildingTools()
+            .filter(tool => tool.buildingType === 'Tool Shed')
+            .sort((a, b) => b.speedBonus - a.speedBonus);
 
-        console.log(`Available Tools:`, tools);
+        // Assign tools to staff based on available tools
+        const assignedTools = new Array(taskStaff.length).fill(null);
+        tools.forEach((tool, index) => {
+            if (index < taskStaff.length) {
+                assignedTools[index] = tool;
+            }
+        });
 
-        // Calculate bonuses only for the number of tools available
-        const usedTools = Math.min(availableToolsCount, taskStaff.length);
+        assignedTools.forEach((tool, index) => {
+            if (tool) {
+                console.log(`Assigning Tool: ${tool.name} to staff ${index + 1}, Speed Bonus: ${tool.speedBonus}`);
+                totalWorkApplied += workApplied * (tool.speedBonus - 1.0);
+            }
+        });
 
-        // Calculate bonus for staff that has access to tools
-        let maxTotalSpeedBonus = 1.0;
-        for (let i = 0; i < usedTools; i++) {
-            const tool = tools[i];
-            console.log(`Staff ${i + 1} assigned Tool: ${tool.name}, Speed Bonus: ${tool.speedBonus}`);
-            maxTotalSpeedBonus += (tool.speedBonus - 1.0);
-        }
-
-        console.log(`Max Total Speed Bonus applied for ${usedTools} staff: ${maxTotalSpeedBonus}`);
-
-        // Divide the total bonus across all staff
-        totalWorkApplied *= maxTotalSpeedBonus;
+        console.log(`Total work applied with tool assignments: ${totalWorkApplied}`);
     }
 
     console.log(`Final Total work applied for ${processingFunction}: ${totalWorkApplied}, using Process Per Work Applied: ${processPerWorkApplied}`);
