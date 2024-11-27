@@ -20,111 +20,116 @@ function initializePanel() {
 
 // Task class definition
 export class Task {
-    static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
-    // Define task types with associated processing functions and skill keys
-    static taskTypes = {
-        'Administration': {
-            processPerWorkApplied: 0.6,
-            processingFunctions: ['bookkeepingTaskFunction', 'hiringTaskFunction'], // Include new function
-            skillKey: 'administration'
-        },
-        'Field': {
-            processPerWorkApplied: 1,
-            processingFunctions: ['plantAcres', 'uproot', 'harvestAcres', 'clearing', ],
-            skillKey: 'field'
-        },
-        'Winery': {
-            processPerWorkApplied: 10,
-            processingFunctions: ['grapeCrushing', 'fermentMust'],
-            skillKey: 'winery'
-        },
-        'Sales': {
-            processPerWorkApplied: 2,
-            processingFunctions: ['Sales'], // Adjust with specific function if necessary
-            skillKey: 'sales'
-        }
-    };
-        constructor(
-            taskName,
-            taskFunction,
-            taskId = null,
-            workTotal = 0,
-            resourceName = '',
-            resourceState = '',
-            vintage = '',
-            quality = '',
-            iconPath = '',
-            fieldName = '',
-            type = 'Administration',
-            workProgress = 0,  // Add workProgress here
-            staff = []         // Add staff here
-          ) {
-            this.taskName = taskName;
-            this.taskFunction = taskFunction;
-            this.taskId = taskId || Task.generateTaskId();
-            this.workTotal = workTotal;
-            this.workProgress = workProgress; // Initialize with constructor
-            this.resourceName = resourceName;
-            this.resourceState = resourceState;
-            this.vintage = vintage;
-            this.quality = quality;
-            this.iconPath = iconPath;
-            this.fieldName = fieldName;
-            this.staff = staff; // Initialize with constructor
-            this.type = type;
-            this.createTaskBox();
-          
+  // Static property to track the latest task ID from localStorage or start at 0
+  static latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
+  // Define task types with associated processing functions and their skill keys
+  static taskTypes = {
+    'Administration': {
+      processPerWorkApplied: 0.6, // Process rate per unit of work applied
+      processingFunctions: ['bookkeepingTaskFunction', 'hiringTaskFunction'], // Relevant functions for this type
+      skillKey: 'administration' // Skill key related to the task type
+    },
+    'Field': {
+      processPerWorkApplied: 1, // Standard processing rate
+      processingFunctions: ['plantAcres', 'uproot', 'harvestAcres', 'clearing'],
+      skillKey: 'field'
+    },
+    'Winery': {
+      processPerWorkApplied: 10, // High processing rate for winery tasks
+      processingFunctions: ['grapeCrushing', 'fermentMust'],
+      skillKey: 'winery'
+    },
+    'Sales': {
+      processPerWorkApplied: 2, // Moderate processing rate
+      processingFunctions: ['Sales'],
+      skillKey: 'sales'
+    },
+    'Maintenance': { // New maintenance task type
+      processPerWorkApplied: 0.8, // Processing rate for maintenance tasks
+      processingFunctions: ['maintenanceTaskFunction'], // Add your maintenance processing function here
+      skillKey: 'maintenance' // Skill key related to maintenance
     }
-    static generateTaskId() {
-        const newTaskId = ++Task.latestTaskId;
-        localStorage.setItem('latestTaskId', newTaskId);
-        return newTaskId;
+  };
+  constructor(
+    taskName,
+    taskFunction,
+    taskId = null,
+    workTotal = 0,
+    resourceName = '',
+    resourceState = '',
+    vintage = '',
+    quality = '',
+    iconPath = '',
+    fieldName = '',
+    type = 'Administration',
+    workProgress = 0,
+    staff = []
+  ) {
+    this.taskName = taskName;
+    this.taskFunction = taskFunction;
+    this.taskId = taskId || Task.generateTaskId();
+    this.workTotal = workTotal;
+    this.workProgress = workProgress;
+    this.resourceName = resourceName;
+    this.resourceState = resourceState;
+    this.vintage = vintage;
+    this.quality = quality;
+    this.iconPath = iconPath;
+    this.fieldName = fieldName;
+    this.staff = staff;
+    this.type = type;
+    this.createTaskBox(); // Create the UI box for the task
+  }
+  static generateTaskId() {
+    const newTaskId = ++Task.latestTaskId;
+    localStorage.setItem('latestTaskId', newTaskId); // Store the updated ID in localStorage
+    return newTaskId;
+  }
+  createTaskBox() {
+    const taskList = document.getElementById('task-list');
+    if (!taskList) {
+      console.error("Element 'task-list' not found"); // Error handling if element is missing
+      return;
     }
-    createTaskBox() {
-        const taskList = document.getElementById('task-list');
-        if (!taskList) {
-            console.error("Element 'task-list' not found");
-            return;
-        }
-        const taskBox = document.createElement('div');
-        taskBox.className = 'task-box';
-
-        // Conditional class based on task type
-        switch (this.type) {
-            case 'Field':
-                taskBox.classList.add('field-task');
-                break;
-            case 'Winery':
-                taskBox.classList.add('winery-task');
-                break;
-            case 'Administration':
-                taskBox.classList.add('administration-task');
-                break;
-            case 'Sales':
-                taskBox.classList.add('sales-task');
-                break;
-            default:
-                console.warn(`Unknown task type: ${this.type}`);
-        }
-
-        // Constructing the task details part conditionally
-        let taskDetailsContent = '';
-        const companyName = localStorage.getItem('companyName');
-
-        if (this.type === 'Administration') {
-            // No resource details for administration
-            taskDetailsContent = `<div><strong>${companyName}</strong></div>`;
-        } else if (this.type === 'Winery' || this.type === 'Sales') {
-            taskDetailsContent = `<div><strong>${companyName}</strong></div>
-                                  <div>${this.resourceName}, ${this.vintage}</div>`;
-        } else if (this.taskName === 'Clearing') {
-            // Only show field name for Clearing tasks
-            taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
-        } else {
-            // Default for other Field tasks
-            taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>
-                                  <div>${this.resourceName}, ${this.vintage}</div>`;
-        }
+    const taskBox = document.createElement('div');
+    taskBox.className = 'task-box';
+    // Add a specific class based on the task type for styling
+    switch (this.type) {
+      case 'Field':
+        taskBox.classList.add('field-task');
+        break;
+      case 'Winery':
+        taskBox.classList.add('winery-task');
+        break;
+      case 'Administration':
+        taskBox.classList.add('administration-task');
+        break;
+      case 'Sales':
+        taskBox.classList.add('sales-task');
+        break;
+      case 'Maintenance': // Class for maintenance tasks
+        taskBox.classList.add('maintenance-task');
+        break;
+      default:
+        console.warn(`Unknown task type: ${this.type}`);
+    }
+    // Construct the task details content based on task type and properties
+    let taskDetailsContent = '';
+    const companyName = localStorage.getItem('companyName');
+    if (this.type === 'Administration') {
+      taskDetailsContent = `<div><strong>${companyName}</strong></div>`;
+    } else if (this.type === 'Winery' || this.type === 'Sales') {
+      taskDetailsContent = `<div><strong>${companyName}</strong></div>
+                            <div>${this.resourceName}, ${this.vintage}</div>`;
+    } else if (this.type === 'Maintenance') { // Details for a maintenance task
+      taskDetailsContent = `<div><strong>${companyName}</strong></div>
+                            <div>Building & Maintenance Task</div>`;
+    } else if (this.taskName === 'Clearing') {
+      taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
+    } else {
+      taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>
+                            <div>${this.resourceName}, ${this.vintage}</div>`;
+    }
 
         // Set the taskBox inner HTML using class names
         taskBox.innerHTML = `
@@ -335,12 +340,12 @@ export function executeTaskFunction(task) {
         task.workProgress += increment;
         task.updateProgressBar();
 
-        // Retrieve all tasks from localStorage, update only the specific task's progress
+        // Retrieve all tasks from localStorage and update the specific task's progress
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const taskIndex = tasks.findIndex(t => t.taskId === task.taskId);
 
         if (taskIndex !== -1) {
-            // Update just the workProgress field for the specific task
+            // Update the workProgress field for the specific task
             tasks[taskIndex].workProgress = task.workProgress;
             localStorage.setItem('tasks', JSON.stringify(tasks));
         }
@@ -348,10 +353,10 @@ export function executeTaskFunction(task) {
 
     // Check if the task is complete
     if (task.workProgress >= task.workTotal) {
-        task.removeTaskBox();
-        removeTask(task.taskId);
+        task.removeTaskBox();    // Remove the task UI representation
+        removeTask(task.taskId); // Remove the task record
 
-        // Perform actions based on task type
+        // Handle actions based on task type and name
         switch (true) {
             case task.taskName.startsWith("Bookkeeping"):
                 const bookkeepingDetails = task.taskName.split(", ");
@@ -380,17 +385,16 @@ export function executeTaskFunction(task) {
                 const pendingHires = JSON.parse(localStorage.getItem('pendingHires')) || [];
                 if (pendingHires.length > 0) {
                     let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-
-                    // Add pending hires to the active staff list
+                    // Add pending hires to active staff list and save
                     staffData = staffData.concat(pendingHires);
                     saveStaff(staffData);
-
-
                     // Clear pending hires
                     localStorage.removeItem('pendingHires');
-
                     addConsoleMessage(`Hiring task completed. ${pendingHires.length} new staff members added.`);
                 }
+                break;
+            case task.taskName.startsWith("Maintenance"): // Handling maintenance tasks
+                addConsoleMessage(`Maintenance task completed: ${task.taskName}.`);
                 break;
             default:
                 console.warn(`No console message for task name: ${task.taskName}`);

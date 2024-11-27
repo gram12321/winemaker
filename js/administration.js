@@ -129,3 +129,26 @@ export function hiringTaskFunction(task, mode) {
     const workApplied = calculateWorkApplied(task.staff || [], 'hiringTaskFunction');
     return workApplied;
 }
+
+export function maintenanceTaskFunction(task, mode) {
+  if (mode === 'initialize') {
+    // Setup for a maintenance task upon building creation
+    const taskName = `Maintenance`;
+    const workTotal = 1000; // Example work total
+    const iconPath = '/assets/icon/icon_maintenance.webp'; // Path to maintenance task icon
+
+    return {
+      taskName,
+      workTotal,
+      iconPath,
+      taskType: 'Maintenance'
+    };
+  } else if (mode === 'update') {
+    const additionalWork = 10; // Example additional work on update
+    return additionalWork;
+  }
+
+  // Calculate the actual work done by applying staff and tool effects
+  const workApplied = calculateWorkApplied(task.staff || [], 'maintenanceTaskFunction');
+  return workApplied;
+}

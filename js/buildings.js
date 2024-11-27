@@ -135,6 +135,8 @@ const ToolManager = (() => {
 export const getBuildingTools = () => ToolManager.getTools();
 
 
+import { handleGenericTask, maintenanceTaskFunction } from './administration.js'; // Import the task logic
+
 export function buildBuilding(buildingName) {
   // Load existing buildings and check if the building already exists
   const buildings = loadBuildings();
@@ -167,6 +169,9 @@ export function buildBuilding(buildingName) {
 
   // Console message to indicate the building process is complete
   addConsoleMessage(`${buildingName} has been built successfully!`);
+
+  // Spawn a maintenance task for the newly built building
+  handleGenericTask('Maintenance', maintenanceTaskFunction, { buildingName });
 
   // Update the building cards
   updateBuildingCards();
