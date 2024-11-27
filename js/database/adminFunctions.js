@@ -224,7 +224,7 @@ export function saveTask(taskInfo) {
 
 export const activeTasks = []; // Exported array to hold task references
 
-// Function to load tasks from localStorage and initialize them as Task instances
+
 export function loadTasks() {
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     Task.latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
@@ -239,7 +239,6 @@ export function loadTasks() {
         let task;
         let resource;
 
-        // Determine the function to execute based on task type
         switch (true) {
             case taskInfo.taskName.startsWith("Bookkeeping"):
                 executeTaskFunction = bookkeepingTaskFunction;
@@ -267,7 +266,7 @@ export function loadTasks() {
             case taskInfo.taskName.startsWith("Hiring"):
                 executeTaskFunction = hiringTaskFunction;
                 break;
-            case taskInfo.taskName.startsWith("Maintenance"): // Add handling for maintenance tasks
+            case taskInfo.taskName.startsWith("Maintenance"):
                 executeTaskFunction = maintenanceTaskFunction;
                 break;
             default:
@@ -286,16 +285,13 @@ export function loadTasks() {
                 taskInfo.quality,
                 taskInfo.iconPath,
                 taskInfo.fieldName,
-                taskInfo.type
+                taskInfo.type,
+                taskInfo.workProgress || 0,
+                Array.isArray(taskInfo.staff) ? taskInfo.staff : [],
+                taskInfo.buildingName // Ensure buildingName is passed
             );
 
-            // Load the work progress directly from taskInfo
-            task.workProgress = taskInfo.workProgress || 0;
-
-            // Ensure staff is managed as an array
-            task.staff = Array.isArray(taskInfo.staff) ? taskInfo.staff : [];
-
-            // Assign task-specific properties if applicable
+            // Assign task-specific properties including fieldId and fieldName if applicable
             Object.assign(task, {
                 fieldId: taskInfo.fieldId,
                 fieldName: taskInfo.fieldName,

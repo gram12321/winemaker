@@ -7,17 +7,19 @@ import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; //
 import {calculateWorkApplied } from './staff.js';
 
 export function handleGenericTask(taskType, taskFunction, additionalTaskParams = {}) {
-  const { fieldId, resourceName } = additionalTaskParams;
+  const { fieldId, resourceName, buildingName } = additionalTaskParams; // Destructure buildingName
 
   const isTaskAlreadyActive = activeTasks.some(task =>
     task.taskName.startsWith(taskType) &&
-    (fieldId === undefined || task.fieldId === fieldId)
+    (fieldId === undefined || task.fieldId === fieldId) &&
+    (buildingName === undefined || task.buildingName === buildingName)
   );
 
   if (isTaskAlreadyActive) {
     const activeTask = activeTasks.find(task =>
       task.taskName.startsWith(taskType) &&
-      (fieldId === undefined || task.fieldId === fieldId)
+      (fieldId === undefined || task.fieldId === fieldId) &&
+      (buildingName === undefined || task.buildingName === buildingName)
     );
 
     if (activeTask) {
@@ -41,13 +43,13 @@ export function handleGenericTask(taskType, taskFunction, additionalTaskParams =
     const plantedResourceName = field.plantedResourceName || resourceName;
 
     // Destructure additional details from the taskFunction output
-    const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize', { fieldId, resourceName });
+    const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize', { fieldId, resourceName, buildingName });
 
     // Ensure the task is initialized with all relevant information
     const task = new Task(taskName, taskFunction, undefined, workTotal, plantedResourceName,
                           '', vintage, '', iconPath, fieldName, taskType, 0, []);
 
-    Object.assign(task, { fieldId, resourceName, fieldName, vintage });
+    Object.assign(task, { fieldId, resourceName, fieldName, vintage, buildingName });
 
     saveTask({
       taskName: task.taskName,
@@ -60,11 +62,12 @@ export function handleGenericTask(taskType, taskFunction, additionalTaskParams =
       fieldId,
       resourceName: plantedResourceName,
       fieldName,
-      vintage
+      vintage,
+      buildingName
     });
 
     activeTasks.push(task);
-    addConsoleMessage(`${taskType} task started for ${fieldName} with ${plantedResourceName}, Vintage ${vintage}.`);
+    addConsoleMessage(`${taskType} task started for ${fieldName} with ${plantedResourceName}, Vintage ${vintage}${buildingName ? `, Building: ${buildingName}` : ''}.`);
   }
 }
 

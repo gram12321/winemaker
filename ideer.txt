@@ -42,6 +42,7 @@ Imidiatly on building a building the headline (name of the building) disapears. 
 
 
 
+
 QoL Improvement
  - Hover over info on "Statuspic" on sales.html
  - Default selected staff for new task
@@ -53,6 +54,7 @@ QoL Improvement
   Clicking staff name in Select staff overlay should open staffoverlay
   add error consolemsg when clicking a building that is not build
   add error when trying to build a building that allreadu excist
+  Better info on Maintaince task - like what building is maintained and is it building or upgrading. 
   
 
  New/Better mechanics

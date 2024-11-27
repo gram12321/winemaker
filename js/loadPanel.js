@@ -50,36 +50,38 @@ export class Task {
       skillKey: 'maintenance' // Skill key related to maintenance
     }
   };
-  constructor(
-    taskName,
-    taskFunction,
-    taskId = null,
-    workTotal = 0,
-    resourceName = '',
-    resourceState = '',
-    vintage = '',
-    quality = '',
-    iconPath = '',
-    fieldName = '',
-    type = 'Administration',
-    workProgress = 0,
-    staff = []
-  ) {
-    this.taskName = taskName;
-    this.taskFunction = taskFunction;
-    this.taskId = taskId || Task.generateTaskId();
-    this.workTotal = workTotal;
-    this.workProgress = workProgress;
-    this.resourceName = resourceName;
-    this.resourceState = resourceState;
-    this.vintage = vintage;
-    this.quality = quality;
-    this.iconPath = iconPath;
-    this.fieldName = fieldName;
-    this.staff = staff;
-    this.type = type;
-    this.createTaskBox(); // Create the UI box for the task
-  }
+    constructor(
+      taskName,
+      taskFunction,
+      taskId = null,
+      workTotal = 0,
+      resourceName = '',
+      resourceState = '',
+      vintage = '',
+      quality = '',
+      iconPath = '',
+      fieldName = '',
+      type = 'Administration',
+      workProgress = 0,
+      staff = [],
+      buildingName = '' // Add this parameter with a default value
+    ) {
+      this.taskName = taskName;
+      this.taskFunction = taskFunction;
+      this.taskId = taskId || Task.generateTaskId();
+      this.workTotal = workTotal;
+      this.workProgress = workProgress;
+      this.resourceName = resourceName;
+      this.resourceState = resourceState;
+      this.vintage = vintage;
+      this.quality = quality;
+      this.iconPath = iconPath;
+      this.fieldName = fieldName;
+      this.staff = staff;
+      this.type = type;
+      this.buildingName = buildingName; // Assign it to the instance
+      this.createTaskBox(); // Create the UI box for the task
+    }
   static generateTaskId() {
     const newTaskId = ++Task.latestTaskId;
     localStorage.setItem('latestTaskId', newTaskId); // Store the updated ID in localStorage
@@ -114,22 +116,24 @@ export class Task {
         console.warn(`Unknown task type: ${this.type}`);
     }
     // Construct the task details content based on task type and properties
-    let taskDetailsContent = '';
-    const companyName = localStorage.getItem('companyName');
-    if (this.type === 'Administration') {
-      taskDetailsContent = `<div><strong>${companyName}</strong></div>`;
-    } else if (this.type === 'Winery' || this.type === 'Sales') {
-      taskDetailsContent = `<div><strong>${companyName}</strong></div>
-                            <div>${this.resourceName}, ${this.vintage}</div>`;
-    } else if (this.type === 'Maintenance') { // Details for a maintenance task
-      taskDetailsContent = `<div><strong>${companyName}</strong></div>
-                            <div>Building & Maintenance Task</div>`;
-    } else if (this.taskName === 'Clearing') {
-      taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
-    } else {
-      taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>
-                            <div>${this.resourceName}, ${this.vintage}</div>`;
-    }
+      let taskDetailsContent = '';
+      const companyName = localStorage.getItem('companyName');
+
+      if (this.type === 'Administration') {
+        taskDetailsContent = `<div><strong>${companyName}</strong></div>`;
+      } else if (this.type === 'Winery' || this.type === 'Sales') {
+        taskDetailsContent = `<div><strong>${companyName}</strong></div>
+                              <div>${this.resourceName}, ${this.vintage}</div>`;
+      } else if (this.type === 'Maintenance') { // Details for a maintenance task
+        taskDetailsContent = `<div><strong>${companyName}</strong></div>
+                              <div>Building: ${this.buildingName || 'General'}</div>
+                              <div>Maintenance Task</div>`;
+      } else if (this.taskName === 'Clearing') {
+        taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
+      } else {
+        taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>
+                              <div>${this.resourceName}, ${this.vintage}</div>`;
+      }
 
         // Set the taskBox inner HTML using class names
         taskBox.innerHTML = `
