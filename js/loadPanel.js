@@ -126,8 +126,9 @@ export class Task {
                               <div>${this.resourceName}, ${this.vintage}</div>`;
       } else if (this.type === 'Maintenance') { // Details for a maintenance task
         taskDetailsContent = `<div><strong>${companyName}</strong></div>
-                              <div>Building: ${this.buildingName || 'General'}</div>
-                              <div>Maintenance Task</div>`;
+                              <div>Building & Maintenance Task</div>
+                              <div>${this.buildingName }</div>
+                              `;
       } else if (this.taskName === 'Clearing') {
         taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
       } else {
