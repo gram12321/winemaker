@@ -273,23 +273,26 @@ export function calculateWorkApplied(taskStaff, processingFunction) {
 
     // Apply speed bonus only to field tasks
     if (skillKey === 'field') {
-        const tools = getBuildingTools();
-        let maxSpeedBonus = 1.0;
+        const tools = getBuildingTools().filter(tool => tool.buildingType === 'Tool Shed');
+        const availableToolsCount = tools.length;
 
-        console.log(`Evaluating tools for speed bonus:`, tools);
+        console.log(`Available Tools:`, tools);
 
-        // Find the maximum speedBonus of the tools applicable to field tasks
-        tools.forEach(tool => {
-            if (tool.buildingType === 'Tool Shed') {
-                console.log(`Evaluating Tool: ${tool.name}, Speed Bonus: ${tool.speedBonus}`);
-                maxSpeedBonus = Math.max(maxSpeedBonus, tool.speedBonus);
-            }
-        });
+        // Calculate bonuses only for the number of tools available
+        const usedTools = Math.min(availableToolsCount, taskStaff.length);
 
-        console.log(`Max Speed Bonus found: ${maxSpeedBonus}`);
+        // Calculate bonus for staff that has access to tools
+        let maxTotalSpeedBonus = 1.0;
+        for (let i = 0; i < usedTools; i++) {
+            const tool = tools[i];
+            console.log(`Staff ${i + 1} assigned Tool: ${tool.name}, Speed Bonus: ${tool.speedBonus}`);
+            maxTotalSpeedBonus += (tool.speedBonus - 1.0);
+        }
 
-        totalWorkApplied *= maxSpeedBonus;
-        console.log(`Speed Bonus Applied for Field Tasks: ${maxSpeedBonus}. Total work applied now is: ${totalWorkApplied}`);
+        console.log(`Max Total Speed Bonus applied for ${usedTools} staff: ${maxTotalSpeedBonus}`);
+
+        // Divide the total bonus across all staff
+        totalWorkApplied *= maxTotalSpeedBonus;
     }
 
     console.log(`Final Total work applied for ${processingFunction}: ${totalWorkApplied}, using Process Per Work Applied: ${processPerWorkApplied}`);
