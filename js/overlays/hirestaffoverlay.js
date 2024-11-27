@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <tr><td>Winery</td><td class="${getSkillLevelClass(staff.skills.winery.winery)}">${staff.skills.winery.winery}</td></tr>
                             <tr><td>Administration</td><td class="${getSkillLevelClass(staff.skills.administration.administration)}">${staff.skills.administration.administration}</td></tr>
                             <tr><td>Sales</td><td class="${getSkillLevelClass(staff.skills.sales.sales)}">${staff.skills.sales.sales}</td></tr>
+                            <tr><td>Maintenance</td><td class="${getSkillLevelClass(staff.skills.maintenance.maintenance)}">${staff.skills.maintenance.maintenance}</td></tr>
                         </tbody>
                     </table>
                     <button class="btn btn-primary hire-staff-button" style="margin-top: 10px;">Hire</button>
@@ -83,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.querySelectorAll('.hire-staff-button').forEach((button, index) => {
             button.addEventListener('click', () => hireSelectedStaff(createdStaffOptions[index]));
         });
-    }  
+    }
 
     function hireSelectedStaff(staff) {
         // Save pending hire in localStorage without adding to staff list

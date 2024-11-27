@@ -171,7 +171,7 @@ export function buildBuilding(buildingName) {
   addConsoleMessage(`${buildingName} has been built successfully!`);
 
   // Spawn a maintenance task for the newly built building
-  handleGenericTask('Maintenance', maintenanceTaskFunction, { buildingName });
+  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName });
 
   // Update the building cards
   updateBuildingCards();

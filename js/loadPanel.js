@@ -124,7 +124,7 @@ export class Task {
       } else if (this.type === 'Winery' || this.type === 'Sales') {
         taskDetailsContent = `<div><strong>${companyName}</strong></div>
                               <div>${this.resourceName}, ${this.vintage}</div>`;
-      } else if (this.type === 'Maintenance') { // Details for a maintenance task
+      } else if (this.type === 'Building & Maintenance') { // Details for a maintenance task
         taskDetailsContent = `<div><strong>${companyName}</strong></div>
                               <div>${this.buildingName }</div>
                               `;

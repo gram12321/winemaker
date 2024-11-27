@@ -7,7 +7,7 @@ import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; //
 import {calculateWorkApplied } from './staff.js';
 
 export function handleGenericTask(taskType, taskFunction, additionalTaskParams = {}) {
-  const { fieldId, resourceName, buildingName } = additionalTaskParams; // Destructure buildingName
+  const { fieldId, resourceName, buildingName } = additionalTaskParams;
 
   const isTaskAlreadyActive = activeTasks.some(task =>
     task.taskName.startsWith(taskType) &&
@@ -38,7 +38,7 @@ export function handleGenericTask(taskType, taskFunction, additionalTaskParams =
   } else {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[fieldId] || {};
-    const fieldName = field.name || `Field ${fieldId}`;
+    const fieldName = field.name || (fieldId !== undefined ? `Field ${fieldId}` : '');
     const vintage = field.vintage || localStorage.getItem('year') || '';
     const plantedResourceName = field.plantedResourceName || resourceName;
 
@@ -66,8 +66,18 @@ export function handleGenericTask(taskType, taskFunction, additionalTaskParams =
       buildingName
     });
 
+    // Constructing a dynamic message based on available information
+    const messageParts = [`${taskType} task started`];
+    if (fieldName) messageParts.push(`for ${fieldName}`);
+    if (plantedResourceName) messageParts.push(`with ${plantedResourceName}`);
+    if (buildingName) messageParts.push(`Building: ${buildingName}`);
+    if (vintage) messageParts.push(`, ${vintage}`);
+
+
+    const completeMessage = messageParts.join(' ');
+
     activeTasks.push(task);
-    addConsoleMessage(`${taskType} task started for ${fieldName} with ${plantedResourceName}, Vintage ${vintage}${buildingName ? `, Building: ${buildingName}` : ''}.`);
+    addConsoleMessage(completeMessage);
   }
 }
 
@@ -144,7 +154,7 @@ export function maintenanceTaskFunction(task, mode) {
       taskName,
       workTotal,
       iconPath,
-      taskType: 'Maintenance'
+      taskType: 'Building & Maintenance'
     };
   } else if (mode === 'update') {
     const additionalWork = 10; // Example additional work on update
