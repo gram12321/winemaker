@@ -136,7 +136,7 @@ export function hiringTaskFunction(task, mode) {
 export function maintenanceTaskFunction(task, mode) {
   if (mode === 'initialize') {
     // Setup for a maintenance task upon building creation
-    const taskName = `Maintenance`;
+    const taskName = `Building & Maintenance`;
     const workTotal = 1000; // Example work total
     const iconPath = '/assets/icon/icon_maintenance.webp'; // Path to maintenance task icon
 

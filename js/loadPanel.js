@@ -44,7 +44,7 @@ export class Task {
       processingFunctions: ['Sales'],
       skillKey: 'sales'
     },
-    'Maintenance': { // New maintenance task type
+    'Building & Maintenance': { // New maintenance task type
       processPerWorkApplied: 0.8, // Processing rate for maintenance tasks
       processingFunctions: ['maintenanceTaskFunction'], // Add your maintenance processing function here
       skillKey: 'maintenance' // Skill key related to maintenance
@@ -109,7 +109,7 @@ export class Task {
       case 'Sales':
         taskBox.classList.add('sales-task');
         break;
-      case 'Maintenance': // Class for maintenance tasks
+      case 'Building & Maintenance': // Class for maintenance tasks
         taskBox.classList.add('maintenance-task');
         break;
       default:
@@ -126,7 +126,6 @@ export class Task {
                               <div>${this.resourceName}, ${this.vintage}</div>`;
       } else if (this.type === 'Maintenance') { // Details for a maintenance task
         taskDetailsContent = `<div><strong>${companyName}</strong></div>
-                              <div>Building & Maintenance Task</div>
                               <div>${this.buildingName }</div>
                               `;
       } else if (this.taskName === 'Clearing') {
@@ -398,8 +397,8 @@ export function executeTaskFunction(task) {
                     addConsoleMessage(`Hiring task completed. ${pendingHires.length} new staff members added.`);
                 }
                 break;
-            case task.taskName.startsWith("Maintenance"): // Handling maintenance tasks
-                addConsoleMessage(`Maintenance task completed: ${task.taskName}.`);
+            case task.taskName.startsWith("Building & Maintenance"): // Handling maintenance tasks
+                addConsoleMessage(`Building & Maintenance task completed: ${task.taskName}.`);
                 break;
             default:
                 console.warn(`No console message for task name: ${task.taskName}`);

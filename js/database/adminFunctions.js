@@ -266,7 +266,7 @@ export function loadTasks() {
             case taskInfo.taskName.startsWith("Hiring"):
                 executeTaskFunction = hiringTaskFunction;
                 break;
-            case taskInfo.taskName.startsWith("Maintenance"):
+            case taskInfo.taskName.startsWith("Building & Maintenance"):
                 executeTaskFunction = maintenanceTaskFunction;
                 break;
             default:
