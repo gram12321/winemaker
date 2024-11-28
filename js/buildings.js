@@ -138,43 +138,29 @@ export const getBuildingTools = () => ToolManager.getTools();
 import { handleGenericTask, maintenanceTaskFunction } from './administration.js'; // Import the task logic
 
 export function buildBuilding(buildingName) {
-  // Load existing buildings and check if the building already exists
+  // Load existing buildings to check if the building already exists
   const buildings = loadBuildings();
   const existingBuilding = buildings.find(b => b.name === buildingName);
 
   if (existingBuilding) {
     addConsoleMessage(`${buildingName} already exists and cannot be built again.`);
-    return; // Exit the function early if the building exists
+    return;
   }
 
-  // Create a new building instance if it doesn't exist
-  const newBuilding = new Building(buildingName);
-  buildings.push(newBuilding);
-  storeBuildings(buildings);
+  // Start a maintenance task for the building rather than building it immediately
+  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName });
 
-  // Handle UI updates directly within the function
+  // UI feedback that a build process has started
   const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
   const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
 
   if (buildButton && upgradeButton) {
     buildButton.disabled = true;
-    buildButton.textContent = "Built";
-    upgradeButton.disabled = false;
-
-    upgradeButton.addEventListener('click', function () {
-      upgradeBuilding(buildingName);
-      updateBuildingCards();
-    });
+    buildButton.textContent = "Building...";
+    upgradeButton.disabled = true; // Disable upgrade until the building is complete
   }
 
-  // Console message to indicate the building process is complete
-  addConsoleMessage(`${buildingName} has been built successfully!`);
-
-  // Spawn a maintenance task for the newly built building
-  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName });
-
-  // Update the building cards
-  updateBuildingCards();
+  addConsoleMessage(`Started building process for ${buildingName}.`);
 }
 
 

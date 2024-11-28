@@ -1,9 +1,11 @@
 // loadPanel.js
 import { loadTasks, removeTask, saveTask, loadStaff} from './database/adminFunctions.js';
-import { activeTasks, saveStaff } from './database/adminFunctions.js';
+import { activeTasks, saveStaff, loadBuildings, storeBuildings   } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
 import { formatNumber } from './utils.js';
 import { displayStaff} from './staff.js';
+import { Building } from './buildings.js';
+
 
 // Initialize Task Panel
 function initializePanel() {
@@ -332,78 +334,102 @@ export function executeAllTasks() {
 
 // Execute task function
 export function executeTaskFunction(task) {
-    if (!task || typeof task.taskFunction !== 'function') {
-        console.error("Invalid task or task function:", task);
-        return;
+  if (!task || typeof task.taskFunction !== 'function') {
+    console.error("Invalid task or task function:", task);
+    return;
+  }
+
+  // Execute the task function and calculate the work increment
+  const increment = task.taskFunction(task);
+  if (increment > 0) {
+    task.workProgress += increment;
+    task.updateProgressBar();
+
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const taskIndex = tasks.findIndex(t => t.taskId === task.taskId);
+
+    if (taskIndex !== -1) {
+      tasks[taskIndex].workProgress = task.workProgress;
+      localStorage.setItem('tasks', JSON.stringify(tasks));
     }
+  }
 
-    // Execute the task function and get the work increment
-    const increment = task.taskFunction(task);
-    if (increment > 0) {
-        // Apply the work progress increment
-        task.workProgress += increment;
-        task.updateProgressBar();
+  if (task.workProgress >= task.workTotal) {
+    task.removeTaskBox();
+    removeTask(task.taskId);
 
-        // Retrieve all tasks from localStorage and update the specific task's progress
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        const taskIndex = tasks.findIndex(t => t.taskId === task.taskId);
+    switch (true) {
+      case task.taskName.startsWith("Bookkeeping"):
+        const bookkeepingDetails = task.taskName.split(", ");
+        const bookkeepingSeasonYear = bookkeepingDetails[1] || "Unknown Season/Year";
+        addConsoleMessage(`Bookkeeping task completed for ${bookkeepingSeasonYear}.`);
+        break;
 
-        if (taskIndex !== -1) {
-            // Update the workProgress field for the specific task
-            tasks[taskIndex].workProgress = task.workProgress;
-            localStorage.setItem('tasks', JSON.stringify(tasks));
+      case task.taskName.startsWith("Building & Maintenance"):
+        // Create the building after task completion
+        const buildings = loadBuildings();
+        if (!buildings.find(b => b.name === task.buildingName)) {
+          const newBuilding = new Building(task.buildingName);
+          buildings.push(newBuilding);
+          storeBuildings(buildings);
+          addConsoleMessage(`Building task completed. ${task.buildingName} has been constructed.`);
         }
-    }
 
-    // Check if the task is complete
-    if (task.workProgress >= task.workTotal) {
-        task.removeTaskBox();    // Remove the task UI representation
-        removeTask(task.taskId); // Remove the task record
+        // Update UI for the newly constructed building
+        const buildButton = document.querySelector(`.build-button[data-building-name="${task.buildingName}"]`);
+        const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${task.buildingName}"]`);
 
-        // Handle actions based on task type and name
-        switch (true) {
-            case task.taskName.startsWith("Bookkeeping"):
-                const bookkeepingDetails = task.taskName.split(", ");
-                const bookkeepingSeasonYear = bookkeepingDetails[1] || "Unknown Season/Year";
-                addConsoleMessage(`Bookkeeping task completed for ${bookkeepingSeasonYear}.`);
-                break;
-            case task.taskName === "Planting":
-                addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
-                break;
-            case task.taskName === "Crushing Grapes":
-                addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
-                break;
-            case task.taskName === "Fermenting":
-                addConsoleMessage(`Fermenting task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
-                break;
-            case task.taskName === "Harvesting":
-                addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
-                break;
-            case task.taskName === "Uprooting":
-                addConsoleMessage(`Uprooting task completed for field <strong>${task.fieldName || 'Unknown'}</strong>.`);
-                break;
-            case task.taskName === "Clearing":
-                addConsoleMessage(`Clearing task completed for field <strong>${task.fieldName || 'Unknown'}</strong>. Field health improved.`);
-                break;
-            case task.taskName.startsWith("Hiring"):
-                const pendingHires = JSON.parse(localStorage.getItem('pendingHires')) || [];
-                if (pendingHires.length > 0) {
-                    let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-                    // Add pending hires to active staff list and save
-                    staffData = staffData.concat(pendingHires);
-                    saveStaff(staffData);
-                    // Clear pending hires
-                    localStorage.removeItem('pendingHires');
-                    addConsoleMessage(`Hiring task completed. ${pendingHires.length} new staff members added.`);
-                }
-                break;
-            case task.taskName.startsWith("Building & Maintenance"): // Handling maintenance tasks
-                addConsoleMessage(`Building & Maintenance task completed: ${task.taskName}.`);
-                break;
-            default:
-                console.warn(`No console message for task name: ${task.taskName}`);
+        if (buildButton && upgradeButton) {
+          buildButton.disabled = true;
+          buildButton.textContent = "Built";
+          upgradeButton.disabled = false;
+          upgradeButton.addEventListener('click', function () {
+            upgradeBuilding(task.buildingName);
+          });
         }
+
+        break;
+
+      // Maintain existing cases for other task types
+
+      case task.taskName === "Planting":
+        addConsoleMessage(`Planting task completed for field <strong>${task.fieldName || 'Unknown'}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage || 'Unknown'}</strong>.`);
+        break;
+
+      case task.taskName === "Crushing Grapes":
+        addConsoleMessage(`Crushing task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>, Quality <strong>${task.quality}</strong>.`);
+        break;
+
+      case task.taskName === "Fermenting":
+        addConsoleMessage(`Fermenting task completed for <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
+        break;
+
+      case task.taskName === "Harvesting":
+        addConsoleMessage(`Harvesting task completed for field <strong>${task.fieldName}</strong> with <strong>${task.resourceName}</strong>, Vintage <strong>${task.vintage}</strong>.`);
+        break;
+
+      case task.taskName === "Uprooting":
+        addConsoleMessage(`Uprooting task completed for field <strong>${task.fieldName || 'Unknown'}</strong>.`);
+        break;
+
+      case task.taskName === "Clearing":
+        addConsoleMessage(`Clearing task completed for field <strong>${task.fieldName || 'Unknown'}</strong>. Field health improved.`);
+        break;
+
+      case task.taskName.startsWith("Hiring"):
+        const pendingHires = JSON.parse(localStorage.getItem('pendingHires')) || [];
+        if (pendingHires.length > 0) {
+          let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+          staffData = staffData.concat(pendingHires);
+          saveStaff(staffData);
+          localStorage.removeItem('pendingHires');
+          addConsoleMessage(`Hiring task completed. ${pendingHires.length} new staff members added.`);
+        }
+        break;
+
+      default:
+        console.warn(`No console message for task name: ${task.taskName}`);
     }
+  }
 }
-
 export { initializePanel };
