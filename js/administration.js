@@ -2,6 +2,7 @@
 
 import { Task } from './loadPanel.js'; 
 import { saveTask, activeTasks } from '/js/database/adminFunctions.js';
+
 import { addConsoleMessage } from '/js/console.js';
 import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
 import {calculateWorkApplied } from './staff.js';

@@ -61,6 +61,7 @@ export function showBuildingOverlay(building) {
 }
 
 // Function to render the visual representation of capacity
+// Function to render the visual representation of capacity
 function renderCapacityVisual(building) {
   const capacityGrid = document.getElementById('capacity-grid');
   if (!capacityGrid) return;
@@ -75,9 +76,15 @@ function renderCapacityVisual(building) {
   for (let i = 0; i < totalCapacity; i++) {
     const cell = document.createElement('div');
     cell.className = 'capacity-cell';
+
     if (i < usedCapacity) {
-      cell.classList.add('filled'); // Add class if this capacity is used
+      const tool = building.contents[i]; // Assuming contents array holds tools
+      const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`; // Path for the icon
+      cell.innerHTML = `
+        <img src="${iconPath}" alt="${tool.name}" style="width: 24px; height: 24px;" />
+      `;
     }
+
     capacityGrid.appendChild(cell);
   }
 }

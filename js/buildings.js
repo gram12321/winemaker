@@ -1,6 +1,7 @@
 import { buildings, storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 import { showBuildingOverlay } from './overlays/buildingOverlay.js'; // Import the showBuildingOverlay function
 import { addConsoleMessage } from '/js/console.js';
+import { handleGenericTask, maintenanceTaskFunction } from './administration.js'; // Import the task logic
 
 export class Building {
   constructor(name, level = 1) {
@@ -91,22 +92,24 @@ export class Building {
 }
 
 export class Tool {
-  constructor(name, buildingType, speedBonus = 1.0) {
+  constructor(name, buildingType, speedBonus = 1.0, cost = 0) {
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
+    this.cost = cost; // Add cost property
   }
 
   toJSON() {
     return {
       name: this.name,
       buildingType: this.buildingType,
-      speedBonus: this.speedBonus
+      speedBonus: this.speedBonus,
+      cost: this.cost // Include cost in serialization
     };
   }
 
   static fromJSON(json) {
-    return new Tool(json.name, json.buildingType, json.speedBonus);
+    return new Tool(json.name, json.buildingType, json.speedBonus, json.cost); // Include cost in deserialization
   }
 }
 
@@ -117,11 +120,12 @@ const ToolManager = (() => {
 
   function initializeTools() {
     if (!toolsInitialized) {
-      const tractor = new Tool('Tractor', 'Tool Shed', 1.2);
-      const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1);
-      const forklift = new Tool('Forklift', 'Warehouse', 1.0); // Assuming no bonus
-      const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0); // Assuming no bonus
-      tools = [tractor, trimmer, forklift, palletJack];
+      const tractor = new Tool('Tractor', 'Tool Shed', 1.2, 500); // Specify cost
+      const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1, 300); // Specify cost
+      const forklift = new Tool('Forklift', 'Warehouse', 1.0, 400); // Specify cost
+      const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0, 150); // Specify cost
+      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 100); // Specify cost
+      tools = [tractor, trimmer, forklift, palletJack, harvestbins];
       toolsInitialized = true;
     }
     return tools;
@@ -131,11 +135,11 @@ const ToolManager = (() => {
     getTools: initializeTools
   };
 })();
+
 // Export the more generalized function
 export const getBuildingTools = () => ToolManager.getTools();
 
 
-import { handleGenericTask, maintenanceTaskFunction } from './administration.js'; // Import the task logic
 
 export function buildBuilding(buildingName) {
   // Load existing buildings to check if the building already exists

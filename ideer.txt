@@ -39,6 +39,7 @@ There might be an issue where annualYieldFactor  is producing values below 0.5 w
 Plant buttom is not disabled when active clearing task, but we dont allow planting task when active clearing task
 Imidiatly on building a building the headline (name of the building) disapears. reshows on pageupdate
 Buildingname only shows in taskbox after pagereload
+in buildings.html build buttom change to "Building..." when a building proces is started. But it resets to "Build" on page reload
 
 
 
