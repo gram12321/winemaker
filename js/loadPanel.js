@@ -326,70 +326,82 @@ export class Task {
 }
 
 // Execute all tasks
-export function executeAllTasks() {
-    activeTasks.forEach(task => {
-        executeTaskFunction(task);
-    });
-}
-
-// Execute task function
-export function executeTaskFunction(task) {
-  if (!task || typeof task.taskFunction !== 'function') {
-    console.error("Invalid task or task function:", task);
-    return;
-  }
-
-  // Execute the task function and calculate the work increment
-  const increment = task.taskFunction(task);
-  if (increment > 0) {
-    task.workProgress += increment;
-    task.updateProgressBar();
-
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    const taskIndex = tasks.findIndex(t => t.taskId === task.taskId);
-
-    if (taskIndex !== -1) {
-      tasks[taskIndex].workProgress = task.workProgress;
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
-  }
-
-  if (task.workProgress >= task.workTotal) {
-    task.removeTaskBox();
-    removeTask(task.taskId);
-
-    switch (true) {
-      case task.taskName.startsWith("Bookkeeping"):
-        const bookkeepingDetails = task.taskName.split(", ");
-        const bookkeepingSeasonYear = bookkeepingDetails[1] || "Unknown Season/Year";
-        addConsoleMessage(`Bookkeeping task completed for ${bookkeepingSeasonYear}.`);
-        break;
-
-      case task.taskName.startsWith("Building & Maintenance"):
-        // Create the building after task completion
-        const buildings = loadBuildings();
-        if (!buildings.find(b => b.name === task.buildingName)) {
-          const newBuilding = new Building(task.buildingName);
-          buildings.push(newBuilding);
-          storeBuildings(buildings);
-          addConsoleMessage(`Building task completed. ${task.buildingName} has been constructed.`);
-        }
-
-        // Update UI for the newly constructed building
-        const buildButton = document.querySelector(`.build-button[data-building-name="${task.buildingName}"]`);
-        const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${task.buildingName}"]`);
-
-        if (buildButton && upgradeButton) {
-          buildButton.disabled = true;
-          buildButton.textContent = "Built";
-          upgradeButton.disabled = false;
-          upgradeButton.addEventListener('click', function () {
-            upgradeBuilding(task.buildingName);
+        export function executeAllTasks() {
+          activeTasks.forEach(task => {
+              executeTaskFunction(task);
           });
         }
 
-        break;
+        // Execute task function
+        export function executeTaskFunction(task) {
+        if (!task || typeof task.taskFunction !== 'function') {
+          console.error("Invalid task or task function:", task);
+          return;
+        }
 
+        // Execute the task function and calculate the work increment
+        const increment = task.taskFunction(task);
+        if (increment > 0) {
+          task.workProgress += increment;
+          task.updateProgressBar();
+
+          const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+          const taskIndex = tasks.findIndex(t => t.taskId === task.taskId);
+
+          if (taskIndex !== -1) {
+            tasks[taskIndex].workProgress = task.workProgress;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+          }
+        }
+
+        if (task.workProgress >= task.workTotal) {
+          task.removeTaskBox();
+          removeTask(task.taskId);
+
+          switch (true) {
+            case task.taskName.startsWith("Bookkeeping"):
+              const bookkeepingDetails = task.taskName.split(", ");
+              const bookkeepingSeasonYear = bookkeepingDetails[1] || "Unknown Season/Year";
+              addConsoleMessage(`Bookkeeping task completed for ${bookkeepingSeasonYear}.`);
+              break;
+
+            case task.taskName.startsWith("Building & Maintenance"):
+              // Handle building upgrades
+              const buildings = loadBuildings();
+              const existingBuilding = buildings.find(b => b.name === task.buildingName);
+
+              if (!existingBuilding) {
+                // Create the building if it does not exist
+                const newBuilding = new Building(task.buildingName);
+                buildings.push(newBuilding);
+                storeBuildings(buildings);
+                addConsoleMessage(`Building task completed. ${task.buildingName} has been constructed.`);
+              } else {
+                // Upgrade the existing building after task completion
+                existingBuilding.upgrade();
+                storeBuildings(buildings);
+                addConsoleMessage(`Upgrade task completed. ${task.buildingName} has been upgraded to level ${existingBuilding.level}.`);
+              }
+
+              // Update UI for the building
+              const buildButton = document.querySelector(`.build-button[data-building-name="${task.buildingName}"]`);
+              const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${task.buildingName}"]`);
+
+              if (buildButton && upgradeButton) {
+                if (!existingBuilding) {
+                  buildButton.disabled = true;
+                  buildButton.textContent = "Built";            
+                } else {
+                  upgradeButton.disabled = false;
+                  upgradeButton.textContent = "Upgrade";
+                }
+              }
+
+              break;
+
+            // Add other task processing cases as necessary
+           
+        
       // Maintain existing cases for other task types
 
       case task.taskName === "Planting":

@@ -224,11 +224,24 @@ export function upgradeBuilding(buildingName) {
   const buildings = loadBuildings();
   const building = buildings.find(b => b.name === buildingName);
 
-  if (building) {
-    building.upgrade();
-    storeBuildings(buildings);
-    addConsoleMessage(`${buildingName} upgraded to level ${building.level}!`);
-  } else {
+  if (!building) {
     console.error(`Building ${buildingName} not found.`);
+    return;
   }
+
+  // Calculate upgrade cost
+  const upgradeCost = building.getUpgradeCost();
+
+  // Initiate the upgrade as a task
+  const taskName = `Upgrading ${buildingName}`;
+  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName, taskName, upgradeCost });
+
+  // UI feedback that an upgrade process has started
+  const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
+  if (upgradeButton) {
+    upgradeButton.disabled = true;
+    upgradeButton.textContent = "Upgrading...";
+  }
+
+  addConsoleMessage(`Started upgrade process for ${buildingName}.`);
 }
