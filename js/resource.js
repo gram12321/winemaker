@@ -24,36 +24,41 @@ class Inventory {
     this.items = [];
   }
 
-  addResource(name, amount, state, vintage, quality, fieldName, fieldPrestige) {
-    const resource = getResourceByName(name);
-    if (!resource) {
-      throw new Error('Resource not found');
-    }
+  addResource(name, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
+      console.log(`Adding resource: ${name}, Amount: ${amount}, State: ${state}, Vintage: ${vintage}, Quality: ${quality}, Field Name: ${fieldName}, Field Prestige: ${fieldPrestige}, Storage: ${storage}`);
 
-    // Check if the item with these characteristics already exists, including fieldPrestige
-    let existingItem = this.items.find(item =>
-      item.resource.name === name &&
-      item.state === state &&
-      item.vintage === vintage &&
-      item.quality === parseFloat(quality) &&
-      item.fieldName === fieldName &&
-      item.fieldPrestige === fieldPrestige // Include fieldPrestige in the comparison
-    );
+      const resource = getResourceByName(name);
+      if (!resource) {
+          throw new Error('Resource not found');
+      }
 
-    if (existingItem) {
-      existingItem.amount += amount;
-    } else {
-      // Add a new item if not found
-      this.items.push({
-        resource: resource,
-        amount: amount,
-        state: state,
-        vintage: vintage,
-        quality: parseFloat(quality),
-        fieldName: fieldName,
-        fieldPrestige: fieldPrestige // Store fieldPrestige
-      });
-    }
+      // Check if the item with these characteristics already exists
+      let existingItem = this.items.find(item =>
+          item.resource.name === name &&
+          item.state === state &&
+          item.vintage === vintage &&
+          item.quality === parseFloat(quality) &&
+          item.fieldName === fieldName &&
+          item.fieldPrestige === fieldPrestige
+      );
+
+      if (existingItem) {
+          existingItem.amount += amount;
+      } else {
+          // Add a new item if not found
+          this.items.push({
+              resource: resource,
+              amount: amount,
+              state: state,
+              vintage: vintage,
+              quality: parseFloat(quality),
+              fieldName: fieldName,
+              fieldPrestige: fieldPrestige,
+              storage: storage // Add storage to the new item's attributes
+          });
+      }
+
+      console.log(`Current Inventory:`, this.items); // Log the current state of the inventory
   }
 
   removeResource(name, amount, state, vintage, quality, fieldName, fieldPrestige) { // Include fieldPrestige

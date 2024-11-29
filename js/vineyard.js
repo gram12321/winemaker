@@ -92,6 +92,7 @@ export function displayVineyardEntries() {
 export function harvestAcres(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
+
     if (field && field.plantedResourceName) {
         const resourceName = field.plantedResourceName;
         const state = 'Grapes';
@@ -112,12 +113,12 @@ export function harvestAcres(index) {
 
         if (acresHarvested > 0) {
             const grapesHarvested = farmlandYield(field) * acresHarvested * 5; // needs to be a more realistic amount.
-          
-          // Get the altitude range for normalization
-          const altitudeRange = regionAltitudeRanges[field.country][field.region];
-          const normalizedAltitude = normalizeAltitude(field.altitude, altitudeRange);
-          const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
-          const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Needs other factors, as ripeness, sugar, acidity, terrorar ect. 
+
+            // Get the altitude range for normalization
+            const altitudeRange = regionAltitudeRanges[field.country][field.region];
+            const normalizedAltitude = normalizeAltitude(field.altitude, altitudeRange);
+            const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
+            const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Needs other factors, as ripeness, sugar, acidity, terroir, etc.
 
             // Add the harvested grapes to the inventory, including the field name and prestige
             inventoryInstance.addResource(
@@ -127,7 +128,8 @@ export function harvestAcres(index) {
                 gameYear,
                 quality,
                 field.name, // Pass the field's name
-                field.farmlandPrestige // Pass the field's prestige
+                field.farmlandPrestige, // Pass the field's prestige
+                true // Indicate that the resource is being stored
             );
 
             const harvestedFormatted = `${acresHarvested} acres`; 
@@ -155,5 +157,6 @@ export function harvestAcres(index) {
     } else {
         addConsoleMessage(`Invalid operation. No planted resource found for ${farmlands[index]?.name || 'unknown'}.`);
     }
+
     return 0;
 }
