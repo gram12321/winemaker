@@ -8,7 +8,7 @@ import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; //
 import {calculateWorkApplied } from './staff.js';
 
 export function handleGenericTask(taskType, taskFunction, additionalTaskParams = {}) {
-  const { fieldId, resourceName, buildingName } = additionalTaskParams;
+  const { fieldId, resourceName, buildingName, storage } = additionalTaskParams; // Destructure storage as selectedTool
 
   const isTaskAlreadyActive = activeTasks.some(task =>
     task.taskName.startsWith(taskType) &&
@@ -44,13 +44,13 @@ export function handleGenericTask(taskType, taskFunction, additionalTaskParams =
     const plantedResourceName = field.plantedResourceName || resourceName;
 
     // Destructure additional details from the taskFunction output
-    const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize', { fieldId, resourceName, buildingName });
+    const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize', { fieldId, resourceName, buildingName, storage }); // Pass storage here
 
     // Ensure the task is initialized with all relevant information
     const task = new Task(taskName, taskFunction, undefined, workTotal, plantedResourceName,
                           '', vintage, '', iconPath, fieldName, taskType, 0, []);
 
-    Object.assign(task, { fieldId, resourceName, fieldName, vintage, buildingName });
+    Object.assign(task, { fieldId, resourceName, fieldName, vintage, buildingName, storage }); // Include storage again
 
     saveTask({
       taskName: task.taskName,
@@ -64,10 +64,10 @@ export function handleGenericTask(taskType, taskFunction, additionalTaskParams =
       resourceName: plantedResourceName,
       fieldName,
       vintage,
-      buildingName
+      buildingName,
+      storage // Add storage to the saved task
     });
 
-    // Constructing a dynamic message based on available information
     const messageParts = [`${taskType} task started`];
     if (fieldName) messageParts.push(`for ${fieldName}`);
     if (plantedResourceName) messageParts.push(`with ${plantedResourceName}`);

@@ -104,7 +104,6 @@ export function harvestAcres(index) {
         }
 
         const workApplied = calculateWorkApplied(currentTask.staff || [], 'harvestAcres');
-
         const acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
         const acresHarvested = Math.min(workApplied, acresLeftToHarvest);
 
@@ -117,6 +116,9 @@ export function harvestAcres(index) {
             const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
             const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Needs other factors, as ripeness, sugar, acidity, terroir, etc.
 
+            // Use the storage parameter from the current task
+            const storage = currentTask.storage || true; // Fallback to true if storage doesn't exist
+
             // Add the harvested grapes to the inventory, including the field name and prestige
             inventoryInstance.addResource(
                 resourceName,
@@ -126,7 +128,7 @@ export function harvestAcres(index) {
                 quality,
                 field.name, // Pass the field's name
                 field.farmlandPrestige, // Pass the field's prestige
-                true // Indicate that the resource is being stored
+                storage // Use the retrieved storage value
             );
 
             const harvestedFormatted = `${acresHarvested} acres`; 
