@@ -191,7 +191,8 @@ function loadInventory() {
       item.vintage,
       item.quality,
       item.fieldName, // Ensure fieldName is loaded
-        item.fieldPrestige
+        item.fieldPrestige,
+      item.storage
     );
   });
 }
@@ -295,7 +296,8 @@ export function loadTasks() {
             Object.assign(task, {
                 fieldId: taskInfo.fieldId,
                 fieldName: taskInfo.fieldName,
-                vintage: taskInfo.vintage
+                vintage: taskInfo.vintage,
+              storage: taskInfo.storage // Attach storage here from taskInfo
             });
 
             // Initialize the task box with staff information and update visuals
