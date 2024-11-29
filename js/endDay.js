@@ -78,6 +78,9 @@ export function updateNewYear(farmlands) {
         field.farmlandPrestige = calculateFarmlandPrestige(field);
         // Reset the annual yield factor for the new year
         field.annualYieldFactor = (0.5 + Math.random()) * 1.5; // reapply the original formula
+        // Reset the annual yield factor for the new year
+        field.annualQualityFactor = Math.random(); // reapply the original formula
+        
     });
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands)); // Update the local storage
 }

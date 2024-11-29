@@ -10,25 +10,24 @@ import { normalizeAltitude, regionAltitudeRanges } from './names.js'; // Ensure 
 import { handleGenericTask } from './administration.js';
 import { fieldTaskFunction } from  './farmland.js'
 
+import { showHarvestOverlay } from './overlays/harvestOverlay.js';
+
+
 export function displayVineyardEntries() {
   const vineyardEntries = document.querySelector('#vineyard-entries');
-  vineyardEntries.innerHTML = ''; // Clear existing entries
-  const vineyards = JSON.parse(localStorage.getItem('ownedFarmlands')) || []; // Load data
+  vineyardEntries.innerHTML = '';
+  const vineyards = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 
   vineyards.forEach((vineyard, index) => {
     const card = document.createElement('div');
     card.className = 'card';
 
-    // Determine vine age display based on status and crop
     const isNotPlanted = !vineyard.plantedResourceName || vineyard.plantedResourceName === 'None';
     const vineAgeDisplay = isNotPlanted ? 'Not Planted' : (vineyard.status === 'No yield in first season' ? 'Not Planted or First Season' : `${vineyard.vineAge} years`);
     const statusDisplay = vineyard.plantedResourceName ? vineyard.status || 'Unknown' : 'Not Planted';
-    const ripenessDisplay = vineyard.ripeness ? vineyard.ripeness.toFixed(2) : 'N/A'; // Format ripeness to 2 decimals
+    const ripenessDisplay = vineyard.ripeness ? vineyard.ripeness.toFixed(2) : 'N/A';
 
-    // Calculate yield using the farmlandYield function
     const yieldValue = farmlandYield(vineyard);
-
-    // Check for active tasks on this vineyard field
     const isTaskActiveOnField = activeTasks.some(task => task.fieldId === index);
     const canHarvest = !isTaskActiveOnField && vineyard.status === 'Ready for Harvest';
 
@@ -67,9 +66,7 @@ export function displayVineyardEntries() {
                 <td>${ripenessDisplay}</td>
                 <td>${yieldValue.toFixed(2)}</td>
                 <td>
-                  <button class="btn btn-success harvest-field-btn" ${
-                    canHarvest ? '' : 'disabled'
-                  }>Harvest</button>
+                  <button class="btn btn-success harvest-field-btn" ${canHarvest ? '' : 'disabled'}>Harvest</button>
                 </td>
               </tr>
             </tbody>
@@ -83,7 +80,7 @@ export function displayVineyardEntries() {
     const harvestButton = card.querySelector('.harvest-field-btn');
     harvestButton.addEventListener('click', () => {
       if (canHarvest) {
-        handleGenericTask('Harvesting', (task, mode) => fieldTaskFunction(task, mode, "Harvesting", { fieldId: index }), { fieldId: index });
+        showHarvestOverlay(vineyard, index); // Display the overlay
       }
     });
   });
