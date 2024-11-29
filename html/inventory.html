@@ -17,6 +17,26 @@
     <div class="container text-center flex-grow-1" id="page-content-wrapper">
       <h1>Inventory</h1>
 
+      <!-- Storage Section -->
+      <section class="my-4">
+        <h3>Storage</h3>
+        <table class="table table-bordered">
+          <thead>
+              <tr>
+                  <th>Container</th>
+                  <th>Capacity</th>
+                  <th>Resource</th>
+                  <th>Amount</th>
+                  <th>Quality</th> <!-- New Quality Column -->
+                  <th>Status</th>
+              </tr>
+          </thead>
+          <tbody id="storage-table-body">
+            <!-- Storage resources will be dynamically generated here -->
+          </tbody>
+        </table>
+      </section>
+
       <!-- Warehouse Inventory -->
       <section class="my-4">
         <h3>Warehouse</h3>
@@ -81,18 +101,55 @@
   <script type="module" src="/js/database/loadSidebar.js"></script>
 
   <script type="module">
-    import { inventoryInstance, displayInventory } from '/js/resource.js'; // Ensure proper import
-    import { initializeSidebar } from '/js/database/loadSidebar.js';
-    import { initializePanel } from '/js/loadPanel.js';
-    import { initializeConsole } from '/js/console.js'; // Import the console initializer
-    document.addEventListener('DOMContentLoaded', function () {
-      initializePanel();
-      initializeSidebar();
-      initializeConsole();
+      import { inventoryInstance, displayInventory } from '/js/resource.js'; // Ensure proper import
+      import { initializeSidebar } from '/js/database/loadSidebar.js';
+      import { initializePanel } from '/js/loadPanel.js';
+      import { initializeConsole } from '/js/console.js'; // Import the console initializer
 
-      // Show the inventory
-      displayInventory(inventoryInstance);
-    });
+      document.addEventListener('DOMContentLoaded', function () {
+        initializePanel();
+        initializeSidebar();
+        initializeConsole();
+
+        // Populate storage table
+        populateStorageTable();
+
+        // Show the inventory
+        displayInventory(inventoryInstance);
+      });
+
+    function populateStorageTable() {
+        const storageTableBody = document.getElementById('storage-table-body');
+
+        // Retrieve buildings from local storage
+        const buildings = JSON.parse(localStorage.getItem('buildings')) || []; // Adjusting the key to fetch buildings
+        console.log('Retrieved buildings from local storage:', buildings);
+        // Clear existing entries
+        storageTableBody.innerHTML = '';
+        // Loop through each building and its contents to find tools
+        buildings.forEach(building => {
+            building.contents.forEach(tool => {
+                console.log(`Processing tool: ${tool.name}, Capacity: ${tool.capacity}`); // Log each tool's name and capacity
+                if (tool.capacity > 0) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${tool.name}</td>
+                        <td>${tool.capacity}</td>
+                        <td></td> <!-- Resource -->
+                        <td></td> <!-- Amount -->
+                        <td>N/A</td> <!-- Quality Column -->
+                        <td></td> <!-- Status Column -->
+                    `;
+                    storageTableBody.appendChild(row);
+                    console.log(`Added row for tool: ${tool.name}`); // Log when a row is added
+                } else {
+                    console.log(`Skipped tool: ${tool.name} (Capacity <= 0)`); // Log if tool is skipped
+                }
+            });
+        });
+        // Log final state of the table body
+        console.log('Final HTML of the Storage table:', storageTableBody.innerHTML);
+    }
   </script>
 </body>
 </html>

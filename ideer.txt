@@ -40,6 +40,7 @@ Plant buttom is not disabled when active clearing task, but we dont allow planti
 Imidiatly on building a building the headline (name of the building) disapears. reshows on pageupdate
 Buildingname only shows in taskbox after pagereload
 in buildings.html build buttom change to "Building..." when a building proces is started. But it resets to "Build" on page reload
+Prevent several building and maintaince task on same building
 
 
 

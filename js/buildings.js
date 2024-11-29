@@ -92,11 +92,12 @@ export class Building {
 }
 
 export class Tool {
-  constructor(name, buildingType, speedBonus = 1.0, cost = 0) {
+  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0) {
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
     this.cost = cost; // Add cost property
+    this.capacity = capacity; // Add capacity property
   }
 
   toJSON() {
@@ -104,12 +105,13 @@ export class Tool {
       name: this.name,
       buildingType: this.buildingType,
       speedBonus: this.speedBonus,
-      cost: this.cost // Include cost in serialization
+      cost: this.cost, // Include cost in serialization
+      capacity: this.capacity // Include capacity in serialization
     };
   }
 
   static fromJSON(json) {
-    return new Tool(json.name, json.buildingType, json.speedBonus, json.cost); // Include cost in deserialization
+    return new Tool(json.name, json.buildingType, json.speedBonus, json.cost, json.capacity); // Include capacity in deserialization
   }
 }
 
@@ -120,11 +122,12 @@ const ToolManager = (() => {
 
   function initializeTools() {
     if (!toolsInitialized) {
-      const tractor = new Tool('Tractor', 'Tool Shed', 1.2, 500); // Specify cost
-      const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1, 300); // Specify cost
-      const forklift = new Tool('Forklift', 'Warehouse', 1.0, 400); // Specify cost
-      const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0, 150); // Specify cost
-      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 100); // Specify cost
+      // Specify the capacity for each tool
+      const tractor = new Tool('Tractor', 'Tool Shed', 1.2, 500, 0); 
+      const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0); 
+      const forklift = new Tool('Forklift', 'Warehouse', 1.0, 400, 0); 
+      const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0, 150, 0); 
+      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 100, 10000); 
       tools = [tractor, trimmer, forklift, palletJack, harvestbins];
       toolsInitialized = true;
     }
