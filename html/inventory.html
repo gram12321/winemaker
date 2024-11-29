@@ -105,6 +105,7 @@
       import { initializeSidebar } from '/js/database/loadSidebar.js';
       import { initializePanel } from '/js/loadPanel.js';
       import { initializeConsole } from '/js/console.js'; // Import the console initializer
+    import { formatNumber, getWineQualityCategory, getColorClass  } from '/js/utils.js';
 
       document.addEventListener('DOMContentLoaded', function () {
         initializePanel();
@@ -117,38 +118,83 @@
         // Show the inventory
         displayInventory(inventoryInstance);
       });
+    document.addEventListener('DOMContentLoaded', function () {
+      populateStorageTable(); // Call to populate the storage table
+    });
 
     function populateStorageTable() {
-        const storageTableBody = document.getElementById('storage-table-body');
+      // Get the table body for storage
+      const storageTableBody = document.getElementById('storage-table-body');
 
-        // Retrieve buildings from local storage
-        const buildings = JSON.parse(localStorage.getItem('buildings')) || []; // Adjusting the key to fetch buildings
-        console.log('Retrieved buildings from local storage:', buildings);
-        // Clear existing entries
-        storageTableBody.innerHTML = '';
-        // Loop through each building and its contents to find tools
-        buildings.forEach(building => {
-            building.contents.forEach(tool => {
-                console.log(`Processing tool: ${tool.name}, Capacity: ${tool.capacity}`); // Log each tool's name and capacity
-                if (tool.capacity > 0) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${tool.name}</td>
-                        <td>${tool.capacity}</td>
-                        <td></td> <!-- Resource -->
-                        <td></td> <!-- Amount -->
-                        <td>N/A</td> <!-- Quality Column -->
-                        <td></td> <!-- Status Column -->
-                    `;
-                    storageTableBody.appendChild(row);
-                    console.log(`Added row for tool: ${tool.name}`); // Log when a row is added
-                } else {
-                    console.log(`Skipped tool: ${tool.name} (Capacity <= 0)`); // Log if tool is skipped
-                }
-            });
+      // Load buildings and player inventory from local storage
+      const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+      const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+
+      // Clear existing table content
+      storageTableBody.innerHTML = '';
+
+      buildings.forEach((building) => {
+        // Iterate through contents of each building (assumed to be tools)
+        building.contents.forEach((tool) => {
+          // Check if the tool has a capacity greater than 0
+          if (tool.capacity > 0) {
+            const row = document.createElement('tr');
+
+            const containerCell = document.createElement('td');
+            containerCell.textContent = tool.name; // Using tool.name as container
+
+            const capacityCell = document.createElement('td');
+            capacityCell.textContent = tool.capacity;
+
+            const matchingInventoryItems = playerInventory.filter(item => item.storage === tool.name);
+            const amountCell = document.createElement('td');
+
+            // Calculate total amount and append "t"
+            const totalAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0) || 0;
+            amountCell.textContent = `${formatNumber(totalAmount)} t`;
+
+            const resourceCell = document.createElement('td');
+            // Use first matched item's details for display, or 'N/A' if no matches are found
+            if (matchingInventoryItems.length > 0) {
+              const { resource, state, vintage, fieldName } = matchingInventoryItems[0];
+              resourceCell.innerHTML = `<strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}`;
+            } else {
+              resourceCell.textContent = 'N/A';
+            }
+
+            const qualityCell = document.createElement('td');
+            // Show quality of resource if available or 'N/A'
+            if (matchingInventoryItems.length > 0) {
+              const { quality } = matchingInventoryItems[0];
+              const qualityDescription = getWineQualityCategory(quality);
+              const colorClass = getColorClass(quality);
+              qualityCell.innerHTML = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
+            } else {
+              qualityCell.textContent = 'N/A'; 
+            }
+
+            const statusCell = document.createElement('td');
+            // Use status icon based on the state of the first inventory item
+            if (matchingInventoryItems.length > 0) {
+              const statusIconPath = `/assets/pic/${matchingInventoryItems[0].state.toLowerCase()}_dalle.webp`;
+              statusCell.innerHTML = `<img src="${statusIconPath}" alt="${matchingInventoryItems[0].state}" class="status-image">`;
+            } else {
+              statusCell.textContent = 'N/A'; // Or an appropriate default
+            }
+
+            // Append cells to the row
+            row.appendChild(containerCell);
+            row.appendChild(capacityCell);
+            row.appendChild(resourceCell);
+            row.appendChild(amountCell);
+            row.appendChild(qualityCell);
+            row.appendChild(statusCell);
+
+            // Append the row to the table body
+            storageTableBody.appendChild(row);
+          }
         });
-        // Log final state of the table body
-        console.log('Final HTML of the Storage table:', storageTableBody.innerHTML);
+      });
     }
   </script>
 </body>

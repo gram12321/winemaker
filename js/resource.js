@@ -57,7 +57,7 @@ class Inventory {
               storage: storage // Add storage to the new item's attributes
           });
       }
-
+      console.log(`Adding resource: ${name}, Amount: ${amount}, State: ${state}, Vintage: ${vintage}, Quality: ${quality}, Field Name: ${fieldName}, Field Prestige: ${fieldPrestige}, Storage: ${storage}`);
       console.log(`Current Inventory:`, this.items); // Log the current state of the inventory
   }
 

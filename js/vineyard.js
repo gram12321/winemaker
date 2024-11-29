@@ -117,7 +117,13 @@ export function harvestAcres(index) {
             const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Needs other factors, as ripeness, sugar, acidity, terroir, etc.
 
             // Use the storage parameter from the current task
-            const storage = currentTask.storage || true; // Fallback to true if storage doesn't exist
+            const storage = currentTask.storage; // No default value here
+
+            // Check if storage is undefined
+            if (storage === undefined) {
+                console.error(`Storage is undefined for task associated with field: ${field.name}`);
+                return 0; // Early exit from the function
+            }
 
             // Add the harvested grapes to the inventory, including the field name and prestige
             inventoryInstance.addResource(
