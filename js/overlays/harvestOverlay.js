@@ -18,6 +18,7 @@ export function showHarvestOverlay(vineyard, index) {
       </select>
       <button class="btn btn-success harvest-btn">Start Harvest</button>
       <button class="btn btn-secondary close-btn">Close</button>
+      <div id="error-message" style="color: red; display: none;"></div>
     </div>
   `;
 
@@ -28,6 +29,30 @@ export function showHarvestOverlay(vineyard, index) {
   harvestButton.addEventListener('click', () => {
     const selectedTool = overlayContainer.querySelector('#tool-select').value;
 
+    // Fetch player inventory
+    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+
+    // Log the player inventory for debugging
+    console.log('Player Inventory:', playerInventory);
+
+    const resourceMatches = playerInventory.filter(item => 
+      item.storage === selectedTool && 
+      item.fieldName === vineyard.name && 
+      item.vintage === vineyard.vintage // Match the actual vintage of the vineyard
+    );
+
+    // Log the resources that match the selection criteria
+    console.log('Matching Resources:', resourceMatches);
+
+    // Check if there are resources available matching the criteria
+    if (resourceMatches.length === 0) {
+      const errorMessage = overlayContainer.querySelector('#error-message');
+      errorMessage.textContent = "No available resources or empty containers for the selected tool.";
+      errorMessage.style.display = "block"; // Show error message
+      console.log('Error: No matching resources found.');
+      return; // Early exit if no valid resources
+    }
+
     // Pass selectedTool along with other parameters
     handleGenericTask(
       'Harvesting',
@@ -35,6 +60,7 @@ export function showHarvestOverlay(vineyard, index) {
       { fieldId: index, storage: selectedTool } // Pass selectedTool here
     );
 
+    console.log('Harvesting process initiated for tool:', selectedTool);
     removeOverlay();
   });
 
