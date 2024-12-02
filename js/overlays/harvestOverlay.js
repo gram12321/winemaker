@@ -28,8 +28,6 @@ export function showHarvestOverlay(vineyard, index) {
               <th>Capacity</th>
               <th>Resource</th>
               <th>Amount</th>
-              <th>Quality</th>
-              <th>Status</th>
           </tr>
         </thead>
         <tbody id="storage-display-body">
@@ -52,7 +50,7 @@ export function showHarvestOverlay(vineyard, index) {
     storageDisplayBody.innerHTML = ''; // Clear previous display
 
     // Populate the storage table based on the selected tool
-    populateStorageTable('storage-display-body');  // Call populateStorageTable to update display
+    populateStorageTable('storage-display-body', true);  // Call populateStorageTable to update display while excluding Quality and Status columns
   }
 
   // Initialize storage display on tool change

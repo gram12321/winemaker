@@ -169,7 +169,7 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
     });
 }
 
-export function populateStorageTable(storageTableBodyId) {
+export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus = false) {
   const storageTableBody = document.getElementById(storageTableBodyId);
 
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
@@ -182,9 +182,9 @@ export function populateStorageTable(storageTableBodyId) {
       if (tool.capacity > 0) {
         const row = document.createElement('tr');
 
-        // Update containerCell to show unique name
+        // Show unique name like "Harvest Bin #1"
         const containerCell = document.createElement('td');
-        containerCell.textContent = `${tool.name} #${tool.instanceNumber}`; // Show unique name like "Harvest Bin #1"
+        containerCell.textContent = `${tool.name} #${tool.instanceNumber}`;
 
         const capacityCell = document.createElement('td');
         capacityCell.textContent = tool.capacity;
@@ -202,30 +202,34 @@ export function populateStorageTable(storageTableBodyId) {
           resourceCell.textContent = 'N/A';
         }
 
-        const qualityCell = document.createElement('td');
-        if (matchingInventoryItems.length > 0) {
-          const { quality } = matchingInventoryItems[0];
-          const qualityDescription = getWineQualityCategory(quality);
-          const colorClass = getColorClass(quality);
-          qualityCell.innerHTML = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
-        } else {
-          qualityCell.textContent = 'N/A'; 
-        }
-
-        const statusCell = document.createElement('td');
-        if (matchingInventoryItems.length > 0) {
-          const statusIconPath = `/assets/pic/${matchingInventoryItems[0].state.toLowerCase()}_dalle.webp`;
-          statusCell.innerHTML = `<img src="${statusIconPath}" alt="${matchingInventoryItems[0].state}" class="status-image">`;
-        } else {
-          statusCell.textContent = 'N/A';
-        }
-
+        // Append essential cells
         row.appendChild(containerCell);
         row.appendChild(capacityCell);
         row.appendChild(resourceCell);
         row.appendChild(amountCell);
-        row.appendChild(qualityCell);
-        row.appendChild(statusCell);
+
+        // Conditionally append Quality and Status columns
+        if (!excludeQualityAndStatus) {
+          const qualityCell = document.createElement('td');
+          if (matchingInventoryItems.length > 0) {
+            const { quality } = matchingInventoryItems[0];
+            const qualityDescription = getWineQualityCategory(quality);
+            const colorClass = getColorClass(quality);
+            qualityCell.innerHTML = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
+          } else {
+            qualityCell.textContent = 'N/A'; 
+          }
+          row.appendChild(qualityCell);
+
+          const statusCell = document.createElement('td');
+          if (matchingInventoryItems.length > 0) {
+            const statusIconPath = `/assets/pic/${matchingInventoryItems[0].state.toLowerCase()}_dalle.webp`;
+            statusCell.innerHTML = `<img src="${statusIconPath}" alt="${matchingInventoryItems[0].state}" class="status-image">`;
+          } else {
+            statusCell.textContent = 'N/A';
+          }
+          row.appendChild(statusCell);
+        }
 
         storageTableBody.appendChild(row);
       }
