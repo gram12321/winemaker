@@ -1,6 +1,8 @@
 import { sellWines } from './sales.js';
 import { formatNumber, getWineQualityCategory, getColorClass  } from './utils.js';
 
+// Add this at the end of resource.js
+
 class Resource {
   constructor(name, naturalYield) {
     this.name = name;
@@ -165,6 +167,70 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
             }
         }
     });
+}
+
+
+export function populateStorageTable(storageTableBodyId) {
+  const storageTableBody = document.getElementById(storageTableBodyId);
+
+  const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+  const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+
+  storageTableBody.innerHTML = '';
+
+  buildings.forEach((building) => {
+    building.contents.forEach((tool) => {
+      if (tool.capacity > 0) {
+        const row = document.createElement('tr');
+
+        const containerCell = document.createElement('td');
+        containerCell.textContent = tool.name;
+
+        const capacityCell = document.createElement('td');
+        capacityCell.textContent = tool.capacity;
+
+        const matchingInventoryItems = playerInventory.filter(item => item.storage === tool.name);
+        const amountCell = document.createElement('td');
+        const totalAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0) || 0;
+        amountCell.textContent = `${formatNumber(totalAmount)} t`;
+
+        const resourceCell = document.createElement('td');
+        if (matchingInventoryItems.length > 0) {
+          const { resource, state, vintage, fieldName } = matchingInventoryItems[0];
+          resourceCell.innerHTML = `<strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}`;
+        } else {
+          resourceCell.textContent = 'N/A';
+        }
+
+        const qualityCell = document.createElement('td');
+        if (matchingInventoryItems.length > 0) {
+          const { quality } = matchingInventoryItems[0];
+          const qualityDescription = getWineQualityCategory(quality);
+          const colorClass = getColorClass(quality);
+          qualityCell.innerHTML = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
+        } else {
+          qualityCell.textContent = 'N/A'; 
+        }
+
+        const statusCell = document.createElement('td');
+        if (matchingInventoryItems.length > 0) {
+          const statusIconPath = `/assets/pic/${matchingInventoryItems[0].state.toLowerCase()}_dalle.webp`;
+          statusCell.innerHTML = `<img src="${statusIconPath}" alt="${matchingInventoryItems[0].state}" class="status-image">`;
+        } else {
+          statusCell.textContent = 'N/A';
+        }
+
+        row.appendChild(containerCell);
+        row.appendChild(capacityCell);
+        row.appendChild(resourceCell);
+        row.appendChild(amountCell);
+        row.appendChild(qualityCell);
+        row.appendChild(statusCell);
+
+        storageTableBody.appendChild(row);
+      }
+    });
+  });
 }
 
 // Inventory instance

@@ -1,13 +1,16 @@
 import { getBuildingTools } from '../buildings.js'; 
 import { handleGenericTask } from '../administration.js'; 
 import { fieldTaskFunction } from '../farmland.js'; 
+import { populateStorageTable } from '../resource.js'; // Importing populateStorageTable
 
 export function showHarvestOverlay(vineyard, index) {
   const overlayContainer = document.createElement('div');
   overlayContainer.className = 'overlay';
 
   const availableTools = getBuildingTools().filter(tool => tool.capacity > 0);
-  const toolOptions = availableTools.map(tool => `<option value="${tool.name}">${tool.name} (Capacity: ${tool.capacity})</option>`).join('');
+  const toolOptions = availableTools.map(tool => 
+    `<option value="${tool.name}">${tool.name} (Capacity: ${tool.capacity})</option>`
+  ).join('');
 
   overlayContainer.innerHTML = `
     <div class="overlay-content">
@@ -16,54 +19,63 @@ export function showHarvestOverlay(vineyard, index) {
       <select id="tool-select">
         ${toolOptions}
       </select>
+
+      <!-- Storage table starts here -->
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+              <th>Container</th>
+              <th>Capacity</th>
+              <th>Resource</th>
+              <th>Amount</th>
+              <th>Quality</th>
+              <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="storage-display-body">
+          <!-- Storage resources will be dynamically generated here -->
+        </tbody>
+      </table>
+      <!-- Storage table ends here -->
+
       <button class="btn btn-success harvest-btn">Start Harvest</button>
       <button class="btn btn-secondary close-btn">Close</button>
-      <div id="error-message" style="color: red; display: none;"></div>
     </div>
   `;
 
   document.body.appendChild(overlayContainer);
 
-  const harvestButton = overlayContainer.querySelector('.harvest-btn');
-
-  harvestButton.addEventListener('click', () => {
+  // Function to display storage options based on selected tool
+  function updateStorageDisplay() {
     const selectedTool = overlayContainer.querySelector('#tool-select').value;
+    const storageDisplayBody = overlayContainer.querySelector('#storage-display-body');
+    storageDisplayBody.innerHTML = ''; // Clear previous display
 
-    // Fetch player inventory
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    // Populate the storage table based on the selected tool
+    populateStorageTable('storage-display-body');  // Call populateStorageTable to update display
+  }
 
-    // Log the player inventory for debugging
-    console.log('Player Inventory:', playerInventory);
+  // Initialize storage display on tool change
+  overlayContainer.querySelector('#tool-select').addEventListener('change', updateStorageDisplay);
 
-    const resourceMatches = playerInventory.filter(item => 
-      item.storage === selectedTool && 
-      item.fieldName === vineyard.name && 
-      item.vintage === vineyard.vintage // Match the actual vintage of the vineyard
-    );
+  // Initial call to display storage based on the default selected tool
+  updateStorageDisplay();
 
-    // Log the resources that match the selection criteria
-    console.log('Matching Resources:', resourceMatches);
-
-    // Check if there are resources available matching the criteria
-    if (resourceMatches.length === 0) {
-      const errorMessage = overlayContainer.querySelector('#error-message');
-      errorMessage.textContent = "No available resources or empty containers for the selected tool.";
-      errorMessage.style.display = "block"; // Show error message
-      console.log('Error: No matching resources found.');
-      return; // Early exit if no valid resources
-    }
+  // Event listener for the harvest button
+  overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
+    const selectedTool = overlayContainer.querySelector('#tool-select').value;
 
     // Pass selectedTool along with other parameters
     handleGenericTask(
       'Harvesting',
       (task, mode) => fieldTaskFunction(task, mode, 'Harvesting', { fieldId: index, storage: selectedTool }),
-      { fieldId: index, storage: selectedTool } // Pass selectedTool here
+      { fieldId: index, storage: selectedTool }
     );
 
-    console.log('Harvesting process initiated for tool:', selectedTool);
     removeOverlay();
   });
 
+  // Event listener for the close button and overlay
   const closeButton = overlayContainer.querySelector('.close-btn');
   closeButton.addEventListener('click', removeOverlay);
   overlayContainer.addEventListener('click', (event) => {
