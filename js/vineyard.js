@@ -105,60 +105,86 @@ export function harvestAcres(index) {
 
         const workApplied = calculateWorkApplied(currentTask.staff || [], 'harvestAcres');
         const acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
-        const acresHarvested = Math.min(workApplied, acresLeftToHarvest);
 
-        if (acresHarvested > 0) {
-            const grapesHarvested = farmlandYield(field) * acresHarvested * 5; // needs to be a more realistic amount.
+        // Calculate maximum acres that can be harvested based on storage capacity
+        const storage = currentTask.storage;
 
-            // Get the altitude range for normalization
-            const altitudeRange = regionAltitudeRanges[field.country][field.region];
-            const normalizedAltitude = normalizeAltitude(field.altitude, altitudeRange);
-            const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
-            const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2); // Needs other factors, as ripeness, sugar, acidity, terroir, etc.
+        // Check capacity of the selected storage
+        const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+        const buildingContainingTool = buildings.find(building => building.contents.some(content => `${content.name} #${content.instanceNumber}` === storage));
+        const tool = buildingContainingTool ? buildingContainingTool.contents.find(content => `${content.name} #${content.instanceNumber}` === storage) : null;
 
-            // Use the storage parameter from the current task
-            const storage = currentTask.storage; // No default value here
-
-            // Check if storage is undefined
-            if (storage === undefined) {
-                console.error(`Storage is undefined for task associated with field: ${field.name}`);
-                return 0; // Early exit from the function
-            }
-
-            // Add the harvested grapes to the inventory, including the field name and prestige
-            inventoryInstance.addResource(
-                resourceName,
-                grapesHarvested,
-                state,
-                gameYear,
-                quality,
-                field.name, // Pass the field's name
-                field.farmlandPrestige, // Pass the field's prestige
-                storage // Use the retrieved storage value
-            );
-
-            const harvestedFormatted = `${acresHarvested} acres`; 
-            const remainingFormatted = `${totalAcres - field.currentAcresHarvested} acres`;
-
-            addConsoleMessage(`Harvested <strong>${formatNumber(grapesHarvested)} tons</strong> of ${resourceName} with quality ${quality} from ${field.name} across <strong>${harvestedFormatted}</strong>. Remaining: ${remainingFormatted}`);
-
-            // Update field's harvested state
-            field.currentAcresHarvested = (field.currentAcresHarvested || 0) + acresHarvested;
-
-            if (field.currentAcresHarvested >= totalAcres) {
-                addConsoleMessage(`${field.name} fully harvested`);
-                field.currentAcresHarvested = 0;
-                field.status = 'Harvested';
-            }
-
-            // Save updated inventory and farmland status
-            saveInventory();
-            localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-            return acresHarvested;
-        } else {
-            addConsoleMessage(`Nothing to harvest. ${field.name} is already fully harvested.`);
+        if (!tool) {
+            addConsoleMessage(`The storage tool ${storage} could not be found.`);
+            return 0;
         }
+
+        // Calculate current storage amount
+        const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+        const currentStoredAmount = playerInventory
+            .filter(item => item.storage === storage)
+            .reduce((total, item) => total + item.amount, 0);
+
+        // Calculate space available and maximum acres that can be harvested based on the storage capacity
+        const spaceAvailable = tool.capacity - currentStoredAmount;
+        const maxAcresByCapacity = Math.floor(spaceAvailable / (farmlandYield(field) * 5)); // Considering the yield per acre
+        const acresHarvested = Math.min(workApplied, acresLeftToHarvest, maxAcresByCapacity);
+
+        // Calculate the amount of grapes to store
+        const grapesHarvested = farmlandYield(field) * acresHarvested * 5; 
+        const grapesToStore = Math.min(grapesHarvested, spaceAvailable); 
+
+        if (grapesToStore <= 0) {
+            if (acresLeftToHarvest > 0) {
+                addConsoleMessage(`<span style="color:red;">Insufficient capacity in ${storage}. Harvested ${acresHarvested} acres, but storage limit reached.</span>`);
+            } else {
+                addConsoleMessage(`<span style="color:red;">Insufficient capacity in ${storage}. Cannot store any more grapes.</span>`);
+            }
+            return 0; // No more grapes can be added due to storage limitations
+        }
+
+        // Log a warning if we're hitting the capacity limit
+        if (grapesToStore === spaceAvailable) {
+            addConsoleMessage(`<span style="color:orange;">Warning: Reached storage capacity for ${storage}. Only this amount can be stored.</span>`);
+        }
+
+        // Get the altitude range for normalization
+        const altitudeRange = regionAltitudeRanges[field.country][field.region];
+        const normalizedAltitude = normalizeAltitude(field.altitude, altitudeRange);
+        const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
+        const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2);
+
+        // Add the harvested grapes to the inventory, using grapesToStore instead of grapesHarvested
+        inventoryInstance.addResource(
+            resourceName,
+            grapesToStore,
+            state,
+            gameYear,
+            quality,
+            field.name,
+            field.farmlandPrestige,
+            storage
+        );
+
+        const harvestedFormatted = `${acresHarvested} acres`;
+        const remainingFormatted = `${totalAcres - field.currentAcresHarvested} acres`;
+
+        addConsoleMessage(`Harvested <strong>${formatNumber(grapesToStore)} tons</strong> of ${resourceName} with quality ${quality} from ${field.name} across <strong>${harvestedFormatted}</strong>. Remaining: ${remainingFormatted}`);
+
+        // Update field's harvested state
+        field.currentAcresHarvested = (field.currentAcresHarvested || 0) + acresHarvested;
+
+        if (field.currentAcresHarvested >= totalAcres) {
+            addConsoleMessage(`${field.name} fully harvested`);
+            field.currentAcresHarvested = 0;
+            field.status = 'Harvested';
+        }
+
+        // Save updated inventory and farmland status
+        saveInventory();
+        localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+        return acresHarvested;
     } else {
         addConsoleMessage(`Invalid operation. No planted resource found for ${farmlands[index]?.name || 'unknown'}.`);
     }

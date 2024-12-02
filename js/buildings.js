@@ -142,7 +142,7 @@ const ToolManager = (() => {
       const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0); 
       const forklift = new Tool('Forklift', 'Warehouse', 1.0, 400, 0); 
       const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0, 150, 0); 
-      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 100, 10000); 
+      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 100, 3000); 
       tools = [tractor, trimmer, forklift, palletJack, harvestbins];
       toolsInitialized = true;
     }
