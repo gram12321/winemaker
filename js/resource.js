@@ -182,6 +182,21 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
       if (tool.capacity > 0) {
         const row = document.createElement('tr');
 
+        // Create if not excluding Quality and Status
+        if (excludeQualityAndStatus) {
+          const selectCell = document.createElement('td');
+          const radioInput = document.createElement('input');
+          radioInput.type = 'radio';
+          radioInput.name = 'tool-select'; // Grouping the radio buttons
+          radioInput.value = `${tool.name} #${tool.instanceNumber}`; // Set value to the tool instance
+
+          selectCell.appendChild(radioInput);
+          row.appendChild(selectCell);
+        } else {
+          // If excluding Quality and Status, add a placeholder cell
+
+        }
+
         // Display the unique name of the tool instance
         const containerCell = document.createElement('td');
         containerCell.textContent = `${tool.name} #${tool.instanceNumber}`;

@@ -8,31 +8,15 @@ export function showHarvestOverlay(vineyard, index) {
   const overlayContainer = document.createElement('div');
   overlayContainer.className = 'overlay';
 
-  // Load existing buildings from localStorage
-  const buildings = loadBuildings();
-
-  // Iterate over all buildings to collect tools for tool selection
-  const toolInstances = buildings.flatMap(building =>
-    building.contents.filter(tool => tool.capacity > 0) // Filter tools with capacity
-  );
-
-  // Generate dropdown options for existing tool instances
-  const toolOptions = toolInstances.map(tool => 
-    `<option value="${tool.name} #${tool.instanceNumber}">${tool.name} #${tool.instanceNumber}</option>`
-  ).join('');
-
   overlayContainer.innerHTML = `
     <div class="overlay-content">
       <h2>Harvest Options for ${vineyard.name}</h2>
-      <label for="tool-select">Select Tool:</label>
-      <select id="tool-select">
-        ${toolOptions}
-      </select>
 
       <!-- Storage table starts here -->
       <table class="table table-bordered">
         <thead>
           <tr>
+              <th>Select</th>
               <th>Container</th>
               <th>Capacity</th>
               <th>Resource</th>
@@ -52,27 +36,30 @@ export function showHarvestOverlay(vineyard, index) {
 
   document.body.appendChild(overlayContainer);
 
+  // Initialize storage display
+  updateStorageDisplay();
+
   // Function to update storage display for the selected tool
   function updateStorageDisplay() {
     populateStorageTable('storage-display-body', true); // Ensure populated table excludes Quality and Status
   }
 
-  // Initialize storage display based on tool change
-  overlayContainer.querySelector('#tool-select').addEventListener('change', updateStorageDisplay);
-
-  // Initial call to display storage based on default selected tool
-  updateStorageDisplay();
-
   // Event listener for the harvest button
   overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
-    const selectedTool = overlayContainer.querySelector('#tool-select').value;
-    // Ensure the selected storage is getting the selected tool name and number
-    handleGenericTask(
-        'Harvesting',
-        (task, mode) => fieldTaskFunction(task, mode, 'Harvesting', { fieldId: index, storage: selectedTool }),
-        { fieldId: index, storage: selectedTool } // Pass the correct stored value from tool selection
-    );
-    removeOverlay();
+    const selectedRadio = overlayContainer.querySelector('input[name="tool-select"]:checked');
+    if (selectedRadio) {
+      const selectedTool = selectedRadio.value;
+
+      // Ensure the selected storage is getting the selected tool name and number
+      handleGenericTask(
+          'Harvesting',
+          (task, mode) => fieldTaskFunction(task, mode, 'Harvesting', { fieldId: index, storage: selectedTool }),
+          { fieldId: index, storage: selectedTool } // Pass the correct stored value from tool selection
+      );
+      removeOverlay();
+    } else {
+      alert('Please select a tool to proceed with harvesting.');
+    }
   });
 
   // Event listener for the close button and overlay
