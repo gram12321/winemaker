@@ -1,10 +1,8 @@
-
-import { getBuildingTools } from '../buildings.js';
+import { getBuildingTools, createTool } from '../buildings.js';
 import { addConsoleMessage } from '/js/console.js';
 import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import path is correct
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction } from '../finance.js'; // Ensure this import is at the top of your file.
-
 
 function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
@@ -29,13 +27,14 @@ function setupToolButtons(building, tools) {
     const button = document.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
     if (button) {
       button.addEventListener('click', () => {
-        if (building.addContent(tool)) {
+        const newToolInstance = createTool(tool.name); // Create a new instance of the tool
+        if (newToolInstance && building.addContent(newToolInstance)) { 
           // Notify addition of the tool
-          addConsoleMessage(`${tool.name} added to ${building.name}.`);
+          addConsoleMessage(`${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}.`);
 
           // Deduct the cost of the tool
-          const expenseMessage = `Purchased ${tool.name} for €${tool.cost}`;
-          addTransaction('Expense', expenseMessage, -tool.cost);
+          const expenseMessage = `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber} for €${newToolInstance.cost}`;
+          addTransaction('Expense', expenseMessage, -newToolInstance.cost);
 
           // Notify expense
           addConsoleMessage(expenseMessage);
@@ -75,7 +74,6 @@ export function showBuildingOverlay(building) {
 }
 
 // Function to render the visual representation of capacity
-// Function to render the visual representation of capacity
 function renderCapacityVisual(building) {
   const capacityGrid = document.getElementById('capacity-grid');
   if (!capacityGrid) return;
@@ -102,7 +100,6 @@ function renderCapacityVisual(building) {
     capacityGrid.appendChild(cell);
   }
 }
-
 
 export function hideBuildingOverlay() {
   const overlay = document.getElementById('buildingOverlay');

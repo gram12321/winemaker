@@ -91,13 +91,25 @@ export class Building {
   }
 }
 
-export class Tool {
+class Tool {
+  static instanceCount = {}; // Static map to hold instance counts for each tool type
+
   constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0) {
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
     this.cost = cost; // Add cost property
     this.capacity = capacity; // Add capacity property
+    this.instanceNumber = this.getNextInstanceNumber(); // Assign instance number
+  }
+
+  getNextInstanceNumber() {
+    // Initialize count if it doesn't exist
+    if (!Tool.instanceCount[this.name]) {
+      Tool.instanceCount[this.name] = 0;
+    }
+    Tool.instanceCount[this.name] += 1; // Increment the count for this tool type
+    return Tool.instanceCount[this.name]; // Return the current instance number
   }
 
   toJSON() {
@@ -105,13 +117,16 @@ export class Tool {
       name: this.name,
       buildingType: this.buildingType,
       speedBonus: this.speedBonus,
-      cost: this.cost, // Include cost in serialization
-      capacity: this.capacity // Include capacity in serialization
+      cost: this.cost,
+      capacity: this.capacity,
+      instanceNumber: this.instanceNumber // Include instance number in serialization
     };
   }
 
   static fromJSON(json) {
-    return new Tool(json.name, json.buildingType, json.speedBonus, json.cost, json.capacity); // Include capacity in deserialization
+    const tool = new Tool(json.name, json.buildingType, json.speedBonus, json.cost, json.capacity);
+    tool.instanceNumber = json.instanceNumber; // Include instance number in deserialization
+    return tool;
   }
 }
 
@@ -134,14 +149,28 @@ const ToolManager = (() => {
     return tools;
   }
 
+  // New function to create tool instances based on their name
+  function createToolInstance(toolName) {
+    const toolTemplate = tools.find(tool => tool.name === toolName);
+    if (toolTemplate) {
+      return new Tool(toolTemplate.name, toolTemplate.buildingType, 
+                       toolTemplate.speedBonus, toolTemplate.cost, 
+                       toolTemplate.capacity);
+    } else {
+      console.log('Tool template not found');
+      return null; // Handle error gracefully
+    }
+  }
+
   return {
-    getTools: initializeTools
+    getTools: initializeTools,
+    createToolInstance // Expose the function to create tool instances
   };
 })();
 
-// Export the more generalized function
+// Export the more generalized functions
 export const getBuildingTools = () => ToolManager.getTools();
-
+export const createTool = (toolName) => ToolManager.createToolInstance(toolName);
 
 
 export function buildBuilding(buildingName) {

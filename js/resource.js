@@ -169,7 +169,6 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
     });
 }
 
-
 export function populateStorageTable(storageTableBodyId) {
   const storageTableBody = document.getElementById(storageTableBodyId);
 
@@ -183,8 +182,9 @@ export function populateStorageTable(storageTableBodyId) {
       if (tool.capacity > 0) {
         const row = document.createElement('tr');
 
+        // Update containerCell to show unique name
         const containerCell = document.createElement('td');
-        containerCell.textContent = tool.name;
+        containerCell.textContent = `${tool.name} #${tool.instanceNumber}`; // Show unique name like "Harvest Bin #1"
 
         const capacityCell = document.createElement('td');
         capacityCell.textContent = tool.capacity;
