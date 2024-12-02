@@ -2,14 +2,23 @@ import { getBuildingTools } from '../buildings.js';
 import { handleGenericTask } from '../administration.js'; 
 import { fieldTaskFunction } from '../farmland.js'; 
 import { populateStorageTable } from '../resource.js'; // Importing populateStorageTable
+import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 
 export function showHarvestOverlay(vineyard, index) {
   const overlayContainer = document.createElement('div');
   overlayContainer.className = 'overlay';
 
-  const availableTools = getBuildingTools().filter(tool => tool.capacity > 0);
-  const toolOptions = availableTools.map(tool => 
-    `<option value="${tool.name}">${tool.name} (Capacity: ${tool.capacity})</option>`
+  // Load existing buildings from localStorage
+  const buildings = loadBuildings();
+
+  // Iterate over all buildings to collect tools for tool selection
+  const toolInstances = buildings.flatMap(building =>
+    building.contents.filter(tool => tool.capacity > 0) // Filter tools with capacity
+  );
+
+  // Generate dropdown options for existing tool instances
+  const toolOptions = toolInstances.map(tool => 
+    `<option value="${tool.name} #${tool.instanceNumber}">${tool.name} #${tool.instanceNumber}</option>`
   ).join('');
 
   overlayContainer.innerHTML = `
@@ -43,33 +52,26 @@ export function showHarvestOverlay(vineyard, index) {
 
   document.body.appendChild(overlayContainer);
 
-  // Function to display storage options based on selected tool
+  // Function to update storage display for the selected tool
   function updateStorageDisplay() {
-    const selectedTool = overlayContainer.querySelector('#tool-select').value;
-    const storageDisplayBody = overlayContainer.querySelector('#storage-display-body');
-    storageDisplayBody.innerHTML = ''; // Clear previous display
-
-    // Populate the storage table based on the selected tool
-    populateStorageTable('storage-display-body', true);  // Call populateStorageTable to update display while excluding Quality and Status columns
+    populateStorageTable('storage-display-body', true); // Ensure populated table excludes Quality and Status
   }
 
-  // Initialize storage display on tool change
+  // Initialize storage display based on tool change
   overlayContainer.querySelector('#tool-select').addEventListener('change', updateStorageDisplay);
 
-  // Initial call to display storage based on the default selected tool
+  // Initial call to display storage based on default selected tool
   updateStorageDisplay();
 
   // Event listener for the harvest button
   overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
     const selectedTool = overlayContainer.querySelector('#tool-select').value;
-
-    // Pass selectedTool along with other parameters
+    // Ensure the selected storage is getting the selected tool name and number
     handleGenericTask(
-      'Harvesting',
-      (task, mode) => fieldTaskFunction(task, mode, 'Harvesting', { fieldId: index, storage: selectedTool }),
-      { fieldId: index, storage: selectedTool }
+        'Harvesting',
+        (task, mode) => fieldTaskFunction(task, mode, 'Harvesting', { fieldId: index, storage: selectedTool }),
+        { fieldId: index, storage: selectedTool } // Pass the correct stored value from tool selection
     );
-
     removeOverlay();
   });
 

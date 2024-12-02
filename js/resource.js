@@ -175,40 +175,43 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
 
-  storageTableBody.innerHTML = '';
+  storageTableBody.innerHTML = ''; // Clear existing table content
 
   buildings.forEach((building) => {
     building.contents.forEach((tool) => {
       if (tool.capacity > 0) {
         const row = document.createElement('tr');
 
-        // Show unique name like "Harvest Bin #1"
+        // Display the unique name of the tool instance
         const containerCell = document.createElement('td');
         containerCell.textContent = `${tool.name} #${tool.instanceNumber}`;
+        row.appendChild(containerCell);
 
+        // Display the tool capacity
         const capacityCell = document.createElement('td');
         capacityCell.textContent = tool.capacity;
+        row.appendChild(capacityCell);
 
-        const matchingInventoryItems = playerInventory.filter(item => item.storage === tool.name);
-        const amountCell = document.createElement('td');
-        const totalAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0) || 0;
-        amountCell.textContent = `${formatNumber(totalAmount)} t`;
+        // Filter for matching inventory items for this specific tool instance
+        const matchingInventoryItems = playerInventory.filter(item => item.storage === `${tool.name} #${tool.instanceNumber}`);
 
+        // Preparing the resource details for the row
         const resourceCell = document.createElement('td');
         if (matchingInventoryItems.length > 0) {
-          const { resource, state, vintage, fieldName } = matchingInventoryItems[0];
+          const { resource, fieldName, vintage } = matchingInventoryItems[0];
           resourceCell.innerHTML = `<strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}`;
         } else {
-          resourceCell.textContent = 'N/A';
+          resourceCell.textContent = 'N/A'; // Display N/A if no items are found
         }
+        row.appendChild(resourceCell); // Correct placement of "resource"
 
-        // Append essential cells
-        row.appendChild(containerCell);
-        row.appendChild(capacityCell);
-        row.appendChild(resourceCell);
-        row.appendChild(amountCell);
+        // Amount cell
+        const amountCell = document.createElement('td');
+        const totalAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0) || 0;
+        amountCell.textContent = `${formatNumber(totalAmount)} t`; // Display the total amount
+        row.appendChild(amountCell); // Correct placement of "amount"
 
-        // Conditionally append Quality and Status columns
+        // Check if quality and status should be included
         if (!excludeQualityAndStatus) {
           const qualityCell = document.createElement('td');
           if (matchingInventoryItems.length > 0) {
@@ -226,11 +229,12 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
             const statusIconPath = `/assets/pic/${matchingInventoryItems[0].state.toLowerCase()}_dalle.webp`;
             statusCell.innerHTML = `<img src="${statusIconPath}" alt="${matchingInventoryItems[0].state}" class="status-image">`;
           } else {
-            statusCell.textContent = 'N/A';
+            statusCell.textContent = 'N/A'; 
           }
           row.appendChild(statusCell);
         }
 
+        // Append the constructed row to the storage table body
         storageTableBody.appendChild(row);
       }
     });
