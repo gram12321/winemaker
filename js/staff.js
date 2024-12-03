@@ -240,101 +240,58 @@ export function calculateWorkApplied(taskStaff, processingFunction) {
     let workApplied = 0;
     const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
     const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
-    console.log(`Calculating work applied for processing function: ${processingFunction}`);
-
-    // Look up the relevant task type using processingFunction
     const taskTypeEntry = Object.values(Task.taskTypes).find(entry => 
         entry.processingFunctions.includes(processingFunction)
     );
-
+    
     if (!taskTypeEntry) {
-        console.warn(`Unknown processing function: ${processingFunction}`);
         return workApplied;
     }
-
     const { processPerWorkApplied, skillKey } = taskTypeEntry;
-
-    // Calculate work applied per staff member
     taskStaff.forEach(staffId => {
         const staffMember = staffData.find(staff => staff.id.toString() === staffId);
         if (staffMember) {
             const taskCount = tasks.reduce((count, task) => {
                 return (task.staff && task.staff.includes(staffId.toString())) ? count + 1 : count;
             }, 0);
-
             let skillLevel = 0;
-
             if (skillKey && staffMember.skills[skillKey]) {
                 skillLevel = parseFloat(staffMember.skills[skillKey][skillKey]);
-                console.log(`Staff ID: ${staffId}, Skill Level: ${skillLevel}`);
-            } else {
-                console.warn(`Unknown skill key: ${skillKey} for Staff ID: ${staffId}`);
             }
-
             if (taskCount > 0 && skillLevel > 0) {
                 const workFromStaff = (staffMember.workforce / taskCount) * skillLevel;
-                console.log(`Staff ID: ${staffId}, Task Count: ${taskCount}, Workforce Share: ${staffMember.workforce / taskCount}, Applied Work: ${workFromStaff}`);
                 workApplied += workFromStaff;
             }
-        } else {
-            console.warn(`Staff ID: ${staffId} not found in staff data.`);
         }
     });
-
+    
     let totalWorkApplied = workApplied * processPerWorkApplied;
-    console.log(`Initial Total work applied: ${totalWorkApplied}`);
-
-    // Apply speed bonus only to field tasks
     if (skillKey === 'field') {
-        // Retrieve all building contents that may contain tools for field tasks
-        const buildings = loadBuildings(); // Make sure this function loads all buildings
-        console.log(`Loaded Buildings:`, buildings);
-
+        const buildings = loadBuildings();
         const tools = [];
-
-        // Iterate over buildings to gather relevant tools
         buildings.forEach(building => {
-            console.log(`Checking building: ${building.name || 'Unnamed Building'} - Contents:`, building.contents);
             if (building.contents) {
                 building.contents.forEach(tool => {
-                    // Only check for buildingType
                     if (tool.buildingType === 'Tool Shed') {
-                        tools.push(tool); // Add tool to the list if it meets the criteria
-                        console.log(`Found tool: ${tool.name} with Speed Bonus: ${tool.speedBonus}`);
+                        tools.push(tool);
                     }
                 });
             }
         });
-
-        // Log total tools found
-        console.log(`Total tools found for field work: ${tools.length}`);
-
-        // Sort tools by speed bonus descending
+        
         tools.sort((a, b) => b.speedBonus - a.speedBonus);
-
-        // Assign tools to staff based on available tools
         const assignedTools = new Array(taskStaff.length).fill(null);
         tools.forEach((tool, index) => {
             if (index < taskStaff.length) {
-                assignedTools[index] = tool; // Assign tool to staff member
-                console.log(`Assigned Tool: ${tool.name} to staff member ${index + 1}`);
+                assignedTools[index] = tool;
             }
         });
-
-        // Calculate total work applied with tool bonuses
+        
         assignedTools.forEach((tool, index) => {
             if (tool) {
-                console.log(`Applying Tool: ${tool.name} - Staff ${index + 1}, Base Work Applied: ${workApplied}, Speed Bonus: ${tool.speedBonus}`);
-                totalWorkApplied += workApplied * (tool.speedBonus - 1.0); // Adjust work based on tool speed bonus
-            } else {
-                console.log(`No tool assigned to staff ${index + 1}`);
+                totalWorkApplied += workApplied * (tool.speedBonus - 1.0);
             }
         });
-
-        console.log(`Total work applied with tool assignments: ${totalWorkApplied}`);
     }
-
-    console.log(`Final Total work applied for ${processingFunction}: ${totalWorkApplied}, using Process Per Work Applied: ${processPerWorkApplied}`);
     return totalWorkApplied;
 }
