@@ -142,8 +142,9 @@ const ToolManager = (() => {
       const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0); 
       const forklift = new Tool('Forklift', 'Warehouse', 1.0, 400, 0); 
       const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0, 150, 0); 
-      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 100, 3000); 
-      tools = [tractor, trimmer, forklift, palletJack, harvestbins];
+      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 1000, 3000); 
+      const fermentationTank = new Tool('Fermentation Tank', 'Warehouse', 1.0, 6000, 2000);
+      tools = [tractor, trimmer, forklift, palletJack, harvestbins, fermentationTank];
       toolsInitialized = true;
     }
     return tools;
@@ -213,6 +214,12 @@ export function updateBuildingCards() {
     const buildings = loadBuildings();
     const building = buildings.find(b => b.name === buildingName);
 
+    // Update the building name in the card
+    const nameDiv = cardDiv.querySelector('.building-name');
+    if (nameDiv) {
+      nameDiv.textContent = buildingName;
+    }
+
     const status = building ? building.getStatus() : "Unbuilt";
     const level = building ? building.level : 0;
     const capacity = building ? building.capacity : 0;
@@ -227,6 +234,7 @@ export function updateBuildingCards() {
     }
 
     detailDiv.innerHTML = `
+      <p><strong>${buildingName}</strong></p>  <!-- Add Building Name here -->
       <p>Status: ${status}</p>
       <p>Level: ${level}</p>
       <p>Upgrade Cost: ${upgradeCost}</p>
