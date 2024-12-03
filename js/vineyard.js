@@ -86,6 +86,11 @@ export function displayVineyardEntries() {
   });
 }
 
+/**
+ * Harvests a specified number of acres from a given field.
+ * @param {number} index The index of the field to harvest.
+ * @returns {number} The number of acres harvested.
+ */
 export function harvestAcres(index) {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const field = farmlands[index];
