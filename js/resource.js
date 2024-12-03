@@ -26,42 +26,45 @@ class Inventory {
     this.items = [];
   }
 
-  addResource(name, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
-      console.log(`Adding resource: ${name}, Amount: ${amount}, State: ${state}, Vintage: ${vintage}, Quality: ${quality}, Field Name: ${fieldName}, Field Prestige: ${fieldPrestige}, Storage: ${storage}`);
+    addResource(name, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
+        console.log(`Adding resource: ${name}, Amount: ${amount}, State: ${state}, Vintage: ${vintage}, Quality: ${quality}, Field Name: ${fieldName}, Field Prestige: ${fieldPrestige}, Storage: ${storage}`);
 
-      const resource = getResourceByName(name);
-      if (!resource) {
-          throw new Error('Resource not found');
-      }
+        const resource = getResourceByName(name);
+        if (!resource) {
+            throw new Error('Resource not found');
+        }
 
-      // Check if the item with these characteristics already exists
-      let existingItem = this.items.find(item =>
-          item.resource.name === name &&
-          item.state === state &&
-          item.vintage === vintage &&
-          item.quality === parseFloat(quality) &&
-          item.fieldName === fieldName &&
-          item.fieldPrestige === fieldPrestige
-      );
+        // Check if the item with these characteristics already exists
+        let existingItem = this.items.find(item =>
+            item.resource.name === name &&
+            item.state === state &&
+            item.vintage === vintage &&
+            item.quality === parseFloat(quality) &&
+            item.fieldName === fieldName &&
+            item.fieldPrestige === fieldPrestige &&
+            item.storage === storage                               
+        );
 
-      if (existingItem) {
-          existingItem.amount += amount;
-      } else {
-          // Add a new item if not found
-          this.items.push({
-              resource: resource,
-              amount: amount,
-              state: state,
-              vintage: vintage,
-              quality: parseFloat(quality),
-              fieldName: fieldName,
-              fieldPrestige: fieldPrestige,
-              storage: storage // Add storage to the new item's attributes
-          });
-      }
-      console.log(`Adding resource: ${name}, Amount: ${amount}, State: ${state}, Vintage: ${vintage}, Quality: ${quality}, Field Name: ${fieldName}, Field Prestige: ${fieldPrestige}, Storage: ${storage}`);
-      console.log(`Current Inventory:`, this.items); // Log the current state of the inventory
-  }
+        if (existingItem) {
+            // If the resource exists, only update the amount
+            existingItem.amount += amount;
+        } else {
+            // If it's a new resource, add it with the specified storage
+            this.items.push({
+                resource: resource,
+                amount: amount,
+                state: state,
+                vintage: vintage,
+                quality: parseFloat(quality),
+                fieldName: fieldName,
+                fieldPrestige: fieldPrestige,
+                storage: storage // New resource goes into the specified storage
+            });
+        }
+
+        // Log the current state of the inventory
+        console.log(`Current Inventory:`, this.items);
+    }
 
   removeResource(name, amount, state, vintage, quality, fieldName, fieldPrestige) { // Include fieldPrestige
     const itemIndex = this.items.findIndex(item =>

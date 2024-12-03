@@ -5,7 +5,7 @@ import { addConsoleMessage } from './console.js';
 import { formatNumber } from './utils.js';
 import { displayStaff} from './staff.js';
 import { Building } from './buildings.js';
-
+import { selectContainerOverlay } from './overlays/selectContainerOverlay.js';
 
 // Initialize Task Panel
 function initializePanel() {
@@ -90,95 +90,107 @@ export class Task {
     return newTaskId;
   }
   createTaskBox() {
-    const taskList = document.getElementById('task-list');
-    if (!taskList) {
-      console.error("Element 'task-list' not found"); // Error handling if element is missing
-      return;
-    }
-    const taskBox = document.createElement('div');
-    taskBox.className = 'task-box';
-    // Add a specific class based on the task type for styling
-    switch (this.type) {
-      case 'Field':
-        taskBox.classList.add('field-task');
-        break;
-      case 'Winery':
-        taskBox.classList.add('winery-task');
-        break;
-      case 'Administration':
-        taskBox.classList.add('administration-task');
-        break;
-      case 'Sales':
-        taskBox.classList.add('sales-task');
-        break;
-      case 'Building & Maintenance': // Class for maintenance tasks
-        taskBox.classList.add('maintenance-task');
-        break;
-      default:
-        console.warn(`Unknown task type: ${this.type}`);
-    }
-    // Construct the task details content based on task type and properties
+      const taskList = document.getElementById('task-list');
+      if (!taskList) {
+          console.error("Element 'task-list' not found");
+          return;
+      }
+      const taskBox = document.createElement('div');
+      taskBox.className = 'task-box';
+
+      // Add a specific class based on the task type for styling
+      switch (this.type) {
+          case 'Field':
+              taskBox.classList.add('field-task');
+              break;
+          case 'Winery':
+              taskBox.classList.add('winery-task');
+              break;
+          case 'Administration':
+              taskBox.classList.add('administration-task');
+              break;
+          case 'Sales':
+              taskBox.classList.add('sales-task');
+              break;
+          case 'Building & Maintenance':
+              taskBox.classList.add('maintenance-task');
+              break;
+          default:
+              console.warn(`Unknown task type: ${this.type}`);
+      }
+
+      // Construct the task details content based on task type and properties
       let taskDetailsContent = '';
       const companyName = localStorage.getItem('companyName');
 
       if (this.type === 'Administration') {
-        taskDetailsContent = `<div><strong>${companyName}</strong></div>`;
+          taskDetailsContent = `<div><strong>${companyName}</strong></div>`;
       } else if (this.type === 'Winery' || this.type === 'Sales') {
-        taskDetailsContent = `<div><strong>${companyName}</strong></div>
-                              <div>${this.resourceName}, ${this.vintage}</div>`;
-      } else if (this.type === 'Building & Maintenance') { // Details for a maintenance task
-        taskDetailsContent = `<div><strong>${companyName}</strong></div>
-                              <div>${this.buildingName }</div>
-                              `;
+          taskDetailsContent = `<div><strong>${companyName}</strong></div>
+                                <div>${this.resourceName}, ${this.vintage}</div>`;
+      } else if (this.type === 'Building & Maintenance') {
+          taskDetailsContent = `<div><strong>${companyName}</strong></div>
+                                <div>${this.buildingName}</div>`;
       } else if (this.taskName === 'Clearing') {
-        taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
+          taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>`;
       } else {
-        taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>
-                              <div>${this.resourceName}, ${this.vintage}</div>`;
+          taskDetailsContent = `<div><strong>Field: ${this.fieldName}</strong></div>
+                                <div>${this.resourceName}, ${this.vintage}</div>`;
       }
 
-        // Set the taskBox inner HTML using class names
-        taskBox.innerHTML = `
-            <div class="task-details">
-                ${taskDetailsContent}
-            </div>
-            <div class="d-flex align-items-center">
-                <span class="task-name">${this.taskName}</span>
-                <img src="${this.iconPath}" alt="Task Icon" class="task-icon" />
-            </div>
-        `;
+      // Set the taskBox inner HTML
+      taskBox.innerHTML = `
+          <div class="task-details">
+              ${taskDetailsContent}
+          </div>
+          <div class="d-flex align-items-center">
+              <span class="task-name">${this.taskName}</span>
+              <img src="${this.iconPath}" alt="Task Icon" class="task-icon" />
+          </div>
+      `;
 
-        const progressInfo = document.createElement('div');
-        progressInfo.className = 'progress-info';
-        const fromLabel = document.createElement('span');
-        fromLabel.textContent = `Progress: ${formatNumber(this.workProgress)}`;
-        const toLabel = document.createElement('span');
-        toLabel.textContent = `Goal: ${formatNumber(this.workTotal)}`;
-        const progressBar = document.createElement('div');
-        progressBar.className = 'progress';
-        progressBar.innerHTML = `
-            <div class="progress-bar" role="progressbar" style="width: ${(this.workProgress / this.workTotal) * 100}%" aria-valuenow="${this.workProgress}" aria-valuemin="0" aria-valuemax="${this.workTotal}"></div>
-        `;
-        progressInfo.appendChild(fromLabel);
-        progressInfo.appendChild(toLabel);
-        taskBox.appendChild(progressInfo);
-        taskBox.appendChild(progressBar);
+      const progressInfo = document.createElement('div');
+      progressInfo.className = 'progress-info';
+      const fromLabel = document.createElement('span');
+      fromLabel.textContent = `Progress: ${formatNumber(this.workProgress)}`;
+      const toLabel = document.createElement('span');
+      toLabel.textContent = `Goal: ${formatNumber(this.workTotal)}`;
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress';
+      progressBar.innerHTML = `
+          <div class="progress-bar" role="progressbar" style="width: ${(this.workProgress / this.workTotal) * 100}%" aria-valuenow="${this.workProgress}" aria-valuemin="0" aria-valuemax="${this.workTotal}"></div>
+      `;
+      progressInfo.appendChild(fromLabel);
+      progressInfo.appendChild(toLabel);
+      taskBox.appendChild(progressInfo);
+      taskBox.appendChild(progressBar);
 
-    const addStaffBtn = document.createElement('button');
-    addStaffBtn.className = 'add-staff-btn';
-    addStaffBtn.textContent = 'Add Staff';
-    addStaffBtn.addEventListener('click', () => {
-        openStaffOverlay(this.staff, this.taskId, this.updateTaskBoxWithStaff.bind(this));
-    });
-    taskBox.appendChild(addStaffBtn);
+      const addStaffBtn = document.createElement('button');
+      addStaffBtn.className = 'add-staff-btn';
+      addStaffBtn.textContent = 'Add Staff';
+      addStaffBtn.addEventListener('click', () => {
+          openStaffOverlay(this.staff, this.taskId, this.updateTaskBoxWithStaff.bind(this));
+      });
+      taskBox.appendChild(addStaffBtn);
 
-        const staffContainer = document.createElement('div');
-        staffContainer.className = 'staff-container';
-        this.updateTaskBoxWithStaff(this.staff, staffContainer);
-        taskBox.appendChild(staffContainer);
-        taskList.appendChild(taskBox);
-        this.taskBox = taskBox;
-    }
+      // Add "Containers" button for Harvesting task
+      if (this.type === 'Field' && this.taskName === 'Harvesting') {
+          const containersBtn = document.createElement('button');
+          containersBtn.className = 'containers-btn';
+          containersBtn.textContent = 'Containers';
+          containersBtn.addEventListener('click', () => {
+              selectContainerOverlay(this); // Call to open the select container overlay
+          });
+          taskBox.appendChild(containersBtn);
+      }
+
+      const staffContainer = document.createElement('div');
+      staffContainer.className = 'staff-container';
+      this.updateTaskBoxWithStaff(this.staff, staffContainer);
+      taskBox.appendChild(staffContainer);
+      taskList.appendChild(taskBox);
+      this.taskBox = taskBox;
+  }
     
       updateTaskBoxWithStaff(staff, staffContainer = this.taskBox.querySelector('.staff-container')) {
         if (staffContainer) {
@@ -254,6 +266,7 @@ export class Task {
         }
     }
 }
+
 
 function openStaffOverlay(currentStaff, staffTaskId, updateTaskBoxCallback) {
     const overlay = document.createElement('div');

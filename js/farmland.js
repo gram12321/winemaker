@@ -10,7 +10,7 @@ import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 import {calculateWorkApplied } from './staff.js';
 import { handleGenericTask } from './administration.js';
 import { showPlantingOverlay } from './overlays/plantingOverlay.js';
-
+import { harvestAcres } from './vineyard.js';
 
 
 // Refactored standalone function for land value calculation

@@ -98,10 +98,6 @@ export function harvestAcres(index) {
         const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
         const currentTask = tasks.find(task => task.taskName === "Harvesting" && task.fieldId === index);
 
-        if (!currentTask) {
-            addConsoleMessage(`No harvesting task found for ${field.name}.`);
-            return 0;
-        }
 
         const workApplied = calculateWorkApplied(currentTask.staff || [], 'harvestAcres');
         const acresLeftToHarvest = totalAcres - (field.currentAcresHarvested || 0);
@@ -113,11 +109,6 @@ export function harvestAcres(index) {
         const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
         const buildingContainingTool = buildings.find(building => building.contents.some(content => `${content.name} #${content.instanceNumber}` === storage));
         const tool = buildingContainingTool ? buildingContainingTool.contents.find(content => `${content.name} #${content.instanceNumber}` === storage) : null;
-
-        if (!tool) {
-            addConsoleMessage(`The storage tool ${storage} could not be found.`);
-            return 0;
-        }
 
         // Calculate current storage amount
         const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
@@ -136,7 +127,7 @@ export function harvestAcres(index) {
 
         if (grapesToStore <= 0) {
             if (acresLeftToHarvest > 0) {
-                addConsoleMessage(`<span style="color:red;">Insufficient capacity in ${storage}. Harvested ${acresHarvested} acres, but storage limit reached.</span>`);
+                addConsoleMessage(`<span style="color:red;">Insufficient capacity in ${storage}, or no staff for Harvesting. Harvested ${acresHarvested} acres, but storage limit reached.</span>`);
             } else {
                 addConsoleMessage(`<span style="color:red;">Insufficient capacity in ${storage}. Cannot store any more grapes.</span>`);
             }
@@ -154,17 +145,18 @@ export function harvestAcres(index) {
         const normalizedDensity = 0.5 + (9000 - (field.density - 1000)) / 18000;
         const quality = ((field.annualQualityFactor + normalizedAltitude + 0.3 + normalizedDensity) / 3).toFixed(2);
 
-        // Add the harvested grapes to the inventory, using grapesToStore instead of grapesHarvested
-        inventoryInstance.addResource(
-            resourceName,
-            grapesToStore,
-            state,
-            gameYear,
-            quality,
-            field.name,
-            field.farmlandPrestige,
-            storage
-        );
+
+      // Call to add the resource to the inventory
+      inventoryInstance.addResource(
+          resourceName,
+          grapesToStore,
+          state,
+          gameYear,
+          quality,
+          field.name,
+          field.farmlandPrestige,
+          storage // Ensure this is the updated storage value
+      );
 
         const harvestedFormatted = `${acresHarvested} acres`;
         const remainingFormatted = `${totalAcres - field.currentAcresHarvested} acres`;
@@ -185,9 +177,7 @@ export function harvestAcres(index) {
         localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
         return acresHarvested;
-    } else {
-        addConsoleMessage(`Invalid operation. No planted resource found for ${farmlands[index]?.name || 'unknown'}.`);
-    }
+    } 
 
     return 0;
 }
