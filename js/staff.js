@@ -5,6 +5,7 @@ import { addRecurringTransaction } from './finance.js'; // Assume you have addRe
 import { loadTasks } from './database/adminFunctions.js'; // Import the function to load tasks
 import { Task } from './loadPanel.js';  // Adjust the path based on your file structure
 import { showStaffOverlay } from './overlays/staffoverlay.js'; // Ensure the correct path
+import { loadBuildings } from './database/adminFunctions.js'; // Ensure the correct path
 
 import { getBuildingTools } from './buildings.js'; // Ensure you're importing the tools 
 
@@ -286,23 +287,48 @@ export function calculateWorkApplied(taskStaff, processingFunction) {
 
     // Apply speed bonus only to field tasks
     if (skillKey === 'field') {
-        // Get tools specific to field tasks, sorted by speed bonus descending
-        const tools = getBuildingTools()
-            .filter(tool => tool.buildingType === 'Tool Shed')
-            .sort((a, b) => b.speedBonus - a.speedBonus);
+        // Retrieve all building contents that may contain tools for field tasks
+        const buildings = loadBuildings(); // Make sure this function loads all buildings
+        console.log(`Loaded Buildings:`, buildings);
+
+        const tools = [];
+
+        // Iterate over buildings to gather relevant tools
+        buildings.forEach(building => {
+            console.log(`Checking building: ${building.name || 'Unnamed Building'} - Contents:`, building.contents);
+            if (building.contents) {
+                building.contents.forEach(tool => {
+                    // Only check for buildingType
+                    if (tool.buildingType === 'Tool Shed') {
+                        tools.push(tool); // Add tool to the list if it meets the criteria
+                        console.log(`Found tool: ${tool.name} with Speed Bonus: ${tool.speedBonus}`);
+                    }
+                });
+            }
+        });
+
+        // Log total tools found
+        console.log(`Total tools found for field work: ${tools.length}`);
+
+        // Sort tools by speed bonus descending
+        tools.sort((a, b) => b.speedBonus - a.speedBonus);
 
         // Assign tools to staff based on available tools
         const assignedTools = new Array(taskStaff.length).fill(null);
         tools.forEach((tool, index) => {
             if (index < taskStaff.length) {
-                assignedTools[index] = tool;
+                assignedTools[index] = tool; // Assign tool to staff member
+                console.log(`Assigned Tool: ${tool.name} to staff member ${index + 1}`);
             }
         });
 
+        // Calculate total work applied with tool bonuses
         assignedTools.forEach((tool, index) => {
             if (tool) {
-                console.log(`Assigning Tool: ${tool.name} to staff ${index + 1}, Speed Bonus: ${tool.speedBonus}`);
-                totalWorkApplied += workApplied * (tool.speedBonus - 1.0);
+                console.log(`Applying Tool: ${tool.name} - Staff ${index + 1}, Base Work Applied: ${workApplied}, Speed Bonus: ${tool.speedBonus}`);
+                totalWorkApplied += workApplied * (tool.speedBonus - 1.0); // Adjust work based on tool speed bonus
+            } else {
+                console.log(`No tool assigned to staff ${index + 1}`);
             }
         });
 
