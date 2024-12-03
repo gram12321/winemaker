@@ -27,12 +27,10 @@ class Inventory {
   }
 
     addResource(name, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
-        console.log(`Adding resource: ${name}, Amount: ${amount}, State: ${state}, Vintage: ${vintage}, Quality: ${quality}, Field Name: ${fieldName}, Field Prestige: ${fieldPrestige}, Storage: ${storage}`);
+
 
         const resource = getResourceByName(name);
-        if (!resource) {
-            throw new Error('Resource not found');
-        }
+
 
         // Check if the item with these characteristics already exists
         let existingItem = this.items.find(item =>
@@ -62,8 +60,6 @@ class Inventory {
             });
         }
 
-        // Log the current state of the inventory
-        console.log(`Current Inventory:`, this.items);
     }
 
   removeResource(name, amount, state, vintage, quality, fieldName, fieldPrestige) { // Include fieldPrestige
@@ -83,9 +79,7 @@ class Inventory {
       } else {
         this.items.splice(itemIndex, 1);
       }
-    } else {
-      throw new Error('Inventory item not found or insufficient amount');
-    }
+    } 
   }
 
   getTotalAmount(name, state = null, vintage = null, quality = null, fieldName = null, fieldPrestige = null) { // Include fieldPrestige
