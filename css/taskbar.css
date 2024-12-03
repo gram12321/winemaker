@@ -1,0 +1,167 @@
+/*  - --- --   Panel styles   - - - - - -*/
+#panel-wrapper {
+  position: fixed !important;
+  right: 0 !important;
+  top: 0 !important;
+  width: 250px !important;
+  height: 100% !important;
+  z-index: 1000 !important;
+  overflow-y: auto !important;
+  background-color: #343a40 !important;
+  /* Set the base background color */
+  /* Remove individual background image properties from here */
+}
+
+#panel-wrapper::before {
+  content: '';
+  /* Necessary to display the pseudo-element */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/assets/bg/bg_panel.webp');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.4;
+  /* Only the image gets this opacity */
+  z-index: -1;
+  /* Place the image behind the panel content */
+}
+
+/*  - --- --   Task Panel styles   - - - - - -*/
+
+/* Task box styles */
+.task-box {
+  background-color: #214a73;
+  border: 1px solid #94bde5;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+  position: relative;
+}
+
+/* Hover not in use after bg-color per type */
+.task-box:hover {
+  background-color: #94bde5;
+}
+
+.task-icon {
+  width: 42px;
+  height: 42px;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border-radius: 50%;
+}
+
+/* Task Details Styling */
+.task-details {
+  color: #fff;
+  font-size: 0.9em;
+}
+
+.company-name {
+  font-weight: bold;
+}
+
+.field-name {
+  font-weight: bold;
+}
+
+.task-name {
+  font-size: 0.9em;
+  /* Add any additional styling you want for task names */
+}
+
+.d-flex {
+  display: flex;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  color: #fff;
+  font-size: 0.6em;
+}
+
+.progress {
+  margin-top: 0;
+}
+
+.task-box.field-task {
+  background-color: #545a16;
+}
+
+.task-box.field-task:hover {
+  background-color: #6a7220;
+  /* Lighter version for hover */
+}
+
+.task-box.winery-task {
+  background-color: #214a73;
+}
+
+.task-box.winery-task:hover {
+  background-color: #2d5aab;
+  /* Lighter version for hover */
+}
+
+.task-box.administration-task {
+  background-color: #23143e;
+}
+
+.task-box.administration-task:hover {
+  background-color: #36214f;
+  /* Lighter version for hover */
+}
+
+.task-box.sales-task {
+  background-color: #491809;
+}
+
+.task-box.sales-task:hover {
+  background-color: #6f2814;
+  /* Lighter version for hover */
+}
+
+.add-staff-btn {
+  background-color: #4178be;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 0.8em;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.add-staff-btn:hover {
+  background-color: #3069ac;
+  cursor: pointer;
+}
+
+.staff-line {
+  display: flex;
+  align-items: center;
+}
+
+.staff-icon {
+  width: 15px;
+  margin-right: 5px;
+}
+
+.staff-names {
+  font-size: 0.8em;
+}

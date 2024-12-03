@@ -1,0 +1,130 @@
+/* Sidebar */
+#sidebar-wrapper {
+  min-width: 250px;
+  max-width: 250px;
+  background: #343a40;
+  color: #fff;
+  flex-shrink: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#sidebar-wrapper .list-group-item {
+  border: none;
+}
+
+
+.dropdown-menu {
+  background-color: #343a40;
+}
+
+.dropdown-menu a {
+  color: #fff;
+}
+
+.dropdown-menu a:hover {
+  background-color: #495057;
+}
+
+.position-sticky {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Define color classes for a gradient from red to green */
+.color-class-0 {
+  color: #ff0000;
+}
+
+/* Red */
+.color-class-1 {
+  color: #ff3300;
+}
+
+.color-class-2 {
+  color: #ff6600;
+}
+
+.color-class-3 {
+  color: #ff9900;
+}
+
+.color-class-4 {
+  color: #ffcc00;
+}
+
+.color-class-5 {
+  color: #ffff00;
+}
+
+/* Yellow */
+.color-class-6 {
+  color: #ccff00;
+}
+
+.color-class-7 {
+  color: #99ff00;
+}
+
+.color-class-8 {
+  color: #66ff00;
+}
+
+.color-class-9 {
+  color: #27c200;
+}
+
+.color-class-10 {
+  color: #008f00;
+}
+
+/* Green */
+
+/* Company Info Styles */
+#companyInfo {
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  color: #ffffff;
+  margin: 15px 0;
+}
+
+#companyInfo .company-name {
+  font-family: 'Georgia', serif;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  text-align: center;
+  /* Center align company name */
+}
+
+#companyInfo .styled-line {
+  width: 60%;
+  /* Line width */
+  height: 3px;
+  /* Thicker line */
+  background-color: #94bde5;
+  /* Line color */
+  border-radius: 5px;
+  /* Rounded corners */
+  margin: 10px auto;
+  /* Center the line */
+}
+
+#companyInfo .info-item {
+  padding: 5px 0;
+}
+
+#companyInfo .info-label {
+  font-weight: bold;
+}
+
+#companyInfo .info-content {
+  font-weight: normal;
+  margin-left: 8px;
+}
+
+#companyInfo .date-info {
+  display: flex;
+  gap: 10px;
+}
