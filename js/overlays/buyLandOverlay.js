@@ -1,7 +1,6 @@
 import { createFarmland, getLastId, getRandomAcres } from '../farmland.js';
 import { addConsoleMessage } from '/js/console.js';
-import { displayOwnedFarmland } from '/js/farmland.js';
-import { getFlagIcon, getColorClass, formatNumber, getFlagIconHTML, formatLandSizeWithUnit } from '../utils.js';
+import { getColorClass, formatNumber, getFlagIconHTML, formatLandSizeWithUnit } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor } from '../names.js';
 import { getUnit, convertToCurrentUnit } from '../settings.js';
 import { addTransaction} from '/js/finance.js';
@@ -126,6 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeOverlay() {
         overlay.style.display = 'none';
-        displayOwnedFarmland();
+
     }
 });

@@ -1,7 +1,7 @@
 // Import necessary utility functions and classes
 import { formatNumber, getColorClass, getFlagIcon } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names.js';
-import { Farmland } from '/js/farmland.js';
+
 
 export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');

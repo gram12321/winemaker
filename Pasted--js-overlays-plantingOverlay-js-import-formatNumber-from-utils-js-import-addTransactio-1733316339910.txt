@@ -1,6 +1,6 @@
+// js/overlays/plantingOverlay.js
 import { formatNumber } from '../utils.js';
-import { addTransaction } from '../finance.js';
-
+import { addTransaction } from '../finance.js'; // Ensure the import path is correct
 
 export function showPlantingOverlay(farmland, onPlantCallback) {
   const overlayContainer = document.createElement('div');
@@ -63,6 +63,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
     const selectedDensity = parseInt(densitySlider.value, 10);
     farmland.density = selectedDensity;
 
+    // Save updated farmland changes in localStorage
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
 
@@ -71,13 +72,11 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     }
 
+    // Calculate total cost
     const totalCost = selectedDensity * 2 * farmland.acres;
-    addTransaction(`Expense`, `Planting on ${farmland.name}`, -totalCost);
 
-    // Assuming resourceName is available or should be provided by the user
-    const resourceName = 'ResourceName'; // replace 'ResourceName' with a valid resource name or get it from a user input
-    const acresPlanted = plantAcres(updatedFarmlandIndex, resourceName);
-    console.log(`Planted ${acresPlanted} acres`);
+    // Record transaction with updated parameters
+    addTransaction(`Expense`, `Planting on ${farmland.name}`, -totalCost);
 
     onPlantCallback(selectedDensity);
     removeOverlay();

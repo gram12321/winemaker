@@ -1,6 +1,4 @@
 import { getBuildingTools } from '../buildings.js'; 
-import { handleGenericTask } from '../administration.js'; 
-import { fieldTaskFunction } from '../farmland.js'; 
 import { populateStorageTable } from '../resource.js'; // Importing populateStorageTable
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 import { addConsoleMessage } from '/js/console.js'; // Adding console message for debugging

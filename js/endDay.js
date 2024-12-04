@@ -1,15 +1,10 @@
 // endDay.js
 import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
-import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
-import { executeAllTasks } from './loadPanel.js'
 import { processRecurringTransactions } from './finance.js';
-import { handleGenericTask, bookkeepingTaskFunction  } from './administration.js';
-import { Farmland, calculateLandvalue, calculateFarmlandPrestige} from './farmland.js';  // Ensure Farmland is imported if used elsewhere
+import { calculateLandvalue, calculateFarmlandPrestige} from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { decayPrestigeHit } from './database/loadSidebar.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
-
-
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -52,7 +47,6 @@ export function incrementWeek() {
     renderCompanyInfo();
 
     // Execute any pending tasks for the week
-    executeAllTasks();
     updateFieldStatuses();
     updateRipeness();
     decayPrestigeHit();

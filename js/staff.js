@@ -2,8 +2,6 @@ import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames,
 import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
-import { loadTasks } from './database/adminFunctions.js'; // Import the function to load tasks
-import { Task } from './loadPanel.js';  // Adjust the path based on your file structure
 import { showStaffOverlay } from './overlays/staffoverlay.js'; // Ensure the correct path
 import { loadBuildings } from './database/adminFunctions.js'; // Ensure the correct path
 
@@ -236,62 +234,3 @@ export function setupStaffWagesRecurringTransaction() {
     }
 }
 
-export function calculateWorkApplied(taskStaff, processingFunction) {
-    let workApplied = 0;
-    const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    const taskTypeEntry = Object.values(Task.taskTypes).find(entry => 
-        entry.processingFunctions.includes(processingFunction)
-    );
-    
-    if (!taskTypeEntry) {
-        return workApplied;
-    }
-    const { processPerWorkApplied, skillKey } = taskTypeEntry;
-    taskStaff.forEach(staffId => {
-        const staffMember = staffData.find(staff => staff.id.toString() === staffId);
-        if (staffMember) {
-            const taskCount = tasks.reduce((count, task) => {
-                return (task.staff && task.staff.includes(staffId.toString())) ? count + 1 : count;
-            }, 0);
-            let skillLevel = 0;
-            if (skillKey && staffMember.skills[skillKey]) {
-                skillLevel = parseFloat(staffMember.skills[skillKey][skillKey]);
-            }
-            if (taskCount > 0 && skillLevel > 0) {
-                const workFromStaff = (staffMember.workforce / taskCount) * skillLevel;
-                workApplied += workFromStaff;
-            }
-        }
-    });
-    
-    let totalWorkApplied = workApplied * processPerWorkApplied;
-    if (skillKey === 'field') {
-        const buildings = loadBuildings();
-        const tools = [];
-        buildings.forEach(building => {
-            if (building.contents) {
-                building.contents.forEach(tool => {
-                    if (tool.buildingType === 'Tool Shed') {
-                        tools.push(tool);
-                    }
-                });
-            }
-        });
-        
-        tools.sort((a, b) => b.speedBonus - a.speedBonus);
-        const assignedTools = new Array(taskStaff.length).fill(null);
-        tools.forEach((tool, index) => {
-            if (index < taskStaff.length) {
-                assignedTools[index] = tool;
-            }
-        });
-        
-        assignedTools.forEach((tool, index) => {
-            if (tool) {
-                totalWorkApplied += workApplied * (tool.speedBonus - 1.0);
-            }
-        });
-    }
-    return totalWorkApplied;
-}

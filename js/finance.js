@@ -1,7 +1,6 @@
 import { formatNumber } from './utils.js';  // Ensure correct path
 import { renderCompanyInfo } from './database/loadSidebar.js';
 
-
 // Function to initialize the finance management page
 function initializeFinance() {
     const cashFlowTable = document.getElementById('cash-flow-table');

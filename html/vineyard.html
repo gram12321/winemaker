@@ -46,10 +46,8 @@
 
   <!-- Custom JavaScript -->
   <script type="module" src="/js/vineyard.js"></script>
-
   <script type="module">
-    import { displayVineyardEntries } from '/js/vineyard.js';
-    import { getFlagIcon } from '/js/utils.js';
+
     
     import { initializeSidebar } from '/js/database/loadSidebar.js';
     import { initializePanel } from '/js/loadPanel.js';
@@ -60,8 +58,6 @@
       initializeSidebar();
       initializeConsole();
 
-      // Initialize vineyard specific scripts
-      displayVineyardEntries(); // Call the function to display vineyards
     });
   </script>
 </body>

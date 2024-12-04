@@ -3,7 +3,7 @@ import { getFlagIconHTML } from '../utils.js';
 import { saveStaff } from '../database/adminFunctions.js'; // Ensure saveStaff is imported
 import { addConsoleMessage } from '../console.js'; // Import addConsoleMessage
 import { addTransaction } from '../finance.js'; // Import addTransaction for recording expenses
-import { handleGenericTask, hiringTaskFunction  } from '../administration.js'; // Import handleHiringTask
+import { hiringTaskFunction  } from '../administration.js'; // Import handleHiringTask
 
 document.addEventListener('DOMContentLoaded', () => {
     const hireStaffBtn = document.getElementById('hire-staff-btn');

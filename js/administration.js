@@ -1,86 +1,8 @@
-// administration.js
-
-import { Task } from './loadPanel.js'; 
-import { saveTask, activeTasks } from '/js/database/adminFunctions.js';
-
 import { addConsoleMessage } from '/js/console.js';
-import { getPreviousSeasonAndYear , extractSeasonAndYear } from './utils.js'; // Import the function
-import {calculateWorkApplied } from './staff.js';
-
-export function handleGenericTask(taskType, taskFunction, additionalTaskParams = {}) {
-  const { fieldId, resourceName, buildingName, storage } = additionalTaskParams; // Destructure storage as selectedTool
-
-  const isTaskAlreadyActive = activeTasks.some(task =>
-    task.taskName.startsWith(taskType) &&
-    (fieldId === undefined || task.fieldId === fieldId) &&
-    (buildingName === undefined || task.buildingName === buildingName)
-  );
-
-  if (isTaskAlreadyActive) {
-    const activeTask = activeTasks.find(task =>
-      task.taskName.startsWith(taskType) &&
-      (fieldId === undefined || task.fieldId === fieldId) &&
-      (buildingName === undefined || task.buildingName === buildingName)
-    );
-
-    if (activeTask) {
-      const extraWork = taskFunction(activeTask, 'update');
-      activeTask.workTotal += extraWork;
-
-      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-      const taskIndex = tasks.findIndex(task => task.taskId === activeTask.taskId);
-      if (taskIndex !== -1) {
-        tasks[taskIndex].workTotal = activeTask.workTotal;
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-      }
-
-      addConsoleMessage(`${taskType} task not completed. More work added: ${activeTask.workTotal}`);
-    }
-  } else {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const field = farmlands[fieldId] || {};
-    const fieldName = field.name || (fieldId !== undefined ? `Field ${fieldId}` : '');
-    const vintage = field.vintage || localStorage.getItem('year') || '';
-    const plantedResourceName = field.plantedResourceName || resourceName;
-
-    // Destructure additional details from the taskFunction output
-    const { taskName, workTotal, iconPath, taskType } = taskFunction(null, 'initialize', { fieldId, resourceName, buildingName, storage }); // Pass storage here
-
-    // Ensure the task is initialized with all relevant information
-    const task = new Task(taskName, taskFunction, undefined, workTotal, plantedResourceName,
-                          '', vintage, '', iconPath, fieldName, taskType, 0, []);
-
-    Object.assign(task, { fieldId, resourceName, fieldName, vintage, buildingName, storage }); // Include storage again
-
-    saveTask({
-      taskName: task.taskName,
-      taskId: task.taskId,
-      workTotal: task.workTotal,
-      workProgress: task.workProgress,
-      iconPath,
-      type: task.type,
-      staff: task.staff,
-      fieldId,
-      resourceName: plantedResourceName,
-      fieldName,
-      vintage,
-      buildingName,
-      storage // Add storage to the saved task
-    });
-
-    const messageParts = [`${taskType} task started`];
-    if (fieldName) messageParts.push(`for ${fieldName}`);
-    if (plantedResourceName) messageParts.push(`with ${plantedResourceName}`);
-    if (buildingName) messageParts.push(`Building: ${buildingName}`);
-    if (vintage) messageParts.push(`, ${vintage}`);
+import { extractSeasonAndYear } from './utils.js'; // Import the function
 
 
-    const completeMessage = messageParts.join(' ');
 
-    activeTasks.push(task);
-    addConsoleMessage(completeMessage);
-  }
-}
 
 export function bookkeepingTaskFunction(task, mode) {
   if (mode === 'initialize') {

@@ -1,9 +1,5 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
 import { inventoryInstance } from '../resource.js';
-import { Task } from '../loadPanel.js'
-import { grapeCrushing, fermentMust } from '/js/wineprocessing.js';
-import { plantAcres, uproot, clearing  } from '/js/farmland.js';
-import { harvestAcres} from '/js/vineyard.js';
 import { Staff, createNewStaff, getLastNameForNationality  } from '/js/staff.js'; // Adjust the import path if necessary
 import { addTransaction } from '/js/finance.js'; // Adjust the import path if necessary
 import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
