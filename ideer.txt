@@ -66,3 +66,6 @@ QoL Improvement
   add cost, adminstrationtask and msg for building buildings and tools
    - Ability to choose witch worker uses what tool. Show which staff is using tools in stafdisplay/consolemsg
    Expected yield (in vineyard.html (displayvineywarentried in vineyard.js)) should give a string to the user instead of a value (IE "High/Great/poor" instead of "0.9") 
+
+
+   Test af GIT new Branch
