@@ -1,5 +1,31 @@
 /*  - --- --   Overlay   - - - - - -*/
 
+/* Mainview Overlay */
+.mainview-overlay {
+    position: fixed;
+    top: 0; /* Start at the top */
+    left: 250px; /* Leave space for the sidebar */
+    right: 250px; /* Leave space for the panel */
+    width: calc(100% - 500px); /* Occupies remaining width (subtract 250px for sidebar and 250px for panel) */
+    height: calc(100vh - 100px); /* Leaves space for the console, typically 100px high */
+    overflow-y: auto; /* Allows vertical scrolling */
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+    display: none; /* Initially hidden */
+    z-index: 999; /* Ensure it sits above other content */
+}
+
+/* Content within the mainview overlay */
+.mainview-overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Top align content */
+    text-align: left; /* Left align text for readability */
+    padding: 30px;
+    background: #fff; /* Ensure content stands out */
+    min-height: 100%; /* Ensure content takes up at least the full height of the overlay */
+};
+
 /* General Overlay Styles */
 .overlay {
   position: fixed;
@@ -21,6 +47,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   display: inline-block;
+  
   /* Natural width based on child content */
   padding: 30px;
   background: #fff;

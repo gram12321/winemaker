@@ -1,6 +1,7 @@
 import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
 import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
 import { Farmland } from '../farmland.js'; // Ensure the correct path
+import { showVineyardOverlay } from '../vineyardoverlay.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -10,6 +11,17 @@ export function initializeSidebar() {
             const sidebarWrapper = document.getElementById('sidebar-wrapper');
             if (sidebarWrapper) {
                 sidebarWrapper.innerHTML = data;
+
+                // Attach event listener to the vineyard link after sidebar loads
+                const vineyardLink = document.getElementById('vineyard-link');
+                if (vineyardLink) {
+                    vineyardLink.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default navigation
+                        showVineyardOverlay();
+                    });
+                } else {
+                    console.error('Vineyard link element not found');
+                }
 
                 // Render company information
                 renderCompanyInfo();
