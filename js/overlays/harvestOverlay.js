@@ -80,7 +80,7 @@ export function showHarvestOverlay(vineyard, index) {
               const { resource, fieldName, vintage } = matchingInventoryItems[0];
 
               // Validate against resource, fieldName, and vintage
-              console.log(`Validating resource: ${resource.name}, Field: ${fieldName}, Vintage: ${vintage}`);
+              
               if (resource.name !== resourceBeingHarvested || fieldName !== vineyard.name || vintage !== vineyard.vintage) {
                   addConsoleMessage(`<span style="color:red;">This container cannot be used for harvesting the specified resource!</span>`);
                   console.log("Validation failed. Harvesting action aborted.");

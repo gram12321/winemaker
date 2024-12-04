@@ -5,7 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Game Page - Buildings</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
-  <link href="/css/style.css" rel="stylesheet" />
+  <link href="/css/style.css" rel="stylesheet">
+  <link href="/css/overlay.css" rel="stylesheet">
+  <link href="/css/buildings.css" rel="stylesheet">
+  <link href="/css/console.css" rel="stylesheet">
+  <link href="/css/finance.css" rel="stylesheet">
+  <link href="/css/overlay.css" rel="stylesheet">
+  <link href="/css/sidebar.css" rel="stylesheet">
+  <link href="/css/taskbar.css" rel="stylesheet">
 </head>
 <body>
   <div class="d-flex" id="wrapper">
@@ -19,10 +26,11 @@
         <!-- Tool Shed Card -->
         <div class="col-md-6">
           <div class="building-card">
+            
             <div class="icon" style="background-image: url('/assets/icon/menu/toolshed.webp');"></div>
-            <div class="details building-details" data-building-name="Tool Shed">
-              <!-- Building details will be updated dynamically -->
-            </div>
+            
+            <div class="details building-details" data-building-name="Tool Shed"></div>
+            
           </div>
           <button class="btn btn-success build-button" data-building-name="Tool Shed">Build</button>
           <button class="btn btn-secondary upgrade-button" data-building-name="Tool Shed" disabled>Upgrade</button>
@@ -32,9 +40,7 @@
         <div class="col-md-6">
           <div class="building-card">
             <div class="icon" style="background-image: url('/assets/icon/menu/warehouse.webp');"></div>
-            <div class="details building-details" data-building-name="Warehouse">
-              <!-- Building details will be updated dynamically -->
-            </div>
+            <div class="details building-details" data-building-name="Warehouse"></div>
           </div>
           <button class="btn btn-success build-button" data-building-name="Warehouse">Build</button>
           <button class="btn btn-secondary upgrade-button" data-building-name="Warehouse" disabled>Upgrade</button>

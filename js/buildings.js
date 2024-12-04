@@ -94,12 +94,13 @@ export class Building {
 class Tool {
   static instanceCount = {}; // Static map to hold instance counts for each tool type
 
-  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0) {
+  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = []) {
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
     this.cost = cost; // Add cost property
     this.capacity = capacity; // Add capacity property
+    this.supportedResources = supportedResources; // Add supportedResources property
     this.instanceNumber = this.getNextInstanceNumber(); // Assign instance number
   }
 
@@ -119,12 +120,20 @@ class Tool {
       speedBonus: this.speedBonus,
       cost: this.cost,
       capacity: this.capacity,
-      instanceNumber: this.instanceNumber // Include instance number in serialization
+      instanceNumber: this.instanceNumber,
+      supportedResources: this.supportedResources // Include supportedResources in serialization
     };
   }
 
   static fromJSON(json) {
-    const tool = new Tool(json.name, json.buildingType, json.speedBonus, json.cost, json.capacity);
+    const tool = new Tool(
+      json.name, 
+      json.buildingType, 
+      json.speedBonus, 
+      json.cost, 
+      json.capacity,
+      json.supportedResources // Include supportedResources in deserialization
+    );
     tool.instanceNumber = json.instanceNumber; // Include instance number in deserialization
     return tool;
   }
@@ -137,13 +146,14 @@ const ToolManager = (() => {
 
   function initializeTools() {
     if (!toolsInitialized) {
-      // Specify the capacity for each tool
+      // Specify the capacity and supported resources for each tool
       const tractor = new Tool('Tractor', 'Tool Shed', 1.2, 500, 0); 
       const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0); 
       const forklift = new Tool('Forklift', 'Warehouse', 1.0, 400, 0); 
       const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0, 150, 0); 
-      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 100, 3000); 
-      tools = [tractor, trimmer, forklift, palletJack, harvestbins];
+      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 1000, 3000, ['Grapes']); 
+      const fermentationTank = new Tool('Fermentation Tank', 'Warehouse', 1.0, 6000, 2000, ['Must']);
+      tools = [tractor, trimmer, forklift, palletJack, harvestbins, fermentationTank];
       toolsInitialized = true;
     }
     return tools;
@@ -155,7 +165,8 @@ const ToolManager = (() => {
     if (toolTemplate) {
       return new Tool(toolTemplate.name, toolTemplate.buildingType, 
                        toolTemplate.speedBonus, toolTemplate.cost, 
-                       toolTemplate.capacity);
+                       toolTemplate.capacity, 
+                       toolTemplate.supportedResources || []); // Add supportedResources if available
     } else {
       console.log('Tool template not found');
       return null; // Handle error gracefully
@@ -213,6 +224,12 @@ export function updateBuildingCards() {
     const buildings = loadBuildings();
     const building = buildings.find(b => b.name === buildingName);
 
+    // Update the building name in the card
+    const nameDiv = cardDiv.querySelector('.building-name');
+    if (nameDiv) {
+      nameDiv.textContent = buildingName;
+    }
+
     const status = building ? building.getStatus() : "Unbuilt";
     const level = building ? building.level : 0;
     const capacity = building ? building.capacity : 0;
@@ -227,6 +244,7 @@ export function updateBuildingCards() {
     }
 
     detailDiv.innerHTML = `
+      <p><strong>${buildingName}</strong></p>  <!-- Add Building Name here -->
       <p>Status: ${status}</p>
       <p>Level: ${level}</p>
       <p>Upgrade Cost: ${upgradeCost}</p>

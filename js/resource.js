@@ -168,7 +168,6 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
 
 export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus = false) {
   const storageTableBody = document.getElementById(storageTableBodyId);
-
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
 
@@ -176,7 +175,8 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
 
   buildings.forEach((building) => {
     building.contents.forEach((tool) => {
-      if (tool.capacity > 0) {
+      // Filter for tools that support "Grapes"
+      if (tool.capacity > 0 && tool.supportedResources && tool.supportedResources.includes('Grapes')) {
         const row = document.createElement('tr');
 
         // Create if not excluding Quality and Status
@@ -191,7 +191,6 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
           row.appendChild(selectCell);
         } else {
           // If excluding Quality and Status, add a placeholder cell
-
         }
 
         // Display the unique name of the tool instance

@@ -1,0 +1,73 @@
+/* Building Card Styles */
+.building-card {
+  background-color: #e0e0e0; /* Lighter grey background */
+  border: 1px solid #cccccc; /* Light grey border */
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  transition: background-color 0.3s;
+  position: relative;
+  color: #333333; /* Darker text for contrast */
+  text-align: left;
+}
+
+.building-card h4 {
+  margin-top: 0;
+  font-size: 1.2em;
+}
+
+.building-card {
+  margin-bottom: 10px; /* Add space between card and button */
+}
+
+.building-card:hover {
+  background-color: #d0d0d0; /* Slightly darker grey on hover */
+}
+
+.building-card .icon {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-size: cover;
+}
+
+.building-card .details {
+  margin-left: 70px;
+}
+
+/* Buildings overlay */
+.unbuilt-card {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Building simulator container */
+.building-simulator {
+  border: 2px solid #333; /* Dark border to simulate building outline */
+  padding: 10px;          /* Inside padding for aesthetics */
+  margin-top: 10px;       /* Space from other content */
+  background-color: #fff; /* Background color for the building */
+  position: relative;     /* Position context for internal elements */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Shadow effect for 3D feel */
+}
+
+/* Capacity grid within the building */
+.capacity-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Adjust number of columns based on layout */
+  gap: 5px; /* Space between cells */
+}
+
+/* Square cell styles */
+.capacity-cell {
+  display: flex;                /* Use Flexbox */
+  align-items: center;          /* Center vertically */
+  justify-content: center;      /* Center horizontally */
+  width: 50px;                  /* Set a width for the cell */
+  height: 50px;                 /* Set a height for the cell */
+  border: 1px solid #ccc;       /* Optional: Add a border */
+  margin: 2px;                  /* Optional: Add some spacing */
+}
+
