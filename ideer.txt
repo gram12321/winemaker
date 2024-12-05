@@ -43,7 +43,8 @@ in buildings.html build buttom change to "Building..." when a building proces is
 Prevent several building and maintaince task on same building
 There dosnøt seems to be a prestige hit for not completing bookkeeeping task as intented
 
-
+Fixed becuase of 0.02 patch
+ - Fix cost for buildbuildings og upgradebuildings (None is applyed as of now)
 
 
 

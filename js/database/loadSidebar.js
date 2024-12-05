@@ -1,7 +1,9 @@
 import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
 import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
 import { Farmland } from '../farmland.js'; // Ensure the correct path
-import { showVineyardOverlay } from '../vineyardoverlay.js';
+import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
+import { showAdminOverlay } from '../overlays/mainpages/adminoverlay.js';
+import { showBuildingsOverlay } from '/js/overlays/mainpages/buildingsoverlay.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -17,10 +19,32 @@ export function initializeSidebar() {
                 if (vineyardLink) {
                     vineyardLink.addEventListener('click', function(e) {
                         e.preventDefault(); // Prevent default navigation
-                        showVineyardOverlay();
+                        showVineyardOverlay(); // Show vineyard overlay
                     });
                 } else {
                     console.error('Vineyard link element not found');
+                }
+
+                // Attach event listener to the admin link after sidebar loads
+                const adminLink = document.getElementById('admin-link');
+                if (adminLink) {
+                    adminLink.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default navigation
+                        showAdminOverlay(); // Show admin overlay
+                    });
+                } else {
+                    console.error('Admin link element not found');
+                }
+
+                // Attach event listener to the buildings link after sidebar loads
+                const buildingsLink = document.getElementById('buildings-link');
+                if (buildingsLink) {
+                    buildingsLink.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default navigation
+                        showBuildingsOverlay(); // Show buildings overlay
+                    });
+                } else {
+                    console.error('Buildings link element not found');
                 }
 
                 // Render company information

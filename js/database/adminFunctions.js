@@ -35,15 +35,12 @@ async function clearLocalStorage() {
   localStorage.removeItem('buildings');
   localStorage.removeItem('playerInventory');
   localStorage.removeItem('consoleMessages');
-  localStorage.removeItem('tasks');
-  localStorage.removeItem('latestTaskId');
   localStorage.removeItem('staffData');
   localStorage.removeItem('latestStaffId');
   localStorage.removeItem('wineOrders');
   localStorage.removeItem('transactions'); // Clear transactions data
   localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
   console.log("Local storage cleared.");
-  Task.latestTaskId = 0; // Reset in memory
 }
 
 
@@ -114,10 +111,7 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('playerInventory', data.playerInventory || '[]');
     localStorage.setItem('buildings', data.buildings || '[]');
     localStorage.setItem('staffData', data.staffData || '[]');
-    localStorage.setItem('tasks', JSON.stringify(data.tasks || []));
     localStorage.setItem('transactions', JSON.stringify(data.transactions || [])); // Load transactions
-    Task.latestTaskId = data.latestTaskId || 0;
-    localStorage.setItem('latestTaskId', Task.latestTaskId.toString());
   }
 }
 
@@ -132,7 +126,6 @@ async function saveCompanyInfo() {
   const ownedFarmlands = localStorage.getItem('ownedFarmlands');
   const playerInventory = localStorage.getItem('playerInventory');
   const staffData = localStorage.getItem('staffData');
-  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
   const transactions = JSON.parse(localStorage.getItem('transactions')) || []; // Retrieve transactions
 
   if (!companyName) {
@@ -153,9 +146,7 @@ async function saveCompanyInfo() {
       ownedFarmlands,
       playerInventory,
       staffData,
-      tasks,
       transactions, // Save transactions
-      latestTaskId: Task.latestTaskId
     });
     console.log("Company info and tasks saved successfully.");
   } catch (error) {
