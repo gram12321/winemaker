@@ -71,6 +71,7 @@ export function showBuildingOverlay(building) {
     setupToolButtons(building, tools);
 
     overlay.style.display = 'flex';
+    overlay.classList.add('active');
   }
 }
 
