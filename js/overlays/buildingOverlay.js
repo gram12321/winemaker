@@ -58,8 +58,11 @@ function setupToolButtons(building, tools) {
 
 // Updated showBuildingOverlay function
 export function showBuildingOverlay(building) {
+  console.log('showBuildingOverlay called with building:', building);
   const overlay = document.getElementById('buildingOverlay');
+  console.log('Found overlay element:', overlay);
   const details = document.getElementById('building-details');
+  console.log('Found details element:', details);
 
   if (details && overlay) {
     details.innerHTML = createBuildingDetails(building);
