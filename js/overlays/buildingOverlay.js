@@ -4,6 +4,7 @@ import { addConsoleMessage } from '/js/console.js';
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction } from '../finance.js'; // Ensure this import is at the top of your file.
 
+
 function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
 
