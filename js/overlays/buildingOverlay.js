@@ -72,6 +72,19 @@ export function showBuildingOverlay(building) {
 
     overlay.style.display = 'flex';
     overlay.classList.add('active');
+
+    // Add click outside listener
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) {
+        hideBuildingOverlay();
+      }
+    });
+
+    // Add close button listener
+    const closeBtn = overlay.querySelector('.close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', hideBuildingOverlay);
+    }
   }
 }
 
