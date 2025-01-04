@@ -35,7 +35,7 @@
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
   /* Semi-transparent background */
-  z-index: 3000; /* Higher z-index to appear above mainview-overlay */
+  z-index: 3000 !important; /* Higher z-index to appear above mainview-overlay */
   display: none;
   /* Hidden by default, will be shown with JS */
 }
