@@ -194,20 +194,27 @@ export function buildBuilding(buildingName) {
     return;
   }
 
-  // Start a maintenance task for the building rather than building it immediately
-  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName });
+  // Create and add the new building
+  const newBuilding = new Building(buildingName);
+  buildings.push(newBuilding);
+  
+  // Store the updated buildings list
+  storeBuildings(buildings);
 
-  // UI feedback that a build process has started
+  // UI feedback
   const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
   const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
 
   if (buildButton && upgradeButton) {
     buildButton.disabled = true;
-    buildButton.textContent = "Building...";
-    upgradeButton.disabled = true; // Disable upgrade until the building is complete
+    buildButton.textContent = "Built";
+    upgradeButton.disabled = false; // Enable upgrade now that building is complete
   }
 
-  addConsoleMessage(`Started building process for ${buildingName}.`);
+  addConsoleMessage(`${buildingName} has been built successfully.`);
+  
+  // Update the building cards to reflect the new building
+  updateBuildingCards();
 }
 
 
