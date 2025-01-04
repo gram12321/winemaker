@@ -36,8 +36,8 @@
   background-color: rgba(0, 0, 0, 0.5);
   /* Semi-transparent background */
   z-index: 2000;
-  display: flex;
-  /* Use flex to ensure child can be centered easily */
+  display: none;
+  /* Hidden by default, will be shown with JS */
 }
 
 .overlay-content {

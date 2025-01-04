@@ -48,6 +48,19 @@ export function showBuildingsOverlay() {
 
     // Add event listeners for building and upgrading buttons
     initButtonListeners();
+    
+    // Add click handlers for building cards
+    const buildingCards = document.querySelectorAll('.building-card');
+    buildingCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const buildingName = card.querySelector('.building-details').getAttribute('data-building-name');
+        const buildings = loadBuildings();
+        const building = buildings.find(b => b.name === buildingName);
+        if (building) {
+          showBuildingOverlay(building);
+        }
+      });
+    });
 }
 
 // Function to initialize event listeners for build and upgrade buttons
