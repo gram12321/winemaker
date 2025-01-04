@@ -11,7 +11,7 @@
     overflow-y: auto; /* Allows vertical scrolling */
     overflow-x: hidden; /* Prevents horizontal scrolling */
     display: none; /* Initially hidden */
-    z-index: 1000; /* Base z-index for main overlays */
+    z-index: 999; /* Lower z-index for base overlays */
 }
 
 /* Content within the mainview overlay */
@@ -35,7 +35,7 @@
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
   /* Semi-transparent background */
-  z-index: 3000 !important; /* Higher z-index to appear above mainview-overlay */
+  z-index: 9999 !important; /* Much higher z-index to ensure it appears on top */
   display: none;
   /* Hidden by default, will be shown with JS */
 }
