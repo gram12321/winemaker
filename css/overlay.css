@@ -35,7 +35,7 @@
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
   /* Semi-transparent background */
-  z-index: 2000;
+  z-index: 3000; /* Increased z-index to show above mainview-overlay */
   display: flex;
   /* Use flex to ensure child can be centered easily */
 }
