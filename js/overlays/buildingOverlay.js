@@ -63,12 +63,6 @@ export function showBuildingOverlay(building) {
   console.log('Found overlay element:', overlay);
   const details = document.getElementById('building-details');
   console.log('Found details element:', details);
-  
-  // Hide the buildings overlay
-  const buildingsOverlay = document.querySelector('.mainview-overlay');
-  if (buildingsOverlay) {
-    buildingsOverlay.style.display = 'none';
-  }
 
   if (details && overlay) {
     details.innerHTML = createBuildingDetails(building);
