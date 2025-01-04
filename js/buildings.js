@@ -291,19 +291,23 @@ export function upgradeBuilding(buildingName) {
     return;
   }
 
-  // Calculate upgrade cost
+  // Calculate and apply upgrade
   const upgradeCost = building.getUpgradeCost();
+  building.upgrade();
+  
+  // Store the updated buildings
+  const updatedBuildings = buildings.map(b => b.name === buildingName ? building : b);
+  storeBuildings(updatedBuildings);
 
-  // Initiate the upgrade as a task
-  const taskName = `Upgrading ${buildingName}`;
-  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName, taskName, upgradeCost });
-
-  // UI feedback that an upgrade process has started
+  // UI feedback
   const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
   if (upgradeButton) {
-    upgradeButton.disabled = true;
-    upgradeButton.textContent = "Upgrading...";
+    upgradeButton.disabled = false;
+    upgradeButton.textContent = "Upgrade";
   }
 
-  addConsoleMessage(`Started upgrade process for ${buildingName}.`);
+  addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}.`);
+  
+  // Update the building cards to reflect the upgrade
+  updateBuildingCards();
 }
