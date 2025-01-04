@@ -1,7 +1,6 @@
 // Import required functions from other modules
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { buildBuilding, upgradeBuilding, updateBuildingCards } from '/js/buildings.js';
-import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
 
 // Function to create and display the buildings overlay
 export function showBuildingsOverlay() {

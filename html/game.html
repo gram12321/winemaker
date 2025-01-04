@@ -51,7 +51,6 @@
       import { initializeConsole } from '/js/console.js';
     import { addTransaction} from '/js/finance.js';
     import {setupStaffWagesRecurringTransaction} from '/js/staff.js';
-    import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
       
       document.addEventListener('DOMContentLoaded', function () {
           initializePanel();
@@ -67,11 +66,5 @@
           document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
       });
   </script>
-  <!-- Building Detail Overlay -->
-  <div id="buildingOverlay" class="popup-overlay">
-      <span class="close-btn">&times;</span>
-      <div id="building-details"></div>
-    </div>
-  </div>
 </body>
 </html>
