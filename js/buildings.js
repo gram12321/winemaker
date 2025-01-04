@@ -1,6 +1,7 @@
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { showBuildingOverlay } from './overlays/buildingOverlay.js'; // Import the showBuildingOverlay function
 import { addConsoleMessage } from '/js/console.js';
+import { storeBuildings} from '/js/database/adminFunctions.js';
 
 
 export class Building {
