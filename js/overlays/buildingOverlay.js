@@ -71,6 +71,7 @@ export function showBuildingOverlay(building) {
     setupToolButtons(building, tools);
 
     overlay.style.display = 'flex';
+    setTimeout(() => overlay.classList.add('active'), 10);
   }
 }
 
