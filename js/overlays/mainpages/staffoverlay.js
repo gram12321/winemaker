@@ -1,5 +1,6 @@
 
 import { displayStaff } from '/js/staff.js';
+import { showHireStaffOverlay } from '/js/overlays/hirestaffoverlay.js';
 
 export function showStaffOverlay() {
     // Remove any existing instances of the overlay
@@ -47,16 +48,7 @@ export function showStaffOverlay() {
             }
         });
     }
-}
 
-    // Add event listener to close hire staff overlay
-    const closeHireStaffBtn = document.getElementById('closeHireStaffOverlay');
-    if (closeHireStaffBtn) {
-        closeHireStaffBtn.addEventListener('click', function() {
-            const hireOverlay = document.getElementById('hireStaffOverlay');
-            if (hireOverlay) {
-                hireOverlay.style.display = 'none';
-            }
-        });
-    }
+
+    
 }
