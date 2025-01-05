@@ -1,6 +1,7 @@
 
 // Import required functions
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
+import { displayFarmland } from '/js/farmland.js';
 
 export function showLandOverlay() {
     // Remove any existing instances of the overlay
@@ -18,6 +19,25 @@ export function showLandOverlay() {
         <div class="mainview-overlay-content">
             <h1>Farmland</h1>
             <button id="buy-land-btn" class="btn btn-success mt-3">Buy Land</button>
+
+            <!-- Farmland Table -->
+            <div class="farmland-table mt-4">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Farmland</th>
+                            <th>Field Name</th>
+                            <th>Country/Region</th>
+                            <th>Size</th>
+                            <th>Crop</th>
+                            <th>Planting Options</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="farmland-entries">
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Buy Land Overlay -->
             <div id="buyLandOverlay" class="overlay" style="display: none;">
@@ -49,4 +69,7 @@ export function showLandOverlay() {
     if (buyLandBtn) {
         buyLandBtn.addEventListener('click', showBuyLandOverlay);
     }
+
+    // Display farmland data
+    displayFarmland();
 }
