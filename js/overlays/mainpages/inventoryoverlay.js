@@ -76,6 +76,12 @@ export function showInventoryOverlay() {
     // Only populate the storage table for containers
     populateStorageTable('storage-table-body');
     
+    // Create an empty inventory if none exists
+    const savedInventory = localStorage.getItem('playerInventory');
+    const inventory = {
+        items: savedInventory ? JSON.parse(savedInventory) : []
+    };
+    
     // Display fermentation and wine cellar contents
-    displayInventory(JSON.parse(localStorage.getItem('playerInventory') || '[]'), ['fermentation-table-body', 'winecellar-table-body']);
+    displayInventory(inventory, ['fermentation-table-body', 'winecellar-table-body']);
 }
