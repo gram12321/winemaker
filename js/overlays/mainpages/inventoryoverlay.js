@@ -1,5 +1,5 @@
 
-import { displayInventory, populateStorageTable } from '/js/resource.js';
+import { displayInventory,inventoryInstance, populateStorageTable } from '/js/resource.js';
 
 export function showInventoryOverlay() {
     // Remove any existing instances of the overlay
