@@ -6,6 +6,7 @@ import { showAdminOverlay } from '../overlays/mainpages/adminoverlay.js';
 import { showBuildingsOverlay } from '/js/overlays/mainpages/buildingsoverlay.js';
 import { showLandOverlay } from '/js/overlays/mainpages/landoverlay.js';
 import { showInventoryOverlay } from '/js/overlays/mainpages/inventoryoverlay.js';
+import { showStaffOverlay } from '/js/overlays/mainpages/staffoverlay.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -69,6 +70,17 @@ export function initializeSidebar() {
                     });
                 } else {
                     console.error('Inventory link element not found');
+                }
+
+                // Attach event listener to the staff link after sidebar loads
+                const staffLink = document.getElementById('staff-link');
+                if (staffLink) {
+                    staffLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        showStaffOverlay();
+                    });
+                } else {
+                    console.error('Staff link element not found');
                 }
 
                 // Render company information
