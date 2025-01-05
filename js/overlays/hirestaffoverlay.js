@@ -20,7 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayStaffOptions() {
+        console.log('Displaying staff options');
         const staffContainer = overlay.querySelector('.overlay-content');
+        console.log('Staff container:', staffContainer);
 
         // Clear existing content except the close button and header
         staffContainer.innerHTML = `
