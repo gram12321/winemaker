@@ -2,7 +2,7 @@ import { formatNumber } from './utils.js';  // Ensure correct path
 import { renderCompanyInfo } from './database/loadSidebar.js';
 
 // Function to load cash flow data dynamically into the table
-function loadCashFlow() {
+export function loadCashFlow() {
   const cashFlowTableBody = document.getElementById('cash-flow-table').querySelector('tbody');
   cashFlowTableBody.innerHTML = '';  // Clear existing entries
     
@@ -34,7 +34,7 @@ function loadCashFlow() {
 }
 
 // Function to update the income statement
-function updateIncomeStatement() {
+export function updateIncomeStatement() {
     // Retrieve transactions from localStorage
     const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
