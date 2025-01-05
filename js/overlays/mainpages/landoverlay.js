@@ -1,6 +1,6 @@
 
 // Import required functions
-//import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
+import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 
 export function showLandOverlay() {
     // Remove any existing instances of the overlay
