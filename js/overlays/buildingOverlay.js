@@ -1,7 +1,9 @@
+import { getBuildingTools, createTool } from '../buildings.js';
 import { addConsoleMessage } from '/js/console.js';
-import { updateBuildingCards, getBuildingTools, createTool } from '/js/buildings.js'; // Make sure the import path is correct
+//import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import path is correct
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction } from '../finance.js'; // Ensure this import is at the top of your file.
+
 
 function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
@@ -56,12 +58,8 @@ function setupToolButtons(building, tools) {
 
 // Updated showBuildingOverlay function
 export function showBuildingOverlay(building) {
-  console.log('Attempting to show building overlay');
   const overlay = document.getElementById('buildingOverlay');
   const details = document.getElementById('building-details');
-  
-  console.log('Overlay element:', overlay);
-  console.log('Details element:', details);
 
   if (details && overlay) {
     details.innerHTML = createBuildingDetails(building);
@@ -73,13 +71,6 @@ export function showBuildingOverlay(building) {
     setupToolButtons(building, tools);
 
     overlay.style.display = 'flex';
-    overlay.classList.add('active');
-
-    // Add close button listener
-    const closeBtn = overlay.querySelector('.close-btn');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', hideBuildingOverlay);
-    }
   }
 }
 
