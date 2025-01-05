@@ -28,6 +28,24 @@
       <!-- Buy Land Button -->
       <button id="buy-land-btn" class="btn btn-success mt-3">Buy Land</button>
 
+      <!-- Farmland Table -->
+      <table class="table mt-4">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">Farmland</th>
+            <th scope="col">Field Name</th>
+            <th scope="col">Country/Region</th>
+            <th scope="col">Size</th>
+            <th scope="col">Crop</th>
+            <th scope="col">Planting Options</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody id="farmland-entries">
+          <!-- Dynamic farmland entries will be populated here -->
+        </tbody>
+      </table>
+
 
 
     <!-- Buy Land Overlay -->
@@ -74,6 +92,7 @@
         initializePanel();
         initializeSidebar();
         initializeConsole();
+        displayFarmlandTable();
 
         // Add event listeners for close buttons
         document.getElementById('closeBuyLandOverlay').addEventListener('click', function() {
