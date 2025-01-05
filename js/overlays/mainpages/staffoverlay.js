@@ -28,4 +28,26 @@ export function showStaffOverlay() {
 
     // Display staff data
     displayStaff();
+
+    // Add event listener to hire staff button
+    const hireStaffBtn = document.getElementById('hire-staff-btn');
+    if (hireStaffBtn) {
+        hireStaffBtn.addEventListener('click', function() {
+            const hireOverlay = document.getElementById('hireStaffOverlay');
+            if (hireOverlay) {
+                hireOverlay.style.display = 'block';
+            }
+        });
+    }
+
+    // Add event listener to close hire staff overlay
+    const closeHireStaffBtn = document.getElementById('closeHireStaffOverlay');
+    if (closeHireStaffBtn) {
+        closeHireStaffBtn.addEventListener('click', function() {
+            const hireOverlay = document.getElementById('hireStaffOverlay');
+            if (hireOverlay) {
+                hireOverlay.style.display = 'none';
+            }
+        });
+    }
 }
