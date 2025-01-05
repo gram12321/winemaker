@@ -7,8 +7,8 @@ import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNo
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
 import { allResources, getResourceByName, inventoryInstance  } from '/js/resource.js';
 import { saveInventory } from '/js/database/adminFunctions.js';
-import { getFlagIcon, formatNumber } from './utils.js';
-import { getUnit, convertToCurrentUnit } from './settings.js';
+//import { getFlagIcon, formatNumber } from './utils.js';
+//import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from './overlays/plantingOverlay.js';
 
@@ -190,9 +190,6 @@ export function displayFarmland() {
       </td>
       <td>${formatNumber(landSize)} ${selectedUnit}</td>
       <td>${farmland.plantedResourceName || 'None'}</td>
-      <td>${farmland.soil}</td>
-      <td>${farmland.altitude}m</td>
-      <td class="${getColorClass(farmland.aspect)}">${farmland.aspect}</td>
     `;
 
     // Add event listener to show farmland details overlay
