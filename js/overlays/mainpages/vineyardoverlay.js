@@ -16,12 +16,12 @@ export function showVineyardOverlay() {
         </div>
     `;
 
+    // Append overlay to the document body
+    document.body.appendChild(overlay);
+
     // Display vineyard table
     const vineyardTable = displayVineyard();
     document.getElementById('vineyard-table-container').appendChild(vineyardTable);
-
-    // Append overlay to the document body
-    document.body.appendChild(overlay);
 
     // Show the overlay
     overlay.style.display = 'block';
