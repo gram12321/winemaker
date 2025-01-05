@@ -1,7 +1,5 @@
 [Done] Udregn værdi for farmland udfra attibutes, Region, Aspect, altitude. Multiply by acres. 
 [Done] Opdater ownedland to display soil and altitude
-
-
 [Done] Names, female for south male for north
 [Done] use country specific names. 
 
