@@ -1,3 +1,7 @@
+
+import { getUnit, convertToCurrentUnit } from './settings.js';
+import { getFlagIcon, formatNumber, getColorClass } from './utils.js';
+
 import { addConsoleMessage  } from '/js/console.js';
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
@@ -164,3 +168,38 @@ function getRandomAspect() {
 
 
 export { Farmland };
+
+export function displayFarmland() {
+  const farmlandEntries = document.querySelector('#farmland-entries');
+  if (!farmlandEntries) return;
+  
+  farmlandEntries.innerHTML = ''; // Clear existing entries
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const selectedUnit = getUnit();
+
+  farmlands.forEach((farmland) => {
+    const landSize = convertToCurrentUnit(farmland.acres);
+    const row = document.createElement('tr');
+    
+    row.innerHTML = `
+      <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
+      <td>${farmland.name}</td>
+      <td>
+        ${getFlagIcon(farmland.country)}
+        ${farmland.country}, ${farmland.region}
+      </td>
+      <td>${formatNumber(landSize)} ${selectedUnit}</td>
+      <td>${farmland.plantedResourceName || 'None'}</td>
+      <td>${farmland.soil}</td>
+      <td>${farmland.altitude}m</td>
+      <td class="${getColorClass(farmland.aspect)}">${farmland.aspect}</td>
+    `;
+
+    // Add event listener to show farmland details overlay
+    row.addEventListener('click', () => {
+      showFarmlandOverlay(farmland);
+    });
+
+    farmlandEntries.appendChild(row);
+  });
+}
