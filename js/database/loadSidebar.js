@@ -4,6 +4,7 @@ import { Farmland } from '../farmland.js'; // Ensure the correct path
 import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
 import { showAdminOverlay } from '../overlays/mainpages/adminoverlay.js';
 import { showBuildingsOverlay } from '/js/overlays/mainpages/buildingsoverlay.js';
+import { showLandOverlay } from '/js/overlays/mainpages/landoverlay.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -45,6 +46,17 @@ export function initializeSidebar() {
                     });
                 } else {
                     console.error('Buildings link element not found');
+                }
+
+                // Attach event listener to the land link after sidebar loads
+                const landLink = document.getElementById('land-link');
+                if (landLink) {
+                    landLink.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default navigation
+                        showLandOverlay(); // Show land overlay
+                    });
+                } else {
+                    console.error('Land link element not found');
                 }
 
                 // Render company information
