@@ -1,19 +1,6 @@
 import { formatNumber } from './utils.js';  // Ensure correct path
 import { renderCompanyInfo } from './database/loadSidebar.js';
 
-// Function to initialize the finance management page
-function initializeFinance() {
-    const cashFlowTable = document.getElementById('cash-flow-table');
-    const weeklyIncomeElement = document.getElementById('weekly-income');
-
-    // Check if elements exist before proceeding
-    if (cashFlowTable && weeklyIncomeElement) {
-        loadCashFlow();
-        updateIncomeStatement();
-        
-    }
-}
-
 // Function to load cash flow data dynamically into the table
 function loadCashFlow() {
   const cashFlowTableBody = document.getElementById('cash-flow-table').querySelector('tbody');
@@ -143,5 +130,3 @@ export function processRecurringTransactions(currentWeek) {
     localStorage.setItem('recurringTransactions', JSON.stringify(recurringTransactions));
 }
 
-// Initialize finance management when the document is ready
-document.addEventListener('DOMContentLoaded', initializeFinance);

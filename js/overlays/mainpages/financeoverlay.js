@@ -1,6 +1,6 @@
 
 import { formatNumber } from '/js/utils.js';
-import { initializeFinance, loadCashFlow, updateIncomeStatement } from '/js/finance.js';
+import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
 
 export function showFinanceOverlay() {
     // Remove any existing instances of the overlay
