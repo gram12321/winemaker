@@ -9,6 +9,7 @@ import { showInventoryOverlay } from '/js/overlays/mainpages/inventoryoverlay.js
 import { showStaffOverlay } from '/js/overlays/mainpages/staffoverlay.js';
 import { showFinanceOverlay } from '/js/overlays/mainpages/financeoverlay.js';
 import { showWineryOverlay } from '/js/overlays/mainpages/wineryoverlay.js';
+import { showSalesOverlay } from '/js/overlays/mainpages/salesoverlay.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -105,6 +106,17 @@ export function initializeSidebar() {
                     });
                 } else {
                     console.error('Winery link element not found');
+                }
+
+                // Attach event listener to the sales link after sidebar loads
+                const salesLink = document.getElementById('sales-link');
+                if (salesLink) {
+                    salesLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        showSalesOverlay();
+                    });
+                } else {
+                    console.error('Sales link element not found');
                 }
 
                 // Render company information
