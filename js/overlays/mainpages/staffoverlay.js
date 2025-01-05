@@ -33,12 +33,21 @@ export function showStaffOverlay() {
     const hireStaffBtn = document.getElementById('hire-staff-btn');
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', function() {
+            showHireStaffOverlay();
+        });
+    }
+
+    // Add event listener to close hire staff overlay
+    const closeHireStaffBtn = document.getElementById('closeHireStaffOverlay');
+    if (closeHireStaffBtn) {
+        closeHireStaffBtn.addEventListener('click', function() {
             const hireOverlay = document.getElementById('hireStaffOverlay');
             if (hireOverlay) {
-                hireOverlay.style.display = 'block';
+                hireOverlay.style.display = 'none';
             }
         });
     }
+}
 
     // Add event listener to close hire staff overlay
     const closeHireStaffBtn = document.getElementById('closeHireStaffOverlay');
