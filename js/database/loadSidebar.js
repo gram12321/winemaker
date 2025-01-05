@@ -5,6 +5,7 @@ import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
 import { showAdminOverlay } from '../overlays/mainpages/adminoverlay.js';
 import { showBuildingsOverlay } from '/js/overlays/mainpages/buildingsoverlay.js';
 import { showLandOverlay } from '/js/overlays/mainpages/landoverlay.js';
+import { showInventoryOverlay } from '/js/overlays/mainpages/inventoryoverlay.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -57,6 +58,17 @@ export function initializeSidebar() {
                     });
                 } else {
                     console.error('Land link element not found');
+                }
+
+                // Attach event listener to the inventory link after sidebar loads
+                const inventoryLink = document.getElementById('inventory-link');
+                if (inventoryLink) {
+                    inventoryLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        showInventoryOverlay();
+                    });
+                } else {
+                    console.error('Inventory link element not found');
                 }
 
                 // Render company information
