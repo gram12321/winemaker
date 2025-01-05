@@ -1,5 +1,5 @@
 
-import { displayInventory,inventoryInstance, populateStorageTable } from '/js/resource.js';
+import { displayInventory, populateStorageTable } from '/js/resource.js';
 
 export function showInventoryOverlay() {
     // Remove any existing instances of the overlay
@@ -73,7 +73,9 @@ export function showInventoryOverlay() {
     document.body.appendChild(overlay);
     overlay.style.display = 'block';
 
-    // Populate tables
+    // Only populate the storage table for containers
     populateStorageTable('storage-table-body');
-    displayInventory(inventoryInstance);
+    
+    // Display fermentation and wine cellar contents
+    displayInventory(JSON.parse(localStorage.getItem('playerInventory') || '[]'), ['fermentation-table-body', 'winecellar-table-body']);
 }
