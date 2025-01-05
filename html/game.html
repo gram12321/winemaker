@@ -74,5 +74,23 @@
       <div id="building-details"></div>
     </div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const buildingOverlay = document.getElementById('buildingOverlay');
+      const closeBtn = buildingOverlay.querySelector('.close-btn');
+      
+      // Close on X button click
+      closeBtn.addEventListener('click', () => {
+        buildingOverlay.style.display = 'none';
+      });
+      
+      // Close on clicking outside
+      buildingOverlay.addEventListener('click', (event) => {
+        if (event.target === buildingOverlay) {
+          buildingOverlay.style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
