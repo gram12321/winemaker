@@ -1,5 +1,5 @@
 
-import { displayVineyard } from '../../../vineyard.js';
+import { displayVineyard } from '../../vineyard.js';
 
 // Function to create and display the vineyard overlay
 export function showVineyardOverlay() {
