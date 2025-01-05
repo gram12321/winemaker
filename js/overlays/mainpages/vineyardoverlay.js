@@ -1,3 +1,6 @@
+
+import { displayVineyard } from '../../../vineyard.js';
+
 // Function to create and display the vineyard overlay
 export function showVineyardOverlay() {
     // Create overlay element
@@ -12,12 +15,10 @@ export function showVineyardOverlay() {
             <div id="vineyard-table-container"></div>
         </div>
     `;
-    
-    // Import and display vineyard table
-    import('../../../vineyard.js').then(module => {
-        const vineyardTable = module.displayVineyard();
-        document.getElementById('vineyard-table-container').appendChild(vineyardTable);
-    });
+
+    // Display vineyard table
+    const vineyardTable = displayVineyard();
+    document.getElementById('vineyard-table-container').appendChild(vineyardTable);
 
     // Append overlay to the document body
     document.body.appendChild(overlay);
@@ -25,6 +26,3 @@ export function showVineyardOverlay() {
     // Show the overlay
     overlay.style.display = 'block';
 }
-
-
-
