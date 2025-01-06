@@ -132,8 +132,10 @@ export function showCrushingOverlay() {
           newInventory.push(mustItem);
           
           // Save the updated inventory
+          console.log('Previous inventory length:', playerInventory.length);
+          console.log('New inventory length:', newInventory.length);
           localStorage.setItem('playerInventory', JSON.stringify(newInventory));
-          console.log('Updated inventory:', newInventory);
+          console.log('Updated inventory saved:', JSON.parse(localStorage.getItem('playerInventory')));
           
           addConsoleMessage(`Crushed ${formatNumber(matchingItem.amount)} t of ${resourceName} grapes from ${fieldName}`);
         } catch (error) {
