@@ -72,6 +72,9 @@ export function showHarvestOverlay(farmland, farmlandId) {
     // Calculate quality based on annual quality factor and ripeness
     const quality = ((farmlandToHarvest.annualQualityFactor + farmlandToHarvest.ripeness) / 2).toFixed(2);
 
+    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    const containerInventory = playerInventory.find(item => item.storage === selectedTool);
+
     if (containerInventory) {
       containerInventory.amount += harvestedAmount;
       containerInventory.quality = parseFloat(quality);
