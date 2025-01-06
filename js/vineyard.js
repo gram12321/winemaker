@@ -20,16 +20,27 @@ export function canHarvest(farmland, storage) {
         return false;
     }
 
-    // Check storage capacity
+    // Get current inventory and expected yield
     const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const currentAmount = currentInventory
-        .filter(item => item.storage === storage)
-        .reduce((sum, item) => sum + item.amount, 0);
+    const expectedYield = farmlandYield(farmland);
+    const existingItems = currentInventory.filter(item => item.storage === storage);
+    const currentAmount = existingItems.reduce((sum, item) => sum + item.amount, 0);
 
+    // Check if container has existing content
+    if (existingItems.length > 0) {
+        const firstItem = existingItems[0];
+        if (firstItem.fieldName !== farmland.name ||
+            firstItem.resource.name !== farmland.plantedResourceName ||
+            firstItem.vintage !== new Date().getFullYear()) {
+            addConsoleMessage("Container already contains different content. Please select another container.");
+            return false;
+        }
+    }
+
+    // Check if container has enough capacity for the expected yield
     const availableCapacity = tool.capacity - currentAmount;
-    
-    if (availableCapacity <= 0) {
-        addConsoleMessage("No storage capacity available.");
+    if (availableCapacity < expectedYield) {
+        addConsoleMessage("Container doesn't have enough capacity for the expected yield.");
         return false;
     }
 
