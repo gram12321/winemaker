@@ -2,6 +2,7 @@ import { getBuildingTools } from '../buildings.js';
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
 import { farmlandYield } from '../farmland.js';
+import { harvest } from '../vineyard.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
   const overlayContainer = document.createElement('div');
@@ -56,7 +57,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
       return;
     }
 
-    import { harvest } from '../vineyard.js';
+
     
     if (harvest(farmlandId, selectedTool)) {
       removeOverlay();
