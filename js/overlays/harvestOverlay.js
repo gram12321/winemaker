@@ -80,7 +80,8 @@ export function showHarvestOverlay(farmland, farmlandId) {
           storage: selectedTool,
           fieldName: farmlandToHarvest.name,
           vintage: localStorage.getItem('year'),
-          quality: parseFloat(quality)
+          quality: parseFloat(quality),
+          state: 'Grapes'
         });
       }
 
