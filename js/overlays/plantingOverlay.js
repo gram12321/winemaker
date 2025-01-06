@@ -94,6 +94,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
 
     if (updatedFarmlandIndex !== -1) {
       // Update both density and planted resource
+      // Update the farmland properties
       farmlands[updatedFarmlandIndex].density = selectedDensity;
       farmlands[updatedFarmlandIndex].plantedResourceName = selectedResource;
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
@@ -102,8 +103,8 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
       const totalCost = selectedDensity * 2 * farmland.acres;
       addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
 
-      // Add console message for successful planting
-      addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${farmland.plantedResourceName}</strong>.`);
+      // Add console message for successful planting using the selectedResource
+      addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${selectedResource}</strong>.`);
 
       onPlantCallback(selectedDensity);
       removeOverlay();
