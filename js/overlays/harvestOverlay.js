@@ -53,7 +53,8 @@ export function showHarvestOverlay(farmland, farmlandId) {
       return;
     }
 
-    // Get current inventory for this container
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     const containerInventory = playerInventory.find(item => item.storage === selectedTool);
 
@@ -62,18 +63,12 @@ export function showHarvestOverlay(farmland, farmlandId) {
       addConsoleMessage('Selected container is full');
       return;
     }
-
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
     
     let harvestedAmount = farmlandYield(farmlandToHarvest);
     if (harvestedAmount === undefined) harvestedAmount = 0;
 
     // Calculate quality based on annual quality factor and ripeness
     const quality = ((farmlandToHarvest.annualQualityFactor + farmlandToHarvest.ripeness) / 2).toFixed(2);
-
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const containerInventory = playerInventory.find(item => item.storage === selectedTool);
 
     if (containerInventory) {
       containerInventory.amount += harvestedAmount;
