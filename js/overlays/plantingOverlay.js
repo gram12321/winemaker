@@ -4,6 +4,36 @@ import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
 import { allResources } from '/js/resource.js';
 
+// Function to handle planting logic
+function plant(farmland, selectedResource, selectedDensity) {
+  if (!selectedResource) {
+    addConsoleMessage('Please select a resource to plant');
+    return false;
+  }
+
+  // Get all farmlands and update the specific one
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
+
+  if (updatedFarmlandIndex !== -1) {
+    // Update both density and planted resource
+    farmlands[updatedFarmlandIndex].density = selectedDensity;
+    farmlands[updatedFarmlandIndex].plantedResourceName = selectedResource;
+    farmlands[updatedFarmlandIndex].vineAge = 0;
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+    // Calculate and process the planting cost
+    const totalCost = selectedDensity * 2 * farmland.acres;
+    addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
+
+    // Add console message for successful planting
+    addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${selectedResource}</strong>.`);
+    return true;
+  }
+  return false;
+}
+
+// Function to show planting overlay UI
 export function showPlantingOverlay(farmland, onPlantCallback) {
   // Check if field is already planted
   if (farmland.plantedResourceName) {
@@ -62,6 +92,13 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
 
   document.body.appendChild(overlayContainer);
 
+  // Setup event listeners
+  setupDensitySlider(overlayContainer, farmland);
+  setupPlantButton(overlayContainer, farmland, onPlantCallback);
+  setupCloseButton(overlayContainer);
+}
+
+function setupDensitySlider(overlayContainer, farmland) {
   const densitySlider = overlayContainer.querySelector('#density-slider');
   const densityValueDisplay = overlayContainer.querySelector('#density-value');
   const plantsPerAcreDisplay = overlayContainer.querySelector('#plants-per-acre');
@@ -77,48 +114,29 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
     const totalCost = costPerAcre * farmland.acres;
     totalCostDisplay.textContent = formatNumber(totalCost);
   });
+}
 
+function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
   const plantButton = overlayContainer.querySelector('.plant-btn');
   plantButton.addEventListener('click', () => {
-    const selectedDensity = parseInt(densitySlider.value, 10);
-    const selectedResource = document.getElementById('resource-select').value;
+    const selectedDensity = parseInt(overlayContainer.querySelector('#density-slider').value, 10);
+    const selectedResource = overlayContainer.querySelector('#resource-select').value;
 
-    if (!selectedResource) {
-      addConsoleMessage('Please select a resource to plant');
-      return;
-    }
-
-    // Get all farmlands and update the specific one
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
-
-    if (updatedFarmlandIndex !== -1) {
-      // Update both density and planted resource
-      // Update the farmland properties
-      farmlands[updatedFarmlandIndex].density = selectedDensity;
-      farmlands[updatedFarmlandIndex].plantedResourceName = selectedResource;
-      farmlands[updatedFarmlandIndex].vineAge = 0;
-      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-      // Calculate and process the planting cost
-      const totalCost = selectedDensity * 2 * farmland.acres;
-      addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
-
-      // Add console message for successful planting using the selectedResource
-      addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${selectedResource}</strong>.`);
-
+    if (plant(farmland, selectedResource, selectedDensity)) {
       onPlantCallback(selectedDensity);
-      removeOverlay();
+      removeOverlay(overlayContainer);
     }
   });
+}
 
+function setupCloseButton(overlayContainer) {
   const closeButton = overlayContainer.querySelector('.close-btn');
-  closeButton.addEventListener('click', removeOverlay);
+  closeButton.addEventListener('click', () => removeOverlay(overlayContainer));
   overlayContainer.addEventListener('click', (event) => {
-    if (event.target === overlayContainer) removeOverlay();
+    if (event.target === overlayContainer) removeOverlay(overlayContainer);
   });
+}
 
-  function removeOverlay() {
-    document.body.removeChild(overlayContainer);
-  }
+function removeOverlay(overlayContainer) {
+  document.body.removeChild(overlayContainer);
 }
