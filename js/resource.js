@@ -171,82 +171,54 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
 
-  storageTableBody.innerHTML = ''; // Clear existing table content
+  storageTableBody.innerHTML = '';
 
-  buildings.forEach((building) => {
-    building.contents.forEach((tool) => {
-      // Filter for tools that support "Grapes"
-      if (tool.capacity > 0 && tool.supportedResources && tool.supportedResources.includes('Grapes')) {
+  buildings.forEach(building => {
+    building.contents.forEach(tool => {
+      if (tool.supportedResources?.includes('Grapes')) {
         const row = document.createElement('tr');
+        const matchingInventoryItems = playerInventory.filter(item => 
+          item.storage === `${tool.name} #${tool.instanceNumber}`
+        );
+        const firstItem = matchingInventoryItems[0];
 
-        // Create if not excluding Quality and Status
         if (excludeQualityAndStatus) {
           const selectCell = document.createElement('td');
           const radioInput = document.createElement('input');
           radioInput.type = 'radio';
-          radioInput.name = 'tool-select'; // Grouping the radio buttons
-          radioInput.value = `${tool.name} #${tool.instanceNumber}`; // Set value to the tool instance
-
+          radioInput.name = 'tool-select';
+          radioInput.value = `${tool.name} #${tool.instanceNumber}`;
           selectCell.appendChild(radioInput);
           row.appendChild(selectCell);
-        } else {
-          // If excluding Quality and Status, add a placeholder cell
         }
 
-        // Display the unique name of the tool instance
-        const containerCell = document.createElement('td');
-        containerCell.textContent = `${tool.name} #${tool.instanceNumber}`;
-        row.appendChild(containerCell);
+        row.innerHTML += `
+          <td>${tool.name} #${tool.instanceNumber}</td>
+          <td>${tool.capacity}</td>
+          <td>${firstItem ? `<strong>${firstItem.fieldName}</strong>, ${firstItem.resource.name}, ${firstItem.vintage || 'Unknown'}` : 'N/A'}</td>
+          <td>${formatNumber(matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0))} t</td>
+        `;
 
-        // Display the tool capacity
-        const capacityCell = document.createElement('td');
-        capacityCell.textContent = tool.capacity;
-        row.appendChild(capacityCell);
-
-        // Filter for matching inventory items for this specific tool instance
-        const matchingInventoryItems = playerInventory.filter(item => item.storage === `${tool.name} #${tool.instanceNumber}`);
-
-        // Preparing the resource details for the row
-        const resourceCell = document.createElement('td');
-        if (matchingInventoryItems.length > 0) {
-          const { resource, fieldName, vintage } = matchingInventoryItems[0];
-          resourceCell.innerHTML = `<strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}`;
-        } else {
-          resourceCell.textContent = 'N/A'; // Display N/A if no items are found
-        }
-        row.appendChild(resourceCell); // Correct placement of "resource"
-
-        // Amount cell
-        const amountCell = document.createElement('td');
-        const totalAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0) || 0;
-        amountCell.textContent = `${formatNumber(totalAmount)} t`; // Display the total amount
-        row.appendChild(amountCell); // Correct placement of "amount"
-
-        // Check if quality and status should be included
         if (!excludeQualityAndStatus) {
-          const qualityCell = document.createElement('td');
-          if (matchingInventoryItems.length > 0 && matchingInventoryItems[0].quality !== undefined) {
-            const { quality } = matchingInventoryItems[0];
-            const qualityDescription = getWineQualityCategory(quality);
-            const colorClass = getColorClass(quality);
-            qualityCell.innerHTML = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
+          if (firstItem?.quality) {
+            const qualityDescription = getWineQualityCategory(firstItem.quality);
+            const colorClass = getColorClass(firstItem.quality);
+            row.innerHTML += `
+              <td>${qualityDescription} <span class="${colorClass}">(${firstItem.quality.toFixed(2)})</span></td>
+            `;
           } else {
-            qualityCell.textContent = 'Raw'; 
+            row.innerHTML += '<td>N/A</td>';
           }
-          row.appendChild(qualityCell);
 
-          const statusCell = document.createElement('td');
-          if (matchingInventoryItems.length > 0 && matchingInventoryItems[0].state) {
-            const state = matchingInventoryItems[0].state;
-            const statusIconPath = `/assets/pic/${state.toLowerCase()}_dalle.webp`;
-            statusCell.innerHTML = `<img src="${statusIconPath}" alt="${state}" class="status-image">`;
+          if (firstItem?.state) {
+            row.innerHTML += `
+              <td><img src="/assets/pic/${firstItem.state.toLowerCase()}_dalle.webp" alt="${firstItem.state}" class="status-image"></td>
+            `;
           } else {
-            statusCell.textContent = 'N/A'; 
+            row.innerHTML += '<td>N/A</td>';
           }
-          row.appendChild(statusCell);
         }
 
-        // Append the constructed row to the storage table body
         storageTableBody.appendChild(row);
       }
     });
