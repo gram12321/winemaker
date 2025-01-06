@@ -210,9 +210,8 @@ export function displayFarmland() {
       const select = row.querySelector('.planting-select');
       const selectedResource = select.value;
       if (selectedResource) {
+        farmland.plantedResourceName = selectedResource;
         showPlantingOverlay(farmland, (density) => {
-          // Handle successful planting
-          farmland.plantedResourceName = selectedResource;
           displayFarmland(); // Refresh display
         });
       }

@@ -69,14 +69,12 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
   plantButton.addEventListener('click', () => {
     const selectedDensity = parseInt(densitySlider.value, 10);
 
-    // Update farmland object
-    farmland.density = selectedDensity;
-
     // Get all farmlands and update the specific one
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
 
     if (updatedFarmlandIndex !== -1) {
+      // Update both density and planted resource
       farmlands[updatedFarmlandIndex].density = selectedDensity;
       farmlands[updatedFarmlandIndex].plantedResourceName = farmland.plantedResourceName;
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
