@@ -1,4 +1,3 @@
-
 import { displayVineyard } from '../../vineyard.js';
 
 // Function to create and display the vineyard overlay
@@ -25,4 +24,13 @@ export function showVineyardOverlay() {
 
     // Show the overlay
     overlay.style.display = 'block';
+
+    // Add event listener for farmland row clicks (placeholder)
+    overlay.addEventListener('click', (event) => {
+        if (event.target.classList.contains('farmland-row')) {
+            const farmlandId = event.target.dataset.farmlandId;
+            // Implement logic to show farmland overlay here using farmlandId
+            console.log("Farmland row clicked:", farmlandId); // Placeholder - Replace with farmland overlay display logic
+        }
+    });
 }
