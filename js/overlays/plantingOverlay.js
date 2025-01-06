@@ -81,6 +81,12 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
   const plantButton = overlayContainer.querySelector('.plant-btn');
   plantButton.addEventListener('click', () => {
     const selectedDensity = parseInt(densitySlider.value, 10);
+    const selectedResource = document.getElementById('resource-select').value;
+
+    if (!selectedResource) {
+      addConsoleMessage('Please select a resource to plant');
+      return;
+    }
 
     // Get all farmlands and update the specific one
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -89,7 +95,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
     if (updatedFarmlandIndex !== -1) {
       // Update both density and planted resource
       farmlands[updatedFarmlandIndex].density = selectedDensity;
-      farmlands[updatedFarmlandIndex].plantedResourceName = farmland.plantedResourceName;
+      farmlands[updatedFarmlandIndex].plantedResourceName = selectedResource;
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
       // Calculate and process the planting cost

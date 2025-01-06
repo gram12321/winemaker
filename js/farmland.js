@@ -168,32 +168,51 @@ export function displayFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   if (!farmlandEntries) return;
   
-  farmlandEntries.innerHTML = ''; // Clear existing entries
+  farmlandEntries.innerHTML = '';
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const selectedUnit = getUnit();
 
   farmlands.forEach((farmland) => {
-    const landSize = convertToCurrentUnit(farmland.acres);
-    const row = document.createElement('tr');
-    
-    // Create planting options dropdown
-    const plantingOptions = allResources.map(resource => 
-      `<option value="${resource.name}">${resource.name}</option>`
-    ).join('');
-    
-    row.innerHTML = `
-      <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
-      <td>${farmland.name}</td>
-      <td>
-        ${getFlagIcon(farmland.country)}
-        ${farmland.country}, ${farmland.region}
-      </td>
-      <td>${formatNumber(landSize)} ${selectedUnit}</td>
-      <td>${farmland.plantedResourceName || 'None'}</td>
-      <td>
-        <button class="btn btn-primary plant-btn" data-farmland-id="${farmland.id}">Plant</button>
-      </td>
-    `;
+    const row = createFarmlandRow(farmland, selectedUnit);
+    setupFarmlandEventListeners(row, farmland);
+    farmlandEntries.appendChild(row);
+  });
+}
+
+function createFarmlandRow(farmland, selectedUnit) {
+  const landSize = convertToCurrentUnit(farmland.acres);
+  const row = document.createElement('tr');
+  
+  row.innerHTML = `
+    <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
+    <td>${farmland.name}</td>
+    <td>
+      ${getFlagIcon(farmland.country)}
+      ${farmland.country}, ${farmland.region}
+    </td>
+    <td>${formatNumber(landSize)} ${selectedUnit}</td>
+    <td>${farmland.plantedResourceName || 'None'}</td>
+    <td>
+      <button class="btn btn-primary plant-btn" data-farmland-id="${farmland.id}">Plant</button>
+    </td>
+  `;
+  return row;
+}
+
+function setupFarmlandEventListeners(row, farmland) {
+  const plantBtn = row.querySelector('.plant-btn');
+  const farmlandCells = row.querySelectorAll('td:not(:last-child)');
+  
+  plantBtn.addEventListener('click', () => {
+    showPlantingOverlay(farmland, () => displayFarmland());
+  });
+
+  farmlandCells.forEach(cell => {
+    cell.addEventListener('click', () => {
+      showFarmlandOverlay(farmland);
+    });
+  });
+}
 
     // Add event listeners
     const plantBtn = row.querySelector('.plant-btn');
