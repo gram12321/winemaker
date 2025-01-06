@@ -20,6 +20,12 @@ export function showVineyardOverlay() {
     // Append overlay to the document body
     document.body.appendChild(overlay);
 
+    // Clear any existing vineyard table
+    const container = document.getElementById('vineyard-table-container');
+    if (container) {
+        container.innerHTML = '';
+    }
+
     // Create and display vineyard table
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const table = document.createElement('table');
