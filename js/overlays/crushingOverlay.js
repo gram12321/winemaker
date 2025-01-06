@@ -2,7 +2,6 @@
 import { formatNumber, getWineQualityCategory, getColorClass } from '../utils.js';
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
-import { inventoryInstance } from '../resource.js';
 
 export function showCrushingOverlay() {
   const overlayContainer = document.createElement('div');
@@ -87,33 +86,36 @@ export function showCrushingOverlay() {
       );
 
       if (matchingItem) {
-        // Convert grapes to must (1:1 ratio for simplicity)
-        inventoryInstance.removeResource(
-          resourceName,
-          matchingItem.amount,
-          'Grapes',
-          vintage,
-          quality,
-          fieldName,
-          fieldPrestige
+        // Get the current inventory
+        const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+        
+        // Remove the grape item
+        const itemIndex = playerInventory.findIndex(item => 
+          item.storage === storage &&
+          item.resource.name === resourceName &&
+          item.vintage === vintage &&
+          item.quality === quality &&
+          item.fieldName === fieldName
         );
-
-        inventoryInstance.addResource(
-          resourceName,
-          matchingItem.amount,
-          'Must',
-          vintage,
-          quality,
-          fieldName,
-          fieldPrestige,
-          storage
-        );
-
-        addConsoleMessage(`Crushed ${formatNumber(matchingItem.amount)} kg of ${resourceName} grapes from ${fieldName}`);
+        
+        if (itemIndex !== -1) {
+          // Create the must item
+          const mustItem = {
+            ...playerInventory[itemIndex],
+            state: 'Must'
+          };
+          
+          // Remove grape item and add must item
+          playerInventory.splice(itemIndex, 1);
+          playerInventory.push(mustItem);
+          
+          // Save updated inventory
+          localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
+          
+          addConsoleMessage(`Crushed ${formatNumber(matchingItem.amount)} t of ${resourceName} grapes from ${fieldName}`);
+        }
       }
     });
-
-    localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
     removeOverlay();
   });
 
