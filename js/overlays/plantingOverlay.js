@@ -17,9 +17,21 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
   const initialCostPerAcre = density * 2;
   const initialTotalCost = initialCostPerAcre * farmland.acres;
 
+  // Create planting options dropdown
+  const plantingOptions = allResources.map(resource => 
+    `<option value="${resource.name}">${resource.name}</option>`
+  ).join('');
+
   overlayContainer.innerHTML = `
     <div class="overlay-content">
       <h2>Planting Options for ${farmland.name}</h2>
+      <div class="form-group">
+        <label for="resource-select" class="form-label">Select Resource to Plant:</label>
+        <select class="form-control" id="resource-select">
+          <option value="">Select Resource</option>
+          ${plantingOptions}
+        </select>
+      </div>
       <div class="form-group">
         <label for="density-slider" class="form-label">Select Planting Density (Plants/Acre):</label>
         <div class="d-flex align-items-center">

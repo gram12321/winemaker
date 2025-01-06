@@ -191,12 +191,6 @@ export function displayFarmland() {
       <td>${formatNumber(landSize)} ${selectedUnit}</td>
       <td>${farmland.plantedResourceName || 'None'}</td>
       <td>
-        <select class="planting-select form-control" data-farmland-id="${farmland.id}">
-          <option value="">Select Resource</option>
-          ${plantingOptions}
-        </select>
-      </td>
-      <td>
         <button class="btn btn-primary plant-btn" data-farmland-id="${farmland.id}">Plant</button>
       </td>
     `;
@@ -207,17 +201,9 @@ export function displayFarmland() {
     
     // Planting button click handler
     plantBtn.addEventListener('click', () => {
-      const select = row.querySelector('.planting-select');
-      const selectedResource = select.value;
-      if (selectedResource) {
-        const tempFarmland = {...farmland};
-        tempFarmland.plantedResourceName = selectedResource;
-        showPlantingOverlay(tempFarmland, (density) => {
-          // Update the actual farmland object after successful planting
-          farmland.plantedResourceName = selectedResource;
-          displayFarmland(); // Refresh display
-        });
-      }
+      showPlantingOverlay(farmland, (density) => {
+        displayFarmland(); // Refresh display
+      });
     });
 
     // Farmland details click handler (excluding planting controls and dropdown)
