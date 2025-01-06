@@ -1,7 +1,11 @@
-import { getBuildingTools } from '../buildings.js'; 
+
+import { getBuildingTools } from '../buildings.js';
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
-import { farmlandYield } from '../farmland.js';
+import { farmlandYield, canHarvest } from '../vineyard.js';
+import { inventoryInstance } from '../resource.js';
+import { formatNumber } from '../utils.js';
+import { saveInventory } from '../database/adminFunctions.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
   const overlayContainer = document.createElement('div');
@@ -39,58 +43,44 @@ export function showHarvestOverlay(farmland, farmlandId) {
     }
 
     const selectedTool = selectedRadio.value;
+    if (!canHarvest(farmland, selectedTool)) {
+      return;
+    }
+
     const storage = getBuildingTools().find(tool => tool.name === selectedTool.split(' #')[0]);
+    const gameYear = parseInt(localStorage.getItem('year'), 10);
     
-    if (!storage) {
-      addConsoleMessage('Invalid storage container selected');
-      return;
-    }
+    // Calculate harvest amount
+    const harvestYield = farmlandYield(farmland);
+    const totalHarvest = harvestYield;
 
-    // Get current inventory for this container
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const containerInventory = playerInventory.find(item => item.storage === selectedTool);
+    // Calculate quality
+    const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
 
-    // Check if container is full
-    if (containerInventory && containerInventory.amount >= storage.capacity) {
-      addConsoleMessage('Selected container is full');
-      return;
-    }
+    // Add harvested grapes to inventory
+    inventoryInstance.addResource(
+      farmland.plantedResourceName,
+      totalHarvest,
+      'Grapes',
+      gameYear,
+      quality,
+      farmland.name,
+      farmland.farmlandPrestige,
+      selectedTool
+    );
 
-    // Call harvest function and update farmland
+    // Update farmland status
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
-    
-    if (farmlandToHarvest) {
-      let harvestedAmount = farmlandYield(farmlandToHarvest);
-      if(harvestedAmount === undefined) harvestedAmount = 0;
-      
-      // Calculate quality based on annual quality factor and ripeness
-      const quality = ((farmlandToHarvest.annualQualityFactor + farmlandToHarvest.ripeness) / 2).toFixed(2);
-      
-      farmlandToHarvest.ripeness = 0;
-      
-      // Update container inventory
-      if (containerInventory) {
-        containerInventory.amount += harvestedAmount;
-        containerInventory.quality = parseFloat(quality);
-      } else {
-        playerInventory.push({
-          resource: { name: farmlandToHarvest.plantedResourceName },
-          amount: harvestedAmount,
-          storage: selectedTool,
-          fieldName: farmlandToHarvest.name,
-          vintage: localStorage.getItem('year'),
-          quality: parseFloat(quality),
-          state: 'Grapes'
-        });
-      }
-
-      localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
+    const farmlandToUpdate = farmlands.find(f => f.id === parseInt(farmlandId));
+    if (farmlandToUpdate) {
+      farmlandToUpdate.ripeness = 0;
+      farmlandToUpdate.status = 'Harvested';
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-      
-      addConsoleMessage(`Harvested ${harvestedAmount.toFixed(2)} kg from ${farmlandToHarvest.name}`);
-      removeOverlay();
     }
+
+    saveInventory();
+    addConsoleMessage(`Harvested ${formatNumber(totalHarvest)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
+    removeOverlay();
   });
 
   const closeButton = overlayContainer.querySelector('.close-btn');
