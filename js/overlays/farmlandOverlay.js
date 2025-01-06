@@ -1,7 +1,7 @@
+
 // Import necessary utility functions and classes
 import { formatNumber, getColorClass, getFlagIcon } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names.js';
-
 
 export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');
@@ -19,6 +19,7 @@ export function showFarmlandOverlay(farmlandData) {
   if (details) {
     details.innerHTML = `
       <div class="overlay-content">
+        <span class="close-btn">&times;</span>
         <h2 class="text-center mb-3">${farmlandData.name}</h2>
         <table class="table table-bordered table-hover">
           <thead class="thead-dark">
@@ -45,19 +46,24 @@ export function showFarmlandOverlay(farmlandData) {
         </table>
       </div>
     `;
+
+    // Add close button event listener
+    const closeBtn = details.querySelector('.close-btn');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        overlay.style.display = 'none';
+      });
+    }
   }
 
   if (overlay) {
     overlay.style.display = 'block';
+
+    // Add click event listener to the overlay for outside clicks
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) {
+        overlay.style.display = 'none';
+      }
+    });
   }
 }
-
-// Event listener for closing the overlay when clicking outside the content
-document.addEventListener('DOMContentLoaded', () => {
-  window.addEventListener('click', (event) => {
-    const overlay = document.getElementById('farmlandOverlay');
-    if (event.target === overlay) {
-      overlay.style.display = 'none';
-    }
-  });
-});
