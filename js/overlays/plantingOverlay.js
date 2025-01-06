@@ -1,8 +1,15 @@
+
 import { formatNumber } from '../utils.js';
 import { addTransaction } from '../finance.js';
-
+import { addConsoleMessage } from '../console.js';
 
 export function showPlantingOverlay(farmland, onPlantCallback) {
+  // Check if field is already planted
+  if (farmland.plantedResourceName) {
+    addConsoleMessage(`Field <strong>${farmland.name}</strong> is already fully planted.`);
+    return;
+  }
+
   const overlayContainer = document.createElement('div');
   overlayContainer.className = 'overlay';
 
@@ -61,26 +68,29 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
   const plantButton = overlayContainer.querySelector('.plant-btn');
   plantButton.addEventListener('click', () => {
     const selectedDensity = parseInt(densitySlider.value, 10);
+
+    // Update farmland object
     farmland.density = selectedDensity;
 
+    // Get all farmlands and update the specific one
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
 
     if (updatedFarmlandIndex !== -1) {
       farmlands[updatedFarmlandIndex].density = selectedDensity;
+      farmlands[updatedFarmlandIndex].plantedResourceName = farmland.plantedResourceName;
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+
+      // Calculate and process the planting cost
+      const totalCost = selectedDensity * 2 * farmland.acres;
+      addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
+
+      // Add console message for successful planting
+      addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${farmland.plantedResourceName}</strong>.`);
+
+      onPlantCallback(selectedDensity);
+      removeOverlay();
     }
-
-    const totalCost = selectedDensity * 2 * farmland.acres;
-    addTransaction(`Expense`, `Planting on ${farmland.name}`, -totalCost);
-
-    // Assuming resourceName is available or should be provided by the user
-    const resourceName = 'ResourceName'; // replace 'ResourceName' with a valid resource name or get it from a user input
-    const acresPlanted = plantAcres(updatedFarmlandIndex, resourceName);
-    console.log(`Planted ${acresPlanted} acres`);
-
-    onPlantCallback(selectedDensity);
-    removeOverlay();
   });
 
   const closeButton = overlayContainer.querySelector('.close-btn');
