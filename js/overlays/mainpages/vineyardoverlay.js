@@ -4,6 +4,12 @@ import { showFarmlandOverlay } from '../farmlandOverlay.js';
 
 // Function to create and display the vineyard overlay
 export function showVineyardOverlay() {
+    // Remove any existing instance of the overlay
+    const existingOverlay = document.querySelector('.mainview-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
     // Create overlay element
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
@@ -16,15 +22,6 @@ export function showVineyardOverlay() {
             <div id="vineyard-table-container"></div>
         </div>
     `;
-
-    // Append overlay to the document body
-    document.body.appendChild(overlay);
-
-    // Clear any existing vineyard table
-    const container = document.getElementById('vineyard-table-container');
-    if (container) {
-        container.innerHTML = '';
-    }
 
     // Create and display vineyard table
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -60,7 +57,12 @@ export function showVineyardOverlay() {
         </tbody>
     `;
 
-    document.getElementById('vineyard-table-container').appendChild(table);
+    // Append overlay to document body
+    document.body.appendChild(overlay);
+    
+    // Add table to container
+    const container = document.getElementById('vineyard-table-container');
+    container.appendChild(table);
 
     // Add click handlers to vineyard rows
     const rows = table.querySelectorAll('tr[data-farmland-id]');
