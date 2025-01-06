@@ -225,13 +225,13 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
         // Check if quality and status should be included
         if (!excludeQualityAndStatus) {
           const qualityCell = document.createElement('td');
-          if (matchingInventoryItems.length > 0) {
+          if (matchingInventoryItems.length > 0 && matchingInventoryItems[0].quality !== undefined) {
             const { quality } = matchingInventoryItems[0];
             const qualityDescription = getWineQualityCategory(quality);
             const colorClass = getColorClass(quality);
             qualityCell.innerHTML = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
           } else {
-            qualityCell.textContent = 'N/A'; 
+            qualityCell.textContent = 'Raw'; 
           }
           row.appendChild(qualityCell);
 
