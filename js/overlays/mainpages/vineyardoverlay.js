@@ -46,7 +46,7 @@ export function showVineyardOverlay() {
                 <tr data-farmland-id="${farmland.id}">
                     <td>${farmland.name}</td>
                     <td>${farmland.acres} acres</td>
-                    <td>${farmland.vineAge || '-'}</td>
+                    <td>${farmland.vineAge !== null && farmland.vineAge !== undefined ? farmland.vineAge : '-'}</td>
                     <td>${farmland.plantedResourceName || 'None'}</td>
                     <td>${farmland.status}</td>
                     <td>${(farmland.ripeness * 100).toFixed(1)}%</td>
