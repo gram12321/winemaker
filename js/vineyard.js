@@ -1,4 +1,3 @@
-
 import { farmlandYield } from './farmland.js';
 import { addConsoleMessage } from './console.js';
 
@@ -44,4 +43,17 @@ export function canHarvest(farmland, storage) {
     }
 
     return { warning: false };
+}
+
+function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
+  const harvestCheck = canHarvest(farmland, selectedTool);
+  if (!harvestCheck && !availableCapacity) {
+    return false;
+  }
+
+  const storage = getBuildingTools().find(tool => tool.name === selectedTool.split(' #')[0]);
+  const gameYear = parseInt(localStorage.getItem('year'), 10);
+  
+  const harvestYield = farmlandYield(farmland);
+  const totalHarvest = availableCapacity ? Math.min(harvestYield, availableCapacity) : harvestYield;
 }

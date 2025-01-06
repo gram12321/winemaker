@@ -114,12 +114,10 @@ export function showHarvestOverlay(farmland, farmlandId) {
       
       // Handle confirmation
       document.getElementById('confirmHarvest').addEventListener('click', () => {
-        if (harvest(farmland, farmlandId, selectedRadio.value)) {
+        if (harvest(farmland, farmlandId, selectedRadio.value, harvestCheck.availableCapacity)) {
           $(warningModal).modal('hide');
-          warningModal.addEventListener('hidden.bs.modal', () => {
-            warningModal.remove();
-            removeOverlay();
-          });
+          warningModal.remove();
+          removeOverlay();
         }
       });
       
