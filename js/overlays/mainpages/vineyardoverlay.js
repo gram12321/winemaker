@@ -1,6 +1,7 @@
 
 import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
+import { showHarvestOverlay } from '../harvestOverlay.js';
 
 export function showVineyardOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
@@ -85,7 +86,7 @@ export function showVineyardOverlay() {
                 const farmlandId = harvestBtn.dataset.farmlandId;
                 const farmland = farmlands.find(f => f.id === parseInt(farmlandId));
                 if (farmland) {
-                    // Call your harvest function or show harvest overlay here
+                    showHarvestOverlay(farmland, farmlandId);
                 }
             });
         }
