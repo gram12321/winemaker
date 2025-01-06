@@ -86,33 +86,39 @@ export function showCrushingOverlay() {
       );
 
       if (matchingItem) {
-        // Get the current inventory
-        const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-        
-        // Remove the grape item
-        const itemIndex = playerInventory.findIndex(item => 
-          item.storage === storage &&
-          item.resource.name === resourceName &&
-          item.vintage === vintage &&
-          item.quality === quality &&
-          item.fieldName === fieldName
-        );
-        
-        if (itemIndex !== -1) {
-          // Create the must item
-          const mustItem = {
-            ...playerInventory[itemIndex],
-            state: 'Must'
-          };
+        try {
+          // Get fresh inventory data
+          const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
           
-          // Remove grape item and add must item
-          playerInventory.splice(itemIndex, 1);
-          playerInventory.push(mustItem);
+          // Find the grape item
+          const itemIndex = playerInventory.findIndex(item => 
+            item.storage === storage &&
+            item.resource.name === resourceName &&
+            item.vintage === vintage &&
+            item.quality === quality &&
+            item.fieldName === fieldName &&
+            item.state === 'Grapes'
+          );
           
-          // Save updated inventory
-          localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
-          
-          addConsoleMessage(`Crushed ${formatNumber(matchingItem.amount)} t of ${resourceName} grapes from ${fieldName}`);
+          if (itemIndex !== -1) {
+            // Create the must item
+            const mustItem = {
+              ...playerInventory[itemIndex],
+              state: 'Must'
+            };
+            
+            // Remove grape item and add must item
+            playerInventory.splice(itemIndex, 1);
+            playerInventory.push(mustItem);
+            
+            // Save updated inventory
+            localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
+            
+            addConsoleMessage(`Crushed ${formatNumber(matchingItem.amount)} t of ${resourceName} grapes from ${fieldName}`);
+          }
+        } catch (error) {
+          console.error('Error during grape crushing:', error);
+          addConsoleMessage('Error occurred while crushing grapes');
         }
       }
     });
