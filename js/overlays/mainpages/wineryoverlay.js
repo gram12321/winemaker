@@ -21,7 +21,7 @@ export function showWineryOverlay() {
             <div class="winery-container">
                 <section class="my-4">
                     <h4>Grapes in Inventory</h4>
-                    <button class="btn btn-primary mb-2" onclick="window.showCrushingOverlay()">Crush Grapes</button>
+                    <button class="btn btn-primary mb-2" id="crushGrapesBtn">Crush Grapes</button>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -80,4 +80,10 @@ export function showWineryOverlay() {
     });
 
     overlay.style.display = 'block';
+    
+    // Add click handler for crush grapes button
+    const crushButton = document.getElementById('crushGrapesBtn');
+    if (crushButton) {
+        crushButton.addEventListener('click', showCrushingOverlay);
+    }
 }
