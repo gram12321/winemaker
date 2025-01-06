@@ -203,7 +203,7 @@ export function displayFarmland() {
 
     // Add event listeners
     const plantBtn = row.querySelector('.plant-btn');
-    const farmlandRow = row.querySelectorAll('td:not(:last-child)');
+    const farmlandRow = row.querySelectorAll('td:not(:last-child):not(:nth-last-child(2))');
     
     // Planting button click handler
     plantBtn.addEventListener('click', () => {
@@ -218,7 +218,7 @@ export function displayFarmland() {
       }
     });
 
-    // Farmland details click handler (excluding planting controls)
+    // Farmland details click handler (excluding planting controls and dropdown)
     farmlandRow.forEach(cell => {
       cell.addEventListener('click', () => {
         showFarmlandOverlay(farmland);
