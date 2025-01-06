@@ -40,9 +40,8 @@ export function canHarvest(farmland, storage) {
     // Check if container has enough capacity for the expected yield
     const availableCapacity = tool.capacity - currentAmount;
     if (availableCapacity < expectedYield) {
-        addConsoleMessage("Container doesn't have enough capacity for the expected yield.");
-        return false;
+        return { warning: true, availableCapacity };
     }
 
-    return true;
+    return { warning: false };
 }

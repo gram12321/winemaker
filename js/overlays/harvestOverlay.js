@@ -82,8 +82,18 @@ export function showHarvestOverlay(farmland, farmlandId) {
       return;
     }
 
-    if (harvest(farmland, farmlandId, selectedRadio.value)) {
-      removeOverlay();
+    const harvestCheck = canHarvest(farmland, selectedRadio.value);
+    if (harvestCheck.warning) {
+      const expectedYield = farmlandYield(farmland);
+      if (confirm(`Container only has capacity for ${formatNumber(harvestCheck.availableCapacity)}kg out of expected ${formatNumber(expectedYield)}kg.\n\nDo you want to harvest what fits in the container?`)) {
+        if (harvest(farmland, farmlandId, selectedRadio.value)) {
+          removeOverlay();
+        }
+      }
+    } else if (harvestCheck.warning === false) {
+      if (harvest(farmland, farmlandId, selectedRadio.value)) {
+        removeOverlay();
+      }
     }
   });
 
