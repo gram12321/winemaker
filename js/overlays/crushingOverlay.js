@@ -67,13 +67,9 @@ export function showCrushingOverlay() {
   // Handle crushing
   const crushBtn = overlayContainer.querySelector('.crush-btn');
   crushBtn.addEventListener('click', () => {
-    console.log('Crush button clicked');
     const selectedGrapes = overlayContainer.querySelectorAll('.grape-select:checked');
-    console.log('Selected grapes:', selectedGrapes.length);
-    
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const newInventory = [...playerInventory];
-
+    
     selectedGrapes.forEach(checkbox => {
       const storage = checkbox.dataset.storage;
       const resourceName = checkbox.dataset.resource;
@@ -81,34 +77,17 @@ export function showCrushingOverlay() {
       const quality = parseFloat(checkbox.dataset.quality);
       const fieldName = checkbox.dataset.field;
 
-      // Find index of grape item
-      const grapeIndex = newInventory.findIndex(item => 
-        item.storage === storage &&
-        item.resource.name === resourceName &&
-        item.vintage === vintage &&
-        Math.abs(item.quality - quality) < 0.0001 &&
-        item.fieldName === fieldName &&
-        item.state === 'Grapes'
-      );
-
-      if (grapeIndex !== -1) {
-        // Create must item by copying grape item and changing state
-        const grapeItem = newInventory[grapeIndex];
-        const mustItem = {
-          ...grapeItem,
-          state: 'Must'
-        };
-
-        // Remove grape item and add must item
-        newInventory.splice(grapeIndex, 1);
-        newInventory.push(mustItem);
-
-        addConsoleMessage(`Crushed ${formatNumber(mustItem.amount)} t of ${resourceName} grapes from ${fieldName}`);
-      }
+      playerInventory.forEach(item => {
+        if (item.storage === storage && 
+            item.resource.name === resourceName && 
+            item.state === 'Grapes') {
+          item.state = 'Must';
+          addConsoleMessage(`Crushed ${formatNumber(item.amount)} t of ${resourceName} grapes from ${fieldName}`);
+        }
+      });
     });
 
-    // Save updated inventory
-    localStorage.setItem('playerInventory', JSON.stringify(newInventory));
+    localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
     removeOverlay();
   });
 
