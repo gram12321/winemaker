@@ -77,14 +77,28 @@ export function showCrushingOverlay() {
       const quality = parseFloat(checkbox.dataset.quality);
       const fieldName = checkbox.dataset.field;
 
+      console.log('Current inventory before crushing:', playerInventory);
+      let found = false;
+      
       playerInventory.forEach(item => {
+        console.log('Checking item:', item);
+        console.log('Comparing with:', { storage, resourceName, state: 'Grapes' });
+        
         if (item.storage === storage && 
             item.resource.name === resourceName && 
             item.state === 'Grapes') {
+          console.log('Match found! Converting to Must:', item);
           item.state = 'Must';
+          found = true;
           addConsoleMessage(`Crushed ${formatNumber(item.amount)} t of ${resourceName} grapes from ${fieldName}`);
         }
       });
+      
+      if (!found) {
+        console.log('No matching grapes found to crush');
+      }
+      
+      console.log('Inventory after crushing:', playerInventory);
     });
 
     localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
