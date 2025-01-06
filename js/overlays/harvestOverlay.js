@@ -1,4 +1,3 @@
-
 import { getBuildingTools } from '../buildings.js'; 
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
@@ -62,7 +61,8 @@ export function showHarvestOverlay(farmland, farmlandId) {
     const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
     
     if (farmlandToHarvest) {
-      const harvestedAmount = farmlandYield(farmlandToHarvest);
+      let harvestedAmount = farmlandYield(farmlandToHarvest); //Added let
+      if(harvestedAmount === undefined) harvestedAmount = 0; // Handle undefined case.
       farmlandToHarvest.ripeness = 0;
       
       // Update container inventory
