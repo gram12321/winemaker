@@ -75,7 +75,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
         containerInventory.quality = parseFloat(quality);
       } else {
         playerInventory.push({
-          resource: farmlandToHarvest.plantedResourceName,
+          resource: { name: farmlandToHarvest.plantedResourceName },
           amount: harvestedAmount,
           storage: selectedTool,
           fieldName: farmlandToHarvest.name,
