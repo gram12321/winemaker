@@ -61,20 +61,26 @@ export function showHarvestOverlay(farmland, farmlandId) {
     const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
     
     if (farmlandToHarvest) {
-      let harvestedAmount = farmlandYield(farmlandToHarvest); //Added let
-      if(harvestedAmount === undefined) harvestedAmount = 0; // Handle undefined case.
+      let harvestedAmount = farmlandYield(farmlandToHarvest);
+      if(harvestedAmount === undefined) harvestedAmount = 0;
+      
+      // Calculate quality based on annual quality factor and ripeness
+      const quality = ((farmlandToHarvest.annualQualityFactor + farmlandToHarvest.ripeness) / 2).toFixed(2);
+      
       farmlandToHarvest.ripeness = 0;
       
       // Update container inventory
       if (containerInventory) {
         containerInventory.amount += harvestedAmount;
+        containerInventory.quality = parseFloat(quality);
       } else {
         playerInventory.push({
           resource: farmlandToHarvest.plantedResourceName,
           amount: harvestedAmount,
           storage: selectedTool,
           fieldName: farmlandToHarvest.name,
-          vintage: localStorage.getItem('year')
+          vintage: localStorage.getItem('year'),
+          quality: parseFloat(quality)
         });
       }
 
