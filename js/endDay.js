@@ -32,10 +32,11 @@ export function incrementWeek() {
         currentYear += 1;
     }
 
+    // Bookeeping task is disabled untill we have a Task system in place
     // Check if it's the start of a new season
-    if (currentWeek === 1) {
-        handleGenericTask('Bookkeeping', bookkeepingTaskFunction);
-    }
+        //if (currentWeek === 1) {
+        //    handleGenericTask('Bookkeeping', bookkeepingTaskFunction);
+        //}
 
     // Update the local storage with the new values for week, season, and year
     localStorage.setItem('week', currentWeek);
