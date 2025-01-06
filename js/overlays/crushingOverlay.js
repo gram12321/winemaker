@@ -88,6 +88,20 @@ export function showCrushingOverlay() {
     });
 
     localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
+    
+    // Refresh inventory tables
+    const storageTableBody = document.getElementById('storage-table-body');
+    const fermentationTableBody = document.getElementById('fermentation-table-body');
+    const wineCellarTableBody = document.getElementById('winecellar-table-body');
+    
+    if (storageTableBody) populateStorageTable('storage-table-body');
+    if (fermentationTableBody || wineCellarTableBody) {
+      const inventory = {
+        items: playerInventory
+      };
+      displayInventory(inventory, ['fermentation-table-body', 'winecellar-table-body']);
+    }
+    
     removeOverlay();
   });
 
