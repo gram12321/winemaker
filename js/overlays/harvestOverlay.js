@@ -85,11 +85,48 @@ export function showHarvestOverlay(farmland, farmlandId) {
     const harvestCheck = canHarvest(farmland, selectedRadio.value);
     if (harvestCheck.warning) {
       const expectedYield = farmlandYield(farmland);
-      if (confirm(`Container only has capacity for ${formatNumber(harvestCheck.availableCapacity)}kg out of expected ${formatNumber(expectedYield)}kg.\n\nDo you want to harvest what fits in the container?`)) {
+      // Create warning modal
+      const warningModal = document.createElement('div');
+      warningModal.className = 'modal fade';
+      warningModal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Warning: Limited Container Capacity</h5>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <p>Container only has capacity for ${formatNumber(harvestCheck.availableCapacity)}kg out of expected ${formatNumber(expectedYield)}kg.</p>
+              <p>Do you want to harvest what fits in the container?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="confirmHarvest">Harvest Available</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(warningModal);
+      
+      // Initialize modal
+      $(warningModal).modal('show');
+      
+      // Handle confirmation
+      document.getElementById('confirmHarvest').addEventListener('click', () => {
         if (harvest(farmland, farmlandId, selectedRadio.value)) {
-          removeOverlay();
+          $(warningModal).modal('hide');
+          warningModal.addEventListener('hidden.bs.modal', () => {
+            warningModal.remove();
+            removeOverlay();
+          });
         }
-      }
+      });
+      
+      // Clean up modal on close
+      warningModal.addEventListener('hidden.bs.modal', () => {
+        warningModal.remove();
+      });
     } else if (harvestCheck.warning === false) {
       if (harvest(farmland, farmlandId, selectedRadio.value)) {
         removeOverlay();
