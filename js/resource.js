@@ -130,10 +130,6 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
             tableBodyId = 'fermentation-table-body';
             displayAmount += ' l';
             statusIconPath = '/assets/pic/must_dalle.webp';
-            // Add container and capacity info for fermentation tanks
-            const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-            const building = buildings.find(b => b.contents.some(t => t.name === 'Fermentation Tank' && `${t.name} #${t.instanceNumber}` === item.storage));
-            const tool = building?.contents.find(t => `${t.name} #${t.instanceNumber}` === item.storage);
         } else if (state === 'Bottle' && tablesToShow.includes('winecellar-table-body')) {
             tableBodyId = 'winecellar-table-body';
           displayAmount += ' bottles';
@@ -152,6 +148,10 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
             const qualityText = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
 
             if (state === 'Must') {
+                const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+                const building = buildings.find(b => b.contents.some(t => t.name === 'Fermentation Tank' && `${t.name} #${t.instanceNumber}` === item.storage));
+                const tool = building?.contents.find(t => `${t.name} #${t.instanceNumber}` === item.storage);
+                
                 row.innerHTML = `
                     <td>${item.storage || 'N/A'}</td>
                     <td>${tool ? tool.capacity : 'N/A'}</td>
