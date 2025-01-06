@@ -176,6 +176,11 @@ export function displayFarmland() {
     const landSize = convertToCurrentUnit(farmland.acres);
     const row = document.createElement('tr');
     
+    // Create planting options dropdown
+    const plantingOptions = allResources.map(resource => 
+      `<option value="${resource.name}">${resource.name}</option>`
+    ).join('');
+    
     row.innerHTML = `
       <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
       <td>${farmland.name}</td>
@@ -185,11 +190,39 @@ export function displayFarmland() {
       </td>
       <td>${formatNumber(landSize)} ${selectedUnit}</td>
       <td>${farmland.plantedResourceName || 'None'}</td>
+      <td>
+        <select class="planting-select form-control" data-farmland-id="${farmland.id}">
+          <option value="">Select Resource</option>
+          ${plantingOptions}
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-primary plant-btn" data-farmland-id="${farmland.id}">Plant</button>
+      </td>
     `;
 
-    // Add event listener to show farmland details overlay
-    row.addEventListener('click', () => {
-      showFarmlandOverlay(farmland);
+    // Add event listeners
+    const plantBtn = row.querySelector('.plant-btn');
+    const farmlandRow = row.querySelectorAll('td:not(:last-child)');
+    
+    // Planting button click handler
+    plantBtn.addEventListener('click', () => {
+      const select = row.querySelector('.planting-select');
+      const selectedResource = select.value;
+      if (selectedResource) {
+        showPlantingOverlay(farmland, (density) => {
+          // Handle successful planting
+          farmland.plantedResourceName = selectedResource;
+          displayFarmland(); // Refresh display
+        });
+      }
+    });
+
+    // Farmland details click handler (excluding planting controls)
+    farmlandRow.forEach(cell => {
+      cell.addEventListener('click', () => {
+        showFarmlandOverlay(farmland);
+      });
     });
 
     farmlandEntries.appendChild(row);
