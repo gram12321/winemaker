@@ -1,10 +1,7 @@
-
 import { getBuildingTools } from '../buildings.js'; 
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
 import { farmlandYield } from '../farmland.js';
-import { canHarvest } from '../vineyard.js';
-import { saveInventory } from '../database/adminFunctions.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
   const overlayContainer = document.createElement('div');
@@ -35,10 +32,6 @@ export function showHarvestOverlay(farmland, farmlandId) {
   populateStorageTable('storage-display-body', true);
 
   overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
-    if (!canHarvest(farmlandId)) {
-      return;
-    }
-
     const selectedRadio = overlayContainer.querySelector('input[name="tool-select"]:checked');
     if (!selectedRadio) {
       addConsoleMessage('Please select a storage container for harvesting');
@@ -53,8 +46,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
       return;
     }
 
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
+    // Get current inventory for this container
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     const containerInventory = playerInventory.find(item => item.storage === selectedTool);
 
@@ -63,38 +55,42 @@ export function showHarvestOverlay(farmland, farmlandId) {
       addConsoleMessage('Selected container is full');
       return;
     }
+
+    // Call harvest function and update farmland
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
     
-    let harvestedAmount = farmlandYield(farmlandToHarvest);
-    if (harvestedAmount === undefined) harvestedAmount = 0;
+    if (farmlandToHarvest) {
+      let harvestedAmount = farmlandYield(farmlandToHarvest);
+      if(harvestedAmount === undefined) harvestedAmount = 0;
+      
+      // Calculate quality based on annual quality factor and ripeness
+      const quality = ((farmlandToHarvest.annualQualityFactor + farmlandToHarvest.ripeness) / 2).toFixed(2);
+      
+      farmlandToHarvest.ripeness = 0;
+      
+      // Update container inventory
+      if (containerInventory) {
+        containerInventory.amount += harvestedAmount;
+        containerInventory.quality = parseFloat(quality);
+      } else {
+        playerInventory.push({
+          resource: { name: farmlandToHarvest.plantedResourceName },
+          amount: harvestedAmount,
+          storage: selectedTool,
+          fieldName: farmlandToHarvest.name,
+          vintage: localStorage.getItem('year'),
+          quality: parseFloat(quality),
+          state: 'Grapes'
+        });
+      }
 
-    // Calculate quality based on annual quality factor and ripeness
-    const quality = ((farmlandToHarvest.annualQualityFactor + farmlandToHarvest.ripeness) / 2).toFixed(2);
-
-    if (containerInventory) {
-      containerInventory.amount += harvestedAmount;
-      containerInventory.quality = parseFloat(quality);
-    } else {
-      playerInventory.push({
-        resource: { name: farmlandToHarvest.plantedResourceName },
-        amount: harvestedAmount,
-        storage: selectedTool,
-        fieldName: farmlandToHarvest.name,
-        vintage: localStorage.getItem('year'),
-        quality: parseFloat(quality),
-        state: 'Grapes'
-      });
+      localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
+      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+      
+      addConsoleMessage(`Harvested ${harvestedAmount.toFixed(2)} kg from ${farmlandToHarvest.name}`);
+      removeOverlay();
     }
-
-    // Update farmland
-    farmlandToHarvest.ripeness = 0;
-    
-    // Save updates
-    localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-    saveInventory();
-
-    addConsoleMessage(`Harvested ${harvestedAmount.toFixed(2)} kg from ${farmlandToHarvest.name}`);
-    removeOverlay();
   });
 
   const closeButton = overlayContainer.querySelector('.close-btn');
