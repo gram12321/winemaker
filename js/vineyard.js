@@ -47,13 +47,27 @@ export function canHarvest(farmland, storage) {
 
 function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
   const harvestCheck = canHarvest(farmland, selectedTool);
-  if (!harvestCheck && !availableCapacity) {
+  if ((!harvestCheck || harvestCheck.warning) && !availableCapacity) {
     return false;
   }
 
-  const storage = getBuildingTools().find(tool => tool.name === selectedTool.split(' #')[0]);
-  const gameYear = parseInt(localStorage.getItem('year'), 10);
+  const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+  const tool = buildings.flatMap(b => b.contents).find(t => 
+    `${t.name} #${t.instanceNumber}` === selectedTool
+  );
   
+  if (!tool) {
+    addConsoleMessage("Storage container not found");
+    return false;
+  }
+
+  const gameYear = parseInt(localStorage.getItem('year'), 10);
   const harvestYield = farmlandYield(farmland);
-  const totalHarvest = availableCapacity ? Math.min(harvestYield, availableCapacity) : harvestYield;
+  const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+  const currentAmount = currentInventory
+    .filter(item => item.storage === selectedTool)
+    .reduce((sum, item) => sum + item.amount, 0);
+  
+  const remainingCapacity = tool.capacity - currentAmount;
+  const totalHarvest = Math.min(harvestYield, remainingCapacity);
 }
