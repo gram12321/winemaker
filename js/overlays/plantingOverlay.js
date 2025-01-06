@@ -2,6 +2,7 @@
 import { formatNumber } from '../utils.js';
 import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
+import { allResources } from '/js/resource.js';
 
 export function showPlantingOverlay(farmland, onPlantCallback) {
   // Check if field is already planted
