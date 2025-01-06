@@ -2,6 +2,7 @@
 import { getBuildingTools } from '../buildings.js'; 
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
+import { farmlandYield } from '../farmland.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
   const overlayContainer = document.createElement('div');
