@@ -178,7 +178,8 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
       if (tool.supportedResources?.includes('Grapes')) {
         const row = document.createElement('tr');
         const matchingInventoryItems = playerInventory.filter(item => 
-          item.storage === `${tool.name} #${tool.instanceNumber}`
+          item.storage === `${tool.name} #${tool.instanceNumber}` &&
+          item.state === 'Grapes'
         );
         const firstItem = matchingInventoryItems[0];
 
