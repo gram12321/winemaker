@@ -79,6 +79,14 @@ export function showCrushingOverlay() {
       const fieldName = checkbox.dataset.field;
       const fieldPrestige = parseFloat(checkbox.dataset.prestige);
 
+      console.log('Searching for item with:', {
+        storage,
+        resourceName,
+        vintage,
+        quality,
+        fieldName
+      });
+
       const matchingItem = playerInventory.find(item =>
         item.storage === storage &&
         item.resource.name === resourceName &&
@@ -92,6 +100,7 @@ export function showCrushingOverlay() {
         try {
           // Get fresh inventory data
           const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+          console.log('Fresh inventory loaded:', playerInventory);
           console.log('Current inventory length:', playerInventory.length);
           
           // Find the grape item
@@ -117,6 +126,7 @@ export function showCrushingOverlay() {
             
             // Save updated inventory
             localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
+            console.log('Updated inventory saved:', playerInventory);
             
             addConsoleMessage(`Crushed ${formatNumber(matchingItem.amount)} t of ${resourceName} grapes from ${fieldName}`);
           }
