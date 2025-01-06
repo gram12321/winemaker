@@ -97,6 +97,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
       // Update the farmland properties
       farmlands[updatedFarmlandIndex].density = selectedDensity;
       farmlands[updatedFarmlandIndex].plantedResourceName = selectedResource;
+      farmlands[updatedFarmlandIndex].vineAge = 0;
       localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
       // Calculate and process the planting cost
