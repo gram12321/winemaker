@@ -128,8 +128,12 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
             statusIconPath = '/assets/pic/grapes_dalle.webp';
         } else if (state === 'Must' && tablesToShow.includes('fermentation-table-body')) {
             tableBodyId = 'fermentation-table-body';
-          displayAmount += ' l';
+            displayAmount += ' l';
             statusIconPath = '/assets/pic/must_dalle.webp';
+            // Add container and capacity info for fermentation tanks
+            const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+            const building = buildings.find(b => b.contents.some(t => t.name === 'Fermentation Tank' && `${t.name} #${t.instanceNumber}` === item.storage));
+            const tool = building?.contents.find(t => `${t.name} #${t.instanceNumber}` === item.storage);
         } else if (state === 'Bottle' && tablesToShow.includes('winecellar-table-body')) {
             tableBodyId = 'winecellar-table-body';
           displayAmount += ' bottles';
@@ -147,13 +151,25 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
 
             const qualityText = `${qualityDescription} <span class="${colorClass}">(${quality.toFixed(2)})</span>`;
 
-            row.innerHTML = `
-                <td><strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}</td>
-                <td>${displayAmount}</td>
-                <td>${qualityText}</td>
-                <td><img src="${statusIconPath}" alt="${state}" class="status-image"></td>
-                ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
-            `;
+            if (state === 'Must') {
+                row.innerHTML = `
+                    <td>${item.storage || 'N/A'}</td>
+                    <td>${tool ? tool.capacity : 'N/A'}</td>
+                    <td><strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}</td>
+                    <td>${displayAmount}</td>
+                    <td>${qualityText}</td>
+                    <td><img src="${statusIconPath}" alt="${state}" class="status-image"></td>
+                    ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
+                `;
+            } else {
+                row.innerHTML = `
+                    <td><strong>${fieldName}</strong>, ${resource.name}, ${vintage || 'Unknown'}</td>
+                    <td>${displayAmount}</td>
+                    <td>${qualityText}</td>
+                    <td><img src="${statusIconPath}" alt="${state}" class="status-image"></td>
+                    ${includeSellButton ? `<td><button class="btn btn-success sell-btn">Sell</button></td>` : ''}
+                `;
+            }
             inventoryTableBody.appendChild(row);
 
             if (includeSellButton) {

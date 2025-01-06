@@ -1,4 +1,3 @@
-
 import { displayInventory, populateStorageTable } from '/js/resource.js';
 
 export function showInventoryOverlay() {
@@ -40,6 +39,8 @@ export function showInventoryOverlay() {
                 <table class="table table-bordered">
                     <thead>
                         <tr>
+                            <th>Container</th>
+                            <th>Capacity</th>
                             <th>Resource</th>
                             <th>Amount</th>
                             <th>Quality</th>
