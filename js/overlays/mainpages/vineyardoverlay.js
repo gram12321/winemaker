@@ -1,5 +1,5 @@
 
-import { displayVineyard } from '../../vineyard.js';
+import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 
 // Function to create and display the vineyard overlay
@@ -20,16 +20,47 @@ export function showVineyardOverlay() {
     // Append overlay to the document body
     document.body.appendChild(overlay);
 
-    // Display vineyard table
-    const vineyardTable = displayVineyard();
-    document.getElementById('vineyard-table-container').appendChild(vineyardTable);
+    // Create and display vineyard table
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const table = document.createElement('table');
+    table.className = 'table table-bordered';
+    
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Size</th>
+                <th>Vine Age</th>
+                <th>Crop</th>
+                <th>Status</th>
+                <th>Ripeness</th>
+                <th>Expected Yield</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${farmlands.map(farmland => `
+                <tr data-farmland-id="${farmland.id}">
+                    <td>${farmland.name}</td>
+                    <td>${farmland.acres} acres</td>
+                    <td>${farmland.vineAge || '-'}</td>
+                    <td>${farmland.plantedResourceName || 'None'}</td>
+                    <td>${farmland.status}</td>
+                    <td>${(farmland.ripeness * 100).toFixed(1)}%</td>
+                    <td>${farmlandYield(farmland).toFixed(2)} kg</td>
+                    <td></td>
+                </tr>
+            `).join('')}
+        </tbody>
+    `;
+
+    document.getElementById('vineyard-table-container').appendChild(table);
 
     // Add click handlers to vineyard rows
-    const rows = vineyardTable.querySelectorAll('tr[data-farmland-id]');
+    const rows = table.querySelectorAll('tr[data-farmland-id]');
     rows.forEach(row => {
         row.addEventListener('click', () => {
             const farmlandId = row.dataset.farmlandId;
-            const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
             const farmland = farmlands.find(f => f.id === parseInt(farmlandId));
             if (farmland) {
                 showFarmlandOverlay(farmland);
