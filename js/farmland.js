@@ -214,26 +214,4 @@ function setupFarmlandEventListeners(row, farmland) {
   });
 }
 
-    // Add event listeners
-    const plantBtn = row.querySelector('.plant-btn');
-    const farmlandRow = row.querySelectorAll('td:not(:last-child):not(:nth-last-child(2))');
-    
-    // Planting button click handler
-    plantBtn.addEventListener('click', () => {
-      showPlantingOverlay(farmland, (density) => {
-        displayFarmland(); // Refresh display
-      });
-    });
-
-    // Farmland details click handler (excluding planting controls and dropdown)
-    farmlandRow.forEach(cell => {
-      cell.addEventListener('click', () => {
-        showFarmlandOverlay(farmland);
-      });
-    });
-
-    farmlandEntries.appendChild(row);
-  });
-}
-
 export { Farmland };
