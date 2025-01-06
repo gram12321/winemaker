@@ -164,11 +164,6 @@ function getRandomAspect() {
   return getRandomItem(aspects);
 }
 
-
-
-
-export { Farmland };
-
 export function displayFarmland() {
   const farmlandEntries = document.querySelector('#farmland-entries');
   if (!farmlandEntries) return;
@@ -200,3 +195,5 @@ export function displayFarmland() {
     farmlandEntries.appendChild(row);
   });
 }
+
+export { Farmland };
