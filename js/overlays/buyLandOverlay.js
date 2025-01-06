@@ -5,6 +5,7 @@ import { getColorClass, formatNumber, getFlagIconHTML, formatLandSizeWithUnit } 
 import { regionAspectRatings, calculateAndNormalizePriceFactor } from '../names.js';
 import { getUnit, convertToCurrentUnit } from '../settings.js';
 import { addTransaction} from '/js/finance.js';
+import { displayFarmland } from '/js/farmland.js';
 
 export function showBuyLandOverlay() {
     const overlay = document.getElementById('buyLandOverlay');
@@ -106,6 +107,9 @@ function buySelectedFarmland(farmland) {
     localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
 
     addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formatLandSizeWithUnit(farmland.acres)}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
+
+    // Update land display
+    displayFarmland();
 
     // Close the overlay
     document.getElementById('buyLandOverlay').style.display = 'none';
