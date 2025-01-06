@@ -30,7 +30,6 @@ export function showLandOverlay() {
                             <th>Country/Region</th>
                             <th>Size</th>
                             <th>Crop</th>
-                            <th>Planting Options</th>
                             <th>Action</th>
                         </tr>
                     </thead>

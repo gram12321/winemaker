@@ -2,16 +2,11 @@
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { getFlagIcon, formatNumber, getColorClass } from './utils.js';
 
-import { addConsoleMessage  } from '/js/console.js';
+
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
-import { allResources, getResourceByName, inventoryInstance  } from '/js/resource.js';
-import { saveInventory } from '/js/database/adminFunctions.js';
-//import { getFlagIcon, formatNumber } from './utils.js';
-//import { getUnit, convertToCurrentUnit } from './settings.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from './overlays/plantingOverlay.js';
-
 
 // Refactored standalone function for land value calculation
 export function calculateLandvalue(country, region, altitude, aspect) {
