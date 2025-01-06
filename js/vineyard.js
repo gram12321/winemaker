@@ -1,68 +1,52 @@
 
 import { farmlandYield } from './farmland.js';
-import { inventoryInstance } from './resource.js';
 import { addConsoleMessage } from './console.js';
 import { formatNumber } from './utils.js';
 import { saveInventory } from './database/adminFunctions.js';
 
 export { farmlandYield };
 
-export function harvest(farmland, storage) {
-    const gameYear = parseInt(localStorage.getItem('year'), 10);
-    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+export function harvest(farmlandId, selectedStorage) {
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmland = farmlands.find(f => f.id === parseInt(farmlandId));
+    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     
-    // Find the storage tool
-    const buildingWithTool = buildings.find(building => 
-        building.contents.some(content => `${content.name} #${content.instanceNumber}` === storage)
-    );
-    const tool = buildingWithTool?.contents.find(content => 
-        `${content.name} #${content.instanceNumber}` === storage
-    );
-
-    if (!tool) {
-        addConsoleMessage("No valid storage container found.");
-        return 0;
+    if (!farmland) {
+        addConsoleMessage('Invalid farmland selected');
+        return false;
     }
 
-    // Calculate harvest amount based on field yield
-    const harvestYield = farmlandYield(farmland);
-    const totalHarvest = harvestYield * farmland.acres;
+    let harvestedAmount = farmlandYield(farmland);
+    if (harvestedAmount === undefined) harvestedAmount = 0;
 
-    // Check storage capacity
-    const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const currentAmount = currentInventory
-        .filter(item => item.storage === storage)
-        .reduce((sum, item) => sum + item.amount, 0);
+    // Calculate quality based on annual quality factor and ripeness
+    const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
 
-    const availableCapacity = tool.capacity - currentAmount;
-    const harvestAmount = Math.min(totalHarvest, availableCapacity);
+    const containerInventory = playerInventory.find(item => item.storage === selectedStorage);
 
-    if (harvestAmount <= 0) {
-        addConsoleMessage("No storage capacity available.");
-        return 0;
+    if (containerInventory) {
+        containerInventory.amount += harvestedAmount;
+        containerInventory.quality = parseFloat(quality);
+    } else {
+        playerInventory.push({
+            resource: { name: farmland.plantedResourceName },
+            amount: harvestedAmount,
+            storage: selectedStorage,
+            fieldName: farmland.name,
+            vintage: localStorage.getItem('year'),
+            quality: parseFloat(quality),
+            state: 'Grapes'
+        });
     }
 
-    // Calculate quality (simplified)
-    const quality = ((field.annualQualityFactor + field.ripeness) / 2).toFixed(2);
-
-    // Add harvested grapes to inventory
-    inventoryInstance.addResource(
-        farmland.plantedResourceName,
-        harvestAmount,
-        'Grapes',
-        gameYear,
-        quality,
-        farmland.name,
-        farmland.farmlandPrestige,
-        storage
-    );
-
-    // Update field status
-    farmland.status = 'Harvested';
+    // Update farmland
     farmland.ripeness = 0;
+    
+    // Save updates
+    localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
     saveInventory();
 
-    addConsoleMessage(`Harvested ${formatNumber(harvestAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
-    return harvestAmount;
+    addConsoleMessage(`Harvested ${harvestedAmount.toFixed(2)} kg from ${farmland.name}`);
+    return true;
 }

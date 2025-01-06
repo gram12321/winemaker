@@ -56,39 +56,9 @@ export function showHarvestOverlay(farmland, farmlandId) {
       return;
     }
 
-    // Call harvest function and update farmland
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const farmlandToHarvest = farmlands.find(f => f.id === parseInt(farmlandId));
+    import { harvest } from '../vineyard.js';
     
-    if (farmlandToHarvest) {
-      let harvestedAmount = farmlandYield(farmlandToHarvest);
-      if(harvestedAmount === undefined) harvestedAmount = 0;
-      
-      // Calculate quality based on annual quality factor and ripeness
-      const quality = ((farmlandToHarvest.annualQualityFactor + farmlandToHarvest.ripeness) / 2).toFixed(2);
-      
-      farmlandToHarvest.ripeness = 0;
-      
-      // Update container inventory
-      if (containerInventory) {
-        containerInventory.amount += harvestedAmount;
-        containerInventory.quality = parseFloat(quality);
-      } else {
-        playerInventory.push({
-          resource: { name: farmlandToHarvest.plantedResourceName },
-          amount: harvestedAmount,
-          storage: selectedTool,
-          fieldName: farmlandToHarvest.name,
-          vintage: localStorage.getItem('year'),
-          quality: parseFloat(quality),
-          state: 'Grapes'
-        });
-      }
-
-      localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
-      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-      
-      addConsoleMessage(`Harvested ${harvestedAmount.toFixed(2)} kg from ${farmlandToHarvest.name}`);
+    if (harvest(farmlandId, selectedTool)) {
       removeOverlay();
     }
   });
