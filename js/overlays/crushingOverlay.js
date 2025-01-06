@@ -10,19 +10,39 @@ export function showCrushingOverlay() {
   overlayContainer.innerHTML = `
     <div class="overlay-content">
       <h2>Grape Crushing</h2>
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Select</th>
-            <th>Container</th>
-            <th>Resource</th>
-            <th>Amount</th>
-            <th>Quality</th>
-          </tr>
-        </thead>
-        <tbody id="crushing-storage-table">
-        </tbody>
-      </table>
+      <div class="crushing-section">
+        <h4>Select Grapes to Crush</h4>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>Container</th>
+              <th>Resource</th>
+              <th>Amount</th>
+              <th>Quality</th>
+            </tr>
+          </thead>
+          <tbody id="crushing-storage-table">
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="must-storage-section">
+        <h4>Select Must Storage Container</h4>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Select</th>
+              <th>Container</th>
+              <th>Capacity</th>
+              <th>Available Space</th>
+            </tr>
+          </thead>
+          <tbody id="must-storage-table">
+          </tbody>
+        </table>
+      </div>
+      
       <button class="btn btn-success crush-btn">Crush Selected Grapes</button>
       <button class="btn btn-secondary close-btn">Close</button>
     </div>
@@ -30,11 +50,38 @@ export function showCrushingOverlay() {
 
   document.body.appendChild(overlayContainer);
 
-  // Populate table with grape storage
+  // Populate grape storage table
   const storageTableBody = document.getElementById('crushing-storage-table');
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
 
+  // Populate must storage options
+  const mustStorageBody = document.getElementById('must-storage-table');
+  buildings.forEach(building => {
+    building.contents.forEach(tool => {
+      if (tool.supportedResources?.includes('Must')) {
+        const matchingInventoryItems = playerInventory.filter(item => 
+          item.storage === `${tool.name} #${tool.instanceNumber}`
+        );
+        const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
+        const availableSpace = tool.capacity - currentAmount;
+
+        if (availableSpace > 0) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><input type="radio" name="must-storage" value="${tool.name} #${tool.instanceNumber}" 
+                data-capacity="${tool.capacity}" data-available="${availableSpace}"></td>
+            <td>${tool.name} #${tool.instanceNumber}</td>
+            <td>${formatNumber(tool.capacity)} l</td>
+            <td>${formatNumber(availableSpace)} l</td>
+          `;
+          mustStorageBody.appendChild(row);
+        }
+      }
+    });
+  });
+
+  // Populate grapes table
   buildings.forEach(building => {
     building.contents.forEach(tool => {
       if (tool.supportedResources?.includes('Grapes')) {
@@ -51,6 +98,7 @@ export function showCrushingOverlay() {
             <td><input type="checkbox" class="grape-select" data-storage="${item.storage}" 
                 data-resource="${item.resource.name}" data-vintage="${item.vintage}" 
                 data-quality="${item.quality}" data-field="${item.fieldName}"
+                data-amount="${item.amount}"
                 data-prestige="${item.fieldPrestige}"></td>
             <td>${item.storage}</td>
             <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
@@ -68,6 +116,23 @@ export function showCrushingOverlay() {
   const crushBtn = overlayContainer.querySelector('.crush-btn');
   crushBtn.addEventListener('click', () => {
     const selectedGrapes = overlayContainer.querySelectorAll('.grape-select:checked');
+    const selectedMustStorage = overlayContainer.querySelector('input[name="must-storage"]:checked');
+
+    if (!selectedMustStorage) {
+      addConsoleMessage("Please select a storage container for the must");
+      return;
+    }
+
+    const mustStorage = selectedMustStorage.value;
+    const availableSpace = parseFloat(selectedMustStorage.dataset.available);
+    const totalGrapes = Array.from(selectedGrapes)
+      .reduce((sum, checkbox) => sum + parseFloat(checkbox.dataset.amount), 0);
+
+    if (totalGrapes > availableSpace) {
+      addConsoleMessage("Not enough space in selected container for all the must");
+      return;
+    }
+
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     
     selectedGrapes.forEach(checkbox => {
@@ -82,6 +147,7 @@ export function showCrushingOverlay() {
             item.resource.name === resourceName && 
             item.state === 'Grapes') {
           item.state = 'Must';
+          item.storage = mustStorage;
           addConsoleMessage(`Crushed ${formatNumber(item.amount)} t of ${resourceName} grapes from ${fieldName}`);
         }
       });
