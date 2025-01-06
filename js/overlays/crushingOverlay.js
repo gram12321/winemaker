@@ -87,13 +87,25 @@ export function showCrushingOverlay() {
         fieldName
       });
 
-      const matchingItem = playerInventory.find(item =>
-        item.storage === storage &&
-        item.resource.name === resourceName &&
-        item.vintage === vintage &&
-        item.quality === quality &&
-        item.fieldName === fieldName
-      );
+      console.log('Full inventory:', playerInventory);
+      
+      const matchingItem = playerInventory.find(item => {
+        console.log('Comparing with item:', {
+          storage: item.storage,
+          resourceName: item.resource?.name,
+          vintage: item.vintage,
+          quality: item.quality,
+          fieldName: item.fieldName,
+          state: item.state
+        });
+        
+        return item.storage === storage &&
+          item.resource?.name === resourceName &&
+          item.vintage === vintage &&
+          Math.abs(item.quality - quality) < 0.0001 && // Use approximate equality for floating point
+          item.fieldName === fieldName &&
+          item.state === 'Grapes'; // Make sure we're only finding grape items
+      });
 
       if (matchingItem) {
         console.log('Found matching item:', matchingItem);
