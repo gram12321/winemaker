@@ -1,6 +1,7 @@
 
 import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
 import { populateStorageTable } from '/js/resource.js';
+import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 
 export function showWineryOverlay() {
     // Remove any existing instances of the overlay
@@ -20,6 +21,7 @@ export function showWineryOverlay() {
             <div class="winery-container">
                 <section class="my-4">
                     <h4>Grapes in Inventory</h4>
+                    <button class="btn btn-primary mb-2" onclick="window.showCrushingOverlay()">Crush Grapes</button>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
