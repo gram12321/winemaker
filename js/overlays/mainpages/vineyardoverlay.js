@@ -2,19 +2,15 @@
 import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 
-// Function to create and display the vineyard overlay
 export function showVineyardOverlay() {
-    // Remove any existing instance of the overlay
     const existingOverlay = document.querySelector('.mainview-overlay');
     if (existingOverlay) {
         existingOverlay.remove();
     }
 
-    // Create overlay element
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
 
-    // Create content element within overlay
     overlay.innerHTML = `
         <div class="mainview-overlay-content">
             <h1>Vineyard</h1>
@@ -23,7 +19,6 @@ export function showVineyardOverlay() {
         </div>
     `;
 
-    // Create and display vineyard table
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const table = document.createElement('table');
     table.className = 'table table-bordered';
@@ -42,40 +37,59 @@ export function showVineyardOverlay() {
             </tr>
         </thead>
         <tbody>
-            ${farmlands.map(farmland => `
-                <tr data-farmland-id="${farmland.id}">
-                    <td>${farmland.name}</td>
-                    <td>${farmland.acres} acres</td>
-                    <td>${farmland.plantedResourceName ? farmland.vineAge : 'Not Planted'}</td>
-                    <td>${farmland.plantedResourceName || 'None'}</td>
-                    <td>${farmland.status}</td>
-                    <td>${farmland.plantedResourceName ? (farmland.ripeness * 100).toFixed(1) + '%' : 'Not Planted'}</td>
-                    <td>${farmlandYield(farmland).toFixed(2)} kg</td>
-                    <td></td>
-                </tr>
-            `).join('')}
+            ${farmlands.map(farmland => {
+                const canHarvest = farmland.plantedResourceName && farmland.ripeness >= 0.10;
+                return `
+                    <tr data-farmland-id="${farmland.id}">
+                        <td>${farmland.name}</td>
+                        <td>${farmland.acres} acres</td>
+                        <td>${farmland.plantedResourceName ? farmland.vineAge : 'Not Planted'}</td>
+                        <td>${farmland.plantedResourceName || 'None'}</td>
+                        <td>${farmland.status}</td>
+                        <td>${farmland.plantedResourceName ? (farmland.ripeness * 100).toFixed(1) + '%' : 'Not Planted'}</td>
+                        <td>${farmlandYield(farmland).toFixed(2)} kg</td>
+                        <td>
+                            <button class="btn btn-success harvest-btn" 
+                                    data-farmland-id="${farmland.id}"
+                                    ${!canHarvest ? 'disabled' : ''}>
+                                Harvest
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('')}
         </tbody>
     `;
 
-    // Append overlay to document body
     document.body.appendChild(overlay);
     
-    // Add table to container
     const container = document.getElementById('vineyard-table-container');
     container.appendChild(table);
 
-    // Add click handlers to vineyard rows
     const rows = table.querySelectorAll('tr[data-farmland-id]');
     rows.forEach(row => {
-        row.addEventListener('click', () => {
-            const farmlandId = row.dataset.farmlandId;
-            const farmland = farmlands.find(f => f.id === parseInt(farmlandId));
-            if (farmland) {
-                showFarmlandOverlay(farmland);
+        row.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('harvest-btn')) {
+                const farmlandId = row.dataset.farmlandId;
+                const farmland = farmlands.find(f => f.id === parseInt(farmlandId));
+                if (farmland) {
+                    showFarmlandOverlay(farmland);
+                }
             }
         });
+
+        const harvestBtn = row.querySelector('.harvest-btn');
+        if (harvestBtn) {
+            harvestBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const farmlandId = harvestBtn.dataset.farmlandId;
+                const farmland = farmlands.find(f => f.id === parseInt(farmlandId));
+                if (farmland) {
+                    // Call your harvest function or show harvest overlay here
+                }
+            });
+        }
     });
 
-    // Show the overlay
     overlay.style.display = 'block';
 }
