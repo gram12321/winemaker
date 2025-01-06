@@ -236,9 +236,10 @@ export function populateStorageTable(storageTableBodyId, excludeQualityAndStatus
           row.appendChild(qualityCell);
 
           const statusCell = document.createElement('td');
-          if (matchingInventoryItems.length > 0) {
-            const statusIconPath = `/assets/pic/${matchingInventoryItems[0].state.toLowerCase()}_dalle.webp`;
-            statusCell.innerHTML = `<img src="${statusIconPath}" alt="${matchingInventoryItems[0].state}" class="status-image">`;
+          if (matchingInventoryItems.length > 0 && matchingInventoryItems[0].state) {
+            const state = matchingInventoryItems[0].state;
+            const statusIconPath = `/assets/pic/${state.toLowerCase()}_dalle.webp`;
+            statusCell.innerHTML = `<img src="${statusIconPath}" alt="${state}" class="status-image">`;
           } else {
             statusCell.textContent = 'N/A'; 
           }
