@@ -67,7 +67,9 @@ export function showCrushingOverlay() {
   // Handle crushing
   const crushBtn = overlayContainer.querySelector('.crush-btn');
   crushBtn.addEventListener('click', () => {
+    console.log('Crush button clicked');
     const selectedGrapes = overlayContainer.querySelectorAll('.grape-select:checked');
+    console.log('Selected grapes:', selectedGrapes.length);
     
     selectedGrapes.forEach(checkbox => {
       const storage = checkbox.dataset.storage;
@@ -86,9 +88,11 @@ export function showCrushingOverlay() {
       );
 
       if (matchingItem) {
+        console.log('Found matching item:', matchingItem);
         try {
           // Get fresh inventory data
           const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+          console.log('Current inventory length:', playerInventory.length);
           
           // Find the grape item
           const itemIndex = playerInventory.findIndex(item => 
