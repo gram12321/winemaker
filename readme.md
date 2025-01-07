@@ -46,6 +46,8 @@ A web-based simulation game where players manage their own winery, from vineyard
   - `initializeSidebar()`: Sets up game sidebar
   - `calculateCompanyPrestige()`: Computes prestige score
 
+
+
 ### Complete File List
 ```
 JavaScript Core:
