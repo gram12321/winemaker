@@ -1,11 +1,10 @@
-
 # Winery Management Game
 
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 
 ## Project Statistics
 - Total Files: 41
-- Total Lines of Code: 4,897
+- Total Lines of Code: 5820 #Updated line count
 - Primary Language: JavaScript
 - Secondary Languages: HTML, CSS
 
@@ -17,10 +16,38 @@ A web-based simulation game where players manage their own winery, from vineyard
 - **Wine Production**: Control the wine-making process from crushing to fermentation
 - **Financial System**: Manage expenses, sales, and track company prestige
 - **Resource Management**: Handle inventory, storage, and wine aging
+- **Farmland Management**: Buy, manage, and improve the quality of your farmland.
+- **Harvesting**: Collect grapes from your farmland, considering quality factors.
+
 
 ## Project Structure & Functions
 
 ## Core Systems & Functions
+
+### Farmland System (farmland.js - 446 lines)
+- `Farmland` class: Core class managing field properties and calculations
+- `calculateLandvalue()`: Determines land value based on region, altitude, aspect
+- `farmlandAgePrestigeModifier()`: Calculates prestige based on vine age
+- `calculateFarmlandPrestige()`: Computes overall field prestige
+- `farmlandYield()`: Calculates expected yield based on multiple factors
+- `createFarmland()`: Generates new farmland with randomized or specified attributes
+
+### Land Acquisition (buyLandOverlay.js - 135 lines)
+- `showBuyLandOverlay()`: Displays available land for purchase
+- Land value calculation based on:
+  - Regional prestige rankings
+  - Altitude benefits
+  - Aspect ratings
+  - Soil composition
+
+### Harvesting System (harvestOverlay.js - 144 lines)
+- `harvest()`: Manages grape collection and quality calculation
+- Quality determined by:
+  - Annual quality factor
+  - Ripeness level
+  - Field prestige
+  - Farmland health
+- Integrates with storage system for harvest collection
 
 ### Vineyard Management (vineyard.js - 72 lines)
 - `harvestField()`: Manages grape harvesting
@@ -131,6 +158,7 @@ JavaScript Core:
 78 ./js/console.js
 75 ./js/settings.js
 72 ./js/vineyard.js
+446 ./js/farmland.js #Added farmland.js
 
 Overlays:
 167 ./js/overlays/crushingOverlay.js
@@ -166,4 +194,3 @@ CSS:
 73 ./css/buildings.css
 46 ./css/finance.css
 42 ./css/console.css
-```
