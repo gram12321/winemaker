@@ -20,33 +20,96 @@ A web-based simulation game where players manage their own winery, from vineyard
 
 ## Project Structure & Functions
 
-### Core System Files
-- **buildings.js** (312 lines)
-  - `buildBuilding()`: Creates new buildings
-  - `upgradeBuilding()`: Handles building upgrades
-  - `updateBuildingCards()`: Updates UI for buildings
+## Core Systems & Functions
 
-- **resource.js** (247 lines)
-  - `Resource` class: Base class for game resources
-  - `sellWines()`: Handles wine sales
-  - `populateStorageTable()`: Updates storage UI
+### Vineyard Management (vineyard.js - 72 lines)
+- `harvestField()`: Manages grape harvesting
+- `calculateYield()`: Determines harvest amounts
+- `validateStorage()`: Checks storage availability
+- `calculateQuality()`: Computes grape quality based on conditions
 
-- **staff.js** (236 lines)
-  - `hireStaff()`: Handles staff recruitment
-  - `updateStaffWages()`: Manages salary payments
-  - `assignStaffToTask()`: Task management
+### Buildings System (buildings.js - 312 lines)
+- `buildBuilding()`: Creates new buildings
+- `upgradeBuilding()`: Handles building upgrades
+- `updateBuildingCards()`: Updates UI for buildings
+- `getBuildingTools()`: Retrieves available tools for buildings
+- `createTool()`: Instantiates new building tools
+
+### Resource Management (resource.js - 247 lines)
+- `Resource` class: Base class for game resources
+- `Inventory` class: Manages game inventories
+- `sellWines()`: Handles wine sales
+- `populateStorageTable()`: Updates storage UI
+- `displayInventory()`: Shows current inventory
+
+### Staff Management (staff.js - 236 lines)
+- `hireStaff()`: Handles staff recruitment
+- `updateStaffWages()`: Manages salary payments
+- `assignStaffToTask()`: Task management
+- `setupStaffWagesRecurringTransaction()`: Sets up payroll
+- `updateWagesAndRecurringTransaction()`: Updates staff payments
+
+### Financial System (finance.js - 132 lines)
+- `addTransaction()`: Records financial transactions
+- `updateCashflow()`: Manages money flow
+- `calculateBalance()`: Computes current balance
+- `processRecurringTransactions()`: Handles regular payments
+
+### Production System
+#### Crushing Process (crushingOverlay.js - 167 lines)
+- `showCrushingOverlay()`: Displays crushing interface
+- `handleCrushing()`: Processes grape crushing
+- `updateMustStorage()`: Manages must storage
+- `calculateMustQuality()`: Determines must quality
+
+#### Wine Processing (wineprocessing.js)
+- `fermentMust()`: Manages fermentation process
+- `agingProcess()`: Handles wine aging
+- `calculateWineQuality()`: Determines final wine quality
 
 ### Database Layer
-- **adminFunctions.js** (394 lines)
-  - `saveCompanyInfo()`: Persists company data
-  - `loadBuildings()`: Retrieves building data
-  - `clearLocalStorage()`: Resets game state
+#### Admin Functions (adminFunctions.js - 394 lines)
+- `saveCompanyInfo()`: Persists company data
+- `loadBuildings()`: Retrieves building data
+- `clearLocalStorage()`: Resets game state
+- `saveTask()`: Stores task information
+- `loadTasks()`: Retrieves active tasks
 
-- **loadSidebar.js** (243 lines)
-  - `initializeSidebar()`: Sets up game sidebar
-  - `calculateCompanyPrestige()`: Computes prestige score
+#### Firebase Integration (firebase.js - 19 lines)
+- Database configuration
+- Real-time data synchronization
+- Cloud storage integration
+
+### UI Components
+#### Sidebar System (loadSidebar.js - 243 lines)
+- `initializeSidebar()`: Sets up game sidebar
+- `renderCompanyInfo()`: Updates company display
+- `calculateCompanyPrestige()`: Computes prestige score
+- `applyPrestigeHit()`: Handles prestige penalties
+- `decayPrestigeHit()`: Manages prestige recovery
 
 
+
+## Known Issues
+- Save/load functionality for owned land and staff needs improvement
+- Multiple building/maintenance tasks can be created for same building
+- Building name display issues in task boxes
+- Winery tasks don't properly update UI without page refresh
+- Save/load functionality issues with owned land and staff
+- Building name only shows in taskbox after page reload
+- Missing prestige hit for incomplete bookkeeping tasks
+
+## Planned Improvements
+- Enhanced planting mechanics with vine age system
+- Improved vineyard cycle (harvest, pruning, trimming)
+- Better task management UI
+- Enhanced wine order grouping and filtering
+- Improved building maintenance information display
+
+## Integration Points
+- Firebase Database Integration (firebase.js)
+- Resource Management System (resource.js)
+- Financial Transaction System (finance.js)
 
 ### Complete File List
 ```
@@ -104,24 +167,3 @@ CSS:
 46 ./css/finance.css
 42 ./css/console.css
 ```
-
-## Known Issues
-- Save/load functionality for owned land and staff needs improvement
-- Multiple building/maintenance tasks can be created for same building
-- Building name display issues in task boxes
-- Winery tasks don't properly update UI without page refresh
-- Save/load functionality issues with owned land and staff
-- Building name only shows in taskbox after page reload
-- Missing prestige hit for incomplete bookkeeping tasks
-
-## Planned Improvements
-- Enhanced planting mechanics with vine age system
-- Improved vineyard cycle (harvest, pruning, trimming)
-- Better task management UI
-- Enhanced wine order grouping and filtering
-- Improved building maintenance information display
-
-## Integration Points
-- Firebase Database Integration (firebase.js)
-- Resource Management System (resource.js)
-- Financial Transaction System (finance.js)
