@@ -1,5 +1,6 @@
 import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '../console.js';
+import { showVineyardOverlay } from './mainpages/vineyardoverlay.js';
 import { inventoryInstance } from '../resource.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
 import { formatNumber } from '../utils.js';
@@ -178,5 +179,10 @@ export function showHarvestOverlay(farmland, farmlandId) {
 
     function removeOverlay() {
         document.body.removeChild(overlayContainer);
+        // Update vineyard overlay to reflect changes
+        const vineyardOverlay = document.querySelector('.mainview-overlay');
+        if (vineyardOverlay) {
+            showVineyardOverlay();
+        }
     }
 }
