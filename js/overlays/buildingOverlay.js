@@ -60,9 +60,14 @@ function setupToolButtons(building, tools) {
             storeBuildings(updatedBuildings);
           }
 
-          // Refresh the capacity visual
-          renderCapacityVisual(building);
-          showBuildingOverlay(building);
+          // Refresh the capacity visual and reload the overlay with updated building data
+          const updatedBuildings = loadBuildings();
+          const updatedBuilding = updatedBuildings.find(b => b.name === building.name);
+          if (updatedBuilding) {
+            const buildingInstance = new Building(updatedBuilding.name, updatedBuilding.level);
+            buildingInstance.tools = updatedBuilding.tools;
+            showBuildingOverlay(buildingInstance);
+          }
         } else {
           addConsoleMessage(`Cannot add ${tool.name}. ${building.name} is full!`);
         }
