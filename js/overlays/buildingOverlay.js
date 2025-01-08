@@ -1,4 +1,4 @@
-import { getBuildingTools, createTool } from '../buildings.js';
+import { getBuildingTools, createTool, Building } from '../buildings.js';
 import { addConsoleMessage } from '/js/console.js';
 //import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import path is correct
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
@@ -24,12 +24,14 @@ function createBuildingDetails(building) {
 }
 
 function setupToolButtons(building, tools) {
+  // Make sure we have a proper Building instance
+  const buildingInstance = building instanceof Building ? building : new Building(building.name, building.level);
   tools.forEach(tool => {
     const button = document.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
     if (button) {
       button.addEventListener('click', () => {
         const newToolInstance = createTool(tool.name); // Create a new instance of the tool
-        if (newToolInstance && building.addTool(newToolInstance)) { 
+        if (newToolInstance && buildingInstance.addTool(newToolInstance)) { 
           // Notify addition of the tool
           addConsoleMessage(`${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}.`);
 
