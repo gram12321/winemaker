@@ -142,15 +142,25 @@ export function showCrushingOverlay() {
       const quality = parseFloat(checkbox.dataset.quality);
       const fieldName = checkbox.dataset.field;
 
-      playerInventory.forEach(item => {
-        if (item.storage === storage && 
-            item.resource.name === resourceName && 
-            item.state === 'Grapes') {
-          item.state = 'Must';
-          item.storage = mustStorage;
+      // Create new array of inventory items, excluding the ones being crushed
+      const updatedInventory = playerInventory.filter(item => {
+        const isMatchingItem = item.storage === storage && 
+                             item.resource.name === resourceName && 
+                             item.state === 'Grapes';
+                             
+        if (isMatchingItem) {
+          // Create new Must item in target storage
+          const mustItem = {...item};
+          mustItem.state = 'Must';
+          mustItem.storage = mustStorage;
           addConsoleMessage(`Crushed ${formatNumber(item.amount)} t of ${resourceName} grapes from ${fieldName}`);
+          updatedInventory.push(mustItem);
+          return false; // Remove original item
         }
+        return true; // Keep non-matching items
       });
+
+      localStorage.setItem('playerInventory', JSON.stringify(updatedInventory));
     });
 
     localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
