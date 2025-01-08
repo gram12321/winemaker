@@ -30,8 +30,34 @@ export function showFermentationOverlay() {
 
     document.body.appendChild(overlayContainer);
 
-    // Populate table with only fermentation tanks containing must
-    populateStorageTable('fermentation-storage-body', true);
+    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+    const storageBody = document.getElementById('fermentation-storage-body');
+    
+    buildings.forEach(building => {
+        building.contents.forEach(tool => {
+            if (tool.supportedResources?.includes('Must')) {
+                const toolId = `${tool.name} #${tool.instanceNumber}`;
+                const matchingInventoryItems = playerInventory.filter(item => 
+                    item.storage === toolId && 
+                    item.state === 'Must'
+                );
+                const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
+                
+                const row = document.createElement('tr');
+                const firstItem = matchingInventoryItems[0];
+                
+                row.innerHTML = `
+                    <td><input type="radio" name="tool-select" value="${toolId}"></td>
+                    <td>${toolId}</td>
+                    <td>${tool.capacity}</td>
+                    <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
+                    <td>${formatNumber(currentAmount)} l</td>
+                `;
+                storageBody.appendChild(row);
+            }
+        });
+    });
 
     // Add event listeners
     const fermentButton = overlayContainer.querySelector('.ferment-btn');
