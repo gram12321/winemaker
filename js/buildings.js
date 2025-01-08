@@ -217,6 +217,7 @@ export function upgradeBuilding(buildingName) {
   }
 
   const building = new Building(buildingData.name, buildingData.level);
+  building.tools = buildingData.tools || []; // Preserve existing tools
   const upgradeCost = building.getUpgradeCost();
   building.upgrade();
 
