@@ -44,8 +44,12 @@ function setupToolButtons(building, tools) {
 
           // Load current buildings list, update the relevant building, and store the updated list
           const buildings = loadBuildings();
-          const updatedBuildings = buildings.map(b => b.name === building.name ? building : b);
-          storeBuildings(updatedBuildings);
+          const buildingToUpdate = buildings.find(b => b.name === building.name);
+          if (buildingToUpdate) {
+            buildingToUpdate.tools = buildingInstance.tools; // Copy the tools array from our instance
+            const updatedBuildings = buildings.map(b => b.name === building.name ? buildingToUpdate : b);
+            storeBuildings(updatedBuildings);
+          }
 
           // Refresh the capacity visual
           renderCapacityVisual(building);
