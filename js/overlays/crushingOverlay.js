@@ -166,7 +166,7 @@ function handleCrushing(overlayContainer) {
   });
 
   playerInventory.forEach(item => {
-    const isBeingCrushed = selectedGrapes.some(grape => 
+    const isBeingCrushed = Array.from(selectedGrapes).some(grape => 
       grape.dataset.storage === item.storage && 
       grape.dataset.resource === item.resource.name &&
       grape.dataset.vintage === item.vintage.toString()
