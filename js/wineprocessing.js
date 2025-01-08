@@ -21,6 +21,9 @@ export function fermentMust(selectedResource, storage) {
         resource.amount,
         'Must',
         resource.vintage,
+        resource.quality,
+        resource.fieldName,
+        resource.fieldPrestige,
         storage
     );
 
