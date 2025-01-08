@@ -67,6 +67,10 @@ export function showFermentationOverlay() {
         if (selectedRadio) {
             const storage = selectedRadio.value;
             const resourceCell = selectedRadio.closest('tr').querySelector('td:nth-child(4)');
+            if (resourceCell.textContent === 'Empty') {
+                addConsoleMessage('Cannot ferment from an empty tank.');
+                return;
+            }
             const resourceName = resourceCell.textContent.split(',')[1].trim();
             fermentMust(resourceName, storage);
             removeOverlay();
