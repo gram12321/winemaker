@@ -372,11 +372,26 @@ export function loadWineOrders() {
     return wineOrders;
 }
 
+// Functions to save and load buildings from localStorage
+export function storeBuildings(buildings) {
+  localStorage.setItem('buildings', JSON.stringify(buildings));
+}
+
+export function loadBuildings() {
+  const buildingsJSON = localStorage.getItem('buildings');
+  if (buildingsJSON) {
+    return JSON.parse(buildingsJSON);
+  }
+  return [];
+}
+
 export { 
   storeCompanyName, 
   saveCompanyInfo, 
   clearLocalStorage, 
   clearFirestore, 
   loadInventory, 
-  saveInventory 
+  saveInventory,
+  storeBuildings,
+  loadBuildings
 };
