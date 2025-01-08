@@ -61,7 +61,9 @@ export function showCrushingOverlay() {
   mustStorageBody.innerHTML = ''; // Clear existing content
   
   buildings.forEach(building => {
-    building.contents.forEach(tool => {
+    if (!building.tools) return;
+    
+    building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
         const toolId = `${tool.name} #${tool.instanceNumber}`;
         const matchingInventoryItems = playerInventory.filter(item => 
@@ -87,7 +89,9 @@ export function showCrushingOverlay() {
 
   // Populate grapes table
   buildings.forEach(building => {
-    building.contents.forEach(tool => {
+    if (!building.tools) return;
+    
+    building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Grapes')) {
         const matchingInventoryItems = playerInventory.filter(item => 
           item.storage === `${tool.name} #${tool.instanceNumber}` &&
