@@ -93,6 +93,10 @@ class Tool {
     Tool.instanceCount[this.name] += 1;
     return Tool.instanceCount[this.name];
   }
+
+  canStore(resourceName) {
+    return this.supportedResources.length === 0 || this.supportedResources.includes(resourceName);
+  }
 }
 
 const ToolManager = (() => {

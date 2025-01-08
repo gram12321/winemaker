@@ -9,8 +9,7 @@ class Resource {
 
 const allResources = [
   new Resource('Barbera', 1),
-  new Resource('Chardonnay', 0.9),
-  // Add more resources as needed
+  new Resource('Chardonnay', 0.9)
 ];
 
 export function getResourceByName(name) {
