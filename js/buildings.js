@@ -184,35 +184,36 @@ export function buildBuilding(buildingName) {
 }
 
 export function updateBuildingCards() {
+  const buildings = loadBuildings();
+  
   document.querySelectorAll('.building-card').forEach(cardDiv => {
     const detailDiv = cardDiv.querySelector('.building-details');
+    if (!detailDiv) return;
+    
     const buildingName = detailDiv.getAttribute('data-building-name');
-    const buildings = loadBuildings();
+    if (!buildingName) return;
+    
     const building = buildings.find(b => b.name === buildingName);
-
-    const status = building ? "Operational" : "Unbuilt";
-    const level = building ? building.level : 0;
-    const capacity = building ? building.capacity : 0;
-    const upgradeCost = building ? (building.level * 10) : "N/A";
-    const content = building ? (building.tools.length > 0 ? building.listContents() : "No items stored.") : "No items stored.";
-
-    if (status === "Unbuilt") {
-      cardDiv.classList.add('unbuilt-card');
-    } else {
-      cardDiv.classList.remove('unbuilt-card');
-    }
-
+    const isBuilt = building !== undefined;
+    
+    // Update card appearance
+    cardDiv.classList.toggle('unbuilt-card', !isBuilt);
+    
+    // Update card content
     detailDiv.innerHTML = `
       <p><strong>${buildingName}</strong></p>
-      <p>Status: ${status}</p>
-      <p>Level: ${level}</p>
-      <p>Upgrade Cost: ${upgradeCost}</p>
-      <p>Capacity: ${capacity}</p>
-      <p>Content: <br> ${content}</p>
+      <p>Status: ${isBuilt ? "Operational" : "Unbuilt"}</p>
+      <p>Level: ${isBuilt ? building.level : 0}</p>
+      <p>Upgrade Cost: ${isBuilt ? (building.level * 10) : "N/A"}</p>
+      <p>Capacity: ${isBuilt ? building.capacity : 0}</p>
+      <p>Content: <br> ${isBuilt ? building.listContents() : "No items stored."}</p>
     `;
-
-    if (building) {
-      cardDiv.addEventListener('click', () => showBuildingOverlay(building));
+    
+    // Update click handler
+    if (isBuilt) {
+      cardDiv.onclick = () => showBuildingOverlay(building);
+    } else {
+      cardDiv.onclick = null;
     }
   });
 }
