@@ -69,6 +69,7 @@ export function showInventoryOverlay() {
 
     document.body.appendChild(overlay);
     populateInventoryTables();
+    overlay.style.display = 'block';
 }
 
 function populateInventoryTables() {
@@ -76,6 +77,11 @@ function populateInventoryTables() {
     const grapeStorageBody = document.getElementById('grape-storage-body');
     const mustStorageBody = document.getElementById('must-storage-body');
     const wineStorageBody = document.getElementById('wine-storage-body');
+
+    if (!grapeStorageBody || !mustStorageBody || !wineStorageBody) {
+        console.error('Could not find table bodies');
+        return;
+    }
 
     // Clear existing content
     grapeStorageBody.innerHTML = '';
