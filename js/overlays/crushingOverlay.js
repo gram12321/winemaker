@@ -2,6 +2,7 @@
 import { formatNumber, getWineQualityCategory, getColorClass } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
+import { inventoryInstance } from '../resource.js';
 
 function createOverlayStructure() {
   const overlayContainer = document.createElement('div');
@@ -138,46 +139,41 @@ function handleCrushing(overlayContainer) {
     return false;
   }
 
-  let playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-  const filteredItems = [];
-  const mustItems = [];
-
-  selectedGrapes.forEach(checkbox => {
+  Array.from(selectedGrapes).forEach(checkbox => {
     const resourceName = checkbox.dataset.resource;
-    const vintage = checkbox.dataset.vintage;
+    const storage = checkbox.dataset.storage;
+    const vintage = parseInt(checkbox.dataset.vintage);
     const quality = checkbox.dataset.quality;
     const fieldName = checkbox.dataset.field;
-    const fieldPrestige = checkbox.dataset.prestige;
+    const fieldPrestige = parseFloat(checkbox.dataset.prestige);
     const amount = parseFloat(checkbox.dataset.amount);
 
-    const mustItem = {
-      resource: { name: resourceName, naturalYield: 1 },
-      amount: amount,
-      state: 'Must',
-      vintage: vintage,
-      quality: quality,
-      fieldName: fieldName,
-      fieldPrestige: fieldPrestige,
-      storage: mustStorage
-    };
-
-    addConsoleMessage(`Crushed ${formatNumber(amount)} t of ${resourceName} grapes from ${fieldName}`);
-    mustItems.push(mustItem);
-  });
-
-  playerInventory.forEach(item => {
-    const isBeingCrushed = Array.from(selectedGrapes).some(grape => 
-      grape.dataset.storage === item.storage && 
-      grape.dataset.resource === item.resource.name &&
-      grape.dataset.vintage === item.vintage.toString()
+    // Remove grapes from original storage
+    const removed = inventoryInstance.removeResource(
+      { name: resourceName },
+      amount,
+      'Grapes',
+      vintage,
+      storage
     );
-    if (!isBeingCrushed) {
-      filteredItems.push(item);
+
+    if (removed) {
+      // Add must to new storage
+      inventoryInstance.addResource(
+        { name: resourceName, naturalYield: 1 },
+        amount,
+        'Must',
+        vintage,
+        quality,
+        fieldName,
+        fieldPrestige,
+        mustStorage
+      );
+      addConsoleMessage(`Crushed ${formatNumber(amount)} t of ${resourceName} grapes from ${fieldName}`);
     }
   });
 
-  playerInventory = [...filteredItems, ...mustItems];
-  localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
+  inventoryInstance.save();
   return true;
 }
 
