@@ -27,10 +27,16 @@ class Inventory {
   }
 
     addResource(name, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
-
-
         const resource = getResourceByName(name);
 
+        // Check if the storage already contains incompatible items
+        const storageItems = this.items.filter(item => item.storage === storage);
+        if (storageItems.length > 0) {
+            const firstItem = storageItems[0];
+            if (firstItem.state !== state || firstItem.vintage !== vintage) {
+                throw new Error("Storage contains incompatible items");
+            }
+        }
 
         // Check if the item with these characteristics already exists
         let existingItem = this.items.find(item =>
@@ -151,7 +157,7 @@ function displayInventory(inventory, tablesToShow = ['warehouse-table-body', 'fe
                 const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
                 const building = buildings.find(b => b.contents.some(t => t.name === 'Fermentation Tank' && `${t.name} #${t.instanceNumber}` === item.storage));
                 const tool = building?.contents.find(t => `${t.name} #${t.instanceNumber}` === item.storage);
-                
+
                 row.innerHTML = `
                     <td>${item.storage || 'N/A'}</td>
                     <td>${tool ? tool.capacity : 'N/A'}</td>

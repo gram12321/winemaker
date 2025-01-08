@@ -1,4 +1,3 @@
-
 import { getBuildingTools } from '../buildings.js';
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
@@ -15,7 +14,7 @@ function harvest(farmland, farmlandId, selectedTool) {
 
   const storage = getBuildingTools().find(tool => tool.name === selectedTool.split(' #')[0]);
   const gameYear = parseInt(localStorage.getItem('year'), 10);
-  
+
   const harvestYield = farmlandYield(farmland);
   const totalHarvest = harvestYield;
   const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
@@ -106,12 +105,12 @@ export function showHarvestOverlay(farmland, farmlandId) {
           </div>
         </div>
       `;
-      
+
       document.body.appendChild(warningModal);
-      
+
       // Initialize modal
       $(warningModal).modal('show');
-      
+
       // Handle confirmation
       document.getElementById('confirmHarvest').addEventListener('click', () => {
         if (harvest(farmland, farmlandId, selectedRadio.value, harvestCheck.availableCapacity)) {
@@ -120,7 +119,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
           removeOverlay();
         }
       });
-      
+
       // Clean up modal on close
       warningModal.addEventListener('hidden.bs.modal', () => {
         warningModal.remove();
