@@ -8,29 +8,30 @@ export class Building {
     this.name = name;
     this.level = level;
     this.capacity = this.calculateCapacity();
-    this.contents = [];
+    this.tools = [];
+    this.status = "Operational";
   }
 
   calculateCapacity() {
     return this.level * 2;
   }
 
-  addContent(item) {
-    if (this.contents.length < this.capacity) {
-      this.contents.push(item);
+  addTool(tool) {
+    if (this.tools.length < this.capacity) {
+      this.tools.push(tool);
       return true;
     }
-    console.log(`${this.name} is full! Upgrade to store more items.`);
+    console.log(`${this.name} is full! Upgrade to store more tools.`);
     return false;
   }
 
-  removeContent(itemName) {
-    const itemIndex = this.contents.findIndex(item => item.name === itemName);
-    if (itemIndex >= 0) {
-      this.contents.splice(itemIndex, 1);
-      console.log(`${itemName} removed from ${this.name}.`);
+  removeTool(toolName) {
+    const toolIndex = this.tools.findIndex(tool => tool.name === toolName);
+    if (toolIndex >= 0) {
+      this.tools.splice(toolIndex, 1);
+      console.log(`${toolName} removed from ${this.name}.`);
     } else {
-      console.log(`${itemName} not found in ${this.name}.`);
+      console.log(`${toolName} not found in ${this.name}.`);
     }
   }
 
@@ -41,15 +42,15 @@ export class Building {
   }
 
   listContents() {
-    if (this.contents.length === 0) {
-      return "No items stored.";
+    if (this.tools.length === 0) {
+      return "No tools stored.";
     }
-    const itemCounts = this.contents.reduce((acc, item) => {
-      acc[item.name] = (acc[item.name] || 0) + 1;
+    const toolCounts = this.tools.reduce((acc, tool) => {
+      acc[tool.name] = (acc[tool.name] || 0) + 1;
       return acc;
     }, {});
 
-    return Object.entries(itemCounts)
+    return Object.entries(toolCounts)
       .map(([name, count]) => {
         const iconPath = `/assets/icon/buildings/${name.toLowerCase()}.png`;
         return `<div>
@@ -58,6 +59,10 @@ export class Building {
                 </div>`;
       })
       .join('<br>');
+  }
+
+  getStatus() {
+    return this.status;
   }
 
   getStatus() {
