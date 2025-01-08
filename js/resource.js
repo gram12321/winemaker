@@ -68,14 +68,15 @@ class Inventory {
 
     }
 
-  removeResource(name, amount, state, vintage, quality, fieldName, fieldPrestige) { // Include fieldPrestige
+  removeResource(name, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
     const itemIndex = this.items.findIndex(item =>
       item.resource.name === name &&
       item.state === state &&
       item.vintage === vintage &&
       item.quality === parseFloat(quality) &&
       item.fieldName === fieldName &&
-      item.fieldPrestige === fieldPrestige // Match the fieldPrestige as well
+      item.fieldPrestige === fieldPrestige &&
+      item.storage === storage
     );
 
     if (itemIndex !== -1) {
