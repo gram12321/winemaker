@@ -156,15 +156,15 @@ export function showCrushingOverlay() {
       playerInventory.forEach(item => {
         if (item.storage === storage && 
             item.resource.name === resourceName && 
-            item.state === 'Grapes') {
+            item.state === 'Grapes' &&
+            item.vintage === vintage) {
           const mustItem = {...item};
           mustItem.state = 'Must';
           mustItem.storage = mustStorage;
           addConsoleMessage(`Crushed ${formatNumber(item.amount)} t of ${resourceName} grapes from ${fieldName}`);
           mustItems.push(mustItem);
-          // Don't add the original item to filteredItems
-        } else if (item.storage !== storage) {
-          // Only keep items from other storage containers
+        } else {
+          // Keep all other items
           filteredItems.push(item);
         }
       });
