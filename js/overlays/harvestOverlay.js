@@ -11,7 +11,7 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
     }
 
     const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-    const tool = buildings.flatMap(b => b.contents).find(t => 
+    const tool = buildings.flatMap(b => b.tools).find(t => 
         `${t.name} #${t.instanceNumber}` === selectedTool
     );
 
@@ -92,8 +92,8 @@ export function showHarvestOverlay(farmland, farmlandId) {
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
 
     buildings.forEach(building => {
-        if (building.contents) { // Added check for building.contents
-            building.contents.forEach(tool => {
+        if (building.tools) {
+            building.tools.forEach(tool => {
                 if (tool.supportedResources?.includes('Grapes')) {
                     const toolId = `${tool.name} #${tool.instanceNumber}`;
                     const matchingInventoryItems = playerInventory.filter(item => 
