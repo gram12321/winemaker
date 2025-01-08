@@ -19,7 +19,21 @@ function harvest(farmland, farmlandId, selectedTool) {
   const totalHarvest = harvestYield;
   const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
 
-  // Add harvested grapes to inventory
+  // Check if this resource exists in other containers first
+  const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+  const existingResource = playerInventory.find(item => 
+    item.resource.name === farmland.plantedResourceName &&
+    item.vintage === gameYear &&
+    item.fieldName === farmland.name &&
+    item.state !== 'Grapes'  // Important check to prevent overwriting processed resources
+  );
+
+  if (existingResource) {
+    addConsoleMessage(`Cannot harvest - ${farmland.plantedResourceName} from ${farmland.name} (${gameYear}) already exists in processed form`);
+    return false;
+  }
+
+  // Add harvested grapes to inventory if no conflicts found
   inventoryInstance.addResource(
     farmland.plantedResourceName,
     totalHarvest,
