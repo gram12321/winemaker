@@ -29,7 +29,7 @@ function setupToolButtons(building, tools) {
     if (button) {
       button.addEventListener('click', () => {
         const newToolInstance = createTool(tool.name); // Create a new instance of the tool
-        if (newToolInstance && building.addContent(newToolInstance)) { 
+        if (newToolInstance && building.addTool(newToolInstance)) { 
           // Notify addition of the tool
           addConsoleMessage(`${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}.`);
 
