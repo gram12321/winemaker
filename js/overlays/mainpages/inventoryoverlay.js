@@ -1,5 +1,3 @@
-import { displayInventory, populateStorageTable } from '/js/resource.js';
-
 export function showInventoryOverlay() {
     // Remove any existing instances of the overlay
     const existingOverlay = document.querySelector('.mainview-overlay');
@@ -11,78 +9,15 @@ export function showInventoryOverlay() {
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
 
-    // Create content for the overlay
+    // Create placeholder content
     overlay.innerHTML = `
         <div class="mainview-overlay-content">
             <h3>Inventory</h3>
-            
-            <section class="my-4">
-                <h4>Storage</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Container</th>
-                            <th>Capacity</th>
-                            <th>Resource</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="storage-table-body">
-                    </tbody>
-                </table>
-            </section>
-
-            <section class="my-4">
-                <h4>Fermentation Tanks</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Container</th>
-                            <th>Capacity</th>
-                            <th>Resource</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="fermentation-table-body">
-                    </tbody>
-                </table>
-            </section>
-
-            <section class="my-4">
-                <h4>Wine Cellar</h4>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Resource</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="winecellar-table-body">
-                    </tbody>
-                </table>
-            </section>
+            <p>Inventory system is being rebuilt...</p>
         </div>
     `;
 
     // Append overlay to document body
     document.body.appendChild(overlay);
     overlay.style.display = 'block';
-
-    // Only populate the storage table for containers
-    populateStorageTable('storage-table-body');
-    
-    // Create an empty inventory if none exists
-    const savedInventory = localStorage.getItem('playerInventory');
-    const inventory = {
-        items: savedInventory ? JSON.parse(savedInventory) : []
-    };
-    
-    // Display fermentation and wine cellar contents
-    displayInventory(inventory, ['fermentation-table-body', 'winecellar-table-body']);
 }
