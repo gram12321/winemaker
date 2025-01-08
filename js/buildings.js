@@ -73,15 +73,7 @@ class Tool {
     this.cost = cost;
     this.capacity = capacity;
     this.supportedResources = supportedResources;
-    this.instanceNumber = this.getNextInstanceNumber();
-  }
-
-  getNextInstanceNumber() {
-    if (!Tool.instanceCount[this.name]) {
-      Tool.instanceCount[this.name] = 0;
-    }
-    Tool.instanceCount[this.name] += 1;
-    return Tool.instanceCount[this.name];
+    this.instanceNumber = 1; // Default value, will be overridden by ToolManager
   }
 
   getStorageId() {
@@ -105,9 +97,13 @@ class Tool {
 const ToolManager = (() => {
   let toolsInitialized = false;
   let tools = [];
+  let toolInstanceCounts = {};
 
   function initializeTools() {
     if (!toolsInitialized) {
+      // Reset tool instance counts
+      toolInstanceCounts = {};
+      
       tools = [
         new Tool('Tractor', 'Tool Shed', 1.2, 500, 0),
         new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0),
@@ -124,7 +120,14 @@ const ToolManager = (() => {
   function createToolInstance(toolName) {
     const toolTemplate = tools.find(tool => tool.name === toolName);
     if (toolTemplate) {
-      return new Tool(
+      // Initialize counter if not exists
+      if (!toolInstanceCounts[toolName]) {
+        toolInstanceCounts[toolName] = 0;
+      }
+      // Increment counter
+      toolInstanceCounts[toolName]++;
+      
+      const newTool = new Tool(
         toolTemplate.name,
         toolTemplate.buildingType,
         toolTemplate.speedBonus,
@@ -132,6 +135,9 @@ const ToolManager = (() => {
         toolTemplate.capacity,
         toolTemplate.supportedResources || []
       );
+      // Override the instance number with our managed count
+      newTool.instanceNumber = toolInstanceCounts[toolName];
+      return newTool;
     }
     console.log('Tool template not found');
     return null;
