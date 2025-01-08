@@ -1,4 +1,3 @@
-
 import { farmlandYield } from './farmland.js';
 import { addConsoleMessage } from './console.js';
 
@@ -60,20 +59,11 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
     const tool = buildings.flatMap(b => b.tools).find(t => 
         `${t.name} #${t.instanceNumber}` === selectedTool
     );
-    
+
     if (!tool) {
         addConsoleMessage("Storage container not found");
         return false;
     }
 
-    const gameYear = parseInt(localStorage.getItem('year'), 10);
-    const harvestYield = farmlandYield(farmland);
-    const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const currentAmount = currentInventory
-        .filter(item => item.storage === selectedTool)
-        .reduce((sum, item) => sum + item.amount, 0);
-    
-    const remainingCapacity = tool.capacity - currentAmount;
-    const totalHarvest = availableCapacity || Math.min(harvestYield, remainingCapacity);
     return true;
 }
