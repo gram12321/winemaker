@@ -1,3 +1,4 @@
+
 import { farmlandYield } from './farmland.js';
 import { addConsoleMessage } from './console.js';
 
@@ -8,10 +9,10 @@ export function canHarvest(farmland, storage) {
 
     // Find the storage tool
     const buildingWithTool = buildings.find(building => 
-        building.contents.some(content => `${content.name} #${content.instanceNumber}` === storage)
+        building.tools?.some(tool => `${tool.name} #${tool.instanceNumber}` === storage)
     );
-    const tool = buildingWithTool?.contents.find(content => 
-        `${content.name} #${content.instanceNumber}` === storage
+    const tool = buildingWithTool?.tools.find(tool => 
+        `${tool.name} #${tool.instanceNumber}` === storage
     );
 
     if (!tool) {
@@ -50,28 +51,29 @@ export function canHarvest(farmland, storage) {
 }
 
 function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
-  const harvestCheck = canHarvest(farmland, selectedTool);
-  if ((!harvestCheck || harvestCheck.warning) && !availableCapacity) {
-    return false;
-  }
+    const harvestCheck = canHarvest(farmland, selectedTool);
+    if ((!harvestCheck || harvestCheck.warning) && !availableCapacity) {
+        return false;
+    }
 
-  const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-  const tool = buildings.flatMap(b => b.contents).find(t => 
-    `${t.name} #${t.instanceNumber}` === selectedTool
-  );
-  
-  if (!tool) {
-    addConsoleMessage("Storage container not found");
-    return false;
-  }
+    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+    const tool = buildings.flatMap(b => b.tools).find(t => 
+        `${t.name} #${t.instanceNumber}` === selectedTool
+    );
+    
+    if (!tool) {
+        addConsoleMessage("Storage container not found");
+        return false;
+    }
 
-  const gameYear = parseInt(localStorage.getItem('year'), 10);
-  const harvestYield = farmlandYield(farmland);
-  const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-  const currentAmount = currentInventory
-    .filter(item => item.storage === selectedTool)
-    .reduce((sum, item) => sum + item.amount, 0);
-  
-  const remainingCapacity = tool.capacity - currentAmount;
-  const totalHarvest = Math.min(harvestYield, remainingCapacity);
+    const gameYear = parseInt(localStorage.getItem('year'), 10);
+    const harvestYield = farmlandYield(farmland);
+    const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    const currentAmount = currentInventory
+        .filter(item => item.storage === selectedTool)
+        .reduce((sum, item) => sum + item.amount, 0);
+    
+    const remainingCapacity = tool.capacity - currentAmount;
+    const totalHarvest = availableCapacity || Math.min(harvestYield, remainingCapacity);
+    return true;
 }
