@@ -2,6 +2,7 @@
 import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
 import { populateStorageTable } from '/js/resource.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
+import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
 
 export function showWineryOverlay() {
     // Remove any existing instances of the overlay
@@ -22,6 +23,7 @@ export function showWineryOverlay() {
                 <section class="my-4">
                     <h4>Grapes in Inventory</h4>
                     <button class="btn btn-primary mb-2" id="crushGrapesBtn">Crush Grapes</button>
+                    <button class="btn btn-primary mb-2" id="fermentMustBtn">Ferment Must</button>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -85,5 +87,10 @@ export function showWineryOverlay() {
     const crushButton = document.getElementById('crushGrapesBtn');
     if (crushButton) {
         crushButton.addEventListener('click', showCrushingOverlay);
+    }
+    
+    const fermentButton = document.getElementById('fermentMustBtn');
+    if (fermentButton) {
+        fermentButton.addEventListener('click', showFermentationOverlay);
     }
 }
