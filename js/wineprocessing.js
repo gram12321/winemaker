@@ -1,3 +1,6 @@
+import { inventoryInstance  } from './resource.js';
+import { saveInventory } from './database/adminFunctions.js';
+import { addConsoleMessage } from './console.js';
 
 export function fermentMust(selectedResource, storage) {
     const resource = inventoryInstance.items.find(item => 
