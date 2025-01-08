@@ -35,7 +35,7 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
 
     // Add harvested grapes to inventory using inventoryInstance
     inventoryInstance.addResource(
-        { name: farmland.plantedResourceName },
+        { name: farmland.plantedResourceName, naturalYield: 1 },
         totalHarvest,
         'Grapes',
         gameYear,

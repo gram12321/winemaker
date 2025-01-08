@@ -115,7 +115,7 @@ function populateStorageRow(tableBody, tool, inventoryItems) {
         row.innerHTML = `
             <td>${tool.name} #${tool.instanceNumber}</td>
             <td>${tool.capacity}</td>
-            <td>${firstItem ? `<strong>${firstItem.fieldName}</strong>, ${firstItem.resource.name}, ${firstItem.vintage || 'Unknown'}` : 'N/A'}</td>
+            <td>${firstItem ? `<strong>${firstItem.fieldName}</strong>, ${firstItem.resource?.name || firstItem.resource}, ${firstItem.vintage || 'Unknown'}` : 'N/A'}</td>
             <td>${formatNumber(totalAmount)} t</td>
             <td>${qualityDisplay}</td>
         `;
