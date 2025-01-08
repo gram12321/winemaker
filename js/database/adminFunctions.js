@@ -391,7 +391,5 @@ export {
   clearLocalStorage, 
   clearFirestore, 
   loadInventory, 
-  saveInventory,
-  storeBuildings,
-  loadBuildings
+  saveInventory
 };
