@@ -24,8 +24,17 @@ function createBuildingDetails(building) {
 }
 
 function setupToolButtons(building, tools) {
-  // Make sure we have a proper Building instance
-  const buildingInstance = building instanceof Building ? building : new Building(building.name, building.level);
+  // Make sure we have a proper Building instance with existing tools
+  let buildingInstance;
+  if (building instanceof Building) {
+    buildingInstance = building;
+  } else {
+    buildingInstance = new Building(building.name, building.level);
+    // Copy existing tools if any
+    if (building.tools && Array.isArray(building.tools)) {
+      buildingInstance.tools = [...building.tools];
+    }
+  }
   tools.forEach(tool => {
     const button = document.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
     if (button) {
