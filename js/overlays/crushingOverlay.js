@@ -51,7 +51,11 @@ function populateTables(overlayContainer) {
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
   
-  // Populate must storage options
+  populateMustStorageTable(overlayContainer, buildings, playerInventory);
+  populateGrapesTable(overlayContainer, buildings, playerInventory);
+}
+
+function populateMustStorageTable(overlayContainer, buildings, playerInventory) {
   const mustStorageBody = overlayContainer.querySelector('#crushing-must-storage-table');
   mustStorageBody.innerHTML = '';
   
@@ -61,9 +65,7 @@ function populateTables(overlayContainer) {
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
         const toolId = `${tool.name} #${tool.instanceNumber}`;
-        const matchingInventoryItems = playerInventory.filter(item => 
-          item.storage === toolId
-        );
+        const matchingInventoryItems = playerInventory.filter(item => item.storage === toolId);
         const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
         const availableSpace = tool.capacity - currentAmount;
 
@@ -81,8 +83,9 @@ function populateTables(overlayContainer) {
       }
     });
   });
+}
 
-  // Populate grapes table
+function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
   buildings.forEach(building => {
     if (!building.tools) return;
@@ -140,7 +143,6 @@ function handleCrushing(overlayContainer) {
   const mustItems = [];
 
   selectedGrapes.forEach(checkbox => {
-    const storage = checkbox.dataset.storage;
     const resourceName = checkbox.dataset.resource;
     const vintage = checkbox.dataset.vintage;
     const quality = checkbox.dataset.quality;
@@ -148,7 +150,6 @@ function handleCrushing(overlayContainer) {
     const fieldPrestige = checkbox.dataset.prestige;
     const amount = parseFloat(checkbox.dataset.amount);
 
-    // Create must item
     const mustItem = {
       resource: { name: resourceName, naturalYield: 1 },
       amount: amount,
@@ -164,7 +165,6 @@ function handleCrushing(overlayContainer) {
     mustItems.push(mustItem);
   });
 
-  // Keep all items except the ones being crushed
   playerInventory.forEach(item => {
     const isBeingCrushed = selectedGrapes.some(grape => 
       grape.dataset.storage === item.storage && 
@@ -187,7 +187,6 @@ export function showCrushingOverlay() {
 
   populateTables(overlayContainer);
 
-  // Handle crushing button click
   const crushBtn = overlayContainer.querySelector('.crush-btn');
   crushBtn.addEventListener('click', () => {
     if (handleCrushing(overlayContainer)) {
@@ -196,7 +195,6 @@ export function showCrushingOverlay() {
     }
   });
 
-  // Close button functionality
   const closeBtn = overlayContainer.querySelector('.close-btn');
   closeBtn.addEventListener('click', removeOverlay);
 
