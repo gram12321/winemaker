@@ -1,30 +1,43 @@
+
 import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '../console.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
-//import { inventoryInstance, populateStorageTable } from '../resource.js';
 import { formatNumber } from '../utils.js';
 import { saveInventory } from '../database/adminFunctions.js';
 
-// Function to handle harvest logic
-function harvest(farmland, farmlandId, selectedTool) {
-  if (!canHarvest(farmland, selectedTool)) {
+function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
+  const harvestCheck = canHarvest(farmland, selectedTool);
+  if ((!harvestCheck || harvestCheck.warning) && !availableCapacity) {
     return false;
   }
 
-  const storage = getBuildingTools().find(tool => tool.name === selectedTool.split(' #')[0]);
-  const gameYear = parseInt(localStorage.getItem('year'), 10);
+  const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+  const tool = buildings.flatMap(b => b.contents).find(t => 
+    `${t.name} #${t.instanceNumber}` === selectedTool
+  );
+  
+  if (!tool) {
+    addConsoleMessage("Storage container not found");
+    return false;
+  }
 
+  const gameYear = parseInt(localStorage.getItem('year'), 10);
   const harvestYield = farmlandYield(farmland);
-  const totalHarvest = harvestYield;
+  const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+  const currentAmount = currentInventory
+    .filter(item => item.storage === selectedTool)
+    .reduce((sum, item) => sum + item.amount, 0);
+  
+  const remainingCapacity = tool.capacity - currentAmount;
+  const totalHarvest = availableCapacity || Math.min(harvestYield, remainingCapacity);
   const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
 
   // Check if this resource exists in other containers first
-  const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-  const existingResource = playerInventory.find(item => 
+  const existingResource = currentInventory.find(item => 
     item.resource.name === farmland.plantedResourceName &&
     item.vintage === gameYear &&
     item.fieldName === farmland.name &&
-    item.state !== 'Grapes'  // Important check to prevent overwriting processed resources
+    item.state !== 'Grapes'
   );
 
   if (existingResource) {
@@ -32,17 +45,19 @@ function harvest(farmland, farmlandId, selectedTool) {
     return false;
   }
 
-  // Add harvested grapes to inventory if no conflicts found
-  inventoryInstance.addResource(
-    farmland.plantedResourceName,
-    totalHarvest,
-    'Grapes',
-    gameYear,
-    quality,
-    farmland.name,
-    farmland.farmlandPrestige,
-    selectedTool
-  );
+  // Add harvested grapes to inventory
+  const newInventory = [...currentInventory, {
+    resource: { name: farmland.plantedResourceName },
+    amount: totalHarvest,
+    state: 'Grapes',
+    vintage: gameYear,
+    quality: quality,
+    fieldName: farmland.name,
+    fieldPrestige: farmland.farmlandPrestige,
+    storage: selectedTool
+  }];
+  
+  localStorage.setItem('playerInventory', JSON.stringify(newInventory));
 
   // Update farmland status
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -58,7 +73,6 @@ function harvest(farmland, farmlandId, selectedTool) {
   return true;
 }
 
-// Function to show harvest overlay UI
 export function showHarvestOverlay(farmland, farmlandId) {
   const overlayContainer = document.createElement('div');
   overlayContainer.className = 'overlay';
@@ -97,7 +111,6 @@ export function showHarvestOverlay(farmland, farmlandId) {
     const harvestCheck = canHarvest(farmland, selectedRadio.value);
     if (harvestCheck.warning) {
       const expectedYield = farmlandYield(farmland);
-      // Create warning modal
       const warningModal = document.createElement('div');
       warningModal.className = 'modal fade';
       warningModal.innerHTML = `
@@ -120,11 +133,8 @@ export function showHarvestOverlay(farmland, farmlandId) {
       `;
 
       document.body.appendChild(warningModal);
-
-      // Initialize modal
       $(warningModal).modal('show');
 
-      // Handle confirmation
       document.getElementById('confirmHarvest').addEventListener('click', () => {
         if (harvest(farmland, farmlandId, selectedRadio.value, harvestCheck.availableCapacity)) {
           $(warningModal).modal('hide');
@@ -133,7 +143,6 @@ export function showHarvestOverlay(farmland, farmlandId) {
         }
       });
 
-      // Clean up modal on close
       warningModal.addEventListener('hidden.bs.modal', () => {
         warningModal.remove();
       });

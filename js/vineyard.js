@@ -5,7 +5,7 @@ export { farmlandYield };
 
 export function canHarvest(farmland, storage) {
     const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-    
+
     // Find the storage tool
     const buildingWithTool = buildings.find(building => 
         building.contents.some(content => `${content.name} #${content.instanceNumber}` === storage)
