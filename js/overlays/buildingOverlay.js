@@ -15,7 +15,7 @@ function createBuildingDetails(building) {
   return `
     <h2>${building.name}</h2>
     <p>Capacity: ${building.capacity}</p>
-    <p>Contents: ${building.listContents()}</p>
+    <p>Contents: ${building.listContents ? building.listContents() : "No tools stored."}</p>
     ${toolButtons}
     <div class="building-simulator">
       <div id="capacity-grid" class="capacity-grid"></div>
@@ -80,7 +80,7 @@ function renderCapacityVisual(building) {
   if (!capacityGrid) return;
 
   const totalCapacity = building.capacity;
-  const usedCapacity = building.contents.length; // Assuming contents is an array
+  const usedCapacity = building.tools ? building.tools.length : 0;
 
   // Clear existing grid
   capacityGrid.innerHTML = '';
@@ -91,7 +91,7 @@ function renderCapacityVisual(building) {
     cell.className = 'capacity-cell';
 
     if (i < usedCapacity) {
-      const tool = building.contents[i]; // Assuming contents array holds tools
+      const tool = building.tools[i];
       const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`; // Path for the icon
       cell.innerHTML = `
         <img src="${iconPath}" alt="${tool.name}" style="width: 24px; height: 24px;" />
