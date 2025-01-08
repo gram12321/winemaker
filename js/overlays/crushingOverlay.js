@@ -2,6 +2,7 @@
 import { formatNumber, getWineQualityCategory, getColorClass } from '../utils.js';
 import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
+import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 
 export function showCrushingOverlay() {
   const overlayContainer = document.createElement('div');
@@ -167,6 +168,9 @@ export function showCrushingOverlay() {
       playerInventory = [...filteredItems, ...mustItems];
       localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
     });
+    
+    // Refresh the winery overlay tables
+    showWineryOverlay();
     removeOverlay();
   });
 
