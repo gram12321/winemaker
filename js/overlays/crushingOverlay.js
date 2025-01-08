@@ -133,7 +133,7 @@ export function showCrushingOverlay() {
       return;
     }
 
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    let playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     
     selectedGrapes.forEach(checkbox => {
       const storage = checkbox.dataset.storage;
@@ -142,8 +142,10 @@ export function showCrushingOverlay() {
       const quality = parseFloat(checkbox.dataset.quality);
       const fieldName = checkbox.dataset.field;
 
-      // Create new array of inventory items, excluding the ones being crushed
-      const updatedInventory = playerInventory.filter(item => {
+      const filteredItems = [];
+      const mustItems = [];
+
+      playerInventory.forEach(item => {
         const isMatchingItem = item.storage === storage && 
                              item.resource.name === resourceName && 
                              item.state === 'Grapes';
@@ -154,16 +156,15 @@ export function showCrushingOverlay() {
           mustItem.state = 'Must';
           mustItem.storage = mustStorage;
           addConsoleMessage(`Crushed ${formatNumber(item.amount)} t of ${resourceName} grapes from ${fieldName}`);
-          updatedInventory.push(mustItem);
-          return false; // Remove original item
+          mustItems.push(mustItem);
+        } else {
+          filteredItems.push(item);
         }
-        return true; // Keep non-matching items
       });
 
-      localStorage.setItem('playerInventory', JSON.stringify(updatedInventory));
+      playerInventory = [...filteredItems, ...mustItems];
+      localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
     });
-
-    localStorage.setItem('playerInventory', JSON.stringify(playerInventory));
     removeOverlay();
   });
 
