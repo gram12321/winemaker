@@ -68,6 +68,10 @@ export function showWineryOverlay() {
     const grapeStorageTableBody = document.getElementById('grape-storage-table');
     const mustStorageTableBody = document.getElementById('must-storage-table');
 
+    // Clear existing table contents
+    if (grapeStorageTableBody) grapeStorageTableBody.innerHTML = '';
+    if (mustStorageTableBody) mustStorageTableBody.innerHTML = '';
+
     buildings.forEach(building => {
         building.contents.forEach(tool => {
             if (tool.supportedResources?.includes('Grapes')) {
