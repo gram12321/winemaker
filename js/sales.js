@@ -1,4 +1,4 @@
-import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
+//import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
 import { normalizeLandValue } from './names.js'; // Ensure you import normalizeLandValue
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';

@@ -1,6 +1,6 @@
 
 import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
-import { populateStorageTable } from '/js/resource.js';
+//import { populateStorageTable } from '/js/resource.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
 

@@ -1,4 +1,4 @@
-import { inventoryInstance  } from './resource.js';
+//import { inventoryInstance  } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
 

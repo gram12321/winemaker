@@ -1,8 +1,7 @@
 import { getBuildingTools } from '../buildings.js';
-import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
-import { inventoryInstance } from '../resource.js';
+//import { inventoryInstance, populateStorageTable } from '../resource.js';
 import { formatNumber } from '../utils.js';
 import { saveInventory } from '../database/adminFunctions.js';
 

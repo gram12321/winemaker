@@ -1,6 +1,6 @@
 
 import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
-import { inventoryInstance, displayInventory } from '/js/resource.js';
+//import { inventoryInstance, displayInventory } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
 import { loadWineOrders } from '/js/database/adminFunctions.js';
 

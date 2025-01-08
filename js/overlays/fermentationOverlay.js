@@ -1,6 +1,6 @@
 
 import { fermentMust } from '../wineprocessing.js';
-import { populateStorageTable } from '../resource.js';
+//import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
 import { formatNumber } from '../utils.js';
 

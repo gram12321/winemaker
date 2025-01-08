@@ -1,6 +1,6 @@
 
 import { formatNumber, getWineQualityCategory, getColorClass } from '../utils.js';
-import { populateStorageTable } from '../resource.js';
+//import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 
