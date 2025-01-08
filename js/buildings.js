@@ -182,8 +182,11 @@ export function updateBuildingCards() {
     const buildingName = detailDiv.getAttribute('data-building-name');
     if (!buildingName) return;
 
-    const building = buildings.find(b => b.name === buildingName);
-    const isBuilt = building !== undefined;
+    const buildingData = buildings.find(b => b.name === buildingName);
+    const isBuilt = buildingData !== undefined;
+    
+    // Create proper Building instance if building exists
+    const building = isBuilt ? new Building(buildingData.name, buildingData.level) : null;
 
     cardDiv.classList.toggle('unbuilt-card', !isBuilt);
 
