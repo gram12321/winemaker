@@ -1,5 +1,6 @@
 import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '../console.js';
+import { inventoryInstance } from '../resource.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
 import { formatNumber } from '../utils.js';
 import { saveInventory } from '../database/adminFunctions.js';
@@ -31,19 +32,17 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
     const totalHarvest = availableCapacity || Math.min(harvestYield, remainingCapacity);
     const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
 
-    // Add harvested grapes to inventory
-    const newInventory = [...currentInventory, {
-        resource: { name: farmland.plantedResourceName },
-        amount: totalHarvest,
-        state: 'Grapes',
-        vintage: gameYear,
-        quality: quality,
-        fieldName: farmland.name,
-        fieldPrestige: farmland.farmlandPrestige,
-        storage: selectedTool
-    }];
-
-    localStorage.setItem('playerInventory', JSON.stringify(newInventory));
+    // Add harvested grapes to inventory using inventoryInstance
+    inventoryInstance.addResource(
+        { name: farmland.plantedResourceName },
+        totalHarvest,
+        'Grapes',
+        gameYear,
+        quality,
+        farmland.name,
+        farmland.farmlandPrestige,
+        selectedTool
+    );
 
     // Update farmland status
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
