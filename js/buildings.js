@@ -9,7 +9,6 @@ export class Building {
     this.level = level;
     this.capacity = this.calculateCapacity();
     this.tools = [];
-    this.status = "Operational";
   }
 
   calculateCapacity() {
@@ -21,7 +20,6 @@ export class Building {
       this.tools.push(tool);
       return true;
     }
-    console.log(`${this.name} is full! Upgrade to store more tools.`);
     return false;
   }
 
@@ -29,16 +27,19 @@ export class Building {
     const toolIndex = this.tools.findIndex(tool => tool.name === toolName);
     if (toolIndex >= 0) {
       this.tools.splice(toolIndex, 1);
-      console.log(`${toolName} removed from ${this.name}.`);
-    } else {
-      console.log(`${toolName} not found in ${this.name}.`);
+      return true;
     }
+    return false;
   }
 
   upgrade() {
     this.level += 1;
     this.capacity = this.calculateCapacity();
-    console.log(`${this.name} upgraded! New level is ${this.level} and capacity is ${this.capacity}.`);
+    return true;
+  }
+
+  getUpgradeCost() {
+    return this.level * 1000;
   }
 
   listContents() {
@@ -59,18 +60,6 @@ export class Building {
                 </div>`;
       })
       .join('<br>');
-  }
-
-  getStatus() {
-    return this.level > 0 ? "Operational" : "Unbuilt";
-  }
-
-  getUpgradeCost() {
-    return this.level * 10;
-  }
-
-  getContentDescription() {
-    return this.tools.length > 0 ? this.listContents() : "No items stored.";
   }
 }
 
@@ -185,31 +174,28 @@ export function buildBuilding(buildingName) {
 
 export function updateBuildingCards() {
   const buildings = loadBuildings();
-  
+
   document.querySelectorAll('.building-card').forEach(cardDiv => {
     const detailDiv = cardDiv.querySelector('.building-details');
     if (!detailDiv) return;
-    
+
     const buildingName = detailDiv.getAttribute('data-building-name');
     if (!buildingName) return;
-    
+
     const building = buildings.find(b => b.name === buildingName);
     const isBuilt = building !== undefined;
-    
-    // Update card appearance
+
     cardDiv.classList.toggle('unbuilt-card', !isBuilt);
-    
-    // Update card content
+
     detailDiv.innerHTML = `
       <p><strong>${buildingName}</strong></p>
       <p>Status: ${isBuilt ? "Operational" : "Unbuilt"}</p>
       <p>Level: ${isBuilt ? building.level : 0}</p>
-      <p>Upgrade Cost: ${isBuilt ? (building.level * 10) : "N/A"}</p>
+      <p>Upgrade Cost: ${isBuilt ? `€${building.getUpgradeCost()}` : "N/A"}</p>
       <p>Capacity: ${isBuilt ? building.capacity : 0}</p>
       <p>Content: <br> ${isBuilt ? building.listContents() : "No items stored."}</p>
     `;
-    
-    // Update click handler
+
     if (isBuilt) {
       cardDiv.onclick = () => showBuildingOverlay(building);
     } else {
@@ -223,7 +209,7 @@ export function upgradeBuilding(buildingName) {
   const building = buildings.find(b => b.name === buildingName);
 
   if (!building) {
-    console.error(`Building ${buildingName} not found.`);
+    addConsoleMessage(`Building ${buildingName} not found.`);
     return;
   }
 
@@ -232,12 +218,6 @@ export function upgradeBuilding(buildingName) {
 
   const updatedBuildings = buildings.map(b => b.name === buildingName ? building : b);
   storeBuildings(updatedBuildings);
-
-  const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
-  if (upgradeButton) {
-    upgradeButton.disabled = false;
-    upgradeButton.textContent = "Upgrade";
-  }
 
   addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}.`);
   updateBuildingCards();
