@@ -1,21 +1,18 @@
 
 import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
-//import { populateStorageTable } from '/js/resource.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
+import { loadBuildings } from '/js/database/adminFunctions.js';
 
 export function showWineryOverlay() {
-    // Remove any existing instances of the overlay
     const existingOverlay = document.querySelector('.mainview-overlay');
     if (existingOverlay) {
         existingOverlay.remove();
     }
 
-    // Create overlay element
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
 
-    // Create content for the overlay
     overlay.innerHTML = `
         <div class="mainview-overlay-content">
             <h3>Winery</h3>
@@ -59,21 +56,20 @@ export function showWineryOverlay() {
         </div>
     `;
 
-    // Append overlay to document body
     document.body.appendChild(overlay);
 
-    // Populate storage tables
-    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+    const buildings = loadBuildings();
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     const grapeStorageTableBody = document.getElementById('grape-storage-table');
     const mustStorageTableBody = document.getElementById('must-storage-table');
 
-    // Clear existing table contents
     if (grapeStorageTableBody) grapeStorageTableBody.innerHTML = '';
     if (mustStorageTableBody) mustStorageTableBody.innerHTML = '';
 
     buildings.forEach(building => {
-        building.contents.forEach(tool => {
+        if (!building.tools) return;
+        
+        building.tools.forEach(tool => {
             if (tool.supportedResources?.includes('Grapes')) {
                 const matchingInventoryItems = playerInventory.filter(item => 
                     item.storage === `${tool.name} #${tool.instanceNumber}` && 
@@ -93,7 +89,6 @@ export function showWineryOverlay() {
 
     overlay.style.display = 'block';
     
-    // Add click handlers for buttons
     const crushButton = document.getElementById('crushGrapesBtn');
     if (crushButton) {
         crushButton.addEventListener('click', showCrushingOverlay);

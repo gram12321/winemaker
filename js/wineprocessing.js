@@ -1,4 +1,5 @@
-//import { inventoryInstance  } from './resource.js';
+
+import { inventoryInstance } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
 
@@ -14,18 +15,16 @@ export function fermentMust(selectedResource, storage) {
         return;
     }
 
-    // Remove units from the must resource and add as bottles
+    // Remove units from the must resource
     inventoryInstance.removeResource(
         resource.resource.name,
         resource.amount,
         'Must',
         resource.vintage,
-        resource.quality,
-        resource.fieldName,
-        resource.fieldPrestige,
         storage
     );
 
+    // Add as bottles to Wine Cellar
     inventoryInstance.addResource(
         resource.resource.name,
         resource.amount,
@@ -34,7 +33,7 @@ export function fermentMust(selectedResource, storage) {
         resource.quality,
         resource.fieldName,
         resource.fieldPrestige,
-        'Wine Cellar'  // Bottles go to wine cellar
+        'Wine Cellar'
     );
 
     saveInventory();
