@@ -62,10 +62,6 @@ export class Building {
   }
 
   getStatus() {
-    return this.status;
-  }
-
-  getStatus() {
     return this.level > 0 ? "Operational" : "Unbuilt";
   }
 
@@ -74,7 +70,7 @@ export class Building {
   }
 
   getContentDescription() {
-    return this.contents.length > 0 ? this.listContents() : "No items stored.";
+    return this.tools.length > 0 ? this.listContents() : "No items stored.";
   }
 }
 
