@@ -4,11 +4,11 @@ import { addConsoleMessage } from '/js/console.js';
 import { storeBuildings } from '/js/database/adminFunctions.js';
 
 export class Building {
-  constructor(name, level = 1) {
+  constructor(name, level = 1, tools = []) {
     this.name = name;
     this.level = level;
     this.capacity = this.calculateCapacity();
-    this.tools = [];
+    this.tools = tools;
   }
 
   calculateCapacity() {
@@ -192,7 +192,7 @@ export function updateBuildingCards() {
     const isBuilt = buildingData !== undefined;
     
     // Create proper Building instance if building exists
-    const building = isBuilt ? new Building(buildingData.name, buildingData.level) : null;
+    const building = isBuilt ? new Building(buildingData.name, buildingData.level, buildingData.tools || []) : null;
 
     cardDiv.classList.toggle('unbuilt-card', !isBuilt);
 
@@ -222,8 +222,7 @@ export function upgradeBuilding(buildingName) {
     return;
   }
 
-  const building = new Building(buildingData.name, buildingData.level);
-  building.tools = buildingData.tools || []; // Preserve existing tools
+  const building = new Building(buildingData.name, buildingData.level, buildingData.tools || []);
   const upgradeCost = building.getUpgradeCost();
   building.upgrade();
 
