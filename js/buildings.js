@@ -94,8 +94,21 @@ class Tool {
     return Tool.instanceCount[this.name];
   }
 
+  getStorageId() {
+    return `${this.name} #${this.instanceNumber}`;
+  }
+
   canStore(resourceName) {
     return this.supportedResources.length === 0 || this.supportedResources.includes(resourceName);
+  }
+
+  getCurrentAmount(inventory) {
+    const contents = inventory.getStorageContents(this.getStorageId());
+    return contents.reduce((sum, item) => sum + item.amount, 0);
+  }
+
+  getAvailableSpace(inventory) {
+    return this.capacity - this.getCurrentAmount(inventory);
   }
 }
 
