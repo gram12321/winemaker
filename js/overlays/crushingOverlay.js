@@ -38,7 +38,7 @@ export function showCrushingOverlay() {
               <th>Available Space</th>
             </tr>
           </thead>
-          <tbody id="must-storage-table">
+          <tbody id="crushing-must-storage-table">
           </tbody>
         </table>
       </div>
@@ -56,7 +56,7 @@ export function showCrushingOverlay() {
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
 
   // Populate must storage options
-  const mustStorageBody = document.getElementById('must-storage-table');
+  const mustStorageBody = document.getElementById('crushing-must-storage-table');
   mustStorageBody.innerHTML = ''; // Clear existing content
   
   buildings.forEach(building => {
