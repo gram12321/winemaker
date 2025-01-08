@@ -3,6 +3,7 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { Staff, createNewStaff, getLastNameForNationality  } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
+import { inventoryInstance } from '/js/resource.js';
 
 
 
