@@ -209,13 +209,14 @@ export function updateBuildingCards() {
 
 export function upgradeBuilding(buildingName) {
   const buildings = loadBuildings();
-  const building = buildings.find(b => b.name === buildingName);
+  const buildingData = buildings.find(b => b.name === buildingName);
 
-  if (!building) {
+  if (!buildingData) {
     addConsoleMessage(`Building ${buildingName} not found.`);
     return;
   }
 
+  const building = new Building(buildingData.name, buildingData.level);
   const upgradeCost = building.getUpgradeCost();
   building.upgrade();
 
