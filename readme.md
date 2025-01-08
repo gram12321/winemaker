@@ -138,6 +138,32 @@ A web-based simulation game where players manage their own winery, from vineyard
 - Resource Management System (resource.js)
 - Financial Transaction System (finance.js)
 
+### Development plan
+
+| Tool/Library          | Purpose                                        | Recommendation                                                        |
+|-----------------------|------------------------------------------------|-----------------------------------------------------------------------|
+| **JavaScript**        | Primary development language                   | Already using JavaScript; continue with it.                           |
+| **Replit**            | Cloud-based IDE for development                | Continue using Replit for coding and testing.                         |
+| **Firebase**          | Backend-as-a-Service for real-time database    | Recommended for save/load functionality and storage.                  |
+| **Git + GitHub**      | Version control and repository management      | Use Git for versioning and GitHub for collaboration.                  |
+| **TypeScript**        | Static typing for better maintainability       | Optional but highly recommended for large projects.                   |
+| **Vue.js or React**   | Framework for building dynamic UIs             | Optional, useful for modular UI development.                          |
+| **Bootstrap or Tailwind CSS** | CSS framework for responsive UI          | Recommended to speed up UI design.                                    |
+| **SASS/SCSS**         | CSS preprocessor for cleaner styles            | Optional, useful if CSS grows large and complex.                      |
+| **Lodash.js**         | Utility library for data manipulation          | Optional, useful for simplifying array and object operations.         |
+
+Summary Timeline
+Phase    Description
+Phase 1: Planning & Setup    Define game mechanics, set up project structure, and configure Firebase.
+Phase 2: Farmland & Vineyard   Implement farmland acquisition, vineyard management, and basic UI.
+Phase 3: Buildings & Resources   Develop the building system and implement resource management with storage limits.
+Phase 4: Staff & Financials    Implement staff hiring, task management, payroll, and financial transactions.
+Phase 5: Production System    Build grape crushing, fermentation, and wine aging mechanics with UI.
+Phase 6: Save/Load System    Integrate Firebase for persistent data storage and implement save/load functionality.
+Phase 7: UI Enhancements    Improve UI, add prestige mechanics, and polish task management.
+Phase 8: Balancing & Testing    Playtest, balance game mechanics, fix bugs, and polish UI.
+Phase 9: Final Deployment    Optimize the game for deployment and host it on a web platform.
+
 ### Complete File List
 ```
 JavaScript Core:
