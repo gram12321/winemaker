@@ -57,11 +57,14 @@ export function showCrushingOverlay() {
 
   // Populate must storage options
   const mustStorageBody = document.getElementById('must-storage-table');
+  mustStorageBody.innerHTML = ''; // Clear existing content
+  
   buildings.forEach(building => {
     building.contents.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
+        const toolId = `${tool.name} #${tool.instanceNumber}`;
         const matchingInventoryItems = playerInventory.filter(item => 
-          item.storage === `${tool.name} #${tool.instanceNumber}`
+          item.storage === toolId
         );
         const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
         const availableSpace = tool.capacity - currentAmount;
@@ -69,9 +72,9 @@ export function showCrushingOverlay() {
         if (availableSpace > 0) {
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td><input type="radio" name="must-storage" value="${tool.name} #${tool.instanceNumber}" 
+            <td><input type="radio" name="must-storage" value="${toolId}" 
                 data-capacity="${tool.capacity}" data-available="${availableSpace}"></td>
-            <td>${tool.name} #${tool.instanceNumber}</td>
+            <td>${toolId}</td>
             <td>${formatNumber(tool.capacity)} l</td>
             <td>${formatNumber(availableSpace)} l</td>
           `;
