@@ -1,4 +1,3 @@
-
 import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '../console.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
@@ -15,7 +14,7 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
     const tool = buildings.flatMap(b => b.contents).find(t => 
         `${t.name} #${t.instanceNumber}` === selectedTool
     );
-    
+
     if (!tool) {
         addConsoleMessage("Storage container not found");
         return false;
@@ -27,7 +26,7 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
     const currentAmount = currentInventory
         .filter(item => item.storage === selectedTool)
         .reduce((sum, item) => sum + item.amount, 0);
-    
+
     const remainingCapacity = tool.capacity - currentAmount;
     const totalHarvest = availableCapacity || Math.min(harvestYield, remainingCapacity);
     const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
@@ -43,7 +42,7 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
         fieldPrestige: farmland.farmlandPrestige,
         storage: selectedTool
     }];
-    
+
     localStorage.setItem('playerInventory', JSON.stringify(newInventory));
 
     // Update farmland status
@@ -93,28 +92,30 @@ export function showHarvestOverlay(farmland, farmlandId) {
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
 
     buildings.forEach(building => {
-        building.contents.forEach(tool => {
-            if (tool.supportedResources?.includes('Grapes')) {
-                const toolId = `${tool.name} #${tool.instanceNumber}`;
-                const matchingInventoryItems = playerInventory.filter(item => 
-                    item.storage === toolId && 
-                    item.state === 'Grapes'
-                );
-                const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
-                
-                const row = document.createElement('tr');
-                const firstItem = matchingInventoryItems[0];
-                
-                row.innerHTML = `
-                    <td><input type="radio" name="tool-select" value="${toolId}"></td>
-                    <td>${toolId}</td>
-                    <td>${tool.capacity}</td>
-                    <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
-                    <td>${formatNumber(currentAmount)} kg</td>
-                `;
-                storageBody.appendChild(row);
-            }
-        });
+        if (building.contents) { // Added check for building.contents
+            building.contents.forEach(tool => {
+                if (tool.supportedResources?.includes('Grapes')) {
+                    const toolId = `${tool.name} #${tool.instanceNumber}`;
+                    const matchingInventoryItems = playerInventory.filter(item => 
+                        item.storage === toolId && 
+                        item.state === 'Grapes'
+                    );
+                    const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
+
+                    const row = document.createElement('tr');
+                    const firstItem = matchingInventoryItems[0];
+
+                    row.innerHTML = `
+                        <td><input type="radio" name="tool-select" value="${toolId}"></td>
+                        <td>${toolId}</td>
+                        <td>${tool.capacity}</td>
+                        <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
+                        <td>${formatNumber(currentAmount)} kg</td>
+                    `;
+                    storageBody.appendChild(row);
+                }
+            });
+        }
     });
 
     // Handle harvest button click
