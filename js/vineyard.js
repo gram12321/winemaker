@@ -49,21 +49,3 @@ export function canHarvest(farmland, storage) {
     return { warning: false };
 }
 
-function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
-    const harvestCheck = canHarvest(farmland, selectedTool);
-    if ((!harvestCheck || harvestCheck.warning) && !availableCapacity) {
-        return false;
-    }
-
-    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-    const tool = buildings.flatMap(b => b.tools).find(t => 
-        `${t.name} #${t.instanceNumber}` === selectedTool
-    );
-
-    if (!tool) {
-        addConsoleMessage("Storage container not found");
-        return false;
-    }
-
-    return true;
-}
