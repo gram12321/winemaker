@@ -184,7 +184,7 @@ export function buildBuilding(buildingName) {
     upgradeButton.disabled = false;
   }
 
-  addConsoleMessage(`${buildingName} has been built successfully.`);
+  addConsoleMessage(`${buildingName} has been built successfully. <span style="color: red">Cost: €${formatNumber(buildingCost)}</span>. Capacity: ${newBuilding.capacity} (${newBuilding.capacity} spaces available)`);
   updateBuildingCards();
 }
 
@@ -243,6 +243,6 @@ export function upgradeBuilding(buildingName) {
   const updatedBuildings = buildings.map(b => b.name === buildingName ? building : b);
   storeBuildings(updatedBuildings);
 
-  addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}.`);
+  addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}. <span style="color: red">Cost: €${formatNumber(upgradeCost)}</span>. New Capacity: ${building.capacity} (${building.capacity - (building.tools ? building.tools.length : 0)} spaces available)`);
   updateBuildingCards();
 }

@@ -42,7 +42,7 @@ function setupToolButtons(building, tools) {
         const newToolInstance = createTool(tool.name); // Create a new instance of the tool
         if (newToolInstance && buildingInstance.addTool(newToolInstance)) { 
           // Notify addition of the tool
-          addConsoleMessage(`${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}.`);
+          addConsoleMessage(`${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Remaining Capacity: ${building.capacity - buildingInstance.tools.length} spaces`);
 
           // Deduct the cost of the tool
           const expenseMessage = `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber} for €${newToolInstance.cost}`;
