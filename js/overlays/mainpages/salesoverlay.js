@@ -127,12 +127,23 @@ function displayWineOrders() {
             <td>${qualityText}</td>
             <td>${displayAmount}</td>
             <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
-            <td><button class="btn btn-success sell-order-btn">Sell</button></td>
+            <td>
+                <button class="btn btn-success sell-order-btn">Sell</button>
+                <button class="btn btn-danger refuse-order-btn">Refuse</button>
+            </td>
         `;
 
         const sellButton = row.querySelector('.sell-order-btn');
         sellButton.addEventListener('click', () => {
             sellOrderWine(index);
+        });
+
+        const refuseButton = row.querySelector('.refuse-order-btn');
+        refuseButton.addEventListener('click', () => {
+            const wineOrders = loadWineOrders();
+            wineOrders.splice(index, 1);
+            saveWineOrders(wineOrders);
+            displayWineOrders();
         });
 
         wineOrdersTableBody.appendChild(row);
