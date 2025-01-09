@@ -52,19 +52,25 @@ export function getRandomSoil(country, region) {
 }
 
 export function formatNumber(value, decimals = 0) {
-    if (value >= 1_000_000) {
+    const isNegative = value < 0;
+    const absValue = Math.abs(value);
+    let formattedValue;
+    
+    if (absValue >= 1_000_000) {
         // For values of one million or more
-        return `${(value / 1_000_000).toLocaleString('de-DE', {
+        formattedValue = `${(absValue / 1_000_000).toLocaleString('de-DE', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })} Mio`;
     } else {
         // For smaller amounts
-        return value.toLocaleString('de-DE', {
+        formattedValue = absValue.toLocaleString('de-DE', {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals
         });
     }
+    
+    return isNegative ? `-${formattedValue}` : formattedValue;
 }
 
 export function getFlagIconHTML(country) {
