@@ -48,9 +48,6 @@ export class Inventory {
     );
     return wine ? wine.getBottleInfo() : null;
   }
-
-export class Inventory {
-  constructor() {
     this.items = [];
   }
 
