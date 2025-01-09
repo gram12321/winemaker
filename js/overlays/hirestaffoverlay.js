@@ -82,12 +82,12 @@ export function showHireStaffOverlay() {
 }
 
 function hireSelectedStaff(staff) {
-    // Load existing staff and add new staff member
-    let staffMembers = JSON.parse(localStorage.getItem('staffData')) || [];
-    staffMembers.push(staff);
+    // Add staff directly to the global staff list
+    window.staffMembers = window.staffMembers || [];
+    window.staffMembers.push(staff);
     
-    // Save to adminFunctions for persistence
-    saveStaff(staffMembers);
+    // Save for persistence, let saveStaff handle the JSON conversion
+    saveStaff(window.staffMembers);
 
     // Handle hiring expense
     const hiringExpense = staff.wage * 12;
