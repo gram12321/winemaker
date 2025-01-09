@@ -90,7 +90,7 @@ function displayWineCellarInventory() {
             <td>${wine.storage}</td>
             <td>${formatNumber(wine.amount)} bottles</td>
             <td>${qualityDisplay}</td>
-            <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> Privat</strong></td>
+            <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
             <td><button class="btn btn-success sell-wine-btn" data-resource="${wine.name.split(', ')[1]}">Sell</button></td>
         `;
 
