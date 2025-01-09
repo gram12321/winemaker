@@ -75,7 +75,8 @@ export function showFermentationOverlay() {
         if (selectedMust) {
             const storage = selectedMust.dataset.storage;
             const resourceName = selectedMust.dataset.resource;
-            fermentMust(resourceName, storage);
+            const amount = parseFloat(selectedMust.dataset.amount);
+            fermentMust(resourceName, storage, amount);
             showWineryOverlay();
             removeOverlay();
         } else {

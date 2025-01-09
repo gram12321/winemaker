@@ -3,7 +3,7 @@ import { inventoryInstance } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
 
-export function fermentMust(selectedResource, storage) {
+export function fermentMust(selectedResource, storage, mustAmount) {
     const resource = inventoryInstance.items.find(item => 
         item.resource.name === selectedResource && 
         item.state === 'Must' &&
