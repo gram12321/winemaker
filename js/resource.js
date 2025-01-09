@@ -24,7 +24,11 @@ export class InventoryItem {
       name: `${this.fieldName}, ${this.resource.name}, ${this.vintage}`,
       quality: this.quality,
       amount: this.amount,
-      storage: this.storage
+      storage: this.storage,
+      fieldName: this.fieldName,
+      resource: this.resource,
+      vintage: this.vintage,
+      fieldPrestige: this.fieldPrestige
     };
   }
 }
