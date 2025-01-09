@@ -28,7 +28,7 @@ export function fermentMust(selectedResource, storage) {
 
     // Add as bottles to Wine Cellar
     inventoryInstance.addResource(
-        resource.resource.name,
+        { name: resource.resource.name, naturalYield: 1 },
         bottleAmount,
         'Bottles',
         resource.vintage,
