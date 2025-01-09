@@ -48,8 +48,6 @@ export class Inventory {
     );
     return wine ? wine.getBottleInfo() : null;
   }
-    this.items = [];
-  }
 
   addResource(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
     const existingItem = this.items.find(item => 
