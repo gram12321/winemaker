@@ -138,26 +138,44 @@ function displayWineOrders() {
     wineOrdersTableBody.innerHTML = '';
     currentOrders = loadWineOrders();
 
-    // Setup event listeners for filters
-    document.getElementById('type-filter')?.addEventListener('change', () => displayWineOrders());
-    document.getElementById('resource-filter')?.addEventListener('change', () => displayWineOrders());
+    // Remove existing event listeners by cloning and replacing elements
+    const typeFilter = document.getElementById('type-filter');
+    const resourceFilter = document.getElementById('resource-filter');
+    const newTypeFilter = typeFilter.cloneNode(true);
+    const newResourceFilter = resourceFilter.cloneNode(true);
+    typeFilter.parentNode.replaceChild(newTypeFilter, typeFilter);
+    resourceFilter.parentNode.replaceChild(newResourceFilter, resourceFilter);
+
+    // Setup new event listeners
+    newTypeFilter.addEventListener('change', displayWineOrders);
+    newResourceFilter.addEventListener('change', displayWineOrders);
 
     // Setup event listeners for sorting
     document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.addEventListener('click', () => {
+        th.onclick = () => {
             const sortKey = th.dataset.sort;
             sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
-            currentOrders.sort((a, b) => {
-                const valueA = sortKey === 'amount' ? a.amount : a.wineOrderPrice;
-                const valueB = sortKey === 'amount' ? b.amount : b.wineOrderPrice;
+            
+            let filteredOrders = filterAndSortOrders();
+            filteredOrders.sort((a, b) => {
+                const valueA = sortKey === 'amount' ? parseFloat(a.amount) : parseFloat(a.wineOrderPrice);
+                const valueB = sortKey === 'amount' ? parseFloat(b.amount) : parseFloat(b.wineOrderPrice);
                 return sortDirection[sortKey] === 'asc' ? valueA - valueB : valueB - valueA;
             });
-            displayWineOrders();
-        });
+            
+            displayFilteredOrders(filteredOrders);
+            return false;
+        };
     });
 
     populateResourceFilter();
     const filteredOrders = filterAndSortOrders();
+    displayFilteredOrders(filteredOrders);
+}
+
+function displayFilteredOrders(filteredOrders) {
+    const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
+    wineOrdersTableBody.innerHTML = '';
 
     filteredOrders.forEach((order, index) => {
         const row = document.createElement('tr');
