@@ -67,6 +67,8 @@ function setupToolButtons(building, tools) {
             const buildingInstance = new Building(updatedBuilding.name, updatedBuilding.level);
             buildingInstance.tools = updatedBuilding.tools;
             showBuildingOverlay(buildingInstance);
+            // Update building cards to reflect new tool
+            updateBuildingCards();
           }
         } else {
           addConsoleMessage(`Cannot add ${tool.name}. ${building.name} is full!`);
