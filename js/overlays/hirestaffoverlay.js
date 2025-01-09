@@ -82,19 +82,26 @@ export function showHireStaffOverlay() {
 }
 
 function hireSelectedStaff(staff) {
-    let pendingHires = JSON.parse(localStorage.getItem('pendingHires')) || [];
-    pendingHires.push(staff);
-    localStorage.setItem('pendingHires', JSON.stringify(pendingHires));
+    // Get current staff data
+    let staffData = JSON.parse(localStorage.getItem('staffData')) || [];
+    
+    // Add the new staff member
+    staffData.push(staff);
+    
+    // Save updated staff data
+    localStorage.setItem('staffData', JSON.stringify(staffData));
 
+    // Handle hiring expense
     const hiringExpense = staff.wage * 12;
     addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
 
+    // Display confirmation message
     const flagIconHTML = getFlagIconHTML(staff.nationality);
-    addConsoleMessage(`Started hiring process for: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, One-time hiring cost: €${hiringExpense}`, true);
+    addConsoleMessage(`Hired: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, Hiring cost: €${hiringExpense}`, true);
 
-    hiringTaskFunction();
-
+    // Close the overlay and refresh staff display
     document.getElementById('hireStaffOverlay').style.display = 'none';
+    displayStaff(); // Refresh the staff display
 }
 
 function getSkillLevelClass(skillValue) {
