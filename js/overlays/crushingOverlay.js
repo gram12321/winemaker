@@ -139,6 +139,24 @@ function handleCrushing(overlayContainer) {
     return false;
   }
 
+  // Check if container has existing content
+  const existingMust = playerInventory.filter(item => 
+    item.storage === mustStorage && 
+    item.state === 'Must'
+  );
+
+  if (existingMust.length > 0) {
+    const firstGrape = selectedGrapes[0];
+    const firstMust = existingMust[0];
+    
+    if (firstMust.resource.name !== firstGrape.dataset.resource ||
+        firstMust.vintage !== parseInt(firstGrape.dataset.vintage) ||
+        firstMust.fieldName !== firstGrape.dataset.field) {
+      addConsoleMessage("Container already contains different content. Cannot mix different must types.");
+      return false;
+    }
+  }
+
   Array.from(selectedGrapes).forEach(checkbox => {
     const resourceName = checkbox.dataset.resource;
     const storage = checkbox.dataset.storage;
