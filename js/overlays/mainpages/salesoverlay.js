@@ -130,12 +130,9 @@ function filterOrders(orders) {
 
 function sortOrders(orders, sortKey, direction) {
     return [...orders].sort((a, b) => {
-        if (sortKey === 'amount') {
-            return direction === 'asc' ? parseFloat(a.amount) - parseFloat(b.amount) : parseFloat(b.amount) - parseFloat(a.amount);
-        } else if (sortKey === 'price') {
-            return direction === 'asc' ? parseFloat(a.wineOrderPrice) - parseFloat(b.wineOrderPrice) : parseFloat(b.wineOrderPrice) - parseFloat(a.wineOrderPrice);
-        }
-        return 0;
+        const aValue = sortKey === 'amount' ? parseFloat(a.amount) : parseFloat(a.wineOrderPrice);
+        const bValue = sortKey === 'amount' ? parseFloat(b.amount) : parseFloat(b.wineOrderPrice);
+        return direction === 'asc' ? aValue - bValue : bValue - aValue;
     });
 }
 
