@@ -1,4 +1,3 @@
-
 import { getColorClass } from './utils.js';
 
 export class Resource {

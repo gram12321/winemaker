@@ -1,4 +1,3 @@
-
 import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
@@ -23,7 +22,7 @@ export function showVineyardOverlay() {
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const table = document.createElement('table');
     table.className = 'table table-bordered';
-    
+
     table.innerHTML = `
         <thead>
             <tr>
@@ -63,7 +62,7 @@ export function showVineyardOverlay() {
     `;
 
     document.body.appendChild(overlay);
-    
+
     const container = document.getElementById('vineyard-table-container');
     container.appendChild(table);
 
