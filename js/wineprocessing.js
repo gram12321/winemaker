@@ -17,13 +17,10 @@ export function fermentMust(selectedResource, storage) {
 
     // Remove units from the must resource
     inventoryInstance.removeResource(
-        resource.resource.name,
+        { name: selectedResource },
         resource.amount,
         'Must',
         resource.vintage,
-        resource.quality,
-        resource.fieldName,
-        resource.fieldPrestige,
         storage
     );
 
