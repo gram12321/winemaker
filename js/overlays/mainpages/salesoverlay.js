@@ -84,7 +84,8 @@ function displayWineCellarInventory() {
 
         const sellButton = row.querySelector('.sell-wine-btn');
         sellButton.addEventListener('click', () => {
-            sellWines(wine.resource.name);
+            const wineName = wine.name.split(', ')[1];
+            sellWines(wineName);
             displayWineCellarInventory(); // Refresh the display
         });
 

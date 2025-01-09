@@ -29,7 +29,7 @@ export function sellWines(resourceName) {
 
         // Remove one bottle from inventory and process the sale
         if (inventoryInstance.removeResource(
-            bottledWine.resource, 
+            { name: resourceName }, 
             1, 
             'Bottles', 
             bottledWine.vintage, 
