@@ -117,15 +117,56 @@ function populateResourceFilter() {
     });
 }
 
-function filterAndSortOrders() {
+function filterOrders(orders) {
     const typeFilter = document.getElementById('type-filter')?.value;
     const resourceFilter = document.getElementById('resource-filter')?.value;
 
-    return currentOrders.filter(order => {
+    return orders.filter(order => {
         const matchesType = !typeFilter || order.type === typeFilter;
         const matchesResource = !resourceFilter || order.resourceName === resourceFilter;
         return matchesType && matchesResource;
     });
+}
+
+function sortOrders(orders, sortKey, direction) {
+    return [...orders].sort((a, b) => {
+        const valueA = sortKey === 'amount' ? parseFloat(a.amount) : parseFloat(a.wineOrderPrice);
+        const valueB = sortKey === 'amount' ? parseFloat(b.amount) : parseFloat(b.wineOrderPrice);
+        return direction === 'asc' ? valueA - valueB : valueB - valueA;
+    });
+}
+
+function setupEventListeners() {
+    // Setup filter listeners
+    const typeFilter = document.getElementById('type-filter');
+    const resourceFilter = document.getElementById('resource-filter');
+    const newTypeFilter = typeFilter.cloneNode(true);
+    const newResourceFilter = resourceFilter.cloneNode(true);
+    
+    typeFilter.parentNode.replaceChild(newTypeFilter, typeFilter);
+    resourceFilter.parentNode.replaceChild(newResourceFilter, resourceFilter);
+    
+    newTypeFilter.addEventListener('change', refreshDisplay);
+    newResourceFilter.addEventListener('change', refreshDisplay);
+
+    // Setup sort listeners
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.onclick = () => {
+            const sortKey = th.dataset.sort;
+            sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
+            refreshDisplay();
+            return false;
+        };
+    });
+}
+
+function refreshDisplay() {
+    let orders = filterOrders(currentOrders);
+    const activeSortKey = Object.keys(sortDirection).find(key => sortDirection[key] !== null);
+    if (activeSortKey) {
+        orders = sortOrders(orders, activeSortKey, sortDirection[activeSortKey]);
+    }
+    displayFilteredOrders(orders);
 }
 
 function displayWineOrders() {
@@ -133,39 +174,9 @@ function displayWineOrders() {
     wineOrdersTableBody.innerHTML = '';
     currentOrders = loadWineOrders();
 
-    // Remove existing event listeners by cloning and replacing elements
-    const typeFilter = document.getElementById('type-filter');
-    const resourceFilter = document.getElementById('resource-filter');
-    const newTypeFilter = typeFilter.cloneNode(true);
-    const newResourceFilter = resourceFilter.cloneNode(true);
-    typeFilter.parentNode.replaceChild(newTypeFilter, typeFilter);
-    resourceFilter.parentNode.replaceChild(newResourceFilter, resourceFilter);
-
-    // Setup new event listeners
-    newTypeFilter.addEventListener('change', displayWineOrders);
-    newResourceFilter.addEventListener('change', displayWineOrders);
-
-    // Setup event listeners for sorting
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.onclick = () => {
-            const sortKey = th.dataset.sort;
-            sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
-            
-            let filteredOrders = filterAndSortOrders();
-            filteredOrders.sort((a, b) => {
-                const valueA = sortKey === 'amount' ? parseFloat(a.amount) : parseFloat(a.wineOrderPrice);
-                const valueB = sortKey === 'amount' ? parseFloat(b.amount) : parseFloat(b.wineOrderPrice);
-                return sortDirection[sortKey] === 'asc' ? valueA - valueB : valueB - valueA;
-            });
-            
-            displayFilteredOrders(filteredOrders);
-            return false;
-        };
-    });
-
+    setupEventListeners();
     populateResourceFilter();
-    const filteredOrders = filterAndSortOrders();
-    displayFilteredOrders(filteredOrders);
+    refreshDisplay();
 }
 
 function displayFilteredOrders(filteredOrders) {
