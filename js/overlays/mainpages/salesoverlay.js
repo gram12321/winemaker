@@ -38,14 +38,24 @@ export function showSalesOverlay() {
             <!-- Wine Orders Section -->
             <section class="my-4">
                 <h3>Wine Orders</h3>
+                <div class="filters mb-3">
+                    <select id="type-filter" class="form-control d-inline-block w-auto mr-2">
+                        <option value="">All Types</option>
+                        <option value="Private Order">Private Order</option>
+                        <option value="Engross Order">Engross Order</option>
+                    </select>
+                    <select id="resource-filter" class="form-control d-inline-block w-auto">
+                        <option value="">All Resources</option>
+                    </select>
+                </div>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
                             <th>Type</th>
                             <th>Resource</th>
                             <th>Quality</th>
-                            <th>Amount</th>
-                            <th>Offered Price</th>
+                            <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
+                            <th data-sort="price" style="cursor: pointer">Offered Price ↕</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -93,12 +103,61 @@ function displayWineCellarInventory() {
     });
 }
 
+let currentOrders = [];
+let sortDirection = { amount: 'asc', price: 'asc' };
+
+function populateResourceFilter() {
+    const resourceFilter = document.getElementById('resource-filter');
+    const uniqueResources = [...new Set(currentOrders.map(order => order.resourceName))];
+    resourceFilter.innerHTML = '<option value="">All Resources</option>';
+    uniqueResources.forEach(resource => {
+        resourceFilter.innerHTML += `<option value="${resource}">${resource}</option>`;
+    });
+}
+
+function filterAndSortOrders() {
+    const typeFilter = document.getElementById('type-filter').value;
+    const resourceFilter = document.getElementById('resource-filter').value;
+    
+    let filteredOrders = currentOrders;
+    
+    if (typeFilter) {
+        filteredOrders = filteredOrders.filter(order => order.type === typeFilter);
+    }
+    if (resourceFilter) {
+        filteredOrders = filteredOrders.filter(order => order.resourceName === resourceFilter);
+    }
+    
+    return filteredOrders;
+}
+
 function displayWineOrders() {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
-    const wineOrders = loadWineOrders();
+    currentOrders = loadWineOrders();
+    
+    // Setup event listeners for filters
+    document.getElementById('type-filter')?.addEventListener('change', () => displayWineOrders());
+    document.getElementById('resource-filter')?.addEventListener('change', () => displayWineOrders());
+    
+    // Setup event listeners for sorting
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const sortKey = th.dataset.sort;
+            sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
+            currentOrders.sort((a, b) => {
+                const valueA = sortKey === 'amount' ? a.amount : a.wineOrderPrice;
+                const valueB = sortKey === 'amount' ? b.amount : b.wineOrderPrice;
+                return sortDirection[sortKey] === 'asc' ? valueA - valueB : valueB - valueA;
+            });
+            displayWineOrders();
+        });
+    });
 
-    wineOrders.forEach((order, index) => {
+    populateResourceFilter();
+    const filteredOrders = filterAndSortOrders();
+
+    filteredOrders.forEach((order, index) => {
         const row = document.createElement('tr');
         const quality = parseFloat(order.quality);
         const qualityDescription = getWineQualityCategory(quality);
