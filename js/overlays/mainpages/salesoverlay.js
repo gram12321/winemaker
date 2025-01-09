@@ -22,7 +22,7 @@ export function showSalesOverlay() {
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Resource</th>
+                            <th>Wine</th>
                             <th>Storage</th>
                             <th>Amount</th>
                             <th>Quality</th>
@@ -51,8 +51,8 @@ export function showSalesOverlay() {
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Type</th>
-                            <th>Resource</th>
+                            <th>Order Type</th>
+                            <th>Wine</th>
                             <th>Quality</th>
                             <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
                             <th data-sort="price" style="cursor: pointer">Offered Price ↕</th>
@@ -81,7 +81,9 @@ function displayWineCellarInventory() {
 
     bottledWines.forEach(wine => {
         const row = document.createElement('tr');
-        const qualityDisplay = `<span class="${getColorClass(wine.quality)}">(${(wine.quality * 100).toFixed(0)}%)</span>`;
+        const qualityDescription = getWineQualityCategory(wine.quality);
+        const colorClass = getColorClass(wine.quality);
+        const qualityDisplay = `${qualityDescription} <span class="${colorClass}">(${(wine.quality * 100).toFixed(0)}%)</span>`;
 
         row.innerHTML = `
             <td><strong>${wine.name}</strong></td>
@@ -181,7 +183,7 @@ function displayWineOrders() {
         const displayAmount = `${order.amount} Bottles`;
 
         row.innerHTML = `
-            <td>${typeInfo}</td>
+            <td style="text-align: center;"><strong>${typeInfo}<br>${order.type}</strong></td>
             <td><strong>${order.fieldName || ''}</strong>, ${order.resourceName || ''}, ${order.vintage || ''}</td>
             <td>${qualityText}</td>
             <td>${displayAmount}</td>
