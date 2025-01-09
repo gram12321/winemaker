@@ -1,10 +1,11 @@
 
 import { createNewStaff, displayStaff } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
-import { saveStaff } from '../database/adminFunctions.js';
+import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
 import { hiringTaskFunction } from '../administration.js';
+
 
 export function showHireStaffOverlay() {
     const overlay = document.getElementById('hireStaffOverlay');
