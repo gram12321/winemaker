@@ -26,8 +26,8 @@ export function showSalesOverlay() {
                             <th>Storage</th>
                             <th>Amount</th>
                             <th>Quality</th>
-                            <th>Status</th>
-                            <th>Action</th>
+                            <th>Order Type</th>
+                            <th>Bulk Sales</th>
                         </tr>
                     </thead>
                     <tbody id="winecellar-table-body">
@@ -78,7 +78,7 @@ function displayWineCellarInventory() {
             <td>${wine.storage}</td>
             <td>${formatNumber(wine.amount)} bottles</td>
             <td>${qualityDisplay}</td>
-            <td><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"></td>
+            <td><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> Privat</td>
             <td><button class="btn btn-success sell-wine-btn" data-resource="${wine.resource.name}">Sell</button></td>
         `;
 
