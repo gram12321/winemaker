@@ -55,7 +55,7 @@ export function showSalesOverlay() {
                             <th>Wine</th>
                             <th>Quality</th>
                             <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
-                            <th data-sort="price" style="cursor: pointer">Offered Price ↕</th>
+                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price ↕</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -130,8 +130,8 @@ function filterOrders(orders) {
 
 function sortOrders(orders, sortKey, direction) {
     return [...orders].sort((a, b) => {
-        const aValue = sortKey === 'amount' ? parseFloat(a.amount) : parseFloat(a.wineOrderPrice);
-        const bValue = sortKey === 'amount' ? parseFloat(b.amount) : parseFloat(b.wineOrderPrice);
+        const aValue = parseFloat(a[sortKey]);
+        const bValue = parseFloat(b[sortKey]);
         return direction === 'asc' ? aValue - bValue : bValue - aValue;
     });
 }
