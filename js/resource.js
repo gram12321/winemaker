@@ -19,7 +19,35 @@ export class InventoryItem {
     this.fieldPrestige = fieldPrestige;
     this.storage = storage;
   }
+
+  getBottleInfo() {
+    return {
+      name: `${this.fieldName}, ${this.resource.name}, ${this.vintage}`,
+      quality: this.quality,
+      amount: this.amount,
+      storage: this.storage
+    };
+  }
 }
+
+export class Inventory {
+  constructor() {
+    this.items = [];
+  }
+
+  getBottledWines() {
+    return this.items
+      .filter(item => item.state === 'Bottles')
+      .map(item => item.getBottleInfo());
+  }
+
+  getBottledWineByResource(resourceName) {
+    const wine = this.items.find(item => 
+      item.resource.name === resourceName && 
+      item.state === 'Bottles'
+    );
+    return wine ? wine.getBottleInfo() : null;
+  }
 
 export class Inventory {
   constructor() {
