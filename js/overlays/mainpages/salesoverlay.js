@@ -106,7 +106,8 @@ function displayWineCellarInventory() {
 }
 
 let currentOrders = [];
-let sortDirection = { amount: 'asc', price: 'asc' };
+let currentSortKey = null;
+let currentSortDirection = 'asc';
 
 function populateResourceFilter() {
     const resourceFilter = document.getElementById('resource-filter');
@@ -142,29 +143,32 @@ function setupEventListeners() {
     const resourceFilter = document.getElementById('resource-filter');
     const newTypeFilter = typeFilter.cloneNode(true);
     const newResourceFilter = resourceFilter.cloneNode(true);
-    
+
     typeFilter.parentNode.replaceChild(newTypeFilter, typeFilter);
     resourceFilter.parentNode.replaceChild(newResourceFilter, resourceFilter);
-    
+
     newTypeFilter.addEventListener('change', refreshDisplay);
     newResourceFilter.addEventListener('change', refreshDisplay);
 
     // Setup sort listeners
     document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.onclick = () => {
+        th.addEventListener('click', () => {
             const sortKey = th.dataset.sort;
-            sortDirection[sortKey] = sortDirection[sortKey] === 'asc' ? 'desc' : 'asc';
+            if (currentSortKey === sortKey) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortKey = sortKey;
+                currentSortDirection = 'asc';
+            }
             refreshDisplay();
-            return false;
-        };
+        });
     });
 }
 
 function refreshDisplay() {
     let orders = filterOrders(currentOrders);
-    const activeSortKey = Object.keys(sortDirection).find(key => sortDirection[key] !== null);
-    if (activeSortKey) {
-        orders = sortOrders(orders, activeSortKey, sortDirection[activeSortKey]);
+    if (currentSortKey) {
+        orders = sortOrders(orders, currentSortKey, currentSortDirection);
     }
     displayFilteredOrders(orders);
 }
