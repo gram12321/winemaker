@@ -82,12 +82,8 @@ export function showHireStaffOverlay() {
 }
 
 function hireSelectedStaff(staff) {
-    // Get the current staff list directly from Staff's latestId tracking
-    const existingStaffCount = Staff.latestId;
-    const staffMembers = Array(existingStaffCount).fill().map((_, i) => ({
-        id: i + 1,
-        ...JSON.parse(localStorage.getItem('staffData'))[i]
-    }));
+    // Get current staff from adminFunctions
+    const staffMembers = loadStaff();
     
     // Add new staff member
     staffMembers.push(staff);
