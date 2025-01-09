@@ -81,13 +81,14 @@ export function showHireStaffOverlay() {
     }
 }
 
-let staffMembers = [];
-
 function hireSelectedStaff(staff) {
-    // Add staff directly to the module-scoped staff list
+    // Load existing staff from adminFunctions
+    let staffMembers = JSON.parse(localStorage.getItem('staffData')) || [];
+    
+    // Add new staff member
     staffMembers.push(staff);
     
-    // Save for persistence, let saveStaff handle the JSON conversion
+    // Save updated staff list
     saveStaff(staffMembers);
 
     // Handle hiring expense
