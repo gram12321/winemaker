@@ -1,8 +1,8 @@
 
 import { fermentMust } from '../wineprocessing.js';
-//import { populateStorageTable } from '../resource.js';
 import { addConsoleMessage } from '../console.js';
-import { formatNumber } from '../utils.js';
+import { formatNumber, getColorClass } from '../utils.js';
+import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 
 export function showFermentationOverlay() {
     const overlayContainer = document.createElement('div');
@@ -19,6 +19,7 @@ export function showFermentationOverlay() {
                         <th>Capacity</th>
                         <th>Resource</th>
                         <th>Amount</th>
+                        <th>Quality</th>
                     </tr>
                 </thead>
                 <tbody id="fermentation-storage-body">
@@ -36,46 +37,49 @@ export function showFermentationOverlay() {
     const storageBody = document.getElementById('fermentation-storage-body');
     
     buildings.forEach(building => {
-        building.contents.forEach(tool => {
+        if (!building.tools) return;
+        
+        building.tools.forEach(tool => {
             if (tool.supportedResources?.includes('Must')) {
                 const toolId = `${tool.name} #${tool.instanceNumber}`;
                 const matchingInventoryItems = playerInventory.filter(item => 
                     item.storage === toolId && 
                     item.state === 'Must'
                 );
-                const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
                 
-                const row = document.createElement('tr');
-                const firstItem = matchingInventoryItems[0];
-                
-                row.innerHTML = `
-                    <td><input type="radio" name="tool-select" value="${toolId}"></td>
-                    <td>${toolId}</td>
-                    <td>${tool.capacity}</td>
-                    <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
-                    <td>${formatNumber(currentAmount)} l</td>
-                `;
-                storageBody.appendChild(row);
+                matchingInventoryItems.forEach(item => {
+                    const row = document.createElement('tr');
+                    const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
+                    
+                    row.innerHTML = `
+                        <td><input type="radio" name="must-select" data-resource="${item.resource.name}" 
+                            data-storage="${toolId}" data-vintage="${item.vintage}"
+                            data-quality="${item.quality}" data-field="${item.fieldName}"
+                            data-prestige="${item.fieldPrestige}"
+                            data-amount="${item.amount}"></td>
+                        <td>${toolId}</td>
+                        <td>${tool.capacity}</td>
+                        <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
+                        <td>${formatNumber(item.amount)} l</td>
+                        <td>${qualityDisplay}</td>
+                    `;
+                    storageBody.appendChild(row);
+                });
             }
         });
     });
 
-    // Add event listeners
     const fermentButton = overlayContainer.querySelector('.ferment-btn');
     fermentButton.addEventListener('click', () => {
-        const selectedRadio = overlayContainer.querySelector('input[name="tool-select"]:checked');
-        if (selectedRadio) {
-            const storage = selectedRadio.value;
-            const resourceCell = selectedRadio.closest('tr').querySelector('td:nth-child(4)');
-            if (resourceCell.textContent === 'Empty') {
-                addConsoleMessage('Cannot ferment from an empty tank.');
-                return;
-            }
-            const resourceName = resourceCell.textContent.split(',')[1].trim();
+        const selectedMust = overlayContainer.querySelector('input[name="must-select"]:checked');
+        if (selectedMust) {
+            const storage = selectedMust.dataset.storage;
+            const resourceName = selectedMust.dataset.resource;
             fermentMust(resourceName, storage);
+            showWineryOverlay();
             removeOverlay();
         } else {
-            addConsoleMessage('Please select a fermentation tank.');
+            addConsoleMessage('Please select must to ferment.');
         }
     });
 
