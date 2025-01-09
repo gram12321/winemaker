@@ -30,7 +30,7 @@ export function fermentMust(selectedResource, storage) {
     inventoryInstance.addResource(
         resource.resource.name,
         bottleAmount,
-        'Bottle',
+        'Bottles',
         resource.vintage,
         resource.quality,
         resource.fieldName,
