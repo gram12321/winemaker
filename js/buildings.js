@@ -202,7 +202,7 @@ export function updateBuildingCards() {
       <p>Level: ${isBuilt ? building.level : 0}</p>
       <p>Upgrade Cost: ${isBuilt ? `€${building.getUpgradeCost()}` : "N/A"}</p>
       <p>Capacity: ${isBuilt ? building.capacity : 0}</p>
-      <p>Content: <br> ${isBuilt ? building.listContents() : "No items stored."}</p>
+      <p>Content: <br> ${isBuilt && building.tools && building.tools.length > 0 ? building.listContents() : "No tools stored."}</p>
     `;
 
     if (isBuilt) {
