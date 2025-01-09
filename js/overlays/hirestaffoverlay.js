@@ -81,13 +81,14 @@ export function showHireStaffOverlay() {
     }
 }
 
+let staffMembers = [];
+
 function hireSelectedStaff(staff) {
-    // Add staff directly to the global staff list
-    window.staffMembers = window.staffMembers || [];
-    window.staffMembers.push(staff);
+    // Add staff directly to the module-scoped staff list
+    staffMembers.push(staff);
     
     // Save for persistence, let saveStaff handle the JSON conversion
-    saveStaff(window.staffMembers);
+    saveStaff(staffMembers);
 
     // Handle hiring expense
     const hiringExpense = staff.wage * 12;
