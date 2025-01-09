@@ -45,7 +45,7 @@ export function showSalesOverlay() {
                         <option value="Engross Order">Engross Order</option>
                     </select>
                     <select id="resource-filter" class="form-control d-inline-block w-auto">
-                        <option value="">All Resources</option>
+                        <option value="">All Wines</option>
                     </select>
                 </div>
                 <table class="table table-bordered">
@@ -111,7 +111,7 @@ let sortDirection = { amount: 'asc', price: 'asc' };
 function populateResourceFilter() {
     const resourceFilter = document.getElementById('resource-filter');
     const uniqueResources = [...new Set(currentOrders.map(order => order.resourceName))];
-    resourceFilter.innerHTML = '<option value="">All Resources</option>';
+    resourceFilter.innerHTML = '<option value="">All Wines</option>';
     uniqueResources.forEach(resource => {
         resourceFilter.innerHTML += `<option value="${resource}">${resource}</option>`;
     });
@@ -120,16 +120,16 @@ function populateResourceFilter() {
 function filterAndSortOrders() {
     const typeFilter = document.getElementById('type-filter').value;
     const resourceFilter = document.getElementById('resource-filter').value;
-    
+
     let filteredOrders = currentOrders;
-    
+
     if (typeFilter) {
         filteredOrders = filteredOrders.filter(order => order.type === typeFilter);
     }
     if (resourceFilter) {
         filteredOrders = filteredOrders.filter(order => order.resourceName === resourceFilter);
     }
-    
+
     return filteredOrders;
 }
 
@@ -137,11 +137,11 @@ function displayWineOrders() {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
     currentOrders = loadWineOrders();
-    
+
     // Setup event listeners for filters
     document.getElementById('type-filter')?.addEventListener('change', () => displayWineOrders());
     document.getElementById('resource-filter')?.addEventListener('change', () => displayWineOrders());
-    
+
     // Setup event listeners for sorting
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {
