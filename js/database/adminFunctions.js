@@ -172,13 +172,13 @@ function loadInventory() {
   // Populate the inventory instance
   savedInventory.forEach(item => {
     inventoryInstance.addResource(
-      item.resource.name,
+      { name: item.resource.name, naturalYield: item.resource.naturalYield || 1 },
       item.amount,
       item.state,
       item.vintage,
       item.quality,
-      item.fieldName, // Ensure fieldName is loaded
-        item.fieldPrestige,
+      item.fieldName,
+      item.fieldPrestige,
       item.storage
     );
   });
