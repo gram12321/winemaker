@@ -100,9 +100,10 @@ function displayWineOrders() {
 
     wineOrders.forEach((order, index) => {
         const row = document.createElement('tr');
-        const qualityDescription = getWineQualityCategory(order.quality);
-        const colorClass = getColorClass(order.quality);
-        const qualityText = `${qualityDescription} <span class="${colorClass}">(${order.quality.toFixed(2)})</span>`;
+        const quality = parseFloat(order.quality);
+        const qualityDescription = getWineQualityCategory(quality);
+        const colorClass = getColorClass(quality);
+        const qualityText = `${qualityDescription} <span class="${colorClass}">(${(quality * 100).toFixed(0)}%)</span>`;
 
         let iconPath;
         switch (order.type) {
