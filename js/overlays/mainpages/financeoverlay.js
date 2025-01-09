@@ -12,52 +12,51 @@ export function showFinanceOverlay() {
     overlay.classList.add('mainview-overlay');
 
     overlay.innerHTML = `
-        <div class="mainview-overlay-content">
-            <h1>Finance Management</h1>
+        <div class="mainview-overlay-content finance-container">
+            <h1 class="mb-4">Finance Management</h1>
             
-            <!-- Income Statement Section -->
-            <section id="income-statement">
-                <h2>Income Statement</h2>
-                <div id="weekly-income-statement">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Weekly Income:</span>
-                        <span id="weekly-income" class="text-success">0</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Weekly Expenses:</span>
-                        <span id="weekly-expenses" class="text-danger">0</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between font-weight-bold">
-                        <span>Net Income:</span>
-                        <span id="net-income">0</span>
+            <div class="row">
+                <!-- Income Statement Cards -->
+                <div class="col-md-4">
+                    <div class="income-statement">
+                        <h2 class="h4 mb-4">Income Statement</h2>
+                        <div class="stat-card">
+                            <div class="stat-label">Weekly Income</div>
+                            <div id="weekly-income" class="stat-value transaction-income">€0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Weekly Expenses</div>
+                            <div id="weekly-expenses" class="stat-value transaction-expense">€0</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Net Income</div>
+                            <div id="net-income" class="stat-value">€0</div>
+                        </div>
                     </div>
                 </div>
-            </section>
 
-            <!-- Balance Sheet Section -->
-            <section id="balance-sheet">
-                <h2>Balance Sheet</h2>
-                <p>Coming Soon</p>
-            </section>
-
-            <!-- Cash Flow Section -->
-            <section id="cash-flow">
-                <h2>Cash Flow</h2>
-                <table id="cash-flow-table" class="table table-bordered table-hover table-sm">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                            <th>Amount (€)</th>
-                            <th>Balance (€)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </section>
+                <!-- Cash Flow Section -->
+                <div class="col-md-8">
+                    <div class="cash-flow-section">
+                        <h2 class="h4 mb-4">Cash Flow Statement</h2>
+                        <div class="cash-flow-table">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Amount (€)</th>
+                                        <th>Balance (€)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
