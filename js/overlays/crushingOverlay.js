@@ -140,7 +140,7 @@ function handleCrushing(overlayContainer) {
   }
 
   // Check if container has existing content
-  const existingMust = playerInventory.filter(item => 
+  const existingMust = inventoryInstance.items.filter(item => 
     item.storage === mustStorage && 
     item.state === 'Must'
   );
