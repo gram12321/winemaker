@@ -52,6 +52,8 @@ export function getRandomSoil(country, region) {
 }
 
 export function formatNumber(value, decimals = 0) {
+    if (value === 0) return "0";
+    
     const isNegative = value < 0;
     const absValue = Math.abs(value);
     let formattedValue;
