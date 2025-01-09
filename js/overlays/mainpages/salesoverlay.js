@@ -1,25 +1,21 @@
-
 import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
-//import { inventoryInstance, displayInventory } from '/js/resource.js';
+import { inventoryInstance } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
 import { loadWineOrders } from '/js/database/adminFunctions.js';
 
 export function showSalesOverlay() {
-    // Remove any existing instances of the overlay
     const existingOverlay = document.querySelector('.mainview-overlay');
     if (existingOverlay) {
         existingOverlay.remove();
     }
 
-    // Create overlay element
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
 
-    // Create content for the overlay
     overlay.innerHTML = `
         <div class="mainview-overlay-content">
             <h3>Sales</h3>
-            
+
             <!-- Wine Cellar Inventory Section -->
             <section class="my-4">
                 <h3>Wine Cellar Inventory</h3>
@@ -27,6 +23,7 @@ export function showSalesOverlay() {
                     <thead>
                         <tr>
                             <th>Resource</th>
+                            <th>Storage</th>
                             <th>Amount</th>
                             <th>Quality</th>
                             <th>Status</th>
@@ -49,6 +46,7 @@ export function showSalesOverlay() {
                             <th>Quality</th>
                             <th>Amount</th>
                             <th>Offered Price</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="wine-orders-table-body">
@@ -58,13 +56,40 @@ export function showSalesOverlay() {
         </div>
     `;
 
-    // Append overlay to document body
     document.body.appendChild(overlay);
     overlay.style.display = 'block';
 
-    // Display inventory and wine orders
-    displayInventory(inventoryInstance, ['winecellar-table-body'], true);
+    displayWineCellarInventory();
     displayWineOrders();
+}
+
+function displayWineCellarInventory() {
+    const tableBody = document.getElementById('winecellar-table-body');
+    tableBody.innerHTML = '';
+
+    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottles');
+
+    bottledWines.forEach(wine => {
+        const row = document.createElement('tr');
+        const qualityDisplay = `<span class="${getColorClass(wine.quality)}">(${(wine.quality * 100).toFixed(0)}%)</span>`;
+
+        row.innerHTML = `
+            <td><strong>${wine.fieldName}</strong>, ${wine.resource.name}, ${wine.vintage}</td>
+            <td>${wine.storage}</td>
+            <td>${formatNumber(wine.amount)} bottles</td>
+            <td>${qualityDisplay}</td>
+            <td><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"></td>
+            <td><button class="btn btn-success sell-wine-btn" data-resource="${wine.resource.name}">Sell</button></td>
+        `;
+
+        const sellButton = row.querySelector('.sell-wine-btn');
+        sellButton.addEventListener('click', () => {
+            sellWines(wine.resource.name);
+            displayWineCellarInventory(); // Refresh the display
+        });
+
+        tableBody.appendChild(row);
+    });
 }
 
 function displayWineOrders() {
