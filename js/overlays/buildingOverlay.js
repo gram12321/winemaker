@@ -3,6 +3,7 @@ import { addConsoleMessage } from '/js/console.js';
 import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import path is correct
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction } from '../finance.js'; // Ensure this import is at the top of your file.
+import { formatNumber } from '../utils.js';
 
 
 function createBuildingDetails(building) {

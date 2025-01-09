@@ -3,6 +3,7 @@ import { showBuildingOverlay } from './overlays/buildingOverlay.js';
 import { addConsoleMessage } from '/js/console.js';
 import { storeBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction} from '/js/finance.js';
+import { formatNumber } from '/js/utils.js';
 
 export class Building {
   static BASE_COSTS = {
