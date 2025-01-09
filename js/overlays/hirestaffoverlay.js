@@ -82,10 +82,9 @@ export function showHireStaffOverlay() {
 }
 
 function hireSelectedStaff(staff) {
-    // Add staff directly to the staff manager
-    const staffMembers = window.staffMembers || [];
+    // Load existing staff and add new staff member
+    let staffMembers = JSON.parse(localStorage.getItem('staffData')) || [];
     staffMembers.push(staff);
-    window.staffMembers = staffMembers;
     
     // Save to adminFunctions for persistence
     saveStaff(staffMembers);
