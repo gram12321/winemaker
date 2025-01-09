@@ -53,7 +53,7 @@ export function getRandomSoil(country, region) {
 
 export function formatNumber(value, decimals = 0) {
     // Check if value is effectively zero (very small number)
-    if (Math.abs(value) < 0.000001) return "0";
+    if (Math.abs(value) < 0.5) return "0";
     
     const isNegative = value < 0;
     const absValue = Math.abs(value);
