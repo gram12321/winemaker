@@ -118,19 +118,14 @@ function populateResourceFilter() {
 }
 
 function filterAndSortOrders() {
-    const typeFilter = document.getElementById('type-filter').value;
-    const resourceFilter = document.getElementById('resource-filter').value;
+    const typeFilter = document.getElementById('type-filter')?.value;
+    const resourceFilter = document.getElementById('resource-filter')?.value;
 
-    let filteredOrders = currentOrders;
-
-    if (typeFilter) {
-        filteredOrders = filteredOrders.filter(order => order.type === typeFilter);
-    }
-    if (resourceFilter) {
-        filteredOrders = filteredOrders.filter(order => order.resourceName === resourceFilter);
-    }
-
-    return filteredOrders;
+    return currentOrders.filter(order => {
+        const matchesType = !typeFilter || order.type === typeFilter;
+        const matchesResource = !resourceFilter || order.resourceName === resourceFilter;
+        return matchesType && matchesResource;
+    });
 }
 
 function displayWineOrders() {
