@@ -15,9 +15,11 @@ export function fermentMust(selectedResource, storage) {
         return;
     }
 
+    const bottleAmount = resource.amount * 0.75; // Convert must to bottle amount (75% conversion rate)
+
     // Remove units from the must resource
     inventoryInstance.removeResource(
-        { name: selectedResource },
+        { name: resource.resource.name },
         resource.amount,
         'Must',
         resource.vintage,
@@ -27,7 +29,7 @@ export function fermentMust(selectedResource, storage) {
     // Add as bottles to Wine Cellar
     inventoryInstance.addResource(
         resource.resource.name,
-        resource.amount,
+        bottleAmount,
         'Bottle',
         resource.vintage,
         resource.quality,
