@@ -2,6 +2,7 @@ import { loadBuildings } from '/js/database/adminFunctions.js';
 import { showBuildingOverlay } from './overlays/buildingOverlay.js';
 import { addConsoleMessage } from '/js/console.js';
 import { storeBuildings } from '/js/database/adminFunctions.js';
+import { addTransaction} from '/js/finance.js';
 
 export class Building {
   constructor(name, level = 1, tools = []) {
