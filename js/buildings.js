@@ -162,6 +162,9 @@ export function buildBuilding(buildingName) {
     return;
   }
 
+  const buildingCost = 5000; // Base cost for constructing a new building
+  addTransaction('Expense', `Construction of ${buildingName}`, -buildingCost);
+  
   const newBuilding = new Building(buildingName);
   buildings.push(newBuilding);
   storeBuildings(buildings);
