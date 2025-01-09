@@ -74,12 +74,12 @@ function displayWineCellarInventory() {
         const qualityDisplay = `<span class="${getColorClass(wine.quality)}">(${(wine.quality * 100).toFixed(0)}%)</span>`;
 
         row.innerHTML = `
-            <td><strong>${wine.fieldName}</strong>, ${wine.resource.name}, ${wine.vintage}</td>
+            <td><strong>${wine.name}</strong></td>
             <td>${wine.storage}</td>
             <td>${formatNumber(wine.amount)} bottles</td>
             <td>${qualityDisplay}</td>
             <td><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> Privat</td>
-            <td><button class="btn btn-success sell-wine-btn" data-resource="${wine.resource.name}">Sell</button></td>
+            <td><button class="btn btn-success sell-wine-btn" data-resource="${wine.name.split(', ')[1]}">Sell</button></td>
         `;
 
         const sellButton = row.querySelector('.sell-wine-btn');
