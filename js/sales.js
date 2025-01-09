@@ -7,11 +7,8 @@ import { loadWineOrders, saveWineOrders } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 
 export function sellWines(resourceName) {
-    // Find bottled wine of the specified resource
-    const bottledWine = inventoryInstance.items.find(item => 
-        item.resource.name === resourceName && 
-        item.state === 'Bottles'
-    );
+    // Get bottled wine using the new method
+    const bottledWine = inventoryInstance.getBottledWineByResource(resourceName);
 
     if (bottledWine && bottledWine.amount > 0) {
         // Get farmland data for price calculation
