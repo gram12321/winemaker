@@ -39,5 +39,5 @@ export function fermentMust(selectedResource, storage) {
     );
 
     saveInventory();
-    addConsoleMessage(`${resource.amount} liters of ${selectedResource} has been fermented and bottled.`);
+    addConsoleMessage(`${resource.amount} liters of ${selectedResource} must has been fermented into ${bottleAmount} bottles.`);
 }
