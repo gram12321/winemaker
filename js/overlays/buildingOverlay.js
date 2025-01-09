@@ -42,12 +42,10 @@ function setupToolButtons(building, tools) {
       button.addEventListener('click', () => {
         const newToolInstance = createTool(tool.name); // Create a new instance of the tool
         if (newToolInstance && buildingInstance.addTool(newToolInstance)) { 
-          // Notify addition of the tool
-          addConsoleMessage(`${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Remaining Capacity: ${building.capacity - buildingInstance.tools.length} spaces`);
-
-          // Deduct the cost of the tool
-          const expenseMessage = `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber} for €${newToolInstance.cost}`;
-          addTransaction('Expense', expenseMessage, -newToolInstance.cost);
+          // Add the enhanced message and record transaction
+          const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Remaining Capacity: ${building.capacity - buildingInstance.tools.length} spaces`;
+          addConsoleMessage(expenseMessage);
+          addTransaction('Expense', `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber}`, -newToolInstance.cost);
 
           // Notify expense
           addConsoleMessage(expenseMessage);
