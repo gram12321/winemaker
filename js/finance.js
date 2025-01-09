@@ -46,17 +46,40 @@ export function loadCashFlow() {
  */
 export function updateIncomeStatement() {
   const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+  const currentWeek = localStorage.getItem('week');
+  const currentSeason = localStorage.getItem('season');
+  const currentYear = localStorage.getItem('year');
   
-  // Calculate total income and expenses
-  const weeklyIncome = transactions.reduce((sum, t) => 
+  // Filter transactions for current week
+  const weeklyTransactions = transactions.filter(t => {
+    return t.date === `Week ${currentWeek}, ${currentSeason}, ${currentYear}`;
+  });
+  
+  // Calculate weekly income and expenses
+  const weeklyIncome = weeklyTransactions.reduce((sum, t) => 
     t.type === 'Income' ? sum + t.amount : sum, 0);
-  const weeklyExpenses = transactions.reduce((sum, t) => 
+  const weeklyExpenses = weeklyTransactions.reduce((sum, t) => 
     t.type === 'Expense' ? sum + Math.abs(t.amount) : sum, 0);
 
-  // Update display with Bootstrap classes
+  // Update income statement
   document.getElementById('weekly-income').textContent = `€${formatNumber(weeklyIncome)}`;
   document.getElementById('weekly-expenses').textContent = `€${formatNumber(weeklyExpenses)}`;
   document.getElementById('net-income').textContent = `€${formatNumber(weeklyIncome - weeklyExpenses)}`;
+
+  // Update balance sheet
+  const currentMoney = parseInt(localStorage.getItem('money')) || 0;
+  const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+  const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  
+  // Calculate fixed assets (buildings + farmland)
+  const buildingValue = buildings.reduce((sum, b) => sum + (b.cost || 0), 0);
+  const farmlandValue = ownedFarmlands.reduce((sum, f) => sum + (f.value || 0), 0);
+  const fixedAssets = buildingValue + farmlandValue;
+  
+  // Update balance sheet display
+  document.getElementById('cash-balance').textContent = `€${formatNumber(currentMoney)}`;
+  document.getElementById('fixed-assets').textContent = `€${formatNumber(fixedAssets)}`;
+  document.getElementById('total-assets').textContent = `€${formatNumber(currentMoney + fixedAssets)}`;
 }
 
 /**
