@@ -1,7 +1,7 @@
 import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
 import { inventoryInstance } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
-import { loadWineOrders } from '/js/database/adminFunctions.js';
+import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 
 export function showSalesOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
