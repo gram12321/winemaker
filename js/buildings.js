@@ -5,9 +5,15 @@ import { storeBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction} from '/js/finance.js';
 
 export class Building {
+  static BASE_COSTS = {
+    'Tool Shed': 500000,
+    'Warehouse': 1000000
+  };
+
   constructor(name, level = 1, tools = []) {
     this.name = name;
     this.level = level;
+    this.baseCost = Building.BASE_COSTS[name] || 500000;
     this.capacity = this.calculateCapacity();
     this.tools = tools;
   }
@@ -40,7 +46,7 @@ export class Building {
   }
 
   getUpgradeCost() {
-    return this.level * 1000;
+    return Math.floor(this.baseCost * Math.pow(1.5, this.level));
   }
 
   listContents() {
@@ -162,7 +168,7 @@ export function buildBuilding(buildingName) {
     return;
   }
 
-  const buildingCost = 5000; // Base cost for constructing a new building
+  const buildingCost = Building.BASE_COSTS[buildingName] || 500000;
   addTransaction('Expense', `Construction of ${buildingName}`, -buildingCost);
   
   const newBuilding = new Building(buildingName);
