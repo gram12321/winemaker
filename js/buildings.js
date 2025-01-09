@@ -224,6 +224,10 @@ export function upgradeBuilding(buildingName) {
 
   const building = new Building(buildingData.name, buildingData.level, buildingData.tools || []);
   const upgradeCost = building.getUpgradeCost();
+  
+  // Deduct the upgrade cost
+  addTransaction('Expense', `Upgraded ${buildingName} to level ${building.level + 1}`, -upgradeCost);
+  
   building.upgrade();
 
   const updatedBuildings = buildings.map(b => b.name === buildingName ? building : b);
