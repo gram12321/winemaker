@@ -67,3 +67,32 @@ QoL Improvement
    Expected yield (in vineyard.html (displayvineywarentried in vineyard.js)) should give a string to the user instead of a value (IE "High/Great/poor" instead of "0.9") 
    No Upgradecost applied to upgrade building even if there is a function for it (that is not used)
 
+
+
+Usefull wine knodledge:
+In general terms, 1 ton of grapes produces approximately:
+   - 60 cases of wine, which translates to about 720 bottles
+     (assuming 12 bottles per case).
+
+Breakdown:
+   - 1 ton of grapes ≈ 60 cases of wine
+   - 1 case of wine = 12 bottles
+   - 1 ton of grapes ≈ 720 bottles
+
+Yield Categories:
+
+   1. Low Yield (Quality-focused, Old World and Cool Climate):
+      - Around 2-4 tons per acre.
+      - Common in high-quality, low-yielding regions like Burgundy 
+        or certain parts of Napa Valley.
+
+   2. Moderate Yield (Balanced Quality and Quantity):
+      - Around 4-6 tons per acre.
+      - Many vineyards in moderate climates and quality-focused 
+        New World regions fall within this range.
+
+   3. High Yield (High-production or Bulk Wines):
+      - Around 6-10+ tons per acre.
+      - Often found in warmer regions with fertile soil, where
+        the focus may be on quantity rather than premium quality 
+        (e.g., La Mancha in Spain, Central Valley in California).
