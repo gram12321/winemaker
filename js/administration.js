@@ -1,9 +1,6 @@
 import { addConsoleMessage } from '/js/console.js';
 import { extractSeasonAndYear } from './utils.js'; // Import the function
 
-
-
-
 export function bookkeepingTaskFunction(task, mode) {
   if (mode === 'initialize') {
     const currentSeason = localStorage.getItem('season') || 'Unknown Season';
