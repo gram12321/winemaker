@@ -170,9 +170,36 @@ body {
 }
 
 /* Winery Styles */
+.mainview-overlay {
+  background-color: var(--color-background);
+}
+
 .winery-container {
   padding: 2rem;
   background-color: var(--color-background);
+}
+
+.winery-container .table {
+  background-color: white;
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.winery-container .table thead th {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  border-bottom: 2px solid var(--color-accent);
+  padding: 12px;
+}
+
+.winery-container .table tbody td {
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+}
+
+.winery-container .table tbody tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
 }
 
 /* Winery Process Sections */
