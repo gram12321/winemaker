@@ -15,6 +15,39 @@
 }
 
 /* Content within the mainview overlay */
+.inventory-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.inventory-container .btn-group {
+    margin-bottom: 1rem;
+}
+
+.inventory-container .card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.inventory-container .card-header {
+    padding: 1rem;
+}
+
+.inventory-container .table {
+    margin-bottom: 0;
+}
+
+.inventory-container .table td {
+    vertical-align: middle;
+}
+
+.inventory-container .badge {
+    font-size: 0.9rem;
+    padding: 0.5em 1em;
+}
+
 .mainview-overlay-content {
     display: flex;
     flex-direction: column;

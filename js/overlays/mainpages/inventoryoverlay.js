@@ -1,7 +1,6 @@
 
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { inventoryInstance } from '/js/resource.js';
-import { getColorClass } from '/js/utils.js';
 
 export function showInventoryOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
@@ -13,116 +12,144 @@ export function showInventoryOverlay() {
     overlay.classList.add('mainview-overlay');
 
     overlay.innerHTML = `
-        <div class="mainview-overlay-content">
-            <h2>Inventory Overview</h2>
+        <div class="mainview-overlay-content inventory-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Inventory Management</h2>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary active" data-view="all">All</button>
+                    <button class="btn btn-outline-primary" data-view="grapes">Grapes</button>
+                    <button class="btn btn-outline-primary" data-view="must">Must</button>
+                    <button class="btn btn-outline-primary" data-view="wine">Wine</button>
+                </div>
+            </div>
             
-            <section>
-                <h3>Warehouse Storage (Grapes)</h3>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Container</th>
-                            <th>Capacity</th>
-                            <th>Resource</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="grape-storage-body"></tbody>
-                </table>
-            </section>
+            <div class="inventory-sections">
+                <section id="grapes-section" class="inventory-section card mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Warehouse Storage (Grapes)</h3>
+                        <span class="badge badge-light" id="grapes-total"></span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Container</th>
+                                        <th>Capacity</th>
+                                        <th>Resource</th>
+                                        <th>Amount</th>
+                                        <th>Quality</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="grape-storage-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
 
-            <section>
-                <h3>Winery Storage (Must)</h3>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Container</th>
-                            <th>Capacity</th>
-                            <th>Resource</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="must-storage-body"></tbody>
-                </table>
-            </section>
+                <section id="must-section" class="inventory-section card mb-4">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Winery Storage (Must)</h3>
+                        <span class="badge badge-light" id="must-total"></span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Container</th>
+                                        <th>Capacity</th>
+                                        <th>Resource</th>
+                                        <th>Amount</th>
+                                        <th>Quality</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="must-storage-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
 
-            <section>
-                <h3>Wine Cellar (Bottles)</h3>
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Resource</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wine-storage-body"></tbody>
-                </table>
-            </section>
+                <section id="wine-section" class="inventory-section card">
+                    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Wine Cellar (Bottles)</h3>
+                        <span class="badge badge-light" id="wine-total"></span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Wine</th>
+                                        <th>Amount</th>
+                                        <th>Quality</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="wine-storage-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
     `;
 
     document.body.appendChild(overlay);
+    setupInventoryFilters(overlay);
     populateInventoryTables();
     overlay.style.display = 'block';
 }
 
+function setupInventoryFilters(overlay) {
+    const btnGroup = overlay.querySelector('.btn-group');
+    btnGroup.addEventListener('click', (e) => {
+        if (!e.target.matches('button')) return;
+        
+        // Update active button
+        btnGroup.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
+
+        // Show/hide sections based on selected view
+        const view = e.target.dataset.view;
+        const sections = overlay.querySelectorAll('.inventory-section');
+        sections.forEach(section => {
+            if (view === 'all' || section.id.startsWith(view)) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+    });
+}
+
 function populateInventoryTables() {
     const buildings = loadBuildings();
-    const grapeStorageBody = document.getElementById('grape-storage-body');
-    const mustStorageBody = document.getElementById('must-storage-body');
-    const wineStorageBody = document.getElementById('wine-storage-body');
+    updateStorageTable('grape', buildings, 'Grapes');
+    updateStorageTable('must', buildings, 'Must');
+    updateWineTable();
+    updateTotals();
+}
 
-    if (!grapeStorageBody || !mustStorageBody || !wineStorageBody) {
-        console.error('Could not find table bodies');
-        return;
-    }
+function updateStorageTable(type, buildings, resourceType) {
+    const tableBody = document.getElementById(`${type}-storage-body`);
+    if (!tableBody) return;
 
-    // Clear existing content
-    grapeStorageBody.innerHTML = '';
-    mustStorageBody.innerHTML = '';
-    wineStorageBody.innerHTML = '';
-
-    // Populate storage containers for grapes and must
+    tableBody.innerHTML = '';
+    
     buildings.forEach(building => {
         if (!building.tools) return;
         
         building.tools.forEach(tool => {
-            if (tool.supportedResources?.includes('Grapes')) {
+            if (tool.supportedResources?.includes(resourceType)) {
                 const storageId = `${tool.name} #${tool.instanceNumber}`;
                 const items = inventoryInstance.getStorageContents(storageId);
                 const row = createStorageRow(tool, items);
-                grapeStorageBody.appendChild(row);
-            }
-            if (tool.supportedResources?.includes('Must')) {
-                const storageId = `${tool.name} #${tool.instanceNumber}`;
-                const items = inventoryInstance.getStorageContents(storageId);
-                const row = createStorageRow(tool, items);
-                mustStorageBody.appendChild(row);
+                tableBody.appendChild(row);
             }
         });
-    });
-
-    // Populate bottled wines
-    const bottledWines = inventoryInstance.getItemsByState('Bottles');
-    bottledWines.forEach(item => {
-        const row = document.createElement('tr');
-        const qualityDisplay = item.quality ? 
-            `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>` : 
-            'N/A';
-
-        row.innerHTML = `
-            <td>${item.fieldName}, ${item.resource.name}, ${item.vintage}</td>
-            <td>${item.amount} bottles</td>
-            <td>${qualityDisplay}</td>
-            <td>Bottles</td>
-        `;
-        wineStorageBody.appendChild(row);
     });
 }
 
@@ -130,20 +157,45 @@ function createStorageRow(tool, items) {
     const row = document.createElement('tr');
     const firstItem = items[0];
     const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
-    const qualityDisplay = firstItem?.quality ? 
-        `<span class="${getColorClass(firstItem.quality)}">(${(firstItem.quality * 100).toFixed(0)}%)</span>` : 
-        'N/A';
+    const qualityDisplay = firstItem?.getQualityDisplay() || 'N/A';
 
     row.innerHTML = `
         <td>${tool.name} #${tool.instanceNumber}</td>
         <td>${tool.capacity}</td>
-        <td>${firstItem ? 
-            `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 
-            'Empty'}</td>
+        <td>${firstItem ? firstItem.getDisplayInfo().name : 'Empty'}</td>
         <td>${firstItem ? `${totalAmount} t` : '0 t'}</td>
         <td>${qualityDisplay}</td>
         <td>${firstItem ? firstItem.state : 'Empty'}</td>
     `;
 
     return row;
+}
+
+function updateWineTable() {
+    const wineStorageBody = document.getElementById('wine-storage-body');
+    if (!wineStorageBody) return;
+
+    wineStorageBody.innerHTML = '';
+    const bottledWines = inventoryInstance.getItemsByState('Bottles');
+    
+    bottledWines.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.getDisplayInfo().name}</td>
+            <td>${item.amount} bottles</td>
+            <td>${item.getQualityDisplay()}</td>
+            <td>Bottles</td>
+        `;
+        wineStorageBody.appendChild(row);
+    });
+}
+
+function updateTotals() {
+    ['grapes', 'must', 'wine'].forEach(type => {
+        const total = inventoryInstance.getItemsByState(type === 'wine' ? 'Bottles' : type.charAt(0).toUpperCase() + type.slice(1)).reduce((sum, item) => sum + item.amount, 0);
+        const badge = document.getElementById(`${type}-total`);
+        if (badge) {
+            badge.textContent = `Total: ${total} ${type === 'wine' ? 'bottles' : 't'}`;
+        }
+    });
 }

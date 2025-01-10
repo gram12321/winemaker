@@ -1,3 +1,4 @@
+
 import { getColorClass } from './utils.js';
 
 export class Resource {
@@ -13,13 +14,13 @@ export class InventoryItem {
     this.amount = amount;
     this.state = state;
     this.vintage = vintage;
-    this.quality = quality;
+    this.quality = quality || 0;
     this.fieldName = fieldName;
     this.fieldPrestige = fieldPrestige;
     this.storage = storage;
   }
 
-  getBottleInfo() {
+  getDisplayInfo() {
     return {
       name: `${this.fieldName}, ${this.resource.name}, ${this.vintage}`,
       quality: this.quality,
@@ -28,8 +29,15 @@ export class InventoryItem {
       fieldName: this.fieldName,
       resource: this.resource,
       vintage: this.vintage,
-      fieldPrestige: this.fieldPrestige
+      fieldPrestige: this.fieldPrestige,
+      state: this.state
     };
+  }
+
+  getQualityDisplay() {
+    return this.quality ? 
+      `<span class="${getColorClass(this.quality)}">${(this.quality * 100).toFixed(0)}%</span>` : 
+      'N/A';
   }
 }
 
@@ -38,30 +46,17 @@ export class Inventory {
     this.items = [];
   }
 
-  getBottledWines() {
-    return this.items
-      .filter(item => item.state === 'Bottles')
-      .map(item => item.getBottleInfo());
+  getItemsByState(state) {
+    return this.items.filter(item => item.state === state);
   }
 
-  getBottledWineByResource(resourceName) {
-    const wine = this.items.find(item => 
-      item.resource.name === resourceName && 
-      item.state === 'Bottles'
-    );
-    return wine ? wine.getBottleInfo() : null;
+  getStorageContents(storageId) {
+    return this.items.filter(item => item.storage === storageId);
   }
 
   addResource(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
-    const existingItem = this.items.find(item => 
-      item.resource.name === resource.name &&
-      item.state === state &&
-      item.vintage === vintage &&
-      item.quality === quality &&
-      item.fieldName === fieldName &&
-      item.storage === storage
-    );
-
+    const existingItem = this.findMatchingItem(resource, state, vintage, quality, fieldName, storage);
+    
     if (existingItem) {
       existingItem.amount += amount;
     } else {
@@ -89,12 +84,15 @@ export class Inventory {
     return true;
   }
 
-  getStorageContents(storageId) {
-    return this.items.filter(item => item.storage === storageId);
-  }
-
-  getItemsByState(state) {
-    return this.items.filter(item => item.state === state);
+  findMatchingItem(resource, state, vintage, quality, fieldName, storage) {
+    return this.items.find(item => 
+      item.resource.name === resource.name &&
+      item.state === state &&
+      item.vintage === vintage &&
+      item.quality === quality &&
+      item.fieldName === fieldName &&
+      item.storage === storage
+    );
   }
 
   save() {
