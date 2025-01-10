@@ -2,29 +2,38 @@
 #sidebar-wrapper {
   min-width: 250px;
   max-width: 250px;
-  background: #343a40;
-  color: #fff;
+  background: var(--panel-bg);
+  color: var(--panel-text);
   flex-shrink: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
+  border-right: 2px solid var(--color-accent);
 }
 
 #sidebar-wrapper .list-group-item {
   border: none;
+  background-color: transparent;
+  color: var(--panel-text);
+  transition: all 0.3s ease;
 }
 
+#sidebar-wrapper .list-group-item:hover {
+  background-color: var(--color-primary);
+  transform: translateX(5px);
+}
 
 .dropdown-menu {
-  background-color: #343a40;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--color-accent);
 }
 
 .dropdown-menu a {
-  color: #fff;
+  color: var(--panel-text);
 }
 
 .dropdown-menu a:hover {
-  background-color: #495057;
+  background-color: var(--color-primary);
 }
 
 .position-sticky {
@@ -33,61 +42,16 @@
   height: 100%;
 }
 
-/* Define color classes for a gradient from red to green */
-.color-class-0 {
-  color: #ff0000;
-}
-
-/* Red */
-.color-class-1 {
-  color: #ff3300;
-}
-
-.color-class-2 {
-  color: #ff6600;
-}
-
-.color-class-3 {
-  color: #ff9900;
-}
-
-.color-class-4 {
-  color: #ffcc00;
-}
-
-.color-class-5 {
-  color: #ffff00;
-}
-
-/* Yellow */
-.color-class-6 {
-  color: #ccff00;
-}
-
-.color-class-7 {
-  color: #99ff00;
-}
-
-.color-class-8 {
-  color: #66ff00;
-}
-
-.color-class-9 {
-  color: #27c200;
-}
-
-.color-class-10 {
-  color: #008f00;
-}
-
-/* Green */
-
 /* Company Info Styles */
 #companyInfo {
   font-family: Arial, sans-serif;
   font-size: 1rem;
-  color: #ffffff;
-  margin: 15px 0;
+  color: var(--panel-text);
+  margin: 15px;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
 }
 
 #companyInfo .company-name {
@@ -95,28 +59,25 @@
   font-size: 1.5rem;
   margin-bottom: 5px;
   text-align: center;
-  /* Center align company name */
+  color: var(--color-accent);
 }
 
 #companyInfo .styled-line {
   width: 60%;
-  /* Line width */
   height: 3px;
-  /* Thicker line */
-  background-color: #94bde5;
-  /* Line color */
+  background-color: var(--color-accent);
   border-radius: 5px;
-  /* Rounded corners */
   margin: 10px auto;
-  /* Center the line */
 }
 
 #companyInfo .info-item {
-  padding: 5px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #companyInfo .info-label {
   font-weight: bold;
+  color: var(--color-accent);
 }
 
 #companyInfo .info-content {
@@ -127,4 +88,8 @@
 #companyInfo .date-info {
   display: flex;
   gap: 10px;
+  margin-top: 10px;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
 }
