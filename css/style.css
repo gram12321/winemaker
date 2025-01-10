@@ -179,11 +179,34 @@ body {
   background-color: var(--color-background);
 }
 
-.winery-container .table {
-  background-color: white;
+/* Grape Storage Table */
+.winery-container section:first-of-type .table {
+  background: linear-gradient(145deg, var(--color-background), #E8C9C9);
   margin-bottom: 1rem;
   border-radius: var(--radius-md);
   overflow: hidden;
+}
+
+.winery-container section:first-of-type .table thead th {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  color: var(--panel-text);
+  border-bottom: 2px solid var(--color-accent);
+  padding: 12px;
+}
+
+/* Must Storage Table */
+.winery-container section:last-of-type .table {
+  background: linear-gradient(145deg, var(--color-background), #D4B4A7);
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.winery-container section:last-of-type .table thead th {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  color: var(--panel-text);
+  border-bottom: 2px solid var(--task-winery);
+  padding: 12px;
 }
 
 .winery-container .table thead th {
