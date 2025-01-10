@@ -46,6 +46,12 @@ export function getWineQualityCategory(quality) {
   return "Vintage Perfection";
 }
 
+export function formatQualityDisplay(quality) {
+  const qualityDescription = getWineQualityCategory(quality);
+  const colorClass = getColorClass(quality);
+  return `${qualityDescription} <span class="${colorClass}">(${(quality * 100).toFixed(0)}%)</span>`;
+}
+
 export function getRandomSoil(country, region) {
   const soils = regionSoilTypes[country][region];
   return soils[Math.floor(Math.random() * soils.length)];
