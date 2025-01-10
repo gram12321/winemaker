@@ -70,9 +70,9 @@ body {
   overflow: hidden;
 }
 
-#grape-section .card-header {
-  background: linear-gradient(135deg, #8B4513, #654321);
-  border-bottom: 2px solid var(--color-accent);
+#grape-section .card-header.bg-success {
+  background: linear-gradient(135deg, #8B4513, #654321) !important;
+  border-bottom: 2px solid var(--color-accent) !important;
   padding: 1rem;
 }
 
