@@ -17,16 +17,16 @@ export function showInventoryOverlay() {
                 <h2>Inventory Management</h2>
                 <div class="btn-group">
                     <button class="btn btn-outline-primary active" data-view="all">All</button>
-                    <button class="btn btn-outline-primary" data-view="grapes">Grapes</button>
-                    <button class="btn btn-outline-primary" data-view="must">Must</button>
-                    <button class="btn btn-outline-primary" data-view="wine">Wine</button>
+                    <button class="btn btn-outline-primary" data-view="grapes">Warehouse</button>
+                    <button class="btn btn-outline-primary" data-view="must">Winery</button>
+                    <button class="btn btn-outline-primary" data-view="wine">Cellar</button>
                 </div>
             </div>
             
             <div class="inventory-sections">
                 <section id="grapes-section" class="inventory-section card mb-4">
                     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <h3 class="h5 mb-0">Warehouse Storage (Grapes)</h3>
+                        <h3 class="h5 mb-0">Warehouse</h3>
                         <span class="badge badge-light" id="grapes-total"></span>
                     </div>
                     <div class="card-body">
@@ -50,7 +50,7 @@ export function showInventoryOverlay() {
 
                 <section id="must-section" class="inventory-section card mb-4">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                        <h3 class="h5 mb-0">Winery Storage (Must)</h3>
+                        <h3 class="h5 mb-0">Winery</h3>
                         <span class="badge badge-light" id="must-total"></span>
                     </div>
                     <div class="card-body">
@@ -74,7 +74,7 @@ export function showInventoryOverlay() {
 
                 <section id="wine-section" class="inventory-section card">
                     <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-                        <h3 class="h5 mb-0">Wine Cellar (Bottles)</h3>
+                        <h3 class="h5 mb-0">Cellar</h3>
                         <span class="badge badge-light" id="wine-total"></span>
                     </div>
                     <div class="card-body">
