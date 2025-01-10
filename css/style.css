@@ -1,4 +1,3 @@
-
 /* Quality Color Classes */
 .color-class-9 { color: #006400; }  /* Dark Green */
 .color-class-8 { color: #228B22; }  /* Forest Green */
@@ -71,8 +70,8 @@ body {
 }
 
 .inventory-container #grapes-section .card-header {
-  background: linear-gradient(135deg, #D4B4A7, #C5A572);
-  background-color: #D4B4A7;
+  background: linear-gradient(135deg, #E8C9C9, #D4B4A7);
+  background-color: #E8C9C9;
   border-bottom: 2px solid var(--color-accent);
   padding: 1rem;
   color: var(--panel-text);
@@ -80,8 +79,8 @@ body {
 
 /* Override Bootstrap's bg-success */
 .inventory-container #grapes-section .card-header.bg-success {
-  background: linear-gradient(135deg, #D4B4A7, #C5A572);
-  background-color: #D4B4A7;
+  background: linear-gradient(135deg, #E8C9C9, #D4B4A7);
+  background-color: #E8C9C9;
 }
 
 /* Must Storage Theme */
@@ -253,5 +252,3 @@ body {
   display: flex;
   justify-content: center;
 }
-
-
