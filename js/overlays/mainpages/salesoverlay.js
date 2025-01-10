@@ -82,15 +82,12 @@ function displayWineCellarInventory() {
     bottledWines.forEach(wine => {
         const row = document.createElement('tr');
         const displayInfo = wine.getDisplayInfo();
-        const qualityDescription = getWineQualityCategory(wine.quality);
-        const colorClass = getColorClass(wine.quality);
-        const qualityDisplay = `${qualityDescription} <span class="${colorClass}">(${(wine.quality * 100).toFixed(0)}%)</span>`;
 
         row.innerHTML = `
             <td><strong>${displayInfo.name}</strong></td>
             <td>${displayInfo.storage}</td>
             <td>${formatNumber(displayInfo.amount)} bottles</td>
-            <td>${qualityDisplay}</td>
+            <td>${formatQualityDisplay(wine.quality)}</td>
             <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
             <td><button class="btn btn-success sell-wine-btn" data-resource="${displayInfo.resource.name}">Sell</button></td>
         `;
@@ -191,7 +188,6 @@ function displayFilteredOrders(filteredOrders) {
     filteredOrders.forEach((order, index) => {
         const row = document.createElement('tr');
         const quality = parseFloat(order.quality);
-        const qualityText = formatQualityDisplay(quality);
 
         let iconPath;
         switch (order.type) {
@@ -212,7 +208,7 @@ function displayFilteredOrders(filteredOrders) {
         row.innerHTML = `
             <td style="text-align: center;"><strong>${typeInfo}<br>${order.type}</strong></td>
             <td><strong>${order.fieldName || ''}</strong>, ${order.resourceName || ''}, ${order.vintage || ''}</td>
-            <td>${qualityText}</td>
+            <td>${formatQualityDisplay(quality)}</td>
             <td>${displayAmount}</td>
             <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
             <td>
