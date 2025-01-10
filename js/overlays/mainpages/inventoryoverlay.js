@@ -1,7 +1,7 @@
 
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { inventoryInstance } from '/js/resource.js';
-import {formatNumber, getWineQualityCategory} from '/js/utils.js';
+import {formatNumber, getWineQualityCategory, formatQualityDisplay } from '/js/utils.js';
 
 export function showInventoryOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
