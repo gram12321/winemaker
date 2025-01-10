@@ -86,7 +86,7 @@ export function updateIncomeStatement() {
     return sum + totalValue;
   }, 0);
   
-  const farmlandValue = ownedFarmlands.reduce((sum, f) => sum + (f.landvalue || 0), 0);
+  const farmlandValue = ownedFarmlands.reduce((sum, f) => sum + ((f.landvalue || 0) * f.acres), 0);
   const fixedAssets = buildingValue + farmlandValue;
   
   // Update balance sheet display
