@@ -18,8 +18,8 @@ export function showFinanceOverlay() {
             <div class="row mb-4">
                 <!-- Income Statement Cards -->
                 <div class="col-md-6">
-                    <div class="income-statement">
-                        <h2 class="h4 mb-4">Income Statement</h2>
+                    <div class="finance-section income-statement">
+                        <h2 class="h4">Income Statement</h2>
                         <div class="stat-card">
                             <div class="stat-label">Weekly Income</div>
                             <div id="weekly-income" class="stat-value transaction-income">€0</div>
@@ -36,8 +36,8 @@ export function showFinanceOverlay() {
                 </div>
                 
                 <div class="col-md-6">
-                    <div class="balance-sheet">
-                        <h2 class="h4 mb-4">Balance Sheet</h2>
+                    <div class="finance-section balance-sheet">
+                        <h2 class="h4">Balance Sheet</h2>
                         <div class="stat-card">
                             <div class="stat-label">Total Assets</div>
                             <div id="total-assets" class="stat-value">€0</div>
