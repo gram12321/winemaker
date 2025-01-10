@@ -31,8 +31,8 @@ export function showInventoryOverlay() {
                         <span class="badge badge-light" id="grapes-total"></span>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
+                        <div class="table-responsive inventory-table">
+                            <table class="table table-hover inventory-table">
                                 <thead>
                                     <tr>
                                         <th>Container</th>

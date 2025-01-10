@@ -119,16 +119,19 @@ body {
   margin: 0;
 }
 
-.inventory-section .table {
+.inventory-section .table,
+.inventory-table {
   margin: 0;
 }
 
-.inventory-section .table th {
+.inventory-section .table th,
+.inventory-table th {
   background-color: rgba(0, 0, 0, 0.05);
   border-bottom: 2px solid var(--color-accent);
 }
 
-.inventory-section .table td {
+.inventory-section .table td,
+.inventory-table td {
   border-color: rgba(197, 165, 114, 0.2);
 }
 
