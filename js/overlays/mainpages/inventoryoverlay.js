@@ -165,7 +165,7 @@ function createStorageRow(tool, items) {
         <td>${formatNumber(tool.capacity)}</td>
         <td>${firstItem ? firstItem.getDisplayInfo().name : 'Empty'}</td>
         <td>${firstItem ? `${formatNumber(totalAmount)} t` : '0 t'}</td>
-        <td>${firstItem ? getWineQualityCategory(firstItem.quality) : 'N/A'}</td>
+        <td>${firstItem ? formatQualityDisplay(firstItem.quality) : 'N/A'}</td>
         <td>${firstItem ? firstItem.state : 'Empty'}</td>
     `;
 
@@ -184,7 +184,7 @@ function updateWineTable() {
         row.innerHTML = `
             <td>${item.getDisplayInfo().name}</td>
             <td>${formatNumber(item.amount)} bottles</td>
-            <td>${getWineQualityCategory(item.quality)}</td>
+            <td>${formatQualityDisplay(item.quality)}</td>
             <td>Bottles</td>
         `;
         wineStorageBody.appendChild(row);

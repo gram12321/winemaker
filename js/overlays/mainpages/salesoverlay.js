@@ -191,9 +191,7 @@ function displayFilteredOrders(filteredOrders) {
     filteredOrders.forEach((order, index) => {
         const row = document.createElement('tr');
         const quality = parseFloat(order.quality);
-        const qualityDescription = getWineQualityCategory(quality);
-        const colorClass = getColorClass(quality);
-        const qualityText = `${qualityDescription} <span class="${colorClass}">(${(quality * 100).toFixed(0)}%)</span>`;
+        const qualityText = formatQualityDisplay(quality);
 
         let iconPath;
         switch (order.type) {
