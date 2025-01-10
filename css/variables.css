@@ -1,0 +1,26 @@
+
+:root {
+  /* Colors */
+  --primary-color: #214a73;
+  --secondary-color: #545a16;
+  --accent-color: #94bde5;
+  --background-dark: #343a40;
+  --text-light: #ffffff;
+  --text-dark: #333333;
+  
+  /* Task Colors */
+  --task-field: #545a16;
+  --task-winery: #214a73;
+  --task-admin: #23143e;
+  --task-sales: #491809;
+  
+  /* Spacing */
+  --spacing-small: 0.5rem;
+  --spacing-medium: 1rem;
+  --spacing-large: 1.5rem;
+  
+  /* Border Radius */
+  --border-radius-small: 4px;
+  --border-radius-medium: 8px;
+  --border-radius-large: 12px;
+}
