@@ -72,7 +72,7 @@ export function updateIncomeStatement() {
   const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   
   // Calculate fixed assets (buildings + farmland)
-  const buildingValue = buildings.reduce((sum, building => {
+  const buildingValue = buildings.reduce((sum, building) => {
     const buildingInstance = new Building(building.name, building.level);
     let totalValue = buildingInstance.baseCost;
     
