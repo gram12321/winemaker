@@ -83,6 +83,11 @@ export function updateIncomeStatement() {
       totalValue += buildingInstance.getUpgradeCost();
     }
     
+    // Add value of tools in the building
+    if (building.tools && Array.isArray(building.tools)) {
+      totalValue += building.tools.reduce((toolSum, tool) => toolSum + (tool.cost || 0), 0);
+    }
+    
     return sum + totalValue;
   }, 0);
   
