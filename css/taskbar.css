@@ -33,13 +33,14 @@
 
 /* Task box styles */
 .task-box {
-  background-color: #214a73;
-  border: 1px solid #94bde5;
-  border-radius: 4px;
-  padding: 10px;
-  margin-bottom: 10px;
+  background-color: var(--task-winery);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
   transition: background-color 0.3s;
   position: relative;
+  box-shadow: var(--shadow-sm);
 }
 
 /* Hover not in use after bg-color per type */
