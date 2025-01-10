@@ -77,7 +77,7 @@ function displayWineCellarInventory() {
     const tableBody = document.getElementById('winecellar-table-body');
     tableBody.innerHTML = '';
 
-    const bottledWines = inventoryInstance.getBottledWines();
+    const bottledWines = inventoryInstance.getItemsByState('Bottles');
 
     bottledWines.forEach(wine => {
         const row = document.createElement('tr');

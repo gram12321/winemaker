@@ -8,7 +8,7 @@ import { inventoryInstance } from './resource.js';
 
 export function sellWines(resourceName) {
     // Get bottled wine using the new method
-    const bottledWine = inventoryInstance.getBottledWineByResource(resourceName);
+    const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
 
     if (bottledWine && bottledWine.amount > 0) {
         // Get farmland data for price calculation
