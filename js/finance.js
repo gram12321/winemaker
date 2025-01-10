@@ -72,7 +72,19 @@ export function updateIncomeStatement() {
   const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   
   // Calculate fixed assets (buildings + farmland)
-  const buildingValue = buildings.reduce((sum, b) => sum + (b.cost || 0), 0);
+  const buildingValue = buildings.reduce((sum, building => {
+    const buildingInstance = new Building(building.name, building.level);
+    let totalValue = buildingInstance.baseCost;
+    
+    // Add upgrade costs for each level
+    for(let i = 1; i < building.level; i++) {
+      buildingInstance.level = i;
+      totalValue += buildingInstance.getUpgradeCost();
+    }
+    
+    return sum + totalValue;
+  }, 0);
+  
   const farmlandValue = ownedFarmlands.reduce((sum, f) => sum + (f.value || 0), 0);
   const fixedAssets = buildingValue + farmlandValue;
   
