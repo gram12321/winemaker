@@ -5,6 +5,7 @@ import { renderCompanyInfo } from './database/loadSidebar.js';
 import { saveCompanyInfo } from './database/adminFunctions.js';
 import { Building} from './buildings.js';
 import { inventoryInstance } from './resource.js';
+import { calculateWinePrice } from './sales.js';
 
 /**
  * Loads and renders the cash flow table with transaction history
