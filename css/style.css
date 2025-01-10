@@ -61,7 +61,38 @@ body {
   padding: 2rem;
 }
 
-.inventory-section {
+/* Grape Storage Theme */
+#grape-section {
+  border: 1px solid var(--color-secondary);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+#grape-section .card-header {
+  background: linear-gradient(135deg, var(--color-secondary), #4A5D3F);
+  border-bottom: 2px solid var(--color-secondary);
+  padding: 1rem;
+}
+
+/* Must Storage Theme */
+#must-section {
+  border: 1px solid var(--task-winery);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+#must-section .card-header {
+  background: linear-gradient(135deg, var(--task-winery), #491809);
+  border-bottom: 2px solid var(--task-winery);
+  padding: 1rem;
+}
+
+/* Wine Storage Theme */
+#wine-section {
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-lg);
   margin-bottom: 1.5rem;
@@ -69,8 +100,8 @@ body {
   overflow: hidden;
 }
 
-.inventory-section .card-header {
-  background: linear-gradient(135deg, var(--color-primary), var(--panel-bg));
+#wine-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
   border-bottom: 2px solid var(--color-accent);
   padding: 1rem;
 }
@@ -133,8 +164,27 @@ body {
   background-color: var(--color-background);
 }
 
-.winery-container section {
-  background: linear-gradient(145deg, var(--color-background), rgba(255, 255, 255, 0.9));
+/* Winery Process Sections */
+.winery-container .crushing-section {
+  background: linear-gradient(145deg, var(--color-background), #E6D5C3);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-secondary);
+}
+
+.winery-container .fermentation-section {
+  background: linear-gradient(145deg, var(--color-background), #D4C4B7);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--task-winery);
+}
+
+.winery-container .aging-section {
+  background: linear-gradient(145deg, var(--color-background), #C5B1A3);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   margin-bottom: 2rem;
