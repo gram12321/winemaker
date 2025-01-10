@@ -3,6 +3,7 @@
 import { formatNumber } from './utils.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
 import { saveCompanyInfo } from './database/adminFunctions.js';
+import { Building} from './buildings.js';
 
 /**
  * Loads and renders the cash flow table with transaction history
