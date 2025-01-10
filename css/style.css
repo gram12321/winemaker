@@ -71,8 +71,8 @@ body {
 }
 
 #grape-section .card-header {
-  background: linear-gradient(135deg, var(--color-secondary), #4A5D3F);
-  border-bottom: 2px solid var(--color-secondary);
+  background: linear-gradient(135deg, #8B4513, #654321);
+  border-bottom: 2px solid var(--color-accent);
   padding: 1rem;
 }
 
@@ -166,21 +166,21 @@ body {
 
 /* Winery Process Sections */
 .winery-container .crushing-section {
-  background: linear-gradient(145deg, var(--color-background), #E6D5C3);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-secondary);
-}
-
-.winery-container .fermentation-section {
-  background: linear-gradient(145deg, var(--color-background), #D4C4B7);
+  background: linear-gradient(145deg, var(--color-background), #E8C9C9);
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   margin-bottom: 2rem;
   box-shadow: var(--shadow-md);
   border: 1px solid var(--task-winery);
+}
+
+.winery-container .fermentation-section {
+  background: linear-gradient(145deg, var(--color-background), #D4B4A7);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-accent);
 }
 
 .winery-container .aging-section {
