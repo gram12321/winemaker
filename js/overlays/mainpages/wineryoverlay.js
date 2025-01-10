@@ -1,5 +1,5 @@
 
-import { formatNumber, getWineQualityCategory, getColorClass } from '/js/utils.js';
+import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay } from '/js/utils.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
 import { loadBuildings } from '/js/database/adminFunctions.js';
@@ -108,8 +108,7 @@ function populateStorageRow(tableBody, tool, inventoryItems) {
         const row = document.createElement('tr');
         let qualityDisplay = 'N/A';
         if (firstItem?.quality) {
-            const colorClass = getColorClass(firstItem.quality);
-            qualityDisplay = `<span class="${colorClass}">(${(firstItem.quality * 100).toFixed(0)}%)</span>`;
+            qualityDisplay = formatQualityDisplay(firstItem.quality);
         }
 
         row.innerHTML = `
