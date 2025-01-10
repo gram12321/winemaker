@@ -14,8 +14,8 @@ export function showInventoryOverlay() {
     overlay.innerHTML = `
         <div class="mainview-overlay-content inventory-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Inventory Management</h2>
-                <div class="btn-group">
+                <h2 class="me-4">Inventory Management</h2>
+                <div class="btn-group ms-2">
                     <button class="btn btn-outline-primary active" data-view="all">All</button>
                     <button class="btn btn-outline-primary" data-view="grapes">Warehouse</button>
                     <button class="btn btn-outline-primary" data-view="must">Winery</button>
@@ -161,10 +161,10 @@ function createStorageRow(tool, items) {
 
     row.innerHTML = `
         <td>${tool.name} #${tool.instanceNumber}</td>
-        <td>${tool.capacity}</td>
+        <td>${formatNumber(tool.capacity)}</td>
         <td>${firstItem ? firstItem.getDisplayInfo().name : 'Empty'}</td>
-        <td>${firstItem ? `${totalAmount} t` : '0 t'}</td>
-        <td>${qualityDisplay}</td>
+        <td>${firstItem ? `${formatNumber(totalAmount)} t` : '0 t'}</td>
+        <td>${firstItem ? getWineQualityCategory(firstItem.quality) : 'N/A'}</td>
         <td>${firstItem ? firstItem.state : 'Empty'}</td>
     `;
 
@@ -182,8 +182,8 @@ function updateWineTable() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${item.getDisplayInfo().name}</td>
-            <td>${item.amount} bottles</td>
-            <td>${item.getQualityDisplay()}</td>
+            <td>${formatNumber(item.amount)} bottles</td>
+            <td>${getWineQualityCategory(item.quality)}</td>
             <td>Bottles</td>
         `;
         wineStorageBody.appendChild(row);
