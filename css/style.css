@@ -1,3 +1,17 @@
+
+/* Quality Color Classes */
+.color-class-9 { color: #006400; }  /* Dark Green */
+.color-class-8 { color: #228B22; }  /* Forest Green */
+.color-class-7 { color: #32CD32; }  /* Lime Green */
+.color-class-6 { color: #90EE90; }  /* Light Green */
+.color-class-5 { color: #FFD700; }  /* Gold */
+.color-class-4 { color: #FFA500; }  /* Orange */
+.color-class-3 { color: #FF8C00; }  /* Dark Orange */
+.color-class-2 { color: #FF4500; }  /* Orange Red */
+.color-class-1 { color: #FF0000; }  /* Red */
+.color-class-0 { color: #8B0000; }  /* Dark Red */
+
+
 /* General */
 body {
   display: flex;
