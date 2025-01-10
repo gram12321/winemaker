@@ -70,13 +70,18 @@ body {
   overflow: hidden;
 }
 
-#grape-section .card-header.bg-success,
-#grape-section .card-header {
-  background: linear-gradient(135deg, #8B4513, #654321) !important;
-  background-color: #8B4513 !important;
-  border-bottom: 2px solid var(--color-accent) !important;
+.inventory-container #grape-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #654321);
+  background-color: #8B4513;
+  border-bottom: 2px solid var(--color-accent);
   padding: 1rem;
-  color: var(--panel-text) !important;
+  color: var(--panel-text);
+}
+
+/* Override Bootstrap's bg-success */
+.inventory-container #grape-section .card-header.bg-success {
+  background: linear-gradient(135deg, #8B4513, #654321);
+  background-color: #8B4513;
 }
 
 /* Must Storage Theme */
