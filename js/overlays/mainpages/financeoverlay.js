@@ -15,10 +15,10 @@ export function showFinanceOverlay() {
         <div class="mainview-overlay-content finance-container">
             <h1 class="mb-4">Finance Management</h1>
             
-            <div class="row">
-                <!-- Income Statement & Balance Sheet Cards -->
-                <div class="col-md-4">
-                    <div class="income-statement mb-4">
+            <div class="row mb-4">
+                <!-- Income Statement Cards -->
+                <div class="col-md-6">
+                    <div class="income-statement">
                         <h2 class="h4 mb-4">Income Statement</h2>
                         <div class="stat-card">
                             <div class="stat-label">Weekly Income</div>
@@ -33,7 +33,9 @@ export function showFinanceOverlay() {
                             <div id="net-income" class="stat-value">€0</div>
                         </div>
                     </div>
-
+                </div>
+                
+                <div class="col-md-6">
                     <div class="balance-sheet">
                         <h2 class="h4 mb-4">Balance Sheet</h2>
                         <div class="stat-card">
@@ -50,9 +52,11 @@ export function showFinanceOverlay() {
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Cash Flow Section -->
-                <div class="col-md-8">
+            <!-- Cash Flow Section -->
+            <div class="row">
+                <div class="col-12">
                     <div class="cash-flow-section">
                         <h2 class="h4 mb-4">Cash Flow Statement</h2>
                         <div class="cash-flow-table">
