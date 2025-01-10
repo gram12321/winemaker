@@ -62,7 +62,7 @@ body {
 }
 
 /* Grape Storage Theme */
-#grape-section {
+#grapes-section {
   border: 1px solid var(--color-secondary);
   border-radius: var(--radius-lg);
   margin-bottom: 1.5rem;
@@ -70,7 +70,7 @@ body {
   overflow: hidden;
 }
 
-.inventory-container #grape-section .card-header {
+.inventory-container #grapes-section .card-header {
   background: linear-gradient(135deg, #8B4513, #654321);
   background-color: #8B4513;
   border-bottom: 2px solid var(--color-accent);
@@ -79,7 +79,7 @@ body {
 }
 
 /* Override Bootstrap's bg-success */
-.inventory-container #grape-section .card-header.bg-success {
+.inventory-container #grapes-section .card-header.bg-success {
   background: linear-gradient(135deg, #8B4513, #654321);
   background-color: #8B4513;
 }
