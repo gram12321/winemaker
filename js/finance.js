@@ -85,7 +85,8 @@ export function updateIncomeStatement() {
     
     // Add value of tools in the building
     if (building.tools && Array.isArray(building.tools)) {
-      totalValue += building.tools.reduce((toolSum, tool) => toolSum + (tool.cost || 0), 0);
+      // Sum up each individual tool's cost, even if same type
+      totalValue += building.tools.reduce((toolSum, tool) => toolSum + tool.cost, 0);
     }
     
     return sum + totalValue;
