@@ -1,3 +1,4 @@
+
 /* Building Card Styles */
 .building-card {
   background-color: var(--color-background);
@@ -10,20 +11,20 @@
   color: var(--color-text);
   text-align: left;
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
 }
 
 .building-card h4 {
   margin-top: 0;
   font-size: 1.2em;
-}
-
-.building-card {
-  margin-bottom: 10px; /* Add space between card and button */
+  color: var(--color-primary);
 }
 
 .building-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+  background-color: var(--color-background);
+  opacity: 0.95;
 }
 
 .building-card .icon {
@@ -41,34 +42,38 @@
 
 /* Buildings overlay */
 .unbuilt-card {
-  opacity: 0.5;
+  opacity: 0.6;
   pointer-events: none;
+  background-color: var(--panel-bg);
+  color: var(--panel-text);
 }
 
 /* Building simulator container */
 .building-simulator {
-  border: 2px solid #333; /* Dark border to simulate building outline */
-  padding: 10px;          /* Inside padding for aesthetics */
-  margin-top: 10px;       /* Space from other content */
-  background-color: #fff; /* Background color for the building */
-  position: relative;     /* Position context for internal elements */
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Shadow effect for 3D feel */
+  border: 2px solid var(--border-color);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+  background-color: var(--color-background);
+  position: relative;
+  box-shadow: var(--shadow-md);
 }
 
 /* Capacity grid within the building */
 .capacity-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* Adjust number of columns based on layout */
-  gap: 5px; /* Space between cells */
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
 }
 
 /* Square cell styles */
 .capacity-cell {
-  display: flex;                /* Use Flexbox */
-  align-items: center;          /* Center vertically */
-  justify-content: center;      /* Center horizontally */
-  width: 50px;                  /* Set a width for the cell */
-  height: 50px;                 /* Set a height for the cell */
-  border: 1px solid #ccc;       /* Optional: Add a border */
-  margin: 2px;                  /* Optional: Add some spacing */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--border-color);
+  margin: var(--spacing-xs);
+  background-color: var(--color-background);
 }

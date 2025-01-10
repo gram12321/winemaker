@@ -3,6 +3,7 @@
 <head>
   <title>Game Page</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/variables.css" rel="stylesheet">
   <link href="/css/style.css" rel="stylesheet">
   <link href="/css/overlay.css" rel="stylesheet">
   <link href="/css/buildings.css" rel="stylesheet">
@@ -41,7 +42,7 @@
   <script type="module" src="/js/database/loadSidebar.js"></script>
   <script type="module" src="/js/endDay.js"></script>
   <script type="module" src="/js/loadPanel.js"></script>
-  
+
   <script type="module">
 
       import { incrementWeek } from '/js/endDay.js'; // Updated import
@@ -52,7 +53,7 @@
     import { addTransaction} from '/js/finance.js';
     import {setupStaffWagesRecurringTransaction} from '/js/staff.js';
     import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
-      
+
       document.addEventListener('DOMContentLoaded', function () {
           initializePanel();
           initializeSidebar();
@@ -95,13 +96,13 @@
     document.addEventListener('DOMContentLoaded', function() {
       const buildingOverlay = document.getElementById('buildingOverlay');
       const closeBtn = buildingOverlay.querySelector('.close-btn');
-      
+
       // Close on X button click
       closeBtn.addEventListener('click', () => {
         buildingOverlay.style.display = 'none';
       });
-      
-      
+
+
     });
   </script>
 </body>
