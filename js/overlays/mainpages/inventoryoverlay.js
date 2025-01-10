@@ -196,7 +196,7 @@ function updateTotals() {
         const total = inventoryInstance.getItemsByState(type === 'wine' ? 'Bottles' : type.charAt(0).toUpperCase() + type.slice(1)).reduce((sum, item) => sum + item.amount, 0);
         const badge = document.getElementById(`${type}-total`);
         if (badge) {
-            badge.textContent = `Total: ${total} ${type === 'wine' ? 'bottles' : 't'}`;
+            badge.textContent = `Total: ${formatNumber(total)} ${type === 'wine' ? 'bottles' : 't'}`;
         }
     });
 }
