@@ -81,17 +81,18 @@ function displayWineCellarInventory() {
 
     bottledWines.forEach(wine => {
         const row = document.createElement('tr');
+        const displayInfo = wine.getDisplayInfo();
         const qualityDescription = getWineQualityCategory(wine.quality);
         const colorClass = getColorClass(wine.quality);
         const qualityDisplay = `${qualityDescription} <span class="${colorClass}">(${(wine.quality * 100).toFixed(0)}%)</span>`;
 
         row.innerHTML = `
-            <td><strong>${wine.name}</strong></td>
-            <td>${wine.storage}</td>
-            <td>${formatNumber(wine.amount)} bottles</td>
+            <td><strong>${displayInfo.name}</strong></td>
+            <td>${displayInfo.storage}</td>
+            <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${qualityDisplay}</td>
             <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
-            <td><button class="btn btn-success sell-wine-btn" data-resource="${wine.name.split(', ')[1]}">Sell</button></td>
+            <td><button class="btn btn-success sell-wine-btn" data-resource="${displayInfo.resource.name}">Sell</button></td>
         `;
 
         const sellButton = row.querySelector('.sell-wine-btn');
