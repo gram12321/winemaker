@@ -96,9 +96,20 @@ export function updateIncomeStatement() {
   const fixedAssets = buildingValue + farmlandValue;
   
   // Update balance sheet display
+  // Calculate wine inventory value
+  const wineInventoryValue = inventoryInstance.items
+    .filter(item => item.state === 'Bottles')
+    .reduce((sum, wine) => {
+      const farmland = JSON.parse(localStorage.getItem('ownedFarmlands')).find(f => f.name === wine.fieldName);
+      if (!farmland) return sum;
+      const basePrice = calculateWinePrice(wine.quality, farmland.landvalue, wine.fieldPrestige);
+      return sum + (basePrice * wine.amount);
+    }, 0);
+
   document.getElementById('cash-balance').textContent = `€${formatNumber(currentMoney)}`;
   document.getElementById('fixed-assets').textContent = `€${formatNumber(fixedAssets)}`;
-  document.getElementById('total-assets').textContent = `€${formatNumber(currentMoney + fixedAssets)}`;
+  document.getElementById('current-assets').textContent = `€${formatNumber(wineInventoryValue)}`;
+  document.getElementById('total-assets').textContent = `€${formatNumber(currentMoney + fixedAssets + wineInventoryValue)}`;
 }
 
 /**

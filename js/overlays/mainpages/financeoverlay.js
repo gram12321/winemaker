@@ -50,6 +50,10 @@ export function showFinanceOverlay() {
                             <div class="stat-label">Fixed Assets</div>
                             <div id="fixed-assets" class="stat-value">€0</div>
                         </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Current Assets (Wine)</div>
+                            <div id="current-assets" class="stat-value">€0</div>
+                        </div>
                     </div>
                 </div>
             </div>
