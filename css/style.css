@@ -1,3 +1,4 @@
+
 /* Quality Color Classes */
 .color-class-9 { color: #006400; }  /* Dark Green */
 .color-class-8 { color: #228B22; }  /* Forest Green */
@@ -70,8 +71,8 @@ body {
 }
 
 .inventory-container #grapes-section .card-header {
-  background: linear-gradient(135deg, #E8C9C9, #D4B4A7);
-  background-color: #E8C9C9;
+  background: linear-gradient(135deg, #8B4513, #654321);
+  background-color: #8B4513;
   border-bottom: 2px solid var(--color-accent);
   padding: 1rem;
   color: var(--panel-text);
@@ -79,8 +80,8 @@ body {
 
 /* Override Bootstrap's bg-success */
 .inventory-container #grapes-section .card-header.bg-success {
-  background: linear-gradient(135deg, #E8C9C9, #D4B4A7);
-  background-color: #E8C9C9;
+  background: linear-gradient(135deg, #8B4513, #654321);
+  background-color: #8B4513;
 }
 
 /* Must Storage Theme */
@@ -93,7 +94,7 @@ body {
 }
 
 #must-section .card-header {
-  background: linear-gradient(135deg, #8B4513, #722F37);
+  background: linear-gradient(135deg, var(--task-winery), #491809);
   border-bottom: 2px solid var(--task-winery);
   padding: 1rem;
 }
@@ -108,7 +109,7 @@ body {
 }
 
 #wine-section .card-header {
-  background: linear-gradient(135deg, #491809, #23143E);
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
   border-bottom: 2px solid var(--color-accent);
   padding: 1rem;
 }
@@ -252,3 +253,5 @@ body {
   display: flex;
   justify-content: center;
 }
+
+
