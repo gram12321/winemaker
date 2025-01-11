@@ -38,8 +38,8 @@ export function showLandOverlay() {
                     </div>
                 </div>
             </section>
-            <div id="buyLandOverlay" class="overlay" style="display: none;">
-                <div id="farmland-table-container"></div>
+            <div id="buyLandOverlay" class="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000;">
+                <div id="farmland-table-container" style="position: relative; top: 50%; transform: translateY(-50%);"></div>
             </div>
             <div id="farmlandOverlay" class="overlay" style="display: none;">
                 <div class="overlay-content text-center">
