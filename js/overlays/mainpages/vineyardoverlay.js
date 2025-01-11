@@ -16,7 +16,7 @@ export function showVineyardOverlay() {
             <h2 class="mb-4">Vineyard Management</h2>
             <div class="overlay-sections">
                 <section class="overlay-section card mb-4">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513); border-bottom: 2px solid var(--color-accent);">
                         <h3 class="h5 mb-0">Vineyard Fields</h3>
                     </div>
                     <div class="card-body">
