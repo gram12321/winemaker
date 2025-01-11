@@ -41,11 +41,7 @@ export function showLandOverlay() {
             </section>
 
             <div id="buyLandOverlay" class="overlay" style="display: none;">
-                <div class="overlay-content">
-                    <span id="closeBuyLandOverlay" class="close-btn">&times;</span>
-                    <h2>Available Farmlands</h2>
-                    <div id="farmland-table-container"></div>
-                </div>
+                <div id="farmland-table-container"></div>
             </div>
 
             <div id="farmlandOverlay" class="overlay" style="display: none;">
