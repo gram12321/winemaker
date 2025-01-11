@@ -30,6 +30,9 @@ function createFarmlandTable(newFarmlandOptions) {
     let tableHTML = `
         <section id="vineyard-section" class="overlay-section card mb-4">
             <div class="card-body">
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-light btn-sm" id="closeBuyLandBtn">Close</button>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover overlay-table">
                         <thead>
@@ -122,7 +125,7 @@ function buySelectedFarmland(farmland) {
 
 function setupCloseListeners() {
     const overlay = document.getElementById('buyLandOverlay');
-    const closeButton = document.querySelector('.btn.btn-light.btn-sm');
+    const closeButton = document.getElementById('closeBuyLandBtn');
     
     if (closeButton) {
         closeButton.addEventListener('click', () => {
