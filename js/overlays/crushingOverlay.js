@@ -8,11 +8,15 @@ function createOverlayStructure() {
   const overlayContainer = document.createElement('div');
   overlayContainer.className = 'overlay';
   overlayContainer.innerHTML = `
-    <div class="overlay-content">
-      <h2>Grape Crushing</h2>
-      <div class="crushing-section">
-        <h4>Select Grapes to Crush</h4>
-        <table class="table table-bordered">
+    <div class="overlay-content overlay-container">
+      <h2 class="mb-4">Grape Crushing</h2>
+      <section id="grapes-section" class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Select Grapes to Crush</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover overlay-table">
           <thead>
             <tr>
               <th>Select</th>
@@ -26,9 +30,13 @@ function createOverlayStructure() {
           </tbody>
         </table>
       </div>
-      <div class="must-storage-section">
-        <h4>Select Must Storage Container</h4>
-        <table class="table table-bordered">
+      <section id="must-storage-section" class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Select Must Storage Container</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover overlay-table">
           <thead>
             <tr>
               <th>Select</th>
@@ -41,8 +49,10 @@ function createOverlayStructure() {
           </tbody>
         </table>
       </div>
-      <button class="btn btn-success crush-btn">Crush Selected Grapes</button>
-      <button class="btn btn-secondary close-btn">Close</button>
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-light btn-sm close-btn">Close</button>
+        <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
+      </div>
     </div>
   `;
   return overlayContainer;
