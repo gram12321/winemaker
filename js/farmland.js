@@ -180,7 +180,7 @@ function createFarmlandRow(farmland, selectedUnit) {
   const row = document.createElement('tr');
   
   row.innerHTML = `
-    <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
+    <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 80px; height: auto; border-radius: 8px;"></td>
     <td>${farmland.name}</td>
     <td>
       ${getFlagIcon(farmland.country)}
@@ -189,7 +189,7 @@ function createFarmlandRow(farmland, selectedUnit) {
     <td>${formatNumber(landSize)} ${selectedUnit}</td>
     <td>${farmland.plantedResourceName || 'None'}</td>
     <td>
-      <button class="btn btn-primary plant-btn" data-farmland-id="${farmland.id}">Plant</button>
+      <button class="btn btn-light btn-sm plant-btn" data-farmland-id="${farmland.id}">Plant</button>
     </td>
   `;
   return row;

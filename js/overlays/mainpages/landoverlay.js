@@ -14,15 +14,14 @@ export function showLandOverlay() {
     overlay.innerHTML = `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Farmland Management</h2>
-            <button id="buy-land-btn" class="btn btn-light mb-4">Buy Land</button>
-
-            <section id="farmland-section" class="overlay-section card mb-4">
+            <section id="vineyard-section" class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Owned Farmland</h3>
+                    <button id="buy-land-btn" class="btn btn-light btn-sm">Buy Land</button>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table overlay-table">
+                        <table class="table table-hover overlay-table">
                             <thead>
                                 <tr>
                                     <th>Farmland</th>
@@ -39,13 +38,9 @@ export function showLandOverlay() {
                     </div>
                 </div>
             </section>
-
             <div id="buyLandOverlay" class="overlay" style="display: none;">
-                <div class="overlay-content">
-                    <div id="farmland-table-container"></div>
-                </div>
+                <div id="farmland-table-container"></div>
             </div>
-
             <div id="farmlandOverlay" class="overlay" style="display: none;">
                 <div class="overlay-content text-center">
                     <div id="farmland-details"></div>
