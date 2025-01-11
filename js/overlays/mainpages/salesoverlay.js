@@ -17,9 +17,12 @@ export function showSalesOverlay() {
             <h3>Sales</h3>
 
             <!-- Wine Cellar Inventory Section -->
-            <section class="my-4">
-                <h3>Wine Cellar Inventory</h3>
-                <table class="table table-bordered">
+            <section id="inventory-section" class="overlay-section card mb-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
+                </div>
+                <div class="card-body">
+                <table class="table overlay-table">
                     <thead>
                         <tr>
                             <th>Wine</th>
@@ -36,8 +39,11 @@ export function showSalesOverlay() {
             </section>
 
             <!-- Wine Orders Section -->
-            <section class="my-4">
-                <h3>Wine Orders</h3>
+            <section id="orders-section" class="overlay-section card mb-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Wine Orders</h3>
+                </div>
+                <div class="card-body">
                 <div class="filters mb-3">
                     <select id="type-filter" class="form-control d-inline-block w-auto mr-2">
                         <option value="">All Types</option>

@@ -223,6 +223,17 @@
   border-bottom: 2px solid var(--color-accent);
 }
 
+/* Sales Section Headers */
+#inventory-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+#orders-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
+}
+
 /* Fullscreen overlay specific for hire staff */
 #hireStaffOverlay {
   display: none;
