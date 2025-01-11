@@ -10,51 +10,35 @@
 .color-class-1 { color: #FF0000; }  /* Red */
 .color-class-0 { color: #8B0000; }  /* Dark Red */
 
-
-/* General */
+/* General Layout */
 body {
   display: flex;
-  margin-bottom: 220px;
-  /* Ensure space for the fixed console */
+  margin-bottom: 220px;  /* Space for the fixed console */
 }
-
-button.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
 
 #wrapper {
   display: flex;
   width: 100%;
 }
 
-/*  - --- --   Mainview   - - - - - -*/
-
-
-body {
-  margin-bottom: 220px;
-  /* Space for the fixed console panel */
-}
-
-/* Centering the gamepages vertically and horizontally */
 #page-content-wrapper {
   flex: 1;
   padding: 20px;
   display: flex;
   align-items: center;
-  /* Center content vertically */
   flex-direction: column;
-  /* Stack elements vertically */
   min-height: 100vh;
-  /* Take at least the full viewport height to center correctly */
   margin-left: 250px;
-  /* Account for sidebar width */
   margin-right: 450px;
-  /* Account for panel width */
 }
 
-/* Overlay Styles */
+/* Shared Button Styles */
+button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Overlay Container Styles */
 .overlay-container {
   background-color: var(--color-background);
   padding: 2rem;
@@ -62,149 +46,9 @@ body {
   margin: 0 auto;
 }
 
-/* Grape Storage Theme */
-#grapes-section {
-  border: 1px solid var(--color-secondary);
-  border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-}
-
-.overlay-container #grapes-section .card-header {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  background-color: var(--color-accent);
-  border-bottom: 2px solid var(--color-accent);
-  padding: 1rem;
-  color: var(--panel-text);
-}
-
-/* Override Bootstrap's bg-success */
-.overlay-container #grapes-section .card-header.bg-success {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  background-color: var(--color-accent);
-}
-
-/* Must Storage Theme */
-#must-section {
-  border: 1px solid var(--task-winery);
-  border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-}
-
-#must-section .card-header {
-  background: linear-gradient(135deg, #8B4513, #491809);
-  border-bottom: 2px solid var(--task-winery);
-  padding: 1rem;
-}
-
-#must-section .btn-light {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  color: var(--panel-text);
-}
-
-#must-section .btn-light:hover {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
-}
-
-.overlay-section .badge {
-  background-color: var(--color-accent);
-  color: var(--panel-text);
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  margin-left: 1rem;
-}
-
-.inventory-section .badge,
-.overlay-section .badge-light {
-  background-color: var(--color-accent);
-  color: var(--panel-text);
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  margin-left: 1rem;
-}
-
-/* Wine Storage Theme */
-#wine-section {
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
-}
-
-#wine-section .card-header {
-  background: linear-gradient(135deg, #491809, #23143E);
-  border-bottom: 2px solid var(--color-accent);
-  padding: 1rem;
-}
-
-.overlay-section .card-header h3 {
-  color: var(--panel-text);
-  margin: 0;
-}
-
-.overlay-section .table,
-.overlay-table {
-  margin: 0;
-}
-
-.overlay-section .table th,
-.overlay-table th {
-  background-color: rgba(0, 0, 0, 0.05);
-  border-bottom: 2px solid var(--color-accent);
-}
-
-.overlay-section .table td,
-.overlay-table td {
-  border-color: rgba(197, 165, 114, 0.2);
-}
-
-.overlay-section .badge {
-  background-color: var(--color-accent);
-  color: var(--panel-text);
-}
-
-/* Filter Buttons */
-.btn-group .btn-outline-primary {
-  color: var(--color-primary);
-  border-color: var(--color-accent);
-}
-
-.btn-group .btn-outline-primary:hover,
-.btn-group .btn-outline-primary.active {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
-}
-
-/* Pictures in main view */
-
-.process-image {
-  max-width: 200px;
-  height: auto;
-  padding: 20px 20px;
-  border-radius: 60px;
-}
-
-.status-image {
-  max-width: 100px;
-  height: auto;
-  padding: 10px;
-  border-radius: 30px;
-}
-
-/* Shared Overlay Styles */
-.mainview-overlay {
-  background-color: var(--color-background);
-}
-
+/* Section Styles */
 .overlay-section {
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-lg);
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-md);
@@ -214,20 +58,30 @@ body {
 .overlay-section .card-header {
   padding: 1rem;
   border-bottom: 2px solid var(--color-accent);
+  color: var(--panel-text);
 }
 
-.overlay-section .table {
+.overlay-section .card-header h3 {
+  color: var(--panel-text);
+  margin: 0;
+}
+
+/* Table Styles */
+.overlay-section .table,
+.overlay-table {
   margin: 0;
   background-color: transparent;
 }
 
-.overlay-section .table thead th {
+.overlay-section .table th,
+.overlay-table th {
   background-color: rgba(0, 0, 0, 0.05);
   padding: 12px;
   border-bottom: 2px solid var(--color-accent);
 }
 
-.overlay-section .table tbody td {
+.overlay-section .table td,
+.overlay-table td {
   padding: 12px;
   border-color: rgba(197, 165, 114, 0.2);
 }
@@ -236,6 +90,18 @@ body {
   background-color: rgba(197, 165, 114, 0.1);
 }
 
+/* Badge Styles */
+.overlay-section .badge,
+.inventory-section .badge,
+.overlay-section .badge-light {
+  background-color: var(--color-accent);
+  color: var(--panel-text);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+}
+
+/* Button Styles */
 .overlay-section .btn-light {
   background-color: var(--color-accent);
   border-color: var(--color-primary);
@@ -248,18 +114,57 @@ body {
   color: var(--panel-text);
 }
 
+.btn-group .btn-outline-primary {
+  color: var(--color-primary);
+  border-color: var(--color-accent);
+}
 
-/* Farmland.html */
+.btn-group .btn-outline-primary:hover,
+.btn-group .btn-outline-primary.active {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+}
 
+/* Section-specific Styles */
+#grapes-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+#must-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--task-winery);
+}
+
+#wine-section .card-header {
+  background: linear-gradient(135deg, #491809, #23143E);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Image Styles */
+.process-image {
+  max-width: 200px;
+  height: auto;
+  padding: 20px;
+  border-radius: 60px;
+}
+
+.status-image {
+  max-width: 100px;
+  height: auto;
+  padding: 10px;
+  border-radius: 30px;
+}
+
+/* Farmland Table Styles */
 .owned-farmland-table td,
 .owned-farmland-table th {
   white-space: nowrap;
-  /* Ensure no line breaks in table cells */
 }
 
 #farmlandAccordion {
   overflow-x: auto;
-  /* Allow horizontal scrolling if necessary */
 }
 
 .card-body {
