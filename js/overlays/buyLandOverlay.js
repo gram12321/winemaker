@@ -34,14 +34,6 @@ export function showBuyLandOverlay() {
         <table class="table">
             <thead>
                 <tr>
-                    <th colspan="10" class="text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
-                        <h3 class="h5 mb-0">Available Farmlands</h3>
-                        <button id="closeBuyLandOverlay" class="btn btn-light btn-sm">Close</button>
-                    </th>
-                </tr>
-                <tr>
-            <thead>
-                <tr>
                     <th>Field Name</th>
                     <th>Country</th>
                     <th>Region</th>
@@ -89,7 +81,14 @@ export function showBuyLandOverlay() {
         </table>
     `;
 
-    farmlandTableContainer.innerHTML = tableHTML;
+    const closeButton = document.createElement('div');
+    closeButton.className = 'text-right mb-2';
+    closeButton.innerHTML = `
+        <h3 class="h5 d-inline mr-3">Available Farmlands</h3>
+        <button id="closeBuyLandOverlay" class="btn btn-light btn-sm">Close</button>
+    `;
+    farmlandTableContainer.appendChild(closeButton);
+    farmlandTableContainer.innerHTML += tableHTML;
     const buyButtons = farmlandTableContainer.querySelectorAll('.buy-farmland-btn');
     buyButtons.forEach((button, index) => {
         button.addEventListener('click', () => buySelectedFarmland(newFarmlandOptions[index]));
