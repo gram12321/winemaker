@@ -213,80 +213,17 @@ body {
 }
 
 .inventory-section .btn-light {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
   color: var(--panel-text);
 }
 
 .inventory-section .btn-light:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  color: var(--panel-text);
-}
-
-/* Winery Process Sections */
-.winery-container .crushing-section {
-  background: linear-gradient(145deg, var(--color-background), #E8C9C9) !important;
-  background-color: #E8C9C9 !important;
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--task-winery);
-}
-
-.winery-container .fermentation-section {
-  background: linear-gradient(145deg, var(--color-background), #D4B4A7) !important;
-  background-color: #D4B4A7 !important;
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-accent);
-}
-
-.winery-container .aging-section {
-  background: linear-gradient(145deg, var(--color-background), #C5B1A3);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-accent);
-}
-
-.winery-container h4 {
-  color: var(--color-primary);
-  border-bottom: 2px solid var(--color-accent);
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.winery-container .table {
-  background-color: transparent;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.winery-container .table thead th {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  border-bottom: 2px solid var(--color-accent);
-}
-
-.winery-container .table td {
-  border-color: rgba(197, 165, 114, 0.2);
-}
-
-.winery-container .btn-primary {
   background-color: var(--color-primary);
   border-color: var(--color-accent);
   color: var(--panel-text);
 }
 
-.winery-container .btn-primary:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-}
 
 /* Farmland.html */
 
