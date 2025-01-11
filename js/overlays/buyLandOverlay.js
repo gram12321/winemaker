@@ -31,9 +31,14 @@ export function showBuyLandOverlay() {
     const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1;
     farmlandTableContainer.innerHTML = '';
     let tableHTML = `
-        <button id="closeBuyLandOverlay" class="btn btn-secondary" style="position: absolute; top: 10px; left: 10px;">Close</button>
         <table class="table">
             <thead>
+                <tr>
+                    <th colspan="10" class="text-center position-relative">
+                        Available Farmlands
+                        <button id="closeBuyLandOverlay" class="btn btn-secondary" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">Close</button>
+                    </th>
+                </tr>
                 <tr>
                     <th>Field Name</th>
                     <th>Country</th>
