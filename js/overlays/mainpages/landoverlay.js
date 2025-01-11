@@ -14,7 +14,12 @@ export function showLandOverlay() {
     overlay.innerHTML = `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Farmland Management</h2>
-            <button id="buy-land-btn" class="btn btn-light mb-4">Buy Land</button>
+            <section id="vineyard-section" class="overlay-section card mb-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Available Land</h3>
+                    <button id="buy-land-btn" class="btn btn-light btn-sm">Buy Land</button>
+                </div>
+            </section>
 
             <section id="farmland-section" class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
