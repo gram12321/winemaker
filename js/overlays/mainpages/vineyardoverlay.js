@@ -12,16 +12,26 @@ export function showVineyardOverlay() {
     overlay.classList.add('mainview-overlay');
 
     overlay.innerHTML = `
-        <div class="mainview-overlay-content">
-            <h1>Vineyard</h1>
-            <p>Here you can manage your vineyards, check grape quality and more.</p>
-            <div id="vineyard-table-container"></div>
+        <div class="mainview-overlay-content overlay-container">
+            <h2 class="mb-4">Vineyard Management</h2>
+            <div class="overlay-sections">
+                <section class="overlay-section card mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Vineyard Fields</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <div id="vineyard-table-container"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
     `;
 
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const table = document.createElement('table');
-    table.className = 'table table-bordered';
+    table.className = 'table table-hover overlay-table';
 
     table.innerHTML = `
         <thead>
