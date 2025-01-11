@@ -353,3 +353,16 @@
   border-color: var(--color-primary);
   color: var(--panel-text);
 }
+
+/* Refuse button styling */
+.refuse-order-btn {
+  background-color: #8B4513;
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+}
+
+.refuse-order-btn:hover {
+  background-color: #5C2E0E;
+  border-color: var(--color-primary);
+  color: var(--panel-text);
+}

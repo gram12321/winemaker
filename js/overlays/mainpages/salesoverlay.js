@@ -42,18 +42,18 @@ export function showSalesOverlay() {
             <section id="orders-section" class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Wine Orders</h3>
+                    <div class="filters d-flex gap-2">
+                        <select id="type-filter" class="form-control form-control-sm d-inline-block w-auto">
+                            <option value="">All Types</option>
+                            <option value="Private Order">Private Order</option>
+                            <option value="Engross Order">Engross Order</option>
+                        </select>
+                        <select id="resource-filter" class="form-control form-control-sm d-inline-block w-auto">
+                            <option value="">All Wines</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="card-body">
-                <div class="filters mb-3">
-                    <select id="type-filter" class="form-control d-inline-block w-auto mr-2">
-                        <option value="">All Types</option>
-                        <option value="Private Order">Private Order</option>
-                        <option value="Engross Order">Engross Order</option>
-                    </select>
-                    <select id="resource-filter" class="form-control d-inline-block w-auto">
-                        <option value="">All Wines</option>
-                    </select>
-                </div>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -219,7 +219,7 @@ function displayFilteredOrders(filteredOrders) {
             <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
             <td>
                 <button class="btn btn-light sell-order-btn">Sell</button>
-                <button class="btn btn-danger refuse-order-btn">Refuse</button>
+                <button class="btn refuse-order-btn">Refuse</button>
             </td>
         `;
 
