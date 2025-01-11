@@ -50,7 +50,6 @@ export function showLandOverlay() {
 
             <div id="farmlandOverlay" class="overlay">
                 <div class="overlay-content text-center">
-                    <span id="closeFarmlandOverlay" class="close-btn">&times;</span>
                     <div id="farmland-details"></div>
                 </div>
             </div>

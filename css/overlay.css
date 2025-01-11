@@ -52,7 +52,7 @@
 }
 
 /* Table styles within overlays (Popupoverlay and the like Farmlandover ect.) */
-.overlay .table {
+.overlay .table:not(#buyLandOverlay .table) {
   margin: 0 auto;
   width: auto;
   min-width: 400px;
@@ -61,10 +61,26 @@
   background-color: transparent;
 }
 
-.overlay .table th {
+.overlay .table:not(#buyLandOverlay .table) th {
   background-color: var(--color-primary);
   color: var(--panel-text);
   border-bottom: 2px solid var(--color-accent);
+}
+
+/* Specific styles for buyLandOverlay table */
+#buyLandOverlay .table {
+  margin: 0 auto;
+  width: auto;
+  min-width: 400px;
+  color: #333;
+  text-align: center;
+  background-color: #f9f9f9;
+}
+
+#buyLandOverlay .table th {
+  background-color: #f5f5f5;
+  color: #333;
+  border-bottom: 2px solid #ddd;
 }
 
 /* Skills Table Styles */
