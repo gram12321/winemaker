@@ -148,16 +148,19 @@
 
 .overlay-section .table td,
 
-/* Section-specific Styles */
+/* Section-specific Header Styles */
 #vineyard-section .card-header {
   background: linear-gradient(135deg, var(--color-accent), #8B4513);
   border-bottom: 2px solid var(--color-accent);
 }
 
 
-.overlay-table td {
+/* Table Cell Styles */
+.overlay-table td,
+.overlay-section .table td {
   padding: 12px;
   border-color: rgba(197, 165, 114, 0.2);
+  background: transparent;
 }
 
 .overlay-section .table tbody tr:hover {
