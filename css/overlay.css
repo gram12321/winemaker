@@ -52,36 +52,49 @@
 }
 
 /* Default table styles for overlays */
-.overlay .table {
+.overlay .table:not(#buyLandOverlay .table) {
   margin: 0 auto;
   width: auto;
   min-width: 400px;
-  color: var(--panel-text);
+  background-color: #fff;
+  text-align: center;
+}
+
+.overlay .table:not(#buyLandOverlay .table) th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* BuyLandOverlay specific styles */
+#buyLandOverlay {
+  background-color: var(--color-background);
+}
+
+#buyLandOverlay .table {
+  margin: 0 auto;
+  width: auto;
+  min-width: 400px;
+  color: var(--color-text);
   text-align: center;
   background-color: transparent;
 }
 
-.overlay .table th {
+#buyLandOverlay .table th {
   background-color: var(--color-primary);
   color: var(--panel-text);
   border-bottom: 2px solid var(--color-accent);
 }
 
-/* Specific styles for buyLandOverlay */
-#buyLandOverlay {
-  background-color: var(--color-background);
-}
-
 /* General overlay content styles */
 .overlay-content {
+  background-color: #fff;
+  color: #212529;
+}
+
+#buyLandOverlay .overlay-content {
   background-color: var(--color-background);
   color: var(--color-text);
 }
-
-/* BuyLandOverlay specific styles */
-#buyLandOverlay .table {
-  margin: 0 auto;
-  width: auto;
   min-width: 400px;
   color: var(--color-text);
   text-align: center;
