@@ -88,6 +88,7 @@ export function showBuyLandOverlay() {
         button.addEventListener('click', () => buySelectedFarmland(newFarmlandOptions[index]));
     });
     overlay.style.display = 'block';
+    setupCloseListeners();
 }
 
 function buySelectedFarmland(farmland) {
@@ -117,13 +118,15 @@ function buySelectedFarmland(farmland) {
 }
 
 // Close button event listener
-document.addEventListener('DOMContentLoaded', () => {
+function setupCloseListeners() {
     const overlay = document.getElementById('buyLandOverlay');
+    const closeButton = document.getElementById('closeBuyLandOverlay');
     
-    // Close on clicking close button
-    document.getElementById('closeBuyLandOverlay').addEventListener('click', () => {
-        overlay.style.display = 'none';
-    });
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            overlay.style.display = 'none';
+        });
+    }
 
     // Close on clicking outside
     window.addEventListener('click', (event) => {
