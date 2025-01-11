@@ -1,46 +1,45 @@
 
+// Import required functions
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 import { displayFarmland } from '/js/farmland.js';
 
 export function showLandOverlay() {
+    // Remove any existing instances of the overlay
     const existingOverlay = document.querySelector('.mainview-overlay');
     if (existingOverlay) {
         existingOverlay.remove();
     }
 
+    // Create the overlay element
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
 
+    // Create content for the overlay
     overlay.innerHTML = `
-        <div class="mainview-overlay-content overlay-container">
-            <h2 class="mb-4">Farmland Management</h2>
-            <button id="buy-land-btn" class="btn btn-light mb-4">Buy Land</button>
+        <div class="mainview-overlay-content">
+            <h1>Farmland</h1>
+            <button id="buy-land-btn" class="btn btn-success mt-3">Buy Land</button>
 
-            <section id="farmland-section" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Owned Farmland</h3>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table overlay-table">
-                            <thead>
-                                <tr>
-                                    <th>Farmland</th>
-                                    <th>Field Name</th>
-                                    <th>Country/Region</th>
-                                    <th>Size</th>
-                                    <th>Crop</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="farmland-entries">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+            <!-- Farmland Table -->
+            <div class="farmland-table mt-4">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Farmland</th>
+                            <th>Field Name</th>
+                            <th>Country/Region</th>
+                            <th>Size</th>
+                            <th>Crop</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="farmland-entries">
+                    </tbody>
+                </table>
+            </div>
 
-            <div id="buyLandOverlay" class="overlay">
+            <!-- Buy Land Overlay -->
+            <div id="buyLandOverlay" class="overlay" style="display: none;">
                 <div class="overlay-content">
                     <span id="closeBuyLandOverlay" class="close-btn">&times;</span>
                     <h2>Available Farmlands</h2>
@@ -48,7 +47,8 @@ export function showLandOverlay() {
                 </div>
             </div>
 
-            <div id="farmlandOverlay" class="overlay">
+            <!-- Farmland Overlay -->
+            <div id="farmlandOverlay" class="overlay" style="display: none;">
                 <div class="overlay-content text-center">
                     <span id="closeFarmlandOverlay" class="close-btn">&times;</span>
                     <div id="farmland-details"></div>
@@ -57,13 +57,18 @@ export function showLandOverlay() {
         </div>
     `;
 
+    // Append overlay to the document body
     document.body.appendChild(overlay);
 
+    // Display the overlay
+    overlay.style.display = 'block';
+
+    // Add event listener for buy land button
     const buyLandBtn = overlay.querySelector('#buy-land-btn');
     if (buyLandBtn) {
         buyLandBtn.addEventListener('click', showBuyLandOverlay);
     }
 
+    // Display farmland data
     displayFarmland();
-    overlay.style.display = 'block';
 }
