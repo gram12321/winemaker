@@ -134,4 +134,4 @@ function setupCloseListeners() {
             overlay.style.display = 'none';
         }
     });
-});
+}
