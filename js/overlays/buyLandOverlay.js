@@ -17,10 +17,7 @@ export function showBuyLandOverlay() {
     while (newFarmlandOptions.length < numberOfOptions) {
         const id = getLastId(ownedFarmlands.concat(newFarmlandOptions)) + 1;
         const acres = getRandomAcres();
-
-        // Create the farmland with random attributes
         const farmland = createFarmland(id, acres);
-
         const isOwned = ownedFarmlands.some(f => f.name === farmland.name);
         if (!isOwned) {
             newFarmlandOptions.push(farmland);
@@ -29,7 +26,8 @@ export function showBuyLandOverlay() {
 
     const selectedUnit = getUnit();
     const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1;
-    farmlandTableContainer.innerHTML = `
+    
+    let tableHTML = `
         <section id="farmland-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
                 <h3 class="h5 mb-0">Available Farmlands</h3>
@@ -41,29 +39,28 @@ export function showBuyLandOverlay() {
                         <thead>
                             <tr>
                                 <th>Field Name</th>
-                    <th>Country</th>
-                    <th>Region</th>
-                    <th>Size</th>
-                    <th>Soil</th>
-                    <th>Altitude</th>
-                    <th>Aspect</th>
-                    <th>Land Value (per ${selectedUnit})</th>
-                    <th>Price</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
+                                <th>Country</th>
+                                <th>Region</th>
+                                <th>Size</th>
+                                <th>Soil</th>
+                                <th>Altitude</th>
+                                <th>Aspect</th>
+                                <th>Land Value (per ${selectedUnit})</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
     `;
 
     newFarmlandOptions.forEach(farmland => {
         const aspectRating = regionAspectRatings[farmland.country][farmland.region][farmland.aspect];
         const colorClass = getColorClass(aspectRating);
-
         const priceFactorPerAcre = calculateAndNormalizePriceFactor(farmland.country, farmland.region, farmland.altitude, farmland.aspect);
         const landValuePerUnit = parseFloat(priceFactorPerAcre * conversionFactor);
         const landSize = parseFloat(convertToCurrentUnit(farmland.acres));
         const totalPrice = landSize * landValuePerUnit;
-
+        
         farmland.totalPrice = totalPrice;
 
         tableHTML += `
@@ -83,16 +80,19 @@ export function showBuyLandOverlay() {
     });
 
     tableHTML += `
-        </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </section>
     `;
+
+    farmlandTableContainer.innerHTML = tableHTML;
     const buyButtons = farmlandTableContainer.querySelectorAll('.buy-farmland-btn');
     buyButtons.forEach((button, index) => {
         button.addEventListener('click', () => buySelectedFarmland(newFarmlandOptions[index]));
     });
+
     overlay.style.display = 'block';
     setupCloseListeners();
 }
@@ -107,23 +107,14 @@ function buySelectedFarmland(farmland) {
         return;
     }
 
-    // Log the purchase transaction and update the balance
     addTransaction('Expense', `Purchase of ${farmland.name}`, -totalPrice);
-
-    // Add farmland to ownedFarmlands
     ownedFarmlands.push(farmland);
     localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
-
     addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formatLandSizeWithUnit(farmland.acres)}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
-
-    // Update land display
     displayFarmland();
-
-    // Close the overlay
     document.getElementById('buyLandOverlay').style.display = 'none';
 }
 
-// Close button event listener
 function setupCloseListeners() {
     const overlay = document.getElementById('buyLandOverlay');
     const closeButton = document.getElementById('closeBuyLandOverlay');
@@ -134,7 +125,6 @@ function setupCloseListeners() {
         });
     }
 
-    // Close on clicking outside
     window.addEventListener('click', (event) => {
         if (event.target === overlay) {
             overlay.style.display = 'none';
