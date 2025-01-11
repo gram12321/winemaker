@@ -255,15 +255,6 @@
   color: #FAF9F7;
 }
 
-.form-control-sm option:hover,
-.form-control-sm option:focus,
-.form-control-sm option:checked,
-.form-control-sm option:active {
-  background-color: #8B4513 !important;
-  color: #FAF9F7 !important;
-  box-shadow: none !important;
-}
-
 .form-control-sm:hover {
   border-color: #8B4513;
 }
