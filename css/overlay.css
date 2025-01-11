@@ -68,11 +68,20 @@
 }
 
 /* Specific styles for buyLandOverlay table */
+#buyLandOverlay {
+  background-color: var(--color-background);
+}
+
+#buyLandOverlay .overlay-content {
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
 #buyLandOverlay .table {
   margin: 0 auto;
   width: auto;
   min-width: 400px;
-  color: var(--panel-text);
+  color: var(--color-text);
   text-align: center;
   background-color: transparent;
 }
@@ -81,6 +90,17 @@
   background-color: var(--color-primary);
   color: var(--panel-text);
   border-bottom: 2px solid var(--color-accent);
+  padding: 12px;
+}
+
+#buyLandOverlay .table td {
+  color: var(--color-text);
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+}
+
+#buyLandOverlay .table tbody tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
 }
 
 /* Skills Table Styles */
