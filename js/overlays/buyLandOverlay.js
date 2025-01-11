@@ -31,11 +31,15 @@ export function showBuyLandOverlay() {
     const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1;
     farmlandTableContainer.innerHTML = '';
     let tableHTML = `
-        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center mb-3">
-            <h3 class="h5 mb-0">Available Farmlands</h3>
-            <button id="closeBuyLandOverlay" class="btn btn-light btn-sm">Close</button>
-        </div>
         <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="10" class="text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
+                        <h3 class="h5 mb-0">Available Farmlands</h3>
+                        <button id="closeBuyLandOverlay" class="btn btn-light btn-sm">Close</button>
+                    </th>
+                </tr>
+                <tr>
             <thead>
                 <tr>
                     <th>Field Name</th>
