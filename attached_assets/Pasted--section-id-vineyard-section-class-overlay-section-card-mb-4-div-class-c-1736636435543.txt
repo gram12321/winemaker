@@ -1,0 +1,71 @@
+<section id="vineyard-section" class="overlay-section card mb-4">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Vineyard Fields</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <div id="vineyard-table-container"><table class="table table-hover overlay-table">
+        <thead>
+            <tr>
+                <th>Field Name</th>
+                <th>Size</th>
+                <th>Vine Age</th>
+                <th>Crop</th>
+                <th>Status</th>
+                <th>Ripeness</th>
+                <th>Expected Yield</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+                    <tr data-farmland-id="2">
+                        <td>José</td>
+                        <td>44 acres</td>
+                        <td>3</td>
+                        <td>Barbera</td>
+                        <td>Harvested</td>
+                        <td>2.0%</td>
+                        <td>4.58 kg</td>
+                        <td>
+                            <button class="btn btn-light btn-sm harvest-btn" data-farmland-id="2" disabled="">
+                                Harvest
+                            </button>
+                        </td>
+                    </tr>
+                
+                    <tr data-farmland-id="5">
+                        <td>Adriana</td>
+                        <td>127 acres</td>
+                        <td>0</td>
+                        <td>Chardonnay</td>
+                        <td>Harvested</td>
+                        <td>2.0%</td>
+                        <td>4.40 kg</td>
+                        <td>
+                            <button class="btn btn-light btn-sm harvest-btn" data-farmland-id="5" disabled="">
+                                Harvest
+                            </button>
+                        </td>
+                    </tr>
+                
+                    <tr data-farmland-id="8">
+                        <td>Nicolò</td>
+                        <td>182 acres</td>
+                        <td>0</td>
+                        <td>Chardonnay</td>
+                        <td>Harvested</td>
+                        <td>2.0%</td>
+                        <td>3.21 kg</td>
+                        <td>
+                            <button class="btn btn-light btn-sm harvest-btn" data-farmland-id="8" disabled="">
+                                Harvest
+                            </button>
+                        </td>
+                    </tr>
+                
+        </tbody>
+    </table></div>
+                        </div>
+                    </div>
+                </section>
