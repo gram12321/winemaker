@@ -17,19 +17,22 @@ function createOverlayStructure() {
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-hover overlay-table">
-          <thead>
-            <tr>
-              <th>Select</th>
-              <th>Container</th>
-              <th>Resource</th>
-              <th>Amount</th>
-              <th>Quality</th>
-            </tr>
-          </thead>
-          <tbody id="crushing-storage-table">
-          </tbody>
-        </table>
-      </div>
+              <thead>
+                <tr>
+                  <th>Select</th>
+                  <th>Container</th>
+                  <th>Resource</th>
+                  <th>Amount</th>
+                  <th>Quality</th>
+                </tr>
+              </thead>
+              <tbody id="crushing-storage-table">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      
       <section id="must-storage-section" class="overlay-section card mb-4">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
           <h3 class="h5 mb-0">Select Must Storage Container</h3>
