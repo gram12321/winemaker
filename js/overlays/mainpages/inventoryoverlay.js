@@ -13,7 +13,7 @@ export function showInventoryOverlay() {
     overlay.classList.add('mainview-overlay');
 
     overlay.innerHTML = `
-        <div class="mainview-overlay-content inventory-container">
+        <div class="mainview-overlay-content overlay-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="me-4">Inventory Management</h2>
                 <div class="btn-group ms-2">

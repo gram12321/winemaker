@@ -54,10 +54,12 @@ body {
   /* Account for panel width */
 }
 
-/* Inventory Styles */
-.inventory-container {
+/* Overlay Styles */
+.overlay-container {
   background-color: var(--color-background);
   padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Grape Storage Theme */
@@ -69,7 +71,7 @@ body {
   overflow: hidden;
 }
 
-.inventory-container #grapes-section .card-header {
+.overlay-container #grapes-section .card-header {
   background: linear-gradient(135deg, var(--color-accent), #8B4513);
   background-color: var(--color-accent);
   border-bottom: 2px solid var(--color-accent);
@@ -78,7 +80,7 @@ body {
 }
 
 /* Override Bootstrap's bg-success */
-.inventory-container #grapes-section .card-header.bg-success {
+.overlay-container #grapes-section .card-header.bg-success {
   background: linear-gradient(135deg, var(--color-accent), #8B4513);
   background-color: var(--color-accent);
 }
@@ -113,28 +115,28 @@ body {
   padding: 1rem;
 }
 
-.inventory-section .card-header h3 {
+.overlay-section .card-header h3 {
   color: var(--panel-text);
   margin: 0;
 }
 
-.inventory-section .table,
-.inventory-table {
+.overlay-section .table,
+.overlay-table {
   margin: 0;
 }
 
-.inventory-section .table th,
-.inventory-table th {
+.overlay-section .table th,
+.overlay-table th {
   background-color: rgba(0, 0, 0, 0.05);
   border-bottom: 2px solid var(--color-accent);
 }
 
-.inventory-section .table td,
-.inventory-table td {
+.overlay-section .table td,
+.overlay-table td {
   border-color: rgba(197, 165, 114, 0.2);
 }
 
-.inventory-section .badge {
+.overlay-section .badge {
   background-color: var(--color-accent);
   color: var(--panel-text);
 }
@@ -173,52 +175,45 @@ body {
   background-color: var(--color-background);
 }
 
-.inventory-container {
-  padding: 2rem;
-  background-color: var(--color-background);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.inventory-section {
+.overlay-section {
   border-radius: var(--radius-lg);
   margin-bottom: 1.5rem;
   box-shadow: var(--shadow-md);
   overflow: hidden;
 }
 
-.inventory-section .card-header {
+.overlay-section .card-header {
   padding: 1rem;
   border-bottom: 2px solid var(--color-accent);
 }
 
-.inventory-section .table {
+.overlay-section .table {
   margin: 0;
   background-color: transparent;
 }
 
-.inventory-section .table thead th {
+.overlay-section .table thead th {
   background-color: rgba(0, 0, 0, 0.05);
   padding: 12px;
   border-bottom: 2px solid var(--color-accent);
 }
 
-.inventory-section .table tbody td {
+.overlay-section .table tbody td {
   padding: 12px;
   border-color: rgba(197, 165, 114, 0.2);
 }
 
-.inventory-section .table tbody tr:hover {
+.overlay-section .table tbody tr:hover {
   background-color: rgba(197, 165, 114, 0.1);
 }
 
-.inventory-section .btn-light {
+.overlay-section .btn-light {
   background-color: var(--color-accent);
   border-color: var(--color-primary);
   color: var(--panel-text);
 }
 
-.inventory-section .btn-light:hover {
+.overlay-section .btn-light:hover {
   background-color: var(--color-primary);
   border-color: var(--color-accent);
   color: var(--panel-text);
