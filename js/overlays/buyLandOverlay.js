@@ -31,6 +31,7 @@ export function showBuyLandOverlay() {
     const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1;
     farmlandTableContainer.innerHTML = '';
     let tableHTML = `
+        <button id="closeBuyLandOverlay" class="btn btn-secondary" style="position: absolute; top: 10px; left: 10px;">Close</button>
         <table class="table">
             <thead>
                 <tr>
@@ -117,14 +118,12 @@ function buySelectedFarmland(farmland) {
 
 // Close button event listener
 document.addEventListener('DOMContentLoaded', () => {
-    const closeOverlayBtn = document.getElementById('closeBuyLandOverlay');
     const overlay = document.getElementById('buyLandOverlay');
     
-    if (closeOverlayBtn) {
-        closeOverlayBtn.addEventListener('click', () => {
-            overlay.style.display = 'none';
-        });
-    }
+    // Close on clicking close button
+    document.getElementById('closeBuyLandOverlay').addEventListener('click', () => {
+        overlay.style.display = 'none';
+    });
 
     // Close on clicking outside
     window.addEventListener('click', (event) => {
