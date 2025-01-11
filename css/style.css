@@ -214,7 +214,15 @@ body {
 }
 
 .inventory-section .btn-light {
+  background-color: var(--color-primary);
   border-color: var(--color-accent);
+  color: var(--panel-text);
+}
+
+.inventory-section .btn-light:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  color: var(--panel-text);
 }
 
 /* Winery Process Sections */
