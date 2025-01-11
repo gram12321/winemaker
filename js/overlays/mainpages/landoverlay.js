@@ -1,4 +1,3 @@
-
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 import { displayFarmland } from '/js/farmland.js';
 
