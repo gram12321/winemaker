@@ -100,6 +100,26 @@ body {
   padding: 1rem;
 }
 
+#must-section .btn-light {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  color: var(--panel-text);
+}
+
+#must-section .btn-light:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+}
+
+.overlay-section .badge {
+  background-color: var(--color-accent);
+  color: var(--panel-text);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+}
+
 /* Wine Storage Theme */
 #wine-section {
   border: 1px solid var(--color-accent);
