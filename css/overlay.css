@@ -234,6 +234,31 @@
   border-bottom: 2px solid var(--color-accent);
 }
 
+/* Dropdown Styling */
+.form-control-sm {
+  background-color: var(--panel-bg);
+  border: 1px solid var(--color-accent);
+  color: var(--panel-text);
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.form-control-sm:focus {
+  background-color: var(--panel-bg);
+  border-color: var(--color-primary);
+  color: var(--panel-text);
+  box-shadow: 0 0 0 0.2rem rgba(197, 165, 114, 0.25);
+}
+
+.form-control-sm option {
+  background-color: var(--panel-bg);
+  color: var(--panel-text);
+}
+
+.form-control-sm:hover {
+  border-color: var(--color-primary);
+}
+
 /* Fullscreen overlay specific for hire staff */
 #hireStaffOverlay {
   display: none;
