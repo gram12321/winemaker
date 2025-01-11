@@ -179,6 +179,7 @@ function createFarmlandRow(farmland, selectedUnit) {
   const landSize = convertToCurrentUnit(farmland.acres);
   const row = document.createElement('tr');
   
+  const isPlantingAllowed = !farmland.plantedResourceName;
   row.innerHTML = `
     <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 80px; height: auto; border-radius: 8px;"></td>
     <td>${farmland.name}</td>
@@ -189,7 +190,7 @@ function createFarmlandRow(farmland, selectedUnit) {
     <td>${formatNumber(landSize)} ${selectedUnit}</td>
     <td>${farmland.plantedResourceName || 'None'}</td>
     <td>
-      <button class="btn btn-light btn-sm plant-btn" data-farmland-id="${farmland.id}">Plant</button>
+      <button class="btn btn-light btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>Plant</button>
     </td>
   `;
   return row;
