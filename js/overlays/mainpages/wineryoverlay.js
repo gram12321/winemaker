@@ -14,43 +14,56 @@ export function showWineryOverlay() {
     overlay.classList.add('mainview-overlay');
 
     overlay.innerHTML = `
-        <div class="mainview-overlay-content">
-            <h3>Winery</h3>
-            <div class="winery-container">
-                <section class="my-4">
-                    <h4>Grapes in Storage</h4>
-                    <button class="btn btn-primary mb-2" id="crushGrapesBtn">Crush Grapes</button>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Container</th>
-                                <th>Capacity</th>
-                                <th>Resource</th>
-                                <th>Amount</th>
-                                <th>Quality</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grape-storage-table">
-                        </tbody>
-                    </table>
+        <div class="mainview-overlay-content inventory-container">
+            <h2 class="mb-4">Winery Management</h2>
+            
+            <div class="inventory-sections">
+                <section id="grapes-section" class="inventory-section card mb-4">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Warehouse Storage</h3>
+                        <button class="btn btn-light btn-sm" id="crushGrapesBtn">Crush Grapes</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Container</th>
+                                        <th>Capacity</th>
+                                        <th>Resource</th>
+                                        <th>Amount</th>
+                                        <th>Quality</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="grape-storage-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </section>
 
-                <section class="my-4">
-                    <h4>Must in Fermentation</h4>
-                    <button class="btn btn-primary mb-2" id="fermentMustBtn">Ferment Must</button>
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Container</th>
-                                <th>Capacity</th>
-                                <th>Resource</th>
-                                <th>Amount</th>
-                                <th>Quality</th>
-                            </tr>
-                        </thead>
-                        <tbody id="must-storage-table">
-                        </tbody>
-                    </table>
+                <section id="must-section" class="inventory-section card mb-4">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Winery Processing</h3>
+                        <button class="btn btn-light btn-sm" id="fermentMustBtn">Ferment Must</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Container</th>
+                                        <th>Capacity</th>
+                                        <th>Resource</th>
+                                        <th>Amount</th>
+                                        <th>Quality</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="must-storage-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>
