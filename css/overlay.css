@@ -238,6 +238,12 @@
 
 .hire-staff-content h3 {
   margin-top: 20px;
+
+#vineyard-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
+}
+
   margin-bottom: 40px;
 }
 
