@@ -27,13 +27,10 @@ function createFarmlandTable(newFarmlandOptions) {
     const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1;
 
     let tableHTML = `
-        <section id="vineyard-section" class="overlay-section card mb-4">
-            <div class="card-header text-white d-flex justify-content-between align-items-center">
-                <h3 class="h5 mb-0">Available Farmlands</h3>
-                <button id="closeBuyLandOverlay" class="btn btn-light btn-sm">Close</button>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
+        <div class="d-flex justify-content-end mb-3">
+            <button id="closeBuyLandOverlay" class="btn btn-light btn-sm">Close</button>
+        </div>
+        <div class="table-responsive">
                     <table class="table table-hover overlay-table">
                         <thead>
                             <tr>
@@ -79,9 +76,7 @@ function createFarmlandTable(newFarmlandOptions) {
     tableHTML += `
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </section>`;
+                </div>`;
 
     return { tableHTML, farmlandOptions: newFarmlandOptions };
 }
