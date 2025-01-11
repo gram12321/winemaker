@@ -14,6 +14,40 @@
     z-index: 999; /* Ensure it sits above other content */
 }
 
+/* Content within the mainview overlay */
+.inventory-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.inventory-container .btn-group {
+    margin-bottom: 1rem;
+}
+
+.inventory-container .card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.inventory-container .card-header {
+    padding: 1rem;
+}
+
+.inventory-container .table {
+    margin-bottom: 0;
+}
+
+.inventory-container .table td {
+    vertical-align: middle;
+}
+
+.inventory-container .badge {
+    font-size: 0.9rem;
+    padding: 0.5em 1em;
+}
+
 .mainview-overlay-content {
     display: flex;
     flex-direction: column;
@@ -50,109 +84,35 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Overlay Container Styles */
-.overlay-container {
-  background-color: var(--color-background);
-  padding: 2rem;
-  max-width: 1200px;
+/* Table styles within overlays */
+.overlay .table {
   margin: 0 auto;
+  /* Center align the table */
+  width: auto;
+  /* Allow natural width expansion */
+  min-width: 400px;
+  /* Minimum width */
+  color: #333;
+  text-align: center;
+  background-color: #f9f9f9;
 }
 
-/* Section Styles */
-.overlay-section {
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-lg);
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow-md);
-  overflow: hidden;
+.overlay .table thead th {
+  background-color: #343a40;
+  color: #fff;
 }
 
-.overlay-section .card-header {
-  padding: 1rem;
-  border-bottom: 2px solid var(--color-accent);
-  color: var(--panel-text);
+.overlay .table tbody tr:nth-child(even) {
+  background-color: #e9ecef;
 }
 
-.overlay-section .card-header h3 {
-  color: var(--panel-text);
-  margin: 0;
+.table-hover tbody tr:hover {
+  background-color: #d1e7fd;
+  /* Light blue highlight */
 }
 
-/* Table Styles */
-.overlay-section .table,
-.overlay-table {
-  margin: 0;
-  background-color: transparent;
-}
 
-.overlay-section .table th,
-.overlay-table th {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 12px;
-  border-bottom: 2px solid var(--color-accent);
-}
 
-.overlay-section .table td,
-.overlay-table td {
-  padding: 12px;
-  border-color: rgba(197, 165, 114, 0.2);
-}
-
-.overlay-section .table tbody tr:hover {
-  background-color: rgba(197, 165, 114, 0.1);
-}
-
-/* Badge Styles */
-.overlay-section .badge,
-.inventory-section .badge,
-.overlay-section .badge-light {
-  background-color: var(--color-accent);
-  color: var(--panel-text);
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  margin-left: 1rem;
-}
-
-/* Button Styles */
-.overlay-section .btn-light {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  color: var(--panel-text);
-}
-
-.overlay-section .btn-light:hover {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
-}
-
-.btn-group .btn-outline-primary {
-  color: var(--color-primary);
-  border-color: var(--color-accent);
-}
-
-.btn-group .btn-outline-primary:hover,
-.btn-group .btn-outline-primary.active {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
-}
-
-/* Section-specific Styles */
-#grapes-section .card-header {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  border-bottom: 2px solid var(--color-accent);
-}
-
-#must-section .card-header {
-  background: linear-gradient(135deg, #8B4513, #491809);
-  border-bottom: 2px solid var(--color-accent);
-}
-
-#wine-section .card-header {
-  background: linear-gradient(135deg, #491809, #23143E);
-  border-bottom: 2px solid var(--color-accent);
-}
 
 /* Skills Table Styles */
 .skills-table {
