@@ -48,7 +48,7 @@ export function showLandOverlay() {
                 </div>
             </div>
 
-            <div id="farmlandOverlay" class="overlay">
+            <div id="farmlandOverlay" class="overlay" style="display: none;">
                 <div class="overlay-content text-center">
                     <div id="farmland-details"></div>
                 </div>
