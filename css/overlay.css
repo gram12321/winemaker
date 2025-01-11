@@ -51,8 +51,8 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Table styles within overlays (Popupoverlay and the like Farmlandover ect.) */
-.overlay .table:not(#buyLandOverlay .table) {
+/* Default table styles for overlays */
+.overlay .table {
   margin: 0 auto;
   width: auto;
   min-width: 400px;
@@ -61,22 +61,24 @@
   background-color: transparent;
 }
 
-.overlay .table:not(#buyLandOverlay .table) th {
+.overlay .table th {
   background-color: var(--color-primary);
   color: var(--panel-text);
   border-bottom: 2px solid var(--color-accent);
 }
 
-/* Specific styles for buyLandOverlay table */
+/* Specific styles for buyLandOverlay */
 #buyLandOverlay {
   background-color: var(--color-background);
 }
 
-#buyLandOverlay .overlay-content {
+/* General overlay content styles */
+.overlay-content {
   background-color: var(--color-background);
   color: var(--color-text);
 }
 
+/* BuyLandOverlay specific styles */
 #buyLandOverlay .table {
   margin: 0 auto;
   width: auto;
