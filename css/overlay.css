@@ -148,13 +148,6 @@
 
 .overlay-section .table td,
 
-/* Section-specific Header Styles */
-#vineyard-section .card-header {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  border-bottom: 2px solid var(--color-accent);
-}
-
-
 /* Table Cell Styles */
 .overlay-table td {
   padding: 12px;
@@ -209,21 +202,7 @@
   color: var(--panel-text);
 }
 
-/* Section-specific Styles */
-#grapes-section .card-header {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  border-bottom: 2px solid var(--color-accent);
-}
 
-#must-section .card-header {
-  background: linear-gradient(135deg, #8B4513, #491809);
-  border-bottom: 2px solid var(--color-accent);
-}
-
-#wine-section .card-header {
-  background: linear-gradient(135deg, #491809, #23143E);
-  border-bottom: 2px solid var(--color-accent);
-}
 
 
 /* Fullscreen overlay specific for hire staff */
