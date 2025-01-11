@@ -187,8 +187,12 @@ body {
   overflow: hidden;
 }
 
-.winery-container section:first-of-type .table thead th {
+.winery-container section:first-of-type .table thead tr {
   background: linear-gradient(135deg, var(--color-accent), #8B4513);
+}
+
+.winery-container section:first-of-type .table thead th {
+  background: transparent;
   color: var(--panel-text);
   border-bottom: 2px solid var(--color-accent);
   padding: 12px;
@@ -202,8 +206,12 @@ body {
   overflow: hidden;
 }
 
-.winery-container section:last-of-type .table thead th {
+.winery-container section:last-of-type .table thead tr {
   background: linear-gradient(135deg, #8B4513, #491809);
+}
+
+.winery-container section:last-of-type .table thead th {
+  background: transparent;
   color: var(--panel-text);
   border-bottom: 2px solid var(--task-winery);
   padding: 12px;
