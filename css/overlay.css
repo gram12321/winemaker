@@ -54,14 +54,17 @@
 /* Table styles within overlays (Popupoverlay and the like Farmlandover ect.) */
 .overlay .table {
   margin: 0 auto;
-  /* Center align the table */
   width: auto;
-  /* Allow natural width expansion */
   min-width: 400px;
-  /* Minimum width */
-  color: #333;
+  color: var(--panel-text);
   text-align: center;
-  background-color: #f9f9f9;
+  background-color: transparent;
+}
+
+.overlay .table th {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  border-bottom: 2px solid var(--color-accent);
 }
 
 /* Skills Table Styles */
