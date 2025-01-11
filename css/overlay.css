@@ -64,20 +64,6 @@
   background-color: #f9f9f9;
 }
 
-.overlay .table thead th {
-  background-color: #343a40;
-  color: #fff;
-}
-
-.overlay .table tbody tr:nth-child(even) {
-  background-color: #e9ecef;
-}
-
-.table-hover tbody tr:hover {
-  background-color: #d1e7fd;
-  /* Light blue highlight */
-}
-
 /* Skills Table Styles */
 .skills-table {
   width: auto;
@@ -108,39 +94,9 @@
   /* Light blue highlight */
 }
 
-/* Header styling */
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
 
-/* Close button styling */
-.close-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  font-size: 24px;
-  cursor: pointer;
-  color: #333;
-}
 
-/* Skill Level Classes */
-.high {
-  color: green;
-  font-weight: bold;
-}
-
-.medium {
-  color: orange;
-  font-weight: bold;
-}
-
-.low {
-  color: red;
-  font-weight: bold;
-}
-
-/* Player Image styling */
+/* Farmland Image styling */
 .player-image {
   width: 100px;
   height: auto;
