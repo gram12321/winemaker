@@ -69,7 +69,7 @@ function createFarmlandTable(newFarmlandOptions) {
                 <td>${formatNumber(landSize)} ${selectedUnit}</td>
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
-                <td class="${colorClass}">${farmland.aspect} (${formatNumber(aspectRating, 2)})</td>
+                <td>${farmland.aspect} (<span class="${colorClass}">${formatNumber(aspectRating, 2)}</span>)</td>
                 <td>${formatNumber(landValuePerUnit)}€</td>
                 <td>${formatNumber(totalPrice)}€</td>
                 <td><button class="btn btn-light btn-sm buy-farmland-btn">Buy</button></td>
