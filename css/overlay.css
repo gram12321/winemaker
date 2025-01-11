@@ -65,35 +65,10 @@
   border-bottom: 2px solid #dee2e6;
 }
 
-/* BuyLandOverlay specific styles */
-#buyLandOverlay {
-  background-color: var(--color-background);
-}
-
-#buyLandOverlay .table {
-  margin: 0 auto;
-  width: auto;
-  min-width: 400px;
-  color: var(--color-text);
-  text-align: center;
-  background-color: transparent;
-}
-
-#buyLandOverlay .table th {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  border-bottom: 2px solid var(--color-accent);
-}
-
 /* General overlay content styles */
 .overlay-content {
   background-color: #fff;
   color: #212529;
-}
-
-#buyLandOverlay .overlay-content {
-  background-color: var(--color-background);
-  color: var(--color-text);
 }
   min-width: 400px;
   color: var(--color-text);
