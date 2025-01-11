@@ -45,7 +45,7 @@ export function showWineryOverlay() {
                 <section id="must-section" class="inventory-section card mb-4">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Winery Processing</h3>
-                        <button class="btn btn-success btn-sm" id="fermentMustBtn">Ferment Must</button>
+                        <button class="btn btn-light btn-sm" id="fermentMustBtn">Ferment Must</button>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">

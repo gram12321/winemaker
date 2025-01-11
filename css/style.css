@@ -134,7 +134,7 @@ button.disabled {
 
 #must-section .card-header {
   background: linear-gradient(135deg, #8B4513, #491809);
-  border-bottom: 2px solid var(--task-winery);
+  border-bottom: 2px solid var(--color-accent);
 }
 
 #wine-section .card-header {
