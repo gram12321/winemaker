@@ -1,4 +1,3 @@
-
 import { createFarmland, getLastId, getRandomAcres } from '../farmland.js';
 import { addConsoleMessage } from '/js/console.js';
 import { getColorClass, formatNumber, getFlagIconHTML, formatLandSizeWithUnit, formatQualityDisplay } from '../utils.js';
@@ -26,7 +25,7 @@ function generateFarmlandOptions(numberOfOptions) {
 function createFarmlandTable(newFarmlandOptions) {
     const selectedUnit = getUnit();
     const conversionFactor = (selectedUnit === 'hectares') ? 2.47105 : 1;
-    
+
     let tableHTML = `
         <section id="vineyard-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -59,7 +58,7 @@ function createFarmlandTable(newFarmlandOptions) {
         const landValuePerUnit = parseFloat(priceFactorPerAcre * conversionFactor);
         const landSize = parseFloat(convertToCurrentUnit(farmland.acres));
         const totalPrice = landSize * landValuePerUnit;
-        
+
         farmland.totalPrice = totalPrice;
 
         tableHTML += `
@@ -73,7 +72,7 @@ function createFarmlandTable(newFarmlandOptions) {
                 <td>${formatQualityDisplay(aspectRating)}</td>
                 <td>${formatNumber(landValuePerUnit)}€</td>
                 <td>${formatNumber(totalPrice)}€</td>
-                <td><button class="btn btn-primary buy-farmland-btn">Buy</button></td>
+                <td><button class="btn btn-light btn-sm buy-farmland-btn">Buy</button></td>
             </tr>`;
     });
 
@@ -83,7 +82,7 @@ function createFarmlandTable(newFarmlandOptions) {
                 </div>
             </div>
         </section>`;
-    
+
     return { tableHTML, farmlandOptions: newFarmlandOptions };
 }
 
@@ -91,12 +90,12 @@ export function showBuyLandOverlay() {
     const overlay = document.getElementById('buyLandOverlay');
     const farmlandTableContainer = document.getElementById('farmland-table-container');
     const numberOfOptions = 5;
-    
+
     const farmlandOptions = generateFarmlandOptions(numberOfOptions);
     const { tableHTML, farmlandOptions: updatedOptions } = createFarmlandTable(farmlandOptions);
-    
+
     farmlandTableContainer.innerHTML = tableHTML;
-    
+
     const buyButtons = farmlandTableContainer.querySelectorAll('.buy-farmland-btn');
     buyButtons.forEach((button, index) => {
         button.addEventListener('click', () => buySelectedFarmland(updatedOptions[index]));
@@ -127,7 +126,7 @@ function buySelectedFarmland(farmland) {
 function setupCloseListeners() {
     const overlay = document.getElementById('buyLandOverlay');
     const closeButton = document.getElementById('closeBuyLandOverlay');
-    
+
     if (closeButton) {
         closeButton.addEventListener('click', () => {
             overlay.style.display = 'none';
