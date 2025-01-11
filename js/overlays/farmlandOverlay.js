@@ -21,7 +21,7 @@ export function showFarmlandOverlay(farmlandData) {
       <div class="overlay-content">
         <span class="close-btn">&times;</span>
         <h2 class="text-center mb-3">${farmlandData.name}</h2>
-        <table class="table table-bordered table-hover overlay-table">
+        <table class="table table-bordered table-hover">
           <thead class="thead-dark">
             <tr>
               <th>Property</th>

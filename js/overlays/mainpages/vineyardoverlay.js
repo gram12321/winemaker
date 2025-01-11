@@ -21,7 +21,7 @@ export function showVineyardOverlay() {
 
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const table = document.createElement('table');
-    table.className = 'table table-bordered overlay-table';
+    table.className = 'table table-bordered';
 
     table.innerHTML = `
         <thead>
