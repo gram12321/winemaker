@@ -1,4 +1,3 @@
-
 import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay } from '/js/utils.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
@@ -16,10 +15,10 @@ export function showWineryOverlay() {
     overlay.innerHTML = `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Winery Management</h2>
-            
+
             <div class="overlay-sections">
                 <section id="grapes-section" class="overlay-section card mb-4">
-                    <img src="../../../assets/pic/warehouse_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Warehouse">
+                    <img src="/assets/pic/warehouse_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Warehouse">
                     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Warehouse Storage</h3>
                         <button class="btn btn-light btn-sm" id="crushGrapesBtn">Crush Grapes</button>
@@ -44,7 +43,7 @@ export function showWineryOverlay() {
                 </section>
 
                 <section id="must-section" class="overlay-section card mb-4">
-                    <img src="../../../assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Winery">
+                    <img src="/assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Winery">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Winery Processing</h3>
                         <button class="btn btn-light btn-sm" id="fermentMustBtn">Ferment Must</button>
@@ -83,7 +82,7 @@ export function showWineryOverlay() {
 
     buildings.forEach(building => {
         if (!building.tools) return;
-        
+
         building.tools.forEach(tool => {
             if (tool.supportedResources?.includes('Grapes')) {
                 const matchingInventoryItems = playerInventory.filter(item => 
@@ -103,12 +102,12 @@ export function showWineryOverlay() {
     });
 
     overlay.style.display = 'block';
-    
+
     const crushButton = document.getElementById('crushGrapesBtn');
     if (crushButton) {
         crushButton.addEventListener('click', showCrushingOverlay);
     }
-    
+
     const fermentButton = document.getElementById('fermentMustBtn');
     if (fermentButton) {
         fermentButton.addEventListener('click', showFermentationOverlay);
