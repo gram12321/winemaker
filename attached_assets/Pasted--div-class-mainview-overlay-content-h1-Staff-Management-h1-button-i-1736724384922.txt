@@ -1,0 +1,74 @@
+<div class="mainview-overlay-content">
+            <h1>Staff Management</h1>
+            <button id="hire-staff-btn" class="btn btn-primary mt-3">Hire Staff</button>
+            <div id="staff-container" class="mt-4"><table class="table mt-4"><thead class="thead-light">
+      <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Nationality</th>
+        <th scope="col">Workforce</th>
+        <th scope="col">Wage (€)</th>
+        <th scope="col">Assigned Tasks</th>
+        <th scope="col" class="skills-column" style="min-width: 250px;">Skills</th> <!-- Ensure min-width -->
+      </tr>
+    </thead><tbody id="staff-entries"><tr style="cursor: pointer;">
+          <td>Macarena</td>
+          <td><span class="flag-icon flag-icon-es" style="vertical-align: middle; margin-right: 5px;"></span> Spain</td>
+          <td>50</td>
+          <td>€256</td>
+          <td>None</td>
+          <td>
+          <div class="skill-bar-container">
+            <div class="skill-bar" style="width: 92%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.92">F</div>
+            <div class="skill-bar" style="width: 25%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.25">W</div>
+            <div class="skill-bar" style="width: 39%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.39">A</div>
+            <div class="skill-bar" style="width: 63%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.63">S</div>
+            <div class="skill-bar" style="width: 81%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.81">M</div>
+          </div>
+        </td>
+        </tr><tr style="cursor: pointer;">
+          <td>Elena</td>
+          <td><span class="flag-icon flag-icon-es" style="vertical-align: middle; margin-right: 5px;"></span> Spain</td>
+          <td>50</td>
+          <td>€249</td>
+          <td>None</td>
+          <td>
+          <div class="skill-bar-container">
+            <div class="skill-bar" style="width: 22%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.22">F</div>
+            <div class="skill-bar" style="width: 92%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.92">W</div>
+            <div class="skill-bar" style="width: 28.999999999999996%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.29">A</div>
+            <div class="skill-bar" style="width: 31%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.31">S</div>
+            <div class="skill-bar" style="width: 55.00000000000001%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.55">M</div>
+          </div>
+        </td>
+        </tr><tr style="cursor: pointer;">
+          <td>Jorge</td>
+          <td><span class="flag-icon flag-icon-es" style="vertical-align: middle; margin-right: 5px;"></span> Spain</td>
+          <td>50</td>
+          <td>€164</td>
+          <td>None</td>
+          <td>
+          <div class="skill-bar-container">
+            <div class="skill-bar" style="width: 57.99999999999999%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.58">F</div>
+            <div class="skill-bar" style="width: 16%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.16">W</div>
+            <div class="skill-bar" style="width: 2%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.02">A</div>
+            <div class="skill-bar" style="width: 55.00000000000001%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.55">S</div>
+            <div class="skill-bar" style="width: 75%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.75">M</div>
+          </div>
+        </td>
+        </tr><tr style="cursor: pointer;">
+          <td>Emma</td>
+          <td><span class="flag-icon flag-icon-de" style="vertical-align: middle; margin-right: 5px;"></span> Germany</td>
+          <td>50</td>
+          <td>€267</td>
+          <td>None</td>
+          <td>
+          <div class="skill-bar-container">
+            <div class="skill-bar" style="width: 48%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.48">F</div>
+            <div class="skill-bar" style="width: 4%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.04">W</div>
+            <div class="skill-bar" style="width: 15%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.15">A</div>
+            <div class="skill-bar" style="width: 26%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.26">S</div>
+            <div class="skill-bar" style="width: 48%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.48">M</div>
+          </div>
+        </td>
+        </tr></tbody></table></div>
+        </div>
