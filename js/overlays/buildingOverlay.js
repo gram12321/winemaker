@@ -1,8 +1,8 @@
 import { getBuildingTools, createTool, Building } from '../buildings.js';
 import { addConsoleMessage } from '/js/console.js';
-import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import path is correct
+import { updateBuildingCards } from '/js/buildings.js';
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
-import { addTransaction } from '../finance.js'; // Ensure this import is at the top of your file.
+import { addTransaction } from '../finance.js';
 import { formatNumber } from '../utils.js';
 
 
@@ -10,7 +10,7 @@ function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
 
   const toolButtons = tools.map(tool => `
-    <button class="add-tool-button" data-tool-name="${tool.name}">Add ${tool.name}</button>
+    <button class="add-tool-button btn btn-primary btn-sm" data-tool-name="${tool.name}">Add ${tool.name}</button>
   `).join('');
 
   return `
@@ -25,13 +25,11 @@ function createBuildingDetails(building) {
 }
 
 function setupToolButtons(building, tools) {
-  // Make sure we have a proper Building instance with existing tools
   let buildingInstance;
   if (building instanceof Building) {
     buildingInstance = building;
   } else {
     buildingInstance = new Building(building.name, building.level);
-    // Copy existing tools if any
     if (building.tools && Array.isArray(building.tools)) {
       buildingInstance.tools = [...building.tools];
     }
@@ -40,33 +38,25 @@ function setupToolButtons(building, tools) {
     const button = document.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
     if (button) {
       button.addEventListener('click', () => {
-        const newToolInstance = createTool(tool.name); // Create a new instance of the tool
-        if (newToolInstance && buildingInstance.addTool(newToolInstance)) { 
-          // Add the enhanced message and record transaction
+        const newToolInstance = createTool(tool.name);
+        if (newToolInstance && buildingInstance.addTool(newToolInstance)) {
           const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Remaining Capacity: ${building.capacity - buildingInstance.tools.length} spaces`;
           addConsoleMessage(expenseMessage);
           addTransaction('Expense', `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber}`, -newToolInstance.cost);
-
-          // Notify expense
           addConsoleMessage(expenseMessage);
-
-          // Load current buildings list, update the relevant building, and store the updated list
           const buildings = loadBuildings();
           const buildingToUpdate = buildings.find(b => b.name === building.name);
           if (buildingToUpdate) {
-            buildingToUpdate.tools = buildingInstance.tools; // Copy the tools array from our instance
+            buildingToUpdate.tools = buildingInstance.tools;
             const updatedBuildings = buildings.map(b => b.name === building.name ? buildingToUpdate : b);
             storeBuildings(updatedBuildings);
           }
-
-          // Refresh the capacity visual and reload the overlay with updated building data
           const updatedBuildings = loadBuildings();
           const updatedBuilding = updatedBuildings.find(b => b.name === building.name);
           if (updatedBuilding) {
             const buildingInstance = new Building(updatedBuilding.name, updatedBuilding.level);
             buildingInstance.tools = updatedBuilding.tools;
             showBuildingOverlay(buildingInstance);
-            // Update building cards to reflect new tool
             updateBuildingCards();
           }
         } else {
@@ -77,25 +67,53 @@ function setupToolButtons(building, tools) {
   });
 }
 
-// Updated showBuildingOverlay function
 export function showBuildingOverlay(building) {
   const overlay = document.getElementById('buildingOverlay');
-  const details = document.getElementById('building-details');
+  const overlayContent = document.getElementById('building-details');
+  const toolsHTML = building.tools.map(tool => `<p>${tool.name}</p>`).join(''); // Example toolsHTML generation
 
-  if (details && overlay) {
-    details.innerHTML = createBuildingDetails(building);
+  if (overlayContent && overlay) {
+    overlayContent.innerHTML = `
+      <div class="overlay-content overlay-container">
+        <section class="overlay-section card mb-4">
+          <div class="card-header text-white d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0">${building.name}</h3>
+            <button class="btn btn-light btn-sm overlay-section-btn" id="close-building-overlay">Close</button>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Building Status</h5>
+                    <p class="card-text">Level: ${building.level}</p>
+                    <p class="card-text">Storage: ${building.currentStorage}/${building.maxStorage}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card mb-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Available Tools</h5>
+                    <div class="building-tools">
+                      ${toolsHTML}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
 
-    // Call the function to render capacity visual
     renderCapacityVisual(building);
-
     const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
     setupToolButtons(building, tools);
-
     overlay.style.display = 'flex';
   }
 }
 
-// Function to render the visual representation of capacity
 function renderCapacityVisual(building) {
   const capacityGrid = document.getElementById('capacity-grid');
   if (!capacityGrid) return;
@@ -103,17 +121,15 @@ function renderCapacityVisual(building) {
   const totalCapacity = building.capacity;
   const usedCapacity = building.tools ? building.tools.length : 0;
 
-  // Clear existing grid
   capacityGrid.innerHTML = '';
 
-  // Create grid squares
   for (let i = 0; i < totalCapacity; i++) {
     const cell = document.createElement('div');
     cell.className = 'capacity-cell';
 
     if (i < usedCapacity) {
       const tool = building.tools[i];
-      const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`; // Path for the icon
+      const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`;
       cell.innerHTML = `
         <img src="${iconPath}" alt="${tool.name}" style="width: 24px; height: 24px;" />
       `;
@@ -126,9 +142,7 @@ function renderCapacityVisual(building) {
 export function hideBuildingOverlay() {
   const overlay = document.getElementById('buildingOverlay');
   if (overlay) {
-    overlay.style.display = 'none'; // Hide the overlay
-
-    // Update building cards when overlay is closed
+    overlay.style.display = 'none';
     updateBuildingCards();
   }
 }
