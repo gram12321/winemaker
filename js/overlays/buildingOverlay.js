@@ -14,12 +14,20 @@ function createBuildingDetails(building) {
   `).join('');
 
   return `
-    <h2>${building.name}</h2>
-    <p>Capacity: ${building.capacity}</p>
-    <p>Contents: ${building.listContents ? building.listContents() : "No tools stored."}</p>
-    ${toolButtons}
-    <div class="building-simulator">
-      <div id="capacity-grid" class="capacity-grid"></div>
+    <div class="card">
+      <div class="card-header">
+        <h2 class="mb-0">${building.name}</h2>
+      </div>
+      <div class="card-body">
+        <p>Capacity: ${building.capacity}</p>
+        <p>Contents: ${building.listContents ? building.listContents() : "No tools stored."}</p>
+        <div class="button-container">
+          ${toolButtons}
+        </div>
+        <div class="building-simulator mt-3">
+          <div id="capacity-grid" class="capacity-grid"></div>
+        </div>
+      </div>
     </div>
   `;
 }

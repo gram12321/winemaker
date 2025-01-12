@@ -73,13 +73,36 @@
 
 /* Building simulator container */
 .building-simulator {
-  border: 2px solid var(--color-accent);
   padding: 20px;
-  margin-top: 20px;
   background-color: var(--color-background);
   position: relative;
-  box-shadow: var(--shadow-md);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
+}
+
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  padding: 1rem;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+}
+
+.card-body {
+  padding: 1.5rem;
 }
 
 /* Capacity grid within the building */
