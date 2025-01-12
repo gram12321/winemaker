@@ -1,10 +1,8 @@
-
 import { getFlagIconHTML } from '../utils.js';
 
 export function showStaffOverlay(staffData) {
-  console.log('showStaffOverlay called with data:', staffData);
   const existingOverlay = document.getElementById('staffOverlay');
-  
+
   if (existingOverlay) {
     existingOverlay.remove();
   }
@@ -13,11 +11,11 @@ export function showStaffOverlay(staffData) {
   const overlay = document.createElement('div');
   overlay.id = 'staffOverlay';
   overlay.className = 'overlay';
-  
+
   // Create content container
   const content = document.createElement('div');
   content.className = 'overlay-content';
-  
+
   content.innerHTML = `
     <div class="card-header text-white d-flex justify-content-between align-items-center">
       <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
