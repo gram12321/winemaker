@@ -25,8 +25,8 @@ export function showBuildingsOverlay() {
                   <div class="icon" style="background-image: url('/assets/icon/menu/toolshed.webp');"></div>
                   <div class="details building-details" data-building-name="Tool Shed"></div>
                 </div>
-                <button class="btn btn-primary build-button" data-building-name="Tool Shed">Build</button>
-                <button class="btn btn-primary upgrade-button" data-building-name="Tool Shed" disabled>Upgrade</button>
+                <button class="btn btn-light btn-sm build-button" data-building-name="Tool Shed">Build</button>
+                <button class="btn btn-light btn-sm upgrade-button" data-building-name="Tool Shed" disabled>Upgrade</button>
               </div>
 
               <div class="col-md-6">
@@ -34,8 +34,8 @@ export function showBuildingsOverlay() {
                   <div class="icon" style="background-image: url('/assets/icon/menu/warehouse.webp');"></div>
                   <div class="details building-details" data-building-name="Warehouse"></div>
                 </div>
-                <button class="btn btn-success build-button" data-building-name="Warehouse">Build</button>
-                <button class="btn btn-secondary upgrade-button" data-building-name="Warehouse" disabled>Upgrade</button>
+                <button class="btn btn-light btn-sm build-button" data-building-name="Warehouse">Build</button>
+                <button class="btn btn-light btn-sm upgrade-button" data-building-name="Warehouse" disabled>Upgrade</button>
               </div>
             </div>
         </div>
