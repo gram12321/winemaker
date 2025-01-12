@@ -14,13 +14,11 @@ export function showStaffOverlay(staffData) {
   overlay.id = 'staffOverlay';
   overlay.className = 'overlay';
   
-  // Create the details container
-  const details = document.createElement('div');
-  details.id = 'staff-details';
-  details.className = 'hire-staff-content';
-  overlay.style.zIndex = '2000'; // Ensure overlay is on top
+  // Create content container
+  const content = document.createElement('div');
+  content.className = 'overlay-content';
   
-  details.innerHTML = `
+  content.innerHTML = `
     <div class="card-header text-white d-flex justify-content-between align-items-center">
       <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
       <button id="closeStaffOverlay" class="btn btn-primary btn-sm">Close</button>
@@ -53,21 +51,21 @@ export function showStaffOverlay(staffData) {
     </div>
   `;
 
-  overlay.appendChild(details);
+  overlay.appendChild(content);
   document.body.appendChild(overlay);
 
   // Add close button functionality
-  const closeBtn = details.querySelector('#closeStaffOverlay');
+  const closeBtn = content.querySelector('#closeStaffOverlay');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
-      overlay.style.display = 'none';
+      overlay.remove();
     });
   }
 
   // Add click outside to close
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) {
-      overlay.style.display = 'none';
+      overlay.remove();
     }
   });
 
