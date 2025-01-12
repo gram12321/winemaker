@@ -1,3 +1,24 @@
+
+/* Building Button Styles */
+.overlay-section-btn {
+  background-color: var(--color-accent) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--panel-text) !important;
+}
+
+.overlay-section-btn:hover {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-accent) !important;
+  color: var(--panel-text) !important;
+}
+
+.overlay-section-btn:disabled {
+  background-color: rgba(197, 165, 114, 0.5) !important;
+  border-color: rgba(114, 47, 55, 0.3) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: not-allowed !important;
+}
+
 /* Building Card Styles */
 .building-card {
   background-color: var(--color-background);
