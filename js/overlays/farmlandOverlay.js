@@ -20,7 +20,6 @@ export function showFarmlandOverlay(farmlandData) {
     details.innerHTML = `
       <div class="overlay-content">
         <span class="close-btn">&times;</span>
-        <img src="/assets/pic/farming_dalle.webp" class="process-image mx-auto d-block mb-3" alt="Farming">
         <h2 class="text-center mb-3">${farmlandData.name}</h2>
         <table class="table table-bordered table-hover">
           <thead class="thead-dark">
