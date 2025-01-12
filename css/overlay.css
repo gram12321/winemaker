@@ -205,6 +205,14 @@
   margin-bottom: 20px;
 }
 
+.hire-staff-content .staff-option {
+  border: 1px solid var(--color-accent);
+  border-radius: 8px;
+  background-color: var(--color-background);
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 .staff-option .btn-primary,
 .staff-option .hire-staff-button,
 #closeHireStaffOverlay {
