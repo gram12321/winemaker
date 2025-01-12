@@ -3,21 +3,23 @@ import { getFlagIconHTML } from '../utils.js';
 
 export function showStaffOverlay(staffData) {
   console.log('showStaffOverlay called with data:', staffData);
-  const overlay = document.getElementById('staffOverlay');
-  console.log('Found overlay element:', overlay);
-  const details = document.getElementById('staff-details');
-  console.log('Found details element:', details);
-
-  if (!overlay) {
-    const newOverlay = document.createElement('div');
-    newOverlay.id = 'staffOverlay';
-    newOverlay.className = 'overlay';
-    newOverlay.innerHTML = '<div id="staff-details" class="hire-staff-content"></div>';
-    document.body.appendChild(newOverlay);
+  const existingOverlay = document.getElementById('staffOverlay');
+  
+  if (existingOverlay) {
+    existingOverlay.remove();
   }
 
-  const staffDetails = document.getElementById('staff-details');
-  staffDetails.innerHTML = `
+  // Create new overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'staffOverlay';
+  overlay.className = 'overlay';
+  
+  // Create the details container
+  const details = document.createElement('div');
+  details.id = 'staff-details';
+  details.className = 'hire-staff-content';
+  
+  details.innerHTML = `
     <div class="card-header text-white d-flex justify-content-between align-items-center">
       <h3 class="h5 mb-0">${staffData.firstName} ${staffData.lastName}</h3>
       <button id="closeStaffOverlay" class="btn btn-primary btn-sm">Close</button>
@@ -50,14 +52,25 @@ export function showStaffOverlay(staffData) {
     </div>
   `;
 
-  const closeBtn = document.getElementById('closeStaffOverlay');
+  overlay.appendChild(details);
+  document.body.appendChild(overlay);
+
+  // Add close button functionality
+  const closeBtn = details.querySelector('#closeStaffOverlay');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
-      document.getElementById('staffOverlay').style.display = 'none';
+      overlay.style.display = 'none';
     });
   }
 
-  document.getElementById('staffOverlay').style.display = 'block';
+  // Add click outside to close
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      overlay.style.display = 'none';
+    }
+  });
+
+  overlay.style.display = 'block';
 }
 
 function getSkillLevelClass(skillValue) {
