@@ -19,7 +19,7 @@ export function showStaffOverlay(staffData) {
   content.innerHTML = `
     <div class="card-header text-white d-flex justify-content-between align-items-center">
       <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
-      <button id="closeStaffOverlay" class="btn btn-primary btn-sm hire-staff-button">Close</button>
+      <button id="closeStaffOverlay" class="btn btn-primary btn-sm">Close</button>
     </div>
     <div class="staff-options-container">
       <div class="staff-option">
