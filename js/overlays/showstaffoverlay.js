@@ -20,7 +20,7 @@ export function showStaffOverlay(staffData) {
     <section id="staff-details-section" class="overlay-section card mb-4">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
         <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
-        <button id="closeStaffOverlay" class="btn btn-primary btn-sm">Close</button>
+        <button class="btn btn-light btn-sm close-btn">Close</button>
       </div>
       <div class="staff-options-container">
       <div class="staff-option">
@@ -54,7 +54,7 @@ export function showStaffOverlay(staffData) {
   document.body.appendChild(overlay);
 
   // Add close button functionality
-  const closeBtn = content.querySelector('#closeStaffOverlay');
+  const closeBtn = content.querySelector('.close-btn');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
       overlay.remove();
