@@ -197,11 +197,32 @@
 }
 
 #farmland-details .staff-option {
-  border: 1px solid var(--color-accent);
+  border: 2px solid var(--color-accent);
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--color-background);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.staff-option .btn-primary,
+.staff-option .hire-staff-button,
+#closeHireStaffOverlay {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+  padding: 0.375rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.staff-option .btn-primary:hover,
+.staff-option .hire-staff-button:hover,
+#closeHireStaffOverlay:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 #farmland-details h4 {
