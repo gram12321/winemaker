@@ -102,7 +102,7 @@ function displayWineCellarInventory() {
 
         const sellButton = row.querySelector('.sell-wine-btn');
         sellButton.addEventListener('click', () => {
-            const wineName = wine.name.split(', ')[1];
+            const wineName = wine.name ? wine.name.split(', ')[1] : wine.resource.name;
             sellWines(wineName);
             displayWineCellarInventory(); // Refresh the display
         });
