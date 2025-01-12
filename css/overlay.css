@@ -282,13 +282,15 @@
 }
 
 /* Button Styles */
-.overlay-section .btn-light {
+.overlay-section .btn-light,
+.hire-staff-content .btn-primary {
   background-color: var(--color-accent);
   border-color: var(--color-primary);
   color: var(--panel-text);
 }
 
-.overlay-section .btn-light:hover {
+.overlay-section .btn-light:hover,
+.hire-staff-content .btn-primary:hover {
   background-color: var(--color-primary);
   border-color: var(--color-accent);
   color: var(--panel-text);
