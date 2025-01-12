@@ -13,8 +13,11 @@ export function showHireStaffOverlay() {
 
     // Clear existing content except the close button and header
     staffContainer.innerHTML = `
-        <span id="closeHireStaffOverlay" class="close-btn">&times;</span>
-        <h3>Hire Staff</h3>
+        <section id="hiring-section" class="overlay-section card mb-4">
+            <div class="card-header text-white d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">Hire Staff</h3>
+                <button id="closeHireStaffOverlay" class="btn btn-primary btn-sm">Close</button>
+            </div>
     `;
 
     const numberOfOptions = 5;
@@ -25,7 +28,7 @@ export function showHireStaffOverlay() {
         createdStaffOptions.push(newStaff);
     }
 
-    let staffHTML = '<div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; overflow-y: auto; max-height: 80vh;">';
+    let staffHTML = '<div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; overflow-y: auto; max-height: 80vh;">';
 
     createdStaffOptions.forEach(staff => {
         staffHTML += `
@@ -71,7 +74,7 @@ export function showHireStaffOverlay() {
         `;
     });
 
-    staffHTML += '</div>';
+    staffHTML += '</div></section>';
     staffContainer.innerHTML += staffHTML;
     overlay.style.display = 'block';
 
@@ -87,6 +90,13 @@ export function showHireStaffOverlay() {
             overlay.style.display = 'none';
         });
     }
+
+    // Add click event listener to the overlay for outside clicks
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+            overlay.style.display = 'none';
+        }
+    });
 }
 
 function hireSelectedStaff(staff) {
