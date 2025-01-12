@@ -21,7 +21,7 @@ export function showFarmlandOverlay(farmlandData) {
       <div class="hire-staff-content">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
           <h3 class="h5 mb-0">
-            ${farmlandData.name} ${flagIcon} ${farmlandData.region}, ${farmlandData.country} 
+            ${flagIcon} ${farmlandData.name}, ${farmlandData.region}, ${farmlandData.country} 
             ${farmlandData.plantedResourceName ? `| ${farmlandData.plantedResourceName}` : ''}
           </h3>
           <button id="closeFarmlandOverlay" class="btn btn-primary btn-sm">Close</button>
