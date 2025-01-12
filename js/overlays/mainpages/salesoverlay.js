@@ -93,7 +93,10 @@ function displayWineCellarInventory() {
         const row = document.createElement('tr');
         const displayInfo = wine.getDisplayInfo();
 
-        const sellingPrice = calculateWinePrice(wine.quality, wine.landValue, wine.fieldPrestige);
+        // Get farmland data for price calculation
+        const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+        const farmland = farmlands.find(field => field.name === wine.fieldName);
+        const sellingPrice = farmland ? calculateWinePrice(wine.quality, farmland.landvalue, wine.fieldPrestige) : 0;
 
         row.innerHTML = `
             <td><strong>${displayInfo.name}</strong></td>
