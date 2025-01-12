@@ -129,31 +129,36 @@
 /* Skills Table Styles */
 .skills-table {
   width: auto;
-  /* Adjust table width to fit content */
   table-layout: auto;
-  /* Let the table size be determined by its content */
   border-collapse: collapse;
   margin: 15px auto;
-  /* Center align table */
   font-size: 0.9em;
-  /* Reduced font size */
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
 }
 
 .skills-table th,
 .skills-table td {
   padding: 8px 12px;
-  /* Reduced padding */
-  border: 1px solid #dddddd;
+  border: 1px solid var(--color-accent);
   text-align: left;
+  color: var(--color-text);
+}
+
+.skills-table th {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  font-weight: 500;
 }
 
 .skills-table tr:nth-child(even) {
-  background-color: #f9f9f9;
+  background-color: rgba(197, 165, 114, 0.05);
 }
 
 .skills-table tr:hover {
-  background-color: rgba(197, 165, 114, 0.2);
-  /* Golden highlight matching theme */
+  background-color: rgba(197, 165, 114, 0.1);
+  transition: background-color 0.2s ease;
 }
 
 
