@@ -15,6 +15,7 @@ export function showFermentationOverlay() {
                     <h3 class="h5 mb-0">Must Fermentation</h3>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
+                <div class="card-body"></div>
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Select Must to Ferment</h3>
                 </div>
@@ -36,7 +37,7 @@ export function showFermentationOverlay() {
                         </table>
                     </div>
                     <div class="text-center mt-3">
-                        <button class="btn btn-success ferment-btn">Ferment Must</button>
+                        <button class="btn btn-light btn-sm ferment-btn">Ferment Must</button>
                     </div>
                 </div>
             </section>
