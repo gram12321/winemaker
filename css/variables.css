@@ -19,8 +19,8 @@
   --color-error: #8B2E2E;        /* Dark red */
 
   /* UI Element Colors */
-  --panel-bg: #343A40;           /* Dark background for panels */
-  --panel-text: #FFFFFF;         /* Light text for dark backgrounds */
+  --panel-bg: var(--color-background);    /* Light background for panels */
+  --panel-text: var(--color-text);        /* Dark text for light backgrounds */
   --border-color: #94BDE5;       /* Maintained from original */
   
   /* Spacing */
