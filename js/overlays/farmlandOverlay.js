@@ -20,7 +20,10 @@ export function showFarmlandOverlay(farmlandData) {
     details.innerHTML = `
       <div class="hire-staff-content">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
-          <h3 class="h5 mb-0">${farmlandData.name}</h3>
+          <h3 class="h5 mb-0">
+            ${farmlandData.name} ${flagIcon} ${farmlandData.region}, ${farmlandData.country} 
+            ${farmlandData.plantedResourceName ? `| ${farmlandData.plantedResourceName}` : ''}
+          </h3>
           <button id="closeFarmlandOverlay" class="btn btn-primary btn-sm">Close</button>
         </div>
         <img src="/assets/pic/farming_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Farming">
