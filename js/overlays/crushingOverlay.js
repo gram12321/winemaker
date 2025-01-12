@@ -118,7 +118,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
           const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
 
           row.innerHTML = `
-            <td><input type="checkbox" class="grape-select" data-storage="${item.storage}" 
+            <td><input type="radio" name="grape-select" class="grape-select" data-storage="${item.storage}" 
                 data-resource="${item.resource.name}" data-vintage="${item.vintage}" 
                 data-quality="${item.quality}" data-field="${item.fieldName}"
                 data-amount="${item.amount}"
@@ -136,7 +136,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
 }
 
 function handleCrushing(overlayContainer) {
-  const selectedGrapes = overlayContainer.querySelectorAll('.grape-select:checked');
+  const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
   const selectedMustStorage = overlayContainer.querySelector('input[name="must-storage"]:checked');
 
   if (!selectedMustStorage) {
@@ -146,8 +146,7 @@ function handleCrushing(overlayContainer) {
 
   const mustStorage = selectedMustStorage.value;
   const availableSpace = parseFloat(selectedMustStorage.dataset.available);
-  const totalGrapes = Array.from(selectedGrapes)
-    .reduce((sum, checkbox) => sum + parseFloat(checkbox.dataset.amount), 0);
+  const totalGrapes = parseFloat(selectedGrape.dataset.amount);
 
   if (totalGrapes > availableSpace) {
     addConsoleMessage("Not enough space in selected container for all the must");
@@ -172,14 +171,13 @@ function handleCrushing(overlayContainer) {
     }
   }
 
-  Array.from(selectedGrapes).forEach(checkbox => {
-    const resourceName = checkbox.dataset.resource;
-    const storage = checkbox.dataset.storage;
-    const vintage = parseInt(checkbox.dataset.vintage);
-    const quality = checkbox.dataset.quality;
-    const fieldName = checkbox.dataset.field;
-    const fieldPrestige = parseFloat(checkbox.dataset.prestige);
-    const amount = parseFloat(checkbox.dataset.amount);
+  const resourceName = selectedGrape.dataset.resource;
+  const storage = selectedGrape.dataset.storage;
+  const vintage = parseInt(selectedGrape.dataset.vintage);
+  const quality = selectedGrape.dataset.quality;
+  const fieldName = selectedGrape.dataset.field;
+  const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
+  const amount = parseFloat(selectedGrape.dataset.amount);
 
     // Remove grapes from original storage
     const removed = inventoryInstance.removeResource(
