@@ -2,7 +2,7 @@ import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames,
 import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
-import { showStaffOverlay } from './overlays/mainpages/staffoverlay.js'; // Assume you have showStaffOverlay implemented
+import { showStaffOverlay } from './overlays/showstaffoverlay.js'; // Assume you have showStaffOverlay implemented
 import { loadBuildings } from './database/adminFunctions.js'; // Ensure the correct path
 
 //import { getBuildingTools } from './buildings.js'; // Ensure you're importing the tools 
@@ -233,4 +233,3 @@ export function setupStaffWagesRecurringTransaction() {
         addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
     }
 }
-
