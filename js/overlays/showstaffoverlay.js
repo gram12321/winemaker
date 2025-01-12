@@ -18,10 +18,11 @@ export function showStaffOverlay(staffData) {
   const details = document.createElement('div');
   details.id = 'staff-details';
   details.className = 'hire-staff-content';
+  overlay.style.zIndex = '2000'; // Ensure overlay is on top
   
   details.innerHTML = `
     <div class="card-header text-white d-flex justify-content-between align-items-center">
-      <h3 class="h5 mb-0">${staffData.firstName} ${staffData.lastName}</h3>
+      <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
       <button id="closeStaffOverlay" class="btn btn-primary btn-sm">Close</button>
     </div>
     <div class="staff-options-container">
