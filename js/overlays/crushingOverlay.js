@@ -179,30 +179,29 @@ function handleCrushing(overlayContainer) {
   const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
   const amount = parseFloat(selectedGrape.dataset.amount);
 
-    // Remove grapes from original storage
-    const removed = inventoryInstance.removeResource(
-      { name: resourceName },
-      amount,
-      'Grapes',
-      vintage,
-      storage
-    );
+  // Remove grapes from original storage
+  const removed = inventoryInstance.removeResource(
+    { name: resourceName },
+    amount,
+    'Grapes',
+    vintage,
+    storage
+  );
 
-    if (removed) {
-      // Add must to new storage
-      inventoryInstance.addResource(
-        { name: resourceName, naturalYield: 1 },
-        amount,
-        'Must',
-        vintage,
-        quality,
-        fieldName,
-        fieldPrestige,
-        mustStorage
-      );
-      addConsoleMessage(`Crushed ${formatNumber(amount)} t of ${resourceName} grapes from ${fieldName}`);
-    }
-  });
+  if (removed) {
+    // Add must to new storage
+    inventoryInstance.addResource(
+      { name: resourceName, naturalYield: 1 },
+      amount,
+      'Must',
+      vintage,
+      quality,
+      fieldName,
+      fieldPrestige,
+      mustStorage
+    );
+    addConsoleMessage(`Crushed ${formatNumber(amount)} t of ${resourceName} grapes from ${fieldName}`);
+  }
 
   inventoryInstance.save();
   return true;
