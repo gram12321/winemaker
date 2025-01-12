@@ -10,7 +10,7 @@ function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
 
   const toolButtons = tools.map(tool => `
-    <button class="btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
+    <button class="add-tool-button" data-tool-name="${tool.name}">Add ${tool.name}</button>
   `).join('');
 
   return `
