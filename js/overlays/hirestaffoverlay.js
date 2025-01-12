@@ -29,37 +29,44 @@ export function showHireStaffOverlay() {
 
     createdStaffOptions.forEach(staff => {
         staffHTML += `
-            <div class="staff-option" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                <h4>${staff.firstName} ${staff.lastName}</h4>
-                <table class="table table-bordered" style="width: 100%;">
-                    <tbody>
-                        <tr>
-                            <td>Nationality</td>
-                            <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
-                        </tr>
-                        <tr>
-                            <td>Wage</td>
-                            <td>€${staff.wage}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h4>Skills</h4>
-                <table class="skills-table" style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th>Skill</th>
-                            <th>Level</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Field</td><td class="${getSkillLevelClass(staff.skills.field.field)}">${staff.skills.field.field}</td></tr>
-                        <tr><td>Winery</td><td class="${getSkillLevelClass(staff.skills.winery.winery)}">${staff.skills.winery.winery}</td></tr>
-                        <tr><td>Administration</td><td class="${getSkillLevelClass(staff.skills.administration.administration)}">${staff.skills.administration.administration}</td></tr>
-                        <tr><td>Sales</td><td class="${getSkillLevelClass(staff.skills.sales.sales)}">${staff.skills.sales.sales}</td></tr>
-                        <tr><td>Maintenance</td><td class="${getSkillLevelClass(staff.skills.maintenance.maintenance)}">${staff.skills.maintenance.maintenance}</td></tr>
-                    </tbody>
-                </table>
-                <button class="btn btn-primary hire-staff-button" style="margin-top: 10px;">Hire</button>
+            <div class="staff-option">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">${staff.firstName} ${staff.lastName}</h3>
+                    <button class="btn btn-primary btn-sm hire-staff-button">Hire</button>
+                </div>
+                <div class="staff-options-container">
+                    <div class="staff-option">
+                        <h4>Personal Details</h4>
+                        <table class="skills-table">
+                            <tbody>
+                                <tr>
+                                    <td>Nationality</td>
+                                    <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly Wage</td>
+                                    <td>€${staff.wage}</td>
+                                </tr>
+                                <tr>
+                                    <td>Annual Cost</td>
+                                    <td>€${staff.wage * 12}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="staff-option">
+                        <h4>Skills & Expertise</h4>
+                        <table class="skills-table">
+                            <tbody>
+                                <tr><td>Field Work</td><td class="${getSkillLevelClass(staff.skills.field.field)}">${staff.skills.field.field}</td></tr>
+                                <tr><td>Winery Operations</td><td class="${getSkillLevelClass(staff.skills.winery.winery)}">${staff.skills.winery.winery}</td></tr>
+                                <tr><td>Administration</td><td class="${getSkillLevelClass(staff.skills.administration.administration)}">${staff.skills.administration.administration}</td></tr>
+                                <tr><td>Sales Management</td><td class="${getSkillLevelClass(staff.skills.sales.sales)}">${staff.skills.sales.sales}</td></tr>
+                                <tr><td>Maintenance</td><td class="${getSkillLevelClass(staff.skills.maintenance.maintenance)}">${staff.skills.maintenance.maintenance}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         `;
     });
