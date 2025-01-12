@@ -190,6 +190,7 @@ export function displayStaff() {
 
         // Add event listener to open overlay on row click
         row.addEventListener('click', () => {
+            console.log('Staff row clicked:', staff);
             showStaffOverlay(staff);
         });
     });

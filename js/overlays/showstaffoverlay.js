@@ -2,8 +2,11 @@
 import { getFlagIconHTML } from '../utils.js';
 
 export function showStaffOverlay(staffData) {
+  console.log('showStaffOverlay called with data:', staffData);
   const overlay = document.getElementById('staffOverlay');
+  console.log('Found overlay element:', overlay);
   const details = document.getElementById('staff-details');
+  console.log('Found details element:', details);
 
   if (!overlay) {
     const newOverlay = document.createElement('div');
