@@ -177,8 +177,9 @@ export function displayStaff() {
         `;
 
         const row = document.createElement('tr');
+        row.style.cursor = 'pointer';
         row.innerHTML = `
-          <td class="staff-name">${staff.name}</td>
+          <td>${staff.name}</td>
           <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
           <td>${staff.workforce}</td>
           <td>€${staff.wage}</td>
@@ -187,8 +188,8 @@ export function displayStaff() {
         `;
         tbody.appendChild(row);
 
-        // Add event listener to open overlay on staff name click
-        row.querySelector('.staff-name').addEventListener('click', () => {
+        // Add event listener to open overlay on row click
+        row.addEventListener('click', () => {
             showStaffOverlay(staff);
         });
     });
