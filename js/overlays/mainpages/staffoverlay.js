@@ -3,52 +3,57 @@ import { displayStaff } from '/js/staff.js';
 import { showHireStaffOverlay } from '/js/overlays/hirestaffoverlay.js';
 
 export function showStaffOverlay() {
-    // Remove any existing instances of the overlay
     const existingOverlay = document.querySelector('.mainview-overlay');
     if (existingOverlay) {
         existingOverlay.remove();
     }
 
-    // Create the overlay element
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
 
-    // Create content for the overlay
     overlay.innerHTML = `
-        <div class="mainview-overlay-content">
-            <h1>Staff Management</h1>
-            <button id="hire-staff-btn" class="btn btn-primary mt-3">Hire Staff</button>
-            <div id="staff-container" class="mt-4">
+        <div class="mainview-overlay-content overlay-container">
+            <h2 class="mb-4">Staff Management</h2>
+
+            <div class="overlay-sections">
+                <section id="staff-section" class="overlay-section card mb-4">
+                    <img src="/assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">Staff Overview</h3>
+                        <button class="btn btn-light btn-sm" id="hire-staff-btn">Hire Staff</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Nationality</th>
+                                        <th>Workforce</th>
+                                        <th>Wage (€)</th>
+                                        <th>Assigned Tasks</th>
+                                        <th class="skills-column">Skills</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="staff-entries">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     `;
 
-    // Append overlay to the document body
     document.body.appendChild(overlay);
     overlay.style.display = 'block';
 
-    // Display staff data
     displayStaff();
 
-    // Add event listener to hire staff button
     const hireStaffBtn = document.getElementById('hire-staff-btn');
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', function() {
             showHireStaffOverlay();
         });
     }
-
-    // Add event listener to close hire staff overlay
-    const closeHireStaffBtn = document.getElementById('closeHireStaffOverlay');
-    if (closeHireStaffBtn) {
-        closeHireStaffBtn.addEventListener('click', function() {
-            const hireOverlay = document.getElementById('hireStaffOverlay');
-            if (hireOverlay) {
-                hireOverlay.style.display = 'none';
-            }
-        });
-    }
-
-
-    
 }
