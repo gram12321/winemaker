@@ -1,4 +1,5 @@
 import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay  } from '/js/utils.js';
+import { calculateWinePrice } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
@@ -31,6 +32,7 @@ export function showSalesOverlay() {
                             <th>Amount</th>
                             <th>Quality</th>
                             <th>Order Type</th>
+                            <th>Bulk Price</th>
                             <th>Bulk Sales</th>
                         </tr>
                     </thead>
@@ -91,12 +93,18 @@ function displayWineCellarInventory() {
         const row = document.createElement('tr');
         const displayInfo = wine.getDisplayInfo();
 
+        // Get farmland data for price calculation
+        const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+        const farmland = farmlands.find(field => field.name === wine.fieldName);
+        const sellingPrice = farmland ? calculateWinePrice(wine.quality, farmland.landvalue, wine.fieldPrestige) : 0;
+
         row.innerHTML = `
             <td><strong>${displayInfo.name}</strong></td>
             <td>${displayInfo.storage}</td>
             <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${formatQualityDisplay(wine.quality)}</td>
             <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
+            <td>€${sellingPrice.toFixed(2)}</td>
             <td><button class="btn btn-light sell-wine-btn" data-resource="${displayInfo.resource.name}">Sell</button></td>
         `;
 
