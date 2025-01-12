@@ -67,8 +67,8 @@
 
 /* General overlay content styles */
 .overlay-content {
-  background-color: var(--panel-bg);
-  color: var(--panel-text);
+  background-color: var(--color-background);
+  color: var(--color-text);
   min-width: 400px;
   text-align: center;
   padding: 2rem;
@@ -79,17 +79,18 @@
 
 #farmland-details .table {
   margin: 0;
-  background-color: var(--panel-bg);
-  color: var(--panel-text);
+  background-color: var(--color-background);
+  color: var(--color-text);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 #farmland-details .table th {
   background-color: var(--color-primary);
-  color: var(--panel-text);
+  color: #fff;
   border-bottom: 2px solid var(--color-accent);
   padding: 12px;
+  font-weight: 500;
 }
 
 #farmland-details .table td {
