@@ -18,6 +18,7 @@ export function showSalesOverlay() {
 
             <!-- Wine Cellar Inventory Section -->
             <section id="inventory-section" class="overlay-section card mb-4">
+                <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
                 </div>
@@ -40,6 +41,7 @@ export function showSalesOverlay() {
 
             <!-- Wine Orders Section -->
             <section id="orders-section" class="overlay-section card mb-4">
+                <img src="/assets/pic/sales_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Sales">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Wine Orders</h3>
                     <div class="filters d-flex gap-2">
