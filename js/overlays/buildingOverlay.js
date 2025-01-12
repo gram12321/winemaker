@@ -10,16 +10,16 @@ function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
 
   const toolButtons = tools.map(tool => `
-    <button class="add-tool-button" data-tool-name="${tool.name}">Add ${tool.name}</button>
+    <button class="btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
   `).join('');
 
   return `
     <div class="card">
-      <div class="card-header">
-        <h2 class="mb-0">${building.name}</h2>
+      <div class="card-header text-white d-flex justify-content-between align-items-center">
+        <h3 class="h5 mb-0">${building.name}</h3>
+        <button id="closeBuildingOverlay" class="btn btn-light btn-sm">Close</button>
       </div>
       <div class="card-body">
-
         <div class="button-container">
           ${toolButtons}
         </div>
@@ -97,7 +97,8 @@ export function showBuildingOverlay(building) {
 
     const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
     setupToolButtons(building, tools);
-
+    setupCloseListeners(overlay);
+    
     overlay.style.display = 'flex';
   }
 }
@@ -133,9 +134,20 @@ function renderCapacityVisual(building) {
 export function hideBuildingOverlay() {
   const overlay = document.getElementById('buildingOverlay');
   if (overlay) {
-    overlay.style.display = 'none'; // Hide the overlay
-
-    // Update building cards when overlay is closed
+    overlay.style.display = 'none';
     updateBuildingCards();
   }
+}
+
+function setupCloseListeners(overlay) {
+  const closeButton = document.getElementById('closeBuildingOverlay');
+  if (closeButton) {
+    closeButton.addEventListener('click', hideBuildingOverlay);
+  }
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      hideBuildingOverlay();
+    }
+  });
 }
