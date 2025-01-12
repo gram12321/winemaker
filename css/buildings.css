@@ -1,15 +1,15 @@
 /* Building Card Styles */
 .building-card {
-  background-color: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
   padding: 20px;
   margin-bottom: 15px;
   transition: all 0.3s ease;
   position: relative;
-  color: var(--panel-text);
+  color: var(--color-text);
   text-align: left;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
   overflow: hidden;
 }
