@@ -9,8 +9,11 @@ function createOverlayStructure() {
   overlayContainer.className = 'overlay';
   overlayContainer.innerHTML = `
     <div class="overlay-content overlay-container">
-      <h2 class="mb-4">Grape Crushing</h2>
       <section id="vineyard-section" class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Grape Crushing</h3>
+          <button class="btn btn-light btn-sm close-btn">Close</button>
+        </div>
         <div class="card-header text-white d-flex justify-content-between align-items-center">
           <h3 class="h5 mb-0">Select Grapes to Crush</h3>
         </div>
@@ -52,8 +55,7 @@ function createOverlayStructure() {
           </tbody>
         </table>
       </div>
-      <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-light btn-sm close-btn">Close</button>
+      <div class="d-flex justify-content-end mt-3">
         <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
       </div>
     </div>
