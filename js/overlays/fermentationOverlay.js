@@ -9,24 +9,37 @@ export function showFermentationOverlay() {
     overlayContainer.className = 'overlay';
 
     overlayContainer.innerHTML = `
-        <div class="overlay-content">
-            <h2>Ferment Must</h2>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Container</th>
-                        <th>Capacity</th>
-                        <th>Resource</th>
-                        <th>Amount</th>
-                        <th>Quality</th>
-                    </tr>
-                </thead>
-                <tbody id="fermentation-storage-body">
-                </tbody>
-            </table>
-            <button class="btn btn-success ferment-btn">Ferment</button>
-            <button class="btn btn-secondary close-btn">Close</button>
+        <div class="overlay-content overlay-container">
+            <section id="vineyard-section" class="overlay-section card mb-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Must Fermentation</h3>
+                    <button class="btn btn-light btn-sm close-btn">Close</button>
+                </div>
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Select Must to Ferment</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover overlay-table">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Container</th>
+                                    <th>Capacity</th>
+                                    <th>Resource</th>
+                                    <th>Amount</th>
+                                    <th>Quality</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fermentation-storage-body">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-success ferment-btn">Ferment Must</button>
+                    </div>
+                </div>
+            </section>
         </div>
     `;
 
