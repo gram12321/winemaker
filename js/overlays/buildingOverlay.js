@@ -19,8 +19,7 @@ function createBuildingDetails(building) {
         <h2 class="mb-0">${building.name}</h2>
       </div>
       <div class="card-body">
-        <p>Capacity: ${building.capacity}</p>
-        <p>Contents: ${building.listContents ? building.listContents() : "No tools stored."}</p>
+
         <div class="button-container">
           ${toolButtons}
         </div>
