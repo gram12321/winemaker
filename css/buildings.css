@@ -1,43 +1,46 @@
 
 /* Building Card Styles */
 .building-card {
-  background-color: var(--color-background);
+  background-color: var(--panel-bg);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 15px;
   transition: all 0.3s ease;
   position: relative;
-  color: var(--color-text);
+  color: var(--panel-text);
   text-align: left;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+  overflow: hidden;
 }
 
 .building-card h4 {
   margin-top: 0;
   font-size: 1.2em;
-  color: var(--color-primary);
+  color: var(--accent-color);
+  font-weight: 600;
 }
 
 .building-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
-  background-color: var(--color-background);
-  opacity: 0.95;
+  background-color: var(--hover-bg);
 }
 
 .building-card .icon {
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   position: absolute;
   top: 15px;
   left: 15px;
   background-size: cover;
+  border-radius: 4px;
 }
 
 .building-card .details {
-  margin-left: 70px;
+  margin-left: 80px;
+  padding: 5px;
 }
 
 /* Buildings overlay */
@@ -51,19 +54,58 @@
 /* Building simulator container */
 .building-simulator {
   border: 2px solid var(--border-color);
-  padding: var(--spacing-md);
-  margin-top: var(--spacing-md);
-  background-color: var(--color-background);
+  padding: 20px;
+  margin-top: 20px;
+  background-color: var(--panel-bg);
   position: relative;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
 }
 
 /* Capacity grid within the building */
 .capacity-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--spacing-xs);
-  padding: var(--spacing-sm);
+  gap: 10px;
+  padding: 15px;
+  background: var(--hover-bg);
+  border-radius: 6px;
+}
+
+.capacity-cell {
+  aspect-ratio: 1;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.capacity-cell:hover {
+  transform: scale(1.05);
+}
+
+.add-tool-button {
+  background-color: var(--accent-color);
+  color: var(--button-text);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-tool-button:hover {
+  background-color: var(--hover-bg);
+  transform: translateY(-1px);
+}
+
+.add-tool-button:disabled {
+  background-color: var(--disabled-bg);
+  cursor: not-allowed;
 }
 
 /* Square cell styles */
