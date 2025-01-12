@@ -19,6 +19,7 @@ export function showFarmlandOverlay(farmlandData) {
   if (details) {
     details.innerHTML = `
       <div class="hire-staff-content">
+        <img src="/assets/pic/farming_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Farming">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
           <h3 class="h5 mb-0">${farmlandData.name}</h3>
           <button id="closeFarmlandOverlay" class="btn btn-light btn-sm">Close</button>
