@@ -17,11 +17,12 @@ export function showStaffOverlay(staffData) {
   content.className = 'overlay-content';
 
   content.innerHTML = `
-    <div class="card-header text-white d-flex justify-content-between align-items-center">
-      <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
-      <button id="closeStaffOverlay" class="btn btn-primary btn-sm">Close</button>
-    </div>
-    <div class="staff-options-container">
+    <section id="staff-details-section" class="overlay-section card mb-4">
+      <div class="card-header text-white d-flex justify-content-between align-items-center">
+        <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
+        <button id="closeStaffOverlay" class="btn btn-primary btn-sm">Close</button>
+      </div>
+      <div class="staff-options-container">
       <div class="staff-option">
         <h4>Personal Details</h4>
         <table class="skills-table">
@@ -46,7 +47,7 @@ export function showStaffOverlay(staffData) {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   `;
 
   overlay.appendChild(content);
