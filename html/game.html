@@ -72,6 +72,7 @@
   <!-- Building Detail Overlay -->
   <div id="buildingOverlay" class="overlay" style="display: none;">
     <div class="overlay-content">
+      <span class="close-btn">&times;</span>
       <div id="building-details"></div>
     </div>
   </div>
@@ -92,5 +93,18 @@
     </div>
   </div>
 
-  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const buildingOverlay = document.getElementById('buildingOverlay');
+      const closeBtn = buildingOverlay.querySelector('.close-btn');
+
+      // Close on X button click
+      closeBtn.addEventListener('click', () => {
+        buildingOverlay.style.display = 'none';
+      });
+
+
+    });
+  </script>
+</body>
 </html>
