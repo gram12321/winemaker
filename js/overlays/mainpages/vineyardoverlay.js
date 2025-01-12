@@ -16,6 +16,7 @@ export function showVineyardOverlay() {
             <h2 class="mb-4">Vineyard Management</h2>
             <div class="overlay-sections">
                 <section id="vineyard-section" class="overlay-section card mb-4">
+                    <img src="/assets/pic/vineyard_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Vineyard">
                     <div class="card-header text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Vineyard Fields</h3>
                     </div>
