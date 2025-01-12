@@ -19,7 +19,7 @@ export function showWineryOverlay() {
             
             <div class="overlay-sections">
                 <section id="grapes-section" class="overlay-section card mb-4">
-                    <img src="/assets/pic/warehouse_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Warehouse">
+                    <img src="assets/pic/warehouse_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Warehouse">
                     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Warehouse Storage</h3>
                         <button class="btn btn-light btn-sm" id="crushGrapesBtn">Crush Grapes</button>
@@ -44,7 +44,7 @@ export function showWineryOverlay() {
                 </section>
 
                 <section id="must-section" class="overlay-section card mb-4">
-                    <img src="/assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Winery">
+                    <img src="assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Winery">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Winery Processing</h3>
                         <button class="btn btn-light btn-sm" id="fermentMustBtn">Ferment Must</button>
