@@ -17,7 +17,7 @@ export function showStaffOverlay() {
 
             <div class="overlay-sections">
                 <section id="staff-section" class="overlay-section card mb-4">
-                    <img src="/assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+                    <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
                     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
                         <h3 class="h5 mb-0">Staff Overview</h3>
                         <button class="btn btn-light btn-sm" id="hire-staff-btn">Hire Staff</button>
