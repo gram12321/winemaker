@@ -115,8 +115,8 @@ const ToolManager = (() => {
       tools = [
         new Tool('Tractor', 'Tool Shed', 1.2, 500, 0),
         new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0),
-        new Tool('Forklift', 'Warehouse', 1.5, 4000, 0),
-        new Tool('Pallet Jack', 'Warehouse', 1.7, 11150, 0),
+        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0),
+        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0),
         new Tool('Harvest Bins', 'Warehouse', 1.1, 1000, 0, ['Grapes']),
         new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must']),
         new Tool('Macro Bin', 'Warehouse', 1.0, 750, 5000, ['Grapes']),
