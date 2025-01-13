@@ -382,27 +382,36 @@
 
 /* Dropdown Styling */
 .form-control-sm {
-  background-color: #722F37;
-  border: 1px solid #C5A572;
-  color: #FAF9F7;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
   font-size: 0.875rem;
   padding: 0.25rem 0.5rem;
+  transition: all 0.2s ease;
 }
 
 .form-control-sm:focus {
-  background-color: #8B4513;
-  border-color: #C5A572;
-  color: #FAF9F7;
-  box-shadow: 0 0 0 0.2rem rgba(197, 165, 114, 0.25);
-}
-
-.form-control-sm option {
-  background-color: #722F37;
-  color: #FAF9F7;
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(197, 165, 114, 0.25);
 }
 
 .form-control-sm:hover {
-  border-color: #8B4513;
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.form-control-sm option {
+  background-color: var(--color-primary);
+  color: var(--color-accent);
+  padding: 8px;
+}
+
+.form-control-sm option:hover {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
 }
 
 /* Fullscreen overlay specific for hire staff */
