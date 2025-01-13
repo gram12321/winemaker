@@ -240,6 +240,14 @@
   text-align: center;
 }
 
+.tool-name {
+  color: var(--color-text);
+  font-size: 0.75em;
+  text-align: center;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
 .add-tool-button {
   background-color: var(--accent-color);
   color: var(--button-text);

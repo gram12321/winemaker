@@ -161,6 +161,7 @@ function renderCapacityVisual(building) {
             ${tool.speedBonus !== 1.0 ? `<br>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%` : ''}
           </div>
         </div>
+        <div class="tool-name">${tool.name}</div>
       `;
     } else {
       cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty)</div>`;
