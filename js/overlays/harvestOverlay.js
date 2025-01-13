@@ -120,9 +120,9 @@ export function showHarvestOverlay(farmland, farmlandId) {
                     row.innerHTML = `
                         <td><input type="radio" name="tool-select" value="${toolId}"></td>
                         <td>${toolId}</td>
-                        <td>${formatNumber(tool.capacity)}</td>
+                        <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
                         <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
-                        <td>${formatNumber(currentAmount)} kg</td>
+                        <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
                     `;
                     storageBody.appendChild(row);
                 }
