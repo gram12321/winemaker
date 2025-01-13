@@ -1,6 +1,7 @@
 import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
+import { loadFarmlands } from '../../database/adminFunctions.js';
 
 export function showVineyardOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
@@ -30,8 +31,7 @@ export function showVineyardOverlay() {
         </div>
     `;
 
-    import { loadFarmlands } from '../../database/adminFunctions.js';
-const farmlands = loadFarmlands();
+    const farmlands = loadFarmlands();
     const table = document.createElement('table');
     table.className = 'table table-hover overlay-table';
 
