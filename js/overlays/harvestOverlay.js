@@ -151,7 +151,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
-                            <p>Container only has capacity for ${formatNumber(harvestCheck.availableCapacity)}kg out of expected ${formatNumber(expectedYield)}kg.</p>
+                            <p>Container only has capacity for ${harvestCheck.availableCapacity >= 1000 ? formatNumber(harvestCheck.availableCapacity/1000, 2) + ' t' : formatNumber(harvestCheck.availableCapacity) + ' kg'} out of expected ${expectedYield >= 1000 ? formatNumber(expectedYield/1000, 2) + ' t' : formatNumber(expectedYield) + ' kg'}.</p>
                             <p>Do you want to harvest what fits in the container?</p>
                         </div>
                         <div class="modal-footer">
