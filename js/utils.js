@@ -71,12 +71,6 @@ export function formatNumber(value, decimals = 0) {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })} Mio`;
-    } else if (absValue >= 1_000) {
-        // For values 1000 or more (convert to tons)
-        formattedValue = `${(absValue / 1_000).toLocaleString('de-DE', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })} t`;
     } else {
         // For smaller amounts
         formattedValue = absValue.toLocaleString('de-DE', {
