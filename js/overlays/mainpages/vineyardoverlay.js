@@ -1,7 +1,8 @@
+import { inventoryInstance } from '../../resource.js';
 import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
-import { loadFarmlands } from '../../database/adminFunctions.js';
+import { loadFarmlands, saveInventory } from '../../database/adminFunctions.js';
 
 export function showVineyardOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
