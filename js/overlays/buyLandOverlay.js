@@ -106,7 +106,6 @@ export function showBuyLandOverlay() {
 }
 
 function buySelectedFarmland(farmland) {
-    const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
     const totalPrice = farmland.totalPrice;
     const currentMoney = parseFloat(localStorage.getItem('money') || '0');
 
@@ -116,8 +115,7 @@ function buySelectedFarmland(farmland) {
     }
 
     addTransaction('Expense', `Purchase of ${farmland.name}`, -totalPrice);
-    ownedFarmlands.push(farmland);
-    localStorage.setItem('ownedFarmlands', JSON.stringify(ownedFarmlands));
+    addFarmland(farmland);
     addConsoleMessage(`Land successfully purchased: <strong>${farmland.name}</strong>, in ${farmland.region}, ${getFlagIconHTML(farmland.country)}${farmland.country} total size of (${formatLandSizeWithUnit(farmland.acres)}) for <strong>${formatNumber(totalPrice)}€</strong>.`);
     displayFarmland();
     document.getElementById('buyLandOverlay').style.display = 'none';

@@ -1,5 +1,6 @@
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 import { displayFarmland } from '/js/farmland.js';
+import { loadFarmlands } from '/js/adminFunctions.js'; // Assuming this function exists
 
 export function showLandOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');

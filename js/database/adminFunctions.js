@@ -404,17 +404,39 @@ export function loadBuildings() {
   return [];
 }
 
+// In-memory storage for farmlands
+let farmlandsStore = [];
+
 // Function to load farmlands from localStorage
 /**
  * Loads all owned farmlands from localStorage
  * @returns {Array} Array of farmland objects, or empty array if none exist
  */
 export function loadFarmlands() {
-  const farmlandsJSON = localStorage.getItem('ownedFarmlands');
-  if (farmlandsJSON) {
-    return JSON.parse(farmlandsJSON);
+  if (farmlandsStore.length === 0) {
+    const farmlandsJSON = localStorage.getItem('ownedFarmlands');
+    if (farmlandsJSON) {
+      farmlandsStore = JSON.parse(farmlandsJSON);
+    }
   }
-  return [];
+  return farmlandsStore;
+}
+
+/**
+ * Saves farmlands to localStorage
+ * @private
+ */
+function saveFarmlandsToStorage() {
+  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlandsStore));
+}
+
+/**
+ * Adds a new farmland to the store
+ * @param {Object} farmland - The farmland object to add
+ */
+export function addFarmland(farmland) {
+  farmlandsStore.push(farmland);
+  saveFarmlandsToStorage();
 }
 
 /**

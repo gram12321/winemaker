@@ -165,7 +165,7 @@ export function displayFarmland() {
   if (!farmlandEntries) return;
   
   farmlandEntries.innerHTML = '';
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const farmlands = loadFarmlands();
   const selectedUnit = getUnit();
 
   farmlands.forEach((farmland) => {
