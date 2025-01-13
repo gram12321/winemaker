@@ -221,10 +221,10 @@ export function renderCompanyInfo() {
         companyInfoDiv.innerHTML = `
           <div class="company-name">${companyName}</div>
           <div class="styled-line"></div>
-          <div class="info-item date-info">
+          
             <span class="info-label"><img src="/assets/icon/small/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
             <span class="info-content">Week ${currentWeek}, ${currentSeason}, ${currentYear}</span>
-          </div>
+          
           <div class="info-item">
             <span class="info-label"><img src="/assets/icon/small/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
             <span class="info-content">€ ${formatNumber(money, 0)}</span>
