@@ -1,4 +1,4 @@
-import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
+import { saveCompanyInfo, clearLocalStorage, loadFarmlands  } from './adminFunctions.js';
 import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
 import { Farmland } from '../farmland.js'; // Ensure the correct path
 import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
