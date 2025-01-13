@@ -170,12 +170,23 @@
 
 /* Capacity grid within the building */
 .capacity-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
   padding: 15px;
   background: rgba(114, 47, 55, 0.05);
   border-radius: var(--radius-md);
+}
+
+.capacity-header {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.capacity-grid-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
 }
 
 .capacity-cell {
@@ -187,10 +198,46 @@
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  position: relative;
 }
 
 .capacity-cell:hover {
   transform: scale(1.05);
+}
+
+.tool-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-background);
+  border: 1px solid var(--color-primary);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  z-index: 100;
+  color: var(--color-text);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tool-info:hover .tool-tooltip {
+  display: block;
+}
+
+.empty-slot {
+  color: var(--color-text);
+  opacity: 0.5;
+  font-size: 0.8em;
+  text-align: center;
 }
 
 .add-tool-button {

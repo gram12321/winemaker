@@ -133,8 +133,16 @@ function renderCapacityVisual(building) {
   const totalCapacity = building.capacity;
   const usedCapacity = building.tools ? building.tools.length : 0;
 
-  // Clear existing grid
+  // Add header text
+  const headerText = document.createElement('div');
+  headerText.className = 'capacity-header';
+  headerText.textContent = `Building Slots (${usedCapacity}/${totalCapacity} used)`;
   capacityGrid.innerHTML = '';
+  capacityGrid.appendChild(headerText);
+
+  // Create grid container
+  const gridContainer = document.createElement('div');
+  gridContainer.className = 'capacity-grid-container';
 
   // Create grid squares
   for (let i = 0; i < totalCapacity; i++) {
@@ -143,14 +151,25 @@ function renderCapacityVisual(building) {
 
     if (i < usedCapacity) {
       const tool = building.tools[i];
-      const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`; // Path for the icon
+      const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`;
       cell.innerHTML = `
-        <img src="${iconPath}" alt="${tool.name}" style="width: 24px; height: 24px;" />
+        <div class="tool-info">
+          <img src="${iconPath}" alt="${tool.name}" style="width: 24px; height: 24px;" />
+          <div class="tool-tooltip">
+            <strong>Slot ${i + 1}:</strong> ${tool.name} #${tool.instanceNumber}
+            ${tool.capacity ? `<br>Storage: ${formatNumber(tool.capacity)} kg` : ''}
+            ${tool.speedBonus !== 1.0 ? `<br>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%` : ''}
+          </div>
+        </div>
       `;
+    } else {
+      cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty)</div>`;
     }
 
-    capacityGrid.appendChild(cell);
+    gridContainer.appendChild(cell);
   }
+
+  capacityGrid.appendChild(gridContainer);
 }
 
 export function hideBuildingOverlay() {
