@@ -164,9 +164,9 @@ export function showHarvestOverlay(farmland, farmlandId) {
             const harvestCheck = canHarvest(farmland, selectedTool);
             
             if (harvestCheck.warning) {
-            const expectedYield = farmlandYield(farmland);
-            const warningModal = document.createElement('div');
-            warningModal.className = 'modal fade';
+                const expectedYield = farmlandYield(farmland);
+                const warningModal = document.createElement('div');
+                warningModal.className = 'modal fade';
             warningModal.innerHTML = `
                 <div class="modal-dialog">
                     <div class="modal-content overlay-section">
