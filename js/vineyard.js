@@ -2,6 +2,7 @@
 import { farmlandYield } from './farmland.js';
 import { addConsoleMessage } from './console.js';
 import { loadBuildings } from './database/adminFunctions.js';
+import { inventoryInstance } from './resource.js';
 
 export { farmlandYield };
 
