@@ -189,9 +189,7 @@ function saveInventory() {
   localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
 }
 
-
-
-export function saveTask(taskInfo) {
+function saveTask(taskInfo) {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
     // Find if the task already exists based on taskId
@@ -465,5 +463,6 @@ export {
   clearLocalStorage, 
   clearFirestore, 
   loadInventory, 
-  saveInventory
+  saveInventory,
+  saveTask
 };
