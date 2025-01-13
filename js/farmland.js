@@ -71,11 +71,14 @@ export function farmlandYield(farmland) {
   if (farmland.plantedResourceName) {
     const resource = getResourceByName(farmland.plantedResourceName);
     if (resource) {
-      // Calculate the theoretical yield
-      const theoreticalYield = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
-
-      // Use the existing annualYieldFactor
-      const expectedYield = theoreticalYield * farmland.annualYieldFactor * (farmland.density / 1000);
+      // Base yield in kg per acre (1 ton = 907.185 kg)
+      const baseYieldPerAcre = 4000; // About 4.4 tons per acre (moderate yield)
+      
+      // Quality factors affect yield
+      const qualityMultiplier = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
+      
+      // Calculate total yield based on acres and factors
+      const expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor;
 
       return expectedYield;
     }
