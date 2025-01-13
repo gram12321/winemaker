@@ -10,7 +10,15 @@ function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
 
   const toolButtons = tools.map(tool => `
-    <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
+    <div class="tool-container mb-2">
+      <button class="add-tool-button btn btn-light btn-sm overlay-section-btn mb-1" data-tool-name="${tool.name}">Add ${tool.name}</button>
+      <div class="tool-stats small">
+        <div>Cost: €${formatNumber(tool.cost)}</div>
+        ${tool.speedBonus !== 1.0 ? `<div>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%</div>` : ''}
+        ${tool.capacity > 0 ? `<div>Storage: ${formatNumber(tool.capacity)} kg</div>` : ''}
+        ${tool.supportedResources?.length ? `<div>Stores: ${tool.supportedResources.join(', ')}</div>` : ''}
+      </div>
+    </div>
   `).join('');
 
   return `

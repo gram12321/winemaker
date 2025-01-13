@@ -71,6 +71,23 @@
   color: var(--panel-text);
 }
 
+
+.tool-container {
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.tool-stats {
+  color: #aaa;
+  font-size: 0.85rem;
+}
+
+.tool-stats div {
+  margin: 2px 0;
+}
+
 /* Building simulator container */
 .building-simulator {
   padding: 20px;
