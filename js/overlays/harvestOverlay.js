@@ -190,7 +190,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
             $(warningModal).modal('show');
 
             document.getElementById('confirmHarvest').addEventListener('click', () => {
-                if (harvest(farmland, farmlandId, selectedRadio.value, harvestCheck.availableCapacity)) {
+                if (harvest(farmland, farmlandId, selectedTool, harvestCheck.availableCapacity)) {
                     $(warningModal).modal('hide');
                     warningModal.remove();
                     removeOverlay();
@@ -201,7 +201,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
                 warningModal.remove();
             });
         } else if (harvestCheck.warning === false) {
-            if (harvest(farmland, farmlandId, selectedRadio.value)) {
+            if (harvest(farmland, farmlandId, selectedTool)) {
                 removeOverlay();
             }
         }
