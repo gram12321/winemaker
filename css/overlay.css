@@ -505,22 +505,35 @@ input[type="range"]::-webkit-slider-thumb:hover {
 /* Planting overlay select styling */
 .planting-overlay select {
   background-color: var(--color-primary);
-  color: var(--panel-text);
+  color: var(--color-accent);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
   padding: 8px 12px;
   width: 100%;
   margin: 10px 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .planting-overlay select:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 0 2px rgba(197, 165, 114, 0.25);
+  background-color: var(--color-primary);
+}
+
+.planting-overlay select:hover {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
 }
 
 .planting-overlay select option {
   background-color: var(--color-primary);
-  color: var(--panel-text);
+  color: var(--color-accent);
+}
+
+.planting-overlay select option:hover {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
 }
 
 /* Planting overlay button styling */
