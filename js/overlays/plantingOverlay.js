@@ -41,8 +41,7 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Get all farmlands and update the specific one
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  // Update the farmland in the existing farmlands array
   const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
 
   if (updatedFarmlandIndex !== -1) {
