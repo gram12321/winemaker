@@ -18,8 +18,8 @@
   margin: 0 auto;
   margin-bottom: 25px;
   max-height: 90vh;
-  max-width: 90vw;
-  width: 1200px;
+  width: calc(100% - 40px);
+  max-width: calc(100vw - 540px);
   overflow-y: auto;
 }
 
