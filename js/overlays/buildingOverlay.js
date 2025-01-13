@@ -17,7 +17,7 @@ function createBuildingDetails(building) {
           <span class="chevron">▼</span>
         </button>
       </div>
-      <div class="tool-stats small collapsed">
+      <div class="tool-stats small">
         <div>Cost: €${formatNumber(tool.cost)}</div>
         ${tool.speedBonus !== 1.0 ? `<div>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%</div>` : ''}
         ${tool.capacity > 0 ? `<div>Storage: ${formatNumber(tool.capacity)} kg</div>` : ''}
