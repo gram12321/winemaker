@@ -179,22 +179,8 @@ export function calculateCompanyPrestige() {
     const moneyPrestige = money / 10000000;
     const farmlands = loadFarmlands();
 
-    const totalFarmlandPrestige = farmlands.reduce((total, farmlandData) => {
-        const farmland = new Farmland(
-            farmlandData.id, 
-            farmlandData.name, 
-            farmlandData.country, 
-            farmlandData.region, 
-            farmlandData.acres, 
-            farmlandData.plantedResourceName, 
-            farmlandData.vineAge, 
-            farmlandData.grape, 
-            farmlandData.soil, 
-            farmlandData.altitude, 
-            farmlandData.aspect, 
-            farmlandData.density
-        );
-        return total + farmland.farmlandPrestige;
+    const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
+        return total + (farmland.farmlandPrestige || 0);
     }, 0);
 
     const currentPrestigeHit = parseFloat(localStorage.getItem('currentPrestigeHit') || '0');
