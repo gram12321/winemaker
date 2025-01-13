@@ -152,7 +152,9 @@ function renderCapacityVisual(building) {
     if (i < usedCapacity) {
       const tool = building.tools[i];
       const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`;
-      cell.innerHTML = `
+      const cellContent = document.createElement('div');
+      cellContent.className = 'cell-content';
+      cellContent.innerHTML = `
         <div class="tool-info">
           <img src="${iconPath}" alt="${tool.name}" style="width: 24px; height: 24px;" />
           <div class="tool-tooltip">
@@ -160,8 +162,14 @@ function renderCapacityVisual(building) {
             ${tool.capacity ? `<br>Storage: ${formatNumber(tool.capacity)} kg` : ''}
             ${tool.speedBonus !== 1.0 ? `<br>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%` : ''}
           </div>
-        </div>
-        <div class="tool-name">${tool.name}</div>
+        </div>`;
+      
+      const toolName = document.createElement('div');
+      toolName.className = 'tool-name';
+      toolName.textContent = tool.name;
+      
+      cell.appendChild(cellContent);
+      cell.appendChild(toolName);
       `;
     } else {
       cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty)</div>`;
