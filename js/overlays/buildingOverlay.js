@@ -13,9 +13,6 @@ function createBuildingDetails(building) {
     <div class="tool-container">
       <div class="tool-header">
         <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
-        <button class="toggle-stats-btn btn btn-sm" type="button">
-          <span class="chevron">▼</span>
-        </button>
       </div>
       <div class="tool-stats small">
         <div>Cost: €${formatNumber(tool.cost)}</div>

@@ -15,37 +15,19 @@
 }
 
 #buildingOverlay .overlay-content {
-  margin-top: 0;
+  margin: 0 auto;
   margin-bottom: 25px;
   max-height: 90vh;
+  max-width: 90vw;
+  width: 1200px;
   overflow-y: auto;
 }
 
 .tool-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 8px;
-}
-
-.toggle-stats-btn {
-  padding: 4px 8px;
-  background: transparent;
-  border: none;
-  color: var(--color-text);
-}
-
-.toggle-stats-btn .chevron {
-  display: inline-block;
-  transition: transform 0.3s;
-}
-
-.tool-stats.collapsed {
-  display: none;
-}
-
-.toggle-stats-btn[aria-expanded="true"] .chevron {
-  transform: rotate(180deg);
 }
 
 /* Building Button Styles */
