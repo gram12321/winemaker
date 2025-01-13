@@ -8,7 +8,12 @@ import { displayFarmland  } from '/js/farmland.js';
 // Function to handle planting logic
 function plant(farmland, selectedResource, selectedDensity) {
   if (!selectedResource) {
-    addConsoleMessage('Please select a resource to plant');
+    addConsoleMessage('Please select a resource to plant', false, true);
+    return false;
+  }
+
+  if (!farmland || typeof farmland.id === 'undefined') {
+    addConsoleMessage('Invalid farmland data', false, true);
     return false;
   }
 
@@ -18,7 +23,21 @@ function plant(farmland, selectedResource, selectedDensity) {
 
   // Check if enough money is available
   if (currentMoney < totalCost) {
-    addConsoleMessage(`Insufficient funds for planting. Required: <strong>${formatNumber(totalCost)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>`);
+    addConsoleMessage(`Insufficient funds for planting. Required: <strong>${formatNumber(totalCost)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>`, false, true);
+    return false;
+  }
+
+  // Verify farmland is not already planted
+  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const currentFarmland = farmlands.find(f => f.id === farmland.id);
+  
+  if (!currentFarmland) {
+    addConsoleMessage('Farmland not found in storage', false, true);
+    return false;
+  }
+
+  if (currentFarmland.plantedResourceName) {
+    addConsoleMessage(`Field <strong>${farmland.name}</strong> is already planted`, false, true);
     return false;
   }
 

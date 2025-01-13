@@ -13,9 +13,11 @@ function getTimestamp() {
     return new Date().toLocaleTimeString('en-GB', options);
 }
 
-function addConsoleMessage(message, isHTML = false) {
+function addConsoleMessage(message, isHTML = false, isError = false) {
     const timestamp = getTimestamp();
-    const messageHTML = isHTML ? `[${timestamp}] ${message}` : `[${timestamp}] ${message}`;
+    const messageHTML = isHTML ? 
+        `<span ${isError ? 'style="color: #ff4444;"' : ''}>[${timestamp}] ${message}</span>` : 
+        `<span ${isError ? 'style="color: #ff4444;"' : ''}>[${timestamp}] ${message}</span>`;
 
     consoleMessages.push(messageHTML);
     localStorage.setItem('consoleMessages', JSON.stringify(consoleMessages)); // Store messages in localStorage
