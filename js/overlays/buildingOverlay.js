@@ -11,8 +11,13 @@ function createBuildingDetails(building) {
 
   const toolButtons = `<div class="tool-grid">` + tools.map(tool => `
     <div class="tool-container">
-      <button class="add-tool-button btn btn-light btn-sm overlay-section-btn mb-1" data-tool-name="${tool.name}">Add ${tool.name}</button>
-      <div class="tool-stats small">
+      <div class="tool-header">
+        <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
+        <button class="toggle-stats-btn btn btn-sm" type="button">
+          <span class="chevron">▼</span>
+        </button>
+      </div>
+      <div class="tool-stats small collapsed">
         <div>Cost: €${formatNumber(tool.cost)}</div>
         ${tool.speedBonus !== 1.0 ? `<div>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%</div>` : ''}
         ${tool.capacity > 0 ? `<div>Storage: ${formatNumber(tool.capacity)} kg</div>` : ''}
@@ -106,8 +111,20 @@ export function showBuildingOverlay(building) {
     const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
     setupToolButtons(building, tools);
     setupCloseListeners(overlay);
+    setupStatsToggles();
     
     overlay.style.display = 'flex';
+}
+
+function setupStatsToggles() {
+  document.querySelectorAll('.toggle-stats-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const statsDiv = e.target.closest('.tool-container').querySelector('.tool-stats');
+      statsDiv.classList.toggle('collapsed');
+      const isExpanded = !statsDiv.classList.contains('collapsed');
+      btn.setAttribute('aria-expanded', isExpanded);
+    });
+  });
   }
 }
 
