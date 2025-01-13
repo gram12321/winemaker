@@ -246,6 +246,12 @@
   text-align: center;
   margin-top: 4px;
   opacity: 0.8;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2em;
+  max-height: 1.2em;
 }
 
 .add-tool-button {
