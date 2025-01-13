@@ -95,9 +95,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
                         </tbody>
                     </table>
                 </div>
-                <div class="button-container d-flex justify-content-between align-items-center mt-3 mb-3 px-3">
-                    <div>Expected Yield: <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span></div>
-                    <div>Selected Capacity: <span id="selected-capacity">0 kg</span></div>
+                <div class="button-container d-flex justify-content-center mt-3 mb-3">
                     <button class="overlay-section-btn harvest-btn">Harvest Selected</button>
                 </div>
             </div>
@@ -153,20 +151,17 @@ export function showHarvestOverlay(farmland, farmlandId) {
 
     // Handle harvest button click
     overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
-        const selectedCheckboxes = overlayContainer.querySelectorAll('.storage-checkbox:checked');
-        if (selectedCheckboxes.length === 0) {
-            addConsoleMessage('Please select at least one storage container for harvesting');
+        const selectedRadio = overlayContainer.querySelector('input[name="tool-select"]:checked');
+        if (!selectedRadio) {
+            addConsoleMessage('Please select a storage container for harvesting');
             return;
         }
 
-        selectedCheckboxes.forEach(checkbox => {
-            const selectedTool = checkbox.value;
-            const harvestCheck = canHarvest(farmland, selectedTool);
-            
-            if (harvestCheck.warning) {
-                const expectedYield = farmlandYield(farmland);
-                const warningModal = document.createElement('div');
-                warningModal.className = 'modal fade';
+        const harvestCheck = canHarvest(farmland, selectedRadio.value);
+        if (harvestCheck.warning) {
+            const expectedYield = farmlandYield(farmland);
+            const warningModal = document.createElement('div');
+            warningModal.className = 'modal fade';
             warningModal.innerHTML = `
                 <div class="modal-dialog">
                     <div class="modal-content overlay-section">
@@ -190,7 +185,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
             $(warningModal).modal('show');
 
             document.getElementById('confirmHarvest').addEventListener('click', () => {
-                if (harvest(farmland, farmlandId, selectedTool, harvestCheck.availableCapacity)) {
+                if (harvest(farmland, farmlandId, selectedRadio.value, harvestCheck.availableCapacity)) {
                     $(warningModal).modal('hide');
                     warningModal.remove();
                     removeOverlay();
@@ -201,7 +196,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
                 warningModal.remove();
             });
         } else if (harvestCheck.warning === false) {
-            if (harvest(farmland, farmlandId, selectedTool)) {
+            if (harvest(farmland, farmlandId, selectedRadio.value)) {
                 removeOverlay();
             }
         }
