@@ -1,8 +1,10 @@
 import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
+import { formatNumber } from '../../utils.js';
 import { loadFarmlands } from '../../database/adminFunctions.js';
 
+ 
 /**
  * Creates and displays the vineyard management overlay
  * Shows a table of all farmlands with their current status, crops, and actions
