@@ -404,6 +404,31 @@ export function loadBuildings() {
   return [];
 }
 
+// Function to load farmlands from localStorage
+export function loadFarmlands() {
+  const farmlandsJSON = localStorage.getItem('ownedFarmlands');
+  if (farmlandsJSON) {
+    return JSON.parse(farmlandsJSON);
+  }
+  return [];
+}
+
+// Function to update specific farmland properties
+export function updateFarmland(farmlandId, updates) {
+  const farmlands = loadFarmlands();
+  const farmlandIndex = farmlands.findIndex(f => f.id === parseInt(farmlandId));
+  
+  if (farmlandIndex !== -1) {
+    farmlands[farmlandIndex] = {
+      ...farmlands[farmlandIndex],
+      ...updates
+    };
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    return true;
+  }
+  return false;
+}
+
 export { 
   storeCompanyName, 
   saveCompanyInfo, 
