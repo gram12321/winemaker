@@ -12,6 +12,16 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
+  // Calculate planting cost
+  const totalCost = selectedDensity * 2 * farmland.acres;
+  const currentMoney = parseFloat(localStorage.getItem('money') || '0');
+
+  // Check if enough money is available
+  if (currentMoney < totalCost) {
+    addConsoleMessage(`Insufficient funds for planting. Required: <strong>${formatNumber(totalCost)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>`);
+    return false;
+  }
+
   // Get all farmlands and update the specific one
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
