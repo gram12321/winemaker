@@ -195,12 +195,14 @@ export function calculateCompanyPrestige() {
 export function renderCompanyInfo() {
     // Calculate companyPrestige based on current money
     calculateCompanyPrestige();
+    
+    // Use the same data loading mechanism as loadExistingCompanyData
     const companyName = localStorage.getItem('companyName');
-    const money = parseFloat(localStorage.getItem('money') || '0');
+    const money = localStorage.getItem('money');
     const currentWeek = localStorage.getItem('week');
     const currentSeason = localStorage.getItem('season');
     const currentYear = localStorage.getItem('year');
-    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige') || '0');
+    const companyPrestige = localStorage.getItem('companyPrestige');
     const companyInfoDiv = document.getElementById('companyInfo');
 
     if (companyInfoDiv) {
