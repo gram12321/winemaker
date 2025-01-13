@@ -64,7 +64,7 @@ export function showVineyardOverlay() {
                         <td>${farmland.plantedResourceName || 'None'}</td>
                         <td>${farmland.status}</td>
                         <td>${farmland.plantedResourceName ? (farmland.ripeness * 100).toFixed(1) + '%' : 'Not Planted'}</td>
-                        <td>${farmlandYield(farmland).toFixed(2)} kg</td>
+                        <td>${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland), 2) + ' kg'}</td>
                         <td>
                             <button class="btn btn-light btn-sm harvest-btn" 
                                     data-farmland-id="${farmland.id}"
