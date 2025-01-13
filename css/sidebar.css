@@ -16,20 +16,15 @@
 }
 
 .menu-grid {
-  flex: 1;
-  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 10px;
+  margin-bottom: auto;
 }
 
 .dropdown {
-  margin-top: auto;
   flex-shrink: 0;
-}
-
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-  padding: 15px;
 }
 
 .menu-item {
