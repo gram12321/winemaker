@@ -5,8 +5,6 @@ import { addTransaction } from '/js/finance.js';
 import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
 import { inventoryInstance } from '/js/resource.js';
 
-
-
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
         try {
