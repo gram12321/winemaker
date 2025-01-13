@@ -41,9 +41,11 @@ export function sellWines(resourceName) {
     }
 }
 
+// Calculate wine price based on quality, land value, and field prestige
 export function calculateWinePrice(quality, wine) {
-    const baseValue = 1;
+    const baseValue = 1; // Base value for wine pricing
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    // Find the farmland that produced this wine
     const farmland = farmlands.find(field => field.name === wine.fieldName);
 
     if (!farmland) return 0;
@@ -53,9 +55,12 @@ export function calculateWinePrice(quality, wine) {
     return baseValue * wineValueModifier;
 }
 
+// Generate a random wine order based on available inventory and company prestige
 export function generateWineOrder() {
+    // Get all bottled wines from inventory
     const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottles');
 
+    // Check if we have any bottles to sell
     if (bottledWines.length === 0) {
         addConsoleMessage("A customer wants to buy wine, but there are no bottles in the wine cellar.");
         return;

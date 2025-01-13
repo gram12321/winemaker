@@ -5,7 +5,9 @@ import { inventoryInstance } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 
+// Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
+    // Remove any existing overlay before creating a new one
     const existingOverlay = document.querySelector('.mainview-overlay');
     if (existingOverlay) {
         existingOverlay.remove();
@@ -73,7 +75,9 @@ function populateResourceFilter() {
     });
 }
 
+// Filter wine orders based on selected type and resource filters
 function filterOrders(orders) {
+    // Get current filter values from the UI
     const typeFilter = document.getElementById('type-filter')?.value;
     const resourceFilter = document.getElementById('resource-filter')?.value;
 
