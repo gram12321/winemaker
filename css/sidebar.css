@@ -130,7 +130,10 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--color-accent);
   overflow-x: hidden;
-  text-align: right;
+}
+
+#companyInfo .info-content {
+  float: right;
 }
 
 #companyInfo .company-name {
