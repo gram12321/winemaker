@@ -159,12 +159,11 @@ export function showHarvestOverlay(farmland, farmlandId) {
             return;
         }
 
-        let totalSuccess = true;
         selectedCheckboxes.forEach(checkbox => {
             const selectedTool = checkbox.value;
-
-        const harvestCheck = canHarvest(farmland, selectedRadio.value);
-        if (harvestCheck.warning) {
+            const harvestCheck = canHarvest(farmland, selectedTool);
+            
+            if (harvestCheck.warning) {
             const expectedYield = farmlandYield(farmland);
             const warningModal = document.createElement('div');
             warningModal.className = 'modal fade';
