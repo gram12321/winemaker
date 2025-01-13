@@ -275,17 +275,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
-  padding: 8px;
+  gap: 4px;
+  padding: 6px;
   border: 1px solid var(--border-color);
   margin: var(--spacing-xs);
   background-color: var(--color-background);
+  width: 70px;
+  height: 70px;
 }
 
 .cell-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
 }
