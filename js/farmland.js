@@ -2,6 +2,7 @@
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { getFlagIcon, formatNumber, getColorClass } from './utils.js';
 import { getResourceByName } from './resource.js';
+import { loadFarmlands } from './database/adminFunctions.js';
 
 
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map

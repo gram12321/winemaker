@@ -5,6 +5,7 @@ import { regionAspectRatings, calculateAndNormalizePriceFactor } from '../names.
 import { getUnit, convertToCurrentUnit } from '../settings.js';
 import { addTransaction } from '/js/finance.js';
 import { displayFarmland } from '/js/farmland.js';
+import { addFarmland } from '../database/adminFunctions.js';
 
 function generateFarmlandOptions(numberOfOptions) {
     const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
