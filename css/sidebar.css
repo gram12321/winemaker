@@ -11,6 +11,20 @@
   border-right: 2px solid var(--color-accent);
 }
 
+#companyInfo {
+  flex-shrink: 0;
+}
+
+.menu-grid {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.dropdown {
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
