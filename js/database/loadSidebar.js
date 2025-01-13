@@ -229,6 +229,6 @@ export function renderCompanyInfo() {
 
     const dropdownToggle = document.querySelector('#navbarDropdown');
     if (companyName && dropdownToggle) {
-        dropdownToggle.textContent = companyName;
+        dropdownToggle.textContent = companyName.charAt(0).toUpperCase() + companyName.slice(1);
     }
 }

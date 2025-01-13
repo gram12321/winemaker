@@ -106,8 +106,9 @@
   border: 1px solid var(--color-accent);
 }
 
-.dropdown-menu a {
-  color: var(--panel-text);
+.dropdown-menu a,
+#navbarDropdown {
+  color: var(--color-accent);
 }
 
 .dropdown-menu a:hover {
