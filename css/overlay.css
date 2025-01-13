@@ -38,6 +38,15 @@
   display: none;
 }
 
+/* Ensure modal appears above overlay */
+.modal {
+  z-index: 2100;
+}
+
+.modal-backdrop {
+  z-index: 2050;
+}
+
 .overlay-content {
   position: absolute;
   top: 50%;
