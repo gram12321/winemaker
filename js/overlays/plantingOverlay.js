@@ -27,44 +27,22 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Get and update farmlands
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const currentFarmland = farmlands.find(f => f.id === farmland.id);
-  
-  if (!currentFarmland) {
-    addConsoleMessage('Farmland not found in storage', false, true);
-    return false;
-  }
+  // Use plantFarmland from adminFunctions
+  const plantingSuccess = plantFarmland(farmland.id, {
+    density: selectedDensity,
+    resourceName: selectedResource
+  });
 
-  if (currentFarmland.plantedResourceName) {
-    addConsoleMessage(`Field <strong>${farmland.name}</strong> is already planted`, false, true);
-    return false;
-  }
-
-  // Update the farmland in the existing farmlands array
-  const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
-
-  if (updatedFarmlandIndex !== -1) {
-    // Create updated farmland object
-    const updatedFarmland = {
-      ...farmlands[updatedFarmlandIndex],
-      density: selectedDensity,
-      plantedResourceName: selectedResource,
-      vineAge: 0
-    };
-    
-    // Update array and localStorage
-    farmlands[updatedFarmlandIndex] = updatedFarmland;
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-    // Update the reference passed to the function
-    Object.assign(farmland, updatedFarmland);
-
+  if (plantingSuccess) {
     // Process transaction
     addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
     addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${selectedResource}</strong>.`);
+    // Update the reference passed to the function
+    Object.assign(farmland, { density: selectedDensity, plantedResourceName: selectedResource, vineAge: 0 });
     return true;
   }
+  
+  addConsoleMessage('Failed to plant field', false, true);
   return false;
 }
 

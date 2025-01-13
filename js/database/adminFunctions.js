@@ -468,3 +468,29 @@ export {
   loadInventory, 
   saveInventory
 };
+/**
+ * Updates farmland with planting information
+ * @param {number} farmlandId - The ID of the farmland to plant
+ * @param {Object} plantingData - Object containing planting details
+ * @returns {boolean} True if planting successful, false otherwise
+ */
+export function plantFarmland(farmlandId, plantingData) {
+  const farmlands = loadFarmlands();
+  const farmlandIndex = farmlands.findIndex(f => f.id === farmlandId);
+  
+  if (farmlandIndex !== -1) {
+    // Create updated farmland object with planting data
+    const updatedFarmland = {
+      ...farmlands[farmlandIndex],
+      density: plantingData.density,
+      plantedResourceName: plantingData.resourceName,
+      vineAge: 0
+    };
+    
+    // Update farmland store
+    farmlands[farmlandIndex] = updatedFarmland;
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    return true;
+  }
+  return false;
+}
