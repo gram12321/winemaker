@@ -207,7 +207,7 @@ export function renderCompanyInfo() {
 
     if (companyInfoDiv) {
         companyInfoDiv.innerHTML = `
-          <div class="company-name" title="Your Company Name">${companyName}</div>
+          <div class="company-name" title="Your Company Name">${companyName.charAt(0).toUpperCase() + companyName.slice(1)}</div>
           <div class="styled-line"></div>
           
           <div class="info-item" title="Current Game Date">

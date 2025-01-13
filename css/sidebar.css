@@ -166,6 +166,7 @@
 #companyInfo .info-content {
   font-weight: normal;
   margin-left: 8px;
+  color: var(--color-accent);
 }
 
 #companyInfo [title],
