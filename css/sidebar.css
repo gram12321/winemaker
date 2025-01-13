@@ -107,8 +107,9 @@
 }
 
 .dropdown-menu a,
-#navbarDropdown {
-  color: var(--color-accent);
+#navbarDropdown,
+.dropdown-toggle {
+  color: var(--color-accent) !important;
 }
 
 .dropdown-menu a:hover {
