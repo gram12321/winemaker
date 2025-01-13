@@ -136,6 +136,7 @@ export function sellOrderWine(orderIndex) {
                 applyPrestigeHit(totalSellingPrice / 1000);
                 removeWineOrder(orderIndex);
                 inventoryInstance.save();
+                displayWineCellarInventory();
                 return true;
             }
         } else {

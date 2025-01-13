@@ -65,7 +65,7 @@ export function showSalesOverlay() {
                             <th>Wine</th>
                             <th>Quality</th>
                             <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
-                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price ↕</th>
+                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price/Bottle ↕</th>
                             <th>Action</th>
                         </tr>
                     </thead>
