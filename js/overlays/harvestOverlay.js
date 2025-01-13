@@ -120,7 +120,7 @@ export function showHarvestOverlay(farmland, farmlandId) {
                     row.innerHTML = `
                         <td><input type="radio" name="tool-select" value="${toolId}"></td>
                         <td>${toolId}</td>
-                        <td>${tool.capacity}</td>
+                        <td>${formatNumber(tool.capacity)}</td>
                         <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
                         <td>${formatNumber(currentAmount)} kg</td>
                     `;
