@@ -1,3 +1,4 @@
+
 import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay  } from '/js/utils.js';
 import { calculateWinePrice } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
@@ -79,6 +80,10 @@ export function showSalesOverlay() {
     document.body.appendChild(overlay);
     overlay.style.display = 'block';
 
+    initializeSalesTables();
+}
+
+function initializeSalesTables() {
     displayWineCellarInventory();
     displayWineOrders();
 }
@@ -109,7 +114,7 @@ export function displayWineCellarInventory() {
         sellButton.addEventListener('click', () => {
             const wineName = wine.name ? wine.name.split(', ')[1] : wine.resource.name;
             sellWines(wineName);
-            displayWineCellarInventory(); // Refresh the display
+            displayWineCellarInventory();
         });
 
         tableBody.appendChild(row);
@@ -149,7 +154,6 @@ function sortOrders(orders, sortKey, direction) {
 }
 
 function setupEventListeners() {
-    // Setup filter listeners
     const typeFilter = document.getElementById('type-filter');
     const resourceFilter = document.getElementById('resource-filter');
     const newTypeFilter = typeFilter.cloneNode(true);
@@ -161,7 +165,6 @@ function setupEventListeners() {
     newTypeFilter.addEventListener('change', refreshDisplay);
     newResourceFilter.addEventListener('change', refreshDisplay);
 
-    // Setup sort listeners
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {
             const sortKey = th.dataset.sort;
