@@ -51,15 +51,21 @@ export function sellWines(resourceName) {
     }
 }
 
-export function calculateWinePrice(quality, landValue, fieldPrestige) {
+export function calculateWinePrice(quality, wine) {
     // Base value for wine pricing
     const baseValue = 1;
     
+    // Get farmland data for price calculation
+    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmland = farmlands.find(field => field.name === wine.fieldName);
+    
+    if (!farmland) return 0;
+
     // Normalize land value to 0-1 scale
-    const normalizedLandValue = normalizeLandValue(landValue);
+    const normalizedLandValue = normalizeLandValue(farmland.landvalue);
     
     // Calculate wine value based on quality, land value, and field prestige
-    const wineValueModifier = (quality * 100 + normalizedLandValue * 100 + fieldPrestige * 100) / 3;
+    const wineValueModifier = (quality * 100 + normalizedLandValue * 100 + wine.fieldPrestige * 100) / 3;
     return baseValue * wineValueModifier;
 }
 
