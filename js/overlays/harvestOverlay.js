@@ -95,7 +95,9 @@ export function showHarvestOverlay(farmland, farmlandId) {
                         </tbody>
                     </table>
                 </div>
-                <div class="button-container d-flex justify-content-center mt-3 mb-3">
+                <div class="button-container d-flex justify-content-between align-items-center mt-3 mb-3 px-3">
+                    <div>Expected Yield: <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span></div>
+                    <div>Selected Capacity: <span id="selected-capacity">0 kg</span></div>
                     <button class="overlay-section-btn harvest-btn">Harvest Selected</button>
                 </div>
             </div>
@@ -151,11 +153,15 @@ export function showHarvestOverlay(farmland, farmlandId) {
 
     // Handle harvest button click
     overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
-        const selectedRadio = overlayContainer.querySelector('input[name="tool-select"]:checked');
-        if (!selectedRadio) {
-            addConsoleMessage('Please select a storage container for harvesting');
+        const selectedCheckboxes = overlayContainer.querySelectorAll('.storage-checkbox:checked');
+        if (selectedCheckboxes.length === 0) {
+            addConsoleMessage('Please select at least one storage container for harvesting');
             return;
         }
+
+        let totalSuccess = true;
+        selectedCheckboxes.forEach(checkbox => {
+            const selectedTool = checkbox.value;
 
         const harvestCheck = canHarvest(farmland, selectedRadio.value);
         if (harvestCheck.warning) {
