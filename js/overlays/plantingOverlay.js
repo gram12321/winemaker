@@ -123,8 +123,16 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
     const selectedResource = overlayContainer.querySelector('#resource-select').value;
 
     if (plant(farmland, selectedResource, selectedDensity)) {
+      // Force a UI refresh by reloading the farmlands
+      const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+      const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
+      if (updatedFarmlandIndex !== -1) {
+        farmland = farmlands[updatedFarmlandIndex];
+      }
       onPlantCallback(selectedDensity);
       removeOverlay(overlayContainer);
+      // Refresh the display
+      displayFarmland();
     }
   });
 }
