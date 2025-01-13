@@ -1,7 +1,7 @@
 
 import { farmlandYield } from './farmland.js';
 import { addConsoleMessage } from './console.js';
-import { loadBuildings, saveInventory } from './database/adminFunctions.js';
+import { loadBuildings } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 
 // Export farmlandYield for use in other modules
