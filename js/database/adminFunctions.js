@@ -139,17 +139,18 @@ async function saveCompanyInfo() {
       week,
       season,
       year,
-      companyPrestige,
-      currentPrestigeHit,
+        companyPrestige,
+        currentPrestigeHit,
       ownedFarmlands,
       playerInventory,
       staffData,
-      transactions,
+      transactions, // Save transactions
     });
+    
   } catch (error) {
-    console.error('Error saving company data:', error);
-    alert('An error occurred while saving company data.');
+    console.error("Error saving company info: ", error);
   }
+}
 
 // Function to load inventory from localStorage
 function loadInventory() {
@@ -189,7 +190,9 @@ function saveInventory() {
   localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
 }
 
-function saveTask(taskInfo) {
+
+
+export function saveTask(taskInfo) {
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
     // Find if the task already exists based on taskId
@@ -463,6 +466,5 @@ export {
   clearLocalStorage, 
   clearFirestore, 
   loadInventory, 
-  saveInventory,
-  saveTask
+  saveInventory
 };
