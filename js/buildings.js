@@ -121,7 +121,7 @@ const ToolManager = (() => {
         new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must']),
         new Tool('Macro Bin', 'Warehouse', 1.0, 750, 5000, ['Grapes']),
         new Tool('Lug Box', 'Warehouse', 1.0, 50, 20000, ['Grapes']),
-        new Tool('Grape Gondola', 'Warehouse', 1.0, 2000, 180000, ['Grapes'])
+        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 180000, ['Grapes'])
       ];
       toolsInitialized = true;
     }
