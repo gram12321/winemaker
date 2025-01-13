@@ -169,48 +169,50 @@ export function showHarvestOverlay(farmland, farmlandId) {
         selectedCheckboxes.forEach(checkbox => {
             const selectedTool = checkbox.value;
             const harvestCheck = canHarvest(farmland, selectedTool);
+            
             if (harvestCheck.warning) {
-            const expectedYield = farmlandYield(farmland);
-            const warningModal = document.createElement('div');
-            warningModal.className = 'modal fade';
-            warningModal.innerHTML = `
-                <div class="modal-dialog">
-                    <div class="modal-content overlay-section">
-                        <div class="modal-header card-header">
-                            <h3 class="modal-title">Warning: Limited Container Capacity</h3>
-                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Container only has capacity for ${harvestCheck.availableCapacity >= 1000 ? formatNumber(harvestCheck.availableCapacity/1000, 2) + ' t' : formatNumber(harvestCheck.availableCapacity) + ' kg'} out of expected ${expectedYield >= 1000 ? formatNumber(expectedYield/1000, 2) + ' t' : formatNumber(expectedYield) + ' kg'}.</p>
-                            <p>Do you want to harvest what fits in the container?</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
-                            <button type="button" class="overlay-section-btn" id="confirmHarvest">Harvest Available</button>
+                const expectedYield = farmlandYield(farmland);
+                const warningModal = document.createElement('div');
+                warningModal.className = 'modal fade';
+                warningModal.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content overlay-section">
+                            <div class="modal-header card-header">
+                                <h3 class="modal-title">Warning: Limited Container Capacity</h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Container only has capacity for ${harvestCheck.availableCapacity >= 1000 ? formatNumber(harvestCheck.availableCapacity/1000, 2) + ' t' : formatNumber(harvestCheck.availableCapacity) + ' kg'} out of expected ${expectedYield >= 1000 ? formatNumber(expectedYield/1000, 2) + ' t' : formatNumber(expectedYield) + ' kg'}.</p>
+                                <p>Do you want to harvest what fits in the container?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="overlay-section-btn" id="confirmHarvest">Harvest Available</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
+                `;
 
-            document.body.appendChild(warningModal);
-            $(warningModal).modal('show');
+                document.body.appendChild(warningModal);
+                $(warningModal).modal('show');
 
-            document.getElementById('confirmHarvest').addEventListener('click', () => {
-                if (harvest(farmland, farmlandId, selectedRadio.value, harvestCheck.availableCapacity)) {
-                    $(warningModal).modal('hide');
+                document.getElementById('confirmHarvest').addEventListener('click', () => {
+                    if (harvest(farmland, farmlandId, selectedTool, harvestCheck.availableCapacity)) {
+                        $(warningModal).modal('hide');
+                        warningModal.remove();
+                        removeOverlay();
+                    }
+                });
+
+                warningModal.addEventListener('hidden.bs.modal', () => {
                     warningModal.remove();
+                });
+            } else if (harvestCheck.warning === false) {
+                if (harvest(farmland, farmlandId, selectedTool)) {
                     removeOverlay();
                 }
-            });
-
-            warningModal.addEventListener('hidden.bs.modal', () => {
-                warningModal.remove();
-            });
-        } else if (harvestCheck.warning === false) {
-            if (harvest(farmland, farmlandId, selectedRadio.value)) {
-                removeOverlay();
             }
-        }
+        });
     });
 
     const closeButton = overlayContainer.querySelector('.close-btn');
