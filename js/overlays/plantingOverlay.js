@@ -27,7 +27,7 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Verify farmland is not already planted
+  // Get and update farmlands
   const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
   const currentFarmland = farmlands.find(f => f.id === farmland.id);
   
@@ -45,17 +45,23 @@ function plant(farmland, selectedResource, selectedDensity) {
   const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
 
   if (updatedFarmlandIndex !== -1) {
-    // Update both density and planted resource
-    farmlands[updatedFarmlandIndex].density = selectedDensity;
-    farmlands[updatedFarmlandIndex].plantedResourceName = selectedResource;
-    farmlands[updatedFarmlandIndex].vineAge = 0;
+    // Create updated farmland object
+    const updatedFarmland = {
+      ...farmlands[updatedFarmlandIndex],
+      density: selectedDensity,
+      plantedResourceName: selectedResource,
+      vineAge: 0
+    };
+    
+    // Update array and localStorage
+    farmlands[updatedFarmlandIndex] = updatedFarmland;
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 
-    // Calculate and process the planting cost
-    const totalCost = selectedDensity * 2 * farmland.acres;
-    addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
+    // Update the reference passed to the function
+    Object.assign(farmland, updatedFarmland);
 
-    // Add console message for successful planting
+    // Process transaction
+    addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
     addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${selectedResource}</strong>.`);
     return true;
   }
