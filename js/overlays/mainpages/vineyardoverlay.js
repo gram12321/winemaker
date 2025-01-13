@@ -3,7 +3,12 @@ import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
 import { loadFarmlands } from '../../database/adminFunctions.js';
 
+/**
+ * Creates and displays the vineyard management overlay
+ * Shows a table of all farmlands with their current status, crops, and actions
+ */
 export function showVineyardOverlay() {
+    // Remove any existing overlay before creating a new one
     const existingOverlay = document.querySelector('.mainview-overlay');
     if (existingOverlay) {
         existingOverlay.remove();

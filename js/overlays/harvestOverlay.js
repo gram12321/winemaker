@@ -6,7 +6,16 @@ import { farmlandYield, canHarvest } from '../vineyard.js';
 import { formatNumber } from '../utils.js';
 import { saveInventory, updateFarmland } from '../database/adminFunctions.js';
 
+/**
+ * Handles the harvesting of grapes from a farmland
+ * @param {Object} farmland - The farmland to harvest from
+ * @param {number} farmlandId - ID of the farmland
+ * @param {string} selectedTool - The storage container identifier
+ * @param {number|null} availableCapacity - Optional capacity limit for partial harvests
+ * @returns {boolean} True if harvest successful, false otherwise
+ */
 function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
+    // Check if harvesting is possible with selected storage
     const harvestCheck = canHarvest(farmland, selectedTool);
     if ((!harvestCheck || harvestCheck.warning) && !availableCapacity) {
         return false;

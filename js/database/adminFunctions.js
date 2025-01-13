@@ -405,6 +405,10 @@ export function loadBuildings() {
 }
 
 // Function to load farmlands from localStorage
+/**
+ * Loads all owned farmlands from localStorage
+ * @returns {Array} Array of farmland objects, or empty array if none exist
+ */
 export function loadFarmlands() {
   const farmlandsJSON = localStorage.getItem('ownedFarmlands');
   if (farmlandsJSON) {
@@ -413,7 +417,12 @@ export function loadFarmlands() {
   return [];
 }
 
-// Function to update specific farmland properties
+/**
+ * Updates specific properties of a farmland
+ * @param {number} farmlandId - The ID of the farmland to update
+ * @param {Object} updates - Object containing the properties to update
+ * @returns {boolean} True if update successful, false if farmland not found
+ */
 export function updateFarmland(farmlandId, updates) {
   const farmlands = loadFarmlands();
   const farmlandIndex = farmlands.findIndex(f => f.id === parseInt(farmlandId));
