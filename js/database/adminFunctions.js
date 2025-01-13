@@ -139,18 +139,17 @@ async function saveCompanyInfo() {
       week,
       season,
       year,
-        companyPrestige,
-        currentPrestigeHit,
+      companyPrestige,
+      currentPrestigeHit,
       ownedFarmlands,
       playerInventory,
       staffData,
-      transactions, // Save transactions
+      transactions,
     });
-    console.log("Company info and tasks saved successfully.");
   } catch (error) {
-    console.error("Error saving company info: ", error);
+    console.error('Error saving company data:', error);
+    alert('An error occurred while saving company data.');
   }
-}
 
 // Function to load inventory from localStorage
 function loadInventory() {
