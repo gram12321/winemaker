@@ -4,6 +4,7 @@ import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
 import { allResources } from '/js/resource.js';
 import { displayFarmland  } from '/js/farmland.js';
+import { updateFarmland } from '../database/adminFunctions.js';
 
 // Function to handle planting logic
 function plant(farmland, selectedResource, selectedDensity) {
