@@ -70,8 +70,9 @@ export function showHarvestOverlay(farmland, farmlandId) {
     overlayContainer.innerHTML = `
         <div class="overlay-content">
             <div class="overlay-section">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h3>Harvest Options for ${farmland.name}</h3>
+                    <button class="overlay-section-btn close-btn">×</button>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered overlay-table">
@@ -87,9 +88,8 @@ export function showHarvestOverlay(farmland, farmlandId) {
                         <tbody id="storage-display-body">
                         </tbody>
                     </table>
-                    <div class="button-container">
-                        <button class="overlay-section-btn harvest-btn">Harvest</button>
-                        <button class="overlay-section-btn close-btn">Close</button>
+                    <div class="button-container d-flex justify-content-center mt-3">
+                        <button class="overlay-section-btn harvest-btn">Harvest Selected</button>
                     </div>
                 </div>
             </div>
