@@ -69,22 +69,30 @@ export function showHarvestOverlay(farmland, farmlandId) {
 
     overlayContainer.innerHTML = `
         <div class="overlay-content">
-            <h2>Harvest Options for ${farmland.name}</h2>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Container</th>
-                        <th>Capacity</th>
-                        <th>Resource</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="storage-display-body">
-                </tbody>
-            </table>
-            <button class="btn btn-success harvest-btn">Harvest</button>
-            <button class="btn btn-secondary close-btn">Close</button>
+            <div class="overlay-section">
+                <div class="card-header">
+                    <h3>Harvest Options for ${farmland.name}</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered overlay-table">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Container</th>
+                                <th>Capacity</th>
+                                <th>Resource</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storage-display-body">
+                        </tbody>
+                    </table>
+                    <div class="button-container">
+                        <button class="overlay-section-btn harvest-btn">Harvest</button>
+                        <button class="overlay-section-btn close-btn">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
 
@@ -137,9 +145,9 @@ export function showHarvestOverlay(farmland, farmlandId) {
             warningModal.className = 'modal fade';
             warningModal.innerHTML = `
                 <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Warning: Limited Container Capacity</h5>
+                    <div class="modal-content overlay-section">
+                        <div class="modal-header card-header">
+                            <h3 class="modal-title">Warning: Limited Container Capacity</h3>
                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
                         <div class="modal-body">
@@ -147,8 +155,8 @@ export function showHarvestOverlay(farmland, farmlandId) {
                             <p>Do you want to harvest what fits in the container?</p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-primary" id="confirmHarvest">Harvest Available</button>
+                            <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="overlay-section-btn" id="confirmHarvest">Harvest Available</button>
                         </div>
                     </div>
                 </div>
