@@ -82,7 +82,7 @@
 .tool-container {
   text-align: left;
   border: 2px solid var(--color-primary);
-  padding: 12px;
+  padding: 15px;
   border-radius: 15px;
   background: rgba(255, 255, 255, 0.05);
   transition: transform 0.2s;
@@ -95,10 +95,12 @@
 .tool-stats {
   color: #aaa;
   font-size: 0.85rem;
+  padding: 8px 0;
 }
 
 .tool-stats div {
   margin: 4px 0;
+  padding: 0 4px;
 }
 
 /* Building simulator container */
