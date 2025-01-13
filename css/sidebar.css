@@ -4,11 +4,14 @@
   max-width: 250px;
   background: var(--panel-bg);
   color: var(--panel-text);
-  flex-shrink: 0;
+  position: fixed;
+  left: 0;
+  top: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
   border-right: 2px solid var(--color-accent);
+  overflow-y: auto;
 }
 
 .menu-title {
