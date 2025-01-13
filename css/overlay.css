@@ -11,7 +11,7 @@
     overflow-y: auto; /* Allows vertical scrolling */
     overflow-x: hidden; /* Prevents horizontal scrolling */
     display: none; /* Initially hidden */
-    z-index: 999; /* Ensure it sits above other content */
+    z-index: 1000; /* Ensure it sits above other content */
 }
 
 

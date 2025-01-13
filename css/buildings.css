@@ -1,4 +1,18 @@
 
+/* Overlay Styles */
+#buildingOverlay {
+  position: fixed;
+  top: 25px; /* Minimum distance from top */
+  max-height: calc(100vh - 125px); /* Account for top margin and console */
+  overflow-y: auto;
+  z-index: 1500; /* Above buildingsoverlay but below console */
+}
+
+#buildingOverlay .overlay-content {
+  margin-top: 0;
+  margin-bottom: 25px;
+}
+
 /* Building Button Styles */
 .overlay-section-btn {
   background-color: var(--color-accent) !important;

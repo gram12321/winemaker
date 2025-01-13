@@ -24,7 +24,7 @@
   /* Rounded corners */
   padding: 10px;
   /* Padding inside the console area */
-  z-index: 1000;
+  z-index: 2000;
   /* Ensure it stays on top of other elements */
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
   /* Subtle shadow for depth */
