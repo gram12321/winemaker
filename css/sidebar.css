@@ -110,10 +110,23 @@
 #navbarDropdown,
 .dropdown-toggle {
   color: var(--color-accent) !important;
+  transition: all 0.2s ease;
+}
+
+.dropdown-menu {
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-accent);
+}
+
+.dropdown-menu a {
+  color: var(--color-accent);
+  transition: all 0.2s ease;
 }
 
 .dropdown-menu a:hover {
-  background-color: var(--color-primary);
+  background-color: var(--color-accent);
+  color: var(--color-primary) !important;
+  transform: translateX(5px);
 }
 
 .position-sticky {
