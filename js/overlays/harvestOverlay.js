@@ -4,7 +4,7 @@ import { showVineyardOverlay } from './mainpages/vineyardoverlay.js';
 import { inventoryInstance } from '../resource.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
 import { formatNumber } from '../utils.js';
-import { saveInventory } from '../database/adminFunctions.js';
+import { saveInventory, updateFarmland } from '../database/adminFunctions.js';
 
 function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
     const harvestCheck = canHarvest(farmland, selectedTool);
@@ -45,14 +45,9 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
         selectedTool
     );
 
-    // Update farmland status
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const farmlandToUpdate = farmlands.find(f => f.id === parseInt(farmlandId));
-    if (farmlandToUpdate) {
-        farmlandToUpdate.ripeness = 0;
-        farmlandToUpdate.status = 'Harvested';
-        localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-    }
+    // Update farmland status using adminFunctions
+    updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
+
 
     saveInventory();
     addConsoleMessage(`Harvested ${formatNumber(totalHarvest)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);

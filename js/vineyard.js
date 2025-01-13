@@ -1,12 +1,13 @@
+
 import { farmlandYield } from './farmland.js';
 import { addConsoleMessage } from './console.js';
+import { loadBuildings } from './database/adminFunctions.js';
 
 export { farmlandYield };
 
 export function canHarvest(farmland, storage) {
-    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+    const buildings = loadBuildings();
 
-    // Find the storage tool
     const buildingWithTool = buildings.find(building => 
         building.tools?.some(tool => `${tool.name} #${tool.instanceNumber}` === storage)
     );
@@ -24,12 +25,11 @@ export function canHarvest(farmland, storage) {
         return false;
     }
 
-    const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    const currentInventory = inventoryInstance.items;
     const expectedYield = farmlandYield(farmland);
     const existingItems = currentInventory.filter(item => item.storage === storage);
     const currentAmount = existingItems.reduce((sum, item) => sum + item.amount, 0);
 
-    // Check if container has existing content of different type
     if (existingItems.length > 0) {
         const firstItem = existingItems[0];
         if (firstItem.fieldName !== farmland.name ||
@@ -40,7 +40,6 @@ export function canHarvest(farmland, storage) {
         }
     }
 
-    // Check container capacity
     const availableCapacity = tool.capacity - currentAmount;
     if (availableCapacity < expectedYield) {
         return { warning: true, availableCapacity };
@@ -48,4 +47,3 @@ export function canHarvest(farmland, storage) {
 
     return { warning: false };
 }
-

@@ -30,7 +30,8 @@ export function showVineyardOverlay() {
         </div>
     `;
 
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    import { loadFarmlands } from '../../database/adminFunctions.js';
+const farmlands = loadFarmlands();
     const table = document.createElement('table');
     table.className = 'table table-hover overlay-table';
 
