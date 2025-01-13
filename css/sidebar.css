@@ -11,7 +11,18 @@
   border-right: 2px solid var(--color-accent);
 }
 
+.menu-title {
+  padding: 15px;
+  margin-bottom: 0;
+}
+
+.menu-grid {
+  padding: 15px;
+  margin-bottom: auto;
+}
+
 #companyInfo {
+  margin-top: auto;
   flex-shrink: 0;
 }
 
