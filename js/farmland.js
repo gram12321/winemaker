@@ -71,8 +71,8 @@ export function farmlandYield(farmland) {
   if (farmland.plantedResourceName) {
     const resource = getResourceByName(farmland.plantedResourceName);
     if (resource) {
-      // Base yield in kg per acre (1 ton = 907.185 kg)
-      const baseYieldPerAcre = 4000; // About 4.4 tons per acre (moderate yield)
+      // Base yield in kg per acre (1 ton = 1000 kg)
+      const baseYieldPerAcre = 4400; // About 4.4 tons per acre (moderate yield)
       
       // Quality factors affect yield
       const qualityMultiplier = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
