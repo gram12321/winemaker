@@ -381,10 +381,11 @@
 }
 
 /* Dropdown Styling */
-.form-control-sm {
+.form-control-sm,
+.dropdown-toggle {
   background-color: #722F37;
   border: 1px solid #C5A572;
-  color: #FAF9F7;
+  color: var(--color-accent) !important;
   font-size: 0.875rem;
   padding: 0.25rem 0.5rem;
 }
