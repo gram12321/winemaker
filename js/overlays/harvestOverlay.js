@@ -70,20 +70,23 @@ export function showHarvestOverlay(farmland, farmlandId) {
     overlayContainer.innerHTML = `
         <div class="overlay-content">
             <h2>Harvest Options for ${farmland.name}</h2>
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Container</th>
-                        <th>Capacity</th>
-                        <th>Resource</th>
-                        <th>Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="storage-display-body">
-                </tbody>
-            </table>
-            <button class="btn btn-success harvest-btn">Harvest</button>
+            <div class="form-group">
+                <label for="storage-select" class="form-label">Select Storage Container:</label>
+                <div class="storage-grid" id="storage-display-body">
+                </div>
+            </div>
+            <div class="harvest-details d-flex justify-content-between">
+                <div class="harvest-overlay-info-box">
+                    <span>Expected Yield: </span><span id="expected-yield">${formatNumber(farmlandYield(farmland))} kg</span>
+                </div>
+                <div class="harvest-overlay-info-box">
+                    <span>Quality: </span><span id="expected-quality">${((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2)}</span>
+                </div>
+                <div class="harvest-overlay-info-box">
+                    <span>Status: </span><span id="field-status">${farmland.status}</span>
+                </div>
+            </div>
+            <button class="btn btn-primary harvest-btn">Harvest</button>
             <button class="btn btn-secondary close-btn">Close</button>
         </div>
     `;
@@ -105,18 +108,26 @@ export function showHarvestOverlay(farmland, farmlandId) {
                         item.state === 'Grapes'
                     );
                     const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
-
-                    const row = document.createElement('tr');
                     const firstItem = matchingInventoryItems[0];
 
-                    row.innerHTML = `
-                        <td><input type="radio" name="tool-select" value="${toolId}"></td>
-                        <td>${toolId}</td>
-                        <td>${tool.capacity}</td>
-                        <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
-                        <td>${formatNumber(currentAmount)} kg</td>
+                    const containerDiv = document.createElement('div');
+                    containerDiv.className = 'storage-container';
+                    containerDiv.innerHTML = `
+                        <div class="storage-header">
+                            <input type="radio" name="tool-select" value="${toolId}" id="${toolId}">
+                            <label for="${toolId}">${tool.name}</label>
+                        </div>
+                        <div class="storage-stats">
+                            <div>Capacity: ${formatNumber(tool.capacity)} kg</div>
+                            <div>Available: ${formatNumber(tool.capacity - currentAmount)} kg</div>
+                            ${firstItem ? 
+                                `<div>Current: ${firstItem.fieldName}</div>
+                                 <div>${firstItem.resource.name}, ${firstItem.vintage}</div>` 
+                                : '<div>Empty</div>'
+                            }
+                        </div>
                     `;
-                    storageBody.appendChild(row);
+                    storageBody.appendChild(containerDiv);
                 }
             });
         }

@@ -535,6 +535,61 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .planting-overlay select option:hover {
   background-color: var(--color-accent);
   color: var(--color-primary);
+
+/* Harvest Overlay Styles */
+.harvest-overlay-info-box {
+    background-color: var(--color-background);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    margin: 10px 0;
+    text-align: center;
+    border: 1px solid var(--color-accent);
+    box-shadow: var(--shadow-sm);
+    width: 120px;
+    color: var(--color-text);
+}
+
+.storage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.storage-container {
+    border: 2px solid var(--color-primary);
+    padding: 15px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: transform 0.2s;
+}
+
+.storage-container:hover {
+    transform: translateY(-2px);
+}
+
+.storage-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.storage-stats {
+    color: #aaa;
+    font-size: 0.85rem;
+    padding: 8px 0;
+}
+
+.storage-stats div {
+    margin: 4px 0;
+    padding: 0 4px;
+}
+
+.harvest-details {
+    margin: 20px 0;
+}
+
 }
 
 /* Planting overlay button styling */
