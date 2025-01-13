@@ -83,7 +83,7 @@ export function showSalesOverlay() {
     displayWineOrders();
 }
 
-function displayWineCellarInventory() {
+export function displayWineCellarInventory() {
     const tableBody = document.getElementById('winecellar-table-body');
     tableBody.innerHTML = '';
 

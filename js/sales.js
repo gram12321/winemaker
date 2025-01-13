@@ -4,6 +4,7 @@ import { addTransaction } from './finance.js';
 import { applyPrestigeHit } from './database/loadSidebar.js';
 import { loadWineOrders, removeWineOrder, addWineOrder } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
+import { displayWineCellarInventory } from './overlays/mainpages/salesoverlay.js';
 
 export function sellWines(resourceName) {
     const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
