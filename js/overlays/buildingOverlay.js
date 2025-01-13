@@ -9,8 +9,8 @@ import { formatNumber } from '../utils.js';
 function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
 
-  const toolButtons = tools.map(tool => `
-    <div class="tool-container mb-2">
+  const toolButtons = `<div class="tool-grid">` + tools.map(tool => `
+    <div class="tool-container">
       <button class="add-tool-button btn btn-light btn-sm overlay-section-btn mb-1" data-tool-name="${tool.name}">Add ${tool.name}</button>
       <div class="tool-stats small">
         <div>Cost: €${formatNumber(tool.cost)}</div>
@@ -19,7 +19,7 @@ function createBuildingDetails(building) {
         ${tool.supportedResources?.length ? `<div>Stores: ${tool.supportedResources.join(', ')}</div>` : ''}
       </div>
     </div>
-  `).join('');
+  `).join('') + `</div>`;
 
   return `
     <div class="card">

@@ -72,11 +72,24 @@
 }
 
 
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .tool-container {
   text-align: left;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 8px;
-  border-radius: 4px;
+  border: 2px solid var(--color-primary);
+  padding: 12px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s;
+}
+
+.tool-container:hover {
+  transform: translateY(-2px);
 }
 
 .tool-stats {
@@ -85,7 +98,7 @@
 }
 
 .tool-stats div {
-  margin: 2px 0;
+  margin: 4px 0;
 }
 
 /* Building simulator container */
