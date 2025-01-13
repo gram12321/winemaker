@@ -104,7 +104,7 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('season', data.season);
     localStorage.setItem('year', data.year);
     localStorage.setItem('companyPrestige', data.companyPrestige);
-    localStorage.setItem('currentPrestigeHit'), data.currentPrestigeHit;
+    localStorage.setItem('currentPrestigeHit', data.currentPrestigeHit);
     localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
     localStorage.setItem('playerInventory', data.playerInventory || '[]');
     localStorage.setItem('buildings', data.buildings || '[]');
