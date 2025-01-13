@@ -57,7 +57,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
   }
 
   const overlayContainer = document.createElement('div');
-  overlayContainer.className = 'overlay';
+  overlayContainer.className = 'overlay planting-overlay';
 
   let density = farmland.density || 1000; // Default density if not set
   const initialCostPerAcre = density * 2;

@@ -460,15 +460,94 @@
   width: 100%;
 }
 
-/* /* Add CSS styles for the planting overlay */
+/* Planting Overlay Styles */
 .planting-overlay-info-box {
-  background-color: #f0f0f0;
-  border-radius: 5px;
-  padding: 10px;
+  background-color: var(--color-background);
+  border-radius: var(--radius-md);
+  padding: 15px;
   margin: 10px 0;
   text-align: center;
-  border: 1px solid #ddd;
-  width: 100px;
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  width: 120px;
+  color: var(--color-text);
+}
+
+/* Custom range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-primary);
+  outline: none;
+  margin: 15px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid var(--color-primary);
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: var(--color-primary);
+  border-color: var(--color-accent);
+  transform: scale(1.1);
+}
+
+/* Planting overlay select styling */
+.planting-overlay select {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  width: 100%;
+  margin: 10px 0;
+}
+
+.planting-overlay select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(197, 165, 114, 0.25);
+}
+
+.planting-overlay select option {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+}
+
+/* Planting overlay button styling */
+.planting-overlay .plant-btn,
+.planting-overlay .close-btn {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  margin: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.planting-overlay .plant-btn:hover,
+.planting-overlay .close-btn:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.planting-overlay .density-details {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+  gap: 10px;
 }
 
 /*  - --- --   staff.html - - - - - -*/
