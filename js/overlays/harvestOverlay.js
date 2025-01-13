@@ -75,12 +75,6 @@ export function showHarvestOverlay(farmland, farmlandId) {
                     <button class="overlay-section-btn close-btn">Close</button>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between">
-                            <div>Expected Yield: <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span></div>
-                            <div>Selected Capacity: <span id="selected-capacity">0 kg</span></div>
-                        </div>
-                    </div>
                     <table class="table table-bordered overlay-table">
                         <thead>
                             <tr>
