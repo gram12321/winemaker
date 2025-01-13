@@ -89,16 +89,19 @@ export function showHarvestOverlay(farmland, farmlandId) {
                         </tbody>
                     </table>
                 </div>
-                <div class="button-container d-flex justify-content-between align-items-center mt-3 mb-3 px-3">
-                    <div>
+                <div class="button-container d-flex flex-column align-items-center mt-3 mb-3 px-3">
+                    <div class="mb-2">
                         <span>Expected Yield: </span>
                         <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span>
                     </div>
-                    <div>
+                    <div class="w-100">
                         <span>Selected Capacity: </span>
                         <span id="selected-capacity">0 kg</span>
+                        <div class="progress">
+                            <div id="selected-capacity-progress" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
                     </div>
-                    <button class="overlay-section-btn harvest-btn">Harvest Selected</button>
+                    <button class="overlay-section-btn harvest-btn mt-3">Harvest Selected</button>
                 </div>
             </div>
         </div>
@@ -145,6 +148,12 @@ export function showHarvestOverlay(farmland, farmlandId) {
                         capacityDisplay.textContent = totalCapacity >= 1000 ? 
                             formatNumber(totalCapacity/1000, 2) + ' t' : 
                             formatNumber(totalCapacity) + ' kg';
+
+                        const expectedYield = farmlandYield(farmland);
+                        const capacityProgress = document.getElementById('selected-capacity-progress');
+                        const progressPercentage = Math.min((totalCapacity / expectedYield) * 100, 100);
+                        capacityProgress.style.width = `${progressPercentage}%`;
+                        capacityProgress.setAttribute('aria-valuenow', progressPercentage);
                     });
                 }
             });
