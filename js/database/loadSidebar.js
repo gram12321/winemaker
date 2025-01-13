@@ -202,7 +202,7 @@ export function renderCompanyInfo() {
     const currentWeek = localStorage.getItem('week');
     const currentSeason = localStorage.getItem('season');
     const currentYear = localStorage.getItem('year');
-    const companyPrestige = localStorage.getItem('companyPrestige');
+    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige') || '0');
     const companyInfoDiv = document.getElementById('companyInfo');
 
     if (companyInfoDiv) {
