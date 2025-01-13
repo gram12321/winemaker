@@ -28,9 +28,10 @@ function plant(farmland, selectedResource, selectedDensity) {
   }
 
   // Update farmland data
-  const plantingSuccess = updateFarmlandPlanting(farmland.id, {
+  const plantingSuccess = updateFarmland(farmland.id, {
     density: selectedDensity,
-    resourceName: selectedResource
+    plantedResourceName: selectedResource,
+    vineAge: 0
   });
 
   if (plantingSuccess) {

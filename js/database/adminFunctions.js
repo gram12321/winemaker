@@ -468,16 +468,4 @@ export {
   loadInventory, 
   saveInventory
 };
-/**
- * Updates farmland with planting information
- * @param {number} farmlandId - The ID of the farmland to plant
- * @param {Object} plantingData - Object containing planting details
- * @returns {boolean} True if planting successful, false otherwise
- */
-export function updateFarmlandPlanting(farmlandId, plantingData) {
-  return updateFarmland(farmlandId, {
-    density: plantingData.density,
-    plantedResourceName: plantingData.resourceName,
-    vineAge: 0
-  });
-}
+
