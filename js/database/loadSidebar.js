@@ -231,7 +231,7 @@ export function renderCompanyInfo() {
             <span class="info-label"><img src="/assets/icon/small/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
             <span class="info-content">€ ${formatNumber(money, 0)}</span>
           </div>
-          <div class="info-item" title="Company Prestige - Increases with better vineyards and successful business">
+          <div class="info-item" title="Company Prestige">
             <span class="info-label"><img src="/assets/icon/small/prestige.png" alt="Prestige Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
             <span class="info-content"> ${formatNumber(companyPrestige.toFixed(2), 0)}</span>
           </div>
