@@ -355,22 +355,42 @@ export function loadStaff() {
 }
 
 
+let currentWineOrders = [];
+
 export function saveWineOrders(wineOrders) {
-    localStorage.setItem('wineOrders', JSON.stringify(wineOrders)); 
+    currentWineOrders = wineOrders;
+    localStorage.setItem('wineOrders', JSON.stringify(wineOrders));
 }
 
 export function loadWineOrders() {
-    let wineOrders = [];
-    const savedWineOrders = localStorage.getItem('wineOrders');
+    if (currentWineOrders.length > 0) {
+        return currentWineOrders;
+    }
     
+    const savedWineOrders = localStorage.getItem('wineOrders');
     if (savedWineOrders) {
         try {
-            wineOrders = JSON.parse(savedWineOrders);
+            currentWineOrders = JSON.parse(savedWineOrders);
         } catch (error) {
             console.error("Failed to parse wine orders from localStorage.", error);
+            currentWineOrders = [];
         }
     }
-    return wineOrders;
+    return currentWineOrders;
+}
+
+export function removeWineOrder(orderIndex) {
+    if (orderIndex >= 0 && orderIndex < currentWineOrders.length) {
+        currentWineOrders.splice(orderIndex, 1);
+        saveWineOrders(currentWineOrders);
+        return true;
+    }
+    return false;
+}
+
+export function addWineOrder(order) {
+    currentWineOrders.push(order);
+    saveWineOrders(currentWineOrders);
 }
 
 // Functions to save and load buildings from localStorage
