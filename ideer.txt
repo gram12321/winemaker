@@ -69,7 +69,10 @@ QoL Improvement
 
 
 
-Usefull wine knodledge:
+Usefull wine knowledge:
+
+600 liters of Must per ton of Grapes
+
 In general terms, 1 ton of grapes produces approximately:
    - 60 cases of wine, which translates to about 720 bottles
      (assuming 12 bottles per case).
