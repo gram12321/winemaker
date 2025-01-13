@@ -27,8 +27,8 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Use plantFarmland from adminFunctions
-  const plantingSuccess = plantFarmland(farmland.id, {
+  // Update farmland data
+  const plantingSuccess = updateFarmlandPlanting(farmland.id, {
     density: selectedDensity,
     resourceName: selectedResource
   });
