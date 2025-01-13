@@ -75,6 +75,12 @@ export function showHarvestOverlay(farmland, farmlandId) {
                     <button class="overlay-section-btn close-btn">Close</button>
                 </div>
                 <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <div>Expected Yield: <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span></div>
+                            <div>Selected Capacity: <span id="selected-capacity">0 kg</span></div>
+                        </div>
+                    </div>
                     <table class="table table-bordered overlay-table">
                         <thead>
                             <tr>
@@ -118,13 +124,26 @@ export function showHarvestOverlay(farmland, farmlandId) {
                     const firstItem = matchingInventoryItems[0];
 
                     row.innerHTML = `
-                        <td><input type="radio" name="tool-select" value="${toolId}"></td>
+                        <td><input type="checkbox" class="storage-checkbox" data-capacity="${tool.capacity - currentAmount}" value="${toolId}"></td>
                         <td>${toolId}</td>
                         <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
                         <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
                         <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
                     `;
                     storageBody.appendChild(row);
+
+                    // Add event listener to update selected capacity
+                    row.querySelector('.storage-checkbox').addEventListener('change', function() {
+                        const checkboxes = document.querySelectorAll('.storage-checkbox:checked');
+                        let totalCapacity = 0;
+                        checkboxes.forEach(checkbox => {
+                            totalCapacity += parseFloat(checkbox.dataset.capacity);
+                        });
+                        const capacityDisplay = document.getElementById('selected-capacity');
+                        capacityDisplay.textContent = totalCapacity >= 1000 ? 
+                            formatNumber(totalCapacity/1000, 2) + ' t' : 
+                            formatNumber(totalCapacity) + ' kg';
+                    });
                 }
             });
         }
