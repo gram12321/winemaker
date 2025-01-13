@@ -177,7 +177,7 @@ export function decayPrestigeHit() {
 export function calculateCompanyPrestige() {
     const money = parseFloat(localStorage.getItem('money') || '0');
     const moneyPrestige = money / 10000000;
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmlands = loadFarmlands();
 
     const totalFarmlandPrestige = farmlands.reduce((total, farmlandData) => {
         const farmland = new Farmland(
