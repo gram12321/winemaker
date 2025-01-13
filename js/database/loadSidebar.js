@@ -219,17 +219,19 @@ export function renderCompanyInfo() {
 
     if (companyInfoDiv) {
         companyInfoDiv.innerHTML = `
-          <div class="company-name">${companyName}</div>
+          <div class="company-name" title="Your Company Name">${companyName}</div>
           <div class="styled-line"></div>
           
+          <div class="info-item" title="Current Game Date">
             <span class="info-label"><img src="/assets/icon/small/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
             <span class="info-content">Week ${currentWeek}, ${currentSeason}, ${currentYear}</span>
+          </div>
           
-          <div class="info-item">
+          <div class="info-item" title="Available Company Funds">
             <span class="info-label"><img src="/assets/icon/small/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
             <span class="info-content">€ ${formatNumber(money, 0)}</span>
           </div>
-          <div class="info-item">
+          <div class="info-item" title="Company Prestige - Increases with better vineyards and successful business">
             <span class="info-label"><img src="/assets/icon/small/prestige.png" alt="Prestige Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
             <span class="info-content"> ${formatNumber(companyPrestige.toFixed(2), 0)}</span>
           </div>

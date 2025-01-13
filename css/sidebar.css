@@ -158,6 +158,11 @@
   margin-left: 8px;
 }
 
+#companyInfo [title] {
+  cursor: help;
+  position: relative;
+}
+
 #companyInfo .date-info {
   display: flex;
   gap: 10px;
