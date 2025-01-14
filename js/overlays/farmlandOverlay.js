@@ -1,10 +1,10 @@
-
 // Import necessary utility functions and classes
 import { formatNumber, getColorClass, getFlagIcon } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names.js';
 
 export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');
+  overlay.style.zIndex = '2050'; // Ensure overlay stays above the console
   const details = document.getElementById('farmland-details');
   details.innerHTML = ''; // Clear existing details
 

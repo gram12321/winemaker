@@ -413,11 +413,9 @@ let farmlandsStore = [];
  * @returns {Array} Array of farmland objects, or empty array if none exist
  */
 export function loadFarmlands() {
-  if (farmlandsStore.length === 0) {
-    const farmlandsJSON = localStorage.getItem('ownedFarmlands');
-    if (farmlandsJSON) {
-      farmlandsStore = JSON.parse(farmlandsJSON);
-    }
+  const farmlandsJSON = localStorage.getItem('ownedFarmlands');
+  if (farmlandsJSON) {
+    farmlandsStore = JSON.parse(farmlandsJSON);
   }
   return farmlandsStore;
 }

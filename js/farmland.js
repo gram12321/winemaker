@@ -1,4 +1,3 @@
-
 import { getUnit, convertToCurrentUnit } from './settings.js';
 import { getFlagIcon, formatNumber, getColorClass } from './utils.js';
 import { getResourceByName } from './resource.js';

@@ -35,7 +35,9 @@
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 2000;
-  display: none;
+  display: flex;  /* Changed from display: none */
+  justify-content: center;
+  align-items: center;
 }
 
 /* Ensure modal appears above overlay */

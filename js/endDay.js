@@ -2,7 +2,7 @@
 import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
 import { processRecurringTransactions } from './finance.js';
-import { calculateLandvalue, calculateFarmlandPrestige} from './farmland.js';  // Ensure Farmland is imported if used elsewhere
+import { calculateLandvalue, calculateFarmlandPrestige, displayFarmland } from './farmland.js';  // Ensure Farmland is imported if used elsewhere
 import { decayPrestigeHit } from './database/loadSidebar.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
 
@@ -120,6 +120,8 @@ export function updateFieldStatuses() {
     });
 
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    // Trigger UI update
+    displayFarmland();
 }
 
 function updateRipeness() {
@@ -151,6 +153,8 @@ function updateRipeness() {
     });
 
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    // Trigger UI update
+    displayFarmland();
 }
 
 
