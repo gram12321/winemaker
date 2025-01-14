@@ -57,8 +57,8 @@ class Farmland {
     this.density = density; // Planting density
     this.farmlandHealth = farmlandHealth; // Current health state of the farmland
     this.landvalue = calculateLandvalue(this.country, this.region, this.altitude, this.aspect); // Calculate and set land value
-    this.status = 'Dormancy'; // Initial status, assuming starting in a dormant state
-    this.ripeness = 0.1; // Initial ripeness level
+    this.status = 'No yield in first season'; // Always start with no yield
+    this.ripeness = 0.0; // Initial ripeness level
     this.farmlandPrestige = calculateFarmlandPrestige(this); // Calculate and set farmland prestige
     this.canBeCleared = 'Ready to be cleared'; // State regarding field clearing
     this.annualYieldFactor = (0.5 + Math.random()) * 1.5; // Random yield factor calculation
@@ -67,22 +67,26 @@ class Farmland {
 }
 
 export function farmlandYield(farmland) {
-  if (farmland.plantedResourceName) {
+    if (!farmland.plantedResourceName || 
+        farmland.annualYieldFactor === 0 || 
+        farmland.status === 'Harvested') {
+        return 0;
+    }
+
     const resource = getResourceByName(farmland.plantedResourceName);
     if (resource) {
-      // Base yield in kg per acre (1 ton = 1000 kg)
-      const baseYieldPerAcre = 2400; // About 4.4 tons per acre (moderate yield)
-      
-      // Quality factors affect yield
-      const qualityMultiplier = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
-      
-      // Calculate total yield based on acres and factors
-      const expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor;
+        // Base yield in kg per acre (1 ton = 1000 kg)
+        const baseYieldPerAcre = 2400; // About 4.4 tons per acre (moderate yield)
+        
+        // Quality factors affect yield
+        const qualityMultiplier = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
+        
+        // Calculate total yield based on acres and factors
+        const expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor;
 
-      return expectedYield;
+        return expectedYield;
     }
-  }
-  return 0; // No yield if nothing is planted
+    return 0;
 }
 
 export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {

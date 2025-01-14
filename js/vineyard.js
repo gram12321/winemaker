@@ -1,4 +1,3 @@
-
 import { farmlandYield } from './farmland.js';
 import { addConsoleMessage } from './console.js';
 import { loadBuildings } from './database/adminFunctions.js';
@@ -14,6 +13,12 @@ export { farmlandYield };
  * @returns {boolean|Object} - Returns false if harvest not possible, or object with warning status
  */
 export function canHarvest(farmland, storage) {
+    // First check if field is in first year "no yield" status
+    if (farmland.status === 'No yield in first season') {
+        addConsoleMessage("Field is in its first year and cannot be harvested yet.");
+        return false;
+    }
+
     const buildings = loadBuildings();
 
     // Find the building and tool that matches the storage identifier
@@ -59,5 +64,5 @@ export function canHarvest(farmland, storage) {
         return { warning: true, availableCapacity };
     }
 
-    return { warning: false };
+    return { warning: false, availableCapacity };
 }

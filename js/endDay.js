@@ -63,6 +63,10 @@ export function updateNewYear(farmlands) {
     farmlands.forEach(field => {
         if (field.plantedResourceName) {
             field.vineAge += 1;
+            // Change status to Growing if it was in first year
+            if (field.status === 'No yield in first season') {
+                field.status = 'Growing';
+            }
         }
         field.landvalue = calculateLandvalue(field.country, field.region, field.altitude, field.aspect);
         field.farmlandPrestige = calculateFarmlandPrestige(field);
@@ -82,25 +86,27 @@ export function updateFieldStatuses() {
         switch (season) {
             case 'Winter':
                 if (week === 1) {
-                    updates = { status: 'Dormancy' };
+                    updates = { 
+                        status: 'No yield in first season',
+                        ripeness: 0,
+                        annualYieldFactor: 0
+                    };
                 }
                 break;
             case 'Spring':
                 if (week === 1) {
-                    if (field.status === "No yield in first season") {
-                        updates = { status: 'Growing' };
-                    } else if (field.status === 'Dormancy' && field.plantedResourceName) {
+                    if (field.status === 'Dormancy' && field.plantedResourceName) {
                         updates = { status: 'Growing' };
                     }
                 }
                 break;
             case 'Summer':
-                if (week === 1 && field.status !== 'Harvested' && field.status !== 'Dormancy') {
+                if (week === 1 && field.status === 'Growing' && field.vineAge > 0) {
                     updates = { status: 'Ripening' };
                 }
                 break;
             case 'Fall':
-                if (week === 1 && field.status !== 'Harvested' && field.status !== 'Dormancy') {
+                if (week === 1 && field.status === 'Ripening' && field.vineAge > 0) {
                     updates = { status: 'Ready for Harvest' };
                 }
                 break;
@@ -112,7 +118,7 @@ export function updateFieldStatuses() {
     });
 
     if (season === 'Spring' && week === 1) {
-        updateNewYear(farmlands);
+        updateNewYear(farmlands); // This will handle setting the new annualYieldFactor
     }
 
     displayFarmland();
@@ -123,7 +129,7 @@ function updateRipeness() {
     const { week, season } = getGameState();
 
     farmlands.forEach((field, index) => {
-        if (!field.plantedResourceName || field.status === 'Harvested') return;
+        if (!field.plantedResourceName || field.status === 'Harvested' || field.vineAge === 0) return;
 
         let ripenessUpdate = 0;
         switch (season) {
