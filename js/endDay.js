@@ -3,14 +3,16 @@ import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
 import { processRecurringTransactions } from './finance.js';
 import { calculateLandvalue, calculateFarmlandPrestige, displayFarmland } from './farmland.js';
-import { decayPrestigeHit } from './database/loadSidebar.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
 import { 
     getGameState, 
     updateGameState, 
     getFarmlands, 
     updateAllFarmlands, 
-    updateFarmland 
+    updateFarmland,
+    getPrestigeHit,
+    setPrestigeHit,
+    calculateRealPrestige
 } from './database/adminFunctions.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
@@ -45,7 +47,10 @@ export function incrementWeek() {
     // Execute pending tasks
     updateFieldStatuses();
     updateRipeness();
-    decayPrestigeHit();
+    
+    // Decay prestige hit by 10%
+    setPrestigeHit(getPrestigeHit() * 0.9);
+    calculateRealPrestige(); // Update calculated prestige after decay
 
     if (shouldGenerateWineOrder()) {
         generateWineOrder();

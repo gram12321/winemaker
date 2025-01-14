@@ -5,6 +5,10 @@ import { addTransaction } from '/js/finance.js';
 import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
 import { inventoryInstance } from '/js/resource.js';
 
+// In-memory prestige state
+let currentPrestigeHit = 0;
+let companyPrestige = 0;
+
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
         try {
@@ -27,8 +31,8 @@ async function clearLocalStorage() {
   localStorage.removeItem('week');
   localStorage.removeItem('season');
   localStorage.removeItem('year');
-  localStorage.removeItem('companyPrestige');
-  localStorage.removeItem('currentPrestigeHit');
+  localStorage.removeItem('companyPrestige');     // Ensure we clear prestige
+  localStorage.removeItem('currentPrestigeHit');  // Ensure we clear prestige hit
   localStorage.removeItem('ownedFarmlands');
   localStorage.removeItem('buildings');
   localStorage.removeItem('playerInventory');
@@ -40,7 +44,6 @@ async function clearLocalStorage() {
   localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
   console.log("Local storage cleared.");
 }
-
 
 async function storeCompanyName() {
   const companyNameInput = document.getElementById('company-name');
@@ -60,6 +63,10 @@ async function storeCompanyName() {
         localStorage.setItem('week', 1); // Initialize week
         localStorage.setItem('season', 'Spring'); // Initialize season
         localStorage.setItem('year', 2023); // Initialize year
+
+        // Initialize prestige values
+        localStorage.setItem('prestigeHit', '0');
+        localStorage.setItem('calculatedPrestige', '0');
 
         // Log the initial income transaction
         addTransaction('Income', 'Initial Company Setup', 10000000);
@@ -125,6 +132,8 @@ async function saveCompanyInfo() {
   const playerInventory = localStorage.getItem('playerInventory');
   const staffData = localStorage.getItem('staffData');
   const transactions = JSON.parse(localStorage.getItem('transactions')) || []; // Retrieve transactions
+  const prestigeHit = localStorage.getItem('prestigeHit');
+  const calculatedPrestige = localStorage.getItem('calculatedPrestige');
 
   if (!companyName) {
     console.error("No company name found to save.");
@@ -145,8 +154,13 @@ async function saveCompanyInfo() {
       playerInventory,
       staffData,
       transactions, // Save transactions
+      prestigeHit,
+      calculatedPrestige,
     });
     
+    // Save current in-memory values to localStorage
+    localStorage.setItem('companyPrestige', companyPrestige.toString());
+    localStorage.setItem('currentPrestigeHit', currentPrestigeHit.toString());
   } catch (error) {
     console.error("Error saving company info: ", error);
   }
@@ -473,6 +487,15 @@ export function updateGameState(week, season, year) {
     localStorage.setItem('year', year);
 }
 
+export function getMoney() {
+    return parseFloat(localStorage.getItem('money') || '0');
+}
+
+export function getCompanyName() {
+    return localStorage.getItem('companyName');
+}
+
+
 // Farmland management functions
 export function getFarmlands() {
     return JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -480,6 +503,36 @@ export function getFarmlands() {
 
 export function updateAllFarmlands(farmlands) {
     localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+}
+
+// Get prestige functions
+export function getPrestigeHit() {
+  return parseFloat(localStorage.getItem('prestigeHit') || '0');
+}
+
+export function setPrestigeHit(value) {
+  localStorage.setItem('prestigeHit', value.toString());
+}
+
+export function calculateRealPrestige() {
+  const money = getMoney();
+  const moneyPrestige = money / 10000000;
+  const farmlands = loadFarmlands();
+  
+  const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
+    return total + (farmland.farmlandPrestige || 0);
+  }, 0);
+
+  const prestigeHit = getPrestigeHit();
+  const calculatedPrestige = moneyPrestige + totalFarmlandPrestige + prestigeHit;
+  
+  // Store the calculated value
+  localStorage.setItem('calculatedPrestige', calculatedPrestige.toString());
+  return calculatedPrestige;
+}
+
+export function getCalculatedPrestige() {
+  return parseFloat(localStorage.getItem('calculatedPrestige') || '0');
 }
 
 export { 

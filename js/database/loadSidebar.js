@@ -1,4 +1,5 @@
-import { saveCompanyInfo, clearLocalStorage, loadFarmlands  } from './adminFunctions.js';
+import { saveCompanyInfo, clearLocalStorage, loadFarmlands, getGameState, getMoney, getCompanyName, 
+         getPrestigeHit, setPrestigeHit, calculateRealPrestige } from './adminFunctions.js';
 import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
 import { Farmland } from '../farmland.js'; // Ensure the correct path
 import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
@@ -151,59 +152,12 @@ export function initializeSidebar() {
         .catch(error => console.error('Error loading sidebar:', error));
 }
 
-export function applyPrestigeHit(amount) {
-    // Retrieve the current prestige hit from localStorage
-    let currentPrestigeHit = parseFloat(localStorage.getItem('currentPrestigeHit') || '0');
-
-    // Add the specified amount to the current prestige hit
-    currentPrestigeHit += amount;
-
-    // Store the updated prestige hit back in localStorage
-    localStorage.setItem('currentPrestigeHit', currentPrestigeHit.toString());
-}
-
-export function decayPrestigeHit() {
-    // Retrieve the current prestige hit from localStorage
-    let currentPrestigeHit = parseFloat(localStorage.getItem('currentPrestigeHit') || '0');
-
-    // Decay the prestige hit by 10%
-    currentPrestigeHit *= 0.9; // Apply the 10% decay factor
-
-    // Store the updated prestige hit back in localStorage
-    localStorage.setItem('currentPrestigeHit', currentPrestigeHit.toString());
-}
-
-
-export function calculateCompanyPrestige() {
-    const money = parseFloat(localStorage.getItem('money') || '0');
-    const moneyPrestige = money / 10000000;
-    const farmlands = loadFarmlands();
-
-    const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
-        return total + (farmland.farmlandPrestige || 0);
-    }, 0);
-
-    const currentPrestigeHit = parseFloat(localStorage.getItem('currentPrestigeHit') || '0');
-
-    const companyPrestige = moneyPrestige + totalFarmlandPrestige + currentPrestigeHit;
-
-    localStorage.setItem('companyPrestige', companyPrestige.toString());
-
-    return companyPrestige;
-}
-
 export function renderCompanyInfo() {
-    // Calculate companyPrestige based on current money
-    calculateCompanyPrestige();
-
-    // Use the same data loading mechanism as loadExistingCompanyData
-    const companyName = localStorage.getItem('companyName');
-    const money = localStorage.getItem('money');
-    const currentWeek = localStorage.getItem('week');
-    const currentSeason = localStorage.getItem('season');
-    const currentYear = localStorage.getItem('year');
-    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige') || '0');
     const companyInfoDiv = document.getElementById('companyInfo');
+    const companyName = getCompanyName();
+    const money = getMoney();
+    const { week, season, year } = getGameState();
+    const prestige = calculateRealPrestige(); // Get real-time calculated prestige
 
     if (companyInfoDiv) {
         companyInfoDiv.innerHTML = `
@@ -212,7 +166,7 @@ export function renderCompanyInfo() {
 
           <div class="info-item" title="Current Game Date">
             <span class="info-label"><img src="/assets/icon/small/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content">Week ${currentWeek}, ${currentSeason}, ${currentYear}</span>
+            <span class="info-content">Week ${week}, ${season}, ${year}</span>
           </div>
 
           <div class="info-item" title="Available Company Funds">
@@ -221,7 +175,7 @@ export function renderCompanyInfo() {
           </div>
           <div class="info-item" title="Company Prestige">
             <span class="info-label"><img src="/assets/icon/small/prestige.png" alt="Prestige Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content"> ${formatNumber(companyPrestige.toFixed(2), 0)}</span>
+            <span class="info-content"> ${formatNumber(prestige, 2)}</span>
           </div>
           <div class="styled-line"></div>
         `;

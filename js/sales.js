@@ -1,7 +1,7 @@
 import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
-import { applyPrestigeHit } from './database/loadSidebar.js';
+import { setPrestigeHit, getPrestigeHit, calculateRealPrestige } from './database/adminFunctions.js';
 import { loadWineOrders, removeWineOrder, addWineOrder } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { displayWineCellarInventory } from './overlays/mainpages/salesoverlay.js';
@@ -35,7 +35,8 @@ export function sellWines(resourceName) {
             );
 
             addTransaction('Income', 'Wine Sale', sellingPrice);
-            applyPrestigeHit(sellingPrice / 1000);
+            setPrestigeHit(getPrestigeHit() + sellingPrice / 1000);
+            calculateRealPrestige(); // Recalculate after changing prestige hit
             inventoryInstance.save();
         }
     }
@@ -139,7 +140,8 @@ export function sellOrderWine(orderIndex) {
                 );
 
                 addTransaction('Income', 'Wine Sale', totalSellingPrice);
-                applyPrestigeHit(totalSellingPrice / 1000);
+                setPrestigeHit(getPrestigeHit() + totalSellingPrice / 1000);
+                calculateRealPrestige(); // Recalculate after changing prestige hit
                 removeWineOrder(orderIndex);
                 inventoryInstance.save();
                 displayWineCellarInventory();
