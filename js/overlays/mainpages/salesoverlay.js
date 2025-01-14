@@ -1,4 +1,3 @@
-
 import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay  } from '/js/utils.js';
 import { calculateWinePrice } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
@@ -144,9 +143,23 @@ function displayFilteredOrders(filteredOrders) {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
 
-    filteredOrders.forEach((order, index) => {
+    // Create a map of filtered orders to their original indices
+    const originalOrders = loadWineOrders();
+    const orderIndices = filteredOrders.map(order => 
+        originalOrders.findIndex(o => 
+            o.resourceName === order.resourceName &&
+            o.vintage === order.vintage &&
+            o.quality === order.quality &&
+            o.amount === order.amount &&
+            o.type === order.type &&
+            o.wineOrderPrice === order.wineOrderPrice
+        )
+    );
+
+    filteredOrders.forEach((order, displayIndex) => {
         const row = document.createElement('tr');
         const quality = parseFloat(order.quality);
+        const originalIndex = orderIndices[displayIndex];
 
         let iconPath;
         switch (order.type) {
@@ -171,20 +184,24 @@ function displayFilteredOrders(filteredOrders) {
             <td>${displayAmount}</td>
             <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
             <td>
-                <button class="btn btn-light sell-order-btn">Sell</button>
-                <button class="btn refuse-order-btn">Refuse</button>
+                <button class="btn btn-light sell-order-btn" data-original-index="${originalIndex}">Sell</button>
+                <button class="btn refuse-order-btn" data-original-index="${originalIndex}">Refuse</button>
             </td>
         `;
 
         const sellButton = row.querySelector('.sell-order-btn');
         sellButton.addEventListener('click', () => {
-            sellOrderWine(index);
+            const orderIndex = parseInt(sellButton.dataset.originalIndex);
+            if (sellOrderWine(orderIndex)) {
+                displayWineOrders();
+            }
         });
 
         const refuseButton = row.querySelector('.refuse-order-btn');
         refuseButton.addEventListener('click', () => {
+            const orderIndex = parseInt(refuseButton.dataset.originalIndex);
             const wineOrders = loadWineOrders();
-            wineOrders.splice(index, 1);
+            wineOrders.splice(orderIndex, 1);
             saveWineOrders(wineOrders);
             displayWineOrders();
         });
@@ -192,6 +209,7 @@ function displayFilteredOrders(filteredOrders) {
         wineOrdersTableBody.appendChild(row);
     });
 }
+
 function createSalesOverlayContent() {
     return `
         <div class="mainview-overlay-content">

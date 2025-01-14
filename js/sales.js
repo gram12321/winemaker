@@ -114,44 +114,51 @@ export function sellOrderWine(orderIndex) {
     const wineOrders = loadWineOrders();
     const order = wineOrders[orderIndex];
 
-    if (order) {
-        const bottledWine = inventoryInstance.items.find(item =>
-            item.resource.name === order.resourceName &&
-            item.state === 'Bottles' &&
-            item.vintage === order.vintage &&
-            item.quality === order.quality
+    if (!order) {
+        addConsoleMessage('Invalid wine order index.');
+        return false;
+    }
+
+    const bottledWine = inventoryInstance.items.find(item =>
+        item.resource.name === order.resourceName &&
+        item.state === 'Bottles' &&
+        item.vintage === order.vintage &&
+        item.quality === order.quality
+    );
+
+    if (!bottledWine || bottledWine.amount < order.amount) {
+        addConsoleMessage('Insufficient inventory to complete this order.');
+        return false;
+    }
+
+    const totalSellingPrice = order.wineOrderPrice * order.amount;
+
+    if (inventoryInstance.removeResource(
+        bottledWine.resource, 
+        order.amount, 
+        'Bottles', 
+        bottledWine.vintage, 
+        bottledWine.storage
+    )) {
+        addConsoleMessage(
+            `Sold ${order.amount} bottles of ${order.resourceName}, ` +
+            `Vintage ${order.vintage}, ` +
+            `Quality ${(order.quality * 100).toFixed(0)}% ` +
+            `for €${totalSellingPrice.toFixed(2)}.`
         );
 
-        if (bottledWine && bottledWine.amount >= order.amount) {
-            const totalSellingPrice = order.wineOrderPrice * order.amount;
-
-            if (inventoryInstance.removeResource(
-                bottledWine.resource, 
-                order.amount, 
-                'Bottles', 
-                bottledWine.vintage, 
-                bottledWine.storage
-            )) {
-                addConsoleMessage(
-                    `Sold ${order.amount} bottles of ${order.resourceName}, ` +
-                    `Vintage ${order.vintage}, ` +
-                    `Quality ${(order.quality * 100).toFixed(0)}% ` +
-                    `for €${totalSellingPrice.toFixed(2)}.`
-                );
-
-                addTransaction('Income', 'Wine Sale', totalSellingPrice);
-                setPrestigeHit(getPrestigeHit() + totalSellingPrice / 1000);
-                calculateRealPrestige(); // Recalculate after changing prestige hit
-                removeWineOrder(orderIndex);
-                inventoryInstance.save();
-                displayWineCellarInventory();
-                return true;
-            }
-        } else {
-            addConsoleMessage('Insufficient inventory to complete this order.');
+        addTransaction('Income', 'Wine Sale', totalSellingPrice);
+        setPrestigeHit(getPrestigeHit() + totalSellingPrice / 1000);
+        calculateRealPrestige();
+        
+        if (!removeWineOrder(orderIndex)) {
+            addConsoleMessage('Error removing wine order.');
+            return false;
         }
-    } else {
-        addConsoleMessage('Invalid wine order index.');
+        
+        inventoryInstance.save();
+        displayWineCellarInventory();
+        return true;
     }
     return false;
 }

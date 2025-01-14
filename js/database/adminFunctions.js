@@ -383,10 +383,11 @@ export function loadWineOrders() {
     return currentWineOrders;
 }
 
-export function removeWineOrder(orderIndex) {
-    if (orderIndex >= 0 && orderIndex < currentWineOrders.length) {
-        currentWineOrders.splice(orderIndex, 1);
-        saveWineOrders(currentWineOrders);
+export function removeWineOrder(index) {
+    const wineOrders = loadWineOrders();
+    if (index >= 0 && index < wineOrders.length) {
+        wineOrders.splice(index, 1);
+        saveWineOrders(wineOrders);
         return true;
     }
     return false;
