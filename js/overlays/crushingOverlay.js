@@ -288,7 +288,10 @@ export function showCrushingOverlay() {
         handleCrushing(overlayContainer, totalGrapes, totalAvailableSpace, selectedGrape, selectedMustStorages);
         $(warningModal).modal('hide');
         warningModal.remove();
-        removeOverlay();
+        const overlay = document.querySelector('.overlay');
+        if (overlay) {
+          document.body.removeChild(overlay);
+        }
       });
 
       warningModal.addEventListener('hidden.bs.modal', () => {
