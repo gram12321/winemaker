@@ -61,7 +61,7 @@ class Farmland {
     this.ripeness = 0.0; // Initial ripeness level
     this.farmlandPrestige = calculateFarmlandPrestige(this); // Calculate and set farmland prestige
     this.canBeCleared = 'Ready to be cleared'; // State regarding field clearing
-    this.annualYieldFactor = (0.5 + Math.random()) * 1.5; // Random yield factor calculation
+    this.annualYieldFactor = (0.75 + Math.random()) ; // Random yield factor calculation
     this.annualQualityFactor = Math.random(); // Random quality factor calculation
   }
 }
@@ -75,15 +75,10 @@ export function farmlandYield(farmland) {
 
     const resource = getResourceByName(farmland.plantedResourceName);
     if (resource) {
-        // Base yield in kg per acre (1 ton = 1000 kg)
-        const baseYieldPerAcre = 2400; // About 4.4 tons per acre (moderate yield)
-        
-        // Quality factors affect yield
+        const baseYieldPerAcre = 2400; // About 2.4 tons per acre
+        const densityModifier = farmland.density / 5000; // Removed cap, baseline at 5000
         const qualityMultiplier = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
-        
-        // Calculate total yield based on acres and factors
-        const expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor;
-
+        const expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor * densityModifier;
         return expectedYield;
     }
     return 0;
