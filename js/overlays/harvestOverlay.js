@@ -57,10 +57,9 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
     // Update farmland status using adminFunctions
     updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
 
-
     saveInventory();
     addConsoleMessage(`Harvested ${formatNumber(totalHarvest)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
-    return true;
+    return totalHarvest;
 }
 
 export function showHarvestOverlay(farmland, farmlandId) {
@@ -239,13 +238,17 @@ export function showHarvestOverlay(farmland, farmlandId) {
             });
         } else {
             // If total capacity is sufficient, harvest to each container
+            let remainingYield = expectedYield;
             let success = true;
             for (const checkbox of selectedCheckboxes) {
                 const selectedTool = checkbox.value;
-                if (!harvest(farmland, farmlandId, selectedTool)) {
+                const amountToHarvest = Math.min(remainingYield, canHarvest(farmland, selectedTool).availableCapacity || expectedYield);
+                if (amountToHarvest > 0 && !harvest(farmland, farmlandId, selectedTool, amountToHarvest)) {
                     success = false;
                     break;
                 }
+                remainingYield -= amountToHarvest;
+                if (remainingYield <= 0) break;
             }
             if (success) {
                 removeOverlay();
