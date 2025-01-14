@@ -130,7 +130,7 @@ function updateRipeness() {
     const currentSeason = localStorage.getItem('season');
 
     farmlands.forEach(field => {
-        if (!field.plantedResourceName) return;
+        if (!field.plantedResourceName || field.status === 'Harvested') return;
 
         switch (currentSeason) {
             case 'Spring':
