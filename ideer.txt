@@ -99,3 +99,13 @@ Yield Categories:
       - Often found in warmer regions with fertile soil, where
         the focus may be on quantity rather than premium quality 
         (e.g., La Mancha in Spain, Central Valley in California).
+
+
+
+
+// AI instructions
+
+We uses Json and localstorage several places in endday.js This should not be nessesart as we are a SPA and all storage between session is in adminfunctions. We allready have some function in place in adminfunctions for maniplulating farmland.
+
+Lets try to eliminate JSON and localstorage in endday, prefeably using excisting function in aminfunctions or creating new to handle storing between sessions
+

@@ -458,6 +458,30 @@ export function updateFarmland(farmlandId, updates) {
   return false;
 }
 
+// Game state management functions
+export function getGameState() {
+    return {
+        week: parseInt(localStorage.getItem('week'), 10) || 1,
+        season: localStorage.getItem('season') || 'Spring',
+        year: parseInt(localStorage.getItem('year'), 10) || 2023
+    };
+}
+
+export function updateGameState(week, season, year) {
+    localStorage.setItem('week', week);
+    localStorage.setItem('season', season);
+    localStorage.setItem('year', year);
+}
+
+// Farmland management functions
+export function getFarmlands() {
+    return JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+}
+
+export function updateAllFarmlands(farmlands) {
+    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+}
+
 export { 
   storeCompanyName, 
   saveCompanyInfo, 
