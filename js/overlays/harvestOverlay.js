@@ -4,7 +4,7 @@ import { showVineyardOverlay } from './mainpages/vineyardoverlay.js';
 import { inventoryInstance } from '../resource.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
 import { formatNumber } from '../utils.js';
-import { saveInventory, updateFarmland } from '../database/adminFunctions.js';
+import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
 
 /**
  * Handles the harvesting of grapes from a farmland
@@ -21,7 +21,7 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
         return false;
     }
 
-    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+    const buildings = loadBuildings();
     const tool = buildings.flatMap(b => b.tools).find(t => 
         `${t.name} #${t.instanceNumber}` === selectedTool
     );
@@ -31,9 +31,8 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
         return false;
     }
 
-    // Check if container already has different grapes or vintage
-    const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const existingGrapes = currentInventory.find(item => 
+    // Check if container already has different grapes or vintage using inventoryInstance
+    const existingGrapes = inventoryInstance.items.find(item => 
         item.storage === selectedTool && 
         item.state === 'Grapes' &&
         (item.resource.name !== farmland.plantedResourceName || 
@@ -47,8 +46,7 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
 
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const harvestYield = farmlandYield(farmland);
-    const currentAmount = currentInventory
-        .filter(item => item.storage === selectedTool)
+    const currentAmount = inventoryInstance.getStorageContents(selectedTool)
         .reduce((sum, item) => sum + item.amount, 0);
 
     const remainingCapacity = tool.capacity - currentAmount;
@@ -121,10 +119,10 @@ export function showHarvestOverlay(farmland, farmlandId) {
 
     document.body.appendChild(overlayContainer);
 
-    // Populate storage options
+    // Populate storage options using existing functions
     const storageBody = document.getElementById('storage-display-body');
-    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    const buildings = loadBuildings();
+    const playerInventory = inventoryInstance.items;
 
     buildings.forEach(building => {
         if (building.tools) {
