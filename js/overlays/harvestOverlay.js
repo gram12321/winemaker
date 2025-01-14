@@ -31,9 +31,22 @@ function harvest(farmland, farmlandId, selectedTool, availableCapacity = null) {
         return false;
     }
 
+    // Check if container already has different grapes or vintage
+    const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    const existingGrapes = currentInventory.find(item => 
+        item.storage === selectedTool && 
+        item.state === 'Grapes' &&
+        (item.resource.name !== farmland.plantedResourceName || 
+         parseInt(item.vintage) !== parseInt(localStorage.getItem('year')))
+    );
+
+    if (existingGrapes) {
+        addConsoleMessage(`Cannot mix different grapes or vintages in the same container. ${selectedTool} contains ${existingGrapes.resource.name} from ${existingGrapes.vintage}`);
+        return false;
+    }
+
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const harvestYield = farmlandYield(farmland);
-    const currentInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     const currentAmount = currentInventory
         .filter(item => item.storage === selectedTool)
         .reduce((sum, item) => sum + item.amount, 0);
