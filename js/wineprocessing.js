@@ -1,4 +1,3 @@
-
 import { inventoryInstance } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
@@ -15,7 +14,10 @@ export function fermentMust(selectedResource, storage, mustAmount) {
         return;
     }
 
-    const bottleAmount = resource.amount * 0.75; // Convert must to bottle amount (75% conversion rate)
+    // Convert must to wine volume (10% loss during fermentation)
+    const wineVolume = resource.amount * 0.9;
+    // Convert wine volume to number of 0.75L bottles
+    const bottleAmount = Math.floor(wineVolume / 0.75);
 
     // Remove units from the must resource
     inventoryInstance.removeResource(

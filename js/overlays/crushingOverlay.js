@@ -207,7 +207,9 @@ function handleCrushing(overlayContainer) {
     totalAvailableSpace += parseFloat(storage.dataset.available);
   });
 
-  if (totalGrapes > totalAvailableSpace) {
+  const mustAmount = totalGrapes * 0.6;  // 60% of grapes become must
+
+  if (mustAmount > totalAvailableSpace) {
     const warningModal = document.createElement('div');
     warningModal.className = 'modal fade';
     warningModal.innerHTML = `
@@ -218,7 +220,7 @@ function handleCrushing(overlayContainer) {
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div class="modal-body">
-            <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l out of needed ${formatNumber(totalGrapes)} l.</p>
+            <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l out of needed ${formatNumber(mustAmount)} l.</p>
             <p>Do you want to crush what fits in the containers?</p>
           </div>
           <div class="modal-footer">
@@ -249,7 +251,7 @@ function handleCrushing(overlayContainer) {
     return false;
   }
 
-  return processGrapeCrushing(selectedGrape, selectedStorages, totalGrapes);
+  return processGrapeCrushing(selectedGrape, selectedStorages, mustAmount);
 }
 
 // Helper function to process the actual crushing
