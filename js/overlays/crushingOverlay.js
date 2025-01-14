@@ -1,4 +1,3 @@
-
 import { formatNumber, getWineQualityCategory, getColorClass } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
@@ -39,25 +38,39 @@ function createOverlayStructure() {
       
       <section id="must-section" class="overlay-section card mb-4">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
-          <h3 class="h5 mb-0">Select Must Storage Container</h3>
+          <h3 class="h5 mb-0">Select Must Storage Containers</h3>
         </div>
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-hover overlay-table">
-          <thead>
-            <tr>
-              <th>Select</th>
-              <th>Container</th>
-              <th>Capacity</th>
-              <th>Available Space</th>
-            </tr>
-          </thead>
-          <tbody id="crushing-must-storage-table">
-          </tbody>
-        </table>
-      </div>
-      <div class="d-flex justify-content-end mt-3">
-        <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
+              <thead>
+                <tr>
+                  <th>Select</th>
+                  <th>Container</th>
+                  <th>Capacity</th>
+                  <th>Available Space</th>
+                </tr>
+              </thead>
+              <tbody id="crushing-must-storage-table">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      
+      <div class="button-container d-flex flex-column align-items-center mt-3 mb-3 px-3">
+        <div class="mb-2">
+          <span>Selected Grapes: </span>
+          <span id="selected-grapes">0 t</span>
+        </div>
+        <div class="w-100">
+          <span>Selected Storage: </span>
+          <span id="selected-storage">0 l</span>
+          <div class="progress" style="height: 20px; background-color: var(--color-background); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">
+            <div id="selected-storage-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--color-primary);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+        <button class="btn btn-light btn-sm crush-btn mt-3" style="background-color: var(--color-primary); color: var(--panel-text); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">Crush Selected Grapes</button>
       </div>
     </div>
   `;
@@ -89,13 +102,32 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory) 
         if (availableSpace > 0) {
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td><input type="radio" name="must-storage" value="${toolId}" 
+            <td><input type="checkbox" name="must-storage" value="${toolId}" 
                 data-capacity="${tool.capacity}" data-available="${availableSpace}"></td>
             <td>${toolId}</td>
             <td>${formatNumber(tool.capacity)} l</td>
             <td>${formatNumber(availableSpace)} l</td>
           `;
           mustStorageBody.appendChild(row);
+
+          // Add event listener to update selected storage
+          row.querySelector('input[name="must-storage"]').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('input[name="must-storage"]:checked');
+            let totalStorage = 0;
+            checkboxes.forEach(checkbox => {
+              totalStorage += parseFloat(checkbox.dataset.available);
+            });
+            const storageDisplay = document.getElementById('selected-storage');
+            storageDisplay.textContent = totalStorage >= 1000 ? 
+              formatNumber(totalStorage / 1000, 2) + ' t' : 
+              formatNumber(totalStorage) + ' l';
+
+            const selectedGrapes = parseFloat(document.querySelector('.grape-select:checked')?.dataset.amount || 0);
+            const storageProgress = document.getElementById('selected-storage-progress');
+            const progressPercentage = Math.min((totalStorage / selectedGrapes) * 100, 100);
+            storageProgress.style.width = `${progressPercentage}%`;
+            storageProgress.setAttribute('aria-valuenow', progressPercentage);
+          });
         }
       }
     });
@@ -130,82 +162,79 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
             <td>${qualityDisplay}</td>
           `;
           storageTableBody.appendChild(row);
+
+          // Add event listener to update selected grapes
+          row.querySelector('.grape-select').addEventListener('change', function() {
+            const selectedGrapes = parseFloat(this.dataset.amount);
+            const grapesDisplay = document.getElementById('selected-grapes');
+            grapesDisplay.textContent = selectedGrapes >= 1000 ? 
+              formatNumber(selectedGrapes / 1000, 2) + ' t' : 
+              formatNumber(selectedGrapes) + ' t';
+
+            const checkboxes = document.querySelectorAll('input[name="must-storage"]:checked');
+            let totalStorage = 0;
+            checkboxes.forEach(checkbox => {
+              totalStorage += parseFloat(checkbox.dataset.available);
+            });
+            const storageProgress = document.getElementById('selected-storage-progress');
+            const progressPercentage = Math.min((totalStorage / selectedGrapes) * 100, 100);
+            storageProgress.style.width = `${progressPercentage}%`;
+            storageProgress.setAttribute('aria-valuenow', progressPercentage);
+          });
         });
       }
     });
   });
 }
 
-function handleCrushing(overlayContainer) {
-  const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
-  const selectedMustStorage = overlayContainer.querySelector('input[name="must-storage"]:checked');
+function handleCrushing(overlayContainer, totalGrapes, totalAvailableSpace, selectedGrape, selectedMustStorages) {
+  let remainingGrapes = totalGrapes;
+  let success = true;
 
-  if (!selectedMustStorage) {
-    addConsoleMessage("Please select a storage container for the must");
-    return false;
+  // Distribute must among containers
+  for (const storage of selectedMustStorages) {
+    const mustStorage = storage.value;
+    const availableSpace = parseFloat(storage.dataset.available);
+    const amountToStore = Math.min(remainingGrapes, availableSpace);
+
+    if (amountToStore > 0) {
+      inventoryInstance.addResource(
+        { name: selectedGrape.dataset.resource, naturalYield: 1 },
+        amountToStore,
+        'Must',
+        parseInt(selectedGrape.dataset.vintage),
+        selectedGrape.dataset.quality,
+        selectedGrape.dataset.field,
+        parseFloat(selectedGrape.dataset.prestige),
+        mustStorage
+      );
+    }
+    remainingGrapes -= amountToStore;
+    if (remainingGrapes <= 0) break;
   }
 
-  const mustStorage = selectedMustStorage.value;
-  const availableSpace = parseFloat(selectedMustStorage.dataset.available);
-  const totalGrapes = parseFloat(selectedGrape.dataset.amount);
-
-  if (totalGrapes > availableSpace) {
-    addConsoleMessage("Not enough space in selected container for all the must");
-    return false;
+  if (success) {
+    const crushedAmount = totalGrapes - remainingGrapes;
+    addConsoleMessage(`Crushed ${formatNumber(crushedAmount)} t of ${selectedGrape.dataset.resource} grapes from ${selectedGrape.dataset.field}`);
+    inventoryInstance.removeResource(
+      { name: selectedGrape.dataset.resource },
+      crushedAmount,
+      'Grapes',
+      parseInt(selectedGrape.dataset.vintage),
+      selectedGrape.dataset.storage
+    );
+    inventoryInstance.save();
+    showWineryOverlay();
+    showCrushingOverlay();
+    removeOverlay();
   }
 
-  // Check if container has existing content
-  const existingMust = inventoryInstance.items.filter(item => 
-    item.storage === mustStorage && 
-    item.state === 'Must'
-  );
-
-  if (existingMust.length > 0) {
-    const firstGrape = selectedGrapes[0];
-    const firstMust = existingMust[0];
-    
-    if (firstMust.resource.name !== firstGrape.dataset.resource ||
-        firstMust.vintage !== parseInt(firstGrape.dataset.vintage) ||
-        firstMust.fieldName !== firstGrape.dataset.field) {
-      addConsoleMessage("Container already contains different content. Cannot mix different must types.");
-      return false;
+  function removeOverlay() {
+    const overlay = document.querySelector('.overlay');
+    if (overlay) {
+      document.body.removeChild(overlay);
     }
   }
-
-  const resourceName = selectedGrape.dataset.resource;
-  const storage = selectedGrape.dataset.storage;
-  const vintage = parseInt(selectedGrape.dataset.vintage);
-  const quality = selectedGrape.dataset.quality;
-  const fieldName = selectedGrape.dataset.field;
-  const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
-  const amount = parseFloat(selectedGrape.dataset.amount);
-
-  // Remove grapes from original storage
-  const removed = inventoryInstance.removeResource(
-    { name: resourceName },
-    amount,
-    'Grapes',
-    vintage,
-    storage
-  );
-
-  if (removed) {
-    // Add must to new storage
-    inventoryInstance.addResource(
-      { name: resourceName, naturalYield: 1 },
-      amount,
-      'Must',
-      vintage,
-      quality,
-      fieldName,
-      fieldPrestige,
-      mustStorage
-    );
-    addConsoleMessage(`Crushed ${formatNumber(amount)} t of ${resourceName} grapes from ${fieldName}`);
-  }
-
-  inventoryInstance.save();
-  return true;
 }
 
 export function showCrushingOverlay() {
@@ -216,9 +245,57 @@ export function showCrushingOverlay() {
 
   const crushBtn = overlayContainer.querySelector('.crush-btn');
   crushBtn.addEventListener('click', () => {
-    if (handleCrushing(overlayContainer)) {
-      showWineryOverlay();
-      removeOverlay();
+    const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
+    const selectedMustStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
+
+    if (selectedMustStorages.length === 0) {
+      addConsoleMessage("Please select at least one storage container for the must");
+      return false;
+    }
+
+    const totalGrapes = parseFloat(selectedGrape.dataset.amount);
+    let totalAvailableSpace = 0;
+    selectedMustStorages.forEach(storage => {
+      totalAvailableSpace += parseFloat(storage.dataset.available);
+    });
+
+    if (totalGrapes > totalAvailableSpace) {
+      const warningModal = document.createElement('div');
+      warningModal.className = 'modal fade';
+      warningModal.innerHTML = `
+        <div class="modal-dialog">
+          <div class="modal-content overlay-section">
+            <div class="modal-header card-header">
+              <h3 class="modal-title">Warning: Limited Container Capacity</h3>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <p>Selected containers only have total capacity for ${totalAvailableSpace >= 1000 ? formatNumber(totalAvailableSpace / 1000, 2) + ' t' : formatNumber(totalAvailableSpace) + ' l'} out of ${totalGrapes >= 1000 ? formatNumber(totalGrapes / 1000, 2) + ' t' : formatNumber(totalGrapes) + ' l'}.</p>
+              <p>Do you want to crush what fits in the containers?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+              <button type="button" class="overlay-section-btn" id="confirmCrush">Crush Available</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(warningModal);
+      $(warningModal).modal('show');
+
+      document.getElementById('confirmCrush').addEventListener('click', () => {
+        handleCrushing(overlayContainer, totalGrapes, totalAvailableSpace, selectedGrape, selectedMustStorages);
+        $(warningModal).modal('hide');
+        warningModal.remove();
+        removeOverlay();
+      });
+
+      warningModal.addEventListener('hidden.bs.modal', () => {
+        warningModal.remove();
+      });
+    } else {
+      handleCrushing(overlayContainer, totalGrapes, totalAvailableSpace, selectedGrape, selectedMustStorages);
     }
   });
 
@@ -226,6 +303,9 @@ export function showCrushingOverlay() {
   closeBtn.addEventListener('click', removeOverlay);
 
   function removeOverlay() {
-    document.body.removeChild(overlayContainer);
+    const overlay = document.querySelector('.overlay');
+    if (overlay) {
+      document.body.removeChild(overlay);
+    }
   }
 }
