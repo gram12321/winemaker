@@ -95,22 +95,22 @@ export function updateFieldStatuses() {
                 break;
             case 'Spring':
                 if (currentWeek === 1) {
-                    // Set field to Growing if it's the second season for a crop
+                    // Only handle first season case, don't change from Dormancy
                     if (field.status === "No yield in first season") {
                         field.status = 'Growing';
+                    } else if (field.status === 'Dormancy' && field.plantedResourceName) {
+                        field.status = 'Growing';
                     }
-
-                    // Increment vine age for every field on the first week of spring
                     updateNewYear(farmlands);
                 }
                 break;
             case 'Summer':
-                if (currentWeek === 1) {
+                if (currentWeek === 1 && field.status !== 'Harvested' && field.status !== 'Dormancy') {
                     field.status = 'Ripening';
                 }
                 break;
             case 'Fall':
-                if (currentWeek === 1) {
+                if (currentWeek === 1 && field.status !== 'Harvested' && field.status !== 'Dormancy') {
                     field.status = 'Ready for Harvest';
                 }
                 break;
