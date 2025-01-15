@@ -2,8 +2,7 @@ import { getUnit, convertToCurrentUnit } from './settings.js';
 import { getFlagIcon, formatNumber, getColorClass } from './utils.js';
 import { getResourceByName } from './resource.js';
 import { loadFarmlands } from './database/adminFunctions.js';
-
-
+import taskManager from './taskManager.js';  // Add this import
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
@@ -199,7 +198,10 @@ function createFarmlandRow(farmland, selectedUnit) {
   const landSize = convertToCurrentUnit(farmland.acres);
   const row = document.createElement('tr');
   
-  const isPlantingAllowed = !farmland.plantedResourceName;
+  const isPlantingAllowed = !farmland.plantedResourceName && 
+                           !taskManager.isTargetBusy(farmland) &&
+                           farmland.status !== 'Planting...';
+  
   const formattedSize = landSize < 10 ? landSize.toFixed(2) : formatNumber(landSize);
   
   row.innerHTML = `
@@ -212,7 +214,9 @@ function createFarmlandRow(farmland, selectedUnit) {
     <td>${formattedSize} ${selectedUnit}</td>
     <td>${farmland.plantedResourceName || 'None'}</td>
     <td>
-      <button class="btn btn-light btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>Plant</button>
+      <button class="btn btn-light btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>
+        ${taskManager.isTargetBusy(farmland) ? 'In Progress' : 'Plant'}
+      </button>
     </td>
   `;
   return row;

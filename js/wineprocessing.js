@@ -1,6 +1,7 @@
 import { inventoryInstance } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
+import { TaskType } from './taskManager.js';
 
 export function fermentMust(selectedResource, storage, mustAmount) {
     const resource = inventoryInstance.items.find(item => 
@@ -14,32 +15,39 @@ export function fermentMust(selectedResource, storage, mustAmount) {
         return;
     }
 
-    // Convert must to wine volume (10% loss during fermentation)
-    const wineVolume = resource.amount * 0.9;
-    // Convert wine volume to number of 0.75L bottles
-    const bottleAmount = Math.floor(wineVolume / 0.75);
+    // Add fermentation as a completion task
+    taskManager.addCompletionTask(
+        'Fermentation',
+        TaskType.winery,
+        4, // 4 weeks for fermentation
+        (target, params) => {
+            const { selectedResource, storage, mustAmount } = params;
+            const wineVolume = mustAmount * 0.9;
+            const bottleAmount = Math.floor(wineVolume / 0.75);
 
-    // Remove units from the must resource
-    inventoryInstance.removeResource(
-        { name: resource.resource.name },
-        resource.amount,
-        'Must',
-        resource.vintage,
-        storage
+            inventoryInstance.removeResource(
+                { name: selectedResource },
+                mustAmount,
+                'Must',
+                resource.vintage,
+                storage
+            );
+
+            inventoryInstance.addResource(
+                { name: selectedResource, naturalYield: 1 },
+                bottleAmount,
+                'Bottles',
+                resource.vintage,
+                resource.quality,
+                resource.fieldName,
+                resource.fieldPrestige,
+                'Wine Cellar'
+            );
+
+            saveInventory();
+            addConsoleMessage(`${mustAmount} liters of ${selectedResource} must has been fermented into ${bottleAmount} bottles.`);
+        },
+        storage,
+        { selectedResource, storage, mustAmount }
     );
-
-    // Add as bottles to Wine Cellar
-    inventoryInstance.addResource(
-        { name: resource.resource.name, naturalYield: 1 },
-        bottleAmount,
-        'Bottles',
-        resource.vintage,
-        resource.quality,
-        resource.fieldName,
-        resource.fieldPrestige,
-        'Wine Cellar'
-    );
-
-    saveInventory();
-    addConsoleMessage(`${resource.amount} liters of ${selectedResource} must has been fermented into ${bottleAmount} bottles.`);
 }

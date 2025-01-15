@@ -54,7 +54,7 @@ export class Staff {
     this.firstName = firstName;
     this.lastName = lastName;
     this.nationality = this.selectNationality();
-    this.name = this.getNameForNationality(this.nationality);
+    this.name = `${firstName} ${lastName}`; // Use the provided names instead
     this.workforce = 50;
     this.wage = 600;
     this.skills = new Skills(skills);
@@ -119,8 +119,15 @@ export function getLastNameForNationality(nationality) {
 
 export function displayStaff() {
     const staffContainer = document.getElementById('staff-container');
-    staffContainer.innerHTML = ''; // Clear any existing content
+    if (!staffContainer) {
+        console.warn('Staff container not found, delaying display...');
+        // Optional: Add retry logic or queue update for next frame
+        setTimeout(displayStaff, 100); // Retry after 100ms
+        return;
+    }
 
+    // Create table only if container exists
+    staffContainer.innerHTML = '';
     const table = document.createElement('table');
     table.className = 'table mt-4';
 

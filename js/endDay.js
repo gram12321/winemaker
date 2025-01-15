@@ -14,6 +14,7 @@ import {
     setPrestigeHit,
     calculateRealPrestige
 } from './database/adminFunctions.js';
+import taskManager from './taskManager.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -21,6 +22,9 @@ export function incrementWeek() {
     const gameState = getGameState();
     let { week, season, year } = gameState;
     let currentSeasonIndex = SEASONS.indexOf(season);
+
+    // Process all running tasks
+    taskManager.processWeek();
 
     // Increment the week
     week += 1;

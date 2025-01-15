@@ -157,6 +157,29 @@ Summary:
 Yield and quality depend heavily on vineyard management, soil fertility, climate, vine age, and density/pruning methods. Smaller vineyards often produce higher quality wines, whereas larger vineyards focus on quantity. The balance between quality and quantity is critical in defining the yield categories and types of wine produced across different regions.
 
 
+// Work rates: 
+A skilled worker can plant about 400 to 600 vines per day, depending on conditions.
+Mechanical Planting: In larger or more modern vineyards, machines can be used to dig holes and plant vines, increasing the speed dramatically to about 1,500 to 3,000 vines per day.
+
+General Planting Time Estimates
+For a 1-acre vineyard, assuming a planting density of 2,500 to 3,000 vines per acre:
+
+Manual Planting:
+
+5 to 8 days of work for 1 acre, depending on soil conditions and worker efficiency.
+This assumes 500 vines planted per day by a single worker.
+Mechanical Planting:
+
+1 to 2 days of work for 1 acre, as machines can plant around 1,500 to 3,000 vines per day.
+If the vineyard is larger (e.g., 10 acres) or located on challenging terrain, you may need to increase these estimates accordingly.
+
+Summary of Planting Time for Your Game
+Flat, machine-planted vineyard:
+~1 day per acre.
+Manual planting on flat terrain:
+~5 to 8 days per acre.
+Manual planting on difficult terrain:
+~7 to 10+ days per acre, depending on how challenging the conditions are.
 
 
 // Calculation for yield as of 15/01/25

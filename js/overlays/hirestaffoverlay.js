@@ -1,11 +1,10 @@
-
 import { createNewStaff, displayStaff } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
 import { hiringTaskFunction } from '../administration.js';
-
+import taskManager, { TaskType } from '../taskManager.js';
 
 export function showHireStaffOverlay() {
     const overlay = document.getElementById('hireStaffOverlay');
@@ -100,26 +99,40 @@ export function showHireStaffOverlay() {
 }
 
 function hireSelectedStaff(staff) {
-    // Get current staff from adminFunctions
-    const staffMembers = loadStaff();
-    
-    // Add new staff member
-    staffMembers.push(staff);
-    
-    // Save updated staff list
-    saveStaff(staffMembers);
-
-    // Handle hiring expense
     const hiringExpense = staff.wage * 12;
-    addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+    const currentMoney = parseFloat(localStorage.getItem('money') || '0');
 
-    // Display confirmation message
-    const flagIconHTML = getFlagIconHTML(staff.nationality);
-    addConsoleMessage(`Hired: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, Hiring cost: €${hiringExpense}`, true);
+    if (currentMoney < hiringExpense) {
+        addConsoleMessage(`Insufficient funds for hiring: <strong>${staff.firstName} ${staff.lastName}</strong>. Required: <strong>${formatNumber(hiringExpense)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>.`);
+        return;
+    }
 
-    // Close the overlay and refresh staff display
-    document.getElementById('hireStaffOverlay').style.display = 'none';
-    displayStaff(); // Refresh the staff display
+    taskManager.addCompletionTask(
+        'Hiring Process',
+        TaskType.administration,
+        2, // 2 weeks duration
+        (target, params) => {
+            // Completion callback - executes after 2 weeks
+            const { staff, hiringExpense } = params;
+            const staffMembers = loadStaff();
+            staffMembers.push(staff);
+            saveStaff(staffMembers);
+            
+            addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+            const flagIconHTML = getFlagIconHTML(staff.nationality);
+            addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
+        },
+        null,
+        { staff, hiringExpense },
+        (target, params) => {
+            const { staff } = params;
+            addConsoleMessage(`Started hiring process for ${staff.firstName} ${staff.lastName}...`, true);
+            const overlay = document.getElementById('hireStaffOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+    );
 }
 
 function getSkillLevelClass(skillValue) {

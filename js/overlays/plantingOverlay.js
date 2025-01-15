@@ -1,10 +1,10 @@
-
 import { formatNumber } from '../utils.js';
 import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
 import { allResources } from '/js/resource.js';
 import { displayFarmland  } from '/js/farmland.js';
 import { updateFarmland } from '../database/adminFunctions.js';
+import taskManager, { TaskType } from '../taskManager.js';
 
 // Function to handle planting logic
 function plant(farmland, selectedResource, selectedDensity) {
@@ -28,24 +28,48 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Update farmland data
-  const plantingSuccess = updateFarmland(farmland.id, {
-    density: selectedDensity,
-    plantedResourceName: selectedResource,
-    vineAge: 0
-  });
+  // Calculate planting duration based on density and acres
+  // Base duration: 1 week per 2 acres
+  const baseDuration = Math.max(2, Math.ceil(farmland.acres / 2));
+  // Density multiplier: 1x at 1000 plants/acre, 3x at 10000 plants/acre
+  const densityMultiplier = 1 + ((selectedDensity - 1000) / 4500);  // Will give 1.0 to 3.0
+  const plantingDurationInWeeks = Math.ceil(baseDuration * densityMultiplier);
 
-  if (plantingSuccess) {
-    // Process transaction
-    addTransaction('Expense', `Planting on ${farmland.name}`, -totalCost);
-    addConsoleMessage(`Field <strong>${farmland.name}</strong> fully planted with <strong>${selectedResource}</strong>.`);
-    // Update the reference passed to the function
-    Object.assign(farmland, { density: selectedDensity, plantedResourceName: selectedResource, vineAge: 0 });
-    return true;
-  }
-  
-  addConsoleMessage('Failed to plant field', false, true);
-  return false;
+  // Since planting is a progressive task, we use addProgressiveTask
+  taskManager.addProgressiveTask(
+    'Planting',
+    TaskType.field,
+    plantingDurationInWeeks,
+    (target, progress, params) => {
+      // This will be called every week with updated progress
+      const percentComplete = Math.floor(progress * 100);
+      addConsoleMessage(`Planting ${target.name}: ${percentComplete}% complete...`, true);
+      
+      if (progress >= 1) {
+        // Final update when task completes
+        const { selectedResource, selectedDensity, totalCost } = params;
+        updateFarmland(target.id, {
+          density: selectedDensity,
+          plantedResourceName: selectedResource,
+          vineAge: 0,
+          status: 'No yield in first season'
+        });
+        addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
+        displayFarmland();
+      }
+    },
+    farmland,
+    { selectedResource, selectedDensity, totalCost },
+    // Initial callback
+    (target, params) => {
+      updateFarmland(target.id, {
+        status: 'Planting...'
+      });
+      displayFarmland();
+    }
+  );
+
+  return true;
 }
 
 // Function to show planting overlay UI
