@@ -1,6 +1,6 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
-
-import { Staff, createNewStaff, getLastNameForNationality  } from '/js/staff.js';
+import { displayFarmland } from '../farmland.js'; // Ensure this import is present
+import { Staff, createNewStaff, getLastNameForNationality } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
 import { inventoryInstance } from '/js/resource.js';
@@ -451,7 +451,7 @@ function getTaskCallback(taskName, taskType) {
                         status: 'No yield in first season'
                     });
                     addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
-                    displayFarmland();
+                    displayFarmland(); // Now properly imported
                 }
             };
         case 'hiring process':

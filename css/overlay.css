@@ -24,7 +24,7 @@
     padding: 30px;
     background: #fff; /* Ensure content stands out */
     min-height: 100%; /* Ensure content takes up at least the full height of the overlay */
-};
+}
 
 /* General Overlay Styles */
 .overlay {
@@ -634,4 +634,67 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background-color: #5C2E0E;
   border-color: var(--color-primary);
   color: var(--panel-text);
+}
+
+/* Assign Staff Overlay Specific Styles */
+.assign-staff-overlay .overlay-content {
+    min-width: 600px;
+    max-width: 800px;
+}
+
+.assign-staff-overlay h2 {
+    color: white;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: 0.5rem;
+}
+
+.assign-staff-overlay .table {
+    margin-bottom: 1.5rem;
+}
+
+.assign-staff-overlay .table th {
+    background-color: var(--color-accent);
+    color: black;
+    font-weight: 500;
+    padding: 12px;
+}
+
+.assign-staff-overlay .table td {
+    vertical-align: middle;
+    padding: 12px;
+    color: black; /* Ensure text color contrasts with background */
+}
+
+.assign-staff-overlay input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-accent);
+    cursor: pointer;
+}
+
+.assign-staff-overlay .btn-group {
+    display: flex;
+    justify-content: center; /* Center the button */
+    margin-top: 20px; /* Add margin to separate from table */
+}
+
+/* Use existing button styles from overlay.css but add specific hover effects */
+.assign-staff-overlay .save-staff-btn {
+    background-color: var(--color-primary);
+    color: var(--panel-text);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s ease;
+}
+
+.assign-staff-overlay .save-staff-btn:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }

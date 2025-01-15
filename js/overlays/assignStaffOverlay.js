@@ -12,7 +12,7 @@ export function showAssignStaffOverlay(task) {
     const currentStaff = task.params.staff || [];
 
     const overlay = document.createElement('div');
-    overlay.className = 'overlay';
+    overlay.className = 'overlay assign-staff-overlay';
 
     const staffList = allStaff.map(staff => `
         <tr>
@@ -30,24 +30,32 @@ export function showAssignStaffOverlay(task) {
 
     overlay.innerHTML = `
         <div class="overlay-content">
-            <h2>Assign Staff to ${task.name}</h2>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Nationality</th>
-                            <th>Wage</th>
-                            <th>Select</th>
-                        </tr>
-                    </thead>
-                    <tbody>${staffList}</tbody>
-                </table>
-            </div>
-            <div class="mt-3">
-                <button class="btn btn-primary save-staff-btn">Save Assignments</button>
-                <button class="btn btn-secondary cancel-btn">Close</button>
-            </div>
+            <section class="overlay-section card">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Assign Staff to ${task.name}</h2>
+                    <button class="btn btn-light btn-sm close-btn">Close</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Nationality</th>
+                                    <th>Skills</th>
+                                    <th class="text-right">Wage</th>
+                                    <th>Select</th>
+                                </tr>
+                            </thead>
+                            <tbody>${staffList}</tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+                <div class="btn-group mt-3">
+                        <button class="btn btn-primary save-staff-btn">Save Assignments</button>
+                    </div>
+            </section>
         </div>
     `;
 
@@ -61,7 +69,7 @@ export function showAssignStaffOverlay(task) {
         overlay.remove();
     });
 
-    overlay.querySelector('.cancel-btn').addEventListener('click', () => {
+    overlay.querySelector('.close-btn').addEventListener('click', () => {
         overlay.remove();
     });
 
