@@ -59,6 +59,7 @@ function createFarmlandTable(newFarmlandOptions) {
         const landValuePerUnit = parseFloat(priceFactorPerAcre * conversionFactor);
         const landSize = parseFloat(convertToCurrentUnit(farmland.acres));
         const totalPrice = landSize * landValuePerUnit;
+        const formattedSize = landSize < 10 ? landSize.toFixed(2) : formatNumber(landSize);
 
         farmland.totalPrice = totalPrice;
 
@@ -67,7 +68,7 @@ function createFarmlandTable(newFarmlandOptions) {
                 <td>${farmland.name}</td>
                 <td>${getFlagIconHTML(farmland.country)} ${farmland.country}</td>
                 <td>${farmland.region}</td>
-                <td>${formatNumber(landSize)} ${selectedUnit}</td>
+                <td>${formattedSize} ${selectedUnit}</td>
                 <td>${farmland.soil}</td>
                 <td>${farmland.altitude}</td>
                 <td>${farmland.aspect} (<span class="${colorClass}">${formatNumber(aspectRating, 2)}</span>)</td>

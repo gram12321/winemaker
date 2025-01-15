@@ -106,7 +106,25 @@ export function getLastId(farmlands) {
 }
 
 export function getRandomAcres() {
-  return Math.floor(Math.random() * 200) + 1;
+  const rand = Math.random() * 100;
+  
+  if (rand < 25) { // Very Small: 25%
+    return 0.1 + Math.random() * 0.9;
+  } else if (rand < 60) { // Small: 35%
+    return 1 + Math.random() * 4;
+  } else if (rand < 85) { // Medium: 25%
+    return 5 + Math.random() * 15;
+  } else if (rand < 93) { // Large: 8%
+    return 20 + Math.random() * 30;
+  } else if (rand < 96) { // Very Large: 3%
+    return 50 + Math.random() * 450;
+  } else if (rand < 96.5) { // Extra Large: 0.5%
+    return 500 + Math.random() * 500;
+  } else if (rand < 96.6) { // Ultra Large: 0.1%
+    return 1000 + Math.random() * 4000;
+  } else { // Fallback to medium size
+    return 5 + Math.random() * 15;
+  }
 }
 
 function getRandomSoil(country, region) {
@@ -182,6 +200,8 @@ function createFarmlandRow(farmland, selectedUnit) {
   const row = document.createElement('tr');
   
   const isPlantingAllowed = !farmland.plantedResourceName;
+  const formattedSize = landSize < 10 ? landSize.toFixed(2) : formatNumber(landSize);
+  
   row.innerHTML = `
     <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 80px; height: auto; border-radius: 8px;"></td>
     <td>${farmland.name}</td>
@@ -189,7 +209,7 @@ function createFarmlandRow(farmland, selectedUnit) {
       ${getFlagIcon(farmland.country)}
       ${farmland.country}, ${farmland.region}
     </td>
-    <td>${formatNumber(landSize)} ${selectedUnit}</td>
+    <td>${formattedSize} ${selectedUnit}</td>
     <td>${farmland.plantedResourceName || 'None'}</td>
     <td>
       <button class="btn btn-light btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>Plant</button>
