@@ -157,9 +157,88 @@ Summary:
 Yield and quality depend heavily on vineyard management, soil fertility, climate, vine age, and density/pruning methods. Smaller vineyards often produce higher quality wines, whereas larger vineyards focus on quantity. The balance between quality and quantity is critical in defining the yield categories and types of wine produced across different regions.
 
 
+
+
+// Calculation for yield as of 15/01/25
+
+Fixed values:
+- baseYieldPerAcre = 2400 kg
+- naturalYield = 1.0 (Barbera)
+- farmlandHealth = 0.5
+- annualYieldFactor = 1.25 (average of 0.75 + random)
+
+Conversion rates:
+1. Grapes → Must: 60% (0.6)
+2. Must → Wine: 90% (after 10% fermentation loss)
+3. Wine → Bottles: divide by 0.75L (standard bottle size)
+
+---------------------------------------------------------------------
+Ripeness: 0.50  | Quality Mult: (0.5 + 1.0 + 0.5)/3 = 0.67
+---------------------------------------------------------------------
+Density 0.2 (1000 vines):
+  Grapes: 400 kg
+  → Must: 240 L
+  → Wine: 216 L
+  → Bottles: 288
+
+Density 1.0 (5000 vines):
+  Grapes: 2,000 kg
+  → Must: 1,200 L
+  → Wine: 1,080 L
+  → Bottles: 1,440
+
+Density 2.0 (10000 vines):
+  Grapes: 4,000 kg
+  → Must: 2,400 L
+  → Wine: 2,160 L
+  → Bottles: 2,880
+
+---------------------------------------------------------------------
+Ripeness: 0.75  | Quality Mult: (0.75 + 1.0 + 0.5)/3 = 0.75
+---------------------------------------------------------------------
+Density 0.2 (1000 vines):
+  Grapes: 450 kg
+  → Must: 270 L
+  → Wine: 243 L
+  → Bottles: 324
+
+Density 1.0 (5000 vines):
+  Grapes: 2,250 kg
+  → Must: 1,350 L
+  → Wine: 1,215 L
+  → Bottles: 1,620
+
+Density 2.0 (10000 vines):
+  Grapes: 4,500 kg
+  → Must: 2,700 L
+  → Wine: 2,430 L
+  → Bottles: 3,240
+
+---------------------------------------------------------------------
+Ripeness: 1.00  | Quality Mult: (1.0 + 1.0 + 0.5)/3 = 0.83
+---------------------------------------------------------------------
+Density 0.2 (1000 vines):
+  Grapes: 500 kg
+  → Must: 300 L
+  → Wine: 270 L
+  → Bottles: 360
+
+Density 1.0 (5000 vines):
+  Grapes: 2,500 kg
+  → Must: 1,500 L
+  → Wine: 1,350 L
+  → Bottles: 1,800
+
+Density 2.0 (10000 vines):
+  Grapes: 5,000 kg
+  → Must: 3,000 L
+  → Wine: 2,700 L
+  → Bottles: 3,600
+
 // AI instructions
 
 We uses Json and localstorage several places in endday.js This should not be nessesart as we are a SPA and all storage between session is in adminfunctions. We allready have some function in place in adminfunctions for maniplulating farmland.
 
 Lets try to eliminate JSON and localstorage in endday, prefeably using excisting function in aminfunctions or creating new to handle storing between sessions
+
 
