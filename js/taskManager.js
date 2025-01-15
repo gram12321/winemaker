@@ -1,4 +1,7 @@
-import { saveTasks, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
+import { loadStaff, saveTasks, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
+import { showStaffOverlay } from './overlays/showstaffoverlay.js';
+import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
+
 // Define task types as constants
 export const TaskType = {
     field: 'Field',
@@ -156,10 +159,41 @@ class TaskManager {
                         </span>
                     </div>
                 ` : ''}
+                <button class="assign-staff-btn">
+                    ${task.params.staff ? 'Manage Staff' : 'Assign Staff'}
+                </button>
             `;
+            
+            // Add click event listener to the assign staff button
+            const assignButton = taskBox.querySelector('.assign-staff-btn');
+            assignButton.addEventListener('click', () => {
+                showAssignStaffOverlay(task);
+            });
             
             taskList.appendChild(taskBox);
         });
+    }
+
+    assignStaffToTask(taskId, staffIds) {
+        const task = this.tasks.get(taskId);
+        if (task) {
+            // Load actual staff objects
+            const allStaff = loadStaff();
+            const assignedStaff = staffIds.map(id => 
+                allStaff.find(s => s.id === parseInt(id))
+            ).filter(s => s); // Filter out any undefined staff
+
+            // Update task params with assigned staff
+            task.params.staff = assignedStaff;
+            
+            // Save tasks to persist changes
+            saveTasks(this.tasks);
+            
+            // Update display
+            this.updateTaskDisplay();
+            return true;
+        }
+        return false;
     }
 }
 
