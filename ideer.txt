@@ -101,7 +101,36 @@ Yield Categories:
         (e.g., La Mancha in Spain, Central Valley in California).
 
 
+High-Density, Well-Pruned Vineyards:
+Lower per-vine yield but better fruit concentration due to competition and careful trimming.
+These vineyards typically yield 3-6 tons per hectare, with intense, complex wines.
+Low-Density, Less-Pruned Vineyards:
+Higher yields per vine but potentially diluted fruit flavors. Yields can reach 10-15+ tons per hectare, but the wine might be less complex.
+Moderate-Density, Balanced Pruning:
+Moderate yields (5-10 tons per hectare) and good quality, common in vineyards aiming for a balance of quality and quantity.
 
+Typical Vineyard Yields:
+
+High-Yield Vineyards: 10-15 tons per hectare (4-6 tons per acre).
+These vineyards prioritize quantity, often using fertile soils, irrigation, and lower-cost grape varieties.
+Moderate-Yield Vineyards: 5-10 tons per hectare (2-4 tons per acre).
+This range is typical for well-managed vineyards that balance quality with profitability. The resulting wine is generally good but not as concentrated as that from low-yield vineyards.
+Low-Yield Vineyards: 2-5 tons per hectare (0.8-2 tons per acre).
+These vineyards focus on quality, often found in prestigious wine regions where vine stress (from poor soil, limited water, etc.) leads to more concentrated, complex wines.
+Very Low-Yield Vineyards: 1-2 tons per hectare (0.4-0.8 tons per acre).
+Found in premium vineyards with very old vines or those grown in particularly challenging conditions. The yield is small, but the wine produced is highly sought after for its intense flavors and depth.
+Influencing Factors:
+
+Soil:
+Fertile soils can increase yields to 15+ tons per hectare, but often at the cost of flavor intensity.
+Poor, well-drained soils typically limit yields to 3-7 tons per hectare, enhancing quality.
+Climate:
+Warmer, irrigated regions like California’s Central Valley can reach 10-15 tons per hectare.
+Cooler or drier regions like Burgundy or parts of Spain may yield 3-6 tons per hectare due to limited water and slower growth.
+Age of Vines:
+Young Vines (under 10 years): Can yield 8-12 tons per hectare but might produce simpler wines.
+Mature Vines (10-30 years): Typically yield 5-10 tons per hectare, often resulting in balanced wines.
+Old Vines (over 30 years): Yields drop significantly, often below 5 tons per hectare, with some premium wines coming from vines that yield as little as 1-3 tons per hectare.
 
 // AI instructions
 
