@@ -8,13 +8,10 @@
   z-index: 1000 !important;
   overflow-y: auto !important;
   background-color: #343a40 !important;
-  /* Set the base background color */
-  /* Remove individual background image properties from here */
 }
 
 #panel-wrapper::before {
   content: '';
-  /* Necessary to display the pseudo-element */
   position: absolute;
   top: 0;
   left: 0;
@@ -24,145 +21,139 @@
   background-size: cover;
   background-position: center;
   opacity: 0.4;
-  /* Only the image gets this opacity */
   z-index: -1;
-  /* Place the image behind the panel content */
 }
 
-/*  - --- --   Task Panel styles   - - - - - -*/
-
-/* Task box styles */
+/* Task Box Styles */
 .task-box {
-  background-color: var(--task-winery);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-sm);
-  transition: background-color 0.3s;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
   position: relative;
-  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Hover not in use after bg-color per type */
-.task-box:hover {
-  background-color: #94bde5;
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
+
+.task-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+}
+
+.task-box:hover {
+  transform: translateX(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Task Type Specific Styles */
+.task-box.field-task::before { background: linear-gradient(to bottom, #84cc16, #4d7c0f); }
+.task-box.winery-task::before { background: linear-gradient(to bottom, #2563eb, #1d4ed8); }
+.task-box.administration-task::before { background: linear-gradient(to bottom, #7c3aed, #5b21b6); }
+.task-box.sales-task::before { background: linear-gradient(to bottom, #dc2626, #991b1b); }
+.task-box.building-task::before { background: linear-gradient(to bottom, #f97316, #c2410c); }
+.task-box.maintenance-task::before { background: linear-gradient(to bottom, #6366f1, #4338ca); }
 
 .task-icon {
   width: 42px;
   height: 42px;
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 15px;
+  right: 15px;
+  opacity: 0.9;
   border-radius: 50%;
 }
 
-/* Task Details Styling */
-.task-details {
-  color: #fff;
-  font-size: 0.9em;
-}
-
-.company-name {
-  font-weight: bold;
-}
-
-.field-name {
-  font-weight: bold;
-}
-
 .task-name {
-  font-size: 0.9em;
-  /* Add any additional styling you want for task names */
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #fff;
+  margin-right: 40px;
+  margin-bottom: 12px;
 }
 
-.d-flex {
-  display: flex;
+.task-type {
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin-bottom: 8px;
 }
 
-.justify-content-between {
-  justify-content: space-between;
+.task-target {
+  font-size: 1.0em;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.align-items-center {
-  align-items: center;
+.progress-container {
+  background: rgba(0, 0, 0, 0.2);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.8) 50%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+  transition: width 0.3s ease;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .progress-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
-  color: #fff;
-  font-size: 0.6em;
+  margin-top: 8px;
+  font-size: 0.75em;
+  color: #94a3b8;
 }
 
-.progress {
-  margin-top: 0;
-}
-
-.task-box.field-task {
-  background-color: #545a16;
-}
-
-.task-box.field-task:hover {
-  background-color: #6a7220;
-  /* Lighter version for hover */
-}
-
-.task-box.winery-task {
-  background-color: #214a73;
-}
-
-.task-box.winery-task:hover {
-  background-color: #2d5aab;
-  /* Lighter version for hover */
-}
-
-.task-box.administration-task {
-  background-color: #23143e;
-}
-
-.task-box.administration-task:hover {
-  background-color: #36214f;
-  /* Lighter version for hover */
-}
-
-.task-box.sales-task {
-  background-color: #491809;
-}
-
-.task-box.sales-task:hover {
-  background-color: #6f2814;
-  /* Lighter version for hover */
-}
-
-.add-staff-btn {
-  background-color: #4178be;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 0.8em;
-  transition: background-color 0.3s;
-  margin-top: 10px;
-}
-
-.add-staff-btn:hover {
-  background-color: #3069ac;
-  cursor: pointer;
-}
-
+/* Staff display in task boxes */
 .staff-line {
   display: flex;
   align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .staff-icon {
   width: 15px;
   margin-right: 5px;
+  opacity: 0.8;
 }
 
 .staff-names {
   font-size: 0.8em;
+  color: #e2e8f0;
 }

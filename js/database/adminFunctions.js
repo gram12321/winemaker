@@ -5,8 +5,6 @@ import { addTransaction } from '/js/finance.js';
 import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
 import { inventoryInstance } from '/js/resource.js';
 
-
-
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
         try {
@@ -58,13 +56,10 @@ async function storeCompanyName() {
         localStorage.setItem('companyName', companyName);
         localStorage.setItem('money', 0); // Initialize money with 10000000
 
-
         // Set initial date values before logging the transaction
         localStorage.setItem('week', 1); // Initialize week
         localStorage.setItem('season', 'Spring'); // Initialize season
         localStorage.setItem('year', 2023); // Initialize year
-
-
 
         // Log the initial income transaction
         addTransaction('Income', 'Initial Company Setup', 10000000);
@@ -198,124 +193,6 @@ function saveInventory() {
 
 
 
-export function saveTask(taskInfo) {
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
-    // Find if the task already exists based on taskId
-    const existingTaskIndex = tasks.findIndex(task => task.taskId === taskInfo.taskId);
-
-    if (existingTaskIndex === -1) {
-        tasks.push(taskInfo); // Add new task
-    } else {
-        tasks[existingTaskIndex] = taskInfo; // Update existing task
-    }
-
-    localStorage.setItem('tasks', JSON.stringify(tasks)); // Save back to localStorage
-    
-}
-
-export const activeTasks = []; // Exported array to hold task references
-
-
-export function loadTasks() {
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    Task.latestTaskId = parseInt(localStorage.getItem('latestTaskId'), 10) || 0;
-    activeTasks.length = 0; // Clear existing active tasks
-
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const inventoryResources = inventoryInstance.items;
-
-    tasks.forEach(taskInfo => {
-        const field = farmlands[taskInfo.fieldId];
-        let executeTaskFunction;
-        let task;
-        let resource;
-
-        switch (true) {
-            case taskInfo.taskName.startsWith("Bookkeeping"):
-                executeTaskFunction = bookkeepingTaskFunction;
-                break;
-            case taskInfo.taskName === "Crushing Grapes":
-                resource = inventoryResources.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Grapes');
-                executeTaskFunction = resource ? () => grapeCrushing(taskInfo.resourceName) : null;
-                break;
-            case taskInfo.taskName === "Fermenting":
-                resource = inventoryResources.find(item => item.resource.name === taskInfo.resourceName && item.state === 'Must');
-                executeTaskFunction = resource ? () => fermentMust(taskInfo.resourceName) : null;
-                break;
-            case taskInfo.taskName === "Planting":
-                if (field) executeTaskFunction = () => plantAcres(taskInfo.fieldId, taskInfo.resourceName);
-                break;
-            case taskInfo.taskName === "Harvesting":
-                if (field) executeTaskFunction = () => harvestAcres(taskInfo.fieldId);
-                break;
-            case taskInfo.taskName === "Uprooting":
-                if (field) executeTaskFunction = () => uproot(taskInfo.fieldId);
-                break;
-            case taskInfo.taskName === "Clearing":
-                if (field) executeTaskFunction = () => clearing(taskInfo.fieldId);
-                break;
-            case taskInfo.taskName.startsWith("Hiring"):
-                executeTaskFunction = hiringTaskFunction;
-                break;
-            case taskInfo.taskName.startsWith("Building & Maintenance"):
-                executeTaskFunction = maintenanceTaskFunction;
-                break;
-            default:
-                console.warn(`Unknown task name: ${taskInfo.taskName}`);
-        }
-
-        if (executeTaskFunction) {
-            task = new Task(
-                taskInfo.taskName,
-                executeTaskFunction,
-                taskInfo.taskId,
-                taskInfo.workTotal,
-                taskInfo.resourceName,
-                taskInfo.resourceState,
-                taskInfo.vintage,
-                taskInfo.quality,
-                taskInfo.iconPath,
-                taskInfo.fieldName,
-                taskInfo.type,
-                taskInfo.workProgress || 0,
-                Array.isArray(taskInfo.staff) ? taskInfo.staff : [],
-                taskInfo.buildingName // Ensure buildingName is passed
-            );
-
-            // Assign task-specific properties including fieldId and fieldName if applicable
-            Object.assign(task, {
-                fieldId: taskInfo.fieldId,
-                fieldName: taskInfo.fieldName,
-                vintage: taskInfo.vintage,
-              storage: taskInfo.storage // Attach storage here from taskInfo
-            });
-
-            // Initialize the task box with staff information and update visuals
-            task.updateTaskBoxWithStaff(task.staff);
-            task.updateProgressBar(); // Update progress bar initially
-            activeTasks.push(task); // Add task to activeTasks array
-        }
-    });
-}
-
-// Existing removeTask function with additional code
-export function removeTask(taskId) {
-    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    const initialTaskCount = tasks.length;
-
-    tasks = tasks.filter(task => task.taskId !== taskId);
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-
-    // Update activeTasks to remove the corresponding task
-    const taskIndex = activeTasks.findIndex(task => task.taskId === taskId);
-    if (taskIndex !== -1) {
-          activeTasks.splice(taskIndex, 1); // Remove the task from activeTasks
-    }
-
-    
-}
-
 // Function to save the list of staff members to localStorage
 export function saveStaff(staffMembers) {
   if (Array.isArray(staffMembers)) {
@@ -357,7 +234,6 @@ export function loadStaff() {
 
   return staffMembers;
 }
-
 
 let currentWineOrders = [];
 
@@ -488,7 +364,6 @@ export function getCompanyName() {
     return localStorage.getItem('companyName');
 }
 
-
 // Farmland management functions
 export function getFarmlands() {
     return JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
@@ -531,6 +406,66 @@ export function calculateRealPrestige() {
 
 export function getCalculatedPrestige() {
   return parseFloat(localStorage.getItem('calculatedPrestige') || '0');
+}
+
+// Task persistence functions
+export function saveTasks(tasks) {
+    const taskData = Array.from(tasks.entries()).map(([id, task]) => ({
+        id: task.id,
+        name: task.name,
+        type: task.type,
+        taskType: task.taskType,
+        duration: task.duration,
+        remainingWeeks: task.remainingWeeks,
+        progress: task.progress,
+        target: task.target,
+        params: task.params
+    }));
+    localStorage.setItem('activeTasks', JSON.stringify(taskData));
+}
+
+export function loadTasks() {
+    const taskData = JSON.parse(localStorage.getItem('activeTasks') || '[]');
+    const tasks = new Map();
+    taskData.forEach(task => {
+        tasks.set(task.id, {
+            ...task,
+            callback: getTaskCallback(task.name, task.taskType)
+        });
+    });
+    return tasks;
+}
+
+// Helper function to get the appropriate callback based on task name and type
+function getTaskCallback(taskName, taskType) {
+    switch(taskName.toLowerCase()) {
+        case 'planting':
+            return (target, progress, params) => {
+                // Planting callback logic
+                if (progress >= 1) {
+                    const { selectedResource, selectedDensity, totalCost } = params;
+                    updateFarmland(target.id, {
+                        density: selectedDensity,
+                        plantedResourceName: selectedResource,
+                        vineAge: 0,
+                        status: 'No yield in first season'
+                    });
+                    addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
+                    displayFarmland();
+                }
+            };
+        case 'hiring process':
+            return (target, params) => {
+                const { staff, hiringExpense } = params;
+                const staffMembers = loadStaff();
+                staffMembers.push(staff);
+                saveStaff(staffMembers);
+                addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+            };
+        // Add more cases for other task types
+        default:
+            return () => console.warn(`No callback found for task: ${taskName}`);
+    }
 }
 
 export { 

@@ -1,3 +1,4 @@
+import { saveTasks, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 // Define task types as constants
 export const TaskType = {
     field: 'Field',
@@ -26,8 +27,9 @@ class Task {
 
 class TaskManager {
     constructor() {
-        this.tasks = new Map();
-        this.taskIdCounter = 0;
+        this.tasks = loadTasksFromStorage();
+        this.taskIdCounter = Math.max(0, ...Array.from(this.tasks.keys()));
+        this.updateTaskDisplay();
     }
 
     addProgressiveTask(name, taskType, durationInWeeks, callback, target = null, params = {}, initialCallback = null) {
@@ -40,6 +42,8 @@ class TaskManager {
 
         const task = new Task(taskId, name, 'progressive', taskType, durationInWeeks, callback, target, params);
         this.tasks.set(taskId, task);
+        saveTasks(this.tasks);
+        this.updateTaskDisplay();
         return taskId;
     }
 
@@ -53,6 +57,8 @@ class TaskManager {
 
         const task = new Task(taskId, name, 'completion', taskType, durationInWeeks, callback, target, params);
         this.tasks.set(taskId, task);
+        saveTasks(this.tasks);
+        this.updateTaskDisplay();
         return taskId;
     }
 
@@ -74,10 +80,14 @@ class TaskManager {
                 this.removeTask(task.id);
             }
         });
+        saveTasks(this.tasks);
+        this.updateTaskDisplay(); // Add this line to update display after processing
     }
 
     removeTask(taskId) {
         this.tasks.delete(taskId);
+        saveTasks(this.tasks);
+        this.updateTaskDisplay();
     }
 
     getTaskProgress(taskId) {
@@ -101,6 +111,55 @@ class TaskManager {
         return Array.from(this.tasks.values()).find(task => 
             task.target && task.target.id === target.id
         );
+    }
+
+    getAllTasks() {
+        return Array.from(this.tasks.values());
+    }
+
+    updateTaskDisplay() {
+        const taskList = document.getElementById('task-list');
+        if (!taskList) return;
+
+        taskList.innerHTML = '';
+        
+        this.getAllTasks().forEach(task => {
+            const taskBox = document.createElement('div');
+            taskBox.className = `task-box ${task.taskType.toLowerCase()}-task`;
+            
+            const progress = (task.duration - task.remainingWeeks) / task.duration * 100;
+            const iconName = task.name.toLowerCase().replace(/\s+/g, '');
+            
+            taskBox.innerHTML = `
+                ${task.target ? `<div class="task-target">${task.target.name || 'No target'}</div>` : ''}
+                <div class="task-header">
+                    <div class="task-type">${task.taskType}</div>
+                    <img src="../assets/icon/icon_${iconName}.webp" 
+                         alt="${task.name}" 
+                         class="task-icon"
+                         onerror="this.style.display='none'"
+                    >
+                </div>
+                <div class="task-name">${task.name}</div>
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: ${progress}%"></div>
+                </div>
+                <div class="progress-info">
+                    <span>${Math.round(progress)}% complete</span>
+                    <span>${task.remainingWeeks} weeks left</span>
+                </div>
+                ${task.params.staff ? `
+                    <div class="staff-line">
+                        <img src="../assets/icon/small/staff.png" alt="Staff Icon" class="staff-icon">
+                        <span class="staff-names">
+                            ${task.params.staff.map(s => s.name).join(', ')}
+                        </span>
+                    </div>
+                ` : ''}
+            `;
+            
+            taskList.appendChild(taskBox);
+        });
     }
 }
 
