@@ -14,19 +14,32 @@ export function showAssignStaffOverlay(task) {
     const overlay = document.createElement('div');
     overlay.className = 'overlay assign-staff-overlay';
 
-    const staffList = allStaff.map(staff => `
-        <tr>
-            <td>${staff.name}</td>
-            <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
-            <td class="text-right">€${staff.wage}</td>
-            <td>
-                <input type="checkbox" 
-                       class="staff-select" 
-                       value="${staff.id}"
-                       ${currentStaff.includes(staff.id) ? 'checked' : ''}>
-            </td>
-        </tr>
-    `).join('');
+    const staffList = allStaff.map(staff => {
+        const skillsHTML = `
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: ${parseFloat(staff.skills.field.field) * 100}%; background-color: #ffcc00; height: 20px;" title="Field Skill: ${staff.skills.field.field}">F</div>
+                <div class="skill-bar" style="width: ${parseFloat(staff.skills.winery.winery) * 100}%; background-color: #2179ff; height: 20px;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
+                <div class="skill-bar" style="width: ${parseFloat(staff.skills.administration.administration) * 100}%; background-color: #6c757d; height: 20px;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
+                <div class="skill-bar" style="width: ${parseFloat(staff.skills.sales.sales) * 100}%; background-color: #28a745; height: 20px;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
+                <div class="skill-bar" style="width: ${parseFloat(staff.skills.maintenance.maintenance) * 100}%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: ${staff.skills.maintenance.maintenance}">M</div>
+            </div>
+        `;
+
+        return `
+            <tr>
+                <td>${staff.name}</td>
+                <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
+                <td>${skillsHTML}</td>
+                <td class="text-right">€${staff.wage}</td>
+                <td>
+                    <input type="checkbox" 
+                           class="staff-select" 
+                           value="${staff.id}"
+                           ${currentStaff.some(s => s.id === staff.id) ? 'checked' : ''}>
+                </td>
+            </tr>
+        `;
+    }).join('');
 
     overlay.innerHTML = `
         <div class="overlay-content">
@@ -50,11 +63,10 @@ export function showAssignStaffOverlay(task) {
                             <tbody>${staffList}</tbody>
                         </table>
                     </div>
-                    
                 </div>
                 <div class="btn-group mt-3">
-                        <button class="btn btn-primary save-staff-btn">Save Assignments</button>
-                    </div>
+                    <button class="btn btn-primary save-staff-btn">Save Assignments</button>
+                </div>
             </section>
         </div>
     `;
