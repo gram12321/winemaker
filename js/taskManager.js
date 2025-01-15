@@ -151,7 +151,7 @@ class TaskManager {
                     <span>${Math.round(progress)}% complete</span>
                     <span>${task.remainingWeeks} weeks left</span>
                 </div>
-                ${task.params.staff ? `
+                ${Array.isArray(task.params.staff) ? `
                     <div class="staff-line">
                         <img src="../assets/icon/small/staff.png" alt="Staff Icon" class="staff-icon">
                         <span class="staff-names">
@@ -160,7 +160,7 @@ class TaskManager {
                     </div>
                 ` : ''}
                 <button class="assign-staff-btn">
-                    ${task.params.staff ? 'Manage Staff' : 'Assign Staff'}
+                    ${Array.isArray(task.params.staff) ? 'Manage Staff' : 'Assign Staff'}
                 </button>
             `;
             

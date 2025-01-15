@@ -121,12 +121,10 @@ export function displayStaff() {
     const staffContainer = document.getElementById('staff-container');
     if (!staffContainer) {
         console.warn('Staff container not found, delaying display...');
-        // Optional: Add retry logic or queue update for next frame
         setTimeout(displayStaff, 100); // Retry after 100ms
         return;
     }
 
-    // Create table only if container exists
     staffContainer.innerHTML = '';
     const table = document.createElement('table');
     table.className = 'table mt-4';
@@ -140,7 +138,7 @@ export function displayStaff() {
         <th scope="col">Workforce</th>
         <th scope="col">Wage (€)</th>
         <th scope="col">Assigned Tasks</th>
-        <th scope="col" class="skills-column" style="min-width: 250px;">Skills</th> <!-- Ensure min-width -->
+        <th scope="col" class="skills-column" style="min-width: 250px;">Skills</th>
       </tr>
     `;
 
@@ -148,27 +146,17 @@ export function displayStaff() {
     tbody.id = 'staff-entries';
 
     const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const tasks = JSON.parse(localStorage.getItem('activeTasks')) || [];
 
     staffData.forEach(staff => {
         const assignedTasks = [];
         tasks.forEach(task => {
-            if (task.staff && task.staff.includes(staff.id.toString())) {
-                let locationLabel = 'Unknown';
-                switch (task.type) {
-                    case 'Winery':
-                        locationLabel = 'Winery';
-                        break;
-                    case 'Administration':
-                        locationLabel = 'Administration';
-                        break;
-                    case 'Sales':
-                        locationLabel = 'Sales';
-                        break;
-                    default:
-                        locationLabel = task.fieldName || 'Unknown';
+            if (Array.isArray(task.params.staff) && task.params.staff.some(s => s.id === staff.id)) {
+                if (task.target) {
+                    assignedTasks.push(`<strong>${task.target.name}</strong> (${task.name})`);
+                } else {
+                    assignedTasks.push(`<strong>${task.name}</strong>`);
                 }
-                assignedTasks.push(`<strong>${task.taskName}</strong>, ${locationLabel}`);
             }
         });
 

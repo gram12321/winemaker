@@ -9,7 +9,7 @@ export function showAssignStaffOverlay(task) {
     }
 
     const allStaff = loadStaff();
-    const currentStaff = task.params.staff || [];
+    const currentStaff = Array.isArray(task.params.staff) ? task.params.staff : [];
 
     const overlay = document.createElement('div');
     overlay.className = 'overlay assign-staff-overlay';
