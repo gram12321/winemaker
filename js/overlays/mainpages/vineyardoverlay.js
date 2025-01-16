@@ -4,7 +4,7 @@ import { showHarvestOverlay } from '../harvestOverlay.js';
 import { formatNumber } from '../../utils.js';
 import { loadFarmlands } from '../../database/adminFunctions.js';
 
- 
+
 /**
  * Creates and displays the vineyard management overlay
  * Shows a table of all farmlands with their current status, crops, and actions
@@ -68,7 +68,7 @@ export function showVineyardOverlay() {
                         <td>${farmland.plantedResourceName ? (farmland.ripeness * 100).toFixed(1) + '%' : 'Not Planted'}</td>
                         <td>${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland), 2) + ' kg'}</td>
                         <td>
-                            <button class="btn btn-light btn-sm harvest-btn" 
+                            <button class="btn btn-alternative btn-sm harvest-btn" 
                                     data-farmland-id="${farmland.id}"
                                     ${!canHarvest ? 'disabled' : ''}>
                                 Harvest

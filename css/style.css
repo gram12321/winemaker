@@ -1,15 +1,3 @@
-/* Quality Color Classes */
-.color-class-9 { color: #006400; }  /* Dark Green */
-.color-class-8 { color: #228B22; }  /* Forest Green */
-.color-class-7 { color: #32CD32; }  /* Lime Green */
-.color-class-6 { color: #90EE90; }  /* Light Green */
-.color-class-5 { color: #FFD700; }  /* Gold */
-.color-class-4 { color: #FFA500; }  /* Orange */
-.color-class-3 { color: #FF8C00; }  /* Dark Orange */
-.color-class-2 { color: #FF4500; }  /* Orange Red */
-.color-class-1 { color: #FF0000; }  /* Red */
-.color-class-0 { color: #8B0000; }  /* Dark Red */
-
 /* General Layout */
 body {
   display: flex;
@@ -32,14 +20,7 @@ body {
   margin-right: 450px;
 }
 
-/* Shared Button Styles */
-button.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-
-
+/* Not sure these image styles is in use in anyplace in the project maybe leftover from before SPA */
 /* Image Styles */
 .process-image {
   width: 100%;
@@ -56,20 +37,101 @@ button.disabled {
   border-radius: 30px;
 }
 
-/* Farmland Table Styles */
-.owned-farmland-table td,
-.owned-farmland-table th {
-  white-space: nowrap;
+/* Global Styles */
+/* General button styles */
+.btn {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
 }
 
-#farmlandAccordion {
-  overflow-x: auto;
+.btn:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  color: var(--panel-text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
-.card-body {
-  display: flex;
-  justify-content: center;
+.btn:disabled {
+  background-color: rgba(197, 165, 114, 0.5);
+  border-color: rgba(197, 165, 114, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
 }
+
+/* Alternative button styles */
+.btn-alternative {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  color: var(--panel-text);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.btn-alternative:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Dropdown Styling */
+.form-control-sm {
+  background-color: #722F37;
+  border: 1px solid #C5A572;
+  color: #FAF9F7;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  height: auto; /* Ensure height is auto to match content */
+}
+
+.form-control-sm:focus {
+  background-color: #8B4513;
+  border-color: #C5A572;
+  color: #FAF9F7;
+  box-shadow: 0 0 0 0.2rem rgba(197, 165, 114, 0.25);
+}
+
+.form-control-sm option {
+  background-color: #722F37;
+  color: #FAF9F7;
+}
+
+.form-control-sm:hover {
+  border-color: #8B4513;
+}
+
+/* Dropdown toggle styling */
+.dropdown-toggle {
+  color: var(--color-accent);
+}
+
+/* Dropdown menu item hover styling */
+.dropdown-menu a:hover {
+  background-color: var(--color-primary);
+}
+
+/* Quality Color Classes */
+.color-class-9 { color: #006400; }  /* Dark Green */
+.color-class-8 { color: #228B22; }  /* Forest Green */
+.color-class-7 { color: #32CD32; }  /* Lime Green */
+.color-class-6 { color: #90EE90; }  /* Light Green */
+.color-class-5 { color: #FFD700; }  /* Gold */
+.color-class-4 { color: #FFA500; }  /* Orange */
+.color-class-3 { color: #FF8C00; }  /* Dark Orange */
+.color-class-2 { color: #FF4500; }  /* Orange Red */
+.color-class-1 { color: #FF0000; }  /* Red */
+.color-class-0 { color: #8B0000; }  /* Dark Red */
 
 /* Global Scrollbar Styling */
 ::-webkit-scrollbar {

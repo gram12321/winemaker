@@ -15,7 +15,7 @@ export function showHireStaffOverlay() {
         <section id="hiring-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
                 <h3 class="h5 mb-0">Hire Staff</h3>
-                <button id="closeHireStaffOverlay" class="btn btn-primary btn-sm">Close</button>
+                <button id="closeHireStaffOverlay" class="btn btn-alternative btn-sm">Close</button>
             </div>
     `;
 
@@ -34,7 +34,7 @@ export function showHireStaffOverlay() {
             <div class="staff-option">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">${staff.firstName} ${staff.lastName}</h3>
-                    <button class="btn btn-primary btn-sm hire-staff-button">Hire</button>
+                    <button class="btn btn-alternative btn-sm hire-staff-button">Hire</button>
                 </div>
                 <div class="staff-options-container">
                     <div class="staff-option">

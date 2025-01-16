@@ -214,7 +214,7 @@ function createFarmlandRow(farmland, selectedUnit) {
     <td>${formattedSize} ${selectedUnit}</td>
     <td>${farmland.plantedResourceName || 'None'}</td>
     <td>
-      <button class="btn btn-light btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>
+      <button class="btn btn-alternative btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>
         ${taskManager.isTargetBusy(farmland) ? 'In Progress' : 'Plant'}
       </button>
     </td>

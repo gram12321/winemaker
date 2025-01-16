@@ -97,7 +97,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
       <h2>Planting Options for ${farmland.name}</h2>
       <div class="form-group">
         <label for="resource-select" class="form-label">Select Resource to Plant:</label>
-        <select class="form-control" id="resource-select">
+        <select class="form-control form-control-sm" id="resource-select">
           <option value="">Select Resource</option>
           ${plantingOptions}
         </select>

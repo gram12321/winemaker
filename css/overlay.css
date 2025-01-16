@@ -330,38 +330,20 @@
   margin-left: 1rem;
 }
 
-/* Button Styles */
+/* Button Styles */ 
+/* Remove redundant button styles */
 .overlay-section .btn-light,
 .hire-staff-content .btn-primary {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  color: var(--panel-text);
+  /* Removed redundant styles */
 }
 
 .overlay-section .btn-light:hover,
 .hire-staff-content .btn-primary:hover {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
+  /* Removed redundant styles */
 }
 
 .overlay-section .btn-light:disabled {
-  background-color: rgba(197, 165, 114, 0.5);
-  border-color: rgba(197, 165, 114, 0.3);
-  color: rgba(255, 255, 255, 0.5);
-  cursor: not-allowed;
-}
-
-.btn-group .btn-outline-primary {
-  color: var(--color-primary);
-  border-color: var(--color-accent);
-}
-
-.btn-group .btn-outline-primary:hover,
-.btn-group .btn-outline-primary.active {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
+  /* Removed redundant styles */
 }
 
 /* Section-specific Header Gradients */
@@ -380,6 +362,7 @@
   border-bottom: 2px solid var(--color-accent);
 }
 
+/*  - --- --   Sales - - - - - -*/
 /* Sales Section Headers */
 #inventory-section .card-header {
   background: linear-gradient(135deg, var(--color-accent), #8B4513);
@@ -391,87 +374,7 @@
   border-bottom: 2px solid var(--color-accent);
 }
 
-/* Dropdown Styling */
-.form-control-sm {
-  background-color: #722F37;
-  border: 1px solid #C5A572;
-  color: #FAF9F7;
-  font-size: 0.875rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.form-control-sm:focus {
-  background-color: #8B4513;
-  border-color: #C5A572;
-  color: #FAF9F7;
-  box-shadow: 0 0 0 0.2rem rgba(197, 165, 114, 0.25);
-}
-
-.form-control-sm option {
-  background-color: #722F37;
-  color: #FAF9F7;
-}
-
-.form-control-sm:hover {
-  border-color: #8B4513;
-}
-
-
-/* Fullscreen overlay specific for hire staff */
-#hireStaffOverlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1100;
-  overflow-y: hidden;
-}
-
-/* Content area inside the hire staff overlay */
-.hire-staff-content {
-  background-color: #fff;
-  padding: 20px;
-  margin: 60px auto;
-  width: 90%;
-  max-width: 1000px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.hire-staff-content h3 {
-  margin-top: 20px;
-  margin-bottom: 40px;
-}
-
-.hire-staff-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.hire-staff-option {
-  flex: 0 0 48%;
-  margin-bottom: 40px;
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
-  background: #f9f9f9;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* Close button styling removed in favor of bootstrap button */
-
-.table.table-bordered {
-  width: 100%;
-}
-
+/*  - --- --   Planting - - - - - -*/
 /* Planting Overlay Styles */
 .planting-overlay-info-box {
   background-color: var(--color-background);
@@ -525,29 +428,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
   margin: 10px 0;
   cursor: pointer;
   transition: all 0.2s ease;
+  height: auto; /* Ensure height is auto to match content */
 }
-
-.planting-overlay select:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px rgba(197, 165, 114, 0.25);
-  background-color: var(--color-primary);
-}
-
-.planting-overlay select:hover {
-  background-color: var(--color-accent);
-  color: var(--color-primary);
-}
-
-.planting-overlay select option {
-  background-color: var(--color-primary);
-  color: var(--color-accent);
-}
-
-.planting-overlay select option:hover {
-  background-color: var(--color-accent);
-  color: var(--color-primary);
-}
-
 
 .planting-overlay .density-details {
   display: flex;
@@ -556,7 +438,59 @@ input[type="range"]::-webkit-slider-thumb:hover {
   gap: 10px;
 }
 
-/*  - --- --   staff.html - - - - - -*/
+/*  - --- --   staff - - - - - -*/
+/* Fullscreen overlay specific for hire staff */
+#hireStaffOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1100;
+  overflow-y: hidden;
+}
+
+/* Content area inside the hire staff overlay */
+.hire-staff-content {
+  background-color: #fff;
+  padding: 20px;
+  margin: 60px auto;
+  width: 90%;
+  max-width: 1000px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.hire-staff-content h3 {
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.hire-staff-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.hire-staff-option {
+  flex: 0 0 48%;
+  margin-bottom: 40px;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  background: #f9f9f9;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.table.table-bordered {
+  width: 100%;
+}
 
 .skill-bar-container {
   display: flex;
@@ -589,45 +523,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   /* Set the minimum width for the skills column */
 }
 
-/* General button styles */
-.btn {
-    background-color: var(--color-primary);
-    border-color: var(--color-accent);
-    color: var(--panel-text);
-    border-radius: var(--radius-md);
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.2s ease;
-}
 
-.btn:hover {
-    background-color: var(--color-accent);
-    border-color: var(--color-primary);
-    color: var(--panel-text);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Alternative button styles */
-.btn-alternative {
-    background-color: var(--color-accent);
-    border-color: var(--color-primary);
-    color: var(--panel-text);
-    border-radius: var(--radius-md);
-    padding: 8px 16px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: all 0.2s ease;
-}
-
-.btn-alternative:hover {
-    background-color: var(--color-primary);
-    border-color: var(--color-accent);
-    color: var(--panel-text);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-}
 
 /* Assign Staff Overlay Specific Styles */
 .assign-staff-overlay h2 {
