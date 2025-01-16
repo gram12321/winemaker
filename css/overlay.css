@@ -548,25 +548,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
   color: var(--color-primary);
 }
 
-/* Planting overlay button styling */
-.planting-overlay .plant-btn,
-.planting-overlay .close-btn {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-md);
-  padding: 8px 16px;
-  margin: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.planting-overlay .plant-btn:hover,
-.planting-overlay .close-btn:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-}
 
 .planting-overlay .density-details {
   display: flex;
@@ -607,22 +588,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
   min-width: 150px;
   /* Set the minimum width for the skills column */
 }
-
-/* Sales Button Styles Sales button use specific btn style to be different than Refuse btn*/
-.sell-wine-btn,
-.sell-order-btn {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
-}
-
-.sell-wine-btn:hover,
-.sell-order-btn:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  color: var(--panel-text);
-}
-
 
 /* General button styles */
 .btn {
