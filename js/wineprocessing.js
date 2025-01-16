@@ -1,7 +1,7 @@
 import { inventoryInstance } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
-import { TaskType } from './taskManager.js';
+import taskManager, { TaskType } from './taskManager.js';
 
 export function fermentMust(selectedResource, storage, mustAmount) {
     const resource = inventoryInstance.items.find(item => 

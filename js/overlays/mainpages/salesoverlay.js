@@ -47,7 +47,7 @@ export function displayWineCellarInventory() {
             <td>${formatQualityDisplay(wine.quality)}</td>
             <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
             <td>€${sellingPrice.toFixed(2)}</td>
-            <td><button class="btn btn-light sell-wine-btn" data-resource="${displayInfo.resource.name}">Sell</button></td>
+            <td><button class="btn-alternative sell-wine-btn" data-resource="${displayInfo.resource.name}">Sell</button></td>
         `;
 
         const sellButton = row.querySelector('.sell-wine-btn');
@@ -184,7 +184,7 @@ function displayFilteredOrders(filteredOrders) {
             <td>${displayAmount}</td>
             <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
             <td>
-                <button class="btn btn-light sell-order-btn" data-original-index="${originalIndex}">Sell</button>
+                <button class="btn-alternative sell-order-btn" data-original-index="${originalIndex}">Sell</button>
                 <button class="btn refuse-order-btn" data-original-index="${originalIndex}">Refuse</button>
             </td>
         `;
