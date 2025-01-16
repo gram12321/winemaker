@@ -105,25 +105,28 @@ export function getLastId(farmlands) {
 }
 
 export function getRandomAcres() {
-  const rand = Math.random() * 100;
-  
-  if (rand < 25) { // Very Small: 25%
-    return 0.1 + Math.random() * 0.9;
-  } else if (rand < 60) { // Small: 35%
-    return 1 + Math.random() * 4;
-  } else if (rand < 85) { // Medium: 25%
-    return 5 + Math.random() * 15;
-  } else if (rand < 93) { // Large: 8%
-    return 20 + Math.random() * 30;
-  } else if (rand < 96) { // Very Large: 3%
-    return 50 + Math.random() * 450;
-  } else if (rand < 96.5) { // Extra Large: 0.5%
-    return 500 + Math.random() * 500;
-  } else if (rand < 96.6) { // Ultra Large: 0.1%
-    return 1000 + Math.random() * 4000;
-  } else { // Fallback to medium size
-    return 5 + Math.random() * 15;
-  }
+    const rand = Math.random() * 100;
+    let acres;
+
+    if (rand < 25) { // Very Small: 25%
+        acres = 0.1 + Math.random() * 0.9;
+    } else if (rand < 60) { // Small: 35%
+        acres = 1 + Math.random() * 4;
+    } else if (rand < 85) { // Medium: 25%
+        acres = 5 + Math.random() * 15;
+    } else if (rand < 93) { // Large: 8%
+        acres = 20 + Math.random() * 30;
+    } else if (rand < 96) { // Very Large: 3%
+        acres = 50 + Math.random() * 450;
+    } else if (rand < 96.5) { // Extra Large: 0.5%
+        acres = 500 + Math.random() * 500;
+    } else if (rand < 96.6) { // Ultra Large: 0.1%
+        acres = 1000 + Math.random() * 4000;
+    } else { // Fallback to medium size
+        acres = 5 + Math.random() * 15;
+    }
+
+    return parseFloat(acres.toFixed(2));
 }
 
 function getRandomSoil(country, region) {
