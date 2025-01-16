@@ -25,6 +25,7 @@ class Task {
         this.params = params;
         this.progress = 0;
         this.initialState = initialState;
+        this.assignedStaff = params.assignedStaff || [];
     }
 }
 
@@ -43,7 +44,7 @@ class TaskManager {
             initialCallback(target, params);
         }
 
-        const task = new Task(taskId, name, 'progressive', taskType, durationInWeeks, callback, target, params);
+        const task = new Task(taskId, name, 'progressive', taskType, durationInWeeks, callback, target, { ...params, assignedStaff: [] });
         this.tasks.set(taskId, task);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
@@ -58,7 +59,7 @@ class TaskManager {
             initialCallback(target, params);
         }
 
-        const task = new Task(taskId, name, 'completion', taskType, durationInWeeks, callback, target, params);
+        const task = new Task(taskId, name, 'completion', taskType, durationInWeeks, callback, target, { ...params, assignedStaff: [] });
         this.tasks.set(taskId, task);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
@@ -151,16 +152,16 @@ class TaskManager {
                     <span>${Math.round(progress)}% complete</span>
                     <span>${task.remainingWeeks} weeks left</span>
                 </div>
-                ${Array.isArray(task.params.staff) ? `
+                ${Array.isArray(task.assignedStaff) && task.assignedStaff.length > 0 ? `
                     <div class="staff-line">
                         <img src="../assets/icon/small/staff.png" alt="Staff Icon" class="staff-icon">
                         <span class="staff-names">
-                            ${task.params.staff.map(s => s.name).join(', ')}
+                            ${task.assignedStaff.map(s => s.name).join(', ')}
                         </span>
                     </div>
                 ` : ''}
                 <button class="assign-staff-btn">
-                    ${Array.isArray(task.params.staff) ? 'Manage Staff' : 'Assign Staff'}
+                    ${Array.isArray(task.assignedStaff) && task.assignedStaff.length > 0 ? 'Manage Staff' : 'Assign Staff'}
                 </button>
             `;
             
@@ -184,7 +185,7 @@ class TaskManager {
             ).filter(s => s); // Filter out any undefined staff
 
             // Update task params with assigned staff
-            task.params.staff = assignedStaff;
+            task.assignedStaff = assignedStaff;
             
             // Save tasks to persist changes
             saveTasks(this.tasks);

@@ -151,7 +151,7 @@ export function displayStaff() {
     staffData.forEach(staff => {
         const assignedTasks = [];
         tasks.forEach(task => {
-            if (Array.isArray(task.params.staff) && task.params.staff.some(s => s.id === staff.id)) {
+            if (Array.isArray(task.assignedStaff) && task.assignedStaff.some(s => s.id === staff.id)) {
                 if (task.target) {
                     assignedTasks.push(`<strong>${task.target.name}</strong> (${task.name})`);
                 } else {
