@@ -14,6 +14,7 @@ export function showFarmlandOverlay(farmlandData) {
   const landValue = calculateAndNormalizePriceFactor(farmlandData.country, farmlandData.region, farmlandData.altitude, farmlandData.aspect);
   const flagIcon = getFlagIcon(farmlandData.country);
   const farmlandPrestige = farmlandData.farmlandPrestige || 0;
+  const formattedSize = farmlandData.acres < 10 ? farmlandData.acres.toFixed(2) : formatNumber(farmlandData.acres);
 
   // Render the specific farmland data
   if (details) {
@@ -35,7 +36,7 @@ export function showFarmlandOverlay(farmlandData) {
               <tbody>
                 <tr><td>Country</td><td>${flagIcon} ${farmlandData.country}</td></tr>
                 <tr><td>Region</td><td>${farmlandData.region}</td></tr>
-                <tr><td>Acres</td><td>${farmlandData.acres}</td></tr>
+                <tr><td>Acres</td><td>${formattedSize}</td></tr>
               </tbody>
             </table>
 
