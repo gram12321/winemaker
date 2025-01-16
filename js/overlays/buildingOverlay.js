@@ -96,6 +96,7 @@ function setupToolButtons(building, tools) {
 
 // Updated showBuildingOverlay function
 export function showBuildingOverlay(building) {
+  
   const overlay = document.getElementById('buildingOverlay');
   const details = document.getElementById('building-details');
 
@@ -111,6 +112,8 @@ export function showBuildingOverlay(building) {
     setupStatsToggles();
     
     overlay.style.display = 'flex';
+    
+  } 
 }
 
 function setupStatsToggles() {
@@ -122,7 +125,6 @@ function setupStatsToggles() {
       btn.setAttribute('aria-expanded', isExpanded);
     });
   });
-  }
 }
 
 // Function to render the visual representation of capacity
