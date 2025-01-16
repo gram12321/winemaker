@@ -34,12 +34,13 @@ function plant(farmland, selectedResource, selectedDensity) {
   // Density multiplier: 1x at 1000 plants/acre, 3x at 10000 plants/acre
   const densityMultiplier = 1 + ((selectedDensity - 1000) / 4500);  // Will give 1.0 to 3.0
   const plantingDurationInWeeks = Math.ceil(baseDuration * densityMultiplier);
+  const totalWork = plantingDurationInWeeks * 10; // Example conversion to totalWork
 
   // Since planting is a progressive task, we use addProgressiveTask
   taskManager.addProgressiveTask(
     'Planting',
     TaskType.field,
-    plantingDurationInWeeks,
+    totalWork,
     (target, progress, params) => {
       // This will be called every week with updated progress
       const percentComplete = Math.floor(progress * 100);

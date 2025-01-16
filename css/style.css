@@ -121,6 +121,39 @@ body {
   background-color: var(--color-primary);
 }
 
+/* Tooltip styling */
+[title]:hover::after {
+  content: attr(title);
+  position: absolute; /* Change to absolute positioning */
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  background: var(--panel-bg);
+  color: var(--color-accent);
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-accent);
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+  max-width: none; /* Remove width limitation */
+  overflow: visible; /* Ensure tooltip is fully visible */
+  max-height: 200px; /* Allow for more height */
+  overflow-y: auto; /* Enable vertical scrolling if needed */
+}
+
+#companyInfo [title]:hover::after {
+  left: 125px;
+  top: auto;
+}
+
+.task-box .staff-line[title]:hover::after {
+  left: 50%;
+  top: 125px;
+  
+}
+
+
+
 /* Quality Color Classes */
 .color-class-9 { color: #006400; }  /* Dark Green */
 .color-class-8 { color: #228B22; }  /* Forest Green */

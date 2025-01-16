@@ -8,18 +8,18 @@ export const TaskType = {
     winery: 'Winery',
     administration: 'Administration',
     sales: 'Sales',
-    building: 'Building',
-    maintenance: 'Maintenance'
+    maintenance: 'Building & Maintenance'
+    
 };
 
 class Task {
-    constructor(id, name, type, taskType, durationInWeeks, callback, target = null, params = {}, initialState = null) {
+    constructor(id, name, type, taskType, totalWork, callback, target = null, params = {}, initialState = null) {
         this.id = id;
         this.name = name;
         this.type = type; // 'progressive' or 'completion'
         this.taskType = taskType; // One of TaskType constants
-        this.duration = durationInWeeks;
-        this.remainingWeeks = durationInWeeks;
+        this.totalWork = totalWork;
+        this.appliedWork = 0;
         this.callback = callback;
         this.target = target; // Optional target (farmland, winery, etc.)
         this.params = params;
@@ -36,7 +36,7 @@ class TaskManager {
         this.updateTaskDisplay();
     }
 
-    addProgressiveTask(name, taskType, durationInWeeks, callback, target = null, params = {}, initialCallback = null) {
+    addProgressiveTask(name, taskType, totalWork, callback, target = null, params = {}, initialCallback = null) {
         const taskId = ++this.taskIdCounter;
         
         // Execute initial state change if provided
@@ -44,14 +44,14 @@ class TaskManager {
             initialCallback(target, params);
         }
 
-        const task = new Task(taskId, name, 'progressive', taskType, durationInWeeks, callback, target, { ...params, assignedStaff: [] });
+        const task = new Task(taskId, name, 'progressive', taskType, totalWork, callback, target, { ...params, assignedStaff: [] });
         this.tasks.set(taskId, task);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
         return taskId;
     }
 
-    addCompletionTask(name, taskType, durationInWeeks, callback, target = null, params = {}, initialCallback = null) {
+    addCompletionTask(name, taskType, totalWork, callback, target = null, params = {}, initialCallback = null) {
         const taskId = ++this.taskIdCounter;
         
         // Execute initial state change if provided
@@ -59,7 +59,7 @@ class TaskManager {
             initialCallback(target, params);
         }
 
-        const task = new Task(taskId, name, 'completion', taskType, durationInWeeks, callback, target, { ...params, assignedStaff: [] });
+        const task = new Task(taskId, name, 'completion', taskType, totalWork, callback, target, { ...params, assignedStaff: [] });
         this.tasks.set(taskId, task);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
@@ -67,16 +67,55 @@ class TaskManager {
     }
 
     processWeek() {
+        const staffTaskCount = new Map();
+
+        // Count the number of tasks each staff member is assigned to
         this.tasks.forEach(task => {
-            task.remainingWeeks--;
-            task.progress = (task.duration - task.remainingWeeks) / task.duration;
+            task.assignedStaff.forEach(staff => {
+                if (!staffTaskCount.has(staff.id)) {
+                    staffTaskCount.set(staff.id, 0);
+                }
+                staffTaskCount.set(staff.id, staffTaskCount.get(staff.id) + 1);
+            });
+        });
+
+        this.tasks.forEach(task => {
+            let appliedWork = 0;
+            task.assignedStaff.forEach(staff => {
+                let relevantSkill = 0;
+                switch (task.taskType) {
+                    case TaskType.field:
+                        relevantSkill = staff.skills.field.field;
+                        break;
+                    case TaskType.winery:
+                        relevantSkill = staff.skills.winery.winery;
+                        break;
+                    case TaskType.administration:
+                        relevantSkill = staff.skills.administration.administration;
+                        break;
+                    case TaskType.sales:
+                        relevantSkill = staff.skills.sales.sales;
+                        break;
+                    case TaskType.maintenance:
+                        relevantSkill = staff.skills.maintenance.maintenance;
+                        break;
+                    // Add more cases for other task types if needed
+                    default:
+                        relevantSkill = 0;
+                }
+                const taskCount = staffTaskCount.get(staff.id) || 1;
+                appliedWork += (staff.workforce / taskCount) * relevantSkill;
+            });
+
+            task.appliedWork += appliedWork;
+            task.progress = task.appliedWork / task.totalWork;
 
             if (task.type === 'progressive') {
                 // Call callback every week with progress
                 task.callback(task.target, task.progress, task.params);
             }
 
-            if (task.remainingWeeks <= 0) {
+            if (task.appliedWork >= task.totalWork) {
                 if (task.type === 'completion') {
                     // Call callback only on completion
                     task.callback(task.target, task.params);
@@ -131,9 +170,13 @@ class TaskManager {
             const taskBox = document.createElement('div');
             taskBox.className = `task-box ${task.taskType.toLowerCase()}-task`;
             
-            const progress = (task.duration - task.remainingWeeks) / task.duration * 100;
+            const progress = task.appliedWork / task.totalWork * 100;
             const iconName = task.name.toLowerCase().replace(/\s+/g, '');
             
+            const staffNames = task.assignedStaff.map(s => s.name.split(' ')[0]);
+            const displayedStaffNames = staffNames.slice(0, 4).join(', ');
+            const tooltipStaffNames = staffNames.join(', ');
+
             taskBox.innerHTML = `
                 ${task.target ? `<div class="task-target">${task.target.name || 'No target'}</div>` : ''}
                 <div class="task-header">
@@ -150,13 +193,13 @@ class TaskManager {
                 </div>
                 <div class="progress-info">
                     <span>${Math.round(progress)}% complete</span>
-                    <span>${task.remainingWeeks} weeks left</span>
+                    <span>${Math.round(task.totalWork - task.appliedWork)} work left</span>
                 </div>
                 ${Array.isArray(task.assignedStaff) && task.assignedStaff.length > 0 ? `
-                    <div class="staff-line">
+                    <div class="staff-line" title="${tooltipStaffNames}">
                         <img src="../assets/icon/small/staff.png" alt="Staff Icon" class="staff-icon">
                         <span class="staff-names">
-                            ${task.assignedStaff.map(s => s.name).join(', ')}
+                            ${displayedStaffNames}${task.assignedStaff.length > 4 ? ', [...]' : ''}
                         </span>
                     </div>
                 ` : ''}

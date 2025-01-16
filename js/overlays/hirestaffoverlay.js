@@ -110,9 +110,9 @@ function hireSelectedStaff(staff) {
     taskManager.addCompletionTask(
         'Hiring Process',
         TaskType.administration,
-        2, // 2 weeks duration
+        20, // totalWork for hiring process
         (target, params) => {
-            // Completion callback - executes after 2 weeks
+            // Completion callback - executes after totalWork is applied
             const { staff, hiringExpense } = params;
             const staffMembers = loadStaff();
             staffMembers.push(staff);

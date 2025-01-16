@@ -19,7 +19,7 @@ export function fermentMust(selectedResource, storage, mustAmount) {
     taskManager.addCompletionTask(
         'Fermentation',
         TaskType.winery,
-        4, // 4 weeks for fermentation
+        100, // totalWork for fermentation
         (target, params) => {
             const { selectedResource, storage, mustAmount } = params;
             const wineVolume = mustAmount * 0.9;

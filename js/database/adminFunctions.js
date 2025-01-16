@@ -415,8 +415,8 @@ export function saveTasks(tasks) {
         name: task.name,
         type: task.type,
         taskType: task.taskType,
-        duration: task.duration,
-        remainingWeeks: task.remainingWeeks,
+        totalWork: task.totalWork, // Save totalWork
+        appliedWork: task.appliedWork, // Save appliedWork
         progress: task.progress,
         target: task.target,
         params: task.params,
