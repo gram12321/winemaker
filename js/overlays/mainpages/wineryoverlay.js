@@ -125,11 +125,20 @@ function populateStorageRow(tableBody, tool, inventoryItems) {
             qualityDisplay = formatQualityDisplay(firstItem.quality);
         }
 
+        let formattedAmount;
+        if (tool.supportedResources.includes('Must')) {
+            formattedAmount = `${formatNumber(totalAmount)} l`;
+        } else {
+            formattedAmount = totalAmount >= 1000 ? 
+                `${formatNumber(totalAmount / 1000, 2)} t` : 
+                `${formatNumber(totalAmount)} kg`;
+        }
+
         row.innerHTML = `
             <td>${tool.name} #${tool.instanceNumber}</td>
             <td>${tool.capacity}</td>
             <td>${firstItem ? `<strong>${firstItem.fieldName}</strong>, ${firstItem.resource?.name || firstItem.resource}, ${firstItem.vintage || 'Unknown'}` : 'N/A'}</td>
-            <td>${formatNumber(totalAmount)} t</td>
+            <td>${formattedAmount}</td>
             <td>${qualityDisplay}</td>
         `;
 

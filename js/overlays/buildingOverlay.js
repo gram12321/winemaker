@@ -170,7 +170,8 @@ function renderCapacityVisual(building) {
       cell.appendChild(cellContent);
       cell.appendChild(toolName);
     } else {
-      cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty)</div>`;
+      const defaultUnit = building.name === 'Fermentation Tank' ? 'l' : 'kg';
+      cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty, 0 ${defaultUnit})</div>`;
     }
 
     gridContainer.appendChild(cell);

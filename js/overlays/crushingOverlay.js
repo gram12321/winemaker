@@ -18,21 +18,7 @@ function createOverlayStructure() {
           <h3 class="h5 mb-0">Select Grapes to Crush</h3>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover overlay-table">
-              <thead>
-                <tr>
-                  <th>Select</th>
-                  <th>Container</th>
-                  <th>Resource</th>
-                  <th>Amount</th>
-                  <th>Quality</th>
-                </tr>
-              </thead>
-              <tbody id="crushing-storage-table">
-              </tbody>
-            </table>
-          </div>
+          ${createGrapesTable()}
         </div>
       </section>
       
@@ -41,49 +27,75 @@ function createOverlayStructure() {
           <h3 class="h5 mb-0">Select Must Storage Container</h3>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover overlay-table">
-          <thead>
-            <tr>
-              <th>Select</th>
-              <th>Container</th>
-              <th>Capacity</th>
-              <th>Available Space</th>
-            </tr>
-          </thead>
-          <tbody id="crushing-must-storage-table">
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <section id="crushing-progress" class="overlay-section card mb-4">
-    <div class="card-header text-white d-flex justify-content-between align-items-center">
-      <h3 class="h5 mb-0">Crushing Progress</h3>
-    </div>
-    <div class="card-body">
-      <div class="button-container d-flex flex-column align-items-center px-3">
-        <div class="w-100 mb-2">
-          <span>Selected Storage: </span>
-          <span id="selected-grapes">0 t</span>
-          <span> / </span>
-          <span id="selected-storage">0 l</span>
+          ${createMustStorageTable()}
         </div>
-        <div class="w-100">
-          <div class="progress" style="height: 20px; background-color: var(--color-background); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">
-            <div id="selected-storage-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--color-primary);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+      </section>
+
+      <section id="crushing-progress" class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Crushing Progress</h3>
+        </div>
+        <div class="card-body">
+          <div class="button-container d-flex flex-column align-items-center px-3">
+            <div class="w-100 mb-2">
+              <span>Selected Storage: </span>
+              <span id="selected-grapes">0 t</span>
+              <span> / </span>
+              <span id="selected-storage">0 l</span>
+            </div>
+            <div class="w-100">
+              <div class="progress" style="height: 20px; background-color: var(--color-background); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">
+                <div id="selected-storage-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--color-primary);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end mt-3 w-100">
+              <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
+            </div>
           </div>
         </div>
-        <div class="d-flex justify-content-end mt-3 w-100">
-          <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
-        </div>
-      </div>
+      </section>
     </div>
-  </section>
-</div>
   `;
   return overlayContainer;
+}
+
+function createGrapesTable() {
+  return `
+    <div class="table-responsive">
+      <table class="table table-hover overlay-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Container</th>
+            <th>Resource</th>
+            <th>Amount</th>
+            <th>Quality</th>
+          </tr>
+        </thead>
+        <tbody id="crushing-storage-table">
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function createMustStorageTable() {
+  return `
+    <div class="table-responsive">
+      <table class="table table-hover overlay-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Container</th>
+            <th>Capacity</th>
+            <th>Available Space</th>
+          </tr>
+        </thead>
+        <tbody id="crushing-must-storage-table">
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 function populateTables(overlayContainer) {
@@ -137,13 +149,11 @@ function updateStorageProgress() {
   });
 
   const storageDisplay = document.getElementById('selected-storage');
-  storageDisplay.textContent = totalStorage >= 1000 ? 
-    formatNumber(totalStorage/1000, 2) + ' t' : 
-    formatNumber(totalStorage) + ' l';
+  storageDisplay.textContent = `${formatNumber(totalStorage)} l`;
 
   const selectedGrapes = parseFloat(document.querySelector('.grape-select:checked')?.dataset.amount || 0);
   const storageProgress = document.getElementById('selected-storage-progress');
-  const progressPercentage = Math.min((totalStorage / selectedGrapes) * 100, 100);
+  const progressPercentage = Math.min((totalStorage / (selectedGrapes * 0.6)) * 100, 100);
   storageProgress.style.width = `${progressPercentage}%`;
   storageProgress.setAttribute('aria-valuenow', progressPercentage);
 }
@@ -163,6 +173,9 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
         matchingInventoryItems.forEach(item => {
           const row = document.createElement('tr');
           const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
+          const formattedAmount = item.amount >= 1000 ? 
+            `${formatNumber(item.amount / 1000, 2)} t` : 
+            `${formatNumber(item.amount)} kg`;
 
           row.innerHTML = `
             <td><input type="radio" name="grape-select" class="grape-select" data-storage="${item.storage}" 
@@ -172,7 +185,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
                 data-prestige="${item.fieldPrestige}"></td>
             <td>${item.storage}</td>
             <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
-            <td>${formatNumber(item.amount)} t</td>
+            <td>${formattedAmount}</td>
             <td>${qualityDisplay}</td>
           `;
           storageTableBody.appendChild(row);
@@ -182,8 +195,8 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
             const selectedGrapes = parseFloat(this.dataset.amount);
             const grapesDisplay = document.getElementById('selected-grapes');
             grapesDisplay.textContent = selectedGrapes >= 1000 ? 
-              formatNumber(selectedGrapes/1000, 2) + ' t' : 
-              formatNumber(selectedGrapes) + ' t';
+              formatNumber(selectedGrapes / 1000, 2) + ' t' : 
+              formatNumber(selectedGrapes) + ' kg';
             updateStorageProgress();
           });
         });
@@ -220,7 +233,7 @@ function handleCrushing(overlayContainer) {
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
           <div class="modal-body">
-            <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l out of needed ${formatNumber(mustAmount)} l.</p>
+            <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l. out of needed ${formatNumber(mustAmount)} l.</p>
             <p>Do you want to crush what fits in the containers?</p>
           </div>
           <div class="modal-footer">
@@ -235,7 +248,7 @@ function handleCrushing(overlayContainer) {
     $(warningModal).modal('show');
 
     document.getElementById('confirmCrush').addEventListener('click', () => {
-      const success = processGrapeCrushing(selectedGrape, selectedStorages, totalAvailableSpace);
+      const success = processGrapeCrushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
       if (success) {
         $(warningModal).modal('hide');
         warningModal.remove();
@@ -251,54 +264,54 @@ function handleCrushing(overlayContainer) {
     return false;
   }
 
-  return processGrapeCrushing(selectedGrape, selectedStorages, mustAmount);
+  return processGrapeCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes);
 }
 
 // Helper function to process the actual crushing
-function processGrapeCrushing(selectedGrape, selectedStorages, availableAmount) {
-  let remainingGrapes = availableAmount;
+function processGrapeCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
+  let remainingMust = mustAmount;
   let success = true;
+
+  // Remove the full amount of grapes from the original storage
+  const resourceName = selectedGrape.dataset.resource;
+  const vintage = parseInt(selectedGrape.dataset.vintage);
+  const quality = selectedGrape.dataset.quality;
+  const fieldName = selectedGrape.dataset.field;
+  const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
+
+  const removed = inventoryInstance.removeResource(
+    { name: resourceName },
+    totalGrapes,
+    'Grapes',
+    vintage,
+    selectedGrape.dataset.storage
+  );
+
+  if (!removed) {
+    addConsoleMessage(`Failed to remove ${formatNumber(totalGrapes)} kg of grapes from ${selectedGrape.dataset.storage}`);
+    return false;
+  }
 
   // Distribute must among containers
   for (const storage of selectedStorages) {
     const mustStorage = storage.value;
     const availableSpace = parseFloat(storage.dataset.available);
-    const amountToStore = Math.min(remainingGrapes, availableSpace);
+    const amountToStore = Math.min(remainingMust, availableSpace);
 
-    const resourceName = selectedGrape.dataset.resource;
-    const vintage = parseInt(selectedGrape.dataset.vintage);
-    const quality = selectedGrape.dataset.quality;
-    const fieldName = selectedGrape.dataset.field;
-    const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
-
-    // Remove grapes from original storage
-    const removed = inventoryInstance.removeResource(
-      { name: resourceName },
+    inventoryInstance.addResource(
+      { name: resourceName, naturalYield: 1 },
       amountToStore,
-      'Grapes',
+      'Must',
       vintage,
-      selectedGrape.dataset.storage
+      quality,
+      fieldName,
+      fieldPrestige,
+      mustStorage
     );
+    addConsoleMessage(`Crushed ${formatNumber(totalGrapes)}kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(amountToStore)}l of must in ${mustStorage}`);
 
-    if (removed) {
-      inventoryInstance.addResource(
-        { name: resourceName, naturalYield: 1 },
-        amountToStore,
-        'Must',
-        vintage,
-        quality,
-        fieldName,
-        fieldPrestige,
-        mustStorage
-      );
-      addConsoleMessage(`Crushed ${formatNumber(amountToStore)} l of ${resourceName} grapes from ${fieldName} into ${mustStorage}`);
-    } else {
-      success = false;
-      break;
-    }
-
-    remainingGrapes -= amountToStore;
-    if (remainingGrapes <= 0) break;
+    remainingMust -= amountToStore;
+    if (remainingMust <= 0) break;
   }
 
   if (success) {

@@ -1,4 +1,3 @@
-
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { inventoryInstance } from '/js/resource.js';
 import {formatNumber, getWineQualityCategory, formatQualityDisplay } from '/js/utils.js';
@@ -162,11 +161,20 @@ function createStorageRow(tool, items) {
     const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
     const qualityDisplay = firstItem?.getQualityDisplay() || 'N/A';
 
+    let formattedAmount;
+    if (tool.supportedResources.includes('Must')) {
+        formattedAmount = `${formatNumber(totalAmount)} l`;
+    } else {
+        formattedAmount = totalAmount >= 1000 ? 
+            `${formatNumber(totalAmount / 1000, 2)} t` : 
+            `${formatNumber(totalAmount)} kg`;
+    }
+
     row.innerHTML = `
         <td>${tool.name} #${tool.instanceNumber}</td>
         <td>${formatNumber(tool.capacity)}</td>
         <td>${firstItem ? firstItem.getDisplayInfo().name : 'Empty'}</td>
-        <td>${firstItem ? `${formatNumber(totalAmount)} t` : '0 t'}</td>
+        <td>${firstItem ? formattedAmount : (tool.supportedResources.includes('Must') ? '0 l' : '0 kg')}</td>
         <td>${firstItem ? formatQualityDisplay(firstItem.quality) : 'N/A'}</td>
         <td>${firstItem ? firstItem.state : 'Empty'}</td>
     `;
