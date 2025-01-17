@@ -8,16 +8,44 @@ import { saveInventory, updateFarmland, loadBuildings } from '../database/adminF
 import taskManager, { TaskType } from '../taskManager.js';
 
 /**
+ * Centralized function to perform the harvest logic
+ * @param {Object} farmland - The farmland object
+ * @param {number} farmlandId - The ID of the farmland
+ * @param {string} selectedTool - The storage container identifier
+ * @param {number} harvestedAmount - The amount harvested
+ */
+function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+    const gameYear = parseInt(localStorage.getItem('year'), 10);
+    const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
+
+    // Add harvested grapes to inventory using inventoryInstance
+    inventoryInstance.addResource(
+        { name: farmland.plantedResourceName, naturalYield: 1 },
+        harvestedAmount,
+        'Grapes',
+        gameYear,
+        quality,
+        farmland.name,
+        farmland.farmlandPrestige,
+        selectedTool
+    );
+
+    // Update farmland status using adminFunctions
+    updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
+
+    saveInventory();
+    addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
+}
+
+/**
  * Handles the harvesting of grapes from a farmland
  * @param {Object} farmland - The farmland to harvest from
  * @param {number} farmlandId - ID of the farmland
  * @param {string} selectedTool - The storage container identifier
  * @param {number} totalHarvest - The total amount to be harvested
- * @param {number} progress - The progress of the task
- * @param {Object} params - Additional parameters for the task
  * @returns {boolean} True if harvest successful, false otherwise
  */
-export function harvest(farmland, farmlandId, selectedTool, totalHarvest, progress = 0, params = {}) {
+function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     const buildings = loadBuildings();
     const tool = buildings.flatMap(b => b.tools).find(t => 
         `${t.name} #${t.instanceNumber}` === selectedTool
@@ -41,47 +69,22 @@ export function harvest(farmland, farmlandId, selectedTool, totalHarvest, progre
         return false;
     }
 
-    const gameYear = parseInt(localStorage.getItem('year'), 10);
-    const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
-    const harvestedAmount = totalHarvest * (progress - (params.lastProgress || 0));
-    params.lastProgress = progress;
+    // Initiate the harvest task using the taskManager system
+    const taskName = `Harvesting`;
+    const totalWork = totalHarvest; // Assuming 1 unit of work per kg of harvest
 
-    // Add harvested grapes to inventory using inventoryInstance
-    if (harvestedAmount > 0) {
-        inventoryInstance.addResource(
-            { name: farmland.plantedResourceName, naturalYield: 1 },
-            harvestedAmount,
-            'Grapes',
-            gameYear,
-            quality,
-            farmland.name,
-            farmland.farmlandPrestige,
-            selectedTool
-        );
-
-        // Update farmland status using adminFunctions
-        updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
-
-        saveInventory();
-        addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
-    }
-
-    // If this is the initial call, initiate the harvest task using the taskManager system
-    if (progress === 0) {
-        const taskName = `Harvesting`;
-        const totalWork = totalHarvest; // Assuming 1 unit of work per kg of harvest
-
-        taskManager.addProgressiveTask(
-            taskName,
-            TaskType.field,
-            totalWork,
-            (target, progress, params) => {
-                harvest(target, farmlandId, params.selectedTool, totalHarvest, progress, params);
-            },
-            farmland,
-            { selectedTool, totalHarvest, lastProgress: 0 }
-        );
-    }
+    taskManager.addProgressiveTask(
+        taskName,
+        TaskType.field,
+        totalWork,
+        (target, progress, params) => {
+            const harvestedAmount = totalHarvest * (progress - (params.lastProgress || 0));
+            params.lastProgress = progress;
+            performHarvest(target, farmlandId, params.selectedTool, harvestedAmount);
+        },
+        farmland,
+        { selectedTool, totalHarvest, lastProgress: 0 }
+    );
 
     return true;
 }
