@@ -16,13 +16,15 @@ export function showInventoryOverlay() {
         <div class="mainview-overlay-content overlay-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="me-4">Inventory Management</h2>
-                <div class="btn-group ms-2">
+                
+            </div>
+            <div class="btn-group ms-2">
                     <button class="btn btn-outline-primary active" data-view="all">All</button>
                     <button class="btn btn-outline-primary" data-view="grapes">Warehouse</button>
                     <button class="btn btn-outline-primary" data-view="must">Winery</button>
                     <button class="btn btn-outline-primary" data-view="wine">Cellar</button>
+                   
                 </div>
-            </div>
             
             <div class="inventory-sections">
                 <section id="grapes-section" class="inventory-section card mb-4">

@@ -12,10 +12,10 @@ import taskManager, { TaskType } from '../taskManager.js';
  * @param {Object} farmland - The farmland to harvest from
  * @param {number} farmlandId - ID of the farmland
  * @param {string} selectedTool - The storage container identifier
- * @param {number} harvestedAmount - The amount to be harvested in this step
+ * @param {number} totalHarvest - The total amount to be harvested
  * @returns {boolean} True if harvest successful, false otherwise
  */
-function harvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     const buildings = loadBuildings();
     const tool = buildings.flatMap(b => b.tools).find(t => 
         `${t.name} #${t.instanceNumber}` === selectedTool
@@ -42,35 +42,8 @@ function harvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
 
-    // Add harvested grapes to inventory using inventoryInstance
-    inventoryInstance.addResource(
-        { name: farmland.plantedResourceName, naturalYield: 1 },
-        harvestedAmount,
-        'Grapes',
-        gameYear,
-        quality,
-        farmland.name,
-        farmland.farmlandPrestige,
-        selectedTool
-    );
-
-    // Update farmland status using adminFunctions
-    updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
-
-    saveInventory();
-    addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
-    return true;
-}
-
-/**
- * Initiates the harvest task using the taskManager system
- * @param {Object} farmland - The farmland object
- * @param {number} farmlandId - The ID of the farmland
- * @param {string} selectedTool - The storage container identifier
- * @param {number} totalHarvest - The total amount to be harvested
- */
-function initiateHarvestTask(farmland, farmlandId, selectedTool, totalHarvest) {
-    const taskName = `Harvest ${farmland.plantedResourceName} from ${farmland.name}`;
+    // Initiate the harvest task using the taskManager system
+    const taskName = `Harvesting`;
     const totalWork = totalHarvest; // Assuming 1 unit of work per kg of harvest
 
     taskManager.addProgressiveTask(
@@ -80,11 +53,30 @@ function initiateHarvestTask(farmland, farmlandId, selectedTool, totalHarvest) {
         (target, progress, params) => {
             const harvestedAmount = totalHarvest * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            harvest(target, farmlandId, selectedTool, harvestedAmount);
+
+            // Add harvested grapes to inventory using inventoryInstance
+            inventoryInstance.addResource(
+                { name: farmland.plantedResourceName, naturalYield: 1 },
+                harvestedAmount,
+                'Grapes',
+                gameYear,
+                quality,
+                farmland.name,
+                farmland.farmlandPrestige,
+                selectedTool
+            );
+
+            // Update farmland status using adminFunctions
+            updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
+
+            saveInventory();
+            addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
         },
         farmland,
         { selectedTool, totalHarvest, lastProgress: 0 }
     );
+
+    return true;
 }
 
 /**
@@ -242,7 +234,7 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
                 const selectedTool = checkbox.value;
                 const amountToHarvest = Math.min(remainingYield, canHarvest(farmland, selectedTool).availableCapacity || expectedYield);
                 if (amountToHarvest > 0) {
-                    initiateHarvestTask(farmland, farmlandId, selectedTool, amountToHarvest);
+                    harvest(farmland, farmlandId, selectedTool, amountToHarvest);
                 }
                 remainingYield -= amountToHarvest;
                 if (remainingYield <= 0) break;
@@ -296,7 +288,7 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
             const amount = Math.min(remainingYield, harvestCheck.availableCapacity || expectedYield);
             
             if (amount > 0) {
-                initiateHarvestTask(farmland, farmlandId, selectedTool, amount);
+                harvest(farmland, farmlandId, selectedTool, amount);
             }
             remainingYield -= amount;
             if (remainingYield <= 0) break;

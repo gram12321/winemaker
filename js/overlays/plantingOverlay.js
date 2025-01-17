@@ -31,7 +31,7 @@ function plant(farmland, selectedResource, selectedDensity) {
   // Calculate planting duration based on density and acres
   // Base duration: 1 week per 2 acres
   const baseDuration = Math.max(2, Math.ceil(farmland.acres / 2));
-  // Density multiplier: 1x at 1000 plants/acre, 3x at 10000 plants/acre
+  // Density multiplier: 1x at 1000 plants/acre, 3x   at 10000 plants/acre
   const densityMultiplier = 1 + ((selectedDensity - 1000) / 4500);  // Will give 1.0 to 3.0
   const plantingDurationInWeeks = Math.ceil(baseDuration * densityMultiplier);
   const totalWork = plantingDurationInWeeks * 10; // Example conversion to totalWork
