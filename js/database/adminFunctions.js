@@ -465,6 +465,29 @@ function getTaskCallback(taskName, taskType) {
                 saveStaff(staffMembers);
                 addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
             };
+        case 'harvesting':
+            return (target, progress, params) => {
+                const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
+                params.lastProgress = progress;
+
+                // Add harvested grapes to inventory using inventoryInstance
+                inventoryInstance.addResource(
+                    { name: target.plantedResourceName, naturalYield: 1 },
+                    harvestedAmount,
+                    'Grapes',
+                    parseInt(localStorage.getItem('year'), 10),
+                    ((target.annualQualityFactor + target.ripeness) / 2).toFixed(2),
+                    target.name,
+                    target.farmlandPrestige,
+                    params.selectedTool
+                );
+
+                // Update farmland status using adminFunctions
+                updateFarmland(target.id, { ripeness: 0, status: 'Harvested' });
+
+                saveInventory();
+                addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${target.plantedResourceName} with quality ${((target.annualQualityFactor + target.ripeness) / 2).toFixed(2)} from ${target.name}`);
+            };
         // Add more cases for other task types
         default:
             return () => console.warn(`No callback found for task: ${taskName}`);

@@ -12,7 +12,9 @@ import {
     updateFarmland,
     getPrestigeHit,
     setPrestigeHit,
-    calculateRealPrestige
+    calculateRealPrestige,
+    loadTasks,
+    saveTasks
 } from './database/adminFunctions.js';
 import taskManager from './taskManager.js';
 
@@ -61,6 +63,18 @@ export function incrementWeek() {
     }
 
     processRecurringTransactions(week);
+
+    // Cancel any active harvesting tasks when season changes to winter
+    if (season === 'Winter' && week === 1) {
+        const tasks = loadTasks();
+        tasks.forEach((task, taskId) => {
+            if (task.name.toLowerCase().includes('harvest')) {
+                taskManager.cancelTask(taskId);
+                addConsoleMessage(`Harvesting task for ${task.target.name} has been cancelled due to season change to Winter.`);
+            }
+        });
+        saveTasks(tasks);
+    }
 }
 
 export function updateNewYear(farmlands) {
