@@ -14,7 +14,7 @@ import taskManager, { TaskType } from '../taskManager.js';
  * @param {string} selectedTool - The storage container identifier
  * @param {number} harvestedAmount - The amount harvested
  */
-function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
 
