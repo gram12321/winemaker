@@ -3,8 +3,8 @@
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 
 ## Project Statistics
-- Total Files: 41
-- Total Lines of Code: 5820 #Updated line count
+- Total Files: 47
+- Total Lines of Code: 6420 #Updated line count
 - Primary Language: JavaScript
 - Secondary Languages: HTML, CSS
 
@@ -178,13 +178,14 @@ JavaScript Core:
 210 ./js/sales.js
 156 ./js/endDay.js
 132 ./js/finance.js
+124 ./js/taskManager.js #Added taskManager.js
 109 ./js/utils.js
 97 ./js/loadPanel.js
 89 ./js/administration.js
 78 ./js/console.js
 75 ./js/settings.js
 72 ./js/vineyard.js
-446 ./js/farmland.js #Added farmland.js
+68 ./js/wineprocessing.js #Added wineprocessing.js
 
 Overlays:
 167 ./js/overlays/crushingOverlay.js
