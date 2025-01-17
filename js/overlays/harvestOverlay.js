@@ -8,6 +8,36 @@ import { saveInventory, updateFarmland, loadBuildings } from '../database/adminF
 import taskManager, { TaskType } from '../taskManager.js';
 
 /**
+ * Centralized function to perform the harvest logic
+ * @param {Object} farmland - The farmland object
+ * @param {number} farmlandId - The ID of the farmland
+ * @param {string} selectedTool - The storage container identifier
+ * @param {number} harvestedAmount - The amount harvested
+ */
+function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+    const gameYear = parseInt(localStorage.getItem('year'), 10);
+    const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
+
+    // Add harvested grapes to inventory using inventoryInstance
+    inventoryInstance.addResource(
+        { name: farmland.plantedResourceName, naturalYield: 1 },
+        harvestedAmount,
+        'Grapes',
+        gameYear,
+        quality,
+        farmland.name,
+        farmland.farmlandPrestige,
+        selectedTool
+    );
+
+    // Update farmland status using adminFunctions
+    updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
+
+    saveInventory();
+    addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
+}
+
+/**
  * Handles the harvesting of grapes from a farmland
  * @param {Object} farmland - The farmland to harvest from
  * @param {number} farmlandId - ID of the farmland
@@ -39,9 +69,6 @@ function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
         return false;
     }
 
-    const gameYear = parseInt(localStorage.getItem('year'), 10);
-    const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
-
     // Initiate the harvest task using the taskManager system
     const taskName = `Harvesting`;
     const totalWork = totalHarvest; // Assuming 1 unit of work per kg of harvest
@@ -53,24 +80,7 @@ function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
         (target, progress, params) => {
             const harvestedAmount = totalHarvest * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-
-            // Add harvested grapes to inventory using inventoryInstance
-            inventoryInstance.addResource(
-                { name: farmland.plantedResourceName, naturalYield: 1 },
-                harvestedAmount,
-                'Grapes',
-                gameYear,
-                quality,
-                farmland.name,
-                farmland.farmlandPrestige,
-                selectedTool
-            );
-
-            // Update farmland status using adminFunctions
-            updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
-
-            saveInventory();
-            addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
+            performHarvest(target, farmlandId, params.selectedTool, harvestedAmount);
         },
         farmland,
         { selectedTool, totalHarvest, lastProgress: 0 }
