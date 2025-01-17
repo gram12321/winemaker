@@ -7,7 +7,7 @@ import { inventoryInstance } from '/js/resource.js';
 import { addConsoleMessage } from '/js/console.js';
 import { formatNumber } from '../utils.js';
 import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
-import { processCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
+import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
 
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -480,7 +480,7 @@ function getTaskCallback(taskName, taskType) {
                 const mustAmount = params.totalGrapes * 0.6;
                 const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
                 params.lastProgress = progress;
-                processCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+                performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
             };
         // Add more cases for other task types
         default:

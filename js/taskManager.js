@@ -251,7 +251,7 @@ function getTaskCallback(taskName, taskType) {
                 const mustAmount = params.totalGrapes * 0.6;
                 const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
                 params.lastProgress = progress;
-                processCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+                performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
             };
         // ...existing code...
     }

@@ -104,12 +104,13 @@ function createMustStorageTable() {
 function populateTables(overlayContainer) {
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-  
-  populateMustStorageTable(overlayContainer, buildings, playerInventory);
+  const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
+
+  populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape);
   populateGrapesTable(overlayContainer, buildings, playerInventory);
 }
 
-function populateMustStorageTable(overlayContainer, buildings, playerInventory) {
+function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
   const mustStorageBody = overlayContainer.querySelector('#crushing-must-storage-table');
   mustStorageBody.innerHTML = '';
   
@@ -124,7 +125,13 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory) 
         const availableSpace = tool.capacity - currentAmount;
         const firstItem = matchingInventoryItems[0];
 
-        if (availableSpace > 0) {
+        // Check if the storage already contains a different resource or vintage
+        const isDifferentResourceOrVintage = selectedGrape && firstItem && (
+          firstItem.resource.name !== selectedGrape.dataset.resource ||
+          firstItem.vintage !== parseInt(selectedGrape.dataset.vintage)
+        );
+
+        if (availableSpace > 0 && !isDifferentResourceOrVintage) {
           const row = document.createElement('tr');
           row.innerHTML = `
             <td><input type="checkbox" name="must-storage" value="${toolId}" 
@@ -211,7 +218,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   });
 }
 
-function handleCrushing(overlayContainer) {
+function crushing(overlayContainer) {
     const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
     const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
     const totalGrapes = parseFloat(selectedGrape.dataset.amount);
@@ -254,7 +261,7 @@ function handleCrushing(overlayContainer) {
         $(warningModal).modal('show');
 
         document.getElementById('confirmCrush').addEventListener('click', () => {
-            const success = initiateCrushingTask(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
+            const success = addCrushingTask(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
             if (success) {
                 $(warningModal).modal('hide');
                 warningModal.remove();
@@ -270,10 +277,7 @@ function handleCrushing(overlayContainer) {
         return false;
     }
 
-    return initiateCrushingTask(selectedGrape, selectedStorages, mustAmount, totalGrapes);
-}
-
-function initiateCrushingTask(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
+    // Initiate the harvest task using the taskManager system
     const taskName = `Crushing`;
     const totalWork = mustAmount;
 
@@ -284,7 +288,7 @@ function initiateCrushingTask(selectedGrape, selectedStorages, mustAmount, total
         (target, progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            processCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+            performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
         },
         selectedGrape,
         { selectedStorages, totalGrapes, lastProgress: 0 }
@@ -293,7 +297,7 @@ function initiateCrushingTask(selectedGrape, selectedStorages, mustAmount, total
     return true;
 }
 
-export function processCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
+export function performCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
     let remainingMust = mustAmount;
     let success = true;
 
@@ -306,13 +310,24 @@ export function processCrushing(selectedGrape, selectedStorages, mustAmount, tot
 
     const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes); // Ensure we don't try to remove more grapes than available
 
-    const removed = inventoryInstance.removeResource(
+    let removed = inventoryInstance.removeResource(
         { name: resourceName },
         grapeAmountToRemove,
         'Grapes',
         vintage,
         selectedGrape.dataset.storage
     );
+
+    if (!removed) {
+        // Try to remove the remaining grapes if the exact amount is not available
+        removed = inventoryInstance.removeResource(
+            { name: resourceName },
+            totalGrapes,
+            'Grapes',
+            vintage,
+            selectedGrape.dataset.storage
+        );
+    }
 
     if (!removed) {
         addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
@@ -360,7 +375,7 @@ export function showCrushingOverlay() {
 
   const crushBtn = overlayContainer.querySelector('.crush-btn');
   crushBtn.addEventListener('click', () => {
-    if (handleCrushing(overlayContainer)) {
+    if (crushing(overlayContainer)) {
       showWineryOverlay();
       removeOverlay(overlayContainer);
     }

@@ -51,12 +51,7 @@ function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
         `${t.name} #${t.instanceNumber}` === selectedTool
     );
 
-    if (!tool) {
-        addConsoleMessage("Storage container not found");
-        return false;
-    }
-
-    // Check if container already has different grapes or vintage using inventoryInstance
+        // Check if container already has different grapes or vintage using inventoryInstance
     const existingGrapes = inventoryInstance.items.find(item => 
         item.storage === selectedTool && 
         item.state === 'Grapes' &&
