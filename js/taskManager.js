@@ -8,8 +8,8 @@ export const TaskType = {
     winery: 'Winery',
     administration: 'Administration',
     sales: 'Sales',
-    maintenance: 'Building & Maintenance'
-    
+    maintenance: 'Building & Maintenance',
+    crushing: 'Crushing'
 };
 
 class Task {
@@ -243,3 +243,16 @@ class TaskManager {
 
 const taskManager = new TaskManager();
 export default taskManager;
+
+function getTaskCallback(taskName, taskType) {
+    switch(taskName.toLowerCase()) {
+        case 'crushing':
+            return (target, progress, params) => {
+                const mustAmount = params.totalGrapes * 0.6;
+                const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
+                params.lastProgress = progress;
+                processCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+            };
+        // ...existing code...
+    }
+}

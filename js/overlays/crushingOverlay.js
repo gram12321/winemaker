@@ -2,6 +2,7 @@ import { formatNumber, getWineQualityCategory, getColorClass } from '../utils.js
 import { addConsoleMessage } from '../console.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { inventoryInstance } from '../resource.js';
+import taskManager, { TaskType } from '../taskManager.js';
 
 function createOverlayStructure() {
   const overlayContainer = document.createElement('div');
@@ -206,118 +207,139 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
 }
 
 function handleCrushing(overlayContainer) {
-  const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
-  const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
-  const totalGrapes = parseFloat(selectedGrape.dataset.amount);
+    const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
+    const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
+    const totalGrapes = parseFloat(selectedGrape.dataset.amount);
 
-  if (selectedStorages.length === 0) {
-    addConsoleMessage("Please select at least one storage container for the must");
-    return false;
-  }
+    if (selectedStorages.length === 0) {
+        addConsoleMessage("Please select at least one storage container for the must");
+        return false;
+    }
 
-  let totalAvailableSpace = 0;
-  selectedStorages.forEach(storage => {
-    totalAvailableSpace += parseFloat(storage.dataset.available);
-  });
-
-  const mustAmount = totalGrapes * 0.6;  // 60% of grapes become must
-
-  if (mustAmount > totalAvailableSpace) {
-    const warningModal = document.createElement('div');
-    warningModal.className = 'modal fade';
-    warningModal.innerHTML = `
-      <div class="modal-dialog">
-        <div class="modal-content overlay-section">
-          <div class="modal-header card-header">
-            <h3 class="modal-title">Warning: Limited Container Capacity</h3>
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
-          </div>
-          <div class="modal-body">
-            <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l. out of needed ${formatNumber(mustAmount)} l.</p>
-            <p>Do you want to crush what fits in the containers?</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
-            <button type="button" class="overlay-section-btn" id="confirmCrush">Crush Available</button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(warningModal);
-    $(warningModal).modal('show');
-
-    document.getElementById('confirmCrush').addEventListener('click', () => {
-      const success = processGrapeCrushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
-      if (success) {
-        $(warningModal).modal('hide');
-        warningModal.remove();
-        showWineryOverlay();
-        removeOverlay(overlayContainer);
-      }
+    let totalAvailableSpace = 0;
+    selectedStorages.forEach(storage => {
+        totalAvailableSpace += parseFloat(storage.dataset.available);
     });
 
-    warningModal.addEventListener('hidden.bs.modal', () => {
-      warningModal.remove();
-    });
+    const mustAmount = totalGrapes * 0.6;  // 60% of grapes become must
 
-    return false;
-  }
+    if (mustAmount > totalAvailableSpace) {
+        const warningModal = document.createElement('div');
+        warningModal.className = 'modal fade';
+        warningModal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content overlay-section">
+                    <div class="modal-header card-header">
+                        <h3 class="modal-title">Warning: Limited Container Capacity</h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l. out of needed ${formatNumber(mustAmount)} l.</p>
+                        <p>Do you want to crush what fits in the containers?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="overlay-section-btn" id="confirmCrush">Crush Available</button>
+                    </div>
+                </div>
+            </div>
+        `;
 
-  return processGrapeCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes);
+        document.body.appendChild(warningModal);
+        $(warningModal).modal('show');
+
+        document.getElementById('confirmCrush').addEventListener('click', () => {
+            const success = initiateCrushingTask(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
+            if (success) {
+                $(warningModal).modal('hide');
+                warningModal.remove();
+                showWineryOverlay();
+                removeOverlay(overlayContainer);
+            }
+        });
+
+        warningModal.addEventListener('hidden.bs.modal', () => {
+            warningModal.remove();
+        });
+
+        return false;
+    }
+
+    return initiateCrushingTask(selectedGrape, selectedStorages, mustAmount, totalGrapes);
 }
 
-// Helper function to process the actual crushing
-function processGrapeCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
-  let remainingMust = mustAmount;
-  let success = true;
+function initiateCrushingTask(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
+    const taskName = `Crushing`;
+    const totalWork = mustAmount;
 
-  // Remove the full amount of grapes from the original storage
-  const resourceName = selectedGrape.dataset.resource;
-  const vintage = parseInt(selectedGrape.dataset.vintage);
-  const quality = selectedGrape.dataset.quality;
-  const fieldName = selectedGrape.dataset.field;
-  const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
-
-  const removed = inventoryInstance.removeResource(
-    { name: resourceName },
-    totalGrapes,
-    'Grapes',
-    vintage,
-    selectedGrape.dataset.storage
-  );
-
-  if (!removed) {
-    addConsoleMessage(`Failed to remove ${formatNumber(totalGrapes)} kg of grapes from ${selectedGrape.dataset.storage}`);
-    return false;
-  }
-
-  // Distribute must among containers
-  for (const storage of selectedStorages) {
-    const mustStorage = storage.value;
-    const availableSpace = parseFloat(storage.dataset.available);
-    const amountToStore = Math.min(remainingMust, availableSpace);
-
-    inventoryInstance.addResource(
-      { name: resourceName, naturalYield: 1 },
-      amountToStore,
-      'Must',
-      vintage,
-      quality,
-      fieldName,
-      fieldPrestige,
-      mustStorage
+    taskManager.addProgressiveTask(
+        taskName,
+        TaskType.winery,
+        totalWork,
+        (target, progress, params) => {
+            const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
+            params.lastProgress = progress;
+            processCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+        },
+        selectedGrape,
+        { selectedStorages, totalGrapes, lastProgress: 0 }
     );
-    addConsoleMessage(`Crushed ${formatNumber(totalGrapes)}kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(amountToStore)}l of must in ${mustStorage}`);
 
-    remainingMust -= amountToStore;
-    if (remainingMust <= 0) break;
-  }
+    return true;
+}
 
-  if (success) {
-    inventoryInstance.save();
-  }
-  return success;
+export function processCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
+    let remainingMust = mustAmount;
+    let success = true;
+
+    // Remove the amount of grapes corresponding to the processed amount
+    const resourceName = selectedGrape.dataset.resource;
+    const vintage = parseInt(selectedGrape.dataset.vintage);
+    const quality = selectedGrape.dataset.quality;
+    const fieldName = selectedGrape.dataset.field;
+    const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
+
+    const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes); // Ensure we don't try to remove more grapes than available
+
+    const removed = inventoryInstance.removeResource(
+        { name: resourceName },
+        grapeAmountToRemove,
+        'Grapes',
+        vintage,
+        selectedGrape.dataset.storage
+    );
+
+    if (!removed) {
+        addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
+        return false;
+    }
+
+    // Distribute must among containers
+    for (const storage of selectedStorages) {
+        const mustStorage = storage.value;
+        const availableSpace = parseFloat(storage.dataset.available);
+        const amountToStore = Math.min(remainingMust, availableSpace);
+
+        inventoryInstance.addResource(
+            { name: resourceName, naturalYield: 1 },
+            amountToStore,
+            'Must',
+            vintage,
+            quality,
+            fieldName,
+            fieldPrestige,
+            mustStorage
+        );
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)}kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(amountToStore)}l of must in ${mustStorage}`);
+
+        remainingMust -= amountToStore;
+        if (remainingMust <= 0) break;
+    }
+
+    if (success) {
+        inventoryInstance.save();
+    }
+    return success;
 }
 
 // Move removeOverlay outside showCrushingOverlay and make it handle the overlay container
