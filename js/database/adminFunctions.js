@@ -38,8 +38,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('wineOrders');
   localStorage.removeItem('transactions'); // Clear transactions data
   localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
-  localStorage.removeItem('calculatedPrestige');
-  localStorage.removeItem('prestigeHit');  // Make sure this is being called
+  localStorage.removeItem('activeTasks'); // Clear active tasks
   console.log("Local storage cleared.");
 }
 
@@ -85,6 +84,7 @@ async function storeCompanyName() {
     }
   }
 }
+
 async function checkCompanyExists(companyName) {
   const docRef = doc(db, "companies", companyName);
   const docSnap = await getDoc(docRef);
@@ -109,6 +109,8 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('buildings', data.buildings || '[]');
     localStorage.setItem('staffData', data.staffData || '[]');
     localStorage.setItem('transactions', JSON.stringify(data.transactions || [])); // Load transactions
+    localStorage.setItem('recurringTransactions', JSON.stringify(data.recurringTransactions || [])); // Load recurring transactions
+    localStorage.setItem('activeTasks', JSON.stringify(data.activeTasks || [])); // Load active tasks
   }
 }
 
@@ -123,6 +125,8 @@ async function saveCompanyInfo() {
   const playerInventory = localStorage.getItem('playerInventory');
   const staffData = localStorage.getItem('staffData');
   const transactions = JSON.parse(localStorage.getItem('transactions')) || []; // Retrieve transactions
+  const recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || []; // Retrieve recurring transactions
+  const activeTasks = JSON.parse(localStorage.getItem('activeTasks')) || []; // Retrieve active tasks
   const prestigeHit = localStorage.getItem('prestigeHit');
   const calculatedPrestige = localStorage.getItem('calculatedPrestige');
 
@@ -143,11 +147,11 @@ async function saveCompanyInfo() {
       playerInventory,
       staffData,
       transactions, // Save transactions
+      recurringTransactions, // Save recurring transactions
+      activeTasks, // Save active tasks
       prestigeHit,
       calculatedPrestige,
     });
-    
-
   } catch (error) {
     console.error("Error saving company info: ", error);
   }
@@ -190,8 +194,6 @@ loadInventory();
 function saveInventory() {
   localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
 }
-
-
 
 // Function to save the list of staff members to localStorage
 export function saveStaff(staffMembers) {
