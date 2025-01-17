@@ -4,6 +4,8 @@ import { Staff, createNewStaff, getLastNameForNationality } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
 import { inventoryInstance } from '/js/resource.js';
+import { addConsoleMessage } from '/js/console.js';
+import { formatNumber } from '../utils.js';
 
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
