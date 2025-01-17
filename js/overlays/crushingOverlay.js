@@ -68,7 +68,7 @@ function createGrapesTable() {
           <tr>
             <th>Select</th>
             <th>Container</th>
-            <th>Resource</th>
+            <th>Wine in Storage</th>
             <th>Amount</th>
             <th>Quality</th>
           </tr>
@@ -88,8 +88,10 @@ function createMustStorageTable() {
           <tr>
             <th>Select</th>
             <th>Container</th>
+            <th>Wine in Storage</th>
             <th>Capacity</th>
             <th>Available Space</th>
+            
           </tr>
         </thead>
         <tbody id="crushing-must-storage-table">
@@ -120,6 +122,7 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory) 
         const matchingInventoryItems = playerInventory.filter(item => item.storage === toolId);
         const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
         const availableSpace = tool.capacity - currentAmount;
+        const firstItem = matchingInventoryItems[0];
 
         if (availableSpace > 0) {
           const row = document.createElement('tr');
@@ -127,8 +130,10 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory) 
             <td><input type="checkbox" name="must-storage" value="${toolId}" 
                 data-capacity="${tool.capacity}" data-available="${availableSpace}"></td>
             <td>${toolId}</td>
+            <td>${firstItem ? `<strong>${firstItem.fieldName}</strong>, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
             <td>${formatNumber(tool.capacity)} l</td>
             <td>${formatNumber(availableSpace)} l</td>
+            
           `;
           mustStorageBody.appendChild(row);
 
