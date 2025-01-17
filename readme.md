@@ -4,20 +4,23 @@ A web-based simulation game where players manage their own winery, from vineyard
 
 ## Project Statistics
 - Total Files: 47
-- Total Lines of Code: 6420 #Updated line count
+- Total Lines of Code: 8041 #Updated line count
 - Primary Language: JavaScript
 - Secondary Languages: HTML, CSS
 
 ## Features
 
-- **Vineyard Management**: Plant, maintain, and harvest various grape varieties
-- **Production Facilities**: Build and upgrade buildings like Tool Sheds and Warehouses
-- **Staff Management**: Hire and manage vineyard workers, cellar masters, and other staff
-- **Wine Production**: Control the wine-making process from crushing to fermentation
-- **Financial System**: Manage expenses, sales, and track company prestige
-- **Resource Management**: Handle inventory, storage, and wine aging
-- **Farmland Management**: Buy, manage, and improve the quality of your farmland.
-- **Harvesting**: Collect grapes from your farmland, considering quality factors.
+- **Vineyard Management**: Plant, maintain, and harvest various grape varieties with vine aging
+- **Production Facilities**: Build and upgrade buildings with maintenance system
+- **Staff Management**: Hire and manage staff with task assignments
+- **Wine Production**: Complete wine-making process from crushing to aging
+- **Financial System**: Financial tracking with bookkeeping and transactions
+- **Resource Management**: Inventory system with storage management
+- **Farmland Management**: Land acquisition and management with quality factors
+- **Harvesting**: Harvesting mechanics with timing and quality tracking
+- **Task System**: Task management with staff allocation
+- **Wine Orders**: Order generation and fulfillment system
+- **Prestige System**: Company reputation based on assets and performance
 
 
 ## Project Structure & Functions
@@ -168,24 +171,24 @@ Phase 9: Final Deployment    Optimize the game for deployment and host it on a w
 ```
 JavaScript Core:
 19 ./js/database/firebase.js
-394 ./js/database/adminFunctions.js
-243 ./js/database/loadSidebar.js
-446 ./js/names.js
-312 ./js/buildings.js
-247 ./js/resource.js
-236 ./js/staff.js
-212 ./js/farmland.js
-210 ./js/sales.js
-156 ./js/endDay.js
-132 ./js/finance.js
-124 ./js/taskManager.js #Added taskManager.js
-109 ./js/utils.js
-97 ./js/loadPanel.js
-89 ./js/administration.js
-78 ./js/console.js
+482 ./js/database/adminFunctions.js
+187 ./js/database/loadSidebar.js
+447 ./js/names.js
+251 ./js/buildings.js
+119 ./js/resource.js
+230 ./js/staff.js
+242 ./js/farmland.js
+176 ./js/sales.js
+158 ./js/endDay.js
+185 ./js/finance.js
+245 ./js/taskManager.js
+124 ./js/utils.js
+11 ./js/loadPanel.js
+86 ./js/administration.js
+80 ./js/console.js
 75 ./js/settings.js
-72 ./js/vineyard.js
-68 ./js/wineprocessing.js #Added wineprocessing.js
+68 ./js/vineyard.js
+53 ./js/wineprocessing.js
 
 Overlays:
 167 ./js/overlays/crushingOverlay.js
@@ -204,6 +207,27 @@ Overlays:
 64 ./js/overlays/mainpages/financeoverlay.js
 54 ./js/overlays/mainpages/staffoverlay.js
 38 ./js/overlays/mainpages/adminoverlay.js
+7 ./js/overlays/mainpages/hideOverlays.js
+93 ./js/overlays/mainpages/financeoverlay.js
+202 ./js/overlays/mainpages/inventoryoverlay.js
+137 ./js/overlays/mainpages/wineryoverlay.js
+97 ./js/overlays/mainpages/buildingsoverlay.js
+60 ./js/overlays/mainpages/landoverlay.js
+276 ./js/overlays/mainpages/salesoverlay.js
+58 ./js/overlays/mainpages/staffoverlay.js
+113 ./js/overlays/mainpages/vineyardoverlay.js
+67 ./js/overlays/selectContainerOverlay.js
+107 ./js/overlays/fermentationOverlay.js
+75 ./js/overlays/showstaffoverlay.js
+336 ./js/overlays/crushingOverlay.js
+93 ./js/overlays/assignStaffOverlay.js
+203 ./js/overlays/buildingOverlay.js
+140 ./js/overlays/buyLandOverlay.js
+90 ./js/overlays/farmlandOverlay.js
+344 ./js/overlays/harvestOverlay.js
+140 ./js/overlays/hirestaffoverlay.js
+190 ./js/overlays/plantingOverlay.js
+
 
 HTML:
 107 ./html/game.html
@@ -221,3 +245,11 @@ CSS:
 73 ./css/buildings.css
 46 ./css/finance.css
 42 ./css/console.css
+108 ./css/finance.css
+47 ./css/variables.css
+42 ./css/console.css
+303 ./css/buildings.css
+550 ./css/overlay.css
+188 ./css/sidebar.css
+193 ./css/style.css
+189 ./css/taskbar.css
