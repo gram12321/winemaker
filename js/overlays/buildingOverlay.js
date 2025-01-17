@@ -64,9 +64,6 @@ function setupToolButtons(building, tools) {
           addConsoleMessage(expenseMessage);
           addTransaction('Expense', `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber}`, -newToolInstance.cost);
 
-          // Notify expense
-          addConsoleMessage(expenseMessage);
-
           // Load current buildings list, update the relevant building, and store the updated list
           const buildings = loadBuildings();
           const buildingToUpdate = buildings.find(b => b.name === building.name);
