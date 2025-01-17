@@ -6,7 +6,7 @@ import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } 
 import { inventoryInstance } from '/js/resource.js';
 import { addConsoleMessage } from '/js/console.js';
 import { formatNumber } from '../utils.js';
-import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
+import { harvest } from '../overlays/harvestOverlay.js'; // Import the combined function
 
 async function clearFirestore() {
     if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -470,9 +470,7 @@ function getTaskCallback(taskName, taskType) {
             };
         case 'harvesting':
             return (target, progress, params) => {
-                const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
-                params.lastProgress = progress;
-                performHarvest(target, target.id, params.selectedTool, harvestedAmount);
+                harvest(target, target.id, params.selectedTool, params.totalHarvest, progress, params);
             };
         // Add more cases for other task types
         default:
