@@ -49,16 +49,16 @@ async function storeCompanyName() {
     if (companyName) {
       const exists = await checkCompanyExists(companyName);
       if (exists) {
-        loadExistingCompanyData(companyName);
+        await loadExistingCompanyData(companyName);
         window.location.href = 'html/game.html'; // Forward to game.html directly
       } else {
         localStorage.setItem('companyName', companyName);
-        localStorage.setItem('money', 0); // Initialize money with 10000000
+        localStorage.setItem('money', 0); // Initialize money with 10000000, set to 0 will get 1000000 in a transaction
 
         // Set initial date values before logging the transaction
         localStorage.setItem('week', 1); // Initialize week
         localStorage.setItem('season', 'Spring'); // Initialize season
-        localStorage.setItem('year', 2023); // Initialize year
+        localStorage.setItem('year', 2025); // Initialize year
 
         // Log the initial income transaction
         addTransaction('Income', 'Initial Company Setup', 10000000);
@@ -78,7 +78,7 @@ async function storeCompanyName() {
         // Save staff data using saveStaff
         saveStaff(staff);
 
-        saveCompanyInfo(); // Save company info to Firestore
+        await saveCompanyInfo(); // Save company info to Firestore
         window.location.href = 'html/game.html'; // Redirect to game.html
       }
     }

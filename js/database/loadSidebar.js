@@ -159,7 +159,7 @@ export function renderCompanyInfo() {
     const { week, season, year } = getGameState();
     const prestige = calculateRealPrestige(); // Get real-time calculated prestige
 
-    if (companyInfoDiv) {
+    if (companyInfoDiv && companyName) {
         companyInfoDiv.innerHTML = `
           <div class="company-name" title="Your Company Name">${companyName.charAt(0).toUpperCase() + companyName.slice(1)}</div>
           <div class="styled-line"></div>
