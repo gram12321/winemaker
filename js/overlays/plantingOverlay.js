@@ -46,15 +46,7 @@ function plant(farmland, selectedResource, selectedDensity) {
       
       if (progress >= 1) {
         // Final update when task completes
-        const { selectedResource, selectedDensity, totalCost } = params;
-        updateFarmland(target.id, {
-          density: selectedDensity,
-          plantedResourceName: selectedResource,
-          vineAge: 0,
-          status: 'No yield in first season'
-        });
-        addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
-        displayFarmland();
+        finalizePlanting(target, params);
       }
     },
     farmland,
@@ -69,6 +61,18 @@ function plant(farmland, selectedResource, selectedDensity) {
   );
 
   return true;
+}
+
+export function finalizePlanting(target, params) {
+    const { selectedResource, selectedDensity, totalCost } = params;
+    updateFarmland(target.id, {
+        density: selectedDensity,
+        plantedResourceName: selectedResource,
+        vineAge: 0,
+        status: 'No yield in first season'
+    });
+    addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
+    displayFarmland();
 }
 
 // Function to show planting overlay UI

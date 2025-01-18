@@ -60,7 +60,7 @@ export function showFarmlandOverlay(farmlandData) {
                 <tr><td>Density</td><td>${farmlandData.density || 'N/A'}</td></tr>
                 <tr><td>Planted Resource</td><td>${farmlandData.plantedResourceName || 'None'}</td></tr>
                 <tr><td>Farmland Prestige</td><td>${formatNumber(farmlandPrestige, 2)}</td></tr>
-                <tr><td>Farmland Health</td><td>${farmlandData.farmlandHealth || 'Unknown'}</td></tr>
+                <tr><td>Farmland Health</td><td>${farmlandData.farmlandHealth}</td></tr>
               </tbody>
             </table>
           </div>

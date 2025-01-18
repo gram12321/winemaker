@@ -17,6 +17,8 @@ import {
     saveTasks
 } from './database/adminFunctions.js';
 import taskManager from './taskManager.js';
+import { finalizePlanting } from './overlays/plantingOverlay.js';
+import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -53,6 +55,7 @@ export function incrementWeek() {
     // Execute pending tasks
     updateFieldStatuses();
     updateRipeness();
+    applyPlantingPenalties(season, week);
     
     // Decay prestige hit by 10%
     setPrestigeHit(getPrestigeHit() * 0.9);
@@ -64,17 +67,85 @@ export function incrementWeek() {
 
     processRecurringTransactions(week);
 
-    // Cancel any active harvesting tasks when season changes to winter
+    // Cancel any active harvesting or planting tasks when season changes to winter
     if (season === 'Winter' && week === 1) {
         const tasks = loadTasks();
         tasks.forEach((task, taskId) => {
-            if (task.name.toLowerCase().includes('harvest')) {
+            if (task.name.toLowerCase().includes('harvest') || task.name.toLowerCase().includes('planting')) {
+                if (task.name.toLowerCase().includes('planting')) {
+                    handleIncompletePlantingTask(task);
+                }
                 taskManager.cancelTask(taskId);
-                addConsoleMessage(`Harvesting task for ${task.target.name} has been cancelled due to season change to Winter.`);
+                addConsoleMessage(`${task.name} task for ${task.target.name} has been cancelled due to season change to Winter.`);
             }
         });
         saveTasks(tasks);
     }
+}
+
+function handleIncompletePlantingTask(task) {
+    const { target, progress, params } = task;
+    const farmlands = getFarmlands();
+    const field = farmlands.find(f => f.id === target.id);
+
+    if (field) {
+        const percentComplete = Math.floor(progress * 100);
+        const unplantedPercentage = 1 - progress;
+        const healthPenalty = unplantedPercentage;
+
+        field.farmlandHealth = Math.max(0, field.farmlandHealth - healthPenalty);
+        field.farmlandHealth = parseFloat(field.farmlandHealth.toFixed(6)); // Round to six decimal places
+
+        updateFarmland(field.id, {
+            farmlandHealth: field.farmlandHealth,
+            status: 'Planted'
+        });
+
+        const flagIcon = getFlagIconHTML(field.country);
+        const percentCompleteClass = getColorClass(progress);
+        const healthClass = getColorClass(field.farmlandHealth);
+
+        addConsoleMessage(`Planting task for ${flagIcon} ${field.name} was incomplete. <span class="${percentCompleteClass}">${percentComplete}%</span> of the field was planted. Field health reduced by <span class="${healthClass}">${formatNumber(healthPenalty)}</span>. The health of ${field.name} is now <span class="${healthClass}">${formatNumber(field.farmlandHealth)}</span>.`);
+
+        // Call the common function to finalize planting
+        finalizePlanting(field, params);
+    }
+}
+
+
+function applyPlantingPenalties(season, week) {
+    const farmlands = getFarmlands();
+    const plantingTasks = taskManager.getAllTasks().filter(task => task.name.toLowerCase().includes('planting'));
+
+    plantingTasks.forEach(task => {
+        const field = farmlands.find(f => f.id === task.target.id);
+        if (field) {
+            let penalty = 0;
+            let seasonName = '';
+            switch (season) {
+                case 'Spring':
+                    penalty = 0.002;
+                    seasonName = 'Spring';
+                    break;
+                case 'Summer':
+                    penalty = 0.006;
+                    seasonName = 'Summer';
+                    break;
+                case 'Fall':
+                    penalty = 0.01;
+                    seasonName = 'Fall';
+                    break;
+            }
+            field.farmlandHealth = Math.max(0, field.farmlandHealth - penalty);
+            field.farmlandHealth = parseFloat(field.farmlandHealth.toFixed(6)); // Round to six decimal places
+            updateFarmland(field.id, { farmlandHealth: field.farmlandHealth });
+
+            // Add console message only on week 1 and not in Winter
+            if (week === 1 && season !== 'Winter') {
+                addConsoleMessage(`Planting task is still ongoing on ${field.name}. Planting later in the year will result in higher mortality of the vines, reducing the field's health by ${penalty} every week of ${seasonName}.`);
+            }
+        }
+    });
 }
 
 export function updateNewYear(farmlands) {
@@ -139,6 +210,7 @@ export function updateFieldStatuses() {
         updateNewYear(farmlands); // This will handle setting the new annualYieldFactor
     }
 
+    
     displayFarmland();
 }
 

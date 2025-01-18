@@ -1,7 +1,6 @@
 import { convertToCurrentUnit, getUnit } from './settings.js';
 import { regionSoilTypes } from './names.js';
 
-
 export function getFlagIcon(countryName) {
   const countryToFlagCode = {
     "Italy": "it",
@@ -18,6 +17,10 @@ export function getFlagIcon(countryName) {
   return flagCode 
     ? `<span class="flag-icon flag-icon-${flagCode}" style="vertical-align: middle; margin-right: 5px;"></span>`
     : ''; // Return an empty string if no flag is found
+}
+
+export function getFlagIconHTML(country) {
+    return getFlagIcon(country);
 }
 
 export function getColorClass(value) {
@@ -82,17 +85,11 @@ export function formatNumber(value, decimals = 0) {
     return isNegative ? `-${formattedValue}` : formattedValue;
 }
 
-export function getFlagIconHTML(country) {
-    return getFlagIcon(country);
-}
-
 export function formatLandSizeWithUnit(acres) {
     const selectedUnit = getUnit(); // 'acres' or 'hectares'
     const convertedSize = convertToCurrentUnit(acres);
     return `${formatNumber(convertedSize)} ${selectedUnit}`;
 }
-
-
 
 export function extractSeasonAndYear(dateString) {
     const [week, season, year] = dateString.split(', ');
