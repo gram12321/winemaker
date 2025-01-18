@@ -195,6 +195,38 @@ Conversion rates:
 2. Must → Wine: 90% (after 10% fermentation loss)
 3. Wine → Bottles: divide by 0.75L (standard bottle size)
 
+// Field Health
+
+Actions That Could Increase Field Health
+To give players a chance to improve Field Health, you could include these vineyard maintenance tasks:
+
+Vine Replacement (Replanting):
+
+Replacing dead or unproductive vines with new ones can restore Field Health, though it’s a costly and time-consuming process.
+Game Effect: A significant boost to Field Health, but at the cost of time and resources.
+Pruning:
+
+Pruning involves cutting back vines to promote healthy growth and remove diseased or weak parts of the plant.
+Game Effect: Small-to-moderate Field Health improvement, depending on how overgrown or neglected the vineyard is.
+Weeding:
+
+Removing weeds prevents competition for nutrients, water, and sunlight, helping the vines thrive.
+Game Effect: Minor boost to Field Health, as well-maintained fields generally have healthier vines.
+Soil Management:
+
+Activities like adding compost, applying fertilizers, or addressing drainage issues improve soil quality, which directly affects vine health.
+Game Effect: Small-to-moderate increase in Field Health, depending on the soil’s starting condition.
+Pest and Disease Control:
+
+Treating for pests and diseases like mildew, phylloxera, or nematodes is critical for maintaining Field Health.
+Game Effect: Stabilizes or increases Field Health, especially if the vineyard has been affected by specific threats.
+Irrigation Management:
+
+Ensuring proper water levels can mitigate stress on vines, especially in regions prone to drought.
+Game Effect: Small but steady health improvement over time.
+
+
+
 ---------------------------------------------------------------------
 Ripeness: 0.50  | Quality Mult: (0.5 + 1.0 + 0.5)/3 = 0.67
 ---------------------------------------------------------------------
