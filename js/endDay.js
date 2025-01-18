@@ -67,20 +67,24 @@ export function incrementWeek() {
 
     processRecurringTransactions(week);
 
-    // Cancel any active harvesting or planting tasks when season changes to winter
+    // Update only when winter starts
     if (season === 'Winter' && week === 1) {
-        const tasks = loadTasks();
-        tasks.forEach((task, taskId) => {
-            if (task.name.toLowerCase().includes('harvest') || task.name.toLowerCase().includes('planting')) {
-                if (task.name.toLowerCase().includes('planting')) {
-                    handleIncompletePlantingTask(task);
-                }
-                taskManager.cancelTask(taskId);
-                addConsoleMessage(`${task.name} task for ${task.target.name} has been cancelled due to season change to Winter.`);
-            }
-        });
-        saveTasks(tasks);
+        updateWinter();
     }
+}
+
+function updateWinter() {
+    const tasks = loadTasks();
+    tasks.forEach((task, taskId) => {
+        if (task.name.toLowerCase().includes('harvest') || task.name.toLowerCase().includes('planting')) {
+            if (task.name.toLowerCase().includes('planting')) {
+                handleIncompletePlantingTask(task);
+            }
+            taskManager.cancelTask(taskId);
+            addConsoleMessage(`${task.name} task for ${task.target.name} has been cancelled due to season change to Winter.`);
+        }
+    });
+    saveTasks(tasks);
 }
 
 function handleIncompletePlantingTask(task) {
