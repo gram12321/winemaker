@@ -79,7 +79,7 @@ class Tool {
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
     this.cost = cost;
-    this.capacity = capacity;
+    this.capacity = capacity; // capacity in kg or liters
     this.supportedResources = supportedResources;
     this.instanceNumber = 1; // Default value, will be overridden by ToolManager
   }
@@ -117,11 +117,11 @@ const ToolManager = (() => {
         new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0),
         new Tool('Forklift', 'Warehouse', 1.5, 40000, 0),
         new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0),
-        new Tool('Harvest Bins', 'Warehouse', 1.1, 1000, 0, ['Grapes']),
+        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes']),
         new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must']),
-        new Tool('Macro Bin', 'Warehouse', 1.0, 750, 5000, ['Grapes']),
-        new Tool('Lug Box', 'Warehouse', 1.0, 50, 20000, ['Grapes']),
-        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 180000, ['Grapes'])
+        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes']),
+        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes']),
+        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'])
       ];
       toolsInitialized = true;
     }
