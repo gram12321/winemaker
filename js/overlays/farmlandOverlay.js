@@ -4,6 +4,10 @@ import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names
 
 export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');
+  if (!overlay) {
+    console.error('Farmland overlay element not found.');
+    return;
+  }
   overlay.style.zIndex = '2050'; // Ensure overlay stays above the console
   const details = document.getElementById('farmland-details');
   details.innerHTML = ''; // Clear existing details
@@ -77,14 +81,12 @@ export function showFarmlandOverlay(farmlandData) {
     }
   }
 
-  if (overlay) {
-    overlay.style.display = 'block';
+  overlay.style.display = 'block';
 
-    // Add click event listener to the overlay for outside clicks
-    overlay.addEventListener('click', (event) => {
-      if (event.target === overlay) {
-        overlay.style.display = 'none';
-      }
-    });
-  }
+  // Add click event listener to the overlay for outside clicks
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      overlay.style.display = 'none';
+    }
+  });
 }

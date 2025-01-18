@@ -107,9 +107,11 @@ function handleIncompletePlantingTask(task) {
 
         const flagIcon = getFlagIconHTML(field.country);
         const percentCompleteClass = getColorClass(progress);
+        const healthPenaltyPercentage = healthPenalty * 100;
+        const healthPercentage = field.farmlandHealth * 100;
         const healthClass = getColorClass(field.farmlandHealth);
 
-        addConsoleMessage(`Planting task for ${flagIcon} ${field.name} was incomplete. <span class="${percentCompleteClass}">${percentComplete}%</span> of the field was planted. Field health reduced by <span class="${healthClass}">${formatNumber(healthPenalty, 2)}</span>. The health of ${field.name} is now <span class="${healthClass}">${formatNumber(field.farmlandHealth, 2)}</span>.`);
+        addConsoleMessage(`Planting task for ${flagIcon} ${field.name} was incomplete. <span class="${percentCompleteClass}">${percentComplete}%</span> of the field was planted. Field health reduced by <span class="${healthClass}">${formatNumber(healthPenaltyPercentage, 2)}%</span>. The health of ${field.name} is now <span class="${healthClass}">${formatNumber(healthPercentage, 2)}%</span>.`);
 
         // Call the common function to finalize planting
         finalizePlanting(field, params);
