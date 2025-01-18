@@ -31,8 +31,9 @@ function plant(farmland, selectedResource, selectedDensity) {
   // Calculate total work based on density and acres
   const vinesPerAcre = selectedDensity;
   const totalVines = vinesPerAcre * farmland.acres;
-  const workPerVine = 1 / 500; // Assuming 500 vines planted per day by a single worker
-  const totalWork = totalVines * workPerVine * 50; // Convert to total work units (50 work units per week)
+  const totalStandardWorkWeek = totalVines / 3500 // How many weeks of work for a single worker capable of planting 500 vines per day (3500 per week) 
+  const totalWork = totalStandardWorkWeek * 50; // Multiply by 50 to convert standartWeekofWork into workunits (50 work units per week (IE a 100% worker do 50 work units per week))
+
 
   // Since planting is a progressive task, we use addProgressiveTask
   taskManager.addProgressiveTask(
