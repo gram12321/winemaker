@@ -17,7 +17,21 @@ export function showLandOverlay() {
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
 
-    overlay.innerHTML = `
+    overlay.innerHTML = getLandOverlayHTML();
+
+    document.body.appendChild(overlay);
+
+    const buyLandBtn = overlay.querySelector('#buy-land-btn');
+    if (buyLandBtn) {
+        buyLandBtn.addEventListener('click', showBuyLandOverlay);
+    }
+
+    displayFarmland();
+    overlay.style.display = 'block';
+}
+
+function getLandOverlayHTML() {
+    return `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Farmland Management</h2>
             <section id="vineyard-section" class="overlay-section card mb-4">
@@ -55,16 +69,6 @@ export function showLandOverlay() {
             </div>
         </div>
     `;
-
-    document.body.appendChild(overlay);
-
-    const buyLandBtn = overlay.querySelector('#buy-land-btn');
-    if (buyLandBtn) {
-        buyLandBtn.addEventListener('click', showBuyLandOverlay);
-    }
-
-    displayFarmland();
-    overlay.style.display = 'block';
 }
 
 export function displayFarmland() {
