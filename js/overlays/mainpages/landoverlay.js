@@ -1,8 +1,8 @@
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 import { getUnit, convertToCurrentUnit } from '/js/settings.js';
-import { getFlagIcon, formatNumber, getColorClass } from '/js/utils.js';
-import { getResourceByName } from '/js/resource.js';
-import { loadFarmlands, updateFarmland } from '/js/database/adminFunctions.js';
+import { getFlagIcon, formatNumber } from '/js/utils.js';
+
+import { loadFarmlands } from '/js/database/adminFunctions.js';
 import taskManager from '/js/taskManager.js';
 import { showFarmlandOverlay } from '/js/overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from '/js/overlays/plantingOverlay.js';
