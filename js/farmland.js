@@ -7,6 +7,7 @@ import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNo
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
 import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from './overlays/plantingOverlay.js';
+import { showResourceInfoOverlay } from './overlays/resourceInfoOverlay.js';
 
 // Refactored standalone function for land value calculation
 export function calculateLandvalue(country, region, altitude, aspect) {
@@ -215,7 +216,7 @@ function createFarmlandRow(farmland, selectedUnit) {
       ${farmland.country}, ${farmland.region}
     </td>
     <td>${formattedSize} ${selectedUnit}</td>
-    <td>${farmland.plantedResourceName || 'None'}</td>
+    <td class="crop-column">${farmland.plantedResourceName || 'None'}</td>
     <td>
       <button class="btn btn-alternative btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>
         ${taskManager.isTargetBusy(farmland) ? 'In Progress' : 'Plant'}
@@ -227,10 +228,18 @@ function createFarmlandRow(farmland, selectedUnit) {
 
 function setupFarmlandEventListeners(row, farmland) {
   const plantBtn = row.querySelector('.plant-btn');
-  const farmlandCells = row.querySelectorAll('td:not(:last-child)');
-  
+  const farmlandCells = row.querySelectorAll('td:not(:last-child):not(.crop-column)');
+  const cropColumn = row.querySelector('.crop-column');
+
   plantBtn.addEventListener('click', () => {
     showPlantingOverlay(farmland, () => displayFarmland());
+  });
+
+  cropColumn.addEventListener('click', (event) => {
+    event.stopPropagation(); // Prevent the row click event
+    if (farmland.plantedResourceName) {
+      showResourceInfoOverlay(farmland.plantedResourceName);
+    }
   });
 
   farmlandCells.forEach(cell => {

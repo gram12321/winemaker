@@ -1,5 +1,6 @@
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 import { displayFarmland } from '/js/farmland.js';
+import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
 
 export function showLandOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
@@ -56,6 +57,12 @@ export function showLandOverlay() {
         buyLandBtn.addEventListener('click', showBuyLandOverlay);
     }
 
+    const cropColumn = overlay.querySelector('th:nth-child(5)');
+    if (cropColumn) {
+        cropColumn.addEventListener('click', showResourceInfoOverlay);
+    }
+
     displayFarmland();
     overlay.style.display = 'block';
 }
+
