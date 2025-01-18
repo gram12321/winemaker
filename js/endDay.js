@@ -105,7 +105,7 @@ export function updateFieldStatuses() {
             case 'Winter':
                 if (week === 1) {
                     updates = { 
-                        status: 'No yield in first season',
+                        status: field.vineAge === 0 ? 'No yield in first season' : 'Dormancy',
                         ripeness: 0,
                         annualYieldFactor: 0
                     };
