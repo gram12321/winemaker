@@ -229,9 +229,29 @@ function crushing(overlayContainer) {
     }
 
     let totalAvailableSpace = 0;
+    let invalidStorage = false;
+
     selectedStorages.forEach(storage => {
-        totalAvailableSpace += parseFloat(storage.dataset.available);
+        const availableSpace = parseFloat(storage.dataset.available);
+        const storageId = storage.value;
+        const matchingInventoryItems = inventoryInstance.items.filter(item => item.storage === storageId);
+
+        if (matchingInventoryItems.length > 0) {
+            const firstItem = matchingInventoryItems[0];
+            if (firstItem.resource.name !== selectedGrape.dataset.resource || firstItem.vintage !== parseInt(selectedGrape.dataset.vintage)) {
+                invalidStorage = true;
+                addConsoleMessage(`Cannot use ${storageId} as it contains a different resource or vintage.`);
+            } else {
+                totalAvailableSpace += availableSpace;
+            }
+        } else {
+            totalAvailableSpace += availableSpace;
+        }
     });
+
+    if (invalidStorage) {
+        return false;
+    }
 
     const mustAmount = totalGrapes * 0.6;  // 60% of grapes become must
 
@@ -320,18 +340,28 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
 
     if (!removed) {
         // Try to remove the remaining grapes if the exact amount is not available
-        removed = inventoryInstance.removeResource(
+        const remainingGrapes = inventoryInstance.getResourceAmount(
             { name: resourceName },
-            totalGrapes,
             'Grapes',
             vintage,
             selectedGrape.dataset.storage
         );
-    }
 
-    if (!removed) {
-        addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
-        return false;
+        if (remainingGrapes > 0) {
+            removed = inventoryInstance.removeResource(
+                { name: resourceName },
+                remainingGrapes,
+                'Grapes',
+                vintage,
+                selectedGrape.dataset.storage
+            );
+            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+        } else {
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
+            return false;
+        }
+    } else {
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
     }
 
     // Distribute must among containers
@@ -350,7 +380,6 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
             fieldPrestige,
             mustStorage
         );
-        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)}kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(amountToStore)}l of must in ${mustStorage}`);
 
         remainingMust -= amountToStore;
         if (remainingMust <= 0) break;

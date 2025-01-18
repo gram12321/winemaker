@@ -1,4 +1,3 @@
-
 import { getColorClass } from './utils.js';
 
 export class Resource {
@@ -82,6 +81,16 @@ export class Inventory {
       this.items.splice(itemIndex, 1);
     }
     return true;
+  }
+
+  getResourceAmount(resource, state, vintage, storage) {
+    const matchingItems = this.items.filter(item => 
+      item.resource.name === resource.name &&
+      item.state === state &&
+      item.vintage === vintage &&
+      item.storage === storage
+    );
+    return matchingItems.reduce((sum, item) => sum + item.amount, 0);
   }
 
   findMatchingItem(resource, state, vintage, quality, fieldName, storage) {
