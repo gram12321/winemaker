@@ -10,18 +10,18 @@ import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the ce
 import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
 
 async function clearFirestore() {
-    if (confirm('Are you sure you want to delete all companies from Firestore?')) {
-        try {
-            const querySnapshot = await getDocs(collection(db, "companies"));
-            querySnapshot.forEach(async (docSnapshot) => {
-                await deleteDoc(docSnapshot.ref);
-            });
-            alert('All company data cleared from Firestore successfully.');
-        } catch (error) {
-            console.error('Error clearing Firestore: ', error);
-            alert('An error occurred while clearing Firestore.');
-        }
+  if (confirm('Are you sure you want to delete all companies from Firestore?')) {
+    try {
+      const querySnapshot = await getDocs(collection(db, "companies"));
+      querySnapshot.forEach(async (docSnapshot) => {
+        await deleteDoc(docSnapshot.ref);
+      });
+      alert('All company data cleared from Firestore successfully.');
+    } catch (error) {
+      console.error('Error clearing Firestore: ', error);
+      alert('An error occurred while clearing Firestore.');
     }
+  }
 }
 
 // Existing clearLocalStorage function in adminFunctions.js
@@ -141,7 +141,7 @@ async function saveCompanyInfo() {
 
   try {
     const docRef = doc(db, "companies", companyName);
-    await setDoc(docRef, { 
+    await setDoc(docRef, {
       name: companyName,
       money,
       week,
@@ -211,10 +211,13 @@ export function saveStaff(staffMembers) {
       wage: staff.wage,
       skills: staff.skills // Include skills in the saved data
     }))));
-  } 
+  }
 }
 
-// Function to load staff members from localStorage
+/**
+ * Loads staff members from localStorage.
+ * @returns {Array} Array of Staff objects.
+ */
 export function loadStaff() {
   let staffMembers = [];
   let savedStaffData = localStorage.getItem('staffData');
@@ -244,40 +247,40 @@ export function loadStaff() {
 let currentWineOrders = [];
 
 export function saveWineOrders(wineOrders) {
-    currentWineOrders = wineOrders;
-    localStorage.setItem('wineOrders', JSON.stringify(wineOrders));
+  currentWineOrders = wineOrders;
+  localStorage.setItem('wineOrders', JSON.stringify(wineOrders));
 }
 
 export function loadWineOrders() {
-    if (currentWineOrders.length > 0) {
-        return currentWineOrders;
-    }
-    
-    const savedWineOrders = localStorage.getItem('wineOrders');
-    if (savedWineOrders) {
-        try {
-            currentWineOrders = JSON.parse(savedWineOrders);
-        } catch (error) {
-            console.error("Failed to parse wine orders from localStorage.", error);
-            currentWineOrders = [];
-        }
-    }
+  if (currentWineOrders.length > 0) {
     return currentWineOrders;
+  }
+
+  const savedWineOrders = localStorage.getItem('wineOrders');
+  if (savedWineOrders) {
+    try {
+      currentWineOrders = JSON.parse(savedWineOrders);
+    } catch (error) {
+      console.error("Failed to parse wine orders from localStorage.", error);
+      currentWineOrders = [];
+    }
+  }
+  return currentWineOrders;
 }
 
 export function removeWineOrder(index) {
-    const wineOrders = loadWineOrders();
-    if (index >= 0 && index < wineOrders.length) {
-        wineOrders.splice(index, 1);
-        saveWineOrders(wineOrders);
-        return true;
-    }
-    return false;
+  const wineOrders = loadWineOrders();
+  if (index >= 0 && index < wineOrders.length) {
+    wineOrders.splice(index, 1);
+    saveWineOrders(wineOrders);
+    return true;
+  }
+  return false;
 }
 
 export function addWineOrder(order) {
-    currentWineOrders.push(order);
-    saveWineOrders(currentWineOrders);
+  currentWineOrders.push(order);
+  saveWineOrders(currentWineOrders);
 }
 
 // Functions to save and load buildings from localStorage
@@ -335,7 +338,7 @@ export function addFarmland(farmland) {
 export function updateFarmland(farmlandId, updates) {
   const farmlands = loadFarmlands();
   const farmlandIndex = farmlands.findIndex(f => f.id === parseInt(farmlandId));
-  
+
   if (farmlandIndex !== -1) {
     farmlands[farmlandIndex] = {
       ...farmlands[farmlandIndex],
@@ -349,34 +352,34 @@ export function updateFarmland(farmlandId, updates) {
 
 // Game state management functions
 export function getGameState() {
-    return {
-        week: parseInt(localStorage.getItem('week'), 10) || 1,
-        season: localStorage.getItem('season') || 'Spring',
-        year: parseInt(localStorage.getItem('year'), 10) || 2023
-    };
+  return {
+    week: parseInt(localStorage.getItem('week'), 10) || 1,
+    season: localStorage.getItem('season') || 'Spring',
+    year: parseInt(localStorage.getItem('year'), 10) || 2023
+  };
 }
 
 export function updateGameState(week, season, year) {
-    localStorage.setItem('week', week);
-    localStorage.setItem('season', season);
-    localStorage.setItem('year', year);
+  localStorage.setItem('week', week);
+  localStorage.setItem('season', season);
+  localStorage.setItem('year', year);
 }
 
 export function getMoney() {
-    return parseFloat(localStorage.getItem('money') || '0');
+  return parseFloat(localStorage.getItem('money') || '0');
 }
 
 export function getCompanyName() {
-    return localStorage.getItem('companyName');
+  return localStorage.getItem('companyName');
 }
 
 // Farmland management functions
 export function getFarmlands() {
-    return JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  return JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
 }
 
 export function updateAllFarmlands(farmlands) {
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
 // Get prestige functions
@@ -397,14 +400,14 @@ export function calculateRealPrestige() {
   const money = getMoney();
   const moneyPrestige = money / 10000000;
   const farmlands = loadFarmlands();
-  
+
   const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
     return total + (farmland.farmlandPrestige || 0);
   }, 0);
 
   const prestigeHit = getPrestigeHit();
   const calculatedPrestige = moneyPrestige + totalFarmlandPrestige + prestigeHit;
-  
+
   // Store the calculated value
   localStorage.setItem('calculatedPrestige', calculatedPrestige.toString());
   return calculatedPrestige;
@@ -416,84 +419,84 @@ export function getCalculatedPrestige() {
 
 // Task persistence functions
 export function saveTasks(tasks) {
-    const taskData = Array.from(tasks.entries()).map(([id, task]) => ({
-        id: task.id,
-        name: task.name,
-        type: task.type,
-        taskType: task.taskType,
-        totalWork: task.totalWork, // Save totalWork
-        appliedWork: task.appliedWork, // Save appliedWork
-        progress: task.progress,
-        target: task.target,
-        params: task.params,
-        assignedStaff: task.assignedStaff // Include assigned staff
-    }));
-    localStorage.setItem('activeTasks', JSON.stringify(taskData));
+  const taskData = Array.from(tasks.entries()).map(([id, task]) => ({
+    id: task.id,
+    name: task.name,
+    type: task.type,
+    taskType: task.taskType,
+    totalWork: task.totalWork, // Save totalWork
+    appliedWork: task.appliedWork, // Save appliedWork
+    progress: task.progress,
+    target: task.target,
+    params: task.params,
+    assignedStaff: task.assignedStaff // Include assigned staff
+  }));
+  localStorage.setItem('activeTasks', JSON.stringify(taskData));
 }
 
 export function loadTasks() {
-    const taskData = JSON.parse(localStorage.getItem('activeTasks') || '[]');
-    const tasks = new Map();
-    taskData.forEach(task => {
-        tasks.set(task.id, {
-            ...task,
-            callback: getTaskCallback(task.name, task.taskType)
-        });
+  const taskData = JSON.parse(localStorage.getItem('activeTasks') || '[]');
+  const tasks = new Map();
+  taskData.forEach(task => {
+    tasks.set(task.id, {
+      ...task,
+      callback: getTaskCallback(task.name, task.taskType)
     });
-    return tasks;
+  });
+  return tasks;
 }
 
 // Helper function to get the appropriate callback based on task name and type
 function getTaskCallback(taskName, taskType) {
-    switch(taskName.toLowerCase()) {
-        case 'planting':
-            return (target, progress, params) => {
-                // Planting callback logic
-                if (progress >= 1) {
-                    const { selectedResource, selectedDensity, totalCost } = params;
-                    updateFarmland(target.id, {
-                        density: selectedDensity,
-                        plantedResourceName: selectedResource,
-                        vineAge: 0,
-                        status: 'No yield in first season'
-                    });
-                    addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
-                    displayFarmland(); // Now properly imported
-                }
-            };
-        case 'hiring process':
-            return (target, params) => {
-                const { staff, hiringExpense } = params;
-                const staffMembers = loadStaff();
-                staffMembers.push(staff);
-                saveStaff(staffMembers);
-                addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
-            };
-        case 'harvesting':
-            return (target, progress, params) => {
-                const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
-                params.lastProgress = progress;
-                performHarvest(target, target.id, params.selectedTool, harvestedAmount);
-            };
-        case 'crushing':
-            return (target, progress, params) => {
-                const mustAmount = params.totalGrapes * 0.6;
-                const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
-                params.lastProgress = progress;
-                performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
-            };
-        // Add more cases for other task types
-        default:
-            return () => console.warn(`No callback found for task: ${taskName}`);
-    }
+  switch (taskName.toLowerCase()) {
+    case 'planting':
+      return (target, progress, params) => {
+        // Planting callback logic
+        if (progress >= 1) {
+          const { selectedResource, selectedDensity, totalCost } = params;
+          updateFarmland(target.id, {
+            density: selectedDensity,
+            plantedResourceName: selectedResource,
+            vineAge: 0,
+            status: 'No yield in first season'
+          });
+          addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
+          displayFarmland(); // Now properly imported
+        }
+      };
+    case 'hiring process':
+      return (target, params) => {
+        const { staff, hiringExpense } = params;
+        const staffMembers = loadStaff();
+        staffMembers.push(staff);
+        saveStaff(staffMembers);
+        addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+      };
+    case 'harvesting':
+      return (target, progress, params) => {
+        const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
+        params.lastProgress = progress;
+        performHarvest(target, target.id, params.selectedTool, harvestedAmount);
+      };
+    case 'crushing':
+      return (target, progress, params) => {
+        const mustAmount = params.totalGrapes * 0.6;
+        const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
+        params.lastProgress = progress;
+        performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+      };
+    // Add more cases for other task types
+    default:
+      return () => console.warn(`No callback found for task: ${taskName}`);
+  }
 }
 
-export { 
-  storeCompanyName, 
-  saveCompanyInfo, 
-  clearLocalStorage, 
-  clearFirestore, 
-  loadInventory, 
+export {
+  storeCompanyName,
+  saveCompanyInfo,
+  clearLocalStorage,
+  clearFirestore,
+  loadInventory,
   saveInventory
 };
 
