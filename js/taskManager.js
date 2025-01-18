@@ -244,15 +244,3 @@ class TaskManager {
 const taskManager = new TaskManager();
 export default taskManager;
 
-function getTaskCallback(taskName, taskType) {
-    switch(taskName.toLowerCase()) {
-        case 'crushing':
-            return (target, progress, params) => {
-                const mustAmount = params.totalGrapes * 0.6;
-                const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
-                params.lastProgress = progress;
-                performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
-            };
-        // ...existing code...
-    }
-}

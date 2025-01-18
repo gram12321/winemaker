@@ -1,5 +1,4 @@
-
-import { fermentMust } from '../wineprocessing.js';
+import { fermentation } from '../wineprocessing.js';
 import { addConsoleMessage } from '../console.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
@@ -90,7 +89,7 @@ export function showFermentationOverlay() {
             const storage = selectedMust.dataset.storage;
             const resourceName = selectedMust.dataset.resource;
             const amount = parseFloat(selectedMust.dataset.amount);
-            fermentMust(resourceName, storage, amount);
+            fermentation(resourceName, storage, amount);
             showWineryOverlay();
             removeOverlay();
         } else {
