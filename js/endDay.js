@@ -2,20 +2,10 @@
 import { addConsoleMessage } from './console.js';
 import { renderCompanyInfo } from './database/loadSidebar.js';
 import { processRecurringTransactions } from './finance.js';
-import { calculateLandvalue, calculateFarmlandPrestige, displayFarmland } from './farmland.js';
+import { calculateLandvalue, calculateFarmlandPrestige } from './farmland.js';
+import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
-import { 
-    getGameState, 
-    updateGameState, 
-    getFarmlands, 
-    updateAllFarmlands, 
-    updateFarmland,
-    getPrestigeHit,
-    setPrestigeHit,
-    calculateRealPrestige,
-    loadTasks,
-    saveTasks
-} from './database/adminFunctions.js';
+import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, updateFarmland, getPrestigeHit, setPrestigeHit, calculateRealPrestige, loadTasks, saveTasks } from './database/adminFunctions.js';
 import taskManager from './taskManager.js';
 import { finalizePlanting } from './overlays/plantingOverlay.js';
 import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';

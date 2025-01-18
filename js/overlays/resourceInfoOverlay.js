@@ -19,6 +19,8 @@ export function showResourceInfoOverlay(resourceName) {
 
   // Render the specific resource data
   if (details) {
+    const naturalYieldPercentage = Math.round(resource.naturalYield * 100);
+
     details.innerHTML = `
       <div class="hire-staff-content">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -35,7 +37,7 @@ export function showResourceInfoOverlay(resourceName) {
             <table class="skills-table">
               <tbody>
                 <tr><td>Name</td><td>${resource.name}</td></tr>
-                <tr><td>Natural Yield</td><td>${formatNumber(resource.naturalYield, 2)}</td></tr>
+                <tr><td>Natural Yield</td><td>${naturalYieldPercentage}%</td></tr>
               </tbody>
             </table>
           </div>

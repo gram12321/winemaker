@@ -2,7 +2,7 @@ import { formatNumber, getFlagIconHTML, getColorClass } from '../utils.js';
 import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
 import { allResources } from '/js/resource.js';
-import { displayFarmland  } from '/js/farmland.js';
+import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
 

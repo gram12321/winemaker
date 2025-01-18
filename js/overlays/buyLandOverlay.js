@@ -4,7 +4,7 @@ import { getColorClass, formatNumber, getFlagIconHTML, formatLandSizeWithUnit, f
 import { regionAspectRatings, calculateAndNormalizePriceFactor } from '../names.js';
 import { getUnit, convertToCurrentUnit } from '../settings.js';
 import { addTransaction } from '/js/finance.js';
-import { displayFarmland } from '/js/farmland.js';
+import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { addFarmland } from '../database/adminFunctions.js';
 
 function generateFarmlandOptions(numberOfOptions) {

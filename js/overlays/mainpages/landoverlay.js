@@ -1,6 +1,12 @@
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
-import { displayFarmland } from '/js/farmland.js';
-import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
+import { getUnit, convertToCurrentUnit } from '/js/settings.js';
+import { getFlagIcon, formatNumber, getColorClass } from '/js/utils.js';
+import { getResourceByName } from '/js/resource.js';
+import { loadFarmlands, updateFarmland } from '/js/database/adminFunctions.js';
+import taskManager from '/js/taskManager.js';
+import { showFarmlandOverlay } from '/js/overlays/farmlandOverlay.js';
+import { showPlantingOverlay } from '/js/overlays/plantingOverlay.js';
+import { showResourceInfoOverlay } from '/js/overlays/resourceInfoOverlay.js';
 
 export function showLandOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
@@ -57,12 +63,73 @@ export function showLandOverlay() {
         buyLandBtn.addEventListener('click', showBuyLandOverlay);
     }
 
-    const cropColumn = overlay.querySelector('th:nth-child(5)');
-    if (cropColumn) {
-        cropColumn.addEventListener('click', showResourceInfoOverlay);
-    }
-
     displayFarmland();
     overlay.style.display = 'block';
+}
+
+export function displayFarmland() {
+    const farmlandEntries = document.querySelector('#farmland-entries');
+    if (!farmlandEntries) return;
+    
+    farmlandEntries.innerHTML = '';
+    const farmlands = loadFarmlands();
+    const selectedUnit = getUnit();
+
+    farmlands.forEach((farmland) => {
+        const row = createFarmlandRow(farmland, selectedUnit);
+        setupFarmlandEventListeners(row, farmland);
+        farmlandEntries.appendChild(row);
+    });
+}
+
+function createFarmlandRow(farmland, selectedUnit) {
+    const landSize = convertToCurrentUnit(farmland.acres);
+    const row = document.createElement('tr');
+    
+    const isPlantingAllowed = !farmland.plantedResourceName && 
+                             !taskManager.isTargetBusy(farmland) &&
+                             farmland.status !== 'Planting...';
+    
+    const formattedSize = landSize < 10 ? landSize.toFixed(2) : formatNumber(landSize);
+    
+    row.innerHTML = `
+        <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 80px; height: auto; border-radius: 8px;"></td>
+        <td>${farmland.name}</td>
+        <td>
+          ${getFlagIcon(farmland.country)}
+          ${farmland.country}, ${farmland.region}
+        </td>
+        <td>${formattedSize} ${selectedUnit}</td>
+        <td class="crop-column">${farmland.plantedResourceName || 'None'}</td>
+        <td>
+          <button class="btn btn-alternative btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>
+            ${taskManager.isTargetBusy(farmland) ? 'In Progress' : 'Plant'}
+          </button>
+        </td>
+    `;
+    return row;
+}
+
+function setupFarmlandEventListeners(row, farmland) {
+    const plantBtn = row.querySelector('.plant-btn');
+    const farmlandCells = row.querySelectorAll('td:not(:last-child):not(.crop-column)');
+    const cropColumn = row.querySelector('.crop-column');
+
+    plantBtn.addEventListener('click', () => {
+        showPlantingOverlay(farmland, () => displayFarmland());
+    });
+
+    cropColumn.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent the row click event
+        if (farmland.plantedResourceName) {
+            showResourceInfoOverlay(farmland.plantedResourceName);
+        }
+    });
+
+    farmlandCells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            showFarmlandOverlay(farmland);
+        });
+    });
 }
 
