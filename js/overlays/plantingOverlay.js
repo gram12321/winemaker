@@ -1,4 +1,4 @@
-import { formatNumber } from '../utils.js';
+import { formatNumber, getFlagIconHTML, getColorClass } from '../utils.js';
 import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
 import { allResources } from '/js/resource.js';
@@ -42,7 +42,8 @@ function plant(farmland, selectedResource, selectedDensity) {
     (target, progress, params) => {
       // This will be called every week with updated progress
       const percentComplete = Math.floor(progress * 100);
-      addConsoleMessage(`Planting ${target.name}: ${percentComplete}% complete...`, true);
+      const percentCompleteClass = getColorClass(progress);
+      addConsoleMessage(`Planting ${getFlagIconHTML(target.country)} ${target.name}: <span class="${percentCompleteClass}">${percentComplete}%</span> complete...`, true);
       
       if (progress >= 1) {
         // Final update when task completes
@@ -71,7 +72,7 @@ export function finalizePlanting(target, params) {
         vineAge: 0,
         status: 'No yield in first season'
     });
-    addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
+    addTransaction('Expense', `Planting on ${getFlagIconHTML(target.country)} ${target.name}`, -totalCost);
     displayFarmland();
 }
 
@@ -79,7 +80,7 @@ export function finalizePlanting(target, params) {
 export function showPlantingOverlay(farmland, onPlantCallback) {
   // Check if field is already planted
   if (farmland.plantedResourceName) {
-    addConsoleMessage(`Field <strong>${farmland.name}</strong> is already fully planted.`);
+    addConsoleMessage(`Field <strong>${getFlagIconHTML(farmland.country)} ${farmland.name}</strong> is already fully planted.`);
     return;
   }
 
@@ -97,7 +98,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
 
   overlayContainer.innerHTML = `
     <div class="overlay-content">
-      <h2>Planting Options for ${farmland.name}</h2>
+      <h2>Planting Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h2>
       <div class="form-group">
         <label for="resource-select" class="form-label">Select Resource to Plant:</label>
         <select class="form-control form-control-sm" id="resource-select">

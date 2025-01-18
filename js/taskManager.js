@@ -1,6 +1,7 @@
 import { loadStaff, saveTasks, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { showStaffOverlay } from './overlays/showstaffoverlay.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
+import { getFlagIconHTML, getColorClass } from './utils.js';
 
 // Define task types as constants
 export const TaskType = {
@@ -171,6 +172,7 @@ class TaskManager {
             taskBox.className = `task-box ${task.taskType.toLowerCase()}-task`;
             
             const progress = task.appliedWork / task.totalWork * 100;
+            const progressClass = getColorClass(progress / 100);
             const iconName = task.name.toLowerCase().replace(/\s+/g, '');
             
             const staffNames = task.assignedStaff.map(s => s.name.split(' ')[0]);
@@ -178,7 +180,7 @@ class TaskManager {
             const tooltipStaffNames = staffNames.join(', ');
 
             taskBox.innerHTML = `
-                ${task.target ? `<div class="task-target">${task.target.name || 'No target'}</div>` : ''}
+                ${task.target ? `<div class="task-target">${getFlagIconHTML(task.target.country)} ${task.target.name || 'No target'}</div>` : ''}
                 <div class="task-header">
                     <div class="task-type">${task.taskType}</div>
                     <img src="../assets/icon/icon_${iconName}.webp" 
@@ -189,10 +191,10 @@ class TaskManager {
                 </div>
                 <div class="task-name">${task.name}</div>
                 <div class="progress-container">
-                    <div class="progress-bar" style="width: ${progress}%"></div>
+                    <div class="progress-bar ${progressClass}" style="width: ${progress}%"></div>
                 </div>
                 <div class="progress-info">
-                    <span>${Math.round(progress)}% complete</span>
+                    <span class="${progressClass}">${Math.round(progress)}% complete</span>
                     <span>${Math.round(task.totalWork - task.appliedWork)} work left</span>
                 </div>
                 ${Array.isArray(task.assignedStaff) && task.assignedStaff.length > 0 ? `
