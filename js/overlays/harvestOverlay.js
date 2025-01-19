@@ -6,6 +6,7 @@ import { farmlandYield, canHarvest } from '../vineyard.js';
 import { formatNumber } from '../utils.js';
 import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
+import { regionAltitudeRanges } from '../names.js'; // Import regionAltitudeRanges
 
 /**
  * Centralized function to perform the harvest logic
@@ -66,7 +67,20 @@ function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
 
     // Initiate the harvest task using the taskManager system
     const taskName = `Harvesting`;
-    const totalWork = totalHarvest; // Assuming 1 unit of work per kg of harvest
+    
+    // Basework is 50 unit of work per 2t of harvest (IE real life 1 worker can harvest 2 ton per day)
+    // TotalHarvest is called via the handleHarvestButtonClick () where amountToHarvest is passed as the parameter totalharvest. 
+    // Add a penalty for high density: 5% extra work for every 1000 plants above 1000 density
+    const densityPenalty = Math.max(0, (farmland.density - 1000) / 1000) * 0.05;
+
+    // Add a penalty or bonus for altitude: 5% extra work for every 10% deviation above the median altitude, and 5% less work for every 10% deviation below the median altitude
+    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+    const medianAltitude = (minAltitude + maxAltitude) / 2;
+    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+    const altitudePenalty = altitudeDeviation * 0.5; // 5% extra work for every 10% deviation above median, 5% less work for every 10% deviation below median
+
+    const totalWork = totalHarvest / 1000 * 25 * (1 + densityPenalty + altitudePenalty); // Totalharvest in kg. Assuming 25 unit of work per ton of harvest (IE a worker does 50 units per day. And in real life 1 worker can harvest 2 ton per day)
+
 
     taskManager.addProgressiveTask(
         taskName,
@@ -231,7 +245,7 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
         });
 
         if (harvestWarning && totalAvailableCapacity < expectedYield) {
-            showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield);
+            showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer);
         } else {
             // If total capacity is sufficient, initiate harvest task for each container
             let remainingYield = expectedYield;
@@ -256,8 +270,9 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
  * @param {NodeList} selectedCheckboxes - The selected checkboxes
  * @param {number} totalAvailableCapacity - The total available capacity
  * @param {number} expectedYield - The expected yield
+ * @param {HTMLElement} overlayContainer - The overlay container element
  */
-function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield) {
+function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer) {
     const warningModal = document.createElement('div');
     warningModal.className = 'modal fade';
     warningModal.innerHTML = `
@@ -302,7 +317,7 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
         if (success) {
             $(warningModal).modal('hide');
             warningModal.remove();
-            removeOverlay();
+            removeOverlay(overlayContainer); // Pass the correct parameter
         }
     });
 
@@ -316,7 +331,9 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
  * @param {HTMLElement} overlayContainer - The overlay container element
  */
 function removeOverlay(overlayContainer) {
-    document.body.removeChild(overlayContainer);
+    if (overlayContainer && overlayContainer.parentNode) {
+        overlayContainer.parentNode.removeChild(overlayContainer);
+    }
     // Update vineyard overlay to reflect changes
     const vineyardOverlay = document.querySelector('.mainview-overlay');
     if (vineyardOverlay) {
