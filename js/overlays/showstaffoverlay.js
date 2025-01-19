@@ -1,18 +1,27 @@
-import { getFlagIconHTML } from '../utils.js';
+import { getFlagIconHTML, formatNumber, getColorClass } from '../utils.js';
 
 export function showStaffOverlay(staffData) {
-  const existingOverlay = document.getElementById('staffOverlay');
+  const overlay = createOverlay();
+  const content = getStaffOverlayHTML(staffData);
+  overlay.appendChild(content);
+  document.body.appendChild(overlay);
+  setupStaffOverlayEventListeners(overlay, content);
+  overlay.style.display = 'block';
+}
 
+function createOverlay() {
+  const existingOverlay = document.getElementById('staffOverlay');
   if (existingOverlay) {
     existingOverlay.remove();
   }
 
-  // Create new overlay
   const overlay = document.createElement('div');
   overlay.id = 'staffOverlay';
   overlay.className = 'overlay';
+  return overlay;
+}
 
-  // Create content container
+function getStaffOverlayHTML(staffData) {
   const content = document.createElement('div');
   content.className = 'overlay-content';
 
@@ -39,20 +48,21 @@ export function showStaffOverlay(staffData) {
         <h4>Skills & Expertise</h4>
         <table class="skills-table">
           <tbody>
-            <tr><td>Field Work</td><td class="${getSkillLevelClass(staffData.skills.field.field)}">${staffData.skills.field.field}</td></tr>
-            <tr><td>Winery Operations</td><td class="${getSkillLevelClass(staffData.skills.winery.winery)}">${staffData.skills.winery.winery}</td></tr>
-            <tr><td>Administration</td><td class="${getSkillLevelClass(staffData.skills.administration.administration)}">${staffData.skills.administration.administration}</td></tr>
-            <tr><td>Sales Management</td><td class="${getSkillLevelClass(staffData.skills.sales.sales)}">${staffData.skills.sales.sales}</td></tr>
-            <tr><td>Maintenance</td><td class="${getSkillLevelClass(staffData.skills.maintenance.maintenance)}">${staffData.skills.maintenance.maintenance}</td></tr>
+            <tr><td>Field Work</td><td class="${getColorClass(staffData.skills.field.field)}">${formatNumber(staffData.skills.field.field * 100)}%</td></tr>
+            <tr><td>Winery Operations</td><td class="${getColorClass(staffData.skills.winery.winery)}">${formatNumber(staffData.skills.winery.winery * 100)}%</td></tr>
+            <tr><td>Administration</td><td class="${getColorClass(staffData.skills.administration.administration)}">${formatNumber(staffData.skills.administration.administration * 100)}%</td></tr>
+            <tr><td>Sales Management</td><td class="${getColorClass(staffData.skills.sales.sales)}">${formatNumber(staffData.skills.sales.sales * 100)}%</td></tr>
+            <tr><td>Maintenance</td><td class="${getColorClass(staffData.skills.maintenance.maintenance)}">${formatNumber(staffData.skills.maintenance.maintenance * 100)}%</td></tr>
           </tbody>
         </table>
       </div>
     </section>
   `;
 
-  overlay.appendChild(content);
-  document.body.appendChild(overlay);
+  return content;
+}
 
+function setupStaffOverlayEventListeners(overlay, content) {
   // Add close button functionality
   const closeBtn = content.querySelector('.close-btn');
   if (closeBtn) {
@@ -67,10 +77,4 @@ export function showStaffOverlay(staffData) {
       overlay.remove();
     }
   });
-
-  overlay.style.display = 'block';
-}
-
-function getSkillLevelClass(skillValue) {
-  return skillValue > 0.75 ? 'high' : skillValue > 0.5 ? 'medium' : 'low';
 }
