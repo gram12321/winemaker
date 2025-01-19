@@ -86,7 +86,7 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
             <tbody>
               <tr><td>Soil</td><td>${farmlandData.soil}</td></tr>
               <tr><td>Altitude</td><td>${farmlandData.altitude}m</td></tr>
-              <tr><td>Aspect</td><td class="${colorClass}">${farmlandData.aspect} (${formatNumber(aspectRating, 2)})</td></tr>
+              <tr><td>Aspect</td><td class="${colorClass}">${farmlandData.aspect} (${formatNumber(aspectRating * 100)}%)</td></tr>
             </tbody>
           </table>
         </div>
@@ -100,8 +100,8 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
               <tr><td>Land Value</td><td>€${formatNumber(landValue)}</td></tr>
               <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
               <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
-              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass}">${formatNumber(farmlandPrestige, 2)}</td></tr>
-              <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth, 2)}</td></tr>
+              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass}">${formatNumber(farmlandPrestige * 100)}%</td></tr>
+              <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
             </tbody>
           </table>
         </div>
