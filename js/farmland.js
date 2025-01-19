@@ -31,6 +31,7 @@ export function farmlandAgePrestigeModifier(vineAge) {
 }
 
 // Refactored calculateFarmlandPrestige function using standalone prestige modifier
+// The calculateFarmlandPrestige function produces values in the range of approximately 0.1625 to 0.9875, with typical values around 0.5875.
 export function calculateFarmlandPrestige(farmland) {
   const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge); // Use standalone function
   const landvalueNormalized = normalizeLandValue(farmland.landvalue);
