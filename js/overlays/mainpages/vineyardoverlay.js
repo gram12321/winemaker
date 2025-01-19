@@ -2,7 +2,7 @@ import { farmlandYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
 import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
-import { formatNumber } from '../../utils.js';
+import { formatNumber, getColorClass } from '../../utils.js';
 import { loadFarmlands } from '../../database/adminFunctions.js';
 
 /**
@@ -74,6 +74,7 @@ function createVineyardTable() {
             ${farmlands.map(farmland => {
                 const canHarvest = farmland.plantedResourceName && farmland.ripeness >= 0.10;
                 const formattedSize = farmland.acres < 10 ? farmland.acres.toFixed(2) : formatNumber(farmland.acres);
+                const ripenessColorClass = getColorClass(farmland.ripeness);
                 return `
                     <tr data-farmland-id="${farmland.id}">
                         <td>${farmland.name}</td>
@@ -81,7 +82,7 @@ function createVineyardTable() {
                         <td>${farmland.plantedResourceName ? farmland.vineAge : 'Not Planted'}</td>
                         <td class="crop-column">${farmland.plantedResourceName || 'None'}</td>
                         <td>${farmland.status}</td>
-                        <td>${farmland.plantedResourceName ? (farmland.ripeness * 100).toFixed(1) + '%' : 'Not Planted'}</td>
+                        <td class="${ripenessColorClass}">${farmland.plantedResourceName ? formatNumber(farmland.ripeness * 100, 0) + '%' : 'Not Planted'}</td>
                         <td>${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland), 2) + ' kg'}</td>
                         <td>
                             <button class="btn btn-alternative btn-sm harvest-btn" 
