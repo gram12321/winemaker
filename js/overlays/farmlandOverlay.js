@@ -20,16 +20,17 @@ export function showFarmlandOverlay(farmlandData) {
   const flagIcon = getFlagIcon(farmlandData.country);
   const farmlandPrestige = farmlandData.farmlandPrestige || 0;
   const formattedSize = farmlandData.acres < 10 ? farmlandData.acres.toFixed(2) : formatNumber(farmlandData.acres);
+  const prestigeColorClass = getColorClass(farmlandPrestige);
+  const healthColorClass = getColorClass(farmlandData.farmlandHealth);
 
   // Render the specific farmland data
   if (details) {
-    details.innerHTML = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize);
+    details.innerHTML = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass);
     setupFarmlandOverlayEventListeners(details, overlay, farmlandData);
   }
 
   overlay.style.display = 'block';
 }
-
 
 function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
   // Add close button event listener
@@ -57,7 +58,7 @@ function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
   });
 }
 
-function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize) {
+function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass) {
   return `
     <div class="hire-staff-content">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -97,10 +98,10 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
               <tr><td>Status</td><td>${farmlandData.status}</td></tr>
               <tr><td>Ripeness</td><td>${formatNumber(farmlandData.ripeness ?? 0, 2)}</td></tr>
               <tr><td>Land Value</td><td>€${formatNumber(landValue)}</td></tr>
-              <tr><td>Density</td><td>${farmlandData.density || 'N/A'}</td></tr>
+              <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
               <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
-              <tr><td>Farmland Prestige</td><td>${formatNumber(farmlandPrestige, 2)}</td></tr>
-              <tr><td>Farmland Health</td><td>${farmlandData.farmlandHealth}</td></tr>
+              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass}">${formatNumber(farmlandPrestige, 2)}</td></tr>
+              <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth, 2)}</td></tr>
             </tbody>
           </table>
         </div>
