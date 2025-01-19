@@ -8,6 +8,8 @@ Cellar Master                          22.12        35.38      884.62     1415.3
 Viticulturist (Vineyard Manager)       26.54        44.23     1061.54     1769.23      4600.00       7666.67   
 
 
+Knownbugs as of Jan 2025
+- Problems with overlay. Atleast closing the modal warning dialog in harvestoverlay, coursing overlays in vineyardoverlay not to work. And the assign staff overlay, causes buildingoverlay to not be able to show
 
 Known Bugs:
 -Save load Owned land and staff (Safe to firestore, but dont restore from localstorage)
@@ -166,6 +168,57 @@ const vinesPerAcre = selectedDensity;
 const totalVines = vinesPerAcre * farmland.acres;
 const workPerVine = 1 / 3500; // Assuming 500 vines planted per day by a single worker (3500 is one week of work for a 100% worker)
 const totalWork = totalVines * workPerVine * 50; // Convert to total work units (50 work units per week)
+
+// Harvest work rate:
+The duration of grape harvest and transportation is influenced by several factors, including vineyard size, harvesting method (manual or mechanical), and terrain features. Here's a detailed overview:
+
+Factors Influencing Harvest Time:
+- Harvest Method:
+    * Manual Harvesting: 
+        - Relies on workers to handpick grapes, placing them gently into baskets or bins to prevent fruit damage. 
+        - Typical Speed: 1 to 2 tons of grapes per worker per day, variables include terrain and grape variety.
+        - Optimal for premium wines or challenging terrains unsuitable for machines.
+    * Mechanical Harvesting:
+        - Utilizes machines which shake or cut through vines, greatly increasing speed but potentially damaging the grapes.
+        - Typical Speed: 3 to 5 acres per day per machine, influenced by vineyard density and terrain.
+        - Suited to flatter terrains where efficiency is key.
+- Terrain:
+    * Flat Terrain:
+        - Facilitates rapid work by both machines and workers.
+    * Steep or Rocky Terrain:
+        - Significantly hampers manual labor and often precludes mechanical harvesters.
+- Vineyard Size and Density:
+    * High-Density Vineyards (3,000+ vines per acre):
+        - Extended harvest time due to numerous grape clusters.
+    * Vineyard Size:
+        - Larger vineyards inherently involve lengthier harvest periods unless multiple crews or machines are employed.
+- Grape Variety:
+    * Delicate Varieties (e.g., Pinot Noir):
+        - Require careful manual handling, making harvesting slower.
+    * Robust Varieties (e.g., Syrah, Chardonnay):
+        - Easier and faster to harvest.
+
+General Harvest Time Estimates:
+- Manual Harvesting:
+    * Small Vineyard (1 acre):
+        - Estimated 6-10 hours of labor with a team of 4-6 workers, assuming ~2 tons of grapes per acre.
+    * Medium Vineyard (10 acres):
+        - 6-10 days of work with a 10-worker team, contingent on conditions.
+    * Large Vineyard (50 acres):
+        - 3-4 weeks of work by a large team, or potentially several crews.
+- Mechanical Harvesting:
+    * Small Vineyard (1 acre):
+        - Approximately 1-2 hours per acre per machine.
+    * Medium Vineyard (10 acres):
+        - 1-2 days with a single machine.
+    * Large Vineyard (50 acres):
+        - 10-15 days with one machine, more swiftly with multiple machines.
+
+Summary:
+- Manual Harvesting: ~6-10 hours per acre with a small team. Slower for challenging terrains or fragile grape varieties.
+- Mechanical Harvesting: ~1-2 hours per acre per machine. Significantly quicker, albeit less precise.
+- Transport: Adds from several minutes to a few hours, contingent on distance.
+
 
 
 
