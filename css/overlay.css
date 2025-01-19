@@ -544,3 +544,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
     margin-top: 20px; /* Add margin to separate from table */
 }
 
+/* Quality Color Classes - Also defined as standart in style.css, but somehow the staff-option class is overriding style.css therefor its here as important to make sure it works*/
+.staff-option .color-class-9 { color: #006400 !important; }  /* Dark Green */
+.staff-option .color-class-8 { color: #228B22 !important; }  /* Forest Green */
+.staff-option .color-class-7 { color: #32CD32 !important; }  /* Lime Green */
+.staff-option .color-class-6 { color: #90EE90 !important; }  /* Light Green */
+.staff-option .color-class-5 { color: #FFD700 !important; }  /* Gold */
+.staff-option .color-class-4 { color: #FFA500 !important; }  /* Orange */
+.staff-option .color-class-3 { color: #FF8C00 !important; }  /* Dark Orange */
+.staff-option .color-class-2 { color: #FF4500 !important; }  /* Orange Red */
+.staff-option .color-class-1 { color: #FF0000 !important; }  /* Red */
+.staff-option .color-class-0 { color: #8B0000 !important; }  /* Dark Red */
+
