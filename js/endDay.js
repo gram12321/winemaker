@@ -148,10 +148,8 @@ export function updateNewYear(farmlands) {
     farmlands.forEach(field => {
         if (field.plantedResourceName) {
             field.vineAge += 1;
-            // Change status to Growing if it was in first year
-            if (field.status === 'No yield in first season') {
-                field.status = 'Growing';
-            }
+            // Remove the status change from here since it's handled in updateFieldStatuses
+            // Only update other annual properties
         }
         field.landvalue = calculateLandvalue(field.country, field.region, field.altitude, field.aspect);
         field.farmlandPrestige = calculateFarmlandPrestige(field);
@@ -164,6 +162,11 @@ export function updateNewYear(farmlands) {
 export function updateFieldStatuses() {
     const farmlands = getFarmlands();
     const { week, season } = getGameState();
+
+    // Handle new year updates first if it's Spring week 1
+    if (season === 'Spring' && week === 1) {
+        updateNewYear(farmlands);
+    }
 
     farmlands.forEach((field, index) => {
         let updates = null;
@@ -202,11 +205,6 @@ export function updateFieldStatuses() {
         }
     });
 
-    if (season === 'Spring' && week === 1) {
-        updateNewYear(farmlands); // This will handle setting the new annualYieldFactor
-    }
-
-    
     displayFarmland();
 }
 
