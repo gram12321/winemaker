@@ -1,5 +1,5 @@
 import { getResourceByName } from '../resource.js';
-import { formatNumber } from '../utils.js';
+import { formatNumber, getColorClass } from '../utils.js';
 
 export function showResourceInfoOverlay(resourceName) {
   const resource = getResourceByName(resourceName);
@@ -19,7 +19,8 @@ export function showResourceInfoOverlay(resourceName) {
 
   // Render the specific resource data
   if (details) {
-    const naturalYieldPercentage = Math.round(resource.naturalYield * 100);
+    const naturalYieldPercentage = resource.naturalYield * 100;
+    const naturalYieldColorClass = getColorClass(resource.naturalYield);
 
     details.innerHTML = `
       <div class="hire-staff-content">
@@ -37,7 +38,7 @@ export function showResourceInfoOverlay(resourceName) {
             <table class="skills-table">
               <tbody>
                 <tr><td>Name</td><td>${resource.name}</td></tr>
-                <tr><td>Natural Yield</td><td>${naturalYieldPercentage}%</td></tr>
+                <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
               </tbody>
             </table>
           </div>
