@@ -1,12 +1,13 @@
 import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '../console.js';
 import { showVineyardOverlay } from './mainpages/vineyardoverlay.js';
-import { inventoryInstance } from '../resource.js';
+import { inventoryInstance, allResources } from '../resource.js'; // Import allResources
 import { farmlandYield, canHarvest } from '../vineyard.js';
-import { formatNumber } from '../utils.js';
+import { formatNumber, getFlagIconHTML  } from '../utils.js';
 import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
-import { regionAltitudeRanges } from '../names.js'; // Import regionAltitudeRanges
+import { regionAltitudeRanges, grapeSuitability } from '../names.js'; // Import regionAltitudeRanges and grapeSuitability
+
 
 /**
  * Centralized function to perform the harvest logic
@@ -17,7 +18,8 @@ import { regionAltitudeRanges } from '../names.js'; // Import regionAltitudeRang
  */
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     const gameYear = parseInt(localStorage.getItem('year'), 10);
-    const quality = ((farmland.annualQualityFactor + farmland.ripeness) / 2).toFixed(2);
+    const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
+    const quality = ((farmland.annualQualityFactor + farmland.ripeness + suitability) / 3).toFixed(2);
 
     // Add harvested grapes to inventory using inventoryInstance
     inventoryInstance.addResource(

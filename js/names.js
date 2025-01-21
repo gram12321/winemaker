@@ -115,6 +115,46 @@ const germanMaleNames = [
   "Rainer", "Matthias", "Kurt", "Axel", "Werner"
 ];
 
+const grapeSuitability = {
+  Italy: {
+    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, PinotNoir: 0.6 },
+    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, PinotNoir: 0.5 },
+    Veneto: { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.7 },
+    Sicily: { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.3 },
+    Puglia: { Barbera: 0.9, Chardonnay: 0.65, PinotNoir: 0.4 },
+  },
+  France: {
+    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, PinotNoir: 0.6 },
+    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, PinotNoir: 0.9 },
+    Champagne: { Barbera: 0.2, Chardonnay: 0.9, PinotNoir: 0.8 },
+    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, PinotNoir: 0.7 },
+    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.5 },
+  },
+  Spain: {
+    Rioja: { Barbera: 0.85, Chardonnay: 0.7, PinotNoir: 0.4 },
+    "Ribera del Duero": { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.35 },
+    Jumilla: { Barbera: 0.9, Chardonnay: 0.5, PinotNoir: 0.3 },
+    "La Mancha": { Barbera: 0.85, Chardonnay: 0.55, PinotNoir: 0.25 },
+    "Sherry (Jerez)": { Barbera: 0.8, Chardonnay: 0.5, PinotNoir: 0.2 },
+  },
+  "United States": {
+    "Napa Valley (California)": { Barbera: 0.9, Chardonnay: 1.0, PinotNoir: 0.7 },
+    "Sonoma County (California)": { Barbera: 0.85, Chardonnay: 0.95, PinotNoir: 0.75 },
+    "Willamette Valley (Oregon)": { Barbera: 0.4, Chardonnay: 0.85, PinotNoir: 1.0 },
+    "Finger Lakes (New York)": { Barbera: 0.3, Chardonnay: 0.7, PinotNoir: 0.75 },
+    "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, PinotNoir: 0.6 },
+  },
+  Germany: {
+    Mosel: { Barbera: 0.15, Chardonnay: 0.8, PinotNoir: 1.0 },
+    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, PinotNoir: 0.9 },
+    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, PinotNoir: 0.85 },
+    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, PinotNoir: 0.8 },
+    Ahr: { Barbera: 0.1, Chardonnay: 0.7, PinotNoir: 0.95 },
+  },
+};
+
+
+
 // Aspect ratings for each region
 const regionAspectRatings = {
   "Italy": {
@@ -230,7 +270,6 @@ const regionAspectRatings = {
   },
 };
 
-// names.js
 
 const regionSoilTypes = {
   "Italy": {
@@ -445,4 +484,4 @@ const lastNamesByCountry = {
 };
 
 // Export the altitude ranges for use in other parts of the application 
-export { regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};
+export { grapeSuitability, regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};
