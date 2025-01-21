@@ -9,29 +9,6 @@ import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from './overlays/plantingOverlay.js';
 import { showResourceInfoOverlay } from './overlays/resourceInfoOverlay.js';
 
-// Refactored standalone function for land value calculation
-export function calculateLandvalue(country, region, altitude, aspect) {
-  return calculateAndNormalizePriceFactor(country, region, altitude, aspect);
-}
-
-// Refactored standalone function for farmland age prestige modifier
-export function farmlandAgePrestigeModifier(vineAge) {
-  const age = parseFloat(vineAge);
-  if (isNaN(age) || age < 0) {
-    return 0;
-  } else if (age <= 3) {
-    return (age * age) / 100 + 0.01;
-  } else if (age <= 25) {
-    return 0.1 + (age - 3) * (0.4 / 22);
-  } else if (age <= 100) {
-    return 0.5 + (Math.atan((age - 25) / 20) / Math.PI) * (0.95 - 0.5);
-  } else {
-    return 0.95;
-  }
-}
-
-
-
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = 5000, farmlandHealth = 0.5) {
     this.id = id; // Unique identifier for the farmland
@@ -75,24 +52,45 @@ export function farmlandYield(farmland) {
     return 0;
 }
 
-// Refactored calculateFarmlandPrestige function using standalone prestige modifier
+// Refactored standalone function for land value calculation
+export function calculateLandvalue(country, region, altitude, aspect) {
+  return calculateAndNormalizePriceFactor(country, region, altitude, aspect);
+}
+
+// Refactored standalone function for farmland age prestige modifier
+export function farmlandAgePrestigeModifier(vineAge) {
+  const age = parseFloat(vineAge);
+  if (isNaN(age) || age < 0) {
+    return 0;
+  } else if (age <= 3) {
+    return (age * age) / 100 + 0.01;
+  } else if (age <= 25) {
+    return 0.1 + (age - 3) * (0.4 / 22);
+  } else if (age <= 100) {
+    return 0.5 + (Math.atan((age - 25) / 20) / Math.PI) * (0.95 - 0.5);
+  } else {
+    return 0.95;
+  }
+}
+
+
+
+// Calculate farmland prestige with contributions from age, land value, prestige ranking, and fragility bonus in separate functions (for export to farmlandoverlay.js)
+
 export function calculateAgeContribution(ageModifier) {
   return ageModifier * 0.30;
 }
-
 export function calculateLandValueContribution(landvalueNormalized) {
   return landvalueNormalized * 0.25;
 }
-
 export function calculatePrestigeRankingContribution(prestigeRanking) {
   return prestigeRanking * 0.25;
 }
-
 export function calculateFragilityBonusContribution(fragilityBonus) {
   return fragilityBonus * 0.20;
 }
 
-// Refactored calculateFarmlandPrestige function using standalone prestige modifier
+
 export function calculateFarmlandPrestige(farmland) {
   const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge);
   const landvalueNormalized = normalizeLandValue(farmland.landvalue);
