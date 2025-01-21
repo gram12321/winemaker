@@ -1,13 +1,7 @@
-import { getUnit, convertToCurrentUnit } from './settings.js';
-import { getFlagIcon, formatNumber, getColorClass } from './utils.js';
 import { getResourceByName } from './resource.js';
-import { loadFarmlands } from './database/adminFunctions.js';
-import taskManager from './taskManager.js';  // Add this import
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
-import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
-import { showPlantingOverlay } from './overlays/plantingOverlay.js';
-import { showResourceInfoOverlay } from './overlays/resourceInfoOverlay.js';
+
 
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = 5000, farmlandHealth = 0.5) {
@@ -72,9 +66,6 @@ export function farmlandAgePrestigeModifier(vineAge) {
     return 0.95;
   }
 }
-
-
-
 // Calculate farmland prestige with contributions from age, land value, prestige ranking, and fragility bonus in separate functions (for export to farmlandoverlay.js)
 
 export function calculateAgeContribution(ageModifier) {
@@ -89,7 +80,6 @@ export function calculatePrestigeRankingContribution(prestigeRanking) {
 export function calculateFragilityBonusContribution(fragilityBonus) {
   return fragilityBonus * 0.20;
 }
-
 
 export function calculateFarmlandPrestige(farmland) {
   const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge);
