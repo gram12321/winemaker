@@ -183,7 +183,7 @@ export function updateFieldStatuses() {
                 break;
             case 'Spring':
                 if (week === 1) {
-                    if (field.status === 'Dormancy' && field.plantedResourceName) {
+                    if ((field.status === 'Dormancy' || field.status === 'No yield in first season') && field.plantedResourceName) {
                         updates = { status: 'Growing' };
                     }
                 }
