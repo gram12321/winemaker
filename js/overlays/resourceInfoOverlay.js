@@ -21,6 +21,9 @@ export function showResourceInfoOverlay(resourceName) {
   if (details) {
     const naturalYieldPercentage = resource.naturalYield * 100;
     const naturalYieldColorClass = getColorClass(resource.naturalYield);
+   
+    const fragilePercentage = resource.fragile * 100;
+    const fregileColorClass = getColorClass(resource.naturalYield);
 
     details.innerHTML = `
       <div class="hire-staff-content">
@@ -39,6 +42,7 @@ export function showResourceInfoOverlay(resourceName) {
               <tbody>
                 <tr><td>Name</td><td>${resource.name}</td></tr>
                 <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
+                <tr><td>Grape Frigile</td><td class="${fregileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
               </tbody>
             </table>
           </div>

@@ -1,9 +1,10 @@
 import { getColorClass } from './utils.js';
 
 export class Resource {
-  constructor(name, naturalYield) {
+  constructor(name, naturalYield, fragile) {
     this.name = name;
     this.naturalYield = naturalYield;
+    this.fragile = fragile;
   }
 }
 
@@ -119,8 +120,9 @@ export class Inventory {
 export const inventoryInstance = new Inventory();
 
 export const allResources = [
-  new Resource('Barbera', 1),
-  new Resource('Chardonnay', 0.9)
+  new Resource('Barbera', 1, 1),
+  new Resource('Chardonnay', 0.9, 1),
+  new Resource('Pinot Noir', 0.7, 0.7)
 ];
 
 export function getResourceByName(name) {
