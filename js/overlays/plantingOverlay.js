@@ -5,6 +5,7 @@ import { allResources } from '/js/resource.js';
 import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
+import { regionAltitudeRanges } from '../names.js';  // Add this import at the top
 
 // Function to handle planting logic
 function plant(farmland, selectedResource, selectedDensity) {
@@ -28,12 +29,26 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Calculate total work based on density and acres
+  // Calculate altitude penalty
+  const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+  const medianAltitude = (minAltitude + maxAltitude) / 2;
+  const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+  const altitudePenalty = altitudeDeviation * 0.5; // 5% extra work for every 10% deviation above median, 5% less work for every 10% deviation below median
+
+  // Calculate total work based on density and acres, including altitude penalty
   const vinesPerAcre = selectedDensity;
   const totalVines = vinesPerAcre * farmland.acres;
-  const totalStandardWorkWeek = totalVines / 3500 // How many weeks of work for a single worker capable of planting 500 vines per day (3500 per week) 
-  const totalWork = totalStandardWorkWeek * 50; // Multiply by 50 to convert standartWeekofWork into workunits (50 work units per week (IE a 100% worker do 50 work units per week))
+  const totalStandardWorkWeek = totalVines / 3500; // How many weeks of work for a single worker capable of planting 500 vines per day (3500 per week)
+  const totalWork = totalStandardWorkWeek * 50 * (1 + altitudePenalty); // Multiply by 50 to convert standardWeekofWork into workunits, then apply altitude penalty
 
+  // Add detailed console message about work calculation
+  addConsoleMessage(`Work calculation for ${getFlagIconHTML(farmland.country)} ${farmland.name}:
+    - Vines per acre: ${formatNumber(vinesPerAcre)}
+    - Total vines: ${formatNumber(totalVines)}
+    - Standard work weeks: ${formatNumber(totalStandardWorkWeek, 2)} (${formatNumber(totalVines)} vines ÷ 3500 vines per week)
+    - Work units before altitude: ${formatNumber(totalStandardWorkWeek * 50, 1)} (${formatNumber(totalStandardWorkWeek, 2)} weeks × 50 units)
+    - Altitude deviation: ${formatNumber(altitudeDeviation * 100, 1)}% (${altitudePenalty >= 0 ? '+' : '-'}${formatNumber(Math.abs(altitudePenalty * 100), 1)}% work)
+    - Final work units: ${formatNumber(totalWork, 1)} (${formatNumber(totalStandardWorkWeek * 50, 1)} × ${formatNumber(1 + altitudePenalty, 2)})`);
 
   // Since planting is a progressive task, we use addProgressiveTask
   taskManager.addProgressiveTask(
