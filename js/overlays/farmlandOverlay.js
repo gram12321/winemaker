@@ -1,8 +1,14 @@
 // Import necessary utility functions and classes
 import { formatNumber, getColorClass, getFlagIcon } from '../utils.js';
-import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names.js';
+import { 
+  regionAspectRatings, 
+  calculateAndNormalizePriceFactor,
+} from '/js/names.js';
+import {calculateAgeContribution, 
+  calculateLandValueContribution, 
+  calculatePrestigeRankingContribution, 
+  calculateFragilityBonusContribution } from '/js/farmland.js';
 import { showResourceInfoOverlay } from './resourceInfoOverlay.js';
-import { calculateFarmlandPrestige } from '../farmland.js';
 
 export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');
@@ -20,14 +26,18 @@ export function showFarmlandOverlay(farmlandData) {
   const landValue = calculateAndNormalizePriceFactor(farmlandData.country, farmlandData.region, farmlandData.altitude, farmlandData.aspect);
   const flagIcon = getFlagIcon(farmlandData.country);
   const farmlandPrestige = farmlandData.farmlandPrestige || 0;
-  const { finalPrestige, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution } = calculateFarmlandPrestige(farmlandData); // Updated line
+  const ageContribution = calculateAgeContribution(farmlandData.vineAge);
+  const landValueContribution = calculateLandValueContribution(farmlandData.landvalue);
+  const prestigeRankingContribution = calculatePrestigeRankingContribution(farmlandData.region, farmlandData.country);
+  const fragilityBonusContribution = calculateFragilityBonusContribution(farmlandData.plantedResourceName);
+  const finalPrestige = ageContribution + landValueContribution + prestigeRankingContribution + fragilityBonusContribution || 0.01;
   const formattedSize = farmlandData.acres < 10 ? farmlandData.acres.toFixed(2) : formatNumber(farmlandData.acres);
   const prestigeColorClass = getColorClass(farmlandPrestige);
   const healthColorClass = getColorClass(farmlandData.farmlandHealth);
 
   // Render the specific farmland data
   if (details) {
-    details.innerHTML = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, finalPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution); // Updated line
+    details.innerHTML = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, finalPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution);
     setupFarmlandOverlayEventListeners(details, overlay, farmlandData);
   }
 
@@ -60,7 +70,7 @@ function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
   });
 }
 
-function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution) { // Updated line
+function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution) {
   const prestigeTooltip = `
     Age Contribution: ${formatNumber(ageContribution * 100)}%
     Land Value Contribution: ${formatNumber(landValueContribution * 100)}%

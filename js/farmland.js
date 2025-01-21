@@ -68,41 +68,42 @@ export function farmlandAgePrestigeModifier(vineAge) {
 }
 // Calculate farmland prestige with contributions from age, land value, prestige ranking, and fragility bonus in separate functions (for export to farmlandoverlay.js)
 
-export function calculateAgeContribution(ageModifier) {
+export function calculateAgeContribution(vineAge) {
+  const ageModifier = farmlandAgePrestigeModifier(vineAge);
   return ageModifier * 0.30;
 }
-export function calculateLandValueContribution(landvalueNormalized) {
+
+export function calculateLandValueContribution(landvalue) {
+  const landvalueNormalized = normalizeLandValue(landvalue);
   return landvalueNormalized * 0.25;
 }
-export function calculatePrestigeRankingContribution(prestigeRanking) {
+
+export function calculatePrestigeRankingContribution(region, country) {
+  const prestigeRanking = regionPrestigeRankings[`${region}, ${country}`] || 0;
   return prestigeRanking * 0.25;
 }
-export function calculateFragilityBonusContribution(fragilityBonus) {
+
+export function calculateFragilityBonusContribution(plantedResourceName) {
+  const fragilityBonus = (typeof plantedResourceName === 'string' && plantedResourceName.trim()) 
+    ? (1 - getResourceByName(plantedResourceName).fragile) 
+    : 0;
   return fragilityBonus * 0.20;
 }
 
 export function calculateFarmlandPrestige(farmland) {
-  const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge);
-  const landvalueNormalized = normalizeLandValue(farmland.landvalue);
-  const prestigeRanking = regionPrestigeRankings[`${farmland.region}, ${farmland.country}`] || 0;
-  const fragilityBonus = (typeof farmland.plantedResourceName === 'string' && farmland.plantedResourceName.trim()) 
-    ? (1 - getResourceByName(farmland.plantedResourceName).fragile) 
-    : 0;
+  const ageContribution = calculateAgeContribution(farmland.vineAge);
+  const landValueContribution = calculateLandValueContribution(farmland.landvalue);
+  const prestigeRankingContribution = calculatePrestigeRankingContribution(farmland.region, farmland.country);
+  const fragilityBonusContribution = calculateFragilityBonusContribution(farmland.plantedResourceName);
 
   const finalPrestige = (
-    calculateAgeContribution(ageModifier) +
-    calculateLandValueContribution(landvalueNormalized) +
-    calculatePrestigeRankingContribution(prestigeRanking) +
-    calculateFragilityBonusContribution(fragilityBonus)
+    ageContribution +
+    landValueContribution +
+    prestigeRankingContribution +
+    fragilityBonusContribution
   ) || 0.01;
 
-  return {
-    finalPrestige,
-    ageContribution: calculateAgeContribution(ageModifier),
-    landValueContribution: calculateLandValueContribution(landvalueNormalized),
-    prestigeRankingContribution: calculatePrestigeRankingContribution(prestigeRanking),
-    fragilityBonusContribution: calculateFragilityBonusContribution(fragilityBonus)
-  };
+  return finalPrestige;
 }
 
 export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
