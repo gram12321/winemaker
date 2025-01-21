@@ -61,6 +61,13 @@ function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
 }
 
 function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution) { // Updated line
+  const prestigeTooltip = `
+    Age Contribution: ${formatNumber(ageContribution * 100)}%
+    Land Value Contribution: ${formatNumber(landValueContribution * 100)}%
+    Prestige Ranking Contribution: ${formatNumber(prestigeRankingContribution * 100)}%
+    Fragility Bonus Contribution: ${formatNumber(fragilityBonusContribution * 100)}%
+  `;
+
   return `
     <div class="hire-staff-content">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -102,7 +109,7 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
               <tr><td>Land Value</td><td>€${formatNumber(landValue)}</td></tr>
               <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
               <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
-              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass}">${formatNumber(farmlandPrestige * 100)}% (${formatNumber(ageContribution * 100)}%, ${formatNumber(landValueContribution * 100)}%, ${formatNumber(prestigeRankingContribution * 100)}%, ${formatNumber(fragilityBonusContribution * 100)}%)</td></tr>
+              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass} overlay-tooltip" title="${prestigeTooltip}">${formatNumber(farmlandPrestige * 100)}%</td></tr>
               <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
             </tbody>
           </table>
