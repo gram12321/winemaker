@@ -12,6 +12,7 @@ import { showFinanceOverlay } from '/js/overlays/mainpages/financeoverlay.js';
 import { showWineryOverlay } from '/js/overlays/mainpages/wineryoverlay.js';
 import { showSalesOverlay } from '/js/overlays/mainpages/salesoverlay.js';
 import { hideAllOverlays } from '/js/overlays/mainpages/hideOverlays.js';
+import { incrementWeek } from '../endDay.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -144,6 +145,18 @@ export function initializeSidebar() {
                         clearLocalStorage();
                         window.location.href = '../index.html';
                     });
+                }
+
+                // Create and append the Increment Week button
+                const incrementWeekButton = document.createElement('button');
+                incrementWeekButton.id = 'increment-week-btn';
+                incrementWeekButton.className = 'btn btn-info';
+                incrementWeekButton.textContent = 'Increment Week';
+                incrementWeekButton.addEventListener('click', incrementWeek);
+
+                const companyInfoDiv = document.getElementById('companyInfo');
+                if (companyInfoDiv) {
+                    companyInfoDiv.insertAdjacentElement('beforebegin', incrementWeekButton);
                 }
             } else {
                 console.error("Sidebar wrapper element not found.");

@@ -1,4 +1,4 @@
-import { clearLocalStorage, clearFirestore } from '/js/database/adminFunctions.js'; // Import functions from adminFunctions.js
+import { clearLocalStorage, clearFirestore, saveCompanyInfo } from '/js/database/adminFunctions.js'; // Import functions from adminFunctions.js
 
 export function showAdminOverlay() {
     // Check if an instance of the overlay already exists and remove it
@@ -18,6 +18,7 @@ export function showAdminOverlay() {
             <div class="text-center mt-4">
                 <button id="clear-storage-btn" class="btn btn-danger">Clear Local Storage</button>
                 <button id="clear-firestore-btn" class="btn btn-warning">Clear Firestore</button>
+                <button id="save-company-info-btn" class="btn btn-primary">Save Company Info</button>
             </div>
         </div>
     `;
@@ -36,4 +37,6 @@ export function showAdminOverlay() {
     document.getElementById('clear-firestore-btn').addEventListener('click', () => {
         clearFirestore();
     });
+
+    document.getElementById('save-company-info-btn').addEventListener('click', saveCompanyInfo);
 }
