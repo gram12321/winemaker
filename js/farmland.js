@@ -85,7 +85,9 @@ export function calculateFarmlandPrestige(farmland) {
   const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge);
   const landvalueNormalized = normalizeLandValue(farmland.landvalue);
   const prestigeRanking = regionPrestigeRankings[`${farmland.region}, ${farmland.country}`] || 0;
-  const fragilityBonus = farmland.plantedResourceName ? (1 - getResourceByName(farmland.plantedResourceName).fragile) : 0;
+  const fragilityBonus = (typeof farmland.plantedResourceName === 'string' && farmland.plantedResourceName.trim()) 
+    ? (1 - getResourceByName(farmland.plantedResourceName).fragile) 
+    : 0;
 
   const finalPrestige = (
     calculateAgeContribution(ageModifier) +
