@@ -2,6 +2,7 @@
 import { formatNumber, getColorClass, getFlagIcon } from '../utils.js';
 import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names.js';
 import { showResourceInfoOverlay } from './resourceInfoOverlay.js';
+import { calculateFarmlandPrestige } from '../farmland.js';
 
 export function showFarmlandOverlay(farmlandData) {
   const overlay = document.getElementById('farmlandOverlay');
@@ -19,13 +20,14 @@ export function showFarmlandOverlay(farmlandData) {
   const landValue = calculateAndNormalizePriceFactor(farmlandData.country, farmlandData.region, farmlandData.altitude, farmlandData.aspect);
   const flagIcon = getFlagIcon(farmlandData.country);
   const farmlandPrestige = farmlandData.farmlandPrestige || 0;
+  const { finalPrestige, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution } = calculateFarmlandPrestige(farmlandData); // Updated line
   const formattedSize = farmlandData.acres < 10 ? farmlandData.acres.toFixed(2) : formatNumber(farmlandData.acres);
   const prestigeColorClass = getColorClass(farmlandPrestige);
   const healthColorClass = getColorClass(farmlandData.farmlandHealth);
 
   // Render the specific farmland data
   if (details) {
-    details.innerHTML = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass);
+    details.innerHTML = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, finalPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution); // Updated line
     setupFarmlandOverlayEventListeners(details, overlay, farmlandData);
   }
 
@@ -58,7 +60,7 @@ function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
   });
 }
 
-function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass) {
+function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution) { // Updated line
   return `
     <div class="hire-staff-content">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -100,7 +102,7 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
               <tr><td>Land Value</td><td>€${formatNumber(landValue)}</td></tr>
               <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
               <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
-              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass}">${formatNumber(farmlandPrestige * 100)}%</td></tr>
+              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass}">${formatNumber(farmlandPrestige * 100)}% (${formatNumber(ageContribution * 100)}%, ${formatNumber(landValueContribution * 100)}%, ${formatNumber(prestigeRankingContribution * 100)}%, ${formatNumber(fragilityBonusContribution * 100)}%)</td></tr>
               <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
             </tbody>
           </table>

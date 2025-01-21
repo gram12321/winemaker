@@ -31,6 +31,7 @@ export function farmlandAgePrestigeModifier(vineAge) {
 }
 
 
+
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = 5000, farmlandHealth = 0.5) {
     this.id = id; // Unique identifier for the farmland
@@ -75,29 +76,43 @@ export function farmlandYield(farmland) {
 }
 
 // Refactored calculateFarmlandPrestige function using standalone prestige modifier
-// The calculateFarmlandPrestige function produces values in the range of approximately 0.1625 to 0.9875, with typical values around 0.5875.
+export function calculateAgeContribution(ageModifier) {
+  return ageModifier * 0.30;
+}
+
+export function calculateLandValueContribution(landvalueNormalized) {
+  return landvalueNormalized * 0.25;
+}
+
+export function calculatePrestigeRankingContribution(prestigeRanking) {
+  return prestigeRanking * 0.25;
+}
+
+export function calculateFragilityBonusContribution(fragilityBonus) {
+  return fragilityBonus * 0.20;
+}
+
+// Refactored calculateFarmlandPrestige function using standalone prestige modifier
 export function calculateFarmlandPrestige(farmland) {
-  const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge); // Use standalone function
+  const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge);
   const landvalueNormalized = normalizeLandValue(farmland.landvalue);
   const prestigeRanking = regionPrestigeRankings[`${farmland.region}, ${farmland.country}`] || 0;
+  const fragilityBonus = farmland.plantedResourceName ? (1 - getResourceByName(farmland.plantedResourceName).fragile) : 0;
 
-  // Calculate fragility bonus (1 - fragility to reverse it, so lower fragility = higher bonus)
-  let fragilityBonus = 0;
-  if (farmland.plantedResourceName) {
-    const resource = getResourceByName(farmland.plantedResourceName);
-    fragilityBonus = (1 - resource.fragile); // More fragile = higher bonus
-  }
-
-  // Combine all factors with weights:
-  // 30% age, 25% land value, 25% region prestige, 20% fragility bonus
   const finalPrestige = (
-    (ageModifier * 0.30) +
-    (landvalueNormalized * 0.25) +
-    (prestigeRanking * 0.25) +
-    (fragilityBonus * 0.20)
+    calculateAgeContribution(ageModifier) +
+    calculateLandValueContribution(landvalueNormalized) +
+    calculatePrestigeRankingContribution(prestigeRanking) +
+    calculateFragilityBonusContribution(fragilityBonus)
   ) || 0.01;
 
-  return finalPrestige;
+  return {
+    finalPrestige,
+    ageContribution: calculateAgeContribution(ageModifier),
+    landValueContribution: calculateLandValueContribution(landvalueNormalized),
+    prestigeRankingContribution: calculatePrestigeRankingContribution(prestigeRanking),
+    fragilityBonusContribution: calculateFragilityBonusContribution(fragilityBonus)
+  };
 }
 
 export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
@@ -199,4 +214,4 @@ function getRandomAspect() {
   return getRandomItem(aspects);
 }
 
-export { Farmland };
+export { Farmland, normalizeLandValue };
