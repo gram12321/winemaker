@@ -119,10 +119,10 @@ export class Inventory {
 
 export const inventoryInstance = new Inventory();
 
-export const allResources = [
+export const allResources = [ // Resource(name, naturalYield, fragile)
   new Resource('Barbera', 1, 1),
   new Resource('Chardonnay', 0.9, 1),
-  new Resource('Pinot Noir', 0.7, 0.7)
+  new Resource('Pinot Noir', 0.7, 0.4)
 ];
 
 export function getResourceByName(name) {

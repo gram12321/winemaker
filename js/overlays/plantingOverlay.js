@@ -14,12 +14,7 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  if (!farmland || typeof farmland.id === 'undefined') {
-    addConsoleMessage('Invalid farmland data', false, true);
-    return false;
-  }
-
-  // Calculate planting cost
+    // Calculate planting cost
   const totalCost = selectedDensity * 2 * farmland.acres;
   const currentMoney = parseFloat(localStorage.getItem('money') || '0');
 
@@ -28,6 +23,12 @@ function plant(farmland, selectedResource, selectedDensity) {
     addConsoleMessage(`Insufficient funds for planting. Required: <strong>${formatNumber(totalCost)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>`, false, true);
     return false;
   }
+
+  // Get the resource object to check its properties
+  const resourceObj = allResources.find(r => r.name === selectedResource);
+  // Calculate density multiplier: 1.0 at 1000 vines/acre, increasing by 0.1 for each 1000 additional vines
+  const densityMultiplier = 1 + Math.max(0, (selectedDensity - 1000) / 1000) * 0.1;
+  const fragilePenalty = (1 - resourceObj.fragile) * 0.5 * densityMultiplier; // More fragile = higher penalty, multiplied by density factor
 
   // Calculate altitude penalty
   const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
@@ -39,16 +40,17 @@ function plant(farmland, selectedResource, selectedDensity) {
   const vinesPerAcre = selectedDensity;
   const totalVines = vinesPerAcre * farmland.acres;
   const totalStandardWorkWeek = totalVines / 3500; // How many weeks of work for a single worker capable of planting 500 vines per day (3500 per week)
-  const totalWork = totalStandardWorkWeek * 50 * (1 + altitudePenalty); // Multiply by 50 to convert standardWeekofWork into workunits, then apply altitude penalty
+  const totalWork = totalStandardWorkWeek * 50 * (1 + altitudePenalty + fragilePenalty); // Multiply by 50 to convert standardWeekofWork into workunits, then apply altitude penalty
 
   // Add detailed console message about work calculation
   addConsoleMessage(`Work calculation for ${getFlagIconHTML(farmland.country)} ${farmland.name}:
     - Vines per acre: ${formatNumber(vinesPerAcre)}
     - Total vines: ${formatNumber(totalVines)}
     - Standard work weeks: ${formatNumber(totalStandardWorkWeek, 2)} (${formatNumber(totalVines)} vines ÷ 3500 vines per week)
-    - Work units before altitude: ${formatNumber(totalStandardWorkWeek * 50, 1)} (${formatNumber(totalStandardWorkWeek, 2)} weeks × 50 units)
+    - Work units before penalties: ${formatNumber(totalStandardWorkWeek * 50, 1)} (${formatNumber(totalStandardWorkWeek, 2)} weeks × 50 units)
     - Altitude deviation: ${formatNumber(altitudeDeviation * 100, 1)}% (${altitudePenalty >= 0 ? '+' : '-'}${formatNumber(Math.abs(altitudePenalty * 100), 1)}% work)
-    - Final work units: ${formatNumber(totalWork, 1)} (${formatNumber(totalStandardWorkWeek * 50, 1)} × ${formatNumber(1 + altitudePenalty, 2)})`);
+    - Fragility penalty: +${formatNumber(fragilePenalty * 100, 1)}% (Base: ${formatNumber((1 - resourceObj.fragile) * 50, 1)}% × Density multiplier: ${formatNumber(densityMultiplier, 2)})
+    - Final work units: ${formatNumber(totalWork, 1)} (${formatNumber(totalStandardWorkWeek * 50, 1)} × ${formatNumber(1 + altitudePenalty + fragilePenalty, 2)})`);
 
   // Since planting is a progressive task, we use addProgressiveTask
   taskManager.addProgressiveTask(

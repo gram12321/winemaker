@@ -48,6 +48,9 @@ export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmou
  */
 function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     const buildings = loadBuildings();
+    // Add this line to get the resource object
+    const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
+    
     const tool = buildings.flatMap(b => b.tools).find(t => 
         `${t.name} #${t.instanceNumber}` === selectedTool
     );
@@ -73,14 +76,24 @@ function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     // Add a penalty for high density: 5% extra work for every 1000 plants above 1000 density
     const densityPenalty = Math.max(0, (farmland.density - 1000) / 1000) * 0.05;
 
+    // Add fragility penalty: higher penalty for lower fragility value
+    const fragilePenalty = (1 - resourceObj.fragile) * 0.5; // Same calculation as planting but without density multiplier
+
     // Add a penalty or bonus for altitude: 5% extra work for every 10% deviation above the median altitude, and 5% less work for every 10% deviation below the median altitude
     const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
     const medianAltitude = (minAltitude + maxAltitude) / 2;
     const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
     const altitudePenalty = altitudeDeviation * 0.5; // 5% extra work for every 10% deviation above median, 5% less work for every 10% deviation below median
 
-    const totalWork = totalHarvest / 1000 * 25 * (1 + densityPenalty + altitudePenalty); // Totalharvest in kg. Assuming 25 unit of work per ton of harvest (IE a worker does 50 units per day. And in real life 1 worker can harvest 2 ton per day)
+    const totalWork = totalHarvest / 1000 * 25 * (1 + densityPenalty + altitudePenalty + fragilePenalty); // Totalharvest in kg. Assuming 25 unit of work per ton of harvest (IE a worker does 50 units per day. And in real life 1 worker can harvest 2 ton per day)
 
+    // Add more detailed console message
+    addConsoleMessage(`Work calculation for harvesting ${getFlagIconHTML(farmland.country)} ${farmland.name}:
+    - Base work units: ${formatNumber(totalHarvest / 1000 * 25, 1)} (${formatNumber(totalHarvest)} kg ÷ 1000 × 25)
+    - Density penalty: +${formatNumber(densityPenalty * 100, 1)}%
+    - Altitude penalty: ${formatNumber(altitudeDeviation * 100, 1)}% (${altitudePenalty >= 0 ? '+' : '-'}${formatNumber(Math.abs(altitudePenalty * 100), 1)}% work)
+    - Fragility penalty: +${formatNumber(fragilePenalty * 100, 1)}% (${resourceObj.name} fragility: ${resourceObj.fragile})
+    - Final work units: ${formatNumber(totalWork, 1)}`);
 
     taskManager.addProgressiveTask(
         taskName,
