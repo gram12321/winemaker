@@ -342,22 +342,24 @@
   border-radius: var(--radius-sm);
 }
 
-/* Default state (expanded) */
-.menu-title .company-name .short-name {
-  display: none !important;
-}
-
-.menu-title .company-name .full-name {
-  display: block !important;
-}
-
-/* Collapsed state */
-#sidebar-wrapper.collapsed .menu-title .company-name .short-name {
-  display: block !important;
+/* Remove all previous display rules for company name */
+.menu-title .company-name {
   font-size: 1.5rem;
   text-align: center;
 }
 
+.menu-title .company-name .short-name {
+  display: none;
+}
+
+.menu-title .company-name .full-name {
+  display: block;
+}
+
+#sidebar-wrapper.collapsed .menu-title .company-name .short-name {
+  display: block;
+}
+
 #sidebar-wrapper.collapsed .menu-title .company-name .full-name {
-  display: none !important;
+  display: none;
 }
