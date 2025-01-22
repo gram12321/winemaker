@@ -1,4 +1,5 @@
-const CACHE_NAME = 'winery-game-cache-v4';
+
+const CACHE_NAME = 'winery-game-cache-v1';
 const urlsToCache = [
   '/assets/pic/bottles_dalle.webp',
   '/assets/pic/crushing_dalle.webp',
@@ -21,34 +22,11 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
   );
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  return self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  // Skip cache in development environment
-  if (event.request.url.includes('.replit.dev')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
   );
 });
