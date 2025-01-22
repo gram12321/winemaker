@@ -30,8 +30,8 @@
 
 .toggle-panel {
   position: absolute;
-  top: 10px;
-  right: 15px;
+  top: 500px;
+  right: 150px;
   background: var(--color-accent);
   border: none;
   color: var(--panel-text);
