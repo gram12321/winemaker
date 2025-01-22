@@ -128,10 +128,15 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 }
 
 .overlay-section .card-header {
-    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
-    color: var(--panel-text);
-    padding: 1rem;
-    border-bottom: 2px solid var(--color-accent);
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  padding: 1rem;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Keep gradient only for multi-section overlays */
+.overlay-section:not(:only-child) .card-header {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
 }
 
 /*  - --- --   Overlay   - - - - - -*/
