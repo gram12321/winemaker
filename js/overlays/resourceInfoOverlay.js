@@ -1,5 +1,6 @@
 import { getResourceByName } from '../resource.js';
 import { formatNumber, getColorClass } from '../utils.js';
+import { grapeSuitability } from '../names.js';
 
 export function showResourceInfoOverlay(resourceName) {
   const resource = getResourceByName(resourceName);
@@ -25,6 +26,28 @@ export function showResourceInfoOverlay(resourceName) {
     const fragilePercentage = resource.fragile * 100;
     const fregileColorClass = getColorClass(resource.naturalYield);
 
+    // Generate regions suitability table with collapsible countries
+    let countryButtons = '';
+    let regionsTable = '';
+    const sortedCountries = Object.keys(grapeSuitability).sort();
+    sortedCountries.forEach((country, index) => {
+      let countryTable = '<table class="skills-table"><tbody>';
+      for (const [region, suitability] of Object.entries(grapeSuitability[country])) {
+        if (suitability[resource.name]) {
+          countryTable += `<tr><td>${region}</td><td>${(suitability[resource.name] * 100).toFixed(0)}%</td></tr>`;
+        }
+      }
+      countryTable += '</tbody></table>';
+      countryButtons += `
+        <button class="btn btn-secondary btn-sm toggle-country" data-country="${country}">${country}</button>
+      `;
+      regionsTable += `
+        <div class="country-section" id="regions-${country.replace(/\s+/g, '-')}" style="display: ${index === 0 ? 'block' : 'none'};">
+          ${countryTable}
+        </div>
+      `;
+    });
+
     details.innerHTML = `
       <div class="hire-staff-content">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -35,8 +58,8 @@ export function showResourceInfoOverlay(resourceName) {
         </div>
         <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
         </div>
-        <div class="staff-options-container">
-          <div class="staff-option">
+        <div class="staff-options-container d-flex">
+          <div class="staff-option flex-fill">
             <h4>Resource Information</h4>
             <table class="skills-table">
               <tbody>
@@ -45,6 +68,16 @@ export function showResourceInfoOverlay(resourceName) {
                 <tr><td>Grape Frigile</td><td class="${fregileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
               </tbody>
             </table>
+          </div>
+          <div class="staff-option flex-fill">
+            <h4>Regions</h4>
+            <div class="country-buttons">
+              ${countryButtons}
+            </div>
+          </div>
+          <div class="staff-option flex-fill">
+            <h4>Regions Info</h4>
+            ${regionsTable}
           </div>
         </div>
       </div>
@@ -57,6 +90,25 @@ export function showResourceInfoOverlay(resourceName) {
         overlay.style.display = 'none';
       });
     }
+
+    // Add toggle button event listeners for countries
+    const toggleButtons = details.querySelectorAll('.toggle-country');
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const country = button.getAttribute('data-country').replace(/\s+/g, '-');
+        const regionsContainer = details.querySelector(`#regions-${country}`);
+        
+        // Hide all other country sections
+        details.querySelectorAll('.country-section').forEach(section => {
+          section.style.display = 'none';
+        });
+
+        // Show the selected country section
+        if (regionsContainer) {
+          regionsContainer.style.display = 'block';
+        }
+      });
+    });
   }
 
   overlay.style.display = 'block';

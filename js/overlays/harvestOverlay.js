@@ -7,6 +7,7 @@ import { formatNumber, getFlagIconHTML  } from '../utils.js';
 import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { regionAltitudeRanges, grapeSuitability } from '../names.js'; // Import regionAltitudeRanges and grapeSuitability
+import { loadFarmlands } from '../database/adminFunctions.js';
 
 
 /**
@@ -19,22 +20,47 @@ import { regionAltitudeRanges, grapeSuitability } from '../names.js'; // Import 
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
-    const quality = ((farmland.annualQualityFactor + farmland.ripeness + suitability) / 3).toFixed(2);
+    const currentFarmland = loadFarmlands().find(f => f.id === farmlandId);
 
-    // Add harvested grapes to inventory using inventoryInstance
-    inventoryInstance.addResource(
-        { name: farmland.plantedResourceName, naturalYield: 1 },
-        harvestedAmount,
-        'Grapes',
-        gameYear,
-        quality,
-        farmland.name,
-        farmland.farmlandPrestige,
-        selectedTool
+    if (!currentFarmland) {
+        console.error(`Farmland with ID ${farmlandId} not found.`);
+        return;
+    }
+
+    const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
+
+    // Log the quality calculation
+    console.log(`Quality calculation: ((annualQualityFactor: ${farmland.annualQualityFactor} + ripeness: ${currentFarmland.ripeness} + suitability: ${suitability}) / 3) = ${quality}`);
+
+    // Check if there is an existing inventory item with the same resource, state, vintage, and storage
+    const existingItem = inventoryInstance.items.find(item =>
+        item.resource.name === farmland.plantedResourceName &&
+        item.state === 'Grapes' &&
+        item.vintage === gameYear &&
+        item.storage === selectedTool
     );
 
-    // Update farmland status using adminFunctions
-    updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
+    if (existingItem) {
+        // Calculate the new average quality
+        const totalAmount = existingItem.amount + harvestedAmount;
+        const newQuality = ((existingItem.quality * existingItem.amount) + (quality * harvestedAmount)) / totalAmount;
+
+        // Update the existing item
+        existingItem.amount = totalAmount;
+        existingItem.quality = newQuality.toFixed(2);
+    } else {
+        // Add harvested grapes to inventory using inventoryInstance
+        inventoryInstance.addResource(
+            { name: farmland.plantedResourceName, naturalYield: 1 },
+            harvestedAmount,
+            'Grapes',
+            gameYear,
+            quality,
+            farmland.name,
+            farmland.farmlandPrestige,
+            selectedTool
+        );
+    }
 
     saveInventory();
     addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
@@ -105,6 +131,9 @@ function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
             const harvestedAmount = totalHarvest * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
             performHarvest(target, farmlandId, params.selectedTool, harvestedAmount);
+            if (progress >= 1) {
+                updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
+            }
         },
         farmland,
         { selectedTool, totalHarvest, lastProgress: 0 }
