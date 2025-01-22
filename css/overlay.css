@@ -53,6 +53,24 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     align-items: center;
 }
 
+.overlay-section .card-header h3,
+.overlay-section .card-header h2 {
+    color: var(--panel-text);
+    margin: 0;
+}
+
+.overlay-section .card-header h2 {
+    border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section-wrapper {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+}
+
 .overlay.active {
     display: flex;
 }
@@ -649,24 +667,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
   padding: 12px;
   border-color: rgba(197, 165, 114, 0.2);
   background: transparent;
-}
-
-.overlay-section .card-header h3,
-.overlay-section .card-header h2 {
-  color: var(--panel-text);
-  margin: 0;
-}
-
-.overlay-section .card-header h2 {
-  border-bottom: 2px solid var(--color-accent);
-}
-
-.overlay-section-wrapper {
-  background-color: #fff;
-  padding: 25px;
-  border-radius: var(--radius-lg);
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
 }
 
 #farmland-details .table:not(#buyLandOverlay .table) {
