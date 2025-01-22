@@ -1,6 +1,6 @@
 hidden=[".config"]
 modules = ["nodejs-20", "web"]
-run = "node index.js"
+run = "python server.py"
 
 [nix]
 channel = "stable-24_05"
