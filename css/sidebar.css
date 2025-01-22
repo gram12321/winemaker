@@ -91,13 +91,10 @@
 }
 
 #sidebar-wrapper.collapsed .menu-title .company-name {
-  font-size: 0.8rem;
+  font-size: 1.2rem;
   margin: 0;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 50px;
-  display: block;
+  text-align: center;
 }
 
 #sidebar-wrapper.collapsed .menu-grid {
