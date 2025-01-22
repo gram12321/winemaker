@@ -484,4 +484,25 @@ const lastNamesByCountry = {
 };
 
 // Export the altitude ranges for use in other parts of the application 
-export { grapeSuitability, regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};
+export {
+  grapeSuitability,
+  regionAltitudeRanges,
+  regionPrestigeRankings,
+  regionSoilTypes,
+  regionAspectRatings,
+  italianMaleNames,
+  italianFemaleNames,
+  frenchFemaleNames,
+  frenchMaleNames,
+  spanishFemaleNames,
+  spanishMaleNames,
+  usFemaleNames,
+  usMaleNames,
+  germanFemaleNames,
+  germanMaleNames,
+  countryRegionMap,
+  lastNamesByCountry,
+  normalizeAltitude,
+  normalizeLandValue,
+  calculateAndNormalizePriceFactor
+};
