@@ -9,15 +9,7 @@
   <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js"></script>
   <script type="module" src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/js/serviceWorker.js')
-          .then(registration => console.log('ServiceWorker registered'))
-          .catch(err => console.log('ServiceWorker registration failed:', err));
-      });
-    }
-  </script>
+
 </head>
 <body>
   <div class="container">
