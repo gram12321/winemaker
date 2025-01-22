@@ -28,6 +28,24 @@
   display: none;
 }
 
+#sidebar-wrapper.collapsed #companyInfo:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 10px;
+  background: var(--panel-bg);
+  color: var(--color-accent);
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-accent);
+  white-space: pre-line;
+  z-index: 10000;
+  pointer-events: none;
+  width: max-content;
+}
+
 #sidebar-wrapper.collapsed .menu-item span {
   font-size: 0.6rem;
   padding: 4px;
