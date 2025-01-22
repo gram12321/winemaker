@@ -24,9 +24,9 @@
   --border-color: #94BDE5;       /* Maintained from original */
   
   /* Layout */
-  --sidebar-width: 250px;
+  --sidebar-width: 60px;
   --sidebar-collapsed-width: 60px;
-  --panel-width: var(--sidebar-width);
+  --panel-width: 60px;
   --panel-collapsed-width: var(--sidebar-collapsed-width);
   --console-height: 100px;
   --transition-speed: 0.3s;
