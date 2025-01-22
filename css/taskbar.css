@@ -1,28 +1,4 @@
-/*  - --- --   Panel styles   - - - - - -*/
-#panel-wrapper {
-  position: fixed !important;
-  right: 0 !important;
-  top: 0 !important;
-  width: 250px !important;
-  height: 100% !important;
-  z-index: 1000 !important;
-  overflow-y: auto !important;
-  background-color: #343a40 !important;
-}
-
-#panel-wrapper::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/assets/bg/bg_panel.webp');
-  background-size: cover;
-  background-position: center;
-  opacity: 0.4;
-  z-index: -1;
-}
+/* Task Box Styles */
 
 /* Task Box Styles */
 .task-box {
