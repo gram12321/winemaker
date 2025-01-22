@@ -356,7 +356,7 @@
 }
 
 .menu-title .company-name .full-name {
-  display: block !important;
+  display: none !important;
 }
 
 #sidebar-wrapper.collapsed .menu-title .company-name .short-name {
