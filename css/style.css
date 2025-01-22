@@ -121,15 +121,7 @@ body.sidebar-collapsed #wrapper {
   border-color: #8B4513;
 }
 
-/* Dropdown toggle styling */
-.dropdown-toggle {
-  color: var(--color-accent);
-}
 
-/* Dropdown menu item hover styling */
-.dropdown-menu a:hover {
-  background-color: var(--color-primary);
-}
 
 /* Tooltip styling */
 [title]:hover::after {
