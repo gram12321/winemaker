@@ -19,7 +19,7 @@ body {
   min-height: 100vh;
   margin-left: var(--sidebar-width);
   margin-right: 450px;
-  transition: margin-left var(--transition-speed) ease;
+  transition: all var(--transition-speed) ease;
 }
 
 body.sidebar-collapsed #wrapper {
