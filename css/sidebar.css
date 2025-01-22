@@ -1,8 +1,8 @@
 /* Sidebar */
 #sidebar-wrapper {
-  width: var(--sidebar-width);
-  min-width: var(--sidebar-width);
-  max-width: var(--sidebar-width);
+  width: 250px;
+  min-width: 250px;
+  max-width: 250px;
   background: var(--panel-bg);
   color: var(--panel-text);
   position: fixed;
@@ -18,9 +18,9 @@
 }
 
 #sidebar-wrapper.collapsed {
-  width: var(--sidebar-collapsed-width) !important;
-  min-width: var(--sidebar-collapsed-width) !important;
-  max-width: var(--sidebar-collapsed-width) !important;
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
   transition: all var(--transition-speed) ease;
 }
 
