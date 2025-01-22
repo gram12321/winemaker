@@ -19,7 +19,11 @@
   width: var(--sidebar-collapsed-width);
 }
 
-#sidebar-wrapper.collapsed .menu-item span {
+#sidebar-wrapper.collapsed .menu-item span,
+#sidebar-wrapper.collapsed .menu-title,
+#sidebar-wrapper.collapsed .dropdown,
+#sidebar-wrapper.collapsed #increment-week-btn,
+#sidebar-wrapper.collapsed .info-item {
   display: none;
 }
 
