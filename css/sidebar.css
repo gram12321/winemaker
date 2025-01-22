@@ -30,6 +30,16 @@
 
 #sidebar-wrapper.collapsed .menu-item {
   height: 50px;
+  width: 50px;
+  margin: 2px auto;
+}
+
+#sidebar-wrapper.collapsed .menu-image {
+  border-radius: 4px;
+}
+
+#sidebar-wrapper.collapsed .toggle-sidebar {
+  right: 5px;
 }
 
 #sidebar-wrapper.collapsed #companyInfo {
