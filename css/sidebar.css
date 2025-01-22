@@ -347,16 +347,13 @@
 
 /* Company name display rules */
 .menu-title .company-name {
+  display: none !important;
+}
+
+#sidebar-wrapper.collapsed .menu-title .company-name {
+  display: block !important;
   font-size: 1.5rem;
   text-align: center;
-}
-
-.menu-title .company-name .short-name {
-  display: none !important;
-}
-
-.menu-title .company-name .full-name {
-  display: none !important;
 }
 
 #sidebar-wrapper.collapsed .menu-title .company-name .short-name {
