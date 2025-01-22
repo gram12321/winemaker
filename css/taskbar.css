@@ -1,14 +1,14 @@
 
 /*  - --- --   Panel styles   - - - - - -*/
 #panel-wrapper {
-  position: fixed !important;
-  right: 0 !important;
-  top: 0 !important;
-  width: 250px !important;
-  height: 100% !important;
-  z-index: 1000 !important;
-  overflow-y: auto !important;
-  background-color: #343a40 !important;
+  position: fixed ;
+  right: 0 ;
+  top: 0 ;
+  width: 250px ;
+  height: 100% ;
+  z-index: 1000 ;
+  overflow-y: auto ;
+  background-color: #343a40 ;
   transition: all var(--transition-speed) ease;
 }
 
@@ -27,9 +27,9 @@
 }
 
 #panel-wrapper.collapsed {
-  width: 60px !important;
-  min-width: 60px !important;
-  max-width: 60px !important;
+  width: 60px ;
+  min-width: 60px ;
+  max-width: 60px ;
 }
 
 .toggle-panel {
