@@ -1,6 +1,6 @@
 hidden=[".config"]
-modules = ["nodejs-20", "web"]
-run = "python server.py"
+modules = ["web"]
+run = "webview index.html"
 
 [nix]
 channel = "stable-24_05"
