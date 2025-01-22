@@ -15,6 +15,7 @@ function initializePanel() {
                     const panel = document.getElementById('panel-wrapper');
                     if (panel) {
                         panel.classList.toggle('collapsed');
+                        document.body.classList.toggle('panel-collapsed');
                         localStorage.setItem('panelCollapsed', panel.classList.contains('collapsed'));
                     }
                 });
