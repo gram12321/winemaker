@@ -89,14 +89,23 @@
   max-width: 60px;
 }
 
-#sidebar-wrapper.collapsed .menu-title .company-name {
-  font-size: 0.8rem;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 50px;
+#sidebar-wrapper.collapsed .menu-title .company-name .full-name {
+  display: none;
+}
+
+#sidebar-wrapper.collapsed .menu-title .company-name .short-name {
   display: block;
+  font-size: 1.2rem;
+  margin: 0;
+  text-align: center;
+}
+
+#sidebar-wrapper:not(.collapsed) .menu-title .company-name .full-name {
+  display: block;
+}
+
+#sidebar-wrapper:not(.collapsed) .menu-title .company-name .short-name {
+  display: none;
 }
 
 #sidebar-wrapper.collapsed .menu-grid {
