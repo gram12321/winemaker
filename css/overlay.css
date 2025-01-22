@@ -15,7 +15,7 @@
     transition: all var(--transition-speed) ease;
 }
 
-/* Add collapsed states */
+/* Collapsed states */
 body.sidebar-collapsed .mainview-overlay {
     left: var(--sidebar-collapsed-width);
     width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-width)));
@@ -27,16 +27,6 @@ body.panel-collapsed .mainview-overlay {
 }
 
 body.sidebar-collapsed.panel-collapsed .mainview-overlay {
-    width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
-}
-
-/* Panel collapsed states */
-#panel-wrapper.collapsed + .mainview-overlay {
-    right: var(--panel-collapsed-width);
-    width: calc(100% - (var(--sidebar-width) + var(--panel-collapsed-width)));
-}
-
-body.sidebar-collapsed #panel-wrapper.collapsed + .mainview-overlay {
     width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
 }
 
