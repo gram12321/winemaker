@@ -53,11 +53,22 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     align-items: center;
 }
 
-  /* white bagground around the overlay */
+.overlay-section .card-header h3,
+.overlay-section .card-header h2 {
+    color: var(--panel-text);
+    margin: 0;
+}
+
+.overlay-section .card-header h2 {
+    border-bottom: 2px solid var(--color-accent);
+}
+
 .overlay-section-wrapper {
     background-color: #fff;
     padding: 25px;
-    border-radius: var(--radius-lg);   
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
 }
 
 .overlay.active {
