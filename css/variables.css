@@ -29,6 +29,7 @@
   --panel-width: 250px;
   --panel-collapsed-width: 60px;
   --console-height: 100px;
+  --transition-speed: 0.3s;
 
 /* Spacing */
   --spacing-xs: 0.25rem;
