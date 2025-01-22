@@ -2,7 +2,7 @@
 #console-bar {
   position: fixed;
   bottom: 0;
-  left: 250px;
+  left: var(--sidebar-width);
   /* Space for the sidebar */
   right: 250px;
   /* Space for the task panel */

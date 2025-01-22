@@ -1,8 +1,8 @@
 /* Sidebar */
 #sidebar-wrapper {
-  width: var(--panel-width);
-  min-width: var(--panel-width);
-  max-width: var(--panel-width);
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  max-width: var(--sidebar-width);
   background: var(--panel-bg);
   color: var(--panel-text);
   position: fixed;
