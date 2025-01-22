@@ -126,10 +126,8 @@ body.sidebar-collapsed #wrapper {
 /* Tooltip styling */
 [title]:hover::after {
   content: attr(title);
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
+  position: absolute; /* Change to absolute positioning */
+  transform: translateX(-50%);
   padding: 5px 10px;
   background: var(--panel-bg);
   color: var(--color-accent);
@@ -139,10 +137,10 @@ body.sidebar-collapsed #wrapper {
   white-space: nowrap;
   z-index: 10000;
   pointer-events: none;
-  max-width: none;
-  overflow: visible;
-  max-height: 200px;
-  overflow-y: auto;
+  max-width: none; /* Remove width limitation */
+  overflow: visible; /* Ensure tooltip is fully visible */
+  max-height: 200px; /* Allow for more height */
+  overflow-y: auto; /* Enable vertical scrolling if needed */
 }
 
 /* Specific tooltip styling for overlays */
