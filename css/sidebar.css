@@ -70,6 +70,13 @@
   padding: 5px;
 }
 
+#sidebar-wrapper.collapsed #increment-week-btn {
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  margin: 8px;
+  width: calc(100% - 16px);
+}
+
 #sidebar-wrapper.collapsed .menu-item {
   height: 50px;
   width: 50px;
