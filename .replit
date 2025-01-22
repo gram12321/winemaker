@@ -1,11 +1,10 @@
-hidden=[".config"]
-modules = ["nodejs-20", "web:v2-20230623-0b7a606"]
-run = "node index.js"
+
+run = "python3 -m http.server 3000 --bind 0.0.0.0"
+modules = ["python-3.10:v18-20230807-322e88b"]
 
 [nix]
-channel = "stable-23_11"
+channel = "stable-24_05"
 
 [deployment]
-publicDir = "/"
-deploymentTarget = "static"
-run = ["sh", "-c", "node index.js"]
+run = ["sh", "-c", "python3 -m http.server 3000 --bind 0.0.0.0"]
+deploymentTarget = "cloudrun"
