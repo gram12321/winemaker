@@ -1,12 +1,5 @@
 {
   "dependencies": {
-    "bootstrap": "^5.3.3",
-    "http-server": "^14.1.1"
-  },
-  "scripts": {
-    "start": "npx http-server ./ -c-1"
-  },
-  "devDependencies": {
-    
+    "bootstrap": "^5.3.3"
   }
 }
