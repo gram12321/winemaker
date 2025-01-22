@@ -1,6 +1,8 @@
 /* Sidebar */
 #sidebar-wrapper {
   width: var(--panel-width);
+  min-width: var(--panel-width);
+  max-width: var(--panel-width);
   background: var(--panel-bg);
   color: var(--panel-text);
   position: fixed;
@@ -12,7 +14,13 @@
   border-right: 2px solid var(--color-accent);
   overflow-y: auto;
   overflow-x: hidden;
-  transition: width var(--transition-speed) ease;
+  transition: all var(--transition-speed) ease;
+}
+
+#sidebar-wrapper.collapsed {
+  width: var(--panel-collapsed-width);
+  min-width: var(--panel-collapsed-width);
+  max-width: var(--panel-collapsed-width);
 }
 
 #sidebar-wrapper.collapsed {
