@@ -98,14 +98,15 @@
   transition: transform var(--transition-speed) ease;
 }
 
-#sidebar-wrapper.collapsed .toggle-sidebar::before {
-  content: '◀';
-  display: inline-block;
-  transform: rotate(180deg);
+.toggle-sidebar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #sidebar-wrapper.collapsed .toggle-sidebar {
   right: 5px;
+  transform: rotate(180deg);
 }
 
 .menu-title {
