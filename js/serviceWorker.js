@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'winery-game-cache-v1';
+const CACHE_NAME = 'winery-game-cache-v2';
 const urlsToCache = [
   '/assets/pic/bottles_dalle.webp',
   '/assets/pic/crushing_dalle.webp',
@@ -22,11 +22,25 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(urlsToCache))
   );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames
+          .filter(cacheName => cacheName !== CACHE_NAME)
+          .map(cacheName => caches.delete(cacheName))
+      );
+    })
+  );
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
   );
 });
