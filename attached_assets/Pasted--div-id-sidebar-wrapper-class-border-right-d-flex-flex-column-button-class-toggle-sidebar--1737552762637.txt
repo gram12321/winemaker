@@ -1,0 +1,76 @@
+<div id="sidebar-wrapper" class="border-right d-flex flex-column">
+  <button class="toggle-sidebar" title="Toggle Sidebar">
+    ◀
+  </button>
+  <div class="menu-title">
+    <div class="company-name">Menu</div>
+    <div class="styled-line"></div>
+  </div>
+  <div class="menu-grid">
+    <a href="#" id="main-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/office2.webp')"></div>
+      <span>Mainoffice</span>
+    </a>
+    <a href="#" id="finance-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/finance2.webp')"></div>
+      <span>Finance</span>
+    </a>
+    <a href="#" id="staff-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/staff.webp')"></div>
+      <span>Staff</span>
+    </a>
+    <a href="#" id="buildings-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/buildings.webp')"></div>
+      <span>Buildings</span>
+    </a>
+    <a href="#" id="inventory-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/inventory.webp')"></div>
+      <span>Warehouse</span>
+    </a>
+    <a href="#" id="land-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/farmland.webp')"></div>
+      <span>Farmland</span>
+    </a>
+    <a href="#" id="vineyard-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/vineyard.webp')"></div>
+      <span>Vineyard</span>
+    </a>
+    <a href="#" id="winery-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/winery.webp')"></div>
+      <span>Winery</span>
+    </a>
+    <a href="#" id="sales-link" class="menu-item">
+      <div class="menu-image" style="background-image: url('/assets/menu/sales2.webp')"></div>
+      <span>Sales Office</span>
+    </a>
+  </div>
+  <button id="increment-week-btn" class="btn btn-info">Increment Week</button><div id="companyInfo">
+          <div class="company-name" title="Your Company Name">Hgfhgfhfg</div>
+          <div class="styled-line"></div>
+
+          <div class="info-item" title="Current Game Date">
+            <span class="info-label"><img src="/assets/icon/small/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
+            <span class="info-content">Week 1, Spring, 2025</span>
+          </div>
+
+          <div class="info-item" title="Available Company Funds">
+            <span class="info-label"><img src="/assets/icon/small/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
+            <span class="info-content">€ 10,00 Mio</span>
+          </div>
+          <div class="info-item" title="Company Prestige">
+            <span class="info-label"><img src="/assets/icon/small/prestige.png" alt="Prestige Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
+            <span class="info-content"> 1,12</span>
+          </div>
+          <div class="styled-line"></div>
+        </div>
+  <div class="list-group-item list-group-item-action bg-dark text-white dropdown">
+    <a href="#" class="dropdown-toggle text-white" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Hgfhgfhfg</a>
+    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+      <a class="dropdown-item" href="./game.html">Startpage</a>
+      <a class="dropdown-item" href="./profile.html">Profile</a>
+      <a class="dropdown-item" href="./settings.html">Settings</a>
+      <a class="dropdown-item" href="#" id="admin-link">Admin Dashboard</a>
+      <a class="dropdown-item" href="#" id="logout-link">Logout</a>
+    </div>
+  </div>
+</div>
