@@ -38,16 +38,11 @@ export function initializeSidebar() {
             }
             const sidebarWrapper = document.getElementById('sidebar-wrapper');
             if (sidebarWrapper) {
-                // Remove any existing sidebar wrapper to prevent nesting
-                while (sidebarWrapper.firstChild) {
-                    sidebarWrapper.removeChild(sidebarWrapper.firstChild);
-                }
-                // Parse the HTML string and append its children
+                // Extract only the inner content from the loaded HTML
                 const temp = document.createElement('div');
                 temp.innerHTML = data;
-                while (temp.firstChild) {
-                    sidebarWrapper.appendChild(temp.firstChild);
-                }
+                const innerContent = temp.querySelector('#sidebar-wrapper').innerHTML;
+                sidebarWrapper.innerHTML = innerContent;
 
                 // Set initial collapse state
                 if (localStorage.getItem('sidebarCollapsed') === 'true') {
