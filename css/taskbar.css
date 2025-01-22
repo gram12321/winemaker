@@ -9,7 +9,7 @@
   z-index: 1000 ;
   overflow-y: auto ;
   background-color: #343a40 ;
-  transition: all var(--transition-speed) ease;
+  transition: width var(--transition-speed) ease;
 }
 
 #panel-wrapper::before {
