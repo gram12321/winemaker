@@ -211,10 +211,11 @@ Money: € ${formatNumber(money, 0)}
 Prestige: ${formatNumber(prestige, 2)}`;
         
         companyInfoDiv.setAttribute('data-tooltip', tooltipContent);
+        const formattedCompanyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
         companyInfoDiv.innerHTML = `
-          <div class="company-name" title="Your Company Name">
-            <span class="full-name">${companyName.charAt(0).toUpperCase() + companyName.slice(1)}</span>
-            <span class="short-name">${companyName.charAt(0).toUpperCase()}</span>
+          <div class="company-name" title="${formattedCompanyName}">
+            <span class="full-name">${formattedCompanyName}</span>
+            <span class="short-name">${formattedCompanyName.charAt(0)}</span>
           </div>
           <div class="styled-line"></div>
 
