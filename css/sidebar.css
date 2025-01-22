@@ -47,13 +47,16 @@
 
 #sidebar-wrapper.collapsed .dropdown-menu {
   min-width: 120px;
-  position: fixed;
-  left: 60px;
-  bottom: 50px;
+  position: absolute;
+  left: 100%;
+  top: -150px;
   background-color: var(--panel-bg);
   border: 1px solid var(--color-accent);
   z-index: 1050;
-  transform: none;
+}
+
+#sidebar-wrapper.collapsed {
+  overflow: visible !important;
 }
 
 #sidebar-wrapper.collapsed .menu-title {
