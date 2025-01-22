@@ -45,7 +45,7 @@ function generateAssignStaffHTML(task) {
         <div class="overlay-section-wrapper">
             <section class="overlay-section card">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0" style="border-bottom: 2px solid var(--color-accent);">Assign Staff to ${task.name}</h2>
+                    <h2 class="mb-0">Assign Staff to ${task.name}</h2>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
             </div>
             <div class="card-body">
