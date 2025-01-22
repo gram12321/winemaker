@@ -4,16 +4,11 @@ import { buildBuilding, upgradeBuilding, updateBuildingCards } from '/js/buildin
 import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
 
 // Function to create and display the buildings overlay
-export function showBuildingsOverlay() {
-    // Remove any existing instances of the overlay
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
+import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
-    // Create the overlay element
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
+export function showBuildingsOverlay() {
+    const overlay = showMainViewOverlay(`
+        <div class="mainview-overlay-content">
 
     // Create content for the overlay
     overlay.innerHTML = `
