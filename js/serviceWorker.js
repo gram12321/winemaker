@@ -1,4 +1,3 @@
-
 const CACHE_NAME = 'winery-game-cache-v2';
 const urlsToCache = [
   '/assets/pic/bottles_dalle.webp',
