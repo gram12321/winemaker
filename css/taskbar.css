@@ -32,19 +32,11 @@
 }
 
 #panel-wrapper.collapsed .task-box {
-  height: 50px;
-  margin: 5px 2px;
-  padding: 5px;
+  height: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transform: none;
-}
-
-#panel-wrapper.collapsed .task-box:hover {
-  transform: none;
-  box-shadow: none;
 }
 
 #panel-wrapper.collapsed .task-box .task-header {
@@ -55,21 +47,14 @@
 #panel-wrapper.collapsed .task-box .task-icon {
   width: 24px;
   height: 24px;
-  position: static;
-  margin-bottom: 2px;
 }
 
 #panel-wrapper.collapsed .task-box .task-target {
-  font-size: 0.65em;
+  font-size: 0.7em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 45px;
-  text-align: center;
-}
-
-#panel-wrapper.collapsed .task-box .task-type {
-  display: none;
+  max-width: 50px;
 }
 
 #panel-wrapper.collapsed .task-box .task-name,
