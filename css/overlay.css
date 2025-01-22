@@ -634,9 +634,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .overlay-section .table th,
 .overlay-table th {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: var(--color-primary);
+  color: var(--panel-text);
   padding: 12px;
   border-bottom: 2px solid var(--color-accent);
+}
+
+/* Keep gradient background for multi-section headers */
+.overlay-section:not(:only-child) .table th {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
 }
 
 .overlay-table td,
