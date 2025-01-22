@@ -120,3 +120,8 @@ export function showResourceInfoOverlay(resourceName) {
     }
   });
 }
+// Resource Info Overlay
+export function showResourceInfo(resource) {
+  // Basic implementation
+  console.log('Resource info:', resource);
+}
