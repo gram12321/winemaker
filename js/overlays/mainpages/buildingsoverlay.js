@@ -1,17 +1,13 @@
+
 // Import required functions from other modules
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { buildBuilding, upgradeBuilding, updateBuildingCards } from '/js/buildings.js';
 import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
-
-// Function to create and display the buildings overlay
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
 export function showBuildingsOverlay() {
+    const buildings = loadBuildings();
     const overlay = showMainViewOverlay(`
-        <div class="mainview-overlay-content">
-
-    // Create content for the overlay
-    overlay.innerHTML = `
         <div class="mainview-overlay-content">
             <h3>Buildings</h3>
             <div class="row">
@@ -34,13 +30,7 @@ export function showBuildingsOverlay() {
               </div>
             </div>
         </div>
-    `;
-
-    // Append overlay to the document body
-    document.body.appendChild(overlay);
-
-    // Display the overlay
-    overlay.style.display = 'block';
+    `);
 
     // Add event listeners for building and upgrading buttons
     initButtonListeners();
