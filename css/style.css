@@ -16,8 +16,13 @@ body {
   align-items: center;
   flex-direction: column;
   min-height: 100vh;
-  margin-left: 250px;
+  margin-left: var(--sidebar-width);
   margin-right: 450px;
+  transition: margin-left var(--transition-speed) ease;
+}
+
+#wrapper.collapsed #page-content-wrapper {
+  margin-left: var(--sidebar-collapsed-width);
 }
 
 /* Not sure these image styles is in use in anyplace in the project maybe leftover from before SPA */
