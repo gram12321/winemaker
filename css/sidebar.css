@@ -25,11 +25,23 @@
 }
 
 #sidebar-wrapper.collapsed .menu-item span,
-#sidebar-wrapper.collapsed .menu-title,
 #sidebar-wrapper.collapsed .dropdown,
 #sidebar-wrapper.collapsed #increment-week-btn,
 #sidebar-wrapper.collapsed .info-item {
   display: none;
+}
+
+#sidebar-wrapper.collapsed .menu-title {
+  padding: 5px;
+}
+
+#sidebar-wrapper.collapsed .menu-title .company-name {
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+#sidebar-wrapper.collapsed .menu-title .styled-line {
+  margin: 5px auto;
 }
 
 #sidebar-wrapper.collapsed .menu-grid {
