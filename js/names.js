@@ -1,28 +1,3 @@
-
-export {
-  grapeSuitability,
-  regionAltitudeRanges,
-  regionPrestigeRankings,
-  regionSoilTypes,
-  regionAspectRatings,
-  italianMaleNames,
-  italianFemaleNames,
-  frenchFemaleNames,
-  frenchMaleNames,
-  spanishFemaleNames,
-  spanishMaleNames,
-  usFemaleNames,
-  usMaleNames,
-  germanFemaleNames,
-  germanMaleNames,
-  countryRegionMap,
-  lastNamesByCountry,
-  normalizeAltitude,
-  normalizeLandValue,
-  calculateAndNormalizePriceFactor
-};
-
-
 // names.js
 
 // Country to Region mapping
@@ -386,7 +361,8 @@ export function normalizeLandValue(landvalue) {
 }
 
 
-function calculateAndNormalizePriceFactor(country, region, altitude, aspect) {
+// Calculate and normalize price factor with real price range integration
+export function calculateAndNormalizePriceFactor(country, region, altitude, aspect) {
   const altitudeRange = regionAltitudeRanges[country][region];
   const altitudeNormalized = normalizeAltitude(altitude, altitudeRange);
 
@@ -508,25 +484,4 @@ const lastNamesByCountry = {
 };
 
 // Export the altitude ranges for use in other parts of the application 
-export {
-  grapeSuitability,
-  regionAltitudeRanges,
-  regionPrestigeRankings,
-  regionSoilTypes,
-  regionAspectRatings,
-  italianMaleNames,
-  italianFemaleNames,
-  frenchFemaleNames,
-  frenchMaleNames,
-  spanishFemaleNames,
-  spanishMaleNames,
-  usFemaleNames,
-  usMaleNames,
-  germanFemaleNames,
-  germanMaleNames,
-  countryRegionMap,
-  lastNamesByCountry,
-  normalizeAltitude,
-  normalizeLandValue,
-  calculateAndNormalizePriceFactor
-};
+export { grapeSuitability, regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};
