@@ -1,6 +1,6 @@
 /* Sidebar */
 #sidebar-wrapper {
-  width: var(--sidebar-width);
+  width: var(--panel-width);
   background: var(--panel-bg);
   color: var(--panel-text);
   position: fixed;
@@ -16,7 +16,7 @@
 }
 
 #sidebar-wrapper.collapsed {
-  width: var(--sidebar-collapsed-width);
+  width: var(--panel-collapsed-width);
 }
 
 #sidebar-wrapper.collapsed .menu-item span,
