@@ -25,10 +25,28 @@
 }
 
 #sidebar-wrapper.collapsed .menu-item span,
-#sidebar-wrapper.collapsed .dropdown,
 #sidebar-wrapper.collapsed #increment-week-btn,
 #sidebar-wrapper.collapsed .info-item {
   display: none;
+}
+
+#sidebar-wrapper.collapsed .dropdown {
+  padding: 5px;
+  text-align: center;
+}
+
+#sidebar-wrapper.collapsed .dropdown-toggle {
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50px;
+  display: block;
+}
+
+#sidebar-wrapper.collapsed .dropdown-menu {
+  min-width: 120px;
+  margin-left: 60px;
 }
 
 #sidebar-wrapper.collapsed .menu-title {
