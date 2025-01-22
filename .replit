@@ -1,6 +1,6 @@
 hidden=[".config"]
-modules = ["web"]
-run = "webview index.html"
+modules = ["web", "python-3.10"]
+run = "python3 -m http.server 3000"
 
 [nix]
 channel = "stable-24_05"
