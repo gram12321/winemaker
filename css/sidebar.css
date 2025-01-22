@@ -46,11 +46,7 @@
 
 #sidebar-wrapper.collapsed .dropdown-menu {
   min-width: 120px;
-  left: var(--sidebar-collapsed-width);
-  right: auto;
-  margin-left: 0;
-  margin-top: -30px;
-  position: fixed;
+  margin-left: 60px;
 }
 
 #sidebar-wrapper.collapsed .menu-title {
