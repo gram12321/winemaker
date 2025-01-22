@@ -172,6 +172,22 @@
   color: var(--color-accent);
 }
 
+.menu-title .company-name .short-name {
+  display: none;
+}
+
+.menu-title .company-name .full-name {
+  display: block;
+}
+
+#sidebar-wrapper.collapsed .menu-title .company-name .short-name {
+  display: block;
+}
+
+#sidebar-wrapper.collapsed .menu-title .company-name .full-name {
+  display: none;
+}
+
 .menu-title .styled-line {
   width: 60%;
   height: 3px;
