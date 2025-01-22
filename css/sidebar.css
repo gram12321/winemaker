@@ -18,9 +18,10 @@
 }
 
 #sidebar-wrapper.collapsed {
-  width: 60px !important;
-  min-width: 60px !important;
-  max-width: 60px !important;
+  width: var(--sidebar-collapsed-width) !important;
+  min-width: var(--sidebar-collapsed-width) !important;
+  max-width: var(--sidebar-collapsed-width) !important;
+  transition: all var(--transition-speed) ease;
 }
 
 #sidebar-wrapper.collapsed .menu-item span,
