@@ -175,12 +175,14 @@
   color: var(--color-accent);
 }
 
-.menu-title .company-name .short-name {
-  display: none;
+.menu-title .company-name .short-name,
+#companyInfo .company-name .short-name {
+  display: none !important;
 }
 
-.menu-title .company-name .full-name {
-  display: block;
+.menu-title .company-name .full-name,
+#companyInfo .company-name .full-name {
+  display: block !important;
 }
 
 #sidebar-wrapper.collapsed .menu-title .company-name .short-name {
