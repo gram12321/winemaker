@@ -38,8 +38,23 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
   );
+});
+
+// Add a message event listener to handle cache clearing
+self.addEventListener('message', event => {
+  if (event.data === 'clearCache') {
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => caches.delete(cacheName))
+      );
+    });
+  }
 });
