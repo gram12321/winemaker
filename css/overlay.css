@@ -417,6 +417,55 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .staff-options-container .staff-option {
   border: 2px solid var(--color-accent);
   border-radius: 12px;
+
+/* 4. Stats Overlays */
+.stats-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--color-background);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1500;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--color-accent);
+}
+
+.stats-overlay .stats-header {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+  color: var(--panel-text);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+
+.stats-overlay .stats-table {
+  width: 100%;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-accent);
+}
+
+.stats-overlay .stats-table th {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  padding: 12px;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.stats-overlay .stats-table td {
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+}
+
+.stats-overlay .stats-table tbody tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+}
+
   background-color: var(--color-background);
   margin-bottom: 15px;
   padding: 15px;
