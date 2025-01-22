@@ -38,7 +38,16 @@ export function initializeSidebar() {
             }
             const sidebarWrapper = document.getElementById('sidebar-wrapper');
             if (sidebarWrapper) {
-                sidebarWrapper.innerHTML = data;
+                // Remove any existing sidebar wrapper to prevent nesting
+                while (sidebarWrapper.firstChild) {
+                    sidebarWrapper.removeChild(sidebarWrapper.firstChild);
+                }
+                // Parse the HTML string and append its children
+                const temp = document.createElement('div');
+                temp.innerHTML = data;
+                while (temp.firstChild) {
+                    sidebarWrapper.appendChild(temp.firstChild);
+                }
 
                 // Set initial collapse state
                 if (localStorage.getItem('sidebarCollapsed') === 'true') {
