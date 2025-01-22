@@ -13,40 +13,7 @@
   </div>
 </div>
 
-<style>
-  #panel-wrapper {
-    transition: width 0.3s ease-in-out; /* Add smooth transition for collapsing */
-  }
 
-  .panel {
-    overflow: hidden; /* Prevent content from overflowing during collapse */
-  }
-
-  .toggle-panel {
-    position: absolute; /* Position the button outside the panel flow */
-    top: 0;
-    left: 0;
-    padding: 5px 10px;
-    background-color: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-  }
-
-  .toggle-panel:focus {
-    outline: none;
-  }
-
-  #panel-wrapper.collapsed .panel {
-    display: none;
-  }
-
-  #panel-wrapper.collapsed {
-    width: 60px !important;
-    min-width: 60px !important;
-    max-width: 60px !important;
-  }
-</style>
 
 <script>
   const togglePanelButton = document.querySelector('.toggle-panel');
