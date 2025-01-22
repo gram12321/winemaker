@@ -1,4 +1,3 @@
-
 // Initialize Task Panel
 function initializePanel() {
     return fetch('/html/panel.html')

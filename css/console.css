@@ -46,12 +46,12 @@ body.sidebar-collapsed #console-bar {
   width: var(--console-width-sidebar-collapsed);
 }
 
-#panel-wrapper.collapsed + #console-bar {
+body.panel-collapsed #console-bar {
   right: var(--panel-collapsed-width);
   width: var(--console-width-panel-collapsed);
 }
 
-body.sidebar-collapsed #panel-wrapper.collapsed + #console-bar {
+body.sidebar-collapsed.panel-collapsed #console-bar {
   left: var(--sidebar-collapsed-width);
   right: var(--panel-collapsed-width);
   width: var(--console-width-both-collapsed);
