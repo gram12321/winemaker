@@ -18,9 +18,9 @@
 }
 
 #sidebar-wrapper.collapsed {
-  width: var(--sidebar-collapsed-width) !important;
-  min-width: var(--sidebar-collapsed-width) !important;
-  max-width: var(--sidebar-collapsed-width) !important;
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
   transition: all var(--transition-speed) ease;
 }
 
