@@ -26,9 +26,45 @@
 }
 
 #panel-wrapper.collapsed {
-  width: 60px ;
-  min-width: 60px ;
-  max-width: 60px ;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+#panel-wrapper.collapsed .task-box {
+  height: 60px;
+  margin: 5px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#panel-wrapper.collapsed .task-box .task-header {
+  margin: 0;
+  padding: 0;
+}
+
+#panel-wrapper.collapsed .task-box .task-icon {
+  width: 24px;
+  height: 24px;
+}
+
+#panel-wrapper.collapsed .task-box .task-target {
+  font-size: 0.7em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 50px;
+}
+
+#panel-wrapper.collapsed .task-box .task-name,
+#panel-wrapper.collapsed .task-box .progress-container,
+#panel-wrapper.collapsed .task-box .progress-info,
+#panel-wrapper.collapsed .task-box .staff-line,
+#panel-wrapper.collapsed .task-box .assign-staff-btn {
+  display: none;
 }
 
 #panel-wrapper {
