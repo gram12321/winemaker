@@ -345,24 +345,24 @@
   border-radius: var(--radius-sm);
 }
 
-/* Remove all previous display rules for company name */
+/* Company name display rules */
 .menu-title .company-name {
   font-size: 1.5rem;
   text-align: center;
 }
 
 .menu-title .company-name .short-name {
-  display: none;
+  display: none !important;
 }
 
 .menu-title .company-name .full-name {
-  display: block;
+  display: block !important;
 }
 
 #sidebar-wrapper.collapsed .menu-title .company-name .short-name {
-  display: block;
+  display: block !important;
 }
 
 #sidebar-wrapper.collapsed .menu-title .company-name .full-name {
-  display: none;
+  display: none !important;
 }
