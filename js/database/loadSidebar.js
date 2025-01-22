@@ -187,9 +187,9 @@ export function initializeSidebar() {
                 incrementWeekButton.textContent = 'Increment Week';
                 incrementWeekButton.addEventListener('click', incrementWeek);
 
-                const companyInfoDiv = document.getElementById('companyInfo');
-                if (companyInfoDiv) {
-                    companyInfoDiv.insertAdjacentElement('beforebegin', incrementWeekButton);
+                const menuGrid = document.querySelector('.menu-grid');
+                if (menuGrid) {
+                    menuGrid.insertAdjacentElement('afterend', incrementWeekButton);
                 }
             } else {
                 console.error("Sidebar wrapper element not found.");
