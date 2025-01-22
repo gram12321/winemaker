@@ -23,8 +23,10 @@
   --border-color: #94BDE5;       /* Maintained from original */
 
   /* Layout */
-  --panel-width: 250px;
-  --panel-collapsed-width: 60px;
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 60px;
+  --panel-width: var(--sidebar-width);
+  --panel-collapsed-width: var(--sidebar-collapsed-width);
   --console-height: 100px;
   --transition-speed: 0.3s;
 
