@@ -77,6 +77,14 @@
   width: calc(100% - 16px);
 }
 
+#increment-week-btn::before {
+  content: "Increment Week";
+}
+
+#sidebar-wrapper.collapsed #increment-week-btn::before {
+  content: "Week";
+}
+
 #sidebar-wrapper.collapsed .menu-item {
   height: 50px;
   width: 50px;
