@@ -58,3 +58,22 @@ self.addEventListener('message', event => {
     });
   }
 });
+const CACHE_NAME = 'wine-game-cache-v1';
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.delete(CACHE_NAME)
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          return caches.delete(cacheName);
+        })
+      );
+    })
+  );
+});
