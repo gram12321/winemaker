@@ -1,4 +1,6 @@
 
+import { hideAllOverlays } from './mainpages/hideOverlays.js';
+
 export function showMainViewOverlay(overlayContent) {
     hideAllOverlays();
     
