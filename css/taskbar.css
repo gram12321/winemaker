@@ -29,9 +29,9 @@
 
 
 .toggle-panel {
-  position: flex;
+  position: absolute;
   top: 10px;
-  right: 10px;
+  right: 15px;
   background: var(--color-accent);
   border: none;
   color: var(--panel-text);
