@@ -7,6 +7,7 @@ body {
 #wrapper {
   display: flex;
   width: 100%;
+  transition: margin-left var(--transition-speed) ease;
 }
 
 #page-content-wrapper {
@@ -19,6 +20,10 @@ body {
   margin-left: var(--sidebar-width);
   margin-right: 450px;
   transition: margin-left var(--transition-speed) ease;
+}
+
+body.sidebar-collapsed #wrapper {
+  margin-left: var(--sidebar-collapsed-width);
 }
 
 #wrapper.collapsed #page-content-wrapper {

@@ -21,28 +21,31 @@ export function initializeSidebar() {
         .then(data => {
             // Initialize sidebar collapse state from localStorage
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            
+
             // Add collapse functionality
             function toggleSidebar() {
                 const sidebar = document.getElementById('sidebar-wrapper');
                 const isCurrentlyCollapsed = sidebar.classList.contains('collapsed');
                 if (isCurrentlyCollapsed) {
                     sidebar.classList.remove('collapsed');
+                    document.body.classList.remove('sidebar-collapsed');
                     localStorage.setItem('sidebarCollapsed', 'false');
                 } else {
                     sidebar.classList.add('collapsed');
+                    document.body.classList.add('sidebar-collapsed');
                     localStorage.setItem('sidebarCollapsed', 'true');
                 }
             }
             const sidebarWrapper = document.getElementById('sidebar-wrapper');
             if (sidebarWrapper) {
                 sidebarWrapper.innerHTML = data;
-                
+
                 // Set initial collapse state
                 if (localStorage.getItem('sidebarCollapsed') === 'true') {
                     sidebarWrapper.classList.add('collapsed');
+                    document.body.classList.add('sidebar-collapsed');
                 }
-                
+
                 // Add click handler for toggle button
                 const toggleButton = sidebarWrapper.querySelector('.toggle-sidebar');
                 if (toggleButton) {
