@@ -1,53 +1,28 @@
-
-/* Panel Base Styles */
+/* Panel collapse styles */
 #panel-wrapper {
-  position: fixed !important;
-  right: 0 !important;
-  top: 0 !important;
-  width: 250px !important;
-  height: 100% !important;
-  z-index: 1000 !important;
-  overflow-y: auto !important;
-  background-color: #343a40 !important;
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: var(--panel-width);
   transition: all var(--transition-speed) ease;
 }
 
-/* Panel Background */
-#panel-wrapper::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url('/assets/bg/bg_panel.webp');
-  background-size: cover;
-  background-position: center;
-  opacity: 0.4;
-  z-index: -1;
-}
-
-/* Panel Collapse Styles */
 #panel-wrapper.collapsed {
   width: 60px !important;
   min-width: 60px !important;
   max-width: 60px !important;
 }
 
-#panel-wrapper.collapsed .panel {
-  display: none;
-}
-
-/* Toggle Button */
 .toggle-panel {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 30px;
-  height: 30px;
   background: var(--color-accent);
   border: none;
   color: var(--panel-text);
+  width: 300px;
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
   z-index: 5000;
@@ -57,177 +32,7 @@
   transition: transform var(--transition-speed) ease;
 }
 
-.toggle-panel:focus {
-  outline: none;
-}
-
 #panel-wrapper.collapsed .toggle-panel span {
   display: inline-block;
   transform: rotate(180deg);
-}
-
-/* Task Box Styles */
-.task-box {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 15px;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.task-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.task-box::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-}
-
-.task-box:hover {
-  transform: translateX(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Task Type Specific Styles */
-.task-box.field-task::before { background: linear-gradient(to bottom, #84cc16, #4d7c0f); }
-.task-box.winery-task::before { background: linear-gradient(to bottom, #2563eb, #1d4ed8); }
-.task-box.administration-task::before { background: linear-gradient(to bottom, #7c3aed, #5b21b6); }
-.task-box.sales-task::before { background: linear-gradient(to bottom, #dc2626, #991b1b); }
-.task-box.building-task::before { background: linear-gradient(to bottom, #f97316, #c2410c); }
-.task-box.maintenance-task::before { background: linear-gradient(to bottom, #6366f1, #4338ca); }
-
-/* Task Elements */
-.task-icon {
-  width: 42px;
-  height: 42px;
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  opacity: 0.9;
-  border-radius: 50%;
-}
-
-.task-name {
-  font-size: 1.1em;
-  font-weight: 600;
-  color: #fff;
-  margin-right: 40px;
-  margin-bottom: 12px;
-}
-
-.task-type {
-  font-size: 0.7em;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #94a3b8;
-  margin-bottom: 8px;
-}
-
-.task-target {
-  font-size: 1.0em;
-  font-weight: 600;
-  color: #e2e8f0;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Progress Styles */
-.progress-container {
-  background: rgba(0, 0, 0, 0.2);
-  height: 6px;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.5) 0%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0.5) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-  transition: width 0.3s ease;
-}
-
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-.progress-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-  font-size: 0.75em;
-  color: #94a3b8;
-}
-
-/* Staff Styles */
-.staff-line {
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.staff-icon {
-  width: 15px;
-  margin-right: 5px;
-  opacity: 0.8;
-}
-
-.staff-names {
-  font-size: 0.8em;
-  color: #e2e8f0;
-}
-
-/* Assign Staff Button */
-.assign-staff-btn {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-md);
-  padding: 8px 16px;
-  margin-top: 12px;
-  width: 100%;
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: all 0.2s ease;
-}
-
-.assign-staff-btn:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.assign-staff-btn:disabled {
-  background-color: rgba(197, 165, 114, 0.5);
-  border-color: rgba(197, 165, 114, 0.3);
-  color: rgba(255, 255, 255, 0.5);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
 }
