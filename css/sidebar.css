@@ -91,7 +91,16 @@
 }
 
 #sidebar-wrapper.collapsed #companyInfo .company-name {
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+#sidebar-wrapper.collapsed #companyInfo .company-name .full-name {
   display: none !important;
+}
+
+#sidebar-wrapper.collapsed #companyInfo .company-name .short-name {
+  display: block !important;
 }
 
 #sidebar-wrapper.collapsed .menu-grid {
