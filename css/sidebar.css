@@ -18,13 +18,9 @@
 }
 
 #sidebar-wrapper.collapsed {
-  width: var(--panel-collapsed-width);
-  min-width: var(--panel-collapsed-width);
-  max-width: var(--panel-collapsed-width);
-}
-
-#sidebar-wrapper.collapsed {
-  width: var(--panel-collapsed-width);
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
 }
 
 #sidebar-wrapper.collapsed .menu-item span,
