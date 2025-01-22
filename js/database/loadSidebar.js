@@ -184,7 +184,6 @@ export function initializeSidebar() {
                 const incrementWeekButton = document.createElement('button');
                 incrementWeekButton.id = 'increment-week-btn';
                 incrementWeekButton.className = 'btn btn-info';
-                incrementWeekButton.textContent = 'Increment Week';
                 incrementWeekButton.addEventListener('click', incrementWeek);
 
                 const menuGrid = document.querySelector('.menu-grid');
