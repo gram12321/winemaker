@@ -216,10 +216,12 @@ function updateRipeness() {
         if (!field.plantedResourceName || field.status === 'Harvested' || field.vineAge === 0) return;
 
         let ripenessUpdate = 0;
+        const suitability = grapeSuitability[field.country]?.[field.region]?.[field.plantedResourceName] || 0.5;
+        
         switch (season) {
-            case 'Spring': ripenessUpdate = 0.01; break;
-            case 'Summer': ripenessUpdate = 0.02; break;
-            case 'Fall': ripenessUpdate = 0.05; break;
+            case 'Spring': ripenessUpdate = 0.01 * suitability; break;
+            case 'Summer': ripenessUpdate = 0.02 * suitability; break;
+            case 'Fall': ripenessUpdate = 0.05 * suitability; break;
             case 'Winter':
                 if (week === 1) {
                     updateFarmland(field.id, { ripeness: 0 });
@@ -228,7 +230,8 @@ function updateRipeness() {
         }
 
         if (ripenessUpdate > 0) {
-            updateFarmland(field.id, { ripeness: field.ripeness + ripenessUpdate });
+            const newRipeness = Math.min(1, field.ripeness + ripenessUpdate);
+            updateFarmland(field.id, { ripeness: newRipeness });
         }
     });
 

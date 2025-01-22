@@ -206,3 +206,32 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
+.suitability-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--color-background);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    margin: 5px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.suitability-fill {
+    height: 100%;
+    background-color: var(--color-primary);
+    transition: width 0.3s ease;
+}
+
+.suitability-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    line-height: 20px;
+    color: var(--panel-text);
+}
+
+.suitability-bar.excellent .suitability-fill { background-color: #4CAF50; }
+.suitability-bar.good .suitability-fill { background-color: #8BC34A; }
+.suitability-bar.moderate .suitability-fill { background-color: #FFC107; }
+.suitability-bar.poor .suitability-fill { background-color: #F44336; }
