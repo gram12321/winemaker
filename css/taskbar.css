@@ -39,10 +39,7 @@
   justify-content: center;
 }
 
-#panel-wrapper.collapsed .task-box .task-header {
-  margin: 0;
-  padding: 0;
-}
+
 
 #panel-wrapper.collapsed .task-box .task-icon {
   width: 24px;
@@ -58,6 +55,7 @@
 }
 
 #panel-wrapper.collapsed .task-box .task-name,
+#panel-wrapper.collapsed .task-box .task-type,
 #panel-wrapper.collapsed .task-box .progress-container,
 #panel-wrapper.collapsed .task-box .progress-info,
 #panel-wrapper.collapsed .task-box .staff-line,
