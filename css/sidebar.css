@@ -90,8 +90,8 @@
   max-width: 60px;
 }
 
-#sidebar-wrapper.collapsed .menu-title .company-name {
-  display: none;
+#sidebar-wrapper.collapsed #companyInfo .company-name {
+  display: none !important;
 }
 
 #sidebar-wrapper.collapsed .menu-grid {
