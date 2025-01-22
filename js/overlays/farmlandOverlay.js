@@ -129,27 +129,3 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
   `;
 }
 
-function displayGrapeSuitability(farmland) {
-    const suitabilityDisplay = document.createElement('div');
-    suitabilityDisplay.className = 'suitability-info';
-    
-    if (farmland.plantedResourceName) {
-        const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
-        const suitabilityPercent = Math.round(suitability * 100);
-        let suitabilityClass = '';
-        
-        if (suitability >= 0.8) suitabilityClass = 'excellent';
-        else if (suitability >= 0.6) suitabilityClass = 'good';
-        else if (suitability >= 0.4) suitabilityClass = 'moderate';
-        else suitabilityClass = 'poor';
-        
-        suitabilityDisplay.innerHTML = `
-            <div class="suitability-bar ${suitabilityClass}">
-                <div class="suitability-fill" style="width: ${suitabilityPercent}%"></div>
-                <span class="suitability-text">Grape Suitability: ${suitabilityPercent}%</span>
-            </div>
-        `;
-    }
-    
-    return suitabilityDisplay;
-}
