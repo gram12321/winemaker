@@ -66,6 +66,13 @@
           initializePanel();
           initializeSidebar();
           initializeConsole();
+
+          // Add click handler for main-link
+          document.getElementById('main-link').addEventListener('click', (e) => {
+              e.preventDefault();
+              hideAllOverlays();
+              document.querySelector('#page-content-wrapper .mainview-overlay').style.display = 'block';
+          });
         // Setop initial staff wage. Hereafter use updateWagesAndRecurringTransaction (in staff.js) to make any change to staff wagesCall this function during initialization of the game or after adding staff
         setupStaffWagesRecurringTransaction();
 

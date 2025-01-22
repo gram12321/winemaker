@@ -209,7 +209,7 @@ export function renderCompanyInfo() {
 Week ${week}, ${season}, ${year}
 Money: € ${formatNumber(money, 0)}
 Prestige: ${formatNumber(prestige, 2)}`;
-        
+
         companyInfoDiv.setAttribute('data-tooltip', tooltipContent);
         const formattedCompanyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
         companyInfoDiv.innerHTML = `
