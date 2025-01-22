@@ -42,17 +42,6 @@
 }
 
 #sidebar-wrapper.collapsed #companyInfo {
-  display: block;
-}
-
-#sidebar-wrapper.collapsed #companyInfo .menu-image {
-  height: 40px;
-  width: 40px;
-  margin: 5px auto;
-  border-radius: 4px;
-}
-
-#sidebar-wrapper.collapsed #companyInfo p {
   display: none;
 }
 
