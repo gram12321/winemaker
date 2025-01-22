@@ -28,6 +28,10 @@
   --panel-width: var(--sidebar-width);
   --panel-collapsed-width: var(--sidebar-collapsed-width);
   --console-height: 100px;
+  --console-width: calc(100% - (var(--sidebar-width) + var(--panel-width)));
+  --console-width-sidebar-collapsed: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-width)));
+  --console-width-panel-collapsed: calc(100% - (var(--sidebar-width) + var(--panel-collapsed-width)));
+  --console-width-both-collapsed: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
   --transition-speed: 0.3s;
 
 /* Spacing */

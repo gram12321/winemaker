@@ -4,11 +4,10 @@
   bottom: 0;
   left: var(--sidebar-width);
   right: var(--panel-width);
-  height: 100px;
-  /* Adjust height as needed */
+  height: var(--console-height);
+  width: var(--console-width);
   transition: all var(--transition-speed) ease;
   overflow-y: scroll;
-  /* Ensure vertical scroll is visible when needed */
   overflow-x: hidden;
   /* Hide horizontal scroll to maintain layout integrity */
   background-color: #888;
@@ -44,13 +43,16 @@
 /* Collapsed states */
 body.sidebar-collapsed #console-bar {
   left: var(--sidebar-collapsed-width);
+  width: var(--console-width-sidebar-collapsed);
 }
 
 #panel-wrapper.collapsed + #console-bar {
   right: var(--panel-collapsed-width);
+  width: var(--console-width-panel-collapsed);
 }
 
 body.sidebar-collapsed #panel-wrapper.collapsed + #console-bar {
   left: var(--sidebar-collapsed-width);
   right: var(--panel-collapsed-width);
+  width: var(--console-width-both-collapsed);
 }
