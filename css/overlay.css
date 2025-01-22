@@ -654,14 +654,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .overlay-section .card-header h3 {
   color: var(--panel-text);
   margin: 0;
-}
-
-.overlay-section-wrapper {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: var(--radius-lg);
-  margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-accent);
 }
 
 #farmland-details .table:not(#buyLandOverlay .table) {

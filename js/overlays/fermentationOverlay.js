@@ -9,8 +9,7 @@ export function showFermentationOverlay() {
 
     overlayContainer.innerHTML = `
         <div class="overlay-content overlay-container">
-            <div class="overlay-section-wrapper">
-  <section id="vineyard-section" class="overlay-section card mb-4">
+            <section id="vineyard-section" class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Must Fermentation</h3>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
@@ -41,7 +40,6 @@ export function showFermentationOverlay() {
                     </div>
                 </div>
             </section>
-</div>
         </div>
     `;
 
