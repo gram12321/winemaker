@@ -208,34 +208,3 @@ body.sidebar-collapsed #wrapper {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
-.welcome-container {
-  text-align: center;
-  padding: 2rem;
-  background-color: var(--color-background);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-accent);
-  max-width: 600px;
-  margin: 2rem auto;
-}
-
-.welcome-title {
-  color: var(--color-accent);
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.welcome-text {
-  color: var(--panel-text);
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-}
-
-.welcome-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-}
-
-.welcome-buttons .btn {
-  min-width: 200px;
-}
