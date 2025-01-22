@@ -32,6 +32,13 @@
   </div>
 
   <!-- Properly order JS dependencies -->
+
+  <!-- Assign Staff Overlay -->
+  <div id="assignStaffOverlay" class="overlay">
+    <div class="overlay-content">
+    </div>
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
@@ -63,16 +70,8 @@
         document.getElementById('add-money-btn').addEventListener('click', () => {
             addTransaction('Income', 'Manual Money Addition', 1000000);
         });
-          document.getElementById('increment-week-btn').addEventListener('click', incrementWeek);  
+        document.getElementById('increment-week-btn').addEventListener('click', incrementWeek);  
       });
-  // Assign Staff Overlay 
-  <div id="assignStaffOverlay" class="overlay">
-    <div class="overlay-content">
-    </div>
-  </div>
-
-          // Removed save-company-info-btn event listener
-      });;
   </script>
   <!-- Building Detail Overlay -->
   <div id="buildingOverlay" class="overlay" style="display: none;">
