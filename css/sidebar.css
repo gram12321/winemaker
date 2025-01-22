@@ -31,8 +31,12 @@
 #sidebar-wrapper.collapsed .menu-item span {
   font-size: 0.6rem;
   padding: 4px;
+  transform: translateY(100%);
+  background: rgba(0, 0, 0, 0.7);
+}
+
+#sidebar-wrapper.collapsed .menu-item:hover span {
   transform: translateY(0);
-  background: rgba(0, 0, 0, 0.9);
 }
 
 #sidebar-wrapper.collapsed .dropdown {
