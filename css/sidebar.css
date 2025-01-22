@@ -89,6 +89,7 @@
   max-width: 60px;
 }
 
+/* Default state (expanded) */
 .menu-title .company-name .short-name {
   display: none;
 }
@@ -99,12 +100,13 @@
   text-align: center;
 }
 
+/* Collapsed state */
 #sidebar-wrapper.collapsed .menu-title .company-name .full-name {
-  display: none;
+  display: none !important;
 }
 
 #sidebar-wrapper.collapsed .menu-title .company-name .short-name {
-  display: block;
+  display: block !important;
   font-size: 1.2rem;
   margin: 0;
   text-align: center;
