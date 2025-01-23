@@ -5,6 +5,7 @@ import { storeBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction} from '/js/finance.js';
 import { formatNumber } from '/js/utils.js';
 
+
 export class Building {
   static BASE_COSTS = {
     'Tool Shed': 500000,
@@ -111,7 +112,7 @@ const ToolManager = (() => {
     if (!toolsInitialized) {
       // Reset tool instance counts
       toolInstanceCounts = {};
-      
+
       tools = [
         new Tool('Tractor', 'Tool Shed', 1.2, 500, 0),
         new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0),
@@ -137,7 +138,7 @@ const ToolManager = (() => {
       }
       // Increment counter
       toolInstanceCounts[toolName]++;
-      
+
       const newTool = new Tool(
         toolTemplate.name,
         toolTemplate.buildingType,
@@ -174,7 +175,7 @@ export function buildBuilding(buildingName) {
 
   const buildingCost = Building.BASE_COSTS[buildingName] || 500000;
   addTransaction('Expense', `Construction of ${buildingName}`, -buildingCost);
-  
+
   const newBuilding = new Building(buildingName);
   buildings.push(newBuilding);
   storeBuildings(buildings);
@@ -204,7 +205,7 @@ export function updateBuildingCards() {
 
     const buildingData = buildings.find(b => b.name === buildingName);
     const isBuilt = buildingData !== undefined;
-    
+
     // Create proper Building instance if building exists
     const building = isBuilt ? new Building(buildingData.name, buildingData.level, buildingData.tools || []) : null;
 
@@ -238,10 +239,10 @@ export function upgradeBuilding(buildingName) {
 
   const building = new Building(buildingData.name, buildingData.level, buildingData.tools || []);
   const upgradeCost = building.getUpgradeCost();
-  
+
   // Deduct the upgrade cost
   addTransaction('Expense', `Upgraded ${buildingName} to level ${building.level + 1}`, -upgradeCost);
-  
+
   building.upgrade();
 
   const updatedBuildings = buildings.map(b => b.name === buildingName ? building : b);
