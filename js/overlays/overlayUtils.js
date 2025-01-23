@@ -46,13 +46,21 @@ export function showMainViewOverlay(overlayContent) {
 }
 
 export function showModalOverlay(overlayId, content) {
-    const overlay = document.getElementById(overlayId);
-    if (overlay) {
-        const contentDiv = overlay.querySelector('.overlay-content') || overlay;
-        contentDiv.innerHTML = content;
-        overlay.classList.add('active');
-        overlay.style.display = 'block';
+    let overlay = document.getElementById(overlayId);
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = overlayId;
+        overlay.classList.add('overlay');
+        document.body.appendChild(overlay);
     }
+    
+    overlay.innerHTML = `
+        <div class="overlay-content">
+            ${content}
+        </div>
+    `;
+    overlay.classList.add('active');
+    overlay.style.display = 'block';
     return overlay;
 }
 
