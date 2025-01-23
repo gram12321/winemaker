@@ -650,28 +650,17 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background: transparent;
 }
 
-#farmland-details .table {
+/* Standard table styles for all overlays */
+.overlay-content .table {
   margin: 0 auto;
   width: auto;
   min-width: 400px;
-  background-color: #fff;
+  background-color: var(--color-background);
   text-align: center;
 }
 
-#farmland-details .table th {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.overlay .table {
-  margin: 0 auto;
-  width: auto;
-  min-width: 400px;
-  background-color: #fff;
-  text-align: center;
-}
-
-.overlay .table th {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
+.overlay-content .table th {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  border-bottom: 2px solid var(--color-accent);
 }
