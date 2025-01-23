@@ -1,5 +1,3 @@
-
-import { formatNumber } from '/js/utils.js';
 import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
 
 export function showFinanceOverlay() {
