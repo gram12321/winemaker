@@ -28,6 +28,11 @@ export function updateAllDisplays() {
             displayWineOrders();
         }
 
+        // Vineyard table
+        if (typeof showVineyardOverlay === 'function' && document.getElementById('vineyard-table-container')) {
+            showVineyardOverlay();
+        }
+
         // Building displays
         if (typeof updateBuildingCards === 'function') {
             updateBuildingCards();
@@ -46,3 +51,4 @@ import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
 import { displayStaff } from './staff.js';
 import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
+import { showVineyardOverlay } from './overlays/mainpages/vineyardoverlay.js';
