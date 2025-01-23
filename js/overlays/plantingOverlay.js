@@ -103,7 +103,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
   }
 
   const overlayContainer = document.createElement('div');
-  overlayContainer.className = 'overlay planting-overlay';
+  overlayContainer.className = 'overlay active';
 
   let density = farmland.density || 1000; // Default density if not set
   const initialCostPerAcre = density * 2;
@@ -115,7 +115,13 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
   ).join('');
 
   overlayContainer.innerHTML = `
-    <div class="overlay-content">
+    <div class="overlay-content overlay-container">
+      <section class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Planting Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h3>
+          <button class="btn btn-light btn-sm close-btn">Close</button>
+        </div>
+        <div class="card-body">
       <h2>Planting Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h2>
       <div class="form-group">
         <label for="resource-select" class="form-label">Select Resource to Plant:</label>
@@ -147,7 +153,8 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
         </div>
       </div>
       <button class="btn btn-primary plant-btn">Plant</button>
-      <button class="btn btn-secondary close-btn">Close</button>
+        </div>
+      </section>
     </div>
   `;
 
