@@ -1,9 +1,9 @@
 import { getBuildingTools, createTool, Building } from '../buildings.js';
 import { addConsoleMessage } from '/js/console.js';
-import { updateBuildingCards } from '/js/buildings.js'; // Make sure the import path is correct
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
-import { addTransaction } from '../finance.js'; // Ensure this import is at the top of your file.
+import { addTransaction } from '../finance.js';
 import { formatNumber } from '../utils.js';
+import { updateAllDisplays } from '/js/displayManager.js';
 
 
 function createBuildingDetails(building) {
@@ -81,7 +81,7 @@ function setupToolButtons(building, tools) {
             buildingInstance.tools = updatedBuilding.tools;
             showBuildingOverlay(buildingInstance);
             // Update building cards to reflect new tool
-            updateBuildingCards();
+            updateAllDisplays();
           }
         } else {
           addConsoleMessage(`Cannot add ${tool.name}. ${building.name} is full!`);
@@ -184,7 +184,7 @@ export function hideBuildingOverlay() {
   const overlay = document.getElementById('buildingOverlay');
   if (overlay) {
     overlay.style.display = 'none';
-    updateBuildingCards();
+    updateAllDisplays();
   }
 }
 
