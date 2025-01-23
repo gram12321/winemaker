@@ -112,31 +112,8 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     z-index: 1900;
 }
 
-/* Shared Table Styles */
-.overlay-table {
-    width: 100%;
-    margin-bottom: 1rem;
-    background-color: transparent;
-}
-
-.overlay-table th {
-    background-color: var(--color-primary);
-    color: var(--panel-text);
-    padding: 12px;
-    border-bottom: 2px solid var(--color-accent);
-}
-
-.overlay-table td {
-    padding: 12px;
-    border-color: rgba(197, 165, 114, 0.2);
-    vertical-align: middle;
-}
-
-.overlay-table tbody tr:hover {
-    background-color: rgba(197, 165, 114, 0.1);
-}
-
 /* 3. Common Table Styles */
+.overlay-table,
 .overlay-content .table,
 .mainview-overlay-content .table {
   margin: 0 auto;
@@ -144,21 +121,27 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   min-width: 400px;
   background-color: var(--color-background);
   text-align: center;
+  margin-bottom: 1rem;
 }
 
+.overlay-table th,
 .overlay-content .table th,
 .mainview-overlay-content .table th {
   background-color: var(--color-primary);
   color: var(--panel-text);
+  padding: 12px;
   border-bottom: 2px solid var(--color-accent);
 }
 
+.overlay-table td,
 .overlay-content .table td,
 .mainview-overlay-content .table td {
   padding: 12px;
   border-color: rgba(197, 165, 114, 0.2);
+  vertical-align: middle;
 }
 
+.overlay-table tbody tr:hover,
 .overlay-content .table tbody tr:hover,
 .mainview-overlay-content .table tbody tr:hover {
   background-color: rgba(197, 165, 114, 0.1);
