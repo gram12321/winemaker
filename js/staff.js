@@ -1,6 +1,6 @@
 import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames, italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry  } from './names.js'; // Adjust import path if necessary
 import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
-import { loadStaff } from './database/adminFunctions.js'; // Ensure correct path
+import { loadStaff, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { showStaffOverlay } from './overlays/showstaffoverlay.js'; // Import the new staff overlay
 import { loadBuildings } from './database/adminFunctions.js'; // Ensure the correct path
@@ -140,8 +140,8 @@ export function displayStaff() {
     const tbody = document.createElement('tbody');
     tbody.id = 'staff-entries';
 
-    const staffData = JSON.parse(localStorage.getItem('staffData')) || [];
-    const tasks = JSON.parse(localStorage.getItem('activeTasks')) || [];
+    const staffData = loadStaff();
+    const tasks = loadTasksFromStorage();
 
     staffData.forEach(staff => {
         const assignedTasks = [];
