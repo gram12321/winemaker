@@ -31,5 +31,7 @@ export function showMainOfficeOverlay() {
     document.getElementById('add-money-btn').addEventListener('click', () => {
         addTransaction('Income', 'Manual Money Addition', 1000000);
     });
-    document.getElementById('increment-week-btn').addEventListener('click', incrementWeek);
+    document.getElementById('increment-week-btn').addEventListener('click', () => {
+        incrementWeek();
+    });
 }
