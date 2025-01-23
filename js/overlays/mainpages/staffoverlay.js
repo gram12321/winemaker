@@ -1,14 +1,11 @@
 
 import { displayStaff } from '/js/staff.js';
 import { showHireStaffOverlay } from '/js/overlays/hirestaffoverlay.js';
+import { showMainViewOverlay } from '../overlayUtils.js';
 
 export function showStaffOverlay() {
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-    overlay.innerHTML = createStaffOverlayHTML();
-    document.body.appendChild(overlay);
+    const overlay = showMainViewOverlay(createStaffOverlayHTML());
     setupStaffOverlayEventListeners(overlay);
-    overlay.style.display = 'block';
 }
 
 function createStaffOverlayHTML() {

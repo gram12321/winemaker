@@ -1,18 +1,10 @@
+
 import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
+import { showMainViewOverlay } from '../overlayUtils.js';
 
 export function showFinanceOverlay() {
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
-
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-    overlay.innerHTML = createFinanceOverlayHTML();
-    document.body.appendChild(overlay);
-    overlay.style.display = 'block';
-
-    setupFinanceEventListeners();
+    const overlay = showMainViewOverlay(createFinanceOverlayHTML());
+    setupFinanceEventListeners(overlay);
 }
 
 function createFinanceOverlayHTML() {
@@ -90,8 +82,7 @@ function createFinanceOverlayHTML() {
     `;
 }
 
-function setupFinanceEventListeners() {
-    // Initialize finance data
+function setupFinanceEventListeners(overlay) {
     loadCashFlow();
     updateIncomeStatement();
 }
