@@ -64,10 +64,9 @@ function setupBuildingsEventListeners(overlay) {
 
     // Setup initial button states
     updateBuildButtonStates();
-        
-    
 
     // Setup upgrade buttons
+    const upgradeButtons = overlay.querySelectorAll('.upgrade-button');
     upgradeButtons.forEach((button) => {
         button.addEventListener('click', () => {
             const buildingName = button.getAttribute('data-building-name');
