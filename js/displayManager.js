@@ -27,6 +27,14 @@ export function updateAllDisplays() {
         if (typeof displayWineOrders === 'function' && document.getElementById('wine-orders-table-body')) {
             displayWineOrders();
         }
+
+        // Building displays
+        if (typeof updateBuildingCards === 'function') {
+            updateBuildingCards();
+        }
+        if (typeof updateBuildButtonStates === 'function') {
+            updateBuildButtonStates();
+        }
     } catch (error) {
         console.debug('Some display functions are not available in current context:', error);
     }
@@ -37,3 +45,4 @@ import { renderCompanyInfo } from './database/loadSidebar.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
 import { displayStaff } from './staff.js';
+import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
