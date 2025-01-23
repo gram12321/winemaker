@@ -20,9 +20,9 @@ export function updateAllDisplays() {
         }
 
         // Staff display
-        if (typeof displayStaff === 'function' && document.getElementById('staff-table-body')) {
+        if (typeof displayStaff === 'function' && document.getElementById('staff-entries')) {
             displayStaff();
-            console.log('Display stafff called');
+            console.log('Display staff called');
         }
 
         // Wine orders
