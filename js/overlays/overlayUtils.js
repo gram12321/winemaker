@@ -46,28 +46,32 @@ export function showMainViewOverlay(overlayContent) {
 }
 
 export function showModalOverlay(overlayId, content) {
-    let overlay = document.getElementById(overlayId);
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = overlayId;
-        overlay.classList.add('overlay');
-        document.body.appendChild(overlay);
-    }
+    // Create a modal overlay for warnings and confirmations
+    const overlay = document.createElement('div');
+    overlay.classList.add('overlay', 'modal-overlay');
+    overlay.id = overlayId;
+    overlay.style.zIndex = '2000'; // Ensure modal appears above standard overlays
     
     overlay.innerHTML = `
-        <div class="overlay-content">
+        <div class="overlay-content modal-content">
             ${content}
         </div>
     `;
-    overlay.classList.add('active');
-    overlay.style.display = 'block';
+    
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => {
+        overlay.classList.add('active');
+    });
+    
     return overlay;
 }
 
-// Standard overlay utility functions
+// Standard overlay for major features (planting, harvesting, etc)
 export function showStandardOverlay(content) {
     const overlayContainer = document.createElement('div');
-    overlayContainer.classList.add('overlay');
+    overlayContainer.classList.add('overlay', 'standard-overlay');
+    overlayContainer.style.zIndex = '1500'; // Below modal overlays
+    
     overlayContainer.innerHTML = `
         <div class="overlay-content">
             ${content}
