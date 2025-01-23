@@ -40,7 +40,17 @@ function getVineyardOverlayHTML() {
     `;
 }
 
-export function createVineyardTable() {
+export function updateVineyardTable() {
+    const container = document.getElementById('vineyard-table-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    const table = createVineyardTable();
+    container.appendChild(table);
+    setupVineyardEventListeners(table);
+}
+
+function createVineyardTable() {
     const farmlands = loadFarmlands();
     const table = document.createElement('table');
     table.className = 'table table-hover overlay-table';

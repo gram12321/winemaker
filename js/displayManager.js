@@ -29,12 +29,8 @@ export function updateAllDisplays() {
         }
 
         // Vineyard table
-        if (typeof createVineyardTable === 'function' && document.getElementById('vineyard-table-container')) {
-            const container = document.getElementById('vineyard-table-container');
-            container.innerHTML = '';
-            const table = createVineyardTable();
-            container.appendChild(table);
-            setupVineyardEventListeners(table);
+        if (typeof updateVineyardTable === 'function') {
+            updateVineyardTable();
         }
 
         // Building displays
