@@ -47,6 +47,20 @@ function createStaffOverlayHTML() {
 function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
     
+    // Create an observer to watch for DOM changes
+    const observer = new MutationObserver(() => {
+        displayStaff();
+    });
+
+    // Start observing the staff container for changes
+    const staffContainer = document.getElementById('staff-container');
+    if (staffContainer) {
+        observer.observe(staffContainer, { 
+            childList: true,
+            subtree: true 
+        });
+    }
+    
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', showHireStaffOverlay);
