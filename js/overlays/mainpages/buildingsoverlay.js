@@ -1,7 +1,7 @@
 
 // Import required functions from other modules
 import { loadBuildings } from '/js/database/adminFunctions.js';
-import { buildBuilding, upgradeBuilding, updateBuildingCards, Building } from '/js/buildings.js';
+import { buildBuilding, upgradeBuilding, updateBuildingCards, updateBuildButtonStates   } from '/js/buildings.js';
 import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
@@ -64,8 +64,8 @@ function setupBuildingsEventListeners(overlay) {
 
     // Setup initial button states
     updateBuildButtonStates();
-        }
-    });
+        
+    
 
     // Setup upgrade buttons
     upgradeButtons.forEach((button) => {

@@ -194,7 +194,7 @@ export function buildBuilding(buildingName) {
   updateBuildButtonStates();
 }
 
-export function updateBuildButtonStates() {
+export function updateBuildButtonStates() { // Disable build and upgrade buttons if not allowed (No money or allready built)
   const buildings = loadBuildings();
   const currentMoney = parseInt(localStorage.getItem('money')) || 0;
 
