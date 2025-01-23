@@ -22,6 +22,7 @@ export function updateAllDisplays() {
         // Staff display
         if (typeof displayStaff === 'function' && document.getElementById('staff-table-body')) {
             displayStaff();
+            console.log('Display stafff called');
         }
 
         // Wine orders
