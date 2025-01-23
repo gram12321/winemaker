@@ -4,13 +4,14 @@ import { incrementWeek } from '/js/endDay.js';
 import { hideAllOverlays } from '/js/overlays/mainpages/hideOverlays.js';
 
 export function showMainOfficeOverlay() {
-    // First hide any existing overlays
-    hideAllOverlays();
-    
+    const existingOverlay = document.querySelector('.mainview-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
-    overlay.style.display = 'flex';
-    
+
     overlay.innerHTML = `
         <div class="mainview-overlay-content">
             <h1>Welcome to the Game!</h1>
@@ -23,11 +24,8 @@ export function showMainOfficeOverlay() {
         </div>
     `;
 
-    const pageContent = document.querySelector('#page-content-wrapper');
-    if (pageContent) {
-        pageContent.innerHTML = ''; // Clear existing content
-        pageContent.appendChild(overlay);
-    }
+    document.body.appendChild(overlay);
+    overlay.style.display = 'block';
 
     // Add event listeners
     document.getElementById('add-money-btn').addEventListener('click', () => {
