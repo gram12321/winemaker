@@ -26,9 +26,13 @@ export function updateAllDisplays() {
             displayStaff();
         }
 
-        // Wine orders
-        if (typeof displayWineOrders === 'function' && document.getElementById('wine-orders-table-body')) {
-            displayWineOrders();
+        // Wine cellar and orders displays
+        if (document.getElementById('wine-orders-table-body')) {
+            const orders = loadWineOrders();
+            currentOrders = orders;
+            setupEventListeners();
+            populateResourceFilter();
+            refreshDisplay();
         }
 
         // Vineyard table

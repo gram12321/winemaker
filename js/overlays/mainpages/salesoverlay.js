@@ -144,7 +144,7 @@ function displayFilteredOrders(filteredOrders) {
         sellButton.addEventListener('click', () => {
             const orderIndex = parseInt(sellButton.dataset.originalIndex);
             if (sellOrderWine(orderIndex)) {
-                updateAllDisplays();// Changed to updateAllDisplays
+                updateAllDisplays();
             }
         });
 
@@ -154,7 +154,7 @@ function displayFilteredOrders(filteredOrders) {
             const wineOrders = loadWineOrders();
             wineOrders.splice(orderIndex, 1);
             saveWineOrders(wineOrders);
-            updateAllDisplays();// Changed to updateAllDisplays
+            updateAllDisplays();
         });
 
         wineOrdersTableBody.appendChild(row);
