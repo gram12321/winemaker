@@ -1,16 +1,18 @@
+
 import { displayStaff } from '/js/staff.js';
 import { showHireStaffOverlay } from '/js/overlays/hirestaffoverlay.js';
 
 export function showStaffOverlay() {
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
-
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
+    overlay.innerHTML = createStaffOverlayHTML();
+    document.body.appendChild(overlay);
+    setupStaffOverlayEventListeners(overlay);
+    overlay.style.display = 'block';
+}
 
-    overlay.innerHTML = `
+function createStaffOverlayHTML() {
+    return `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Staff Management</h2>
 
@@ -43,16 +45,13 @@ export function showStaffOverlay() {
             </div>
         </div>
     `;
+}
 
-    document.body.appendChild(overlay);
-    overlay.style.display = 'block';
-
+function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
-
-    const hireStaffBtn = document.getElementById('hire-staff-btn');
+    
+    const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
     if (hireStaffBtn) {
-        hireStaffBtn.addEventListener('click', function() {
-            showHireStaffOverlay();
-        });
+        hireStaffBtn.addEventListener('click', showHireStaffOverlay);
     }
 }
