@@ -6,20 +6,7 @@ import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
-    // Remove any existing overlay before creating a new one
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
-
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-
-    overlay.innerHTML = createSalesOverlayContent();
-
-    document.body.appendChild(overlay);
-    overlay.style.display = 'block';
-
+    const overlay = showMainViewOverlay(createSalesOverlayContent());
     initializeSalesTables();
 }
 
