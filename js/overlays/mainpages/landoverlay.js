@@ -112,11 +112,17 @@ export function displayFarmland() {
         farmlandEntries.appendChild(row);
     });
     
-    // Setup event listeners after all rows are added
-    const overlay = document.querySelector('.mainview-overlay');
-    if (overlay) {
-        setupLandEventListeners(overlay);
-    }
+    // Setup event listeners directly on the newly added rows
+    const plantButtons = farmlandEntries.querySelectorAll('.plant-btn');
+    plantButtons.forEach(button => {
+        const farmlandId = button.getAttribute('data-farmland-id');
+        const farmland = farmlands.find(f => f.id === parseInt(farmlandId));
+        if (farmland) {
+            button.addEventListener('click', () => {
+                showPlantingOverlay(farmland, () => displayFarmland());
+            });
+        }
+    });
 }
 
 function createFarmlandRow(farmland, selectedUnit) {
