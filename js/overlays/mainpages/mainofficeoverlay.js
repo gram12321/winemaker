@@ -19,7 +19,7 @@ export function showMainOfficeOverlay() {
 
             <div class="text-center mt-4">
                 <button id="add-money-btn" class="btn btn-success">Add $1.000.000 €</button>
-                <button id="increment-week-btn" class="btn btn-info">Increment Week</button> 
+                <button id="increment-week-btn" class="btn btn-info"></button> 
             </div>
         </div>
     `;
