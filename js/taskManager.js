@@ -1,4 +1,5 @@
 import { loadStaff, saveTasks, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
+import { updateAllDisplays } from './displayManager.js';
 import { showStaffOverlay } from './overlays/showstaffoverlay.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass } from './utils.js';
@@ -132,6 +133,7 @@ class TaskManager {
         this.tasks.delete(taskId);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
+        updateAllDisplays(); // Add this line to update all displays when a task is removed
     }
 
     getTaskProgress(taskId) {
