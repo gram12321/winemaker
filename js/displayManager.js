@@ -13,19 +13,21 @@ export function updateAllDisplays() {
             displayFarmland();
         }
 
-        // Wine cellar inventory
-        if (typeof displayWineCellarInventory === 'function' && document.getElementById('winecellar-table-body')) {
+        // Wine cellar and orders displays
+        if (document.getElementById('winecellar-table-body') || document.getElementById('wine-orders-table-body')) {
+            const orders = loadWineOrders();
+            if (orders) {
+                currentOrders = orders;
+                setupEventListeners();
+                populateResourceFilter();
+                refreshDisplay();
+            }
             displayWineCellarInventory();
         }
 
         // Staff display
         if (typeof displayStaff === 'function' && document.getElementById('staff-entries')) {
             displayStaff();
-        }
-
-        // Wine orders
-        if (typeof displayWineOrders === 'function' && document.getElementById('wine-orders-table-body')) {
-            displayWineOrders();
         }
 
         // Vineyard table
