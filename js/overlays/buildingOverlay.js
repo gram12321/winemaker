@@ -87,11 +87,7 @@ function setupToolButtons(building, tools, overlayContainer) {
 }
 
 export function showBuildingOverlay(building) {
-  // Clean up any existing building overlays first
-  document.querySelectorAll('.overlay').forEach(el => {
-    if (el.parentNode) el.parentNode.removeChild(el);
-  });
-  const overlayContainer = showStandardOverlay(createBuildingDetails(building));
+  const overlayContainer = showModalOverlay('buildingOverlay', createBuildingDetails(building));
   renderCapacityVisual(building);
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
   setupToolButtons(building, tools, overlayContainer);
