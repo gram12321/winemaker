@@ -152,7 +152,9 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
           <span>Total Cost: </span><span id="total-cost">${formatNumber(initialTotalCost)}</span>
         </div>
       </div>
-      <button class="btn btn-primary plant-btn">Plant</button>
+      <div class="d-flex justify-content-center mt-4">
+        <button class="btn btn-primary plant-btn">Plant</button>
+      </div>
         </div>
       </section>
     </div>
