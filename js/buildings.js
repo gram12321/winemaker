@@ -191,6 +191,33 @@ export function buildBuilding(buildingName) {
 
   addConsoleMessage(`${buildingName} has been built successfully. <span style="color: red">Cost: €${formatNumber(buildingCost)}</span>. Capacity: ${newBuilding.capacity} (${newBuilding.capacity} spaces available)`);
   updateBuildingCards();
+  updateBuildButtonStates();
+}
+
+export function updateBuildButtonStates() {
+  const buildings = loadBuildings();
+  const currentMoney = parseInt(localStorage.getItem('money')) || 0;
+
+  const buildButtons = document.querySelectorAll('.build-button');
+  const upgradeButtons = document.querySelectorAll('.upgrade-button');
+
+  buildButtons.forEach((button, index) => {
+    const buildingName = button.getAttribute('data-building-name');
+    const upgradeButton = upgradeButtons[index];
+    const existingBuilding = buildings.find(b => b.name === buildingName);
+    const buildCost = Building.BASE_COSTS[buildingName] || 500000;
+
+    if (existingBuilding) {
+      button.disabled = true;
+      button.textContent = "Built";
+      
+      const building = new Building(buildingName, existingBuilding.level);
+      const upgradeCost = building.getUpgradeCost();
+      upgradeButton.disabled = currentMoney < upgradeCost;
+    } else {
+      button.disabled = currentMoney < buildCost;
+    }
+  });
 }
 
 export function updateBuildingCards() {
@@ -250,4 +277,5 @@ export function upgradeBuilding(buildingName) {
 
   addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}. <span style="color: red">Cost: €${formatNumber(upgradeCost)}</span>. New Capacity: ${building.capacity} (${building.capacity - (building.tools ? building.tools.length : 0)} spaces available)`);
   updateBuildingCards();
+  updateBuildButtonStates();
 }

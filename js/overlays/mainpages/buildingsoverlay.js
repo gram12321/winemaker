@@ -55,28 +55,15 @@ function setupBuildingsEventListeners(overlay) {
 
     // Setup build buttons
     const buildButtons = overlay.querySelectorAll('.build-button');
-    const upgradeButtons = overlay.querySelectorAll('.upgrade-button');
-    const currentMoney = parseInt(localStorage.getItem('money')) || 0;
-
-    buildButtons.forEach((button, index) => {
+    buildButtons.forEach(button => {
         const buildingName = button.getAttribute('data-building-name');
-        const upgradeButton = upgradeButtons[index];
-        const existingBuilding = buildings.find(b => b.name === buildingName);
-        const buildCost = Building.BASE_COSTS[buildingName] || 500000;
+        button.addEventListener('click', () => {
+            buildBuilding(buildingName);
+        });
+    });
 
-        if (existingBuilding) {
-            button.disabled = true;
-            button.textContent = "Built";
-            
-            // Check money for upgrade
-            const building = new Building(buildingName, existingBuilding.level);
-            const upgradeCost = building.getUpgradeCost();
-            upgradeButton.disabled = currentMoney < upgradeCost;
-        } else {
-            button.disabled = currentMoney < buildCost;
-            button.addEventListener('click', () => {
-                buildBuilding(buildingName);
-            });
+    // Setup initial button states
+    updateBuildButtonStates();
         }
     });
 
