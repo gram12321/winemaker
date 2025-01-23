@@ -3,6 +3,7 @@ import { calculateWinePrice } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
+import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {

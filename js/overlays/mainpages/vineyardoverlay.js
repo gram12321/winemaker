@@ -4,6 +4,7 @@ import { showHarvestOverlay } from '../harvestOverlay.js';
 import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
 import { formatNumber, getColorClass } from '../../utils.js';
 import { loadFarmlands } from '../../database/adminFunctions.js';
+import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
 /**
  * Creates and displays the vineyard management overlay
