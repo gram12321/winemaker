@@ -14,15 +14,11 @@ export function updateAllDisplays() {
         }
 
         // Wine cellar and orders displays
-        if (document.getElementById('winecellar-table-body') || document.getElementById('wine-orders-table-body')) {
-            const orders = loadWineOrders();
-            if (orders) {
-                currentOrders = orders;
-                setupEventListeners();
-                populateResourceFilter();
-                refreshDisplay();
-            }
+        if (typeof displayWineCellarInventory === 'function' && document.getElementById('winecellar-table-body')) {
             displayWineCellarInventory();
+        }
+        if (typeof displayWineOrders === 'function' && document.getElementById('wine-orders-table-body')) {
+            displayWineOrders();
         }
 
         // Staff display
@@ -53,4 +49,3 @@ import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
 import { displayStaff } from './staff.js';
 import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
-import { createVineyardTable, setupVineyardEventListeners } from './overlays/mainpages/vineyardoverlay.js';
