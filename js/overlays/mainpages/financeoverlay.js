@@ -8,8 +8,15 @@ export function showFinanceOverlay() {
 
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
+    overlay.innerHTML = createFinanceOverlayHTML();
+    document.body.appendChild(overlay);
+    overlay.style.display = 'block';
 
-    overlay.innerHTML = `
+    setupFinanceEventListeners();
+}
+
+function createFinanceOverlayHTML() {
+    return `
         <div class="mainview-overlay-content finance-container">
             <h1 class="mb-4">Finance Management</h1>
             
@@ -81,10 +88,9 @@ export function showFinanceOverlay() {
             </div>
         </div>
     `;
+}
 
-    document.body.appendChild(overlay);
-    overlay.style.display = 'block';
-
+function setupFinanceEventListeners() {
     // Initialize finance data
     loadCashFlow();
     updateIncomeStatement();
