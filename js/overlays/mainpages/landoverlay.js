@@ -8,29 +8,22 @@ import { showFarmlandOverlay } from '/js/overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from '/js/overlays/plantingOverlay.js';
 import { showResourceInfoOverlay } from '/js/overlays/resourceInfoOverlay.js';
 
+import { showMainViewOverlay } from '../overlayUtils.js';
+
 export function showLandOverlay() {
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
+    const overlay = showMainViewOverlay(createLandOverlayHTML());
+    setupLandEventListeners(overlay);
+    displayFarmland();
+}
 
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-
-    overlay.innerHTML = getLandOverlayHTML();
-
-    document.body.appendChild(overlay);
-
+function setupLandEventListeners(overlay) {
     const buyLandBtn = overlay.querySelector('#buy-land-btn');
     if (buyLandBtn) {
         buyLandBtn.addEventListener('click', showBuyLandOverlay);
     }
-
-    displayFarmland();
-    overlay.style.display = 'block';
 }
 
-function getLandOverlayHTML() {
+function createLandOverlayHTML() {
     return `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Farmland Management</h2>
