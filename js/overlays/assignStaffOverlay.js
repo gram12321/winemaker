@@ -2,6 +2,7 @@ import { getFlagIconHTML } from '../utils.js';
 import { loadStaff } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
+import { updateAllDisplays } from '../displayManager.js';
 
 export function showAssignStaffOverlay(task) {
     const overlayContent = generateAssignStaffHTML(task);
@@ -80,6 +81,7 @@ function setupAssignStaffEventListeners(overlay, task) {
             const selectedStaff = Array.from(overlay.querySelectorAll('.staff-select:checked'))
                 .map(checkbox => parseInt(checkbox.value));
             taskManager.assignStaffToTask(task.id, selectedStaff);
+            updateAllDisplays();
             hideOverlay(overlay);
         });
     }
