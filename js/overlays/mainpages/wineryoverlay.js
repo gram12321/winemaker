@@ -1,21 +1,20 @@
+
 import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay } from '/js/utils.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
 import { loadBuildings } from '/js/database/adminFunctions.js';
+import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
 export function showWineryOverlay() {
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
+    const overlayContent = createWineryOverlay();
+    const overlay = showMainViewOverlay(overlayContent);
+    setupWineryOverlay(overlay);
+}
 
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-
-    overlay.innerHTML = `
+function createWineryOverlay() {
+    return `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Winery Management</h2>
-
             <div class="overlay-sections">
                 <section id="grapes-section" class="overlay-section card mb-4">
                     <img src="/assets/pic/warehouse_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Warehouse">
@@ -69,13 +68,13 @@ export function showWineryOverlay() {
             </div>
         </div>
     `;
+}
 
-    document.body.appendChild(overlay);
-
+function setupWineryOverlay(overlay) {
     const buildings = loadBuildings();
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const grapeStorageTableBody = document.getElementById('grape-storage-table');
-    const mustStorageTableBody = document.getElementById('must-storage-table');
+    const grapeStorageTableBody = overlay.querySelector('#grape-storage-table');
+    const mustStorageTableBody = overlay.querySelector('#must-storage-table');
 
     if (grapeStorageTableBody) grapeStorageTableBody.innerHTML = '';
     if (mustStorageTableBody) mustStorageTableBody.innerHTML = '';
@@ -101,14 +100,12 @@ export function showWineryOverlay() {
         });
     });
 
-    overlay.style.display = 'block';
-
-    const crushButton = document.getElementById('crushGrapesBtn');
+    const crushButton = overlay.querySelector('#crushGrapesBtn');
     if (crushButton) {
         crushButton.addEventListener('click', showCrushingOverlay);
     }
 
-    const fermentButton = document.getElementById('fermentMustBtn');
+    const fermentButton = overlay.querySelector('#fermentMustBtn');
     if (fermentButton) {
         fermentButton.addEventListener('click', showFermentationOverlay);
     }
