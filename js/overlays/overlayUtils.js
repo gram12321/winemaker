@@ -16,6 +16,9 @@ export function hideOverlay(overlay) {
     } else {
         overlay.classList.remove('active');
         overlay.style.display = 'none';
+        if (overlay.querySelector('.overlay-content')) {
+            overlay.querySelector('.overlay-content').innerHTML = '';
+        }
     }
 }
 
@@ -37,8 +40,10 @@ export function showMainViewOverlay(overlayContent) {
 export function showModalOverlay(overlayId, content) {
     const overlay = document.getElementById(overlayId);
     if (overlay) {
-        overlay.innerHTML = content;
+        const contentDiv = overlay.querySelector('.overlay-content') || overlay;
+        contentDiv.innerHTML = content;
         overlay.classList.add('active');
+        overlay.style.display = 'block';
     }
     return overlay;
 }
