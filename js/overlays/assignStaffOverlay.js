@@ -1,4 +1,3 @@
-
 import { getFlagIconHTML } from '../utils.js';
 import { loadStaff } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
