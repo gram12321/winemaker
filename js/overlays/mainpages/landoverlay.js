@@ -62,39 +62,43 @@ function setupLandEventListeners(overlay) {
         buyLandBtn.addEventListener('click', showBuyLandOverlay);
     }
 
-    // Farmland row listeners
+    // Set up event delegation for the farmland entries table
     const farmlandEntries = overlay.querySelector('#farmland-entries');
     if (farmlandEntries) {
-        const rows = farmlandEntries.querySelectorAll('tr');
-        rows.forEach(row => {
-            const plantBtn = row.querySelector('.plant-btn');
-            const farmlandCells = row.querySelectorAll('td:not(:last-child):not(.crop-column)');
-            const cropColumn = row.querySelector('.crop-column');
-            const farmlandId = plantBtn?.dataset.farmlandId;
-            const farmland = farmlandId ? loadFarmlands().find(f => f.id === parseInt(farmlandId)) : null;
-
-            if (plantBtn && farmland) {
-                plantBtn.addEventListener('click', () => {
-                    showPlantingOverlay(farmland, () => displayFarmland());
-                });
-            }
-
-            if (cropColumn && farmland) {
-                cropColumn.addEventListener('click', (event) => {
-                    event.stopPropagation();
-                    if (farmland.plantedResourceName) {
-                        showResourceInfoOverlay(farmland.plantedResourceName);
-                    }
-                });
-            }
-
-            farmlandCells.forEach(cell => {
+        farmlandEntries.addEventListener('click', (event) => {
+            const target = event.target;
+            
+            // Handle plant button clicks
+            if (target.classList.contains('plant-btn')) {
+                const farmlandId = target.dataset.farmlandId;
+                const farmland = loadFarmlands().find(f => f.id === parseInt(farmlandId));
                 if (farmland) {
-                    cell.addEventListener('click', () => {
-                        showFarmlandOverlay(farmland);
-                    });
+                    showPlantingOverlay(farmland, () => displayFarmland());
                 }
-            });
+            }
+            
+            // Handle crop column clicks
+            if (target.classList.contains('crop-column')) {
+                event.stopPropagation();
+                const row = target.closest('tr');
+                const plantBtn = row.querySelector('.plant-btn');
+                const farmlandId = plantBtn?.dataset.farmlandId;
+                const farmland = farmlandId ? loadFarmlands().find(f => f.id === parseInt(farmlandId)) : null;
+                if (farmland?.plantedResourceName) {
+                    showResourceInfoOverlay(farmland.plantedResourceName);
+                }
+            }
+            
+            // Handle cell clicks for farmland overlay
+            if (target.tagName === 'TD' && !target.classList.contains('crop-column')) {
+                const row = target.closest('tr');
+                const plantBtn = row.querySelector('.plant-btn');
+                const farmlandId = plantBtn?.dataset.farmlandId;
+                const farmland = farmlandId ? loadFarmlands().find(f => f.id === parseInt(farmlandId)) : null;
+                if (farmland) {
+                    showFarmlandOverlay(farmland);
+                }
+            }
         });
     }
 }
