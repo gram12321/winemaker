@@ -1,8 +1,12 @@
 
 import { addTransaction } from '/js/finance.js';
 import { incrementWeek } from '/js/endDay.js';
+import { hideAllOverlays } from '/js/overlays/mainpages/hideOverlays.js';
 
 export function showMainOfficeOverlay() {
+    // First hide any existing overlays
+    hideAllOverlays();
+    
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
     overlay.style.display = 'flex';
@@ -19,7 +23,11 @@ export function showMainOfficeOverlay() {
         </div>
     `;
 
-    document.querySelector('#page-content-wrapper').appendChild(overlay);
+    const pageContent = document.querySelector('#page-content-wrapper');
+    if (pageContent) {
+        pageContent.innerHTML = ''; // Clear existing content
+        pageContent.appendChild(overlay);
+    }
 
     // Add event listeners
     document.getElementById('add-money-btn').addEventListener('click', () => {
