@@ -10,7 +10,8 @@ import { showInventoryOverlay } from '/js/overlays/mainpages/inventoryoverlay.js
 import { showStaffOverlay } from '/js/overlays/mainpages/staffoverlay.js';
 import { showFinanceOverlay } from '/js/overlays/mainpages/financeoverlay.js';
 import { showWineryOverlay } from '/js/overlays/mainpages/wineryoverlay.js';
-import { showSalesOverlay } from '/js/overlays/mainpages/salesoverlay.js';
+import { showSalesOverlay } from '../overlays/mainpages/salesoverlay.js';
+import { showMainOfficeOverlay } from '../overlays/mainpages/mainofficeoverlay.js';
 import { hideAllOverlays } from '/js/overlays/mainpages/hideOverlays.js';
 import { incrementWeek } from '../endDay.js';
 
@@ -160,7 +161,7 @@ export function initializeSidebar() {
                 if (mainLink) {
                     mainLink.addEventListener('click', function(e) {
                         e.preventDefault();
-                        hideAllOverlays();
+                        showMainOfficeOverlay(); // Updated to show the main office overlay
                     });
                 } else {
                     console.error('Main link element not found');
@@ -209,7 +210,7 @@ export function renderCompanyInfo() {
 Week ${week}, ${season}, ${year}
 Money: € ${formatNumber(money, 0)}
 Prestige: ${formatNumber(prestige, 2)}`;
-        
+
         companyInfoDiv.setAttribute('data-tooltip', tooltipContent);
         const formattedCompanyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
         companyInfoDiv.innerHTML = `
