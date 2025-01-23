@@ -12,7 +12,6 @@ import { showFinanceOverlay } from '/js/overlays/mainpages/financeoverlay.js';
 import { showWineryOverlay } from '/js/overlays/mainpages/wineryoverlay.js';
 import { showSalesOverlay } from '../overlays/mainpages/salesoverlay.js';
 import { showMainOfficeOverlay } from '../overlays/mainpages/mainofficeoverlay.js';
-import { hideAllOverlays } from '/js/overlays/mainpages/hideOverlays.js';
 import { incrementWeek } from '../endDay.js';
 
 // Define a function to load and initialize the sidebar

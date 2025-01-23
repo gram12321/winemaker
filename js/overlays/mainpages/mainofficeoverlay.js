@@ -1,7 +1,6 @@
 
 import { addTransaction } from '/js/finance.js';
 import { incrementWeek } from '/js/endDay.js';
-import { hideAllOverlays } from './hideOverlays.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 
 export function showMainOfficeOverlay() {

@@ -1,6 +1,3 @@
-
-import { hideAllOverlays } from './mainpages/hideOverlays.js';
-
 export function showMainViewOverlay(overlayContent) {
     hideAllOverlays();
     
@@ -15,6 +12,15 @@ export function showMainViewOverlay(overlayContent) {
     
     return overlay;
 }
+
+
+export function hideAllOverlays() {
+    const existingOverlays = document.querySelectorAll('.mainview-overlay');
+    existingOverlays.forEach(overlay => {
+        overlay.remove();
+    });
+}
+
 
 export function showModalOverlay(overlayId, content) {
     const overlay = document.getElementById(overlayId);
