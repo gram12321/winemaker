@@ -1,0 +1,122 @@
+<div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Nationality</th>
+                                <th>Skills</th>
+                                <th class="text-right">Wage</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            <tr>
+                <td>Annika Koch</td>
+                <td><span class="flag-icon flag-icon-it" style="vertical-align: middle; margin-right: 5px;"></span> Italy</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 5%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.05">F</div>
+                <div class="skill-bar" style="width: 80%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.80">W</div>
+                <div class="skill-bar" style="width: 98%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.98">A</div>
+                <div class="skill-bar" style="width: 50%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.50">S</div>
+                <div class="skill-bar" style="width: 69%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.69">M</div>
+            </div>
+        </td>
+                <td class="text-right">€436</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="1">
+                </td>
+            </tr>
+        
+            <tr>
+                <td>Francesca</td>
+                <td><span class="flag-icon flag-icon-it" style="vertical-align: middle; margin-right: 5px;"></span> Italy</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 75%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.75">F</div>
+                <div class="skill-bar" style="width: 76%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.76">W</div>
+                <div class="skill-bar" style="width: 80%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.80">A</div>
+                <div class="skill-bar" style="width: 22%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.22">S</div>
+                <div class="skill-bar" style="width: 56.00000000000001%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.56">M</div>
+            </div>
+        </td>
+                <td class="text-right">€404</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="2">
+                </td>
+            </tr>
+        
+            <tr>
+                <td>Weston Garcia</td>
+                <td><span class="flag-icon flag-icon-fr" style="vertical-align: middle; margin-right: 5px;"></span> France</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 52%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.52">F</div>
+                <div class="skill-bar" style="width: 31%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.31">W</div>
+                <div class="skill-bar" style="width: 31%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.31">A</div>
+                <div class="skill-bar" style="width: 82%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.82">S</div>
+                <div class="skill-bar" style="width: 32%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.32">M</div>
+            </div>
+        </td>
+                <td class="text-right">€210</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="6">
+                </td>
+            </tr>
+        
+            <tr>
+                <td>Benjamin Olivier</td>
+                <td><span class="flag-icon flag-icon-de" style="vertical-align: middle; margin-right: 5px;"></span> Germany</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 47%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.47">F</div>
+                <div class="skill-bar" style="width: 39%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.39">W</div>
+                <div class="skill-bar" style="width: 57.99999999999999%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.58">A</div>
+                <div class="skill-bar" style="width: 50%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.50">S</div>
+                <div class="skill-bar" style="width: 21%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.21">M</div>
+            </div>
+        </td>
+                <td class="text-right">€309</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="10">
+                </td>
+            </tr>
+        
+            <tr>
+                <td>Dylan Hill</td>
+                <td><span class="flag-icon flag-icon-fr" style="vertical-align: middle; margin-right: 5px;"></span> France</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 3%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.03">F</div>
+                <div class="skill-bar" style="width: 100%; background-color: #2179ff; height: 20px;" title="Winery Skill: 1.00">W</div>
+                <div class="skill-bar" style="width: 22%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.22">A</div>
+                <div class="skill-bar" style="width: 32%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.32">S</div>
+                <div class="skill-bar" style="width: 96%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.96">M</div>
+            </div>
+        </td>
+                <td class="text-right">€370</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="47">
+                </td>
+            </tr>
+        
+            <tr>
+                <td>Émile Durand</td>
+                <td><span class="flag-icon flag-icon-de" style="vertical-align: middle; margin-right: 5px;"></span> Germany</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 48%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.48">F</div>
+                <div class="skill-bar" style="width: 52%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.52">W</div>
+                <div class="skill-bar" style="width: 18%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.18">A</div>
+                <div class="skill-bar" style="width: 7.000000000000001%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.07">S</div>
+                <div class="skill-bar" style="width: 60%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.60">M</div>
+            </div>
+        </td>
+                <td class="text-right">€288</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="67">
+                </td>
+            </tr>
+        </tbody>
+                    </table>
+                </div>
