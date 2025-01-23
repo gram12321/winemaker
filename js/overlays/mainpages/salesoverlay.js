@@ -1,4 +1,4 @@
-import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay  } from '/js/utils.js';
+import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
 import { calculateWinePrice } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
