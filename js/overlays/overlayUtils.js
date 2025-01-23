@@ -15,9 +15,8 @@ export function hideOverlay(overlay) {
         overlay.remove();
     } else {
         overlay.classList.remove('active');
-        overlay.style.display = 'none';
-        if (overlay.querySelector('.overlay-content')) {
-            overlay.querySelector('.overlay-content').innerHTML = '';
+        if (overlay.parentNode) {
+            overlay.parentNode.removeChild(overlay);
         }
     }
 }
