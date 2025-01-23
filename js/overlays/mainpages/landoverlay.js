@@ -146,27 +146,3 @@ function createFarmlandRow(farmland, selectedUnit) {
     `;
     return row;
 }
-
-function setupFarmlandEventListeners(row, farmland) {
-    const plantBtn = row.querySelector('.plant-btn');
-    const farmlandCells = row.querySelectorAll('td:not(:last-child):not(.crop-column)');
-    const cropColumn = row.querySelector('.crop-column');
-
-    plantBtn.addEventListener('click', () => {
-        showPlantingOverlay(farmland, () => displayFarmland());
-    });
-
-    cropColumn.addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent the row click event
-        if (farmland.plantedResourceName) {
-            showResourceInfoOverlay(farmland.plantedResourceName);
-        }
-    });
-
-    farmlandCells.forEach(cell => {
-        cell.addEventListener('click', () => {
-            showFarmlandOverlay(farmland);
-        });
-    });
-}
-
