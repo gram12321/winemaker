@@ -43,6 +43,36 @@ export function showModalOverlay(overlayId, content) {
     return overlay;
 }
 
+// Standard overlay utility functions
+export function showStandardOverlay(content) {
+    const overlayContainer = document.createElement('div');
+    overlayContainer.classList.add('overlay');
+    overlayContainer.innerHTML = `
+        <div class="overlay-content">
+            ${content}
+        </div>
+    `;
+    
+    document.body.appendChild(overlayContainer);
+    requestAnimationFrame(() => {
+        overlayContainer.classList.add('active');
+    });
+    
+    return overlayContainer;
+}
+
+export function setupStandardOverlayClose(overlayContainer) {
+    const closeButton = overlayContainer.querySelector('.close-btn');
+    if (closeButton) {
+        closeButton.addEventListener('click', () => hideOverlay(overlayContainer));
+    }
+    overlayContainer.addEventListener('click', (event) => {
+        if (event.target === overlayContainer) {
+            hideOverlay(overlayContainer);
+        }
+    });
+}
+
 // Alias for backward compatibility
 export const removeOverlay = hideOverlay;
 export const hideAllOverlays = () => hideOverlay('.mainview-overlay');
