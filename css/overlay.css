@@ -78,22 +78,13 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .overlay-content {
     background-color: var(--color-background);
     color: var(--color-text);
-    width: auto;
-    min-width: min-content;
-    max-width: 800px;
+    min-width: 400px;
     padding: 2rem;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--color-accent);
     max-height: 90vh;
     overflow-y: auto;
-    margin: 0 auto;
-}
-
-#assignStaffOverlay .overlay-content {
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
 }
 
 /* 3. Modal Dialogs */
@@ -154,12 +145,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .overlay-content .table tbody tr:hover,
 .mainview-overlay-content .table tbody tr:hover {
   background-color: rgba(197, 165, 114, 0.1);
-}
-
-.table-responsive {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto;
 }
 
 /* Section Styling */
