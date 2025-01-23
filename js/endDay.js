@@ -1,6 +1,6 @@
 // endDay.js
 import { addConsoleMessage } from './console.js';
-import { renderCompanyInfo } from './database/loadSidebar.js';
+import { updateAllDisplays } from './displayManager.js';
 import { processRecurringTransactions } from './finance.js';
 import { calculateLandvalue, calculateFarmlandPrestige } from './farmland.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
@@ -40,11 +40,13 @@ export function incrementWeek() {
     
     // Log the change to console and update UI elements
     addConsoleMessage(`New week: <strong>Week ${week}, ${season}, ${year}</strong>`);
-    renderCompanyInfo();
-
+    
     // Execute pending tasks
     updateFieldStatuses();
     updateRipeness();
+    
+    // Update all displays
+    updateAllDisplays();
     applyPlantingPenalties(season, week);
     
     // Decay prestige hit by 10%
