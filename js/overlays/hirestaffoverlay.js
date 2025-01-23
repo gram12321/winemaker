@@ -1,3 +1,4 @@
+
 import { createNewStaff } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
@@ -9,8 +10,13 @@ import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 export function showHireStaffOverlay() {
     const numberOfOptions = 5;
     const createdStaffOptions = Array.from({length: numberOfOptions}, () => createNewStaff());
+    const overlayContainer = showStandardOverlay(createHireStaffHTML(createdStaffOptions));
+    setupHireStaffEventListeners(overlayContainer, createdStaffOptions);
+    return overlayContainer;
+}
 
-    const content = `
+function createHireStaffHTML(createdStaffOptions) {
+    return `
         <section id="hiring-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
                 <h3 class="h5 mb-0">Hire Staff</h3>
@@ -61,9 +67,9 @@ export function showHireStaffOverlay() {
             </div>
         </section>
     `;
+}
 
-    const overlayContainer = showStandardOverlay(content);
-
+function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
     // Add event listeners for hire buttons
     overlayContainer.querySelectorAll('.hire-staff-button').forEach(button => {
         button.addEventListener('click', () => {
@@ -76,8 +82,6 @@ export function showHireStaffOverlay() {
     overlayContainer.querySelector('.close-btn').addEventListener('click', () => {
         hideOverlay(overlayContainer);
     });
-
-    return overlayContainer;
 }
 
 function hireSelectedStaff(staff) {
