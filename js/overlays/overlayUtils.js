@@ -1,11 +1,26 @@
 
-// Common overlay utility functions
-export function removeOverlay(overlayContainer) {
-  document.body.removeChild(overlayContainer);
+// Common overlay utility functions 
+export function hideOverlay(overlay) {
+    if (!overlay) return;
+    
+    // If it's a string, assume it's a selector
+    if (typeof overlay === 'string') {
+        const elements = document.querySelectorAll(overlay);
+        elements.forEach(el => hideOverlay(el));
+        return;
+    }
+
+    // Handle different overlay types
+    if (overlay.classList.contains('mainview-overlay')) {
+        overlay.remove();
+    } else {
+        overlay.classList.remove('active');
+        overlay.style.display = 'none';
+    }
 }
 
 export function showMainViewOverlay(overlayContent) {
-    hideAllOverlays();
+    hideOverlay('.mainview-overlay'); // Use new consolidated function
     
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
@@ -19,15 +34,6 @@ export function showMainViewOverlay(overlayContent) {
     return overlay;
 }
 
-
-export function hideAllOverlays() {
-    const existingOverlays = document.querySelectorAll('.mainview-overlay');
-    existingOverlays.forEach(overlay => {
-        overlay.remove();
-    });
-}
-
-
 export function showModalOverlay(overlayId, content) {
     const overlay = document.getElementById(overlayId);
     if (overlay) {
@@ -37,10 +43,6 @@ export function showModalOverlay(overlayId, content) {
     return overlay;
 }
 
-export function hideOverlay(overlay) {
-    if (overlay.classList.contains('mainview-overlay')) {
-        overlay.remove();
-    } else {
-        overlay.classList.remove('active');
-    }
-}
+// Alias for backward compatibility
+export const removeOverlay = hideOverlay;
+export const hideAllOverlays = () => hideOverlay('.mainview-overlay');
