@@ -112,7 +112,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     z-index: 1900;
 }
 
-/* 3. Common Table Styles */
+/* Common Table Styles */
 .overlay-table,
 .overlay-content .table,
 .mainview-overlay-content .table {
@@ -241,12 +241,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   max-width: 1200px;
   margin: 0 auto;
 }
-
-/* Section Styles */
-
-/* Table Styles */
-
-/* Table Cell Styles */
 
 /* Section-specific Header Styles */
 #vineyard-section .card-header {
