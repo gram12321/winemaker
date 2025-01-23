@@ -56,9 +56,46 @@ function createLandOverlayHTML() {
 }
 
 function setupLandEventListeners(overlay) {
+    // Buy land button listener
     const buyLandBtn = overlay.querySelector('#buy-land-btn');
     if (buyLandBtn) {
         buyLandBtn.addEventListener('click', showBuyLandOverlay);
+    }
+
+    // Farmland row listeners
+    const farmlandEntries = overlay.querySelector('#farmland-entries');
+    if (farmlandEntries) {
+        const rows = farmlandEntries.querySelectorAll('tr');
+        rows.forEach(row => {
+            const plantBtn = row.querySelector('.plant-btn');
+            const farmlandCells = row.querySelectorAll('td:not(:last-child):not(.crop-column)');
+            const cropColumn = row.querySelector('.crop-column');
+            const farmlandId = plantBtn?.dataset.farmlandId;
+            const farmland = farmlandId ? loadFarmlands().find(f => f.id === parseInt(farmlandId)) : null;
+
+            if (plantBtn && farmland) {
+                plantBtn.addEventListener('click', () => {
+                    showPlantingOverlay(farmland, () => displayFarmland());
+                });
+            }
+
+            if (cropColumn && farmland) {
+                cropColumn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (farmland.plantedResourceName) {
+                        showResourceInfoOverlay(farmland.plantedResourceName);
+                    }
+                });
+            }
+
+            farmlandCells.forEach(cell => {
+                if (farmland) {
+                    cell.addEventListener('click', () => {
+                        showFarmlandOverlay(farmland);
+                    });
+                }
+            });
+        });
     }
 }
 
@@ -72,9 +109,14 @@ export function displayFarmland() {
 
     farmlands.forEach((farmland) => {
         const row = createFarmlandRow(farmland, selectedUnit);
-        setupFarmlandEventListeners(row, farmland);
         farmlandEntries.appendChild(row);
     });
+    
+    // Setup event listeners after all rows are added
+    const overlay = document.querySelector('.mainview-overlay');
+    if (overlay) {
+        setupLandEventListeners(overlay);
+    }
 }
 
 function createFarmlandRow(farmland, selectedUnit) {
