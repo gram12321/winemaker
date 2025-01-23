@@ -118,7 +118,7 @@ export function getLastNameForNationality(nationality) {
 
 
 export function displayStaff() {
-    console.log('displayStaff called');
+    
     const staffContainer = document.getElementById('staff-container');
     
     staffContainer.innerHTML = '';

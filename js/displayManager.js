@@ -1,7 +1,6 @@
 
 // Central function to update all displays
 export function updateAllDisplays() {
-    console.log('updateAllDisplays called');
     // Import all necessary display functions
     try {
         // Company info in sidebar
@@ -22,7 +21,6 @@ export function updateAllDisplays() {
         // Staff display
         if (typeof displayStaff === 'function' && document.getElementById('staff-entries')) {
             displayStaff();
-            console.log('Display staff called');
         }
 
         // Wine orders
