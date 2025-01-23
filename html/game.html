@@ -20,14 +20,7 @@
     <div id="sidebar-wrapper">
     </div>
     <!-- Main Content -->
-    <div class="container text-center flex-grow-1" id="page-content-wrapper">
-      <h1>Welcome to the Game!</h1>
-      <p>Start playing now.</p>
-
-      <div class="text-center mt-4">
-          <button id="add-money-btn" class="btn btn-success">Add $1.000.000 €</button>
-          <button id="increment-week-btn" class="btn btn-info">Increment Week</button> 
-      </div>
+    <div id="page-content-wrapper">
     </div>
   </div>
 
@@ -67,10 +60,9 @@
         // Setop initial staff wage. Hereafter use updateWagesAndRecurringTransaction (in staff.js) to make any change to staff wagesCall this function during initialization of the game or after adding staff
         setupStaffWagesRecurringTransaction();
 
-        document.getElementById('add-money-btn').addEventListener('click', () => {
-            addTransaction('Income', 'Manual Money Addition', 1000000);
-        });
-        document.getElementById('increment-week-btn').addEventListener('click', incrementWeek);  
+        // Show main office overlay on page load
+        import { showMainOfficeOverlay } from '/js/overlays/mainpages/mainofficeoverlay.js';
+        showMainOfficeOverlay();
       });
   </script>
   <!-- Building Detail Overlay -->
