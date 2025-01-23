@@ -7,10 +7,24 @@ import { hiringTaskFunction } from '../administration.js';
 import taskManager, { TaskType } from '../taskManager.js';
 
 export function showHireStaffOverlay() {
-    const overlay = document.getElementById('hireStaffOverlay');
-    const staffContainer = overlay.querySelector('.overlay-content');
+    let overlay = document.getElementById('hireStaffOverlay');
 
-    // Clear existing content except the close button and header
+    // Create overlay if it doesn't exist
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'hireStaffOverlay';
+        overlay.className = 'overlay';
+        document.body.appendChild(overlay);
+    }
+
+    // Create content container if it doesn't exist
+    let staffContainer = overlay.querySelector('.overlay-content');
+    if (!staffContainer) {
+        staffContainer = document.createElement('div');
+        staffContainer.className = 'overlay-content';
+        overlay.appendChild(staffContainer);
+    }
+
     staffContainer.innerHTML = `
         <section id="hiring-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -110,14 +124,13 @@ function hireSelectedStaff(staff) {
     taskManager.addCompletionTask(
         'Hiring Process',
         TaskType.administration,
-        20, // totalWork for hiring process
+        20,
         (target, params) => {
-            // Completion callback - executes after totalWork is applied
             const { staff, hiringExpense } = params;
             const staffMembers = loadStaff();
             staffMembers.push(staff);
             saveStaff(staffMembers);
-            
+
             addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
             const flagIconHTML = getFlagIconHTML(staff.nationality);
             addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
@@ -137,4 +150,8 @@ function hireSelectedStaff(staff) {
 
 function getSkillLevelClass(skillValue) {
     return skillValue > 0.75 ? 'high' : skillValue > 0.5 ? 'medium' : 'low';
+}
+
+function formatNumber(number) {
+  return number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }
