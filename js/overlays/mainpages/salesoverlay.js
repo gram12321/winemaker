@@ -6,11 +6,11 @@ import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
-    const overlay = showMainViewOverlay(createSalesOverlayContent());
-    initializeSalesTables();
+    const overlay = showMainViewOverlay(createSalesOverlayHTML());
+    setupSalesOverlayEventListeners(overlay);
 }
 
-function initializeSalesTables() {
+function setupSalesOverlayEventListeners(overlay) {
     displayWineCellarInventory();
     displayWineOrders();
 }
@@ -197,7 +197,7 @@ function displayFilteredOrders(filteredOrders) {
     });
 }
 
-function createSalesOverlayContent() {
+function createSalesOverlayHTML() {
     return `
         <div class="mainview-overlay-content">
             <h3>Sales</h3>
