@@ -129,7 +129,7 @@ function refreshDisplay() {
     displayFilteredOrders(orders);
 }
 
-function displayWineOrders() {
+export function displayWineOrders() {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
     currentOrders = loadWineOrders();

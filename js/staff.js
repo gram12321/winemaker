@@ -119,12 +119,7 @@ export function getLastNameForNationality(nationality) {
 
 export function displayStaff() {
     const staffContainer = document.getElementById('staff-container');
-    if (!staffContainer) {
-        console.warn('Staff container not found, delaying display...');
-        setTimeout(displayStaff, 100); // Retry after 100ms
-        return;
-    }
-
+    
     staffContainer.innerHTML = '';
     const table = document.createElement('table');
     table.className = 'table mt-4';
