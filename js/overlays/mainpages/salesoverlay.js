@@ -3,14 +3,50 @@ import { calculateWinePrice } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
 import { sellWines, sellOrderWine } from '/js/sales.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
-import { updateAllDisplays } from '../../displayManager.js';
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
     const overlay = showMainViewOverlay(createSalesOverlayHTML());
-    updateAllDisplays(); // Replaced setupSalesOverlayEventListeners
+    setupSalesOverlayEventListeners(overlay);
 }
 
+function setupSalesOverlayEventListeners(overlay) {
+    displayWineCellarInventory();
+    displayWineOrders();
+}
+
+export function displayWineCellarInventory() {
+    const tableBody = document.getElementById('winecellar-table-body');
+    tableBody.innerHTML = '';
+
+    const bottledWines = inventoryInstance.getItemsByState('Bottles');
+
+    bottledWines.forEach(wine => {
+        const row = document.createElement('tr');
+        const displayInfo = wine.getDisplayInfo();
+
+        const sellingPrice = calculateWinePrice(wine.quality, wine);
+
+        row.innerHTML = `
+            <td><strong>${displayInfo.name}</strong></td>
+            <td>${displayInfo.storage}</td>
+            <td>${formatNumber(displayInfo.amount)} bottles</td>
+            <td>${formatQualityDisplay(wine.quality)}</td>
+            <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
+            <td>€${sellingPrice.toFixed(2)}</td>
+            <td><button class="btn-alternative sell-wine-btn" data-resource="${displayInfo.resource.name}">Sell</button></td>
+        `;
+
+        const sellButton = row.querySelector('.sell-wine-btn');
+        sellButton.addEventListener('click', () => {
+            const wineName = wine.name ? wine.name.split(', ')[1] : wine.resource.name;
+            sellWines(wineName);
+            displayWineCellarInventory();
+        });
+
+        tableBody.appendChild(row);
+    });
+}
 
 let currentOrders = [];
 let currentSortKey = null;
@@ -55,8 +91,8 @@ function setupEventListeners() {
     typeFilter.parentNode.replaceChild(newTypeFilter, typeFilter);
     resourceFilter.parentNode.replaceChild(newResourceFilter, resourceFilter);
 
-    newTypeFilter.addEventListener('change', updateAllDisplays); // Changed to updateAllDisplays
-    newResourceFilter.addEventListener('change', updateAllDisplays); // Changed to updateAllDisplays
+    newTypeFilter.addEventListener('change', refreshDisplay);
+    newResourceFilter.addEventListener('change', refreshDisplay);
 
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {
@@ -67,7 +103,7 @@ function setupEventListeners() {
                 currentSortKey = sortKey;
                 currentSortDirection = 'asc';
             }
-            updateAllDisplays();// Changed to updateAllDisplays
+            refreshDisplay();
         });
     });
 }
@@ -80,21 +116,21 @@ function refreshDisplay() {
     displayFilteredOrders(orders);
 }
 
-//This function is now obsolete and should be removed or replaced with a call to updateAllDisplays() from displayManager.js
-// export function displayWineOrders() {
-//     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
-//     wineOrdersTableBody.innerHTML = '';
-//     currentOrders = loadWineOrders();
+export function displayWineOrders() {
+    const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
+    wineOrdersTableBody.innerHTML = '';
+    currentOrders = loadWineOrders();
 
-//     setupEventListeners();
-//     populateResourceFilter();
-//     refreshDisplay();
-// }
+    setupEventListeners();
+    populateResourceFilter();
+    refreshDisplay();
+}
 
 function displayFilteredOrders(filteredOrders) {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
 
+    // Create a map of filtered orders to their original indices
     const originalOrders = loadWineOrders();
     const orderIndices = filteredOrders.map(order => 
         originalOrders.findIndex(o => 
@@ -144,7 +180,7 @@ function displayFilteredOrders(filteredOrders) {
         sellButton.addEventListener('click', () => {
             const orderIndex = parseInt(sellButton.dataset.originalIndex);
             if (sellOrderWine(orderIndex)) {
-                updateAllDisplays();
+                displayWineOrders();
             }
         });
 
@@ -154,7 +190,7 @@ function displayFilteredOrders(filteredOrders) {
             const wineOrders = loadWineOrders();
             wineOrders.splice(orderIndex, 1);
             saveWineOrders(wineOrders);
-            updateAllDisplays();
+            displayWineOrders();
         });
 
         wineOrdersTableBody.appendChild(row);
