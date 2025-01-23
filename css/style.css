@@ -182,6 +182,39 @@ body.sidebar-collapsed #wrapper {
 .color-class-1 { color: #FF0000 !important; }  /* Red */
 .color-class-0 { color: #8B0000 !important; }  /* Dark Red */
 
+/* Custom Checkbox Styling */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--checkbox-border);
+  border-radius: 3px;
+  background-color: var(--checkbox-bg);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--checkbox-checked);
+  border-color: var(--checkbox-bg);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  color: var(--checkbox-bg);
+  font-size: 14px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"]:hover {
+  border-color: var(--checkbox-hover);
+}
+
 /* Global Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 12px;

@@ -55,4 +55,10 @@
   --scrollbar-track: #FAF9F7;
   --scrollbar-thumb: #722F37;
   --scrollbar-thumb-hover: #491809;
+
+  /* Checkbox Colors */
+  --checkbox-border: #C5A572;
+  --checkbox-bg: #722F37;
+  --checkbox-checked: #C5A572;
+  --checkbox-hover: #8B4513;
 }
