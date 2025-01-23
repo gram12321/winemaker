@@ -7,7 +7,10 @@ import { updateAllDisplays } from '../displayManager.js';
 export function showAssignStaffOverlay(task) {
     const overlayContent = generateAssignStaffHTML(task);
     const overlay = showModalOverlay('assignStaffOverlay', overlayContent);
-    setupAssignStaffEventListeners(overlay, task);
+    if (overlay) {
+        setupAssignStaffEventListeners(overlay.querySelector('.overlay-content'), task);
+    }
+    return overlay;
 }
 
 function generateAssignStaffHTML(task) {
@@ -72,9 +75,12 @@ function generateAssignStaffHTML(task) {
     `;
 }
 
-function setupAssignStaffEventListeners(overlay, task) {
-    const saveBtn = overlay.querySelector('.save-staff-btn');
-    const closeBtn = overlay.querySelector('.close-btn');
+function setupAssignStaffEventListeners(overlayContent, task) {
+    if (!overlayContent) return;
+    
+    const saveBtn = overlayContent.querySelector('.save-staff-btn');
+    const closeBtn = overlayContent.querySelector('.close-btn');
+    const overlay = document.getElementById('assignStaffOverlay');
 
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
