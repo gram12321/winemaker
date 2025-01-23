@@ -10,7 +10,7 @@ import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 export function showHireStaffOverlay() {
     const numberOfOptions = 5;
     const createdStaffOptions = Array.from({length: numberOfOptions}, () => createNewStaff());
-    const overlayContainer = showModalOverlay('hireStaffOverlay', createHireStaffHTML(createdStaffOptions));
+    const overlayContainer = showStandardOverlay(createHireStaffHTML(createdStaffOptions));
     setupHireStaffEventListeners(overlayContainer, createdStaffOptions);
     return overlayContainer;
 }
