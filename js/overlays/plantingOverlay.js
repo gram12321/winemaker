@@ -6,7 +6,7 @@ import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
-import { removeOverlay } from './overlayUtils.js';
+import { hideOverlay } from './overlayUtils.js';
 
 // Show the planting overlay
 export function showPlantingOverlay(farmland, onPlantCallback) {
@@ -205,7 +205,7 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
         farmland = farmlands[updatedFarmlandIndex];
       }
       onPlantCallback(selectedDensity);
-      removeOverlay(overlayContainer);
+      hideOverlay(overlayContainer);
       // Refresh the display
       displayFarmland();
     }
@@ -214,8 +214,8 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
 
 function setupCloseButton(overlayContainer) {
   const closeButton = overlayContainer.querySelector('.close-btn');
-  closeButton.addEventListener('click', () => removeOverlay(overlayContainer));
+  closeButton.addEventListener('click', () => hideOverlay(overlayContainer));
   overlayContainer.addEventListener('click', (event) => {
-    if (event.target === overlayContainer) removeOverlay(overlayContainer);
+    if (event.target === overlayContainer) hideOverlay(overlayContainer);
   });
 }
