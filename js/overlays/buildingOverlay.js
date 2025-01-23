@@ -75,7 +75,7 @@ function setupToolButtons(building, tools, overlayContainer) {
           if (updatedBuilding) {
             const buildingInstance = new Building(updatedBuilding.name, updatedBuilding.level);
             buildingInstance.tools = updatedBuilding.tools;
-            showBuildingOverlay(buildingInstance);
+            renderCapacityVisual(buildingInstance);
             updateAllDisplays();
           }
         } else {
