@@ -1,17 +1,17 @@
 
-import { formatNumber, getWineQualityCategory, getColorClass, formatQualityDisplay } from '/js/utils.js';
+import { formatNumber, formatQualityDisplay } from '/js/utils.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
 export function showWineryOverlay() {
-    const overlayContent = createWineryOverlay();
+    const overlayContent = createWineryOverlayHTML();
     const overlay = showMainViewOverlay(overlayContent);
-    setupWineryOverlay(overlay);
+    setupWineryOverlayEventListeners(overlay);
 }
 
-function createWineryOverlay() {
+function createWineryOverlayHTML() {
     return `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Winery Management</h2>
@@ -70,7 +70,7 @@ function createWineryOverlay() {
     `;
 }
 
-function setupWineryOverlay(overlay) {
+function setupWineryOverlayEventListeners(overlay) {
     const buildings = loadBuildings();
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     const grapeStorageTableBody = overlay.querySelector('#grape-storage-table');
