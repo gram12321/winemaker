@@ -1,3 +1,9 @@
+
+// Common overlay utility functions
+export function removeOverlay(overlayContainer) {
+  document.body.removeChild(overlayContainer);
+}
+
 export function showMainViewOverlay(overlayContent) {
     hideAllOverlays();
     

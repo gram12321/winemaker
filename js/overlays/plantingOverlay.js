@@ -5,7 +5,86 @@ import { allResources } from '/js/resource.js';
 import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
-import { regionAltitudeRanges } from '../names.js';  // Add this import at the top
+import { regionAltitudeRanges } from '../names.js';
+import { removeOverlay } from './overlayUtils.js';
+
+// Show the planting overlay
+export function showPlantingOverlay(farmland, onPlantCallback) {
+  if (farmland.plantedResourceName) {
+    addConsoleMessage(`Field <strong>${getFlagIconHTML(farmland.country)} ${farmland.name}</strong> is already fully planted.`);
+    return;
+  }
+
+  const overlayContainer = document.createElement('div');
+  overlayContainer.className = 'overlay active';
+  overlayContainer.innerHTML = createOverlayHTML(farmland);
+  document.body.appendChild(overlayContainer);
+
+  setupEventListeners(overlayContainer, farmland, onPlantCallback);
+}
+
+// Create the HTML for the overlay
+function createOverlayHTML(farmland) {
+  const density = farmland.density || 1000;
+  const initialCostPerAcre = density * 2;
+  const initialTotalCost = initialCostPerAcre * farmland.acres;
+  const plantingOptions = allResources.map(resource => 
+    `<option value="${resource.name}">${resource.name}</option>`
+  ).join('');
+
+  return `
+    <div class="overlay-content overlay-container">
+      <section class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Planting Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h3>
+          <button class="btn btn-light btn-sm close-btn">Close</button>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="resource-select" class="form-label">Select Resource to Plant:</label>
+            <select class="form-control form-control-sm" id="resource-select">
+              <option value="">Select Resource</option>
+              ${plantingOptions}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="density-slider" class="form-label">Select Planting Density (Plants/Acre):</label>
+            <div class="d-flex align-items-center">
+              <span class="mr-2">Low</span>
+              <input type="range" class="custom-range" id="density-slider" min="1000" max="10000" step="1000" value="${density}">
+              <span class="ml-2">High</span>
+            </div>
+            <div>
+              Selected density: <span id="density-value">${density}</span> plants/acre
+            </div>
+          </div>
+          <div class="density-details d-flex justify-content-between">
+            <div class="planting-overlay-info-box">
+              <span>Plants/acre: </span><span id="plants-per-acre">${formatNumber(density)}</span>
+            </div>
+            <div class="planting-overlay-info-box">
+              <span>Cost/acre: </span><span id="cost-per-acre">${formatNumber(initialCostPerAcre)}</span>
+            </div>
+            <div class="planting-overlay-info-box">
+              <span>Total Cost: </span><span id="total-cost">${formatNumber(initialTotalCost)}</span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-center mt-4">
+            <button class="btn btn-primary plant-btn">Plant</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+// Set up all event listeners
+function setupEventListeners(overlayContainer, farmland, onPlantCallback) {
+  setupDensitySlider(overlayContainer, farmland);
+  setupPlantButton(overlayContainer, farmland, onPlantCallback);
+  setupCloseButton(overlayContainer);
+}
+
 
 // Function to handle planting logic
 function plant(farmland, selectedResource, selectedDensity) {
@@ -94,80 +173,6 @@ export function finalizePlanting(target, params) {
     displayFarmland();
 }
 
-// Function to show planting overlay UI
-export function showPlantingOverlay(farmland, onPlantCallback) {
-  // Check if field is already planted
-  if (farmland.plantedResourceName) {
-    addConsoleMessage(`Field <strong>${getFlagIconHTML(farmland.country)} ${farmland.name}</strong> is already fully planted.`);
-    return;
-  }
-
-  const overlayContainer = document.createElement('div');
-  overlayContainer.className = 'overlay active';
-
-  let density = farmland.density || 1000; // Default density if not set
-  const initialCostPerAcre = density * 2;
-  const initialTotalCost = initialCostPerAcre * farmland.acres;
-
-  // Create planting options dropdown
-  const plantingOptions = allResources.map(resource => 
-    `<option value="${resource.name}">${resource.name}</option>`
-  ).join('');
-
-  overlayContainer.innerHTML = `
-    <div class="overlay-content overlay-container">
-      <section class="overlay-section card mb-4">
-        <div class="card-header text-white d-flex justify-content-between align-items-center">
-          <h3 class="h5 mb-0">Planting Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h3>
-          <button class="btn btn-light btn-sm close-btn">Close</button>
-        </div>
-        <div class="card-body">
-      <h2>Planting Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h2>
-      <div class="form-group">
-        <label for="resource-select" class="form-label">Select Resource to Plant:</label>
-        <select class="form-control form-control-sm" id="resource-select">
-          <option value="">Select Resource</option>
-          ${plantingOptions}
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="density-slider" class="form-label">Select Planting Density (Plants/Acre):</label>
-        <div class="d-flex align-items-center">
-          <span class="mr-2">Low</span>
-          <input type="range" class="custom-range" id="density-slider" min="1000" max="10000" step="1000" value="${density}">
-          <span class="ml-2">High</span>
-        </div>
-        <div>
-          Selected density: <span id="density-value">${density}</span> plants/acre
-        </div>
-      </div>
-      <div class="density-details d-flex justify-content-between">
-        <div class="planting-overlay-info-box">
-          <span>Plants/acre: </span><span id="plants-per-acre">${formatNumber(density)}</span>
-        </div>
-        <div class="planting-overlay-info-box">
-          <span>Cost/acre: </span><span id="cost-per-acre">${formatNumber(initialCostPerAcre)}</span>
-        </div>
-        <div class="planting-overlay-info-box">
-          <span>Total Cost: </span><span id="total-cost">${formatNumber(initialTotalCost)}</span>
-        </div>
-      </div>
-      <div class="d-flex justify-content-center mt-4">
-        <button class="btn btn-primary plant-btn">Plant</button>
-      </div>
-        </div>
-      </section>
-    </div>
-  `;
-
-  document.body.appendChild(overlayContainer);
-
-  // Setup event listeners
-  setupDensitySlider(overlayContainer, farmland);
-  setupPlantButton(overlayContainer, farmland, onPlantCallback);
-  setupCloseButton(overlayContainer);
-}
-
 function setupDensitySlider(overlayContainer, farmland) {
   const densitySlider = overlayContainer.querySelector('#density-slider');
   const densityValueDisplay = overlayContainer.querySelector('#density-value');
@@ -213,8 +218,4 @@ function setupCloseButton(overlayContainer) {
   overlayContainer.addEventListener('click', (event) => {
     if (event.target === overlayContainer) removeOverlay(overlayContainer);
   });
-}
-
-function removeOverlay(overlayContainer) {
-  document.body.removeChild(overlayContainer);
 }
