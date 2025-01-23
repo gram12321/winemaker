@@ -1,7 +1,7 @@
 
 import { addTransaction } from '/js/finance.js';
 import { incrementWeek } from '/js/endDay.js';
-import { hideAllOverlays } from '/js/overlays/mainpages/hideOverlays.js';
+
 
 export function showMainOfficeOverlay() {
     const existingOverlay = document.querySelector('.mainview-overlay');
