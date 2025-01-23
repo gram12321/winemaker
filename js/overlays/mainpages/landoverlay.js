@@ -1,26 +1,17 @@
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 import { getUnit, convertToCurrentUnit } from '/js/settings.js';
 import { getFlagIcon, formatNumber } from '/js/utils.js';
-
 import { loadFarmlands } from '/js/database/adminFunctions.js';
 import taskManager from '/js/taskManager.js';
 import { showFarmlandOverlay } from '/js/overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from '/js/overlays/plantingOverlay.js';
 import { showResourceInfoOverlay } from '/js/overlays/resourceInfoOverlay.js';
-
 import { showMainViewOverlay } from '../overlayUtils.js';
 
 export function showLandOverlay() {
     const overlay = showMainViewOverlay(createLandOverlayHTML());
     setupLandEventListeners(overlay);
     displayFarmland();
-}
-
-function setupLandEventListeners(overlay) {
-    const buyLandBtn = overlay.querySelector('#buy-land-btn');
-    if (buyLandBtn) {
-        buyLandBtn.addEventListener('click', showBuyLandOverlay);
-    }
 }
 
 function createLandOverlayHTML() {
@@ -62,6 +53,13 @@ function createLandOverlayHTML() {
             </div>
         </div>
     `;
+}
+
+function setupLandEventListeners(overlay) {
+    const buyLandBtn = overlay.querySelector('#buy-land-btn');
+    if (buyLandBtn) {
+        buyLandBtn.addEventListener('click', showBuyLandOverlay);
+    }
 }
 
 export function displayFarmland() {
