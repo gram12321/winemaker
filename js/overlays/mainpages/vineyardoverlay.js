@@ -10,25 +10,13 @@ import { loadFarmlands } from '../../database/adminFunctions.js';
  * Shows a table of all farmlands with their current status, crops, and actions
  */
 export function showVineyardOverlay() {
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
-
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-
-    overlay.innerHTML = getVineyardOverlayHTML();
-
-    document.body.appendChild(overlay);
-
-    const container = document.getElementById('vineyard-table-container');
+    const overlay = showMainViewOverlay(getVineyardOverlayHTML());
+    
+    const container = overlay.querySelector('#vineyard-table-container');
     const table = createVineyardTable();
     container.appendChild(table);
 
     setupVineyardEventListeners(table);
-
-    overlay.style.display = 'block';
 }
 
 function getVineyardOverlayHTML() {
