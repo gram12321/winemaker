@@ -1,29 +1,27 @@
+
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { inventoryInstance } from '/js/resource.js';
-import {formatNumber, getWineQualityCategory, formatQualityDisplay } from '/js/utils.js';
+import { formatNumber, getWineQualityCategory, formatQualityDisplay } from '/js/utils.js';
+import { showMainViewOverlay } from '../overlayUtils.js';
 
 export function showInventoryOverlay() {
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
+    const overlay = showMainViewOverlay(createInventoryOverlayHTML());
+    setupInventoryEventListeners(overlay);
+    populateInventoryTables();
+}
 
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-
-    overlay.innerHTML = `
+function createInventoryOverlayHTML() {
+    return `
         <div class="mainview-overlay-content overlay-container">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="me-4">Inventory Management</h2>
-                
             </div>
             <div class="btn-group ms-2">
-                    <button class="btn btn-outline-primary active" data-view="all">All</button>
-                    <button class="btn btn-outline-primary" data-view="grapes">Warehouse</button>
-                    <button class="btn btn-outline-primary" data-view="must">Winery</button>
-                    <button class="btn btn-outline-primary" data-view="wine">Cellar</button>
-                   
-                </div>
+                <button class="btn btn-outline-primary active" data-view="all">All</button>
+                <button class="btn btn-outline-primary" data-view="grapes">Warehouse</button>
+                <button class="btn btn-outline-primary" data-view="must">Winery</button>
+                <button class="btn btn-outline-primary" data-view="wine">Cellar</button>
+            </div>
             
             <div class="inventory-sections">
                 <section id="grapes-section" class="inventory-section card mb-4">
@@ -98,14 +96,9 @@ export function showInventoryOverlay() {
             </div>
         </div>
     `;
-
-    document.body.appendChild(overlay);
-    setupInventoryFilters(overlay);
-    populateInventoryTables();
-    overlay.style.display = 'block';
 }
 
-function setupInventoryFilters(overlay) {
+function setupInventoryEventListeners(overlay) {
     const btnGroup = overlay.querySelector('.btn-group');
     btnGroup.addEventListener('click', (e) => {
         if (!e.target.matches('button')) return;
@@ -127,6 +120,7 @@ function setupInventoryFilters(overlay) {
     });
 }
 
+// Helper functions
 function populateInventoryTables() {
     const buildings = loadBuildings();
     updateStorageTable('grape', buildings, 'Grapes');
