@@ -17,14 +17,14 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
 
   const overlayContainer = document.createElement('div');
   overlayContainer.className = 'overlay active';
-  overlayContainer.innerHTML = createOverlayHTML(farmland);
+  overlayContainer.innerHTML = createPlantingOverlayHTML(farmland);
   document.body.appendChild(overlayContainer);
 
-  setupEventListeners(overlayContainer, farmland, onPlantCallback);
+  setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback);
 }
 
 // Create the HTML for the overlay
-function createOverlayHTML(farmland) {
+function createPlantingOverlayHTML(farmland) {
   const density = farmland.density || 1000;
   const initialCostPerAcre = density * 2;
   const initialTotalCost = initialCostPerAcre * farmland.acres;
@@ -79,7 +79,7 @@ function createOverlayHTML(farmland) {
 }
 
 // Set up all event listeners
-function setupEventListeners(overlayContainer, farmland, onPlantCallback) {
+function setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback) {
   setupDensitySlider(overlayContainer, farmland);
   setupPlantButton(overlayContainer, farmland, onPlantCallback);
   setupCloseButton(overlayContainer);
