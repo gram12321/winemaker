@@ -1,18 +1,16 @@
 
 import { addTransaction } from '/js/finance.js';
 import { incrementWeek } from '/js/endDay.js';
-
+import { hideAllOverlays } from './hideOverlays.js';
+import { showMainViewOverlay } from '../overlayUtils.js';
 
 export function showMainOfficeOverlay() {
-    const existingOverlay = document.querySelector('.mainview-overlay');
-    if (existingOverlay) {
-        existingOverlay.remove();
-    }
+    const overlay = showMainViewOverlay(createMainOfficeOverlayHTML());
+    setupMainOfficeEventListeners(overlay);
+}
 
-    const overlay = document.createElement('div');
-    overlay.classList.add('mainview-overlay');
-
-    overlay.innerHTML = `
+function createMainOfficeOverlayHTML() {
+    return `
         <div class="mainview-overlay-content">
             <h1>Welcome to the Game!</h1>
             <p>Start playing now.</p>
@@ -23,15 +21,21 @@ export function showMainOfficeOverlay() {
             </div>
         </div>
     `;
+}
 
-    document.body.appendChild(overlay);
-    overlay.style.display = 'block';
+function setupMainOfficeEventListeners(overlay) {
+    const addMoneyBtn = overlay.querySelector('#add-money-btn');
+    const incrementWeekBtn = overlay.querySelector('#increment-week-btn');
 
-    // Add event listeners
-    document.getElementById('add-money-btn').addEventListener('click', () => {
-        addTransaction('Income', 'Manual Money Addition', 1000000);
-    });
-    document.getElementById('increment-week-btn').addEventListener('click', () => {
-        incrementWeek();
-    });
+    if (addMoneyBtn) {
+        addMoneyBtn.addEventListener('click', () => {
+            addTransaction('Income', 'Manual Money Addition', 1000000);
+        });
+    }
+
+    if (incrementWeekBtn) {
+        incrementWeekBtn.addEventListener('click', () => {
+            incrementWeek();
+        });
+    }
 }
