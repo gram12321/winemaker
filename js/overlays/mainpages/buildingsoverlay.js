@@ -6,8 +6,12 @@ import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 
 export function showBuildingsOverlay() {
-    const buildings = loadBuildings();
-    const overlay = showMainViewOverlay(`
+    const overlay = showMainViewOverlay(createBuildingsOverlayHTML());
+    setupBuildingsEventListeners(overlay);
+}
+
+function createBuildingsOverlayHTML() {
+    return `
         <div class="mainview-overlay-content">
             <h3>Buildings</h3>
             <div class="row">
@@ -30,54 +34,52 @@ export function showBuildingsOverlay() {
               </div>
             </div>
         </div>
-    `);
-
-    // Add event listeners for building and upgrading buttons
-    initButtonListeners();
-    
-    // Add click handlers for building cards
-    const buildingCards = document.querySelectorAll('.building-card');
-    buildingCards.forEach(card => {
-      card.addEventListener('click', () => {
-        const buildingName = card.querySelector('.building-details').getAttribute('data-building-name');
-        const buildings = loadBuildings();
-        const building = buildings.find(b => b.name === buildingName);
-        if (building) {
-          showBuildingOverlay(building);
-        }
-      });
-    });
+    `;
 }
 
-// Function to initialize event listeners for build and upgrade buttons
-function initButtonListeners() {
-  const buildings = loadBuildings();
-  const buildButtons = document.querySelectorAll('.build-button');
-  const upgradeButtons = document.querySelectorAll('.upgrade-button');
-
-  buildButtons.forEach((button, index) => {
-    const buildingName = button.getAttribute('data-building-name');
-    const upgradeButton = upgradeButtons[index];
-    const existingBuilding = buildings.find(b => b.name === buildingName);
-
-    if (existingBuilding) {
-      button.disabled = true;
-      button.textContent = "Built";
-      upgradeButton.disabled = false;
-    } else {
-      button.disabled = false;
-      button.addEventListener('click', () => {
-        buildBuilding(buildingName);
-      });
-    }
-  });
-
-  upgradeButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const buildingName = button.getAttribute('data-building-name');
-      upgradeBuilding(buildingName);
+function setupBuildingsEventListeners(overlay) {
+    const buildings = loadBuildings();
+    
+    // Setup building cards click handlers
+    const buildingCards = overlay.querySelectorAll('.building-card');
+    buildingCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const buildingName = card.querySelector('.building-details').getAttribute('data-building-name');
+            const building = buildings.find(b => b.name === buildingName);
+            if (building) {
+                showBuildingOverlay(building);
+            }
+        });
     });
-  });
 
-  updateBuildingCards();
+    // Setup build buttons
+    const buildButtons = overlay.querySelectorAll('.build-button');
+    const upgradeButtons = overlay.querySelectorAll('.upgrade-button');
+
+    buildButtons.forEach((button, index) => {
+        const buildingName = button.getAttribute('data-building-name');
+        const upgradeButton = upgradeButtons[index];
+        const existingBuilding = buildings.find(b => b.name === buildingName);
+
+        if (existingBuilding) {
+            button.disabled = true;
+            button.textContent = "Built";
+            upgradeButton.disabled = false;
+        } else {
+            button.disabled = false;
+            button.addEventListener('click', () => {
+                buildBuilding(buildingName);
+            });
+        }
+    });
+
+    // Setup upgrade buttons
+    upgradeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const buildingName = button.getAttribute('data-building-name');
+            upgradeBuilding(buildingName);
+        });
+    });
+
+    updateBuildingCards();
 }
