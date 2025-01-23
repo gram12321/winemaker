@@ -10,11 +10,20 @@ export function hideOverlay(overlay) {
         return;
     }
 
+    // Clean up any existing overlays of the same type
+    const overlayClass = overlay.classList[0];
+    if (overlayClass) {
+        document.querySelectorAll(`.${overlayClass}`).forEach(el => {
+            if (el !== overlay && el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        });
+    }
+
     // Handle different overlay types
     if (overlay.classList.contains('mainview-overlay')) {
         overlay.remove();
     } else {
-        overlay.classList.remove('active');
         if (overlay.parentNode) {
             overlay.parentNode.removeChild(overlay);
         }
