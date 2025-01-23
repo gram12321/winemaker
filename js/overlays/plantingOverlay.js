@@ -6,7 +6,7 @@ import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland } from '../database/adminFunctions.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
-import { hideOverlay } from './overlayUtils.js';
+import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 
 // Show the planting overlay
 export function showPlantingOverlay(farmland, onPlantCallback) {
@@ -15,11 +15,7 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
     return;
   }
 
-  const overlayContainer = document.createElement('div');
-  overlayContainer.className = 'overlay active';
-  overlayContainer.innerHTML = createPlantingOverlayHTML(farmland);
-  document.body.appendChild(overlayContainer);
-
+  const overlayContainer = showStandardOverlay(createPlantingOverlayHTML(farmland));
   setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback);
 }
 
@@ -213,9 +209,5 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
 }
 
 function setupCloseButton(overlayContainer) {
-  const closeButton = overlayContainer.querySelector('.close-btn');
-  closeButton.addEventListener('click', () => hideOverlay(overlayContainer));
-  overlayContainer.addEventListener('click', (event) => {
-    if (event.target === overlayContainer) hideOverlay(overlayContainer);
-  });
+  setupStandardOverlayClose(overlayContainer);
 }
