@@ -5,7 +5,7 @@ import { incrementWeek } from '/js/endDay.js';
 export function showMainOfficeOverlay() {
     const overlay = document.createElement('div');
     overlay.classList.add('mainview-overlay');
-    overlay.style.display = 'block';
+    overlay.style.display = 'flex';
     
     overlay.innerHTML = `
         <div class="mainview-overlay-content">
