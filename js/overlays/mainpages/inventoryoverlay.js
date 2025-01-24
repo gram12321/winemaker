@@ -120,7 +120,7 @@ function setupInventoryEventListeners(overlay) {
 }
 
 // Helper functions
-function populateInventoryTables() {
+export function populateInventoryTables() {
     const buildings = loadBuildings();
     updateStorageTable('grape', buildings, 'Grapes');
     updateStorageTable('must', buildings, 'Must');

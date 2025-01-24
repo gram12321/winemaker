@@ -38,6 +38,14 @@ export function updateAllDisplays() {
         if (typeof updateBuildButtonStates === 'function') {
             updateBuildButtonStates();
         }
+
+        // Update inventory tables
+        if (typeof populateInventoryTables === 'function' && 
+            (document.getElementById('grape-storage-body') || 
+             document.getElementById('must-storage-body') || 
+             document.getElementById('wine-storage-body'))) {
+            populateInventoryTables();
+        }
     } catch (error) {
         console.debug('Some display functions are not available in current context:', error);
     }
@@ -49,3 +57,4 @@ import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
 import { displayStaff } from './staff.js';
 import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
+import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
