@@ -4,6 +4,7 @@ import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
+import { inventoryInstance } from '/js/resource.js';
 
 export function showWineryOverlay() {
     const overlayContent = createWineryOverlayHTML();
@@ -72,7 +73,7 @@ function createWineryOverlayHTML() {
 
 function setupWineryOverlayEventListeners(overlay) {
     const buildings = loadBuildings();
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+    const playerInventory = inventoryInstance.items;
     const grapeStorageTableBody = overlay.querySelector('#grape-storage-table');
     const mustStorageTableBody = overlay.querySelector('#must-storage-table');
 
