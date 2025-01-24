@@ -18,9 +18,9 @@
 }
 
 #sidebar-wrapper.collapsed {
-  width: var(--sidebar-collapsed-width) !important;
-  min-width: var(--sidebar-collapsed-width) !important;
-  max-width: var(--sidebar-collapsed-width) !important;
+  width: var(--sidebar-collapsed-width) ;
+  min-width: var(--sidebar-collapsed-width) ;
+  max-width: var(--sidebar-collapsed-width) ;
   transition: all var(--transition-speed) ease;
 }
 
@@ -120,7 +120,7 @@
   font-size: 0.7rem;
   padding: 4px 8px;
   margin: 8px;
-  width: calc(100% - 16px);
+  
 }
 
 #increment-week-btn::before {

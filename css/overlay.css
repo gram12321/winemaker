@@ -96,12 +96,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     margin: 0 auto;
 }
 
-#assignStaffOverlay .overlay-content {
-    position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
 /* 3. Modal Overlays */
 .modal-overlay {
     position: fixed;
