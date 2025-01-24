@@ -145,7 +145,7 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
 
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     if (harvestedAmount <= 0) {
-        return; // Skip if no grapes were actually harvested
+        return false; // Skip if no grapes were actually harvested
     }
 
     const gameYear = parseInt(localStorage.getItem('year'), 10);
