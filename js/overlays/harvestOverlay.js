@@ -296,8 +296,7 @@ function updateSelectedCapacity(farmland) {
 }
 
 function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
-    overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
-        const selectedCheckboxes = overlayContainer.querySelectorAll('.storage-checkbox:checked');
+    const selectedCheckboxes = overlayContainer.querySelectorAll('.storage-checkbox:checked');
         if (selectedCheckboxes.length === 0) {
             addConsoleMessage('Please select at least one storage container for harvesting');
             return;
