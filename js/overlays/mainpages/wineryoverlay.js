@@ -71,18 +71,16 @@ function createWineryOverlayHTML() {
     `;
 }
 
-export function setupWineryOverlayEventListeners(overlay) {
+export function updateWineryGrapeStorage() {
+    const grapeStorageTableBody = document.querySelector('#grape-storage-table');
+    if (!grapeStorageTableBody) return;
+    
+    grapeStorageTableBody.innerHTML = '';
     const buildings = loadBuildings();
     const playerInventory = inventoryInstance.items;
-    const grapeStorageTableBody = overlay.querySelector('#grape-storage-table');
-    const mustStorageTableBody = overlay.querySelector('#must-storage-table');
-
-    if (grapeStorageTableBody) grapeStorageTableBody.innerHTML = '';
-    if (mustStorageTableBody) mustStorageTableBody.innerHTML = '';
 
     buildings.forEach(building => {
         if (!building.tools) return;
-
         building.tools.forEach(tool => {
             if (tool.supportedResources?.includes('Grapes')) {
                 const matchingInventoryItems = playerInventory.filter(item => 
@@ -91,6 +89,21 @@ export function setupWineryOverlayEventListeners(overlay) {
                 );
                 populateStorageRow(grapeStorageTableBody, tool, matchingInventoryItems);
             }
+        });
+    });
+}
+
+export function updateWineryMustStorage() {
+    const mustStorageTableBody = document.querySelector('#must-storage-table');
+    if (!mustStorageTableBody) return;
+    
+    mustStorageTableBody.innerHTML = '';
+    const buildings = loadBuildings();
+    const playerInventory = inventoryInstance.items;
+
+    buildings.forEach(building => {
+        if (!building.tools) return;
+        building.tools.forEach(tool => {
             if (tool.supportedResources?.includes('Must')) {
                 const matchingInventoryItems = playerInventory.filter(item => 
                     item.storage === `${tool.name} #${tool.instanceNumber}` && 
@@ -100,6 +113,11 @@ export function setupWineryOverlayEventListeners(overlay) {
             }
         });
     });
+}
+
+export function setupWineryOverlayEventListeners(overlay) {
+    updateWineryGrapeStorage();
+    updateWineryMustStorage();
 
     const crushButton = overlay.querySelector('#crushGrapesBtn');
     if (crushButton) {
