@@ -1,4 +1,4 @@
-import { formatNumber, getWineQualityDisplay, getColorClass } from '../utils.js';
+import { formatNumber, getColorClass } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { inventoryInstance } from '../resource.js';
