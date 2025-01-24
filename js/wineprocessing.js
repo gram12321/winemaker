@@ -37,6 +37,10 @@ export function fermentation(selectedResource, storage, mustAmount) {
 
 export function performFermentation(target, progress, params) {
     const { selectedResource, storage, mustAmount, vintage, quality, fieldName, fieldPrestige } = params;
+    if (mustAmount <= 0) {
+        return false; // Skip if no must to ferment
+    }
+    
     const wineVolume = mustAmount * 0.9 * progress;
     const bottleAmount = Math.floor(wineVolume / 0.75);
 
