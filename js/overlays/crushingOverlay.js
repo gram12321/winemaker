@@ -262,7 +262,7 @@ function crushing(overlayContainer) {
     const totalGrapes = parseFloat(selectedGrape.dataset.amount);
 
     // Check for existing crushing tasks with the same grape storage
-    const existingTasks = taskManager.getTasks().filter(task => 
+    const existingTasks = taskManager.getAllTasks().filter(task => 
         task.name === 'Crushing' && 
         task.target?.dataset?.storage === selectedGrape.dataset.storage
     );
@@ -274,7 +274,7 @@ function crushing(overlayContainer) {
 
     // Check if any selected must storage is already being used in another crushing task
     const selectedStorageIds = Array.from(selectedStorages).map(storage => storage.value);
-    const existingStorageTasks = taskManager.getTasks().filter(task => 
+    const existingStorageTasks = taskManager.getAllTasks().filter(task => 
         task.name === 'Crushing' && 
         task.params?.selectedStorages?.some(storage => 
             selectedStorageIds.includes(storage.value)
