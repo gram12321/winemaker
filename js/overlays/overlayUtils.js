@@ -52,7 +52,7 @@ export function showModalOverlay(overlayId, content) {
     overlay.id = overlayId;
     
     overlay.innerHTML = `
-        <div class="overlay-content modal-content">
+        <div class="overlay-content">
             ${content}
         </div>
     `;

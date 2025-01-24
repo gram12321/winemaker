@@ -117,9 +117,10 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 }
 
 .modal-overlay .overlay-content {
-    position: relative;
-    top: 0;
-    transform: translateY(0);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: var(--color-background);
     max-width: 800px;
     width: 90%;
@@ -128,7 +129,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     box-shadow: var(--shadow-lg);
     max-height: 90vh;
     overflow-y: auto;
-    margin: auto;
 }
 
 /* Common Table Styles */
