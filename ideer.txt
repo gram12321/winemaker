@@ -9,7 +9,9 @@ Viticulturist (Vineyard Manager)       26.54        44.23     1061.54     1769.2
 
 
 Knownbugs as of Jan 2025
-- Problems with overlay. Atleast closing the modal warning dialog in harvestoverlay, coursing overlays in vineyardoverlay not to work. And the assign staff overlay, causes buildingoverlay to not be able to show
+- When sidebar is toogle collapsedfrom localstorage mainwindows down get 'collapsed width' but leave empty space between mainwindow overlay and panel
+- Tooltips in sidebar is not shown above mainview
+- Company info in tooltip when collapsed sidebar does not work
 
 Known Bugs:
 -Save load Owned land and staff (Safe to firestore, but dont restore from localstorage)
