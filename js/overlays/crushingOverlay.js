@@ -261,6 +261,31 @@ function crushing(overlayContainer) {
     const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
     const totalGrapes = parseFloat(selectedGrape.dataset.amount);
 
+    // Check for existing crushing tasks with the same grape storage
+    const existingTasks = taskManager.getTasks().filter(task => 
+        task.name === 'Crushing' && 
+        task.target?.dataset?.storage === selectedGrape.dataset.storage
+    );
+
+    if (existingTasks.length > 0) {
+        addConsoleMessage("A crushing task is already in progress for these grapes");
+        return false;
+    }
+
+    // Check if any selected must storage is already being used in another crushing task
+    const selectedStorageIds = Array.from(selectedStorages).map(storage => storage.value);
+    const existingStorageTasks = taskManager.getTasks().filter(task => 
+        task.name === 'Crushing' && 
+        task.params?.selectedStorages?.some(storage => 
+            selectedStorageIds.includes(storage.value)
+        )
+    );
+
+    if (existingStorageTasks.length > 0) {
+        addConsoleMessage("Selected must storage is already being used in another crushing task");
+        return false;
+    }
+
     // Check if there's any work progress
     const workProgress = taskManager.getTaskProgress('Crushing');
     if (workProgress <= 0) {
