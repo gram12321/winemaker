@@ -267,13 +267,18 @@ function crushing(overlayContainer) {
     selectedStorages.forEach(storage => {
         const availableSpace = parseFloat(storage.dataset.available);
         const storageId = storage.value;
-        const matchingInventoryItems = inventoryInstance.items.filter(item => item.storage === storageId);
+        const matchingInventoryItems = inventoryInstance.items.filter(item => 
+            item.storage === storageId && 
+            item.state === 'Must'
+        );
 
         if (matchingInventoryItems.length > 0) {
             const firstItem = matchingInventoryItems[0];
-            if (firstItem.resource.name !== selectedGrape.dataset.resource || firstItem.vintage !== parseInt(selectedGrape.dataset.vintage)) {
+            if (firstItem.resource.name !== selectedGrape.dataset.resource || 
+                firstItem.vintage !== parseInt(selectedGrape.dataset.vintage) ||
+                firstItem.fieldName !== selectedGrape.dataset.field) {
                 invalidStorage = true;
-                addConsoleMessage(`Cannot use ${storageId} as it contains a different resource or vintage.`);
+                addConsoleMessage(`Cannot use ${storageId} as it contains must from a different field, resource or vintage.`);
             } else {
                 totalAvailableSpace += availableSpace;
             }
