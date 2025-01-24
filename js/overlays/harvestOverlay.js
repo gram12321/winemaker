@@ -93,7 +93,7 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
     warningModal.style.display = 'block';
     warningModal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     warningModal.innerHTML = `
-        <div class="modal-dialog" style="z-index: 2001;">
+        <div class="modal-dialog">
             <div class="modal-content overlay-section">
                 <div class="modal-header card-header">
                     <h3 class="modal-title">Warning: Limited Container Capacity</h3>
