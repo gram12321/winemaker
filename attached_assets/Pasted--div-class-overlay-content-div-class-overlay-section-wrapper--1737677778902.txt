@@ -1,0 +1,67 @@
+<div class="overlay-content">
+            
+        <div class="overlay-section-wrapper">
+            <section class="overlay-section card">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Assign Staff to Hiring Process</h2>
+                    <button class="btn btn-light btn-sm close-btn">Close</button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Nationality</th>
+                                <th>Skills</th>
+                                <th class="text-right">Wage</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            <tr>
+                <td>Lillian Harris</td>
+                <td><span class="flag-icon flag-icon-de" style="vertical-align: middle; margin-right: 5px;"></span> Germany</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 2%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.02">F</div>
+                <div class="skill-bar" style="width: 46%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.46">W</div>
+                <div class="skill-bar" style="width: 87%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.87">A</div>
+                <div class="skill-bar" style="width: 56.99999999999999%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.57">S</div>
+                <div class="skill-bar" style="width: 44%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.44">M</div>
+            </div>
+        </td>
+                <td class="text-right">€213</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="1">
+                </td>
+            </tr>
+        
+            <tr>
+                <td>Niklas</td>
+                <td><span class="flag-icon flag-icon-de" style="vertical-align: middle; margin-right: 5px;"></span> Germany</td>
+                <td>
+            <div class="skill-bar-container">
+                <div class="skill-bar" style="width: 86%; background-color: #ffcc00; height: 20px;" title="Field Skill: 0.86">F</div>
+                <div class="skill-bar" style="width: 22%; background-color: #2179ff; height: 20px;" title="Winery Skill: 0.22">W</div>
+                <div class="skill-bar" style="width: 28.999999999999996%; background-color: #6c757d; height: 20px;" title="Administration Skill: 0.29">A</div>
+                <div class="skill-bar" style="width: 22%; background-color: #28a745; height: 20px;" title="Sales Skill: 0.22">S</div>
+                <div class="skill-bar" style="width: 89%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: 0.89">M</div>
+            </div>
+        </td>
+                <td class="text-right">€335</td>
+                <td>
+                    <input type="checkbox" class="staff-select" value="2">
+                </td>
+            </tr>
+        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="btn-group mt-3">
+                <button class="btn save-staff-btn">Save Assignments</button>
+            </div>
+        </section>
+    </div>
+    
+        </div>
