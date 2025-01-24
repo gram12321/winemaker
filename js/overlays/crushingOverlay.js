@@ -386,7 +386,7 @@ function crushing(overlayContainer) {
             performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
         },
         selectedGrape,
-        { selectedStorages, totalGrapes, lastProgress: 0 }
+        { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
     );
 
     return true;
