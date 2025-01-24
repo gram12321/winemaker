@@ -181,11 +181,14 @@ class TaskManager {
             const displayedStaffNames = staffNames.slice(0, 4).join(', ');
             const tooltipStaffNames = staffNames.join(', ');
 
+            const defaultStaff = loadStaff().find(s => s.id === 1);
+            const defaultFlag = defaultStaff ? getFlagIconHTML(defaultStaff.nationality) : '';
+            
             taskBox.innerHTML = `
                 <div class="task-target">
                     ${task.target ? 
                         `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || task.taskType}` : 
-                        task.taskType}
+                        `${defaultFlag} ${task.taskType}`}
                 </div>
                 <div class="task-header">
                     ${(task.target && task.target.name) ? `<div class="task-type">${task.taskType}</div>` : ''}
