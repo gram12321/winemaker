@@ -190,10 +190,6 @@ class TaskManager {
             const defaultFlag = defaultStaff ? getFlagIconHTML(defaultStaff.nationality) : '';
             
             taskBox.innerHTML = `
-                <!-- Task Target Section:
-                     - Shows country flag + target name if task has a target
-                     - Shows default staff flag + task type if no target
-                     This ensures consistent visual hierarchy in task boxes -->
                 <div class="task-target">
                     ${task.target ? 
                         `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || task.taskType}` : 
