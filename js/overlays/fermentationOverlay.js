@@ -1,20 +1,25 @@
+
 import { fermentation } from '../wineprocessing.js';
 import { addConsoleMessage } from '../console.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
+import { showStandardOverlay, setupStandardOverlayClose, hideOverlay } from './overlayUtils.js';
 
 export function showFermentationOverlay() {
-    const overlayContainer = document.createElement('div');
-    overlayContainer.className = 'overlay';
+    const overlayContent = createFermentationHTML();
+    const overlayContainer = showStandardOverlay(overlayContent);
+    setupFermentationEventListeners(overlayContainer);
+    return overlayContainer;
+}
 
-    overlayContainer.innerHTML = `
-        <div class="overlay-content overlay-container">
-            <section id="vineyard-section" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Must Fermentation</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
+function createFermentationHTML() {
+    return `
+        <div class="overlay-section-wrapper">
+            <section class="overlay-section card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>Must Fermentation</h3>
+                    <button class="overlay-section-btn close-btn">Close</button>
                 </div>
-                <div class="card-body"></div>
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Select Must to Ferment</h3>
                 </div>
@@ -42,9 +47,11 @@ export function showFermentationOverlay() {
             </section>
         </div>
     `;
+}
 
-    document.body.appendChild(overlayContainer);
-
+function setupFermentationEventListeners(overlayContainer) {
+    setupStandardOverlayClose(overlayContainer);
+    
     const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
     const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
     const storageBody = document.getElementById('fermentation-storage-body');
@@ -91,16 +98,9 @@ export function showFermentationOverlay() {
             const amount = parseFloat(selectedMust.dataset.amount);
             fermentation(resourceName, storage, amount);
             showWineryOverlay();
-            removeOverlay();
+            hideOverlay(overlayContainer);
         } else {
             addConsoleMessage('Please select must to ferment.');
         }
     });
-
-    const closeButton = overlayContainer.querySelector('.close-btn');
-    closeButton.addEventListener('click', removeOverlay);
-
-    function removeOverlay() {
-        document.body.removeChild(overlayContainer);
-    }
 }
