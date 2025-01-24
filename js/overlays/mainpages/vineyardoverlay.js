@@ -37,6 +37,16 @@ function getVineyardOverlayHTML() {
                     </div>
                 </section>
             </div>
+            <div id="farmlandOverlay" class="overlay" style="display: none;">
+                <div class="overlay-content">
+                    <div id="farmland-details"></div>
+                </div>
+            </div>
+            <div id="resourceInfoOverlay" class="overlay" style="display: none;">
+                <div class="overlay-content">
+                    <div id="resource-details"></div>
+                </div>
+            </div>
         </div>
     `;
 }
