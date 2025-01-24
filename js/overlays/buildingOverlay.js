@@ -30,11 +30,13 @@ function createBuildingDetails(building) {
         <button class="close-btn btn btn-light btn-sm overlay-section-btn">Close</button>
       </div>
       <div class="card-body">
-        <div class="button-container">
-          ${toolButtons}
-        </div>
-        <div class="building-simulator mt-3">
-          <div id="capacity-grid" class="capacity-grid"></div>
+        <div class="building-layout-grid">
+          <div class="button-container">
+            ${toolButtons}
+          </div>
+          <div class="building-simulator">
+            <div id="capacity-grid" class="capacity-grid"></div>
+          </div>
         </div>
       </div>
     </div>
