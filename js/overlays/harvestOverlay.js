@@ -144,10 +144,11 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
-    const currentFarmland = loadFarmlands().find(f => f.id === farmlandId);
+    const farmlands = loadFarmlands();
+    const currentFarmland = farmlands.find(f => f.id === parseInt(farmlandId));
 
     if (!currentFarmland) {
-        console.error(`Farmland with ID ${farmlandId} not found.`);
+        console.error(`Farmland with ID ${farmlandId} not found in ${farmlands.length} farmlands.`);
         return;
     }
 
