@@ -71,7 +71,7 @@ function createWineryOverlayHTML() {
     `;
 }
 
-function updateWineryStorage() {
+export function updateWineryStorage() {
     const buildings = loadBuildings();
     const playerInventory = inventoryInstance.items;
 
