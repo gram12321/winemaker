@@ -141,7 +141,7 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
     });
 }
 
-function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
     const currentFarmland = loadFarmlands().find(f => f.id === farmlandId);
@@ -185,7 +185,7 @@ function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
 }
 
-function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
+export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     const buildings = loadBuildings();
     const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
     
