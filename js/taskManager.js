@@ -183,10 +183,12 @@ class TaskManager {
 
             taskBox.innerHTML = `
                 <div class="task-target">
-                    ${task.target ? `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || 'No target'}` : task.name}
+                    ${task.target ? 
+                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || task.taskType}` : 
+                        task.taskType}
                 </div>
                 <div class="task-header">
-                    ${task.target ? `<div class="task-type">${task.taskType}</div>` : ''}
+                    ${(task.target && task.target.name) ? `<div class="task-type">${task.taskType}</div>` : ''}
                     <img src="../assets/icon/icon_${iconName}.webp" 
                          alt="${task.name}" 
                          class="task-icon"
