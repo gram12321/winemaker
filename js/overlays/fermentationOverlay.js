@@ -4,6 +4,8 @@ import { addConsoleMessage } from '../console.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { showStandardOverlay, setupStandardOverlayClose, hideOverlay } from './overlayUtils.js';
+import { loadBuildings } from '../database/adminFunctions.js';
+import { inventoryInstance } from '../resource.js';
 
 export function showFermentationOverlay() {
     const overlayContent = createFermentationHTML();
@@ -52,8 +54,7 @@ function createFermentationHTML() {
 function setupFermentationEventListeners(overlayContainer) {
     setupStandardOverlayClose(overlayContainer);
     
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
+    const buildings = loadBuildings();
     const storageBody = document.getElementById('fermentation-storage-body');
     
     buildings.forEach(building => {
@@ -62,7 +63,7 @@ function setupFermentationEventListeners(overlayContainer) {
         building.tools.forEach(tool => {
             if (tool.supportedResources?.includes('Must')) {
                 const toolId = `${tool.name} #${tool.instanceNumber}`;
-                const matchingInventoryItems = playerInventory.filter(item => 
+                const matchingInventoryItems = inventoryInstance.items.filter(item => 
                     item.storage === toolId && 
                     item.state === 'Must'
                 );
