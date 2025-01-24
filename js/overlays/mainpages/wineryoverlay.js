@@ -71,48 +71,35 @@ function createWineryOverlayHTML() {
     `;
 }
 
-export function updateWineryGrapeStorage() {
-    const grapeStorageTableBody = document.querySelector('#grape-storage-table');
-    if (!grapeStorageTableBody) return;
+function updateWineryStorage(resourceType) {
+    const tableId = resourceType === 'Grapes' ? '#grape-storage-table' : '#must-storage-table';
+    const tableBody = document.querySelector(tableId);
+    if (!tableBody) return;
     
-    grapeStorageTableBody.innerHTML = '';
+    tableBody.innerHTML = '';
     const buildings = loadBuildings();
     const playerInventory = inventoryInstance.items;
 
     buildings.forEach(building => {
         if (!building.tools) return;
         building.tools.forEach(tool => {
-            if (tool.supportedResources?.includes('Grapes')) {
+            if (tool.supportedResources?.includes(resourceType)) {
                 const matchingInventoryItems = playerInventory.filter(item => 
                     item.storage === `${tool.name} #${tool.instanceNumber}` && 
-                    item.state === 'Grapes'
+                    item.state === resourceType
                 );
-                populateStorageRow(grapeStorageTableBody, tool, matchingInventoryItems);
+                populateStorageRow(tableBody, tool, matchingInventoryItems);
             }
         });
     });
 }
 
-export function updateWineryMustStorage() {
-    const mustStorageTableBody = document.querySelector('#must-storage-table');
-    if (!mustStorageTableBody) return;
-    
-    mustStorageTableBody.innerHTML = '';
-    const buildings = loadBuildings();
-    const playerInventory = inventoryInstance.items;
+export function updateWineryGrapeStorage() {
+    updateWineryStorage('Grapes');
+}
 
-    buildings.forEach(building => {
-        if (!building.tools) return;
-        building.tools.forEach(tool => {
-            if (tool.supportedResources?.includes('Must')) {
-                const matchingInventoryItems = playerInventory.filter(item => 
-                    item.storage === `${tool.name} #${tool.instanceNumber}` && 
-                    item.state === 'Must'
-                );
-                populateStorageRow(mustStorageTableBody, tool, matchingInventoryItems);
-            }
-        });
-    });
+export function updateWineryMustStorage() {
+    updateWineryStorage('Must');
 }
 
 export function setupWineryOverlayEventListeners(overlay) {
