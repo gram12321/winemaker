@@ -144,6 +144,10 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
 }
 
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+    if (harvestedAmount <= 0) {
+        return; // Skip if no grapes were actually harvested
+    }
+
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
     const farmlands = loadFarmlands();
