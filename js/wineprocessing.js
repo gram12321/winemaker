@@ -4,6 +4,13 @@ import { addConsoleMessage } from './console.js';
 import taskManager, { TaskType } from './taskManager.js';
 
 export function fermentation(selectedResource, storage, mustAmount) {
+    // Check if there's any work progress
+    const workProgress = taskManager.getTaskProgress('Fermentation');
+    if (workProgress <= 0) {
+        addConsoleMessage("No work has been done on fermentation yet");
+        return false;
+    }
+
     const resource = inventoryInstance.items.find(item => 
         item.resource.name === selectedResource && 
         item.state === 'Must' &&

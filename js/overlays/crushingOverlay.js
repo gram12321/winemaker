@@ -253,8 +253,20 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
 
 function crushing(overlayContainer) {
     const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
+    if (!selectedGrape) {
+        addConsoleMessage("Please select grapes to crush");
+        return false;
+    }
+
     const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
     const totalGrapes = parseFloat(selectedGrape.dataset.amount);
+
+    // Check if there's any work progress
+    const workProgress = taskManager.getTaskProgress('Crushing');
+    if (workProgress <= 0) {
+        addConsoleMessage("No work has been done on crushing yet");
+        return false;
+    }
 
     if (selectedStorages.length === 0) {
         addConsoleMessage("Please select at least one storage container for the must");
