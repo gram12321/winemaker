@@ -89,9 +89,11 @@ function setupHarvestEventListeners(overlayContainer, farmland, farmlandId) {
 
 function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer) {
     const warningModal = document.createElement('div');
-    warningModal.className = 'modal fade';
+    warningModal.className = 'modal fade modal-overlay';
+    warningModal.style.display = 'block';
+    warningModal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     warningModal.innerHTML = `
-        <div class="modal-dialog">
+        <div class="modal-dialog" style="z-index: 2001;">
             <div class="modal-content overlay-section">
                 <div class="modal-header card-header">
                     <h3 class="modal-title">Warning: Limited Container Capacity</h3>
