@@ -156,8 +156,6 @@ export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmou
 
     const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
 
-    console.log(`Quality calculation: ((annualQualityFactor: ${farmland.annualQualityFactor} + ripeness: ${currentFarmland.ripeness} + suitability: ${suitability}) / 3) = ${quality}`);
-
     const existingItem = inventoryInstance.items.find(item =>
         item.resource.name === farmland.plantedResourceName &&
         item.state === 'Grapes' &&

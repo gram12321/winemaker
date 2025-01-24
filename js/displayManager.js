@@ -1,6 +1,7 @@
 
 // Central function to update all displays
 export function updateAllDisplays() {
+
     // Import all necessary display functions
     try {
         // Company info in sidebar
