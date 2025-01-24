@@ -182,9 +182,11 @@ class TaskManager {
             const tooltipStaffNames = staffNames.join(', ');
 
             taskBox.innerHTML = `
-                ${task.target ? `<div class="task-target">${getFlagIconHTML(task.target.country)} ${task.target.name || 'No target'}</div>` : ''}
+                <div class="task-target">
+                    ${task.target ? `${getFlagIconHTML(task.target.country)} ${task.target.name}` : task.name}
+                </div>
                 <div class="task-header">
-                    <div class="task-type">${task.taskType}</div>
+                    ${task.target ? `<div class="task-type">${task.taskType}</div>` : ''}
                     <img src="../assets/icon/icon_${iconName}.webp" 
                          alt="${task.name}" 
                          class="task-icon"
