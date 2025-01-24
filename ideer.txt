@@ -16,26 +16,14 @@ Knownbugs as of Jan 2025
 Known Bugs:
 -Save load Owned land and staff (Safe to firestore, but dont restore from localstorage)
 Allow winery-task on same field,grape,vintage if different entry (IE different quality)
-Possible a bug in AmountWork. That calculates workforce of staff without taking care if workers split their workforce to several task
-Bookeeping task dosn't update "Goal", when more task is added to unfinished task (It does, but does not update UI, so need page refresh to show rightly)
 Make sure to clean localstorage on login, in case game was closed without clearing
-Fermenting task has correct value in workprogress, but dont update "Progress" on taskbox info
 Wineorders not saved to firestore, just to localstorage
-last order in wineordertable causes [15:00:29] Invalid wine order index. Can refresh page to make right 
-Possible a crash if 0.000something is left in a task (IE 0.00004 must left will leave fermantation task open, but not possible to finih)
-Close by clicking X on hirering overlay dont work
 There might be an issue where annualYieldFactor  is producing values below 0.5 which is not intentinally. 
 Plant buttom is not disabled when active clearing task, but we dont allow planting task when active clearing task
 Imidiatly on building a building the headline (name of the building) disapears. reshows on pageupdate
 Buildingname only shows in taskbox after pagereload
-in buildings.html build buttom change to "Building..." when a building proces is started. But it resets to "Build" on page reload
 Prevent several building and maintaince task on same building
 There dosnøt seems to be a prestige hit for not completing bookkeeeping task as intented
-
-Fixed becuase of 0.02 patch
- - Fix cost for buildbuildings og upgradebuildings (None is applyed as of now)
-
-
 
 QoL Improvement
  - Hover over info on "Statuspic" on sales.html
