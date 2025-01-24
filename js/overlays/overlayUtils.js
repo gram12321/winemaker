@@ -50,7 +50,6 @@ export function showModalOverlay(overlayId, content) {
     const overlay = document.createElement('div');
     overlay.classList.add('overlay', 'modal-overlay');
     overlay.id = overlayId;
-    overlay.style.zIndex = '2000'; // Ensure modal appears above standard overlays
     
     overlay.innerHTML = `
         <div class="overlay-content modal-content">
@@ -70,7 +69,6 @@ export function showModalOverlay(overlayId, content) {
 export function showStandardOverlay(content) {
     const overlayContainer = document.createElement('div');
     overlayContainer.classList.add('overlay', 'standard-overlay');
-    overlayContainer.style.zIndex = '1500'; // Below modal overlays
     
     overlayContainer.innerHTML = `
         <div class="overlay-content">

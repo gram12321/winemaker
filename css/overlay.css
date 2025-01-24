@@ -39,7 +39,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
 }
 
-/* 2. Standard and Modal Overlays */
+/* 2. Standard Overlays (Task Overlays) */
 .overlay {
     position: fixed;
     width: 100vw;
@@ -50,23 +50,13 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     display: none;
     justify-content: center;
     align-items: center;
+    z-index: 1500;
 }
 
 .standard-overlay .overlay-content {
     max-width: 80vw;
     max-height: 90vh;
     overflow-y: auto;
-}
-
-.modal-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
-}
-
-.modal-overlay .overlay-content {
-    max-width: 500px;
-    padding: 1.5rem;
-    border-radius: var(--radius-md);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .overlay-section .card-header h3,
@@ -113,11 +103,37 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 }
 
 /* 3. Modal Dialogs */
-.modal-dialog {
+.modal-dialog,
+.modal-overlay {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    background: var(--color-background);
+    z-index: 2000;
+}
+
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.7);
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    transform: none;
+}
+
+.modal-overlay .overlay-content {
+    max-width: 500px;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.modal-dialog {
     background: var(--color-background);
     padding: 20px;
     border-radius: var(--radius-md);
