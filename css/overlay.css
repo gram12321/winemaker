@@ -102,55 +102,28 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     transform: translateY(-50%);
 }
 
-/* 3. Modal Dialogs */
-.modal-dialog,
+/* 3. Modal Overlays */
 .modal-overlay {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--color-background);
-    z-index: 2000;
-}
-
-.modal-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
-    width: 100vw;
-    height: 100vh;
     top: 0;
     left: 0;
-    transform: none;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
 }
 
 .modal-overlay .overlay-content {
-    max-width: 500px;
-    padding: 1.5rem;
-    border-radius: var(--radius-md);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-}
-
-.modal-dialog {
     background: var(--color-background);
-    padding: 20px;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    z-index: 2000;
     max-width: 500px;
     width: 90%;
-}
-
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 1900;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
 }
 
 /* Common Table Styles */
