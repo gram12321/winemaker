@@ -48,6 +48,19 @@ body.sidebar-collapsed #wrapper {
 }
 
 /* Global Styles */
+
+/* Quality Color Classes */
+.color-class-9 { color: #006400 !important; }  /* Dark Green */
+.color-class-8 { color: #228B22 !important; }  /* Forest Green */
+.color-class-7 { color: #32CD32 !important; }  /* Lime Green */
+.color-class-6 { color: #90EE90 !important; }  /* Light Green */
+.color-class-5 { color: #FFD700 !important; }  /* Gold */
+.color-class-4 { color: #FFA500 !important; }  /* Orange */
+.color-class-3 { color: #FF8C00 !important; }  /* Dark Orange */
+.color-class-2 { color: #FF4500 !important; }  /* Orange Red */
+.color-class-1 { color: #FF0000 !important; }  /* Red */
+.color-class-0 { color: #8B0000 !important; }  /* Dark Red */
+
 /* General button styles */
 .btn {
   background-color: var(--color-primary);
@@ -121,8 +134,6 @@ body.sidebar-collapsed #wrapper {
   border-color: #8B4513;
 }
 
-
-
 /* Tooltip styling */
 [title]:hover::after {
   content: attr(title);
@@ -170,19 +181,7 @@ body.sidebar-collapsed #wrapper {
   
 }
 
-/* Quality Color Classes */
-.color-class-9 { color: #006400 !important; }  /* Dark Green */
-.color-class-8 { color: #228B22 !important; }  /* Forest Green */
-.color-class-7 { color: #32CD32 !important; }  /* Lime Green */
-.color-class-6 { color: #90EE90 !important; }  /* Light Green */
-.color-class-5 { color: #FFD700 !important; }  /* Gold */
-.color-class-4 { color: #FFA500 !important; }  /* Orange */
-.color-class-3 { color: #FF8C00 !important; }  /* Dark Orange */
-.color-class-2 { color: #FF4500 !important; }  /* Orange Red */
-.color-class-1 { color: #FF0000 !important; }  /* Red */
-.color-class-0 { color: #8B0000 !important; }  /* Dark Red */
-
-/* Custom Checkbox Styling */
+/* Global Checkbox Styling */
 input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
@@ -215,7 +214,7 @@ input[type="checkbox"]:hover {
   border-color: var(--checkbox-hover);
 }
 
-/* Custom Radio Styling */
+/* Global Radio Styling */
 input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
