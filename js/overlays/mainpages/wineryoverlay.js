@@ -71,7 +71,7 @@ function createWineryOverlayHTML() {
     `;
 }
 
-function setupWineryOverlayEventListeners(overlay) {
+export function setupWineryOverlayEventListeners(overlay) {
     const buildings = loadBuildings();
     const playerInventory = inventoryInstance.items;
     const grapeStorageTableBody = overlay.querySelector('#grape-storage-table');
