@@ -215,6 +215,40 @@ input[type="checkbox"]:hover {
   border-color: var(--checkbox-hover);
 }
 
+/* Custom Radio Styling */
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--checkbox-border);
+  border-radius: 50%;
+  background-color: var(--checkbox-bg);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="radio"]:checked {
+  border-color: var(--checkbox-checked);
+}
+
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--checkbox-checked);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+input[type="radio"]:hover {
+  border-color: var(--checkbox-hover);
+}
+
 /* Global Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 12px;
