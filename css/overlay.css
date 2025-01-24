@@ -75,6 +75,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     border-radius: var(--radius-lg);
     margin-bottom: 20px;
     box-shadow: var(--shadow-sm);
+    
 }
 
 .overlay.active {
@@ -85,7 +86,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     background-color: var(--color-background);
     color: var(--color-text);
     width: auto;
-    min-width: min-content;
     max-width: 800px;
     padding: 2rem;
     border-radius: var(--radius-lg);
@@ -120,6 +120,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     box-shadow: var(--shadow-lg);
     max-height: 90vh;
     overflow-y: auto;
+    min-width: min-content;
 }
 
 /* Common Table Styles */
@@ -128,7 +129,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .mainview-overlay-content .table {
   margin: 0 auto;
   width: auto;
-  min-width: 400px;
+  
   background-color: var(--color-background);
   text-align: center;
   margin-bottom: 1rem;
@@ -184,71 +185,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
 }
 
-/*  - --- --   Overlay   - - - - - -*/
-
-/* General Overlay Styles */
-
-/* Ensure modal appears above overlay */
-
-/* Default table styles for overlays */
-
-/* General overlay content styles */
-
-/* Farmland Overlay Styling */
-
-/* Skills Table Styles */
-
-/* Sales Section Headers */
-
-/* Planting Overlay Styles */
-
-/* Custom range input styling */
-
-/* Planting overlay select styling */
-
-
-/* Fullscreen overlay specific for hire staff */
-
-/* Content area inside the hire staff overlay */
-
-/* Assign Staff Overlay Specific Styles */
-.assign-staff-overlay h2 {
-    color: white;
-    margin-bottom: 1.5rem;
-    font-size: 1.5rem;
-    border-bottom: 2px solid var(--color-accent);
-    padding-bottom: 0.5rem;
-}
-
-.assign-staff-overlay .table {
-    margin-bottom: 1.5rem;
-}
-
-.assign-staff-overlay .table th {
-    background-color: var(--color-accent);
-    color: black;
-    font-weight: 500;
-    padding: 12px;
-}
-
-.assign-staff-overlay .table td {
-    vertical-align: middle;
-    padding: 12px;
-    color: black; /* Ensure text color contrasts with background */
-}
-
-.assign-staff-overlay input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--color-accent);
-    cursor: pointer;
-}
-
-.assign-staff-overlay .btn-group {
-    display: flex;
-    justify-content: center; /* Center the button */
-    margin-top: 20px; /* Add margin to separate from table */
-}
 
 /* Overlay Container Styles */
 .overlay-container {
@@ -280,7 +216,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   border-bottom: 2px solid var(--color-accent);
 }
 
-/*  - --- --   Sales - - - - - -*/
 
 /* Planting - - - - - -*/
 .planting-overlay-info-box {
@@ -322,27 +257,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background: var(--color-primary);
   border-color: var(--color-accent);
   transform: scale(1.1);
-}
-
-/* Planting overlay select styling */
-.planting-overlay select {
-  background-color: var(--color-primary);
-  color: var(--color-accent);
-  border: 1px solid var(--color-accent);
-  border-radius: var(--radius-md);
-  padding: 8px 12px;
-  width: 100%;
-  margin: 10px 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  height: auto; /* Ensure height is auto to match content */
-}
-
-.planting-overlay .density-details {
-  display: flex;
-  justify-content: space-between;
-  margin: 20px 0;
-  gap: 10px;
 }
 
 /* staff - - - - - -*/
@@ -641,10 +555,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   margin-left: 1rem;
 }
 
-#inventory-section .card-header {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  border-bottom: 2px solid var(--color-accent);
-}
+
 
 #orders-section .card-header {
   background: linear-gradient(135deg, #8B4513, #491809);

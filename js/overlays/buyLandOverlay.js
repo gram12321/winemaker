@@ -26,7 +26,7 @@ function createBuyLandOverlayHTML(farmlandOptions) {
         <section id="vineyard-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
                 <h3 class="h5 mb-0">Available Farmlands</h3>
-                <button class="close-btn btn btn-light btn-sm">&times;</button>
+                <button class="close-btn btn btn-light btn-sm">Close</button>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
