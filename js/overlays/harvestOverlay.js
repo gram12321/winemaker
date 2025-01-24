@@ -332,7 +332,7 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
             }
             removeOverlay(overlayContainer);
         }
-    });
+    ;
 }
 
 function removeOverlay(overlayContainer) {
