@@ -1,119 +1,104 @@
-import { formatNumber, getWineQualityDisplay, getColorClass } from '../utils.js';
+import { formatNumber, getWineQualityCategory, getColorClass } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { inventoryInstance } from '../resource.js';
 import taskManager, { TaskType } from '../taskManager.js';
-import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 
-export function showCrushingOverlay() {
-    const overlayContent = createCrushingOverlayHTML();
-    const overlay = showModalOverlay('crushingOverlay', overlayContent);
-    setupCrushingEventListeners(overlay);
-    populateTables(overlay);
-    return overlay;
-}
-
-function createCrushingOverlayHTML() {
-    return `
-        <div class="overlay-section-wrapper">
-            <section id="vineyard-section" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Grape Crushing</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
-                </div>
-                <div class="card-body"></div>
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Select Grapes to Crush</h3>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover overlay-table">
-                            <thead>
-                                <tr>
-                                    <th>Select</th>
-                                    <th>Container</th>
-                                    <th>Wine in Storage</th>
-                                    <th>Amount</th>
-                                    <th>Quality</th>
-                                </tr>
-                            </thead>
-                            <tbody id="crushing-storage-table"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="must-section" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Select Must Storage Container</h3>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover overlay-table">
-                            <thead>
-                                <tr>
-                                    <th>Select</th>
-                                    <th>Container</th>
-                                    <th>Wine in Storage</th>
-                                    <th>Capacity</th>
-                                    <th>Available Space</th>
-                                </tr>
-                            </thead>
-                            <tbody id="crushing-must-storage-table"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <section id="crushing-progress" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Crushing Progress</h3>
-                </div>
-                <div class="card-body">
-                    <div class="button-container d-flex flex-column align-items-center px-3">
-                        <div class="w-100 mb-2">
-                            <span>Selected Storage: </span>
-                            <span id="selected-grapes">0 t</span>
-                            <span> / </span>
-                            <span id="selected-storage">0 l</span>
-                        </div>
-                        <div class="w-100">
-                            <div class="progress" style="height: 20px; background-color: var(--color-background); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">
-                                <div id="selected-storage-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--color-primary);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end mt-3 w-100">
-                            <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
+function createOverlayStructure() {
+  const overlayContainer = document.createElement('div');
+  overlayContainer.className = 'overlay';
+  overlayContainer.innerHTML = `
+    <div class="overlay-content overlay-container">
+      <section id="vineyard-section" class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Grape Crushing</h3>
+          <button class="btn btn-light btn-sm close-btn">Close</button>
         </div>
-    `;
+        <div class="card-body"></div>
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Select Grapes to Crush</h3>
+        </div>
+        <div class="card-body">
+          ${createGrapesTable()}
+        </div>
+      </section>
+      
+      <section id="must-section" class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Select Must Storage Container</h3>
+        </div>
+        <div class="card-body">
+          ${createMustStorageTable()}
+        </div>
+      </section>
+
+      <section id="crushing-progress" class="overlay-section card mb-4">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">Crushing Progress</h3>
+        </div>
+        <div class="card-body">
+          <div class="button-container d-flex flex-column align-items-center px-3">
+            <div class="w-100 mb-2">
+              <span>Selected Storage: </span>
+              <span id="selected-grapes">0 t</span>
+              <span> / </span>
+              <span id="selected-storage">0 l</span>
+            </div>
+            <div class="w-100">
+              <div class="progress" style="height: 20px; background-color: var(--color-background); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">
+                <div id="selected-storage-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--color-primary);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-end mt-3 w-100">
+              <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
+  return overlayContainer;
 }
 
-function setupCrushingEventListeners(overlay) {
-    const crushBtn = overlay.querySelector('.crush-btn');
-    const closeBtn = overlay.querySelector('.close-btn');
+function createGrapesTable() {
+  return `
+    <div class="table-responsive">
+      <table class="table table-hover overlay-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Container</th>
+            <th>Wine in Storage</th>
+            <th>Amount</th>
+            <th>Quality</th>
+          </tr>
+        </thead>
+        <tbody id="crushing-storage-table">
+        </tbody>
+      </table>
+    </div>
+  `;
+}
 
-    if (crushBtn) {
-        crushBtn.addEventListener('click', () => {
-            if (crushing(overlay)) {
-                showWineryOverlay();
-                hideOverlay(overlay);
-            }
-        });
-    }
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => hideOverlay(overlay));
-    }
-
-    overlay.addEventListener('click', (event) => {
-        if (event.target === overlay) {
-            hideOverlay(overlay);
-        }
-    });
+function createMustStorageTable() {
+  return `
+    <div class="table-responsive">
+      <table class="table table-hover overlay-table">
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Container</th>
+            <th>Wine in Storage</th>
+            <th>Capacity</th>
+            <th>Available Space</th>
+            
+          </tr>
+        </thead>
+        <tbody id="crushing-must-storage-table">
+        </tbody>
+      </table>
+    </div>
+  `;
 }
 
 function populateTables(overlayContainer) {
@@ -161,7 +146,7 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory, 
 
           // Add event listener to update storage progress
           row.querySelector('input[name="must-storage"]').addEventListener('change', function() {
-            updateStorageProgress(overlayContainer);
+            updateStorageProgress();
           });
         }
       }
@@ -169,18 +154,18 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory, 
   });
 }
 
-function updateStorageProgress(overlayContainer) {
-  const checkboxes = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
+function updateStorageProgress() {
+  const checkboxes = document.querySelectorAll('input[name="must-storage"]:checked');
   let totalStorage = 0;
   checkboxes.forEach(checkbox => {
     totalStorage += parseFloat(checkbox.dataset.available);
   });
 
-  const storageDisplay = overlayContainer.getElementById('selected-storage');
+  const storageDisplay = document.getElementById('selected-storage');
   storageDisplay.textContent = `${formatNumber(totalStorage)} l`;
 
-  const selectedGrapes = parseFloat(overlayContainer.querySelector('.grape-select:checked')?.dataset.amount || 0);
-  const storageProgress = overlayContainer.getElementById('selected-storage-progress');
+  const selectedGrapes = parseFloat(document.querySelector('.grape-select:checked')?.dataset.amount || 0);
+  const storageProgress = document.getElementById('selected-storage-progress');
   const progressPercentage = Math.min((totalStorage / (selectedGrapes * 0.6)) * 100, 100);
   storageProgress.style.width = `${progressPercentage}%`;
   storageProgress.setAttribute('aria-valuenow', progressPercentage);
@@ -221,11 +206,11 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
           // Add event listener to update selected grapes
           row.querySelector('.grape-select').addEventListener('change', function() {
             const selectedGrapes = parseFloat(this.dataset.amount);
-            const grapesDisplay = overlayContainer.getElementById('selected-grapes');
+            const grapesDisplay = document.getElementById('selected-grapes');
             grapesDisplay.textContent = selectedGrapes >= 1000 ? 
               formatNumber(selectedGrapes / 1000, 2) + ' t' : 
               formatNumber(selectedGrapes) + ' kg';
-            updateStorageProgress(overlayContainer);
+            updateStorageProgress();
           });
         });
       }
@@ -301,7 +286,7 @@ function crushing(overlayContainer) {
                 $(warningModal).modal('hide');
                 warningModal.remove();
                 showWineryOverlay();
-                hideOverlay(overlayContainer);
+                removeOverlay(overlayContainer);
             }
         });
 
@@ -406,54 +391,31 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
     return success;
 }
 
-
-function createGrapesTable() {
-  return `
-    <div class="table-responsive">
-      <table class="table table-hover overlay-table">
-        <thead>
-          <tr>
-            <th>Select</th>
-            <th>Container</th>
-            <th>Wine in Storage</th>
-            <th>Amount</th>
-            <th>Quality</th>
-          </tr>
-        </thead>
-        <tbody id="crushing-storage-table">
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-function createMustStorageTable() {
-  return `
-    <div class="table-responsive">
-      <table class="table table-hover overlay-table">
-        <thead>
-          <tr>
-            <th>Select</th>
-            <th>Container</th>
-            <th>Wine in Storage</th>
-            <th>Capacity</th>
-            <th>Available Space</th>
-            
-          </tr>
-        </thead>
-        <tbody id="crushing-must-storage-table">
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-
+// Move removeOverlay outside showCrushingOverlay and make it handle the overlay container
 function removeOverlay(overlayContainer) {
   document.body.removeChild(overlayContainer);
 }
 
-export function addCrushingTask(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes){
-    //This function is assumed to exist elsewhere and handles adding the task.  Implementation omitted for brevity.
-    return true; // Placeholder return value
+export function showCrushingOverlay() {
+  const overlayContainer = createOverlayStructure();
+  document.body.appendChild(overlayContainer);
+
+  populateTables(overlayContainer);
+
+  const crushBtn = overlayContainer.querySelector('.crush-btn');
+  crushBtn.addEventListener('click', () => {
+    if (crushing(overlayContainer)) {
+      showWineryOverlay();
+      removeOverlay(overlayContainer);
+    }
+  });
+
+  const closeBtn = overlayContainer.querySelector('.close-btn');
+  closeBtn.addEventListener('click', () => removeOverlay(overlayContainer));
+  
+  overlayContainer.addEventListener('click', (event) => {
+    if (event.target === overlayContainer) {
+      removeOverlay(overlayContainer);
+    }
+  });
 }
