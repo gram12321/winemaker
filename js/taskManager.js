@@ -177,19 +177,32 @@ class TaskManager {
             const progressClass = getColorClass(progress / 100);
             const iconName = task.name.toLowerCase().replace(/\s+/g, '');
             
+            // Get list of assigned staff first names, limit display to 4 names
             const staffNames = task.assignedStaff.map(s => s.name.split(' ')[0]);
             const displayedStaffNames = staffNames.slice(0, 4).join(', ');
-            const tooltipStaffNames = staffNames.join(', ');
+            const tooltipStaffNames = staffNames.join(', '); // Full list for tooltip
 
+            // Get default staff (ID 1) for nationality flag when no target exists
+            // This ensures we always show a nationality flag in the task box:
+            // - If task has a target: Show target's country flag
+            // - If no target: Show nationality flag of staff ID 1
             const defaultStaff = loadStaff().find(s => s.id === 1);
             const defaultFlag = defaultStaff ? getFlagIconHTML(defaultStaff.nationality) : '';
             
             taskBox.innerHTML = `
+                <!-- Task Target Section:
+                     - Shows country flag + target name if task has a target
+                     - Shows default staff flag + task type if no target
+                     This ensures consistent visual hierarchy in task boxes -->
                 <div class="task-target">
                     ${task.target ? 
                         `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || task.taskType}` : 
                         `${defaultFlag} ${task.taskType}`}
                 </div>
+                <!-- Task Header Section:
+                     Only show task type separately if we have a target with name
+                     This prevents showing the task type twice when it's already
+                     shown in the target section -->
                 <div class="task-header">
                     ${(task.target && task.target.name) ? `<div class="task-type">${task.taskType}</div>` : ''}
                     <img src="../assets/icon/icon_${iconName}.webp" 
