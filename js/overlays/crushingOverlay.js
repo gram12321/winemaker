@@ -383,8 +383,6 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
     const fieldName = selectedGrape.dataset.field;
     const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
 
-    const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes); // Ensure we don't try to remove more grapes than available
-
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
         grapeAmountToRemove,

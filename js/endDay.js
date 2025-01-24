@@ -49,8 +49,8 @@ export function incrementWeek() {
     updateAllDisplays();
     applyPlantingPenalties(season, week);
     
-    // Decay prestige hit by 10%
-    setPrestigeHit(getPrestigeHit() * 0.9);
+    // Decay prestige hit by 10% - Could eventually be applied per season instead 
+    setPrestigeHit(getPrestigeHit() * 0.99);
     calculateRealPrestige(); // Update calculated prestige after decay
 
     if (shouldGenerateWineOrder()) {
