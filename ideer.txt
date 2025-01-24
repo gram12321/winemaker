@@ -26,6 +26,10 @@ Prevent several building and maintaince task on same building
 There dosnøt seems to be a prestige hit for not completing bookkeeeping task as intented
 
 QoL Improvement
+24-01-25
+Better shown error to user  when harvest/crushing/ferminting error. IE Now it only shows in console window. We would maybe like something red flashing
+
+Old Ideas:
  - Hover over info on "Statuspic" on sales.html
  - Default selected staff for new task
   - group orders by field, grape ect. or somekind of filter on orders
