@@ -49,11 +49,9 @@ export function updateAllDisplays() {
         }
 
         // Update winery storage tables
-        if (document.getElementById('grape-storage-table') && typeof updateWineryGrapeStorage === 'function') {
-            updateWineryGrapeStorage();
-        }
-        if (document.getElementById('must-storage-table') && typeof updateWineryMustStorage === 'function') {
-            updateWineryMustStorage();
+        if ((document.getElementById('grape-storage-table') || document.getElementById('must-storage-table')) && 
+            typeof updateWineryStorage === 'function') {
+            updateWineryStorage();
         }
     } catch (error) {
         console.debug('Some display functions are not available in current context:', error);
@@ -68,4 +66,4 @@ import { displayStaff } from './staff.js';
 import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
 import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
 import { updateVineyardTable } from './overlays/mainpages/vineyardoverlay.js';
-import { updateWineryGrapeStorage, updateWineryMustStorage } from './overlays/mainpages/wineryoverlay.js';
+import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
