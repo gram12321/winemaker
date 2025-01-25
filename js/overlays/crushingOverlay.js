@@ -258,24 +258,10 @@ function crushing(overlayContainer) {
         return false;
     }
     
+    const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
     const storage = selectedGrape.dataset.storage;
     const resourceName = selectedGrape.dataset.resource;
-    const vintage = parseInt(selectedGrape.dataset.vintage);
-
-    const grapeResource = inventoryInstance.items.find(item => 
-        item.resource.name === resourceName && 
-        item.state === 'Grapes' &&
-        item.storage === storage &&
-        item.vintage === vintage
-    );
-
-    if (!grapeResource) {
-        addConsoleMessage("Selected grapes not found in inventory");
-        return false;
-    }
-
-    const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
-    const totalGrapes = grapeResource.amount;
+    const totalGrapes = parseFloat(selectedGrape.dataset.amount);
 
     // Check for existing crushing tasks with the same grape storage
     const existingTasks = taskManager.getAllTasks().filter(task => 
@@ -409,31 +395,21 @@ function crushing(overlayContainer) {
     return true;
 }
 
-export function performCrushing(storage, selectedStorages, mustAmount, totalGrapes) {
+export function performCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
     const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
-    }
-
-    const grapeResource = inventoryInstance.items.find(item => 
-        item.state === 'Grapes' &&
-        item.storage === storage
-    );
-
-    if (!grapeResource) {
-        addConsoleMessage("Grapes not found in storage");
-        return false;
     }
     
     let remainingMust = mustAmount;
     let success = true;
 
-    // Remove the amount of grapes corresponding to the processed amount
-    const resourceName = grapeResource.resource.name;
-    const vintage = grapeResource.vintage;
-    const quality = grapeResource.quality;
-    const fieldName = grapeResource.fieldName;
-    const fieldPrestige = grapeResource.fieldPrestige;
+    // Use values directly from dataset
+    const resourceName = selectedGrape.dataset.resource;
+    const vintage = parseInt(selectedGrape.dataset.vintage);
+    const quality = parseFloat(selectedGrape.dataset.quality);
+    const fieldName = selectedGrape.dataset.field;
+    const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
 
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
