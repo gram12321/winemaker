@@ -174,11 +174,11 @@ export function buildBuilding(buildingName) {
   }
 
   const buildingCost = Building.BASE_COSTS[buildingName] || 500000;
-  
+
   // Initial state changes
   const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
   const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
-  
+
   if (buildButton && upgradeButton) {
     buildButton.disabled = true;
     buildButton.textContent = "Building...";
@@ -187,11 +187,14 @@ export function buildBuilding(buildingName) {
   // Add to transaction history
   addTransaction('Expense', `Construction of ${buildingName}`, -buildingCost);
 
+  // Add initial message
+  addConsoleMessage(`Construction of ${buildingName} has begun. <span style="color: red">€${formatNumber(buildingCost)}</span> has been deducted from your account. When complete, capacity will be ${new Building(buildingName).calculateCapacity()} spaces.`);
+
   // Create building task
   taskManager.addCompletionTask(
     'Building & Maintenance',
     TaskType.maintenance,
-    1000, // Total work required
+    1000, // Total work required,
     (target, params) => {
       // Completion callback
       const newBuilding = new Building(buildingName);
@@ -234,7 +237,7 @@ export function updateBuildButtonStates() { // Disable build and upgrade buttons
     if (existingBuilding) {
       button.disabled = true;
       button.textContent = "Built";
-      
+
       const building = new Building(buildingName, existingBuilding.level);
       const upgradeCost = building.getUpgradeCost();
       upgradeButton.disabled = currentMoney < upgradeCost;
