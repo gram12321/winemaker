@@ -4,6 +4,17 @@ import { addConsoleMessage } from './console.js';
 import taskManager, { TaskType } from './taskManager.js';
 
 export function fermentation(selectedResource, storage, mustAmount) {
+    // Check for existing fermentation tasks with the same storage
+    const existingTasks = taskManager.getAllTasks().filter(task => 
+        task.name === 'Fermentation' && 
+        task.target === storage
+    );
+
+    if (existingTasks.length > 0) {
+        addConsoleMessage("A fermentation task is already in progress for this must storage");
+        return false;
+    }
+
     // Check if there's any work progress
     const workProgress = taskManager.getTaskProgress('Fermentation');
     if (workProgress <= 0) {
