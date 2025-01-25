@@ -397,7 +397,7 @@ function crushing(overlayContainer) {
         taskName,
         TaskType.winery,
         totalWork,
-        (target, progress, params) => {
+        (progress, params) => {
             if (!params.lastProgress) params.lastProgress = 0;
             const processedAmount = mustAmount * (progress - params.lastProgress);
             params.lastProgress = progress;
