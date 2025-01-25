@@ -377,6 +377,16 @@ function crushing(overlayContainer) {
     const taskName = `Crushing`;
     const totalWork = mustAmount;
 
+    // Store complete grape data in params
+    const grapeData = {
+        resource: { name: selectedGrape.dataset.resource },
+        vintage: parseInt(selectedGrape.dataset.vintage),
+        quality: selectedGrape.dataset.quality,
+        fieldName: selectedGrape.dataset.field,
+        storage: selectedGrape.dataset.storage,
+        fieldPrestige: parseFloat(selectedGrape.dataset.prestige)
+    };
+
     taskManager.addProgressiveTask(
         taskName,
         TaskType.winery,
@@ -384,10 +394,15 @@ function crushing(overlayContainer) {
         (target, progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
+            performCrushing(params.grapeData, params.selectedStorages, processedAmount, params.totalGrapes);
         },
         "",
-        { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
+        { 
+            selectedStorages: Array.from(selectedStorages), 
+            totalGrapes, 
+            lastProgress: 0,
+            grapeData: grapeData
+        }
     );
 
     return true;
@@ -403,11 +418,11 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
     let success = true;
 
     // Remove the amount of grapes corresponding to the processed amount
-    const resourceName = selectedGrape.dataset.resource;
-    const vintage = parseInt(selectedGrape.dataset.vintage);
-    const quality = selectedGrape.dataset.quality;
-    const fieldName = selectedGrape.dataset.field;
-    const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
+    const resourceName = selectedGrape.resource.name;
+    const vintage = selectedGrape.vintage;
+    const quality = selectedGrape.quality;
+    const fieldName = selectedGrape.fieldName;
+    const fieldPrestige = selectedGrape.fieldPrestige;
 
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
