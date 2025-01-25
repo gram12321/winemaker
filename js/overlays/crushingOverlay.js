@@ -451,7 +451,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
                 );
             addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${storage}`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${storage}`);
             return false;
         }
     } else {
