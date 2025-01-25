@@ -192,7 +192,7 @@ export function buildBuilding(buildingName) {
 
   // Create building task
   taskManager.addCompletionTask(
-    'Building & Maintenance',
+    'Building and Maintenance',
     TaskType.maintenance,
     1000, // Total work required,
     (target, params) => {
