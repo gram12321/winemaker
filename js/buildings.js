@@ -174,24 +174,43 @@ export function buildBuilding(buildingName) {
   }
 
   const buildingCost = Building.BASE_COSTS[buildingName] || 500000;
-  addTransaction('Expense', `Construction of ${buildingName}`, -buildingCost);
-
-  const newBuilding = new Building(buildingName);
-  buildings.push(newBuilding);
-  storeBuildings(buildings);
-
+  
+  // Initial state changes
   const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
   const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
-
+  
   if (buildButton && upgradeButton) {
     buildButton.disabled = true;
-    buildButton.textContent = "Built";
-    upgradeButton.disabled = false;
+    buildButton.textContent = "Building...";
   }
 
-  addConsoleMessage(`${buildingName} has been built successfully. <span style="color: red">Cost: €${formatNumber(buildingCost)}</span>. Capacity: ${newBuilding.capacity} (${newBuilding.capacity} spaces available)`);
-  updateBuildingCards();
-  updateBuildButtonStates();
+  // Add to transaction history
+  addTransaction('Expense', `Construction of ${buildingName}`, -buildingCost);
+
+  // Create building task
+  taskManager.addCompletionTask(
+    'Building Construction',
+    TaskType.maintenance,
+    1000, // Total work required
+    (target, params) => {
+      // Completion callback
+      const newBuilding = new Building(buildingName);
+      const buildings = loadBuildings();
+      buildings.push(newBuilding);
+      storeBuildings(buildings);
+
+      if (buildButton && upgradeButton) {
+        buildButton.textContent = "Built";
+        upgradeButton.disabled = false;
+      }
+
+      addConsoleMessage(`${buildingName} has been built successfully. <span style="color: red">Cost: €${formatNumber(buildingCost)}</span>. Capacity: ${newBuilding.capacity} (${newBuilding.capacity} spaces available)`);
+      updateBuildingCards();
+      updateBuildButtonStates();
+    },
+    null,
+    { buildingName, buildingCost }
+  );
 }
 
 export function updateBuildButtonStates() { // Disable build and upgrade buttons if not allowed (No money or allready built)
