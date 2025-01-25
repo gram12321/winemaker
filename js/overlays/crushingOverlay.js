@@ -424,22 +424,32 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
     const fieldName = params.fieldName;
     const fieldPrestige = params.fieldPrestige;
 
+    // First check if we have enough grapes
+    const availableGrapes = inventoryInstance.getResourceAmount(
+        { name: selectedResource },
+        'Grapes',
+        vintage,
+        storage
+    );
+
+    if (availableGrapes <= 0) {
+        addConsoleMessage(`No grapes found in ${storage}`);
+        return false;
+    }
+
+    const amountToRemove = Math.min(grapeAmountToRemove, availableGrapes);
     let removed = inventoryInstance.removeResource(
         { name: selectedResource },
-        grapeAmountToRemove,
+        amountToRemove,
         'Grapes',
         vintage,
         storage
     );
 
     if (!removed) {
-        // Try to remove the remaining grapes if the exact amount is not available
-        const remainingGrapes = inventoryInstance.getResourceAmount(
-                { name: selectedResource },
-                'Grapes',
-                vintage,
-                storage
-            );
+        addConsoleMessage(`Failed to remove ${formatNumber(amountToRemove)} kg of grapes from ${storage}`);
+        return false;
+    }
 
         if (remainingGrapes > 0) {
             removed = inventoryInstance.removeResource(
