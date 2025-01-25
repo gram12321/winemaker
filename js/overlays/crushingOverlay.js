@@ -450,7 +450,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
             { name: resourceName },
             'Grapes',
             vintage,
-            selectedGrape.dataset.storage
+            grapeResource.storage
         );
 
         if (remainingGrapes > 0) {
@@ -459,15 +459,15 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
                 remainingGrapes,
                 'Grapes',
                 vintage,
-                selectedGrape.dataset.storage
+                grapeResource.storage
             );
-            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes`);
             return false;
         }
     } else {
-        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must`);
     }
 
     // Calculate even distribution of must among containers
