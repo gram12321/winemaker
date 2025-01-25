@@ -429,7 +429,7 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
         grapeAmountToRemove,
         'Grapes',
         vintage,
-        selectedGrape.storage
+        selectedGrape.storage || ''
     );
 
     if (!removed) {
@@ -451,7 +451,7 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
             );
             addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.storage}`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.storage}`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from storage`);
             return false;
         }
     } else {
