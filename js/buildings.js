@@ -211,8 +211,8 @@ export function buildBuilding(buildingName) {
       updateBuildingCards();
       updateBuildButtonStates();
     },
-    null,
-    { buildingName, buildingCost }
+    buildingName,
+    { buildingCost }
   );
 }
 
@@ -326,7 +326,7 @@ export function upgradeBuilding(buildingName) {
         updateBuildButtonStates();
       }
     },
-    null,
-    { buildingName, upgradeCost }
+    buildingName,
+    { upgradeCost }
   );
 }
