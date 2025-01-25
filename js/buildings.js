@@ -213,9 +213,10 @@ export function buildBuilding(buildingName) {
   );
 }
 
-export function updateBuildButtonStates() { // Disable build and upgrade buttons if not allowed (No money or allready built)
+export function updateBuildButtonStates() { // Disable build and upgrade buttons if not allowed (No money or already built)
   const buildings = loadBuildings();
   const currentMoney = parseInt(localStorage.getItem('money')) || 0;
+  const activeTasks = taskManager.getAllTasks();
 
   const buildButtons = document.querySelectorAll('.build-button');
   const upgradeButtons = document.querySelectorAll('.upgrade-button');
@@ -225,6 +226,10 @@ export function updateBuildButtonStates() { // Disable build and upgrade buttons
     const upgradeButton = upgradeButtons[index];
     const existingBuilding = buildings.find(b => b.name === buildingName);
     const buildCost = Building.BASE_COSTS[buildingName] || 500000;
+    const hasBuildingTask = activeTasks.some(task => 
+      task.name === 'Building & Maintenance' && 
+      task.params.buildingName === buildingName
+    );
 
     if (existingBuilding) {
       button.disabled = true;
@@ -233,8 +238,12 @@ export function updateBuildButtonStates() { // Disable build and upgrade buttons
       const building = new Building(buildingName, existingBuilding.level);
       const upgradeCost = building.getUpgradeCost();
       upgradeButton.disabled = currentMoney < upgradeCost;
+    } else if (hasBuildingTask) {
+      button.disabled = true;
+      button.textContent = "Building...";
     } else {
       button.disabled = currentMoney < buildCost;
+      button.textContent = "Build";
     }
   });
 }
