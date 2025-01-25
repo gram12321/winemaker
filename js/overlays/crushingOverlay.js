@@ -410,7 +410,7 @@ function crushing(overlayContainer) {
     return true;
 }
 
-export function performCrushing(storage, selectedStorages, mustAmount, totalGrapes) {
+export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
     const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
