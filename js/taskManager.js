@@ -190,7 +190,12 @@ class TaskManager {
             const defaultFlag = defaultStaff ? getFlagIconHTML(defaultStaff.nationality) : '';
             
             taskBox.innerHTML = `
-                <div class="task-name">${task.name}</div>
+                <div class="task-name">
+                    ${task.target && task.target.name ? 
+                        (task.target.country ? getFlagIconHTML(task.target.country) : defaultFlag) : 
+                        defaultFlag}
+                    ${task.name}
+                </div>
                 <div class="task-header">
                     ${(task.target && task.target.name) ? `<div class="task-type">${task.taskType}</div>` : ''}
                     <img src="../assets/icon/icon_${iconName}.webp" 
@@ -200,9 +205,7 @@ class TaskManager {
                     >
                 </div>
                 <div class="task-target">
-                    ${task.target && task.target.name ? 
-                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name}` : 
-                        `${defaultFlag} ${task.taskType}`}
+                    ${task.target && task.target.name ? task.target.name : task.taskType}
                 </div>
                 <div class="progress-container">
                     <div class="progress-bar ${progressClass}" style="width: ${progress}%"></div>
