@@ -418,18 +418,40 @@ export function getCalculatedPrestige() {
 
 // Task persistence functions
 export function saveTasks(tasks) {
-  const taskData = Array.from(tasks.entries()).map(([id, task]) => ({
-    id: task.id,
-    name: task.name,
-    type: task.type,
-    taskType: task.taskType,
-    totalWork: task.totalWork, // Save totalWork
-    appliedWork: task.appliedWork, // Save appliedWork
-    progress: task.progress,
-    target: task.target,
-    params: task.params,
-    assignedStaff: task.assignedStaff // Include assigned staff
-  }));
+  const taskData = Array.from(tasks.entries()).map(([id, task]) => {
+    // Special handling for crushing tasks
+    if (task.name === 'Crushing') {
+      return {
+        id: task.id,
+        name: task.name,
+        type: task.type,
+        taskType: task.taskType,
+        totalWork: task.totalWork,
+        appliedWork: task.appliedWork,
+        progress: task.progress,
+        target: task.target,
+        params: {
+          ...task.params,
+          selectedGrape: {
+            dataset: task.target?.dataset || {}
+          }
+        },
+        assignedStaff: task.assignedStaff
+      };
+    }
+    return {
+      id: task.id,
+      name: task.name,
+      type: task.type,
+      taskType: task.taskType,
+      totalWork: task.totalWork,
+      appliedWork: task.appliedWork,
+      progress: task.progress,
+      target: task.target,
+      params: task.params,
+      assignedStaff: task.assignedStaff
+    };
+  });
   localStorage.setItem('activeTasks', JSON.stringify(taskData));
 }
 
@@ -502,4 +524,3 @@ export {
   loadInventory,
   saveInventory
 };
-
