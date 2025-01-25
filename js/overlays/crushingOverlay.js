@@ -404,9 +404,15 @@ function crushing(overlayContainer) {
 }
 
 export function performCrushing(selectedResource, storage, mustAmount, params) {
+    if (!mustAmount || isNaN(mustAmount)) {
+        console.error('Invalid must amount:', mustAmount);
+        return false;
+    }
+    
     const grapeAmountToRemove = Math.min(mustAmount / 0.6, params.totalGrapes);
-    if (grapeAmountToRemove <= 0) {
-        return false; // Skip if no grapes to crush
+    if (grapeAmountToRemove <= 0 || isNaN(grapeAmountToRemove)) {
+        console.error('Invalid grape amount to remove:', grapeAmountToRemove);
+        return false;
     }
 
     let remainingMust = mustAmount;
@@ -445,7 +451,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
                 );
             addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${storage}`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${storage}`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
             return false;
         }
     } else {
