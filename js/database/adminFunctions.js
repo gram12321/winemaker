@@ -478,9 +478,10 @@ function getTaskCallback(taskName, taskType) {
         performHarvest(target, target.id, params.selectedTool, harvestedAmount);
       };
     case 'crushing':
-      return (progress, params) => {
+      return (target, progress, params = {}) => {
+        if (!params.lastProgress) params.lastProgress = 0;
         const mustAmount = params.totalGrapes * 0.6;
-        const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
+        const processedAmount = mustAmount * (progress - params.lastProgress);
         params.lastProgress = progress;
         performCrushing(params.selectedStorages, processedAmount, params.totalGrapes);
       };
