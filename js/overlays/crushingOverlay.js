@@ -146,10 +146,10 @@ function populateTables(overlayContainer) {
 function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
   const mustStorageBody = overlayContainer.querySelector('#crushing-must-storage-table');
   mustStorageBody.innerHTML = '';
-
+  
   buildings.forEach(building => {
     if (!building.tools) return;
-
+    
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
         const toolId = `${tool.name} #${tool.instanceNumber}`;
@@ -207,7 +207,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
   buildings.forEach(building => {
     if (!building.tools) return;
-
+    
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Grapes')) {
         const matchingInventoryItems = playerInventory.filter(item => 
@@ -377,16 +377,6 @@ function crushing(overlayContainer) {
     const taskName = `Crushing`;
     const totalWork = mustAmount;
 
-    // Store grape data in params
-    const grapeData = {
-        resource: selectedGrape.dataset.resource,
-        vintage: parseInt(selectedGrape.dataset.vintage),
-        quality: parseFloat(selectedGrape.dataset.quality),
-        fieldName: selectedGrape.dataset.field,
-        fieldPrestige: parseFloat(selectedGrape.dataset.prestige),
-        storage: selectedGrape.dataset.storage
-    };
-
     taskManager.addProgressiveTask(
         taskName,
         TaskType.winery,
@@ -394,15 +384,10 @@ function crushing(overlayContainer) {
         (target, progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            performCrushing(params.grapeData, params.selectedStorages, processedAmount, params.totalGrapes);
+            performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
         },
         "",
-        { 
-            selectedStorages: Array.from(selectedStorages), 
-            totalGrapes, 
-            lastProgress: 0,
-            grapeData
-        }
+        { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
     );
 
     return true;
@@ -413,23 +398,23 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
     }
-
+    
     let remainingMust = mustAmount;
     let success = true;
 
     // Remove the amount of grapes corresponding to the processed amount
-    const resourceName = selectedGrape.resource;
-    const vintage = selectedGrape.vintage;
-    const quality = selectedGrape.quality;
-    const fieldName = selectedGrape.fieldName;
-    const fieldPrestige = selectedGrape.fieldPrestige;
+    const resourceName = selectedGrape.dataset.resource;
+    const vintage = parseInt(selectedGrape.dataset.vintage);
+    const quality = selectedGrape.dataset.quality;
+    const fieldName = selectedGrape.dataset.field;
+    const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
 
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
         grapeAmountToRemove,
         'Grapes',
         vintage,
-        selectedGrape.storage || ''
+        selectedGrape.dataset.storage
     );
 
     if (!removed) {
@@ -438,7 +423,7 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
             { name: resourceName },
             'Grapes',
             vintage,
-            selectedGrape.storage
+            selectedGrape.dataset.storage
         );
 
         if (remainingGrapes > 0) {
@@ -447,15 +432,15 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
                 remainingGrapes,
                 'Grapes',
                 vintage,
-                selectedGrape.storage
+                selectedGrape.dataset.storage
             );
-            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.storage}`);
+            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from storage`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
             return false;
         }
     } else {
-        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.storage}`);
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
     }
 
     // Calculate even distribution of must among containers
@@ -485,7 +470,7 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
 
             remainingMust -= amountToStore;
         }
-
+        
         if (remainingMust <= 0) break;
     }
 
