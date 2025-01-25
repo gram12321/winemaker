@@ -146,10 +146,10 @@ function populateTables(overlayContainer) {
 function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
   const mustStorageBody = overlayContainer.querySelector('#crushing-must-storage-table');
   mustStorageBody.innerHTML = '';
-  
+
   buildings.forEach(building => {
     if (!building.tools) return;
-    
+
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
         const toolId = `${tool.name} #${tool.instanceNumber}`;
@@ -207,7 +207,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
   buildings.forEach(building => {
     if (!building.tools) return;
-    
+
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Grapes')) {
         const matchingInventoryItems = playerInventory.filter(item => 
@@ -257,7 +257,7 @@ function crushing(overlayContainer) {
         addConsoleMessage("Please select grapes to crush");
         return false;
     }
-    
+
     const storage = selectedGrape.dataset.storage;
     const resourceName = selectedGrape.dataset.resource;
     const vintage = parseInt(selectedGrape.dataset.vintage);
@@ -425,7 +425,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
         addConsoleMessage("Grapes not found in storage");
         return false;
     }
-    
+
     let remainingMust = mustAmount;
     let success = true;
 
@@ -441,7 +441,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
         grapeAmountToRemove,
         'Grapes',
         vintage,
-        selectedGrape.dataset.storage
+        grapeResource.storage
     );
 
     if (!removed) {
@@ -470,18 +470,14 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
         addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must`);
     }
 
-    // Calculate even distribution of must among containers
+    // Add even distribution of must among containers
     const storageArray = Array.from(selectedStorages);
-    const totalAvailableSpace = storageArray.reduce((sum, storage) => 
-        sum + parseFloat(storage.dataset.available), 0);
-    const mustPerStorage = Math.min(remainingMust / storageArray.length, 
-        totalAvailableSpace / storageArray.length);
+    const mustPerStorage = remainingMust / storageArray.length;
 
     // Distribute must evenly among containers
     for (const storage of storageArray) {
         const mustStorage = storage.value;
-        const availableSpace = parseFloat(storage.dataset.available);
-        const amountToStore = Math.min(mustPerStorage, availableSpace, remainingMust);
+        const amountToStore = Math.min(mustPerStorage, remainingMust);
 
         if (amountToStore > 0) {
             inventoryInstance.addResource(
@@ -497,7 +493,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
 
             remainingMust -= amountToStore;
         }
-        
+
         if (remainingMust <= 0) break;
     }
 
