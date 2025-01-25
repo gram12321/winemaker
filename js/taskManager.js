@@ -191,8 +191,8 @@ class TaskManager {
             
             taskBox.innerHTML = `
                 <div class="task-target">
-                    ${task.target ? 
-                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || task.taskType}` : 
+                    ${task.target && task.target.name ? 
+                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name}` : 
                         `${defaultFlag} ${task.taskType}`}
                 </div>
                 <!-- Task Header Section:
