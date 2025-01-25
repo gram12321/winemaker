@@ -428,7 +428,8 @@ export function saveTasks(tasks) {
     progress: task.progress,
     target: task.target,
     params: task.params,
-    assignedStaff: task.assignedStaff
+    assignedStaff: task.assignedStaff,
+    initialState: task.initialState
   }));
   localStorage.setItem('activeTasks', JSON.stringify(taskData));
 }
