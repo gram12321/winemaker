@@ -482,20 +482,7 @@ function getTaskCallback(taskName, taskType) {
         const mustAmount = params.totalGrapes * 0.6;
         const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
         params.lastProgress = progress;
-        
-        // Create a proper selectedGrape object with dataset properties
-        const selectedGrape = {
-          dataset: {
-            resource: params.resource,
-            vintage: params.vintage,
-            quality: params.quality,
-            field: params.fieldName,
-            storage: params.storage,
-            prestige: params.fieldPrestige
-          }
-        };
-        
-        performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
+        performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
       };
     case 'fermentation':
       return (target, progress, params) => {
