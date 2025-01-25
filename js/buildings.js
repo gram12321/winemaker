@@ -192,7 +192,7 @@ export function buildBuilding(buildingName) {
 
   // Create building task
   taskManager.addCompletionTask(
-    'Building and Maintenance',
+    'Building & Maintenance',
     TaskType.maintenance,
     buildingCost / 1000, // Total work required based on building cost
     (target, params) => {
@@ -306,18 +306,18 @@ export function upgradeBuilding(buildingName) {
 
   // Create upgrade task
   taskManager.addCompletionTask(
-    'Building and Maintenance',
+    'Building & Maintenance',
     TaskType.maintenance,
     upgradeCost / 1000, // Total work required based on upgrade cost
     (target, params) => {
       // Completion callback
       const buildings = loadBuildings();
       const buildingToUpgrade = buildings.find(b => b.name === params.buildingName);
-      
+
       if (buildingToUpgrade) {
         const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.tools || []);
         building.upgrade();
-        
+
         const updatedBuildings = buildings.map(b => b.name === params.buildingName ? building : b);
         storeBuildings(updatedBuildings);
 
