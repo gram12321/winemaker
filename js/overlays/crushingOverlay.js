@@ -385,7 +385,7 @@ function crushing(overlayContainer) {
         (target, progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            performCrushing(resourceName, params.storage, processedAmount, params);
+            performCrushing(params.selectedResource, params.storage, processedAmount, params);
         },
         selectedGrape.dataset.storage,
         { 
