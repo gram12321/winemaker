@@ -381,7 +381,7 @@ function crushing(overlayContainer) {
     const grapeData = {
         resource: selectedGrape.dataset.resource,
         vintage: parseInt(selectedGrape.dataset.vintage),
-        quality: selectedGrape.dataset.quality,
+        quality: parseFloat(selectedGrape.dataset.quality),
         fieldName: selectedGrape.dataset.field,
         fieldPrestige: parseFloat(selectedGrape.dataset.prestige),
         storage: selectedGrape.dataset.storage
