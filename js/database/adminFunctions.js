@@ -423,13 +423,12 @@ export function saveTasks(tasks) {
     name: task.name,
     type: task.type,
     taskType: task.taskType,
-    totalWork: task.totalWork,
-    appliedWork: task.appliedWork,
+    totalWork: task.totalWork, // Save totalWork
+    appliedWork: task.appliedWork, // Save appliedWork
     progress: task.progress,
     target: task.target,
     params: task.params,
-    assignedStaff: task.assignedStaff,
-    initialState: task.initialState
+    assignedStaff: task.assignedStaff // Include assigned staff
   }));
   localStorage.setItem('activeTasks', JSON.stringify(taskData));
 }
@@ -438,17 +437,9 @@ export function loadTasks() {
   const taskData = JSON.parse(localStorage.getItem('activeTasks') || '[]');
   const tasks = new Map();
   taskData.forEach(task => {
-    // Create proper Task instance with callback
-    const callback = getTaskCallback(task.name, task.taskType);
     tasks.set(task.id, {
       ...task,
-      callback,
-      // Ensure other task properties are properly set
-      type: task.type || 'progressive',
-      appliedWork: task.appliedWork || 0,
-      progress: task.progress || 0,
-      assignedStaff: task.assignedStaff || [],
-      params: task.params || {}
+      callback: getTaskCallback(task.name, task.taskType)
     });
   });
   return tasks;
@@ -491,7 +482,7 @@ function getTaskCallback(taskName, taskType) {
         const mustAmount = params.totalGrapes * 0.6;
         const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
         params.lastProgress = progress;
-        performCrushing(params.selectedResource, params.storage, processedAmount, params);
+        performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
       };
     case 'fermentation':
       return (target, progress, params) => {
@@ -511,3 +502,4 @@ export {
   loadInventory,
   saveInventory
 };
+

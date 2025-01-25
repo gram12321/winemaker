@@ -146,10 +146,10 @@ function populateTables(overlayContainer) {
 function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
   const mustStorageBody = overlayContainer.querySelector('#crushing-must-storage-table');
   mustStorageBody.innerHTML = '';
-
+  
   buildings.forEach(building => {
     if (!building.tools) return;
-
+    
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
         const toolId = `${tool.name} #${tool.instanceNumber}`;
@@ -207,7 +207,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
   buildings.forEach(building => {
     if (!building.tools) return;
-
+    
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Grapes')) {
         const matchingInventoryItems = playerInventory.filter(item => 
@@ -376,7 +376,6 @@ function crushing(overlayContainer) {
     // Initiate the harvest task using the taskManager system
     const taskName = `Crushing`;
     const totalWork = mustAmount;
-    const resourceName = selectedGrape.dataset.resource;
 
     taskManager.addProgressiveTask(
         taskName,
@@ -385,76 +384,67 @@ function crushing(overlayContainer) {
         (target, progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            performCrushing(params.selectedResource, params.storage, processedAmount, params);
+            performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
         },
-        selectedGrape.dataset.storage,
-        { 
-            storage: selectedGrape.dataset.storage,
-            vintage: parseInt(selectedGrape.dataset.vintage),
-            quality: parseFloat(selectedGrape.dataset.quality),
-            fieldName: selectedGrape.dataset.field,
-            fieldPrestige: parseFloat(selectedGrape.dataset.prestige),
-            selectedStorages: Array.from(selectedStorages),
-            totalGrapes,
-            lastProgress: 0
-        }
+        "",
+        { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
     );
 
     return true;
 }
 
-export function performCrushing(selectedResource, storage, mustAmount, params) {
-    if (!mustAmount || isNaN(mustAmount)) {
-        console.error('Invalid must amount:', mustAmount);
-        return false;
+export function performCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
+    const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
+    if (grapeAmountToRemove <= 0) {
+        return false; // Skip if no grapes to crush
     }
     
-    const grapeAmountToRemove = Math.min(mustAmount / 0.6, params.totalGrapes);
-    if (grapeAmountToRemove <= 0 || isNaN(grapeAmountToRemove)) {
-        console.error('Invalid grape amount to remove:', grapeAmountToRemove);
-        return false;
-    }
-
     let remainingMust = mustAmount;
     let success = true;
 
-    // Use parameters directly from params object
-    const vintage = params.vintage;
-    const quality = params.quality;
-    const fieldName = params.fieldName;
-    const fieldPrestige = params.fieldPrestige;
+    // Remove the amount of grapes corresponding to the processed amount
+    const resourceName = selectedGrape.dataset.resource;
+    const vintage = parseInt(selectedGrape.dataset.vintage);
+    const quality = selectedGrape.dataset.quality;
+    const fieldName = selectedGrape.dataset.field;
+    const fieldPrestige = parseFloat(selectedGrape.dataset.prestige);
 
-    // First check if we have enough grapes
-    const availableGrapes = inventoryInstance.getResourceAmount(
-        { name: selectedResource },
-        'Grapes',
-        vintage,
-        storage
-    );
-
-    if (availableGrapes <= 0) {
-        addConsoleMessage(`No grapes found in ${storage}`);
-        return false;
-    }
-
-    const amountToRemove = Math.min(grapeAmountToRemove, availableGrapes);
     let removed = inventoryInstance.removeResource(
-        { name: selectedResource },
-        amountToRemove,
+        { name: resourceName },
+        grapeAmountToRemove,
         'Grapes',
         vintage,
-        storage
+        selectedGrape.dataset.storage
     );
 
     if (!removed) {
-        addConsoleMessage(`Failed to remove ${formatNumber(amountToRemove)} kg of grapes from ${storage}`);
-        return false;
+        // Try to remove the remaining grapes if the exact amount is not available
+        const remainingGrapes = inventoryInstance.getResourceAmount(
+            { name: resourceName },
+            'Grapes',
+            vintage,
+            selectedGrape.dataset.storage
+        );
+
+        if (remainingGrapes > 0) {
+            removed = inventoryInstance.removeResource(
+                { name: resourceName },
+                remainingGrapes,
+                'Grapes',
+                vintage,
+                selectedGrape.dataset.storage
+            );
+            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+        } else {
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
+            return false;
+        }
+    } else {
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
     }
 
-    addConsoleMessage(`Crushed ${formatNumber(amountToRemove)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(amountToRemove * 0.6)} l of must in ${storage}`);
-
     // Calculate even distribution of must among containers
-    const storageArray = Array.from(params.selectedStorages);
+    const storageArray = Array.from(selectedStorages);
     const totalAvailableSpace = storageArray.reduce((sum, storage) => 
         sum + parseFloat(storage.dataset.available), 0);
     const mustPerStorage = Math.min(remainingMust / storageArray.length, 
@@ -468,7 +458,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
 
         if (amountToStore > 0) {
             inventoryInstance.addResource(
-                { name: selectedResource, naturalYield: 1 },
+                { name: resourceName, naturalYield: 1 },
                 amountToStore,
                 'Must',
                 vintage,
@@ -480,7 +470,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
 
             remainingMust -= amountToStore;
         }
-
+        
         if (remainingMust <= 0) break;
     }
 
