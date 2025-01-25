@@ -389,7 +389,7 @@ function crushing(overlayContainer) {
         return false;
     }
 
-    // Initiate the harvest task using the taskManager system
+    // Initiate the crushing task using the taskManager system
     const taskName = `Crushing`;
     const totalWork = mustAmount;
 
