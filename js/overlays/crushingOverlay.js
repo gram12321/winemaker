@@ -443,24 +443,34 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
         addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
     }
 
-    // Distribute must among containers
-    for (const storage of selectedStorages) {
+    // Calculate even distribution of must among containers
+    const storageArray = Array.from(selectedStorages);
+    const totalAvailableSpace = storageArray.reduce((sum, storage) => 
+        sum + parseFloat(storage.dataset.available), 0);
+    const mustPerStorage = Math.min(remainingMust / storageArray.length, 
+        totalAvailableSpace / storageArray.length);
+
+    // Distribute must evenly among containers
+    for (const storage of storageArray) {
         const mustStorage = storage.value;
         const availableSpace = parseFloat(storage.dataset.available);
-        const amountToStore = Math.min(remainingMust, availableSpace);
+        const amountToStore = Math.min(mustPerStorage, availableSpace, remainingMust);
 
-        inventoryInstance.addResource(
-            { name: resourceName, naturalYield: 1 },
-            amountToStore,
-            'Must',
-            vintage,
-            quality,
-            fieldName,
-            fieldPrestige,
-            mustStorage
-        );
+        if (amountToStore > 0) {
+            inventoryInstance.addResource(
+                { name: resourceName, naturalYield: 1 },
+                amountToStore,
+                'Must',
+                vintage,
+                quality,
+                fieldName,
+                fieldPrestige,
+                mustStorage
+            );
 
-        remainingMust -= amountToStore;
+            remainingMust -= amountToStore;
+        }
+        
         if (remainingMust <= 0) break;
     }
 
