@@ -377,17 +377,6 @@ function crushing(overlayContainer) {
     const taskName = `Crushing`;
     const totalWork = mustAmount;
 
-    // Create proper target object for the crushing task
-    const taskTarget = {
-        name: `${selectedGrape.dataset.field} ${selectedGrape.dataset.resource}`,
-        storage: selectedGrape.dataset.storage,
-        resource: selectedGrape.dataset.resource,
-        vintage: selectedGrape.dataset.vintage,
-        quality: selectedGrape.dataset.quality,
-        fieldName: selectedGrape.dataset.field,
-        fieldPrestige: selectedGrape.dataset.prestige
-    };
-
     taskManager.addProgressiveTask(
         taskName,
         TaskType.winery,
@@ -395,9 +384,9 @@ function crushing(overlayContainer) {
         (target, progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+            performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
         },
-        taskTarget,
+        "",
         { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
     );
 
