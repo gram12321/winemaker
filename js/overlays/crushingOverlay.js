@@ -376,6 +376,7 @@ function crushing(overlayContainer) {
     // Initiate the harvest task using the taskManager system
     const taskName = `Crushing`;
     const totalWork = mustAmount;
+    const resourceName = selectedGrape.dataset.resource;
 
     taskManager.addProgressiveTask(
         taskName,
@@ -384,12 +385,17 @@ function crushing(overlayContainer) {
         (target, progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
-            performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
+            performCrushing(resourceName, params.storage, processedAmount, params);
         },
-        selectedGrape,
+        storage,
         { 
-            selectedStorages: Array.from(selectedStorages), 
-            totalGrapes, 
+            storage: selectedGrape.dataset.storage,
+            vintage: parseInt(selectedGrape.dataset.vintage),
+            quality: parseFloat(selectedGrape.dataset.quality),
+            fieldName: selectedGrape.dataset.field,
+            fieldPrestige: parseFloat(selectedGrape.dataset.prestige),
+            selectedStorages: Array.from(selectedStorages),
+            totalGrapes,
             lastProgress: 0
         }
     );
@@ -397,8 +403,8 @@ function crushing(overlayContainer) {
     return true;
 }
 
-export function performCrushing(selectedGrape, selectedStorages, mustAmount, totalGrapes) {
-    const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
+export function performCrushing(selectedResource, storage, mustAmount, params) {
+    const grapeAmountToRemove = Math.min(mustAmount / 0.6, params.totalGrapes);
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
     }
@@ -406,12 +412,11 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
     let remainingMust = mustAmount;
     let success = true;
 
-    // Remove the amount of grapes corresponding to the processed amount
-    const resourceName = selectedGrape.resource.name;
-    const vintage = selectedGrape.vintage;
-    const quality = selectedGrape.quality;
-    const fieldName = selectedGrape.fieldName;
-    const fieldPrestige = selectedGrape.fieldPrestige;
+    // Use parameters directly from params object
+    const vintage = params.vintage;
+    const quality = params.quality;
+    const fieldName = params.fieldName;
+    const fieldPrestige = params.fieldPrestige;
 
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
