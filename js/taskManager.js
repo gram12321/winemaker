@@ -11,8 +11,7 @@ export const TaskType = {
     administration: 'Administration',
     sales: 'Sales',
     maintenance: 'Building & Maintenance',
-    crushing: 'Crushing',
-    building: 'Building Construction'
+    crushing: 'Crushing'
 };
 
 class Task {
