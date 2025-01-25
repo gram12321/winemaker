@@ -418,7 +418,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
 
     const grapeResource = inventoryInstance.items.find(item => 
         item.state === 'Grapes' &&
-        item.storage === storage
+        item.amount > 0
     );
 
     if (!grapeResource) {
