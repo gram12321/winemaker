@@ -451,22 +451,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
         return false;
     }
 
-        if (remainingGrapes > 0) {
-            removed = inventoryInstance.removeResource(
-                    { name: selectedResource },
-                    remainingGrapes,
-                    'Grapes',
-                    vintage,
-                    storage
-                );
-            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${storage}`);
-        } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${storage}`);
-            return false;
-        }
-    } else {
-        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${storage}`);
-    }
+    addConsoleMessage(`Crushed ${formatNumber(amountToRemove)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(amountToRemove * 0.6)} l of must in ${storage}`);
 
     // Calculate even distribution of must among containers
     const storageArray = Array.from(params.selectedStorages);
