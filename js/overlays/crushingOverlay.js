@@ -418,7 +418,7 @@ export function performCrushing(grapeInfo, selectedStorages, mustAmount, totalGr
         grapeAmountToRemove,
         'Grapes',
         vintage,
-        selectedGrape.dataset.storage
+        grapeInfo.storage
     );
 
     if (!removed) {
@@ -427,7 +427,7 @@ export function performCrushing(grapeInfo, selectedStorages, mustAmount, totalGr
             { name: resourceName },
             'Grapes',
             vintage,
-            selectedGrape.dataset.storage
+            grapeInfo.storage
         );
 
         if (remainingGrapes > 0) {
@@ -436,15 +436,15 @@ export function performCrushing(grapeInfo, selectedStorages, mustAmount, totalGr
                 remainingGrapes,
                 'Grapes',
                 vintage,
-                selectedGrape.dataset.storage
+                grapeInfo.storage
             );
-            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${grapeInfo.storage}`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${grapeInfo.storage}`);
             return false;
         }
     } else {
-        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${grapeInfo.storage}`);
     }
 
     // Calculate even distribution of must among containers
