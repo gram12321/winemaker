@@ -204,9 +204,11 @@ class TaskManager {
                          onerror="this.style.display='none'"
                     >
                 </div>
+                ${task.name !== task.taskType ? `
                 <div class="task-target">
                     ${task.target && task.target.name ? task.target.name : task.taskType}
                 </div>
+                ` : ''}
                 <div class="progress-container">
                     <div class="progress-bar ${progressClass}" style="width: ${progress}%"></div>
                 </div>
