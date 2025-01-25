@@ -192,10 +192,8 @@ class TaskManager {
             taskBox.innerHTML = `
                 <div class="task-target">
                     ${task.target ? 
-                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || task.type}` : 
-                        (task.params?.selectedGrape?.dataset?.storage ? 
-                            `Storage: ${task.params.selectedGrape.dataset.storage}` : 
-                            `${defaultFlag} ${task.taskType}`)}
+                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name || task.taskType}` : 
+                        `${defaultFlag} ${task.taskType}`}
                 </div>
                 <!-- Task Header Section:
                      Only show task type separately if we have a target with name
