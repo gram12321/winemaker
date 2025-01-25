@@ -387,7 +387,7 @@ function crushing(overlayContainer) {
             params.lastProgress = progress;
             performCrushing(resourceName, params.storage, processedAmount, params);
         },
-        storage,
+        selectedGrape.dataset.storage,
         { 
             storage: selectedGrape.dataset.storage,
             vintage: parseInt(selectedGrape.dataset.vintage),
