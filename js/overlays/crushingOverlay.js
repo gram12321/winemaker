@@ -146,10 +146,10 @@ function populateTables(overlayContainer) {
 function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
   const mustStorageBody = overlayContainer.querySelector('#crushing-must-storage-table');
   mustStorageBody.innerHTML = '';
-  
+
   buildings.forEach(building => {
     if (!building.tools) return;
-    
+
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
         const toolId = `${tool.name} #${tool.instanceNumber}`;
@@ -207,7 +207,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
   buildings.forEach(building => {
     if (!building.tools) return;
-    
+
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Grapes')) {
         const matchingInventoryItems = playerInventory.filter(item => 
@@ -408,7 +408,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
     }
-    
+
     let remainingMust = mustAmount;
     let success = true;
 
@@ -429,31 +429,31 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
     if (!removed) {
         // Try to remove the remaining grapes if the exact amount is not available
         const remainingGrapes = inventoryInstance.getResourceAmount(
-            { name: resourceName },
-            'Grapes',
-            vintage,
-            selectedGrape.dataset.storage
-        );
+                { name: selectedResource },
+                'Grapes',
+                vintage,
+                storage
+            );
 
         if (remainingGrapes > 0) {
             removed = inventoryInstance.removeResource(
-                { name: resourceName },
-                remainingGrapes,
-                'Grapes',
-                vintage,
-                selectedGrape.dataset.storage
-            );
-            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+                    { name: selectedResource },
+                    remainingGrapes,
+                    'Grapes',
+                    vintage,
+                    storage
+                );
+            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${storage}`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${storage}`);
             return false;
         }
     } else {
-        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${selectedResource} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${storage}`);
     }
 
     // Calculate even distribution of must among containers
-    const storageArray = Array.from(selectedStorages);
+    const storageArray = Array.from(params.selectedStorages);
     const totalAvailableSpace = storageArray.reduce((sum, storage) => 
         sum + parseFloat(storage.dataset.available), 0);
     const mustPerStorage = Math.min(remainingMust / storageArray.length, 
@@ -467,7 +467,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
 
         if (amountToStore > 0) {
             inventoryInstance.addResource(
-                { name: resourceName, naturalYield: 1 },
+                { name: selectedResource, naturalYield: 1 },
                 amountToStore,
                 'Must',
                 vintage,
@@ -479,7 +479,7 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
 
             remainingMust -= amountToStore;
         }
-        
+
         if (remainingMust <= 0) break;
     }
 
