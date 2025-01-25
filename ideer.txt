@@ -12,7 +12,8 @@ Knownbugs as of Jan 2025
 - When sidebar is toogle collapsedfrom localstorage mainwindows down get 'collapsed width' but leave empty space between mainwindow overlay and panel
 - Tooltips in sidebar is not shown above mainview
 - Company info in tooltip when collapsed sidebar does not work
-
+- There is a load/save error on the crushing task. We get a error if we reload the page while there is a active task. Might have something to do with the way we store (or rather fail to) store selectedgrape. 
+ 
 Known Bugs:
 -Save load Owned land and staff (Safe to firestore, but dont restore from localstorage)
 Allow winery-task on same field,grape,vintage if different entry (IE different quality)
