@@ -4,7 +4,7 @@ import { addConsoleMessage } from '/js/console.js';
 import { storeBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction} from '/js/finance.js';
 import { formatNumber } from '/js/utils.js';
-
+import taskManager, { TaskType } from '/js/taskManager.js';
 
 export class Building {
   static BASE_COSTS = {
