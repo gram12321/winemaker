@@ -306,7 +306,7 @@ export function upgradeBuilding(buildingName) {
 
   // Create upgrade task
   taskManager.addCompletionTask(
-    'Building & Maintenance',
+    'Building and Maintenance',
     TaskType.maintenance,
     upgradeCost / 1000, // Total work required based on upgrade cost
     (target, params) => {
