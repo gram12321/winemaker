@@ -479,10 +479,10 @@ function getTaskCallback(taskName, taskType) {
       };
     case 'crushing':
       return (target, progress, params) => {
-        const mustAmount = params.totalGrapes * 0.6;
+        const mustAmount = params.grapeInfo.totalGrapes * 0.6;
         const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
         params.lastProgress = progress;
-        performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+        performCrushing(params.grapeInfo, params.selectedStorages, processedAmount, params.grapeInfo.totalGrapes);
       };
     case 'fermentation':
       return (target, progress, params) => {
