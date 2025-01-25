@@ -68,7 +68,16 @@ class TaskManager {
         return taskId;
     }
 
+    checkDateTriggeredTasks() {
+        // Check for tasks that should be triggered based on game date
+        Bookkeeping();
+        // Add more date-triggered tasks here as needed
+    }
+
     processWeek() {
+        // Check for date-triggered tasks before processing regular tasks
+        this.checkDateTriggeredTasks();
+        
         const staffTaskCount = new Map();
 
         // Count the number of tasks each staff member is assigned to

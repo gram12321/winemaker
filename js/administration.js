@@ -1,44 +1,62 @@
 import { addConsoleMessage } from '/js/console.js';
 import { extractSeasonAndYear } from './utils.js'; // Import the function
 
-export function bookkeepingTaskFunction(task, mode) {
-  if (mode === 'initialize') {
-    const currentSeason = localStorage.getItem('season') || 'Unknown Season';
-    const currentYear = parseInt(localStorage.getItem('year'), 10) || new Date().getFullYear();
+export function Bookkeeping() {
+  const seasons = ['Winter', 'Spring', 'Summer', 'Fall'];
+  const currentSeason = localStorage.getItem('season');
+  const currentYear = parseInt(localStorage.getItem('year'), 10);
+  const currentWeek = parseInt(localStorage.getItem('week'), 10);
 
-    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    const currentSeasonTransactionsCount = transactions.filter(transaction => {
-      // Validate to ensure parsing is correct
-      const { season, year } = extractSeasonAndYear(transaction.date);
-      console.log(`Checking Transaction: ${transaction} -> Season: ${season}, Year: ${year}`);
-      return season === currentSeason && year === currentYear;
-    }).length;
+  // Only trigger on first week of new season
+  if (currentWeek !== 1) return;
 
-    console.log(`Bookkeeping Task for ${currentSeason} ${currentYear}: ${currentSeasonTransactionsCount} transactions found.`);
+  // Get previous season and year
+  const prevSeasonIndex = (seasons.indexOf(currentSeason) - 1 + 4) % 4;
+  const prevSeason = seasons[prevSeasonIndex];
+  const prevYear = prevSeasonIndex === 3 ? currentYear - 1 : currentYear;
 
-    return {
-      taskName: `Bookkeeping, ${currentSeason} ${currentYear}`,
-      workTotal: currentSeasonTransactionsCount,
-      iconPath: '/assets/icon/icon_bookkeeping.webp',
-      taskType: 'Administration'
-    };
-  } else if (mode === 'update') {
-    const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    const currentSeason = localStorage.getItem('season');
-    const currentYear = parseInt(localStorage.getItem('year'), 10);
+  // Get transactions from previous season
+  const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+  const prevSeasonTransactions = transactions.filter(transaction => {
+    const { season, year } = extractSeasonAndYear(transaction.date);
+    return season === prevSeason && year === prevYear;
+  });
 
-    const currentSeasonTransactionsCount = transactions.filter(transaction => {
-      const { season, year } = extractSeasonAndYear(transaction.date);
-      console.log(`Update Checking: Season: ${season}, Year: ${year}`);
-      return season === currentSeason && year === currentYear;
-    }).length;
+  // Check for unfinished bookkeeping tasks
+  const existingTasks = taskManager.getAllTasks().filter(task => 
+    task.name.startsWith('Bookkeeping') && task.type === 'progressive'
+  );
 
-    console.log(`Bookkeeping Update for ${currentSeason} ${currentYear}: ${currentSeasonTransactionsCount} transactions processed.`);
-    return currentSeasonTransactionsCount * 1.1;
+  let spilloverWork = 0;
+  if (existingTasks.length > 0) {
+    // Apply 10% penalty to remaining work
+    spilloverWork = existingTasks.reduce((total, task) => {
+      const remainingWork = task.totalWork - task.appliedWork;
+      return total + (remainingWork * 1.1);
+    }, 0);
+
+    // Apply prestige penalty for incomplete tasks
+    const prestigeHit = -0.1 * existingTasks.length;
+    localStorage.setItem('prestigeHit', (parseFloat(localStorage.getItem('prestigeHit') || 0) + prestigeHit).toString());
+    addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige!`, false, true);
   }
 
-  const workApplied = calculateWorkApplied(task.staff || [], 'bookkeepingTaskFunction');
-  return workApplied;
+  // Create new task
+  const totalWork = (prevSeasonTransactions.length * 10) + spilloverWork;
+  const taskName = `Bookkeeping ${prevSeason} ${prevYear}`;
+
+  taskManager.addProgressiveTask(
+    taskName,
+    TaskType.administration,
+    totalWork,
+    (target, progress, params) => {
+      if (progress >= 1) {
+        addConsoleMessage(`${taskName} completed successfully!`);
+      }
+    },
+    null,
+    { prevSeason, prevYear }
+  );
 }
 
 // Add this function in the administration.js file
