@@ -437,9 +437,17 @@ export function loadTasks() {
   const taskData = JSON.parse(localStorage.getItem('activeTasks') || '[]');
   const tasks = new Map();
   taskData.forEach(task => {
+    // Create proper Task instance with callback
+    const callback = getTaskCallback(task.name, task.taskType);
     tasks.set(task.id, {
       ...task,
-      callback: getTaskCallback(task.name, task.taskType)
+      callback,
+      // Ensure other task properties are properly set
+      type: task.type || 'progressive',
+      appliedWork: task.appliedWork || 0,
+      progress: task.progress || 0,
+      assignedStaff: task.assignedStaff || [],
+      params: task.params || {}
     });
   });
   return tasks;
