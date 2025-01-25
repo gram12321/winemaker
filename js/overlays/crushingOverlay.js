@@ -419,11 +419,11 @@ export function performCrushing(selectedResource, storage, mustAmount, params) {
     const fieldPrestige = params.fieldPrestige;
 
     let removed = inventoryInstance.removeResource(
-        { name: resourceName },
+        { name: selectedResource },
         grapeAmountToRemove,
         'Grapes',
         vintage,
-        selectedGrape.dataset.storage
+        storage
     );
 
     if (!removed) {
