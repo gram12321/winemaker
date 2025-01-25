@@ -482,7 +482,7 @@ function getTaskCallback(taskName, taskType) {
         const mustAmount = params.totalGrapes * 0.6;
         const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
         params.lastProgress = progress;
-        performCrushing(target, params.selectedStorages, processedAmount, params.totalGrapes);
+        performCrushing(params.selectedStorages, processedAmount, params.totalGrapes);
       };
     case 'fermentation':
       return (target, progress, params) => {
