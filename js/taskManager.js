@@ -190,15 +190,7 @@ class TaskManager {
             const defaultFlag = defaultStaff ? getFlagIconHTML(defaultStaff.nationality) : '';
             
             taskBox.innerHTML = `
-                <div class="task-target">
-                    ${task.target && task.target.name ? 
-                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name}` : 
-                        `${defaultFlag} ${task.taskType}`}
-                </div>
-                <!-- Task Header Section:
-                     Only show task type separately if we have a target with name
-                     This prevents showing the task type twice when it's already
-                     shown in the target section -->
+                <div class="task-name">${task.name}</div>
                 <div class="task-header">
                     ${(task.target && task.target.name) ? `<div class="task-type">${task.taskType}</div>` : ''}
                     <img src="../assets/icon/icon_${iconName}.webp" 
@@ -207,7 +199,11 @@ class TaskManager {
                          onerror="this.style.display='none'"
                     >
                 </div>
-                <div class="task-name">${task.name}</div>
+                <div class="task-target">
+                    ${task.target && task.target.name ? 
+                        `${task.target.country ? getFlagIconHTML(task.target.country) : ''} ${task.target.name}` : 
+                        `${defaultFlag} ${task.taskType}`}
+                </div>
                 <div class="progress-container">
                     <div class="progress-bar ${progressClass}" style="width: ${progress}%"></div>
                 </div>
