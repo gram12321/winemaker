@@ -194,7 +194,7 @@ export function buildBuilding(buildingName) {
   taskManager.addCompletionTask(
     'Building and Maintenance',
     TaskType.maintenance,
-    1000, // Total work required,
+    buildingCost / 1000, // Total work required based on building cost
     (target, params) => {
       // Completion callback
       const newBuilding = new Building(buildingName);
