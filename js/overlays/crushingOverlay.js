@@ -397,12 +397,11 @@ function crushing(overlayContainer) {
         taskName,
         TaskType.winery,
         totalWork,
-        (target, progress, params) => {
+        (progress, params) => {
             const processedAmount = mustAmount * (progress - (params.lastProgress || 0));
             params.lastProgress = progress;
             performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
         },
-        "",
         { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
     );
 

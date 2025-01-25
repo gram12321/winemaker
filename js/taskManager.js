@@ -15,7 +15,7 @@ export const TaskType = {
 };
 
 class Task {
-    constructor(id, name, type, taskType, totalWork, callback, target = null, params = {}, initialState = null) {
+    constructor(id, name, type, taskType, totalWork, callback, params = {}, initialState = null) {
         this.id = id;
         this.name = name;
         this.type = type; // 'progressive' or 'completion'
@@ -23,7 +23,6 @@ class Task {
         this.totalWork = totalWork;
         this.appliedWork = 0;
         this.callback = callback;
-        this.target = target; // Optional target (farmland, winery, etc.)
         this.params = params;
         this.progress = 0;
         this.initialState = initialState;
@@ -38,15 +37,15 @@ class TaskManager {
         this.updateTaskDisplay();
     }
 
-    addProgressiveTask(name, taskType, totalWork, callback, target = null, params = {}, initialCallback = null) {
+    addProgressiveTask(name, taskType, totalWork, callback, params = {}, initialCallback = null) {
         const taskId = ++this.taskIdCounter;
         
         // Execute initial state change if provided
         if (initialCallback) {
-            initialCallback(target, params);
+            initialCallback(params);
         }
 
-        const task = new Task(taskId, name, 'progressive', taskType, totalWork, callback, target, { ...params, assignedStaff: [] });
+        const task = new Task(taskId, name, 'progressive', taskType, totalWork, callback, { ...params, assignedStaff: [] });
         this.tasks.set(taskId, task);
         saveTasks(this.tasks);
         this.updateTaskDisplay();

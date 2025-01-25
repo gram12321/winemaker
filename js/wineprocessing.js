@@ -38,10 +38,9 @@ export function fermentation(selectedResource, storage, mustAmount) {
         'Fermentation',
         TaskType.winery,
         100, // totalWork for fermentation
-        (target, progress, params) => {
-            performFermentation(target, progress, params);
+        (progress, params) => {
+            performFermentation(progress, params);
         },
-        storage,
         { selectedResource, storage, mustAmount, vintage: resource.vintage, quality: resource.quality, fieldName: resource.fieldName, fieldPrestige: resource.fieldPrestige }
     );
 }
