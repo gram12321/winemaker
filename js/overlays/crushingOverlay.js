@@ -274,12 +274,13 @@ function crushing(overlayContainer) {
 
     // Check if any selected must storage is already being used in another crushing task
     const selectedStorageIds = Array.from(selectedStorages).map(storage => storage.value);
-    const existingStorageTasks = taskManager.getAllTasks().filter(task => 
-        task.name === 'Crushing' && 
-        task.params?.selectedStorages?.some(storage => 
-            selectedStorageIds.includes(storage.value)
-        )
-    );
+    const existingStorageTasks = taskManager.getAllTasks().filter(task => {
+        if (task.name !== 'Crushing' || !task.params?.selectedStorages) return false;
+        const taskStorages = Array.isArray(task.params.selectedStorages) ? 
+            task.params.selectedStorages : 
+            Array.from(task.params.selectedStorages);
+        return taskStorages.some(storage => selectedStorageIds.includes(storage.value));
+    });
 
     if (existingStorageTasks.length > 0) {
         addConsoleMessage("Selected must storage is already being used in another crushing task");
