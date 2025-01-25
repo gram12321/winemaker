@@ -337,7 +337,7 @@ function crushing(overlayContainer) {
         return false;
     }
 
-    const mustAmount = totalGrapes * 0.6;  // 60% of grapes become must
+    const mustAmount = grapeInfo.totalGrapes * 0.6;  // 60% of grapes become must
 
     if (mustAmount > totalAvailableSpace) {
         const warningModal = document.createElement('div');
