@@ -258,21 +258,29 @@ function crushing(overlayContainer) {
         return false;
     }
     
+    const storage = selectedGrape.dataset.storage;
+    const resourceName = selectedGrape.dataset.resource;
+    const vintage = parseInt(selectedGrape.dataset.vintage);
+
+    const grapeResource = inventoryInstance.items.find(item => 
+        item.resource.name === resourceName && 
+        item.state === 'Grapes' &&
+        item.storage === storage &&
+        item.vintage === vintage
+    );
+
+    if (!grapeResource) {
+        addConsoleMessage("Selected grapes not found in inventory");
+        return false;
+    }
+
     const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
-    const grapeInfo = {
-        storage: selectedGrape.dataset.storage,
-        resourceName: selectedGrape.dataset.resource,
-        totalGrapes: parseFloat(selectedGrape.dataset.amount),
-        vintage: parseInt(selectedGrape.dataset.vintage),
-        quality: parseFloat(selectedGrape.dataset.quality),
-        fieldName: selectedGrape.dataset.field,
-        fieldPrestige: parseFloat(selectedGrape.dataset.prestige)
-    };
+    const totalGrapes = grapeResource.amount;
 
     // Check for existing crushing tasks with the same grape storage
     const existingTasks = taskManager.getAllTasks().filter(task => 
         task.name === 'Crushing' && 
-        task.target === grapeInfo.storage
+        task.target === storage
     );
 
     if (existingTasks.length > 0) {
@@ -337,7 +345,7 @@ function crushing(overlayContainer) {
         return false;
     }
 
-    const mustAmount = grapeInfo.totalGrapes * 0.6;  // 60% of grapes become must
+    const mustAmount = totalGrapes * 0.6;  // 60% of grapes become must
 
     if (mustAmount > totalAvailableSpace) {
         const warningModal = document.createElement('div');
@@ -395,30 +403,44 @@ function crushing(overlayContainer) {
             performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
         },
         "",
-        { selectedStorages: Array.from(selectedStorages), grapeInfo, lastProgress: 0 }
+        { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
     );
 
     return true;
 }
 
-export function performCrushing(grapeInfo, selectedStorages, mustAmount, totalGrapes) {
+export function performCrushing(storage, selectedStorages, mustAmount, totalGrapes) {
     const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
+    }
+
+    const grapeResource = inventoryInstance.items.find(item => 
+        item.state === 'Grapes' &&
+        item.storage === storage
+    );
+
+    if (!grapeResource) {
+        addConsoleMessage("Grapes not found in storage");
+        return false;
     }
     
     let remainingMust = mustAmount;
     let success = true;
 
-    // Use values from grapeInfo object
-    const { resourceName, vintage, quality, fieldName, fieldPrestige } = grapeInfo;
+    // Remove the amount of grapes corresponding to the processed amount
+    const resourceName = grapeResource.resource.name;
+    const vintage = grapeResource.vintage;
+    const quality = grapeResource.quality;
+    const fieldName = grapeResource.fieldName;
+    const fieldPrestige = grapeResource.fieldPrestige;
 
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
         grapeAmountToRemove,
         'Grapes',
         vintage,
-        grapeInfo.storage
+        selectedGrape.dataset.storage
     );
 
     if (!removed) {
@@ -427,7 +449,7 @@ export function performCrushing(grapeInfo, selectedStorages, mustAmount, totalGr
             { name: resourceName },
             'Grapes',
             vintage,
-            grapeInfo.storage
+            selectedGrape.dataset.storage
         );
 
         if (remainingGrapes > 0) {
@@ -436,15 +458,15 @@ export function performCrushing(grapeInfo, selectedStorages, mustAmount, totalGr
                 remainingGrapes,
                 'Grapes',
                 vintage,
-                grapeInfo.storage
+                selectedGrape.dataset.storage
             );
-            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${grapeInfo.storage}`);
+            addConsoleMessage(`Crushed remaining ${formatNumber(remainingGrapes)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(remainingGrapes * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
         } else {
-            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${grapeInfo.storage}`);
+            addConsoleMessage(`Failed to remove ${formatNumber(grapeAmountToRemove)} kg of grapes from ${selectedGrape.dataset.storage}`);
             return false;
         }
     } else {
-        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${grapeInfo.storage}`);
+        addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must in ${selectedGrape.dataset.storage}`);
     }
 
     // Calculate even distribution of must among containers
