@@ -146,10 +146,10 @@ function populateTables(overlayContainer) {
 function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
   const mustStorageBody = overlayContainer.querySelector('#crushing-must-storage-table');
   mustStorageBody.innerHTML = '';
-  
+
   buildings.forEach(building => {
     if (!building.tools) return;
-    
+
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Must')) {
         const toolId = `${tool.name} #${tool.instanceNumber}`;
@@ -207,7 +207,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
   buildings.forEach(building => {
     if (!building.tools) return;
-    
+
     building.tools.forEach(tool => {
       if (tool.supportedResources?.includes('Grapes')) {
         const matchingInventoryItems = playerInventory.filter(item => 
@@ -387,7 +387,17 @@ function crushing(overlayContainer) {
             performCrushing(selectedGrape, params.selectedStorages, processedAmount, params.totalGrapes);
         },
         "",
-        { selectedStorages: Array.from(selectedStorages), totalGrapes, lastProgress: 0 }
+        { 
+            selectedStorages: Array.from(selectedStorages), 
+            totalGrapes, 
+            lastProgress: 0,
+            resource: selectedGrape.dataset.resource,
+            vintage: selectedGrape.dataset.vintage,
+            quality: selectedGrape.dataset.quality,
+            fieldName: selectedGrape.dataset.field,
+            storage: selectedGrape.dataset.storage,
+            fieldPrestige: selectedGrape.dataset.prestige
+        }
     );
 
     return true;
@@ -398,7 +408,7 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
     }
-    
+
     let remainingMust = mustAmount;
     let success = true;
 
@@ -470,7 +480,7 @@ export function performCrushing(selectedGrape, selectedStorages, mustAmount, tot
 
             remainingMust -= amountToStore;
         }
-        
+
         if (remainingMust <= 0) break;
     }
 
