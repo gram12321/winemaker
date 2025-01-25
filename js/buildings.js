@@ -298,15 +298,35 @@ export function upgradeBuilding(buildingName) {
   const building = new Building(buildingData.name, buildingData.level, buildingData.tools || []);
   const upgradeCost = building.getUpgradeCost();
 
-  // Deduct the upgrade cost
-  addTransaction('Expense', `Upgraded ${buildingName} to level ${building.level + 1}`, -upgradeCost);
+  // Add to transaction history
+  addTransaction('Expense', `Upgrade of ${buildingName}`, -upgradeCost);
 
-  building.upgrade();
+  // Add initial message
+  addConsoleMessage(`Upgrade of ${buildingName} has begun. <span style="color: red">€${formatNumber(upgradeCost)}</span> has been deducted from your account. When complete, capacity will be ${building.calculateCapacity() + 2} spaces.`);
 
-  const updatedBuildings = buildings.map(b => b.name === buildingName ? building : b);
-  storeBuildings(updatedBuildings);
+  // Create upgrade task
+  taskManager.addCompletionTask(
+    'Building & Maintenance',
+    TaskType.maintenance,
+    upgradeCost / 1000, // Total work required based on upgrade cost
+    (target, params) => {
+      // Completion callback
+      const buildings = loadBuildings();
+      const buildingToUpgrade = buildings.find(b => b.name === params.buildingName);
+      
+      if (buildingToUpgrade) {
+        const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.tools || []);
+        building.upgrade();
+        
+        const updatedBuildings = buildings.map(b => b.name === params.buildingName ? building : b);
+        storeBuildings(updatedBuildings);
 
-  addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}. <span style="color: red">Cost: €${formatNumber(upgradeCost)}</span>. New Capacity: ${building.capacity} (${building.capacity - (building.tools ? building.tools.length : 0)} spaces available)`);
-  updateBuildingCards();
-  updateBuildButtonStates();
+        addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}. <span style="color: red">Cost: €${formatNumber(upgradeCost)}</span>. New Capacity: ${building.capacity} (${building.capacity - (building.tools ? building.tools.length : 0)} spaces available)`);
+        updateBuildingCards();
+        updateBuildButtonStates();
+      }
+    },
+    null,
+    { buildingName, upgradeCost }
+  );
 }
