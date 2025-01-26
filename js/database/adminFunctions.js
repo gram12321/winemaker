@@ -382,35 +382,22 @@ export function updateAllFarmlands(farmlands) {
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
-// Get prestige functions
+// Prestige storage functions
 export function getPrestigeHit() {
   const prestigeHit = localStorage.getItem('prestigeHit');
-  return prestigeHit === null ? 0 : Number(prestigeHit); // Explicit null check and conversion
+  return prestigeHit === null ? 0 : Number(prestigeHit);
 }
 
 export function setPrestigeHit(value) {
   if (value === null || value === undefined) {
     localStorage.removeItem('prestigeHit');
   } else {
-    localStorage.setItem('prestigeHit', Number(value)); // Ensure we store as number
+    localStorage.setItem('prestigeHit', Number(value));
   }
 }
 
-export function calculateRealPrestige() {
-  const money = getMoney();
-  const moneyPrestige = money / 10000000;
-  const farmlands = loadFarmlands();
-
-  const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
-    return total + (farmland.farmlandPrestige || 0);
-  }, 0);
-
-  const prestigeHit = getPrestigeHit();
-  const calculatedPrestige = moneyPrestige + totalFarmlandPrestige + prestigeHit;
-
-  // Store the calculated value
-  localStorage.setItem('calculatedPrestige', calculatedPrestige.toString());
-  return calculatedPrestige;
+export function saveCalculatedPrestige(value) {
+  localStorage.setItem('calculatedPrestige', value.toString());
 }
 
 export function getCalculatedPrestige() {
