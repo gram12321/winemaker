@@ -1,6 +1,5 @@
 
 import { addConsoleMessage } from '../console.js';
-import { addTransaction } from '../finance.js';
 import { formatNumber } from '../utils.js';
 import { showHireStaffOverlay } from './hirestaffoverlay.js';
 import taskManager, { TaskType } from '../taskManager.js';
@@ -71,9 +70,6 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
         const numberOfCandidates = parseInt(slider.value);
         const totalCost = numberOfCandidates * costPerCandidate;
         const workRequired = 10 * numberOfCandidates;
-
-        // Add transaction for search cost
-        addTransaction('Expense', `Staff search cost for ${numberOfCandidates} candidates`, -totalCost);
 
         taskManager.addCompletionTask(
             'Staff Search',
