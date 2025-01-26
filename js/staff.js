@@ -157,13 +157,23 @@ export function displayStaff() {
         });
 
         const assignedTaskDetail = assignedTasks.length > 0 ? assignedTasks.join('<br>') : 'None';
+        const totalSkills = parseFloat(staff.skills.field.field) + 
+                          parseFloat(staff.skills.winery.winery) + 
+                          parseFloat(staff.skills.administration.administration) + 
+                          parseFloat(staff.skills.sales.sales) + 
+                          parseFloat(staff.skills.maintenance.maintenance);
+        const maxTotalSkills = 5.0;
+        const containerWidth = (totalSkills / maxTotalSkills) * 100;
+        
         const skillsHTML = `
-          <div class="skill-bar-container">
-            <div class="skill-bar" style="width: ${parseFloat(staff.skills.field.field) * 100}%; background-color: #ffcc00; height: 20px;" title="Field Skill: ${staff.skills.field.field}">F</div>
-            <div class="skill-bar" style="width: ${parseFloat(staff.skills.winery.winery) * 100}%; background-color: #2179ff; height: 20px;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
-            <div class="skill-bar" style="width: ${parseFloat(staff.skills.administration.administration) * 100}%; background-color: #6c757d; height: 20px;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
-            <div class="skill-bar" style="width: ${parseFloat(staff.skills.sales.sales) * 100}%; background-color: #28a745; height: 20px;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
-            <div class="skill-bar" style="width: ${parseFloat(staff.skills.maintenance.maintenance) * 100}%; background-color: #d9534f; height: 20px;" title="Maintenance Skill: ${staff.skills.maintenance.maintenance}">M</div>
+          <div class="skill-bar-outer">
+            <div class="skill-bar-container" style="width: ${containerWidth}%">
+              <div class="skill-bar" style="width: ${(parseFloat(staff.skills.field.field) / totalSkills) * 100}%; background-color: #ffcc00;" title="Field Skill: ${staff.skills.field.field}">F</div>
+              <div class="skill-bar" style="width: ${(parseFloat(staff.skills.winery.winery) / totalSkills) * 100}%; background-color: #2179ff;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
+              <div class="skill-bar" style="width: ${(parseFloat(staff.skills.administration.administration) / totalSkills) * 100}%; background-color: #6c757d;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
+              <div class="skill-bar" style="width: ${(parseFloat(staff.skills.sales.sales) / totalSkills) * 100}%; background-color: #28a745;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
+              <div class="skill-bar" style="width: ${(parseFloat(staff.skills.maintenance.maintenance) / totalSkills) * 100}%; background-color: #d9534f;" title="Maintenance Skill: ${staff.skills.maintenance.maintenance}">M</div>
+            </div>
           </div>
         `;
 

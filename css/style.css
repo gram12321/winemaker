@@ -274,3 +274,26 @@ input[type="radio"]:hover {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
+.skill-bar-outer {
+  width: 100%;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  height: 22px;
+  position: relative;
+}
+
+.skill-bar-container {
+  height: 20px;
+  display: flex;
+  transition: width 0.3s ease;
+}
+
+.skill-bar {
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
