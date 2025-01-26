@@ -53,6 +53,14 @@ export function updateAllDisplays() {
             typeof updateWineryStorage === 'function') {
             updateWineryStorage();
         }
+
+        // Update finance displays
+        if (document.getElementById('cash-flow-table') && typeof loadCashFlow === 'function') {
+            loadCashFlow();
+        }
+        if (document.getElementById('weekly-income') && typeof updateIncomeStatement === 'function') {
+            updateIncomeStatement();
+        }
     } catch (error) {
         console.debug('Some display functions are not available in current context:', error);
     }
@@ -67,3 +75,4 @@ import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
 import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
 import { updateVineyardTable } from './overlays/mainpages/vineyardoverlay.js';
 import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
+import { loadCashFlow, updateIncomeStatement } from './finance.js';
