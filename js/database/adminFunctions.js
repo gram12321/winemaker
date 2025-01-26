@@ -480,9 +480,11 @@ function getTaskCallback(taskName, taskType) {
     case 'crushing':
       return (target, progress, params = {}) => {
 
+        }
+
 export function getTransactions() {
   return JSON.parse(localStorage.getItem('transactions')) || [];
-}
+
 
         if (!params.lastProgress) params.lastProgress = 0;
         const mustAmount = params.totalGrapes * 0.6;
