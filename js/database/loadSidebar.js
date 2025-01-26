@@ -9,6 +9,7 @@ import { showSalesOverlay } from '../overlays/mainpages/salesoverlay.js';
 import { showMainOfficeOverlay } from '../overlays/mainpages/mainofficeoverlay.js';
 import { incrementWeek } from '../endDay.js';
 import { renderCompanyInfo  } from '../company.js';
+import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
 
 
 // Define a function to load and initialize the sidebar
