@@ -108,6 +108,7 @@ export function createNewStaff() {
   const newStaff = new Staff(firstName, lastName, skills);
   newStaff.workforce = 50;
   newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
+  updateWagesAndRecurringTransaction(); // Update recurring transaction when new staff is created
   return newStaff;
 }
 
@@ -206,7 +207,7 @@ function calculateTotalStaffWages() {
     return staffMembers.reduce((total, staff) => total + staff.wage, 0);
 }
 
-function updateWagesAndRecurringTransaction() {
+export function updateWagesAndRecurringTransaction() {
     const totalWages = calculateTotalStaffWages();
     const frequencyInWeeks = 1; // Weekly frequency
     const description = 'Weekly Staff Wages';
