@@ -48,11 +48,11 @@ export function bookkeeping() {
   if (existingTasks.length > 0) {
     const prestigeHit = -0.1 * existingTasks.length;
     localStorage.setItem('prestigeHit', (parseFloat(localStorage.getItem('prestigeHit') || 0) + prestigeHit).toString());
-    const totalSpillover = existingTasks.reduce((total, task) => {
+    const penaltyAmount = existingTasks.reduce((total, task) => {
       const remainingWork = task.totalWork - task.appliedWork;
-      return total + (remainingWork * 1.1);
+      return total + (remainingWork * 0.1); // Just the 10% penalty
     }, 0);
-    addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige! Lost ${Math.abs(prestigeHit).toFixed(2)} prestige points. ${formatNumber(totalSpillover, 1)} work units added as penalty to the new task.`, false, true);
+    addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige! Lost ${Math.abs(prestigeHit).toFixed(2)} prestige points. ${formatNumber(penaltyAmount, 1)} extra work units added as penalty to the new task.`, false, true);
   }
 
   // Create new task with combined work
