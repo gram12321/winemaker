@@ -259,38 +259,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.1);
 }
 
-/* staff - - - - - -*/
-#farmland-details .table {
-  margin: 0;
-  background-color: var(--color-background);
-  color: var(--color-text);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-#farmland-details .table th {
-  background-color: var(--color-primary);
-  color: #fff;
-  border-bottom: 2px solid var(--color-accent);
-  padding: 12px;
-  font-weight: 500;
-}
-
-#farmland-details .table td {
-  padding: 12px;
-  border-color: rgba(197, 165, 114, 0.2);
-}
-
-#farmland-details .table tbody tr:nth-child(even) {
-  background-color: rgba(197, 165, 114, 0.05);
-}
-
-#farmland-details .table tbody tr:hover {
-  background-color: rgba(197, 165, 114, 0.1);
-}
-
-
-
 .skills-table {
   width: auto;
   table-layout: auto;
