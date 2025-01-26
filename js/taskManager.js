@@ -186,7 +186,7 @@ class TaskManager {
             
             const progress = task.appliedWork / task.totalWork * 100;
             const progressClass = getColorClass(progress / 100);
-            const iconName = task.name.toLowerCase().replace(/[&\s]+/g, '');
+            const iconName = task.name.split(' ')[0].toLowerCase();
             
             // Get list of assigned staff first names, limit display to 4 names
             const staffNames = task.assignedStaff.map(s => s.name.split(' ')[0]);
