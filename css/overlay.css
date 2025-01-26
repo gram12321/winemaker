@@ -302,8 +302,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
   gap: 20px;
 }
 
-/* Override grid view for for hire staff overlay and showstaffoverlay*/
-#hiring-section .staff-options-container {
+/* Override grid view for hire staff overlay and staff details */
+#hiring-section .staff-options-container,
+#staff-details-section .staff-options-container {
   display: block;
 }
 
