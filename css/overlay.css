@@ -53,118 +53,27 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     z-index: 1500;
 }
 
-.standard-overlay .overlay-content {
-    max-width: 80vw;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.overlay-section .card-header h3,
-.overlay-section .card-header h2 {
-    color: var(--panel-text);
-    margin: 0;
-}
-
-.overlay-section .card-header h2 {
-    border-bottom: 2px solid var(--color-accent);
-}
-
-.overlay-section-wrapper {
-    background-color: #fff;
-    padding: 25px;
-    border-radius: var(--radius-lg);
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
-    
-}
-
 .overlay.active {
     display: flex;
 }
 
-.overlay-content {
+/* 3. Common Overlay Content Styles */
+.overlay-content,
+.modal-overlay .overlay-content,
+.stats-overlay {
     background-color: var(--color-background);
-    color: var(--color-text);
-    width: auto;
-    max-width: 800px;
     padding: 2rem;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
     border: 1px solid var(--color-accent);
     max-height: 90vh;
     overflow-y: auto;
     margin: 0 auto;
-}
-
-/* 3. Modal Overlays */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 2000;
-    overflow-y: auto;
-    padding: 20px 0;
-}
-
-.modal-overlay .overlay-content {
-    position: relative;
     max-width: 800px;
     width: 90%;
-    margin: 2rem auto;
-    background: var(--color-background);
-    padding: 1.5rem;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    max-height: 90vh;
-    overflow-y: auto;
-    min-width: min-content;
 }
 
-/* Common Table Styles */
-.overlay-table,
-.overlay-content .table,
-.mainview-overlay-content .table {
-  margin: 0 auto;
-  width: auto;
-  
-  background-color: var(--color-background);
-  text-align: center;
-  margin-bottom: 1rem;
-}
-
-.overlay-table th,
-.overlay-content .table th,
-.mainview-overlay-content .table th {
-  background-color: rgba(197, 165, 114, 0.2);
-  color: var(--color-text);
-  padding: 12px;
-  border-bottom: 2px solid var(--color-accent);
-}
-
-.overlay-table td,
-.overlay-content .table td,
-.mainview-overlay-content .table td {
-  padding: 12px;
-  border-color: rgba(197, 165, 114, 0.2);
-  vertical-align: middle;
-}
-
-.overlay-table tbody tr:hover,
-.overlay-content .table tbody tr:hover,
-.mainview-overlay-content .table tbody tr:hover {
-  background-color: rgba(197, 165, 114, 0.1);
-}
-
-.table-responsive {
-  width: fit-content;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-/* Section Styling */
+/* 4. Section Styling */
 .overlay-section {
     border: 1px solid var(--color-accent);
     border-radius: var(--radius-lg);
@@ -173,51 +82,118 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     overflow: hidden;
 }
 
-.overlay-section .card-header {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  padding: 1rem;
-  border-bottom: 2px solid var(--color-accent);
+.overlay-section .card-header,
+.stats-overlay .stats-header {
+    background-color: var(--color-primary);
+    color: var(--panel-text);
+    padding: 1rem;
+    border-bottom: 2px solid var(--color-accent);
 }
 
-/* Keep gradient only for multi-section overlays */
 .overlay-section:not(:only-child) .card-header {
-  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
 }
 
-
-/* Overlay Container Styles */
-.overlay-container {
-  background-color: var(--color-background);
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+/* 5. Table Styles */
+.overlay-table,
+.skills-table,
+.stats-table {
+    width: auto;
+    margin: 15px auto;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-accent);
+    box-shadow: var(--shadow-sm);
 }
 
-/* Section-specific Header Styles */
-#vineyard-section .card-header {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  border-bottom: 2px solid var(--color-accent);
+.overlay-table th,
+.skills-table th,
+.stats-table th {
+    background-color: rgba(197, 165, 114, 0.2);
+    color: var(--color-text);
+    padding: 12px;
+    border-bottom: 2px solid var(--color-accent);
 }
 
-/* Section-specific Header Gradients */
-#grapes-section .card-header {
-  background: linear-gradient(135deg, var(--color-accent), #8B4513);
-  border-bottom: 2px solid var(--color-accent);
+.overlay-table td,
+.skills-table td,
+.stats-table td {
+    padding: 12px;
+    border-color: rgba(197, 165, 114, 0.2);
+    vertical-align: middle;
 }
 
-#must-section .card-header {
-  background: linear-gradient(135deg, #8B4513, #491809);
-  border-bottom: 2px solid var(--color-accent);
+.overlay-table tbody tr:hover,
+.skills-table tr:hover,
+.stats-table tbody tr:hover {
+    background-color: rgba(197, 165, 114, 0.1);
+    transition: background-color 0.2s ease;
 }
 
-#wine-section .card-header {
-  background: linear-gradient(135deg, #491809, #23143E);
-  border-bottom: 2px solid var(--color-accent);
+/* 6. Staff Options */
+.staff-options-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 }
 
+.staff-option {
+    border: 1px solid var(--color-accent);
+    border-radius: 8px;
+    margin: 10px 0;
+    padding: 15px;
+    box-shadow: var(--shadow-sm);
+    background-color: var(--color-background);
+}
 
-/* Planting - - - - - -*/
+/* Staff Option Buttons */
+.staff-option .btn-primary,
+.staff-option .hire-staff-button,
+#closeHireStaffOverlay {
+    background-color: var(--color-primary);
+    border-color: var(--color-accent);
+    color: var(--panel-text);
+    padding: 0.375rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.staff-option .btn-primary:hover,
+.staff-option .hire-staff-button:hover,
+#closeHireStaffOverlay:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 7. Quality Color Classes */
+.staff-option [class^="color-class-"] {
+    font-weight: bold;
+}
+
+.staff-option .color-class-9 { color: #006400 !important; }
+.staff-option .color-class-8 { color: #228B22 !important; }
+.staff-option .color-class-7 { color: #32CD32 !important; }
+.staff-option .color-class-6 { color: #90EE90 !important; }
+.staff-option .color-class-5 { color: #FFD700 !important; }
+.staff-option .color-class-4 { color: #FFA500 !important; }
+.staff-option .color-class-3 { color: #FF8C00 !important; }
+.staff-option .color-class-2 { color: #FF4500 !important; }
+.staff-option .color-class-1 { color: #FF0000 !important; }
+.staff-option .color-class-0 { color: #8B0000 !important; }
+
+/* 8. Badges */
+.overlay-section .badge,
+.inventory-section .badge,
+.overlay-section .badge-light {
+    background-color: var(--color-accent);
+    color: var(--panel-text);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    margin-left: 1rem;
+}
+
+/* Planting styles - kept as is since not modified in edited code */
 .planting-overlay-info-box {
   background-color: var(--color-background);
   border-radius: var(--radius-md);
@@ -230,7 +206,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   color: var(--color-text);
 }
 
-/* Custom range input styling */
+/* Custom range input styling - kept as is */
 input[type="range"] {
   -webkit-appearance: none;
   width: 100%;
@@ -259,74 +235,24 @@ input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.1);
 }
 
-/* staff - - - - - -*/
 
-.skills-table {
-  width: auto;
-  table-layout: auto;
-  border-collapse: collapse;
-  margin: 15px auto;
-  font-size: 0.9em;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-accent);
-  box-shadow: var(--shadow-sm);
+/*Modal Overlay - parts not included in edited code*/
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    overflow-y: auto;
+    padding: 20px 0;
 }
 
-.skills-table th,
-.skills-table td {
-  padding: 8px 12px;
-  border: 1px solid var(--color-accent);
-  text-align: left;
-  color: var(--color-text);
-}
+/*Removed Redundant Table Styles*/
 
-.skills-table th {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  font-weight: 500;
-}
 
-.skills-table tr:nth-child(even) {
-  background-color: rgba(197, 165, 114, 0.05);
-}
-
-.skills-table tr:hover {
-  background-color: rgba(197, 165, 114, 0.1);
-  transition: background-color 0.2s ease;
-}
-
-#farmland-details .staff-options-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-/* 4. Stats Overlays */
-.stats-overlay {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: var(--color-background);
-  padding: 2rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  z-index: 1500;
-  max-width: 800px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  border: 1px solid var(--color-accent);
-}
-
-.stats-overlay .stats-header {
-  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
-  color: var(--panel-text);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
-}
-
+/* Stats Overlay - parts not included in edited code*/
 .stats-overlay .stats-table {
   width: 100%;
   margin-bottom: 1rem;
@@ -349,52 +275,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background-color: rgba(197, 165, 114, 0.1);
 }
 
-  background-color: var(--color-background);
-  margin-bottom: 15px;
-  padding: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.staff-options-container .staff-option .staff-option {
-  border: 1px solid var(--color-accent);
-  border-radius: 8px;
-  margin: 10px 0;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.staff-option .btn-primary,
-.staff-option .hire-staff-button,
-#closeHireStaffOverlay {
-  background-color: var(--color-primary);
-  border-color: var(--color-accent);
-  color: var(--panel-text);
-  padding: 0.375rem 1rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.staff-option .btn-primary:hover,
-.staff-option .hire-staff-button:hover,
-#closeHireStaffOverlay:hover {
-  background-color: var(--color-accent);
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Quality Color Classes */
-.staff-option .color-class-9 { color: #006400 !important; }  /* Dark Green */
-.staff-option .color-class-8 { color: #228B22 !important; }  /* Forest Green */
-.staff-option .color-class-7 { color: #32CD32 !important; }  /* Lime Green */
-.staff-option .color-class-6 { color: #90EE90 !important; }  /* Light Green */
-.staff-option .color-class-5 { color: #FFD700 !important; }  /* Gold */
-.staff-option .color-class-4 { color: #FFA500 !important; }  /* Orange */
-.staff-option .color-class-3 { color: #FF8C00 !important; }  /* Dark Orange */
-.staff-option .color-class-2 { color: #FF4500 !important; }  /* Orange Red */
-.staff-option .color-class-1 { color: #FF0000 !important; }  /* Red */
-.staff-option .color-class-0 { color: #8B0000 !important; }  /* Dark Red */
-
+/*Hire Staff Overlay Styles - kept as is*/
 #hireStaffOverlay {
   display: none;
   position: fixed;
@@ -479,25 +360,39 @@ input[type="range"]::-webkit-slider-thumb:hover {
   overflow-y: hidden;
 }
 
-.overlay-section .table tbody tr:hover {
-  background-color: rgba(197, 165, 114, 0.1);
+/*Removed Redundant Table Styles*/
+
+/* Section-specific Header Styles - Kept as is*/
+#vineyard-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
 }
 
-.overlay-section .badge,
-.inventory-section .badge,
-.overlay-section .badge-light {
-  background-color: var(--color-accent);
-  color: var(--panel-text);
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  margin-left: 1rem;
+#grapes-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
 }
 
+#must-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
+}
 
+#wine-section .card-header {
+  background: linear-gradient(135deg, #491809, #23143E);
+  border-bottom: 2px solid var(--color-accent);
+}
 
 #orders-section .card-header {
   background: linear-gradient(135deg, #8B4513, #491809);
   border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-container {
+  background-color: var(--color-background);
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .overlay-section .table,
@@ -519,4 +414,3 @@ input[type="range"]::-webkit-slider-thumb:hover {
   border-color: rgba(197, 165, 114, 0.2);
   background: transparent;
 }
-
