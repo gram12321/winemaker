@@ -1,4 +1,3 @@
-
 import { displayStaff } from '/js/staff.js';
 import { showHireStaffOverlay } from '/js/overlays/hirestaffoverlay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
@@ -46,9 +45,21 @@ function createStaffOverlayHTML() {
 
 function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
-    
+
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
     if (hireStaffBtn) {
-        hireStaffBtn.addEventListener('click', showHireStaffOverlay);
+        //Assuming taskManager and TaskType are defined elsewhere
+        hireStaffBtn.addEventListener('click', () => {
+            taskManager.addCompletionTask(
+                'Hiring Process',
+                TaskType.administration,
+                10, // Small amount of work required
+                (target, params) => {
+                    showHireStaffOverlay();
+                },
+                null,
+                {}
+            );
+        });
     }
 }
