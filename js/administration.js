@@ -1,5 +1,6 @@
+
 import { addConsoleMessage } from '/js/console.js';
-import { extractSeasonAndYear } from './utils.js'; // Import the function
+import { extractSeasonAndYear } from './utils.js';
 import taskManager, { TaskType } from './taskManager.js';
 
 export function bookkeeping() {
@@ -23,27 +24,34 @@ export function bookkeeping() {
     return season === prevSeason && year === prevYear;
   });
 
-  // Check for unfinished bookkeeping tasks
+  // Calculate base work from transactions
+  const baseWork = prevSeasonTransactions.length * 10;
+
+  // Find existing bookkeeping tasks
   const existingTasks = taskManager.getAllTasks().filter(task => 
-    task.name.startsWith('Bookkeeping') && task.type === 'progressive'
+    task.name.startsWith('Bookkeeping') && task.type === 'completion'
   );
 
-  let spilloverWork = 0;
-  if (existingTasks.length > 0) {
-    // Apply 10% penalty to remaining work
-    spilloverWork = existingTasks.reduce((total, task) => {
-      const remainingWork = task.totalWork - task.appliedWork;
-      return total + (remainingWork * 1.1);
-    }, 0);
+  // Calculate spillover work with 10% penalty
+  const spilloverWork = existingTasks.reduce((total, task) => {
+    const remainingWork = task.totalWork - task.appliedWork;
+    return total + (remainingWork * 1.1);
+  }, 0);
 
-    // Apply prestige penalty for incomplete tasks
+  // Remove existing tasks
+  existingTasks.forEach(task => {
+    taskManager.removeTask(task.id);
+  });
+
+  // Apply prestige penalty if there were incomplete tasks
+  if (existingTasks.length > 0) {
     const prestigeHit = -0.1 * existingTasks.length;
     localStorage.setItem('prestigeHit', (parseFloat(localStorage.getItem('prestigeHit') || 0) + prestigeHit).toString());
     addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige!`, false, true);
   }
 
-  // Create new task
-  const totalWork = (prevSeasonTransactions.length * 10) + spilloverWork;
+  // Create new task with combined work
+  const totalWork = baseWork + spilloverWork;
   const taskName = `Bookkeeping ${prevSeason} ${prevYear}`;
 
   taskManager.addCompletionTask(
@@ -54,16 +62,15 @@ export function bookkeeping() {
       addConsoleMessage(`${taskName} completed successfully!`);
     },
     null,
-    { prevSeason, prevYear, spilloverWork }
+    { prevSeason, prevYear }
   );
 }
 
-// Add this function in the administration.js file
 export function hiringTaskFunction(task, mode) {
     if (mode === 'initialize') {
         const taskName = `Hiring Task`;
-        const workTotal = 100; // Example work total, adjust as needed
-        const iconPath = '/assets/icon/icon_hiring.webp'; // An icon specific to the hiring task
+        const workTotal = 100;
+        const iconPath = '/assets/icon/icon_hiring.webp';
         return {
             taskName,
             workTotal,
@@ -71,21 +78,18 @@ export function hiringTaskFunction(task, mode) {
             taskType: 'Administration'
         };
     } else if (mode === 'update') {
-        const additionalWork = 80; // Example additional work, adjust as needed
+        const additionalWork = 80;
         return additionalWork;
     }
-
-    // Apply work if task execution
     const workApplied = calculateWorkApplied(task.staff || [], 'hiringTaskFunction');
     return workApplied;
 }
 
 export function maintenanceTaskFunction(task, mode) {
   if (mode === 'initialize') {
-    // Setup for a maintenance task upon building creation
     const taskName = `Building & Maintenance`;
-    const workTotal = 1000; // Example work total
-    const iconPath = '/assets/icon/icon_maintenance.webp'; // Path to maintenance task icon
+    const workTotal = 1000;
+    const iconPath = '/assets/icon/icon_maintenance.webp';
 
     return {
       taskName,
@@ -94,11 +98,10 @@ export function maintenanceTaskFunction(task, mode) {
       taskType: 'Building & Maintenance'
     };
   } else if (mode === 'update') {
-    const additionalWork = 10; // Example additional work on update
+    const additionalWork = 10;
     return additionalWork;
   }
 
-  // Calculate the actual work done by applying staff and tool effects
   const workApplied = calculateWorkApplied(task.staff || [], 'maintenanceTaskFunction');
   return workApplied;
 }
