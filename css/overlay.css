@@ -307,21 +307,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 #hiring-section .staff-options-container,
 #staff-details-section .staff-options-container {
   display: block;
-  max-width: 400px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 15px;
 }
 
 #staff-details-section .staff-option {
-  margin-bottom: 15px;
-  max-width: 320px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-#staff-details-section .skills-table {
-  width: 100%;
-  min-width: 0;
+  margin-bottom: 20px;
 }
 
 /* Box around 'Staff option' */
