@@ -5,13 +5,11 @@ import taskManager, { TaskType } from './taskManager.js';
 
 
 export function bookkeeping() {
+  const { week, season: currentSeason, year: currentYear } = getGameState();
   const seasons = ['Winter', 'Spring', 'Summer', 'Fall'];
-  const currentSeason = localStorage.getItem('season');
-  const currentYear = parseInt(localStorage.getItem('year'), 10);
-  const currentWeek = parseInt(localStorage.getItem('week'), 10);
 
   // Only trigger on first week of new season
-  if (currentWeek !== 1) return;
+  if (week !== 1) return;
 
   // Get previous season and year
   const prevSeasonIndex = (seasons.indexOf(currentSeason) - 1 + 4) % 4;
