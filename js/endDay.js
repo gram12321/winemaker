@@ -9,7 +9,6 @@ import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, update
 import taskManager from './taskManager.js';
 import { finalizePlanting } from './overlays/plantingOverlay.js';
 import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
-import { bookkeeping } from './administration.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -18,22 +17,17 @@ export function incrementWeek() {
     let { week, season, year } = gameState;
     let currentSeasonIndex = SEASONS.indexOf(season);
 
-    // Increment the week
-    week += 1;
-
     // Process all running tasks
     taskManager.processWeek();
+
+    // Increment the week
+    week += 1;
 
     // Check if the week exceeds 12, which indicates a change of season
     if (week > 12) {
         week = 1;
         currentSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length;
         season = SEASONS[currentSeasonIndex];
-    }
-
-    // Run bookkeeping task on first week of any season
-    if (week === 1) {
-        bookkeeping();
     }
 
     // Only increment the year if we are back to the first week of Spring
