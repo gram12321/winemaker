@@ -1,6 +1,6 @@
 
 // Company prestige and management functions
-import { loadStaff } from './database/adminFunctions.js';
+import { loadStaff, loadFarmlands } from './database/adminFunctions.js';
 
 export function getMoney() {
   return parseFloat(localStorage.getItem('money') || '0');
@@ -15,7 +15,7 @@ export function calculateRealPrestige(prestigeHit = 0, farmlands = null) {
   const moneyPrestige = money / 10000000;
 
   if (!farmlands) {
-    farmlands = JSON.parse(localStorage.getItem('ownedFarmlands') || '[]');
+    farmlands = loadFarmlands();
   }
 
   const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
