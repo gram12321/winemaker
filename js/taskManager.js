@@ -77,9 +77,7 @@ class TaskManager {
     }
 
     processWeek() {
-        // Check for date-triggered tasks before processing regular tasks
-        this.checkDateTriggeredTasks();
-        
+        // Get current tasks state before processing the week
         const staffTaskCount = new Map();
 
         // Count the number of tasks each staff member is assigned to

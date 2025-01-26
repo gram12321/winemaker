@@ -17,6 +17,9 @@ export function incrementWeek() {
     let { week, season, year } = gameState;
     let currentSeasonIndex = SEASONS.indexOf(season);
 
+    // Check for date-triggered tasks first
+    taskManager.checkDateTriggeredTasks();
+    
     // Process all running tasks
     taskManager.processWeek();
 
