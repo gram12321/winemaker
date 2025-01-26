@@ -49,12 +49,13 @@ function setupStaffOverlayEventListeners(overlay) {
 
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
     if (hireStaffBtn) {
-        //Assuming taskManager and TaskType are defined elsewhere
         hireStaffBtn.addEventListener('click', () => {
+            const workRequired = 10;
+            addConsoleMessage(`Started searching for potential candidates. HR department needs ${workRequired} work units to complete the search.`);
             taskManager.addCompletionTask(
                 'Hiring Process',
                 TaskType.administration,
-                10, // Small amount of work required
+                workRequired,
                 (target, params) => {
                     showHireStaffOverlay();
                 },
