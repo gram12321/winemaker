@@ -47,7 +47,11 @@ export function bookkeeping() {
   if (existingTasks.length > 0) {
     const prestigeHit = -0.1 * existingTasks.length;
     localStorage.setItem('prestigeHit', (parseFloat(localStorage.getItem('prestigeHit') || 0) + prestigeHit).toString());
-    addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige!`, false, true);
+    const totalSpillover = existingTasks.reduce((total, task) => {
+      const remainingWork = task.totalWork - task.appliedWork;
+      return total + (remainingWork * 1.1);
+    }, 0);
+    addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige! Lost ${Math.abs(prestigeHit).toFixed(2)} prestige points. ${formatNumber(totalSpillover, 1)} work units added as penalty to the new task.`, false, true);
   }
 
   // Create new task with combined work
