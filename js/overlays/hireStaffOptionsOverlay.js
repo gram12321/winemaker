@@ -71,6 +71,9 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
         const totalCost = numberOfCandidates * costPerCandidate;
         const workRequired = 10 * numberOfCandidates;
 
+        // Add transaction for search cost
+        addTransaction('Expense', `Staff Search Cost (${numberOfCandidates} candidates)`, -totalCost);
+
         taskManager.addCompletionTask(
             'Staff Search',
             TaskType.administration,
