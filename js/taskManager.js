@@ -3,6 +3,8 @@ import { updateAllDisplays } from './displayManager.js';
 import { showStaffOverlay } from './overlays/showstaffoverlay.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass } from './utils.js';
+import { bookkeeping } from './administration.js';
+
 
 // Define task types as constants
 export const TaskType = {
@@ -70,7 +72,7 @@ class TaskManager {
 
     checkDateTriggeredTasks() {
         // Check for tasks that should be triggered based on game date
-        Bookkeeping();
+        bookkeeping();
         // Add more date-triggered tasks here as needed
     }
 

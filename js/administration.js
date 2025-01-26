@@ -1,7 +1,8 @@
 import { addConsoleMessage } from '/js/console.js';
 import { extractSeasonAndYear } from './utils.js'; // Import the function
+import taskManager, { TaskType } from './taskManager.js';
 
-export function Bookkeeping() {
+export function bookkeeping() {
   const seasons = ['Winter', 'Spring', 'Summer', 'Fall'];
   const currentSeason = localStorage.getItem('season');
   const currentYear = parseInt(localStorage.getItem('year'), 10);

@@ -2,7 +2,7 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js'; // Ensure this import is present
 import { Staff, createNewStaff, getLastNameForNationality } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
-import { bookkeepingTaskFunction, hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
+import { hiringTaskFunction, maintenanceTaskFunction } from '/js/administration.js';
 import { inventoryInstance } from '/js/resource.js';
 import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
 import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
