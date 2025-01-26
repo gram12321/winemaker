@@ -31,8 +31,8 @@ export function incrementWeek() {
         season = SEASONS[currentSeasonIndex];
     }
 
-    // Run bookkeeping task after season is updated
-    if (week === 1) {
+    // Run bookkeeping task after season is updated, but only for new seasons
+    if (currentSeasonIndex === 0 && week === 1) {
         bookkeeping();
     }
 
