@@ -4,6 +4,7 @@ import { formatNumber } from '../utils.js';
 import { showHireStaffOverlay } from './hirestaffoverlay.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
+import { addTransaction} from '../finance.js'
 
 export function showHireStaffOptionsOverlay() {
     const overlayContainer = showStandardOverlay(createHireStaffOptionsHTML());
