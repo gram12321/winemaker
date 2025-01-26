@@ -108,7 +108,6 @@ export function createNewStaff() {
   const newStaff = new Staff(firstName, lastName, skills);
   newStaff.workforce = 50;
   newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
-  updateWagesAndRecurringTransaction(); // Update recurring transaction when new staff is created
   return newStaff;
 }
 
