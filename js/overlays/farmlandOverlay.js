@@ -16,7 +16,7 @@ export function showFarmlandOverlay(farmlandData) {
     console.error('Farmland overlay element not found.');
     return;
   }
-  overlay.style.zIndex = '2050'; // Ensure overlay stays above the console
+  
   const details = document.getElementById('farmland-details');
   details.innerHTML = ''; // Clear existing details
 
