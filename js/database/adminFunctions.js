@@ -7,6 +7,9 @@ import { inventoryInstance } from '/js/resource.js';
 import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
 import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
 import { performFermentation } from '../wineprocessing.js'; // Import the centralized function
+import { Building, updateBuildingCards, updateBuildButtonStates } from '../buildings.js';
+import { formatNumber } from '../utils.js';
+import { addConsoleMessage } from '../console.js';
 
 
 async function clearFirestore() {
@@ -437,6 +440,28 @@ export function loadTasks() {
 // Helper function to get the appropriate callback based on task name and type
 function getTaskCallback(taskName, taskType) {
   switch (taskName.toLowerCase()) {
+    case 'building & maintenance':
+      return (target, params) => {
+        if (params.buildingCost) {  // This is a new building task
+          const newBuilding = new Building(target);
+          const buildings = loadBuildings();
+          buildings.push(newBuilding);
+          storeBuildings(buildings);
+          addConsoleMessage(`${target} has been built successfully. Cost: €${formatNumber(params.buildingCost)}. Capacity: ${newBuilding.capacity}`);
+        } else if (params.upgradeCost) {  // This is an upgrade task
+          const buildings = loadBuildings();
+          const buildingToUpgrade = buildings.find(b => b.name === target);
+          if (buildingToUpgrade) {
+            const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.tools || []);
+            building.upgrade();
+            const updatedBuildings = buildings.map(b => b.name === target ? building : b);
+            storeBuildings(updatedBuildings);
+            addConsoleMessage(`${target} has been upgraded to level ${building.level}. Cost: €${formatNumber(params.upgradeCost)}. New Capacity: ${building.capacity}`);
+          }
+        }
+        updateBuildingCards();
+        updateBuildButtonStates();
+      };
     case 'planting':
       return (target, progress, params) => {
         // Planting callback logic
