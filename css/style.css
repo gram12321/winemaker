@@ -277,7 +277,7 @@ input[type="radio"]:hover {
 .skill-bar-outer {
   width: 100%;
   background-color: var(--color-background);
-  border: 1px solid var(--color-accent);
+  border: 0px solid var(--color-accent);
   height: 22px;
   position: relative;
 }
