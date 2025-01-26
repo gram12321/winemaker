@@ -1,3 +1,13 @@
+// Import all necessary display functions
+import { renderCompanyInfo } from './company.js';
+import { displayFarmland } from './overlays/mainpages/landoverlay.js';
+import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
+import { displayStaff } from './staff.js';
+import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
+import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
+import { updateVineyardTable } from './overlays/mainpages/vineyardoverlay.js';
+import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
+import { loadCashFlow, updateIncomeStatement } from './finance.js';
 
 // Central function to update all displays
 export function updateAllDisplays() {
@@ -66,13 +76,3 @@ export function updateAllDisplays() {
     }
 }
 
-// Import all necessary display functions
-import { renderCompanyInfo } from './database/loadSidebar.js';
-import { displayFarmland } from './overlays/mainpages/landoverlay.js';
-import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
-import { displayStaff } from './staff.js';
-import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
-import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
-import { updateVineyardTable } from './overlays/mainpages/vineyardoverlay.js';
-import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
-import { loadCashFlow, updateIncomeStatement } from './finance.js';

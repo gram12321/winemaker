@@ -1,8 +1,4 @@
-import { saveCompanyInfo, clearLocalStorage, loadFarmlands, getGameState, getMoney, getCompanyName } from './adminFunctions.js';
-import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
-import { Farmland } from '../farmland.js'; // Ensure the correct path
-import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
-import { showAdminOverlay } from '../overlays/mainpages/adminoverlay.js';
+import { saveCompanyInfo, clearLocalStorage } from './adminFunctions.js';
 import { showBuildingsOverlay } from '/js/overlays/mainpages/buildingsoverlay.js';
 import { showLandOverlay } from '/js/overlays/mainpages/landoverlay.js';
 import { showInventoryOverlay } from '/js/overlays/mainpages/inventoryoverlay.js';
@@ -12,7 +8,8 @@ import { showWineryOverlay } from '/js/overlays/mainpages/wineryoverlay.js';
 import { showSalesOverlay } from '../overlays/mainpages/salesoverlay.js';
 import { showMainOfficeOverlay } from '../overlays/mainpages/mainofficeoverlay.js';
 import { incrementWeek } from '../endDay.js';
-import { calculateRealPrestige } from '../company.js';
+import { renderCompanyInfo  } from '../company.js';
+
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {
@@ -197,47 +194,3 @@ export function initializeSidebar() {
         .catch(error => console.error('Error loading sidebar:', error));
 }
 
-export function renderCompanyInfo() {
-    const companyInfoDiv = document.getElementById('companyInfo');
-    const companyName = getCompanyName();
-    const money = getMoney();
-    const { week, season, year } = getGameState();
-    const prestige = calculateRealPrestige(); // Get real-time calculated prestige
-
-    if (companyInfoDiv && companyName) {
-        const tooltipContent = `Company: ${companyName.charAt(0).toUpperCase() + companyName.slice(1)}
-Week ${week}, ${season}, ${year}
-Money: € ${formatNumber(money, 0)}
-Prestige: ${formatNumber(prestige, 2)}`;
-
-        companyInfoDiv.setAttribute('data-tooltip', tooltipContent);
-        const formattedCompanyName = companyName.charAt(0).toUpperCase() + companyName.slice(1);
-        companyInfoDiv.innerHTML = `
-          <div class="company-name" title="${formattedCompanyName}">
-            <span class="full-name">${formattedCompanyName}</span>
-            <span class="short-name">${formattedCompanyName.charAt(0)}</span>
-          </div>
-          <div class="styled-line"></div>
-
-          <div class="info-item" title="Current Game Date">
-            <span class="info-label"><img src="/assets/icon/small/sun.png" alt="Date Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content">Week ${week}, ${season}, ${year}</span>
-          </div>
-
-          <div class="info-item" title="Available Company Funds">
-            <span class="info-label"><img src="/assets/icon/small/gold.png" alt="Money Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content">€ ${formatNumber(money, 0)}</span>
-          </div>
-          <div class="info-item" title="Company Prestige">
-            <span class="info-label"><img src="/assets/icon/small/prestige.png" alt="Prestige Icon" style="width:24px; height:24px; margin-left:8px; margin-right:8px;"></span>
-            <span class="info-content"> ${formatNumber(prestige, 2)}</span>
-          </div>
-          <div class="styled-line"></div>
-        `;
-    }
-
-    const dropdownToggle = document.querySelector('#navbarDropdown');
-    if (companyName && dropdownToggle) {
-        dropdownToggle.textContent = companyName.charAt(0).toUpperCase() + companyName.slice(1);
-    }
-}

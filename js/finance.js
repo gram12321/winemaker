@@ -1,7 +1,7 @@
 
 // Import required utilities and functions
 import { formatNumber } from './utils.js';
-import { renderCompanyInfo } from './database/loadSidebar.js';
+import { renderCompanyInfo } from './company.js';
 import { saveCompanyInfo } from './database/adminFunctions.js';
 import { Building} from './buildings.js';
 import { inventoryInstance } from './resource.js';
