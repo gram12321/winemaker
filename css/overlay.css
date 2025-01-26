@@ -295,10 +295,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 
 
-#farmland-details .staff-options-container {
+.staff-options-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+  width: 100%;
 }
 
 .staff-options-container .staff-option {
