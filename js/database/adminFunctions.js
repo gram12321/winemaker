@@ -7,6 +7,7 @@ import { inventoryInstance } from '/js/resource.js';
 import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
 import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
 import { performFermentation } from '../wineprocessing.js'; // Import the centralized function
+import { showHireStaffOverlay } from '../overlays/hirestaffoverlay.js';
 import { Building, updateBuildingCards, updateBuildButtonStates } from '../buildings.js';
 import { formatNumber } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
@@ -477,6 +478,10 @@ function getTaskCallback(taskName, taskType) {
           displayFarmland(); // Now properly imported
         }
       };
+    case 'staff search':
+      return (target, params) => {
+        showHireStaffOverlay(params.numberOfCandidates);
+      };
     case 'hiring process':
       return (target, params) => {
         const { staff, hiringExpense } = params;
@@ -484,6 +489,8 @@ function getTaskCallback(taskName, taskType) {
         staffMembers.push(staff);
         saveStaff(staffMembers);
         addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+        const flagIconHTML = getFlagIconHTML(staff.nationality);
+        addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
       };
     case 'harvesting':
       return (target, progress, params) => {
