@@ -37,33 +37,6 @@ export function incrementWeek() {
     }
 
     // Only increment the year if we are back to the first week of Spring
-
-function updateSeasonStart(season) {
-    const tasks = loadTasks();
-    
-    // Winter-specific updates
-    if (season === 'Winter') {
-        tasks.forEach((task, taskId) => {
-            if (task.name.toLowerCase().includes('harvest') || task.name.toLowerCase().includes('planting')) {
-                if (task.name.toLowerCase().includes('planting')) {
-                    handleIncompletePlantingTask(task);
-                }
-                taskManager.cancelTask(taskId);
-                addConsoleMessage(`${task.name} task for ${task.target.name} has been cancelled due to season change to Winter.`);
-            }
-        });
-    }
-    
-    // Add other season-specific updates here
-    // Example:
-    // if (season === 'Spring') { ... }
-    // if (season === 'Summer') { ... }
-    // if (season === 'Fall') { ... }
-    
-    saveTasks(tasks);
-}
-</new_str>
-
     if (currentSeasonIndex === 0 && week === 1) {
         year += 1;
     }
@@ -92,9 +65,9 @@ function updateSeasonStart(season) {
 
     processRecurringTransactions(week);
 
-    // Update when any season starts
-    if (week === 1) {
-        updateSeasonStart(season);
+    // Update only when winter starts
+    if (season === 'Winter' && week === 1) {
+        updateWinter();
     }
 }
 
