@@ -1,5 +1,5 @@
 
-import { createNewStaff, updateWagesAndRecurringTransaction  } from '../staff.js';
+import { createNewStaff, setupStaffWagesRecurringTransaction  } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
