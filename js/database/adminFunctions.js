@@ -42,6 +42,11 @@ async function clearLocalStorage() {
   localStorage.removeItem('transactions'); // Clear transactions data
   localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
   localStorage.removeItem('activeTasks'); // Clear active tasks
+
+export function getTransactions() {
+  return JSON.parse(localStorage.getItem('transactions')) || [];
+}
+
   console.log("Local storage cleared.");
 }
 
@@ -479,13 +484,6 @@ function getTaskCallback(taskName, taskType) {
       };
     case 'crushing':
       return (target, progress, params = {}) => {
-
-        }
-
-export function getTransactions() {
-  return JSON.parse(localStorage.getItem('transactions')) || [];
-
-
         if (!params.lastProgress) params.lastProgress = 0;
         const mustAmount = params.totalGrapes * 0.6;
         const processedAmount = mustAmount * (progress - params.lastProgress);
