@@ -17,14 +17,14 @@ export function incrementWeek() {
     let { week, season, year } = gameState;
     let currentSeasonIndex = SEASONS.indexOf(season);
 
-    // Check for date-triggered tasks first
+    // Increment the week first
+    week += 1;
+
+    // Check for date-triggered tasks after week increment
     taskManager.checkDateTriggeredTasks();
     
     // Process all running tasks
     taskManager.processWeek();
-
-    // Increment the week
-    week += 1;
 
     // Check if the week exceeds 12, which indicates a change of season
     if (week > 12) {
