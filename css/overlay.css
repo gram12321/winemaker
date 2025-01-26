@@ -260,36 +260,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* staff - - - - - -*/
-#farmland-details .table {
-  margin: 0;
-  background-color: var(--color-background);
-  color: var(--color-text);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-#farmland-details .table th {
-  background-color: var(--color-primary);
-  color: #fff;
-  border-bottom: 2px solid var(--color-accent);
-  padding: 12px;
-  font-weight: 500;
-}
-
-#farmland-details .table td {
-  padding: 12px;
-  border-color: rgba(197, 165, 114, 0.2);
-}
-
-#farmland-details .table tbody tr:nth-child(even) {
-  background-color: rgba(197, 165, 114, 0.05);
-}
-
-#farmland-details .table tbody tr:hover {
-  background-color: rgba(197, 165, 114, 0.1);
-}
-
-
 
 .skills-table {
   width: auto;
@@ -325,37 +295,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
   transition: background-color 0.2s ease;
 }
 
-#farmland-details .hire-staff-content {
-  background-color: var(--color-background);
-  padding: 20px;
-  margin: 60px auto;
-  width: 90%;
-  max-width: 1000px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: relative;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
 #farmland-details .staff-options-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
 }
-
-#farmland-details .staff-option {
-  border: 2px solid var(--color-accent);
-  padding: 15px;
-  border-radius: 12px;
-  background: var(--color-background);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.staff-options-container .staff-option {
-  border: 2px solid var(--color-accent);
-  border-radius: 12px;
 
 /* 4. Stats Overlays */
 .stats-overlay {
@@ -450,12 +394,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .staff-option .color-class-2 { color: #FF4500 !important; }  /* Orange Red */
 .staff-option .color-class-1 { color: #FF0000 !important; }  /* Red */
 .staff-option .color-class-0 { color: #8B0000 !important; }  /* Dark Red */
-
-#farmland-details h4 {
-  color: var(--color-primary);
-  margin: 15px 0;
-  font-weight: 500;
-}
 
 #hireStaffOverlay {
   display: none;
