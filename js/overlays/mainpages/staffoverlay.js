@@ -54,7 +54,7 @@ function setupStaffOverlayEventListeners(overlay) {
             const workRequired = 10;
             addConsoleMessage(`Started searching for potential candidates. HR department needs ${workRequired} work units to complete the search.`);
             taskManager.addCompletionTask(
-                'Hiring Process',
+                'Staff Search',
                 TaskType.administration,
                 workRequired,
                 (target, params) => {
