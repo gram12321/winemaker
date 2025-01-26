@@ -259,6 +259,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.1);
 }
 
+/* 4. Skills tables style */
+
 .skills-table {
   width: auto;
   table-layout: auto;
@@ -293,8 +295,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
   transition: background-color 0.2s ease;
 }
 
-
-
 /* Base grid layout for staff options containers */
 .staff-options-container {
   display: grid;
@@ -302,17 +302,17 @@ input[type="range"]::-webkit-slider-thumb:hover {
   gap: 20px;
 }
 
-/* Override for hire staff overlay */
+/* Override grid view for for hire staff overlay and showstaffoverlay*/
 #hiring-section .staff-options-container {
   display: block;
 }
 
-/* Consistent staff option styling */
+/* Box around 'Staff option' */
 .staff-options-container .staff-option {
   border: 2px solid var(--color-accent);
   border-radius: 12px;
 
-/* 4. Stats Overlays */
+/* 5. Stats Overlays */
 .stats-overlay {
   position: fixed;
   top: 50%;
