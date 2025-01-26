@@ -2,6 +2,7 @@ import { displayStaff } from '/js/staff.js';
 import { showHireStaffOverlay } from '/js/overlays/hirestaffoverlay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import taskManager, { TaskType } from '../../taskManager.js';
+import { addConsoleMessage } from '../../console.js';
 
 export function showStaffOverlay() {
     const overlay = showMainViewOverlay(createStaffOverlayHTML());
