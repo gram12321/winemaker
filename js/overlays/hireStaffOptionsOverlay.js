@@ -84,7 +84,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
             null,
             { numberOfCandidates },
             () => {
-                addConsoleMessage(`Started searching for ${numberOfCandidates} potential candidates. HR department needs ${workRequired} work units to complete the search.`);
+                addConsoleMessage(`Started searching for ${numberOfCandidates} potential candidates (Cost: €${formatNumber(totalCost)}). HR department needs ${workRequired} work units to complete the search.`);
                 hideOverlay(overlayContainer);
             }
         );
