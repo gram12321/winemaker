@@ -2,7 +2,7 @@
 import { addConsoleMessage } from '/js/console.js';
 import { extractSeasonAndYear, formatNumber } from './utils.js';
 import taskManager, { TaskType } from './taskManager.js';
-import { getGameState } from './database/adminFunctions.js';
+import { getGameState, getTransactions } from './database/adminFunctions.js';
 
 
 
@@ -19,7 +19,7 @@ export function bookkeeping() {
   const prevYear = prevSeasonIndex === 3 ? currentYear - 1 : currentYear;
 
   // Get transactions from previous season
-  const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+  const transactions = getTransactions();
   const prevSeasonTransactions = transactions.filter(transaction => {
     const { season, year } = extractSeasonAndYear(transaction.date);
     return season === prevSeason && year === prevYear;
