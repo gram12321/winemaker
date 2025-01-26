@@ -22,6 +22,9 @@ function createHireStaffHTML(createdStaffOptions) {
                 <h3 class="h5 mb-0">Hire Staff</h3>
                 <button class="close-btn btn btn-alternative btn-sm">Close</button>
             </div>
+            <div class="p-3 text-center">
+                <p>HR Department has completed search for candidates for our new staff addition. These are the possible candidates:</p>
+            </div>
             <div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; overflow-y: auto; max-height: 80vh;">
                 ${createdStaffOptions.map((staff, index) => `
                     <div class="staff-option">
