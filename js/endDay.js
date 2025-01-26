@@ -20,8 +20,6 @@ export function incrementWeek() {
     // Increment the week first
     week += 1;
 
-    // Check for date-triggered tasks after week increment
-    taskManager.checkDateTriggeredTasks();
     
     // Process all running tasks
     taskManager.processWeek();
@@ -65,6 +63,11 @@ export function incrementWeek() {
     // Update only when winter starts
     if (season === 'Winter' && week === 1) {
         updateWinter();
+    }
+
+    // Runs every 1. week of every season (Trickkers Bookkeeping task needs to run though the taskmanager to check for last weeks work for penalty calculation )
+    if (week === 1) {
+            taskManager.checkDateTriggeredTasks();
     }
 }
 
