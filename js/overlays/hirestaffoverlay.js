@@ -107,7 +107,7 @@ function hireSelectedStaff(staff) {
             saveStaff(staffMembers);
 
             addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
-            updateWagesAndRecurringTransaction(); // Update wages after staff is actually hired
+            setupStaffWagesRecurringTransaction(); // Update wages after staff is actually hired
             const flagIconHTML = getFlagIconHTML(staff.nationality);
             addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
         },

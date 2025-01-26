@@ -206,16 +206,7 @@ function calculateTotalStaffWages() {
     return staffMembers.reduce((total, staff) => total + staff.wage, 0);
 }
 
-export function updateWagesAndRecurringTransaction() {
-    const totalWages = calculateTotalStaffWages();
-    const frequencyInWeeks = 1; // Weekly frequency
-    const description = 'Weekly Staff Wages';
-
-    addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
-    console.log(`Updated recurring transaction for staff wages: €${totalWages} every ${frequencyInWeeks} week(s).`);
-}
-
-// Initial wage setup. Use updateWagesAndRecurringTransaction to update wage and recurring transaction
+// Initial wage setup
 
 export function setupStaffWagesRecurringTransaction() {
     const totalWages = calculateTotalStaffWages();
