@@ -7,8 +7,7 @@ import { addTransaction } from '../finance.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 
-export function showHireStaffOverlay() {
-    const numberOfOptions = 5;
+export function showHireStaffOverlay(numberOfOptions = 5) {
     const createdStaffOptions = Array.from({length: numberOfOptions}, () => createNewStaff());
     const overlayContainer = showStandardOverlay(createHireStaffHTML(createdStaffOptions));
     setupHireStaffEventListeners(overlayContainer, createdStaffOptions);

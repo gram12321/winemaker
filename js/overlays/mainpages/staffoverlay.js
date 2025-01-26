@@ -1,5 +1,5 @@
 import { displayStaff } from '/js/staff.js';
-import { showHireStaffOverlay } from '/js/overlays/hirestaffoverlay.js';
+import { showHireStaffOptionsOverlay } from '/js/overlays/hireStaffOptionsOverlay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import taskManager, { TaskType } from '../../taskManager.js';
 import { addConsoleMessage } from '../../console.js';
@@ -51,18 +51,7 @@ function setupStaffOverlayEventListeners(overlay) {
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', () => {
-            const workRequired = 10;
-            addConsoleMessage(`Started searching for potential candidates. HR department needs ${workRequired} work units to complete the search.`);
-            taskManager.addCompletionTask(
-                'Staff Search',
-                TaskType.administration,
-                workRequired,
-                (target, params) => {
-                    showHireStaffOverlay();
-                },
-                null,
-                {}
-            );
+            showHireStaffOptionsOverlay();
         });
     }
 }
