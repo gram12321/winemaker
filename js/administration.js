@@ -71,24 +71,7 @@ export function bookkeeping() {
   );
 }
 
-export function hiringTaskFunction(task, mode) {
-    if (mode === 'initialize') {
-        const taskName = `Hiring Task`;
-        const workTotal = 100;
-        const iconPath = '/assets/icon/icon_hiring.webp';
-        return {
-            taskName,
-            workTotal,
-            iconPath,
-            taskType: 'Administration'
-        };
-    } else if (mode === 'update') {
-        const additionalWork = 80;
-        return additionalWork;
-    }
-    const workApplied = calculateWorkApplied(task.staff || [], 'hiringTaskFunction');
-    return workApplied;
-}
+
 
 export function maintenanceTaskFunction(task, mode) {
   if (mode === 'initialize') {
