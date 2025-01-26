@@ -46,12 +46,14 @@ export function bookkeeping() {
   const totalWork = (prevSeasonTransactions.length * 10) + spilloverWork;
   const taskName = `Bookkeeping ${prevSeason} ${prevYear}`;
 
-  taskManager.addCompletionTask(
+  taskManager.addProgressiveTask(
     taskName,
     TaskType.administration,
     totalWork,
-    (target, params) => {
-      addConsoleMessage(`${taskName} completed successfully!`);
+    (target, progress, params) => {
+      if (progress >= 1) {
+        addConsoleMessage(`${taskName} completed successfully!`);
+      }
     },
     null,
     { prevSeason, prevYear }
