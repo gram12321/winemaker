@@ -262,7 +262,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 /* 4. Skills tables style */
 
 .skills-table {
-  width: auto;
+  width: fit-content;
   table-layout: auto;
   border-collapse: collapse;
   margin: 15px auto;
@@ -270,6 +270,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background-color: var(--color-background);
   border: 1px solid var(--color-accent);
   box-shadow: var(--shadow-sm);
+  min-width: 200px;
 }
 
 .skills-table th,
@@ -306,6 +307,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 #hiring-section .staff-options-container,
 #staff-details-section .staff-options-container {
   display: block;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#staff-details-section .staff-option {
+  margin-bottom: 20px;
 }
 
 /* Box around 'Staff option' */
