@@ -1,11 +1,12 @@
 
-import { createNewStaff } from '../staff.js';
+import { createNewStaff, updateWagesAndRecurringTransaction  } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
+
 
 export function showHireStaffOverlay(numberOfOptions = 5) {
     const createdStaffOptions = Array.from({length: numberOfOptions}, () => createNewStaff());

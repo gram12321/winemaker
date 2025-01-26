@@ -9,7 +9,7 @@ import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the 
 import { performFermentation } from '../wineprocessing.js'; // Import the centralized function
 import { showHireStaffOverlay } from '../overlays/hirestaffoverlay.js';
 import { Building, updateBuildingCards, updateBuildButtonStates } from '../buildings.js';
-import { formatNumber } from '../utils.js';
+import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 
 
