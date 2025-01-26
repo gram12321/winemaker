@@ -2,7 +2,6 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js'; // Ensure this import is present
 import { Staff, createNewStaff, getLastNameForNationality } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
-import { maintenanceTaskFunction } from '/js/administration.js';
 import { inventoryInstance } from '/js/resource.js';
 import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
 import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
@@ -11,7 +10,7 @@ import { showHireStaffOverlay } from '../overlays/hirestaffoverlay.js';
 import { Building, updateBuildingCards, updateBuildButtonStates } from '../buildings.js';
 import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
-
+import { setupStaffWagesRecurringTransaction } from '../staff.js';
 
 async function clearFirestore() {
   if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -491,6 +490,7 @@ function getTaskCallback(taskName, taskType) {
         addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
         const flagIconHTML = getFlagIconHTML(staff.nationality);
         addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
+        setupStaffWagesRecurringTransaction();
       };
     case 'harvesting':
       return (target, progress, params) => {

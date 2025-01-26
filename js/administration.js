@@ -1,10 +1,8 @@
-
 import { addConsoleMessage } from '/js/console.js';
 import { extractSeasonAndYear, formatNumber } from './utils.js';
 import taskManager, { TaskType } from './taskManager.js';
 import { getGameState, getTransactions } from './database/adminFunctions.js';
-
-
+import { calculateRealPrestige } from './company.js'; // Add this import
 
 export function bookkeeping() {
   const { week, season: currentSeason, year: currentYear } = getGameState();
@@ -46,13 +44,14 @@ export function bookkeeping() {
 
   // Apply prestige penalty if there were incomplete tasks
   if (existingTasks.length > 0) {
-    const prestigeHit = -0.1 * existingTasks.length;
+    const currentPrestige = calculateRealPrestige();
+    const prestigeHit = -(currentPrestige * 0.1); // Take 10% of current prestige as penalty
     localStorage.setItem('prestigeHit', (parseFloat(localStorage.getItem('prestigeHit') || 0) + prestigeHit).toString());
     const penaltyAmount = existingTasks.reduce((total, task) => {
       const remainingWork = task.totalWork - task.appliedWork;
       return total + (remainingWork * 0.1); // Just the 10% penalty
     }, 0);
-    addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige! Lost ${Math.abs(prestigeHit).toFixed(2)} prestige points. ${formatNumber(penaltyAmount, 1)} extra work units added as penalty to the new task.`, false, true);
+    addConsoleMessage(`Incomplete bookkeeping tasks have affected company prestige! Lost ${Math.abs(prestigeHit).toFixed(2)} prestige points (10% of current prestige). ${formatNumber(penaltyAmount, 1)} extra work units added as penalty to the new task.`, false, true);
   }
 
   // Create new task with combined work
@@ -71,25 +70,56 @@ export function bookkeeping() {
   );
 }
 
+export function maintenanceBuildings() {
+    const { week, season, year } = getGameState();
+    
+    // Only trigger on first week of Spring
+    if (week !== 1 || season !== 'Spring') return;
 
+    const buildings = JSON.parse(localStorage.getItem('buildings') || '[]');
+    const existingTasks = taskManager.getAllTasks().filter(task => 
+        task.name.startsWith('Maintain') && task.type === 'completion'
+    );
 
-export function maintenanceTaskFunction(task, mode) {
-  if (mode === 'initialize') {
-    const taskName = `Building & Maintenance`;
-    const workTotal = 1000;
-    const iconPath = '/assets/icon/icon_maintenance.webp';
+    // Calculate spillover work with 10% penalty for each building
+    const spilloverByBuilding = {};
+    const currentPrestige = calculateRealPrestige();
+    
+    existingTasks.forEach(task => {
+        const buildingName = task.target.name;
+        const remainingWork = task.totalWork - task.appliedWork;
+        spilloverByBuilding[buildingName] = (spilloverByBuilding[buildingName] || 0) + (remainingWork * 1.1);
 
-    return {
-      taskName,
-      workTotal,
-      iconPath,
-      taskType: 'Building & Maintenance'
-    };
-  } else if (mode === 'update') {
-    const additionalWork = 10;
-    return additionalWork;
-  }
+        // Each unmaintained building causes a 10% prestige hit
+        const prestigeHit = -(currentPrestige * 0.1);
+        localStorage.setItem('prestigeHit', 
+            (parseFloat(localStorage.getItem('prestigeHit') || 0) + prestigeHit).toString()
+        );
+        
+        addConsoleMessage(
+            `Incomplete maintenance of ${buildingName} has affected company prestige! Lost ${Math.abs(prestigeHit).toFixed(2)} prestige points (10% of current prestige). Next year's task will include ${formatNumber(remainingWork * 1.1, 1)} additional work units as penalty.`,
+            false, true
+        );
+        taskManager.removeTask(task.id);
+    });
 
-  const workApplied = calculateWorkApplied(task.staff || [], 'maintenanceTaskFunction');
-  return workApplied;
+    buildings.forEach(building => {
+        const baseWork = 100;
+        const levelMultiplier = Math.pow(1.2, building.level);
+        const spilloverWork = spilloverByBuilding[building.name] || 0;
+        const totalWork = Math.round((baseWork * levelMultiplier) + spilloverWork);
+
+        const taskName = `Maintain ${building.name}`;
+
+        taskManager.addCompletionTask(
+            taskName,
+            TaskType.maintenance,
+            totalWork,
+            (target, params) => {
+                addConsoleMessage(`${taskName} completed successfully!`);
+            },
+            building,
+            { year }
+        );
+    });
 }

@@ -1,9 +1,9 @@
-import { loadStaff, saveTasks, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
+import { loadStaff, saveTasks, getGameState ,  loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { updateAllDisplays } from './displayManager.js';
 import { showStaffOverlay } from './overlays/showstaffoverlay.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass } from './utils.js';
-import { bookkeeping } from './administration.js';
+import { bookkeeping, maintenanceBuildings } from './administration.js'; // Update this line
 
 
 // Define task types as constants
@@ -71,9 +71,8 @@ class TaskManager {
     }
 
     checkDateTriggeredTasks() {
-        // Check for tasks that should be triggered based on game date
         bookkeeping();
-        // Add more date-triggered tasks here as needed
+        maintenanceBuildings(); // Add this line to trigger building maintenance
     }
 
     processWeek() {

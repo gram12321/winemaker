@@ -1,6 +1,5 @@
-
 // Company prestige and management functions
-import { getGameState, loadFarmlands } from './database/adminFunctions.js';
+import { getGameState, loadFarmlands, getPrestigeHit } from './database/adminFunctions.js';
 import { formatNumber } from './utils.js'; 
 
 
@@ -12,10 +11,11 @@ export function getCompanyName() {
   return localStorage.getItem('companyName');
 }
 
-export function calculateRealPrestige(prestigeHit = 0) {
+export function calculateRealPrestige() {
   const money = getMoney();
   const moneyPrestige = money / 10000000;
   const farmlands = loadFarmlands();
+  const prestigeHit = getPrestigeHit(); // Get current prestigeHit from storage
 
   const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
     return total + (farmland.farmlandPrestige || 0);
