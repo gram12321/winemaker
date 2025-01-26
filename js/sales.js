@@ -1,10 +1,11 @@
 import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
-import { setPrestigeHit, getPrestigeHit, calculateRealPrestige } from './database/adminFunctions.js';
+import { setPrestigeHit, getPrestigeHit } from './database/adminFunctions.js';
 import { loadWineOrders, removeWineOrder, addWineOrder } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { displayWineCellarInventory } from './overlays/mainpages/salesoverlay.js';
+import { calculateRealPrestige } from './company.js';
 
 export function sellWines(resourceName) {
     const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);

@@ -1,5 +1,4 @@
-import { saveCompanyInfo, clearLocalStorage, loadFarmlands, getGameState, getMoney, getCompanyName, 
-         getPrestigeHit, setPrestigeHit, calculateRealPrestige } from './adminFunctions.js';
+import { saveCompanyInfo, clearLocalStorage, loadFarmlands, getGameState, getMoney, getCompanyName } from './adminFunctions.js';
 import { formatNumber } from '../utils.js'; // Ensure the correct path to the utils file
 import { Farmland } from '../farmland.js'; // Ensure the correct path
 import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
@@ -13,6 +12,7 @@ import { showWineryOverlay } from '/js/overlays/mainpages/wineryoverlay.js';
 import { showSalesOverlay } from '../overlays/mainpages/salesoverlay.js';
 import { showMainOfficeOverlay } from '../overlays/mainpages/mainofficeoverlay.js';
 import { incrementWeek } from '../endDay.js';
+import { calculateRealPrestige } from '../company.js';
 
 // Define a function to load and initialize the sidebar
 export function initializeSidebar() {

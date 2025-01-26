@@ -8,6 +8,7 @@ import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the ce
 import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
 import { performFermentation } from '../wineprocessing.js'; // Import the centralized function
 
+
 async function clearFirestore() {
   if (confirm('Are you sure you want to delete all companies from Firestore?')) {
     try {

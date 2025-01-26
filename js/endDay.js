@@ -5,10 +5,11 @@ import { processRecurringTransactions } from './finance.js';
 import { calculateLandvalue, calculateFarmlandPrestige } from './farmland.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
-import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, updateFarmland, getPrestigeHit, setPrestigeHit, calculateRealPrestige, loadTasks, saveTasks } from './database/adminFunctions.js';
+import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, updateFarmland, getPrestigeHit, setPrestigeHit, loadTasks, saveTasks } from './database/adminFunctions.js';
 import taskManager from './taskManager.js';
 import { finalizePlanting } from './overlays/plantingOverlay.js';
 import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
+import { calculateRealPrestige } from './company.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
