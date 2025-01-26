@@ -10,13 +10,10 @@ export function getCompanyName() {
   return localStorage.getItem('companyName');
 }
 
-export function calculateRealPrestige(prestigeHit = 0, farmlands = null) {
+export function calculateRealPrestige(prestigeHit = 0) {
   const money = getMoney();
   const moneyPrestige = money / 10000000;
-
-  if (!farmlands) {
-    farmlands = loadFarmlands();
-  }
+  const farmlands = loadFarmlands();
 
   const totalFarmlandPrestige = farmlands.reduce((total, farmland) => {
     return total + (farmland.farmlandPrestige || 0);
