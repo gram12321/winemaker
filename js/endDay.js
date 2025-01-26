@@ -17,9 +17,6 @@ export function incrementWeek() {
     let { week, season, year } = gameState;
     let currentSeasonIndex = SEASONS.indexOf(season);
 
-    // Check for date-triggered tasks before incrementing week
-    taskManager.checkDateTriggeredTasks();
-
     // Increment the week
     week += 1;
 
@@ -31,6 +28,7 @@ export function incrementWeek() {
         week = 1;
         currentSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length;
         season = SEASONS[currentSeasonIndex];
+        bookkeeping();
     }
 
     // Only increment the year if we are back to the first week of Spring
