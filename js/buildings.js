@@ -317,6 +317,7 @@ export function upgradeBuilding(buildingName) {
       if (buildingToUpgrade) {
         const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.tools || []);
         building.upgrade();
+        building.tools = buildingToUpgrade.tools || []; // Preserve existing tools after upgrade
 
         const updatedBuildings = buildings.map(b => b.name === params.buildingName ? building : b);
         storeBuildings(updatedBuildings);
