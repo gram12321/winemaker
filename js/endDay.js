@@ -9,6 +9,7 @@ import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, update
 import taskManager from './taskManager.js';
 import { finalizePlanting } from './overlays/plantingOverlay.js';
 import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
+import { bookkeeping } from './administration.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
