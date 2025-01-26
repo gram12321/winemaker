@@ -163,13 +163,18 @@ function createStorageRow(tool, items) {
             `${formatNumber(totalAmount)} kg`;
     }
 
+    const status = firstItem ? firstItem.state : 'Empty';
+    const statusDisplay = status === 'Empty' 
+        ? '<span class="text-muted">Empty</span>'
+        : `<img src="/assets/pic/${status.toLowerCase()}.webp" alt="${status}" title="${status}" class="status-icon">`;
+
     row.innerHTML = `
         <td>${tool.name} #${tool.instanceNumber}</td>
         <td>${formatNumber(tool.capacity)}</td>
         <td>${firstItem ? firstItem.getDisplayInfo().name : 'Empty'}</td>
         <td>${firstItem ? formattedAmount : (tool.supportedResources.includes('Must') ? '0 l' : '0 kg')}</td>
         <td>${firstItem ? formatQualityDisplay(firstItem.quality) : 'N/A'}</td>
-        <td>${firstItem ? firstItem.state : 'Empty'}</td>
+        <td>${statusDisplay}</td>
     `;
 
     return row;
@@ -183,12 +188,13 @@ function updateWineTable() {
     const bottledWines = inventoryInstance.getItemsByState('Bottles');
     
     bottledWines.forEach(item => {
+        const statusImage = `<img src="/assets/pic/bottles.webp" alt="Bottles" title="Bottles" class="status-icon">`;
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${item.getDisplayInfo().name}</td>
             <td>${formatNumber(item.amount)} bottles</td>
             <td>${formatQualityDisplay(item.quality)}</td>
-            <td>Bottles</td>
+            <td>${statusImage}</td>
         `;
         wineStorageBody.appendChild(row);
     });
