@@ -35,7 +35,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('season');
   localStorage.removeItem('year');
   localStorage.removeItem('calculatedPrestige');     // Ensure we clear prestige
-  localStorage.removeItem('PrestigeHit');  // Ensure we clear prestige hit
+  localStorage.removeItem('prestigeHit');  // Ensure we clear prestige hit
   localStorage.removeItem('ownedFarmlands');
   localStorage.removeItem('buildings');
   localStorage.removeItem('playerInventory');
@@ -111,7 +111,6 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('week', data.week);
     localStorage.setItem('season', data.season);
     localStorage.setItem('year', data.year);
-
     localStorage.setItem('ownedFarmlands', data.ownedFarmlands || '[]');
     localStorage.setItem('playerInventory', data.playerInventory || '[]');
     localStorage.setItem('buildings', data.buildings || '[]');
@@ -128,7 +127,6 @@ async function saveCompanyInfo() {
   const week = localStorage.getItem('week');
   const season = localStorage.getItem('season');
   const year = localStorage.getItem('year');
-
   const ownedFarmlands = localStorage.getItem('ownedFarmlands');
   const playerInventory = localStorage.getItem('playerInventory');
   const staffData = localStorage.getItem('staffData');
