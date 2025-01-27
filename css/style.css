@@ -326,6 +326,7 @@ input[type="radio"]:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-height: 400px;  /* Match container height */
 }
 
 .family-image {
@@ -333,12 +334,16 @@ input[type="radio"]:hover {
     height: 100%;
     object-fit: cover;
     border-radius: var(--radius-sm);
+    
 }
 
 .options-container {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    max-height: 400px;  /* Set max height */
+    overflow-y: auto;   /* Enable vertical scrolling */
+    padding-right: 10px; /* Add some padding for the scrollbar */
 }
 
 .option-card {
@@ -348,6 +353,7 @@ input[type="radio"]:hover {
     padding: 15px;
     cursor: pointer;
     transition: all 0.2s ease;
+    flex-shrink: 0;  /* Prevent cards from shrinking */
 }
 
 .option-card:hover {
@@ -379,6 +385,8 @@ input[type="radio"]:hover {
     border: 2px solid var(--color-accent);
     border-radius: var(--radius-md);
     padding: 20px;
+    max-height: 100%;  /* Set max height */
+    overflow-y: auto;   /* Enable scrolling if needed */
 }
 
 .info-header {
