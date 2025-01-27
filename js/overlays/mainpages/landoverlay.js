@@ -1,14 +1,13 @@
 import { showBuyLandOverlay } from '/js/overlays/buyLandOverlay.js';
 import { getUnit, convertToCurrentUnit } from '/js/settings.js';
 import { getFlagIcon, formatNumber } from '/js/utils.js';
-
 import { loadFarmlands } from '/js/database/adminFunctions.js';
 import taskManager from '/js/taskManager.js';
 import { showFarmlandOverlay } from '/js/overlays/farmlandOverlay.js';
 import { showPlantingOverlay } from '/js/overlays/plantingOverlay.js';
 import { showResourceInfoOverlay } from '/js/overlays/resourceInfoOverlay.js';
-
 import { showMainViewOverlay } from '../overlayUtils.js';
+import { showClearingOverlay } from '../clearingOverlay.js';
 
 export function showLandOverlay() {
     const overlay = showMainViewOverlay(createLandOverlayHTML());
@@ -55,11 +54,6 @@ function createLandOverlayHTML() {
             <div id="buyLandOverlay" class="overlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5);">
                 <div id="farmland-table-container" style="position: relative; top: 50%; transform: translateY(-50%);"></div>
             </div>
-            <div id="farmlandOverlay" class="overlay" style="display: none;">
-                <div class="overlay-content text-center">
-                    <div id="farmland-details"></div>
-                </div>
-            </div>
         </div>
     `;
 }
@@ -87,6 +81,9 @@ function createFarmlandRow(farmland, selectedUnit) {
                              !taskManager.isTargetBusy(farmland) &&
                              farmland.status !== 'Planting...';
     
+    const isClearingAllowed = !taskManager.isTargetBusy(farmland) &&
+                             farmland.canBeCleared === 'Ready to be cleared';
+    
     const formattedSize = landSize < 10 ? landSize.toFixed(2) : formatNumber(landSize);
     
     row.innerHTML = `
@@ -102,6 +99,9 @@ function createFarmlandRow(farmland, selectedUnit) {
           <button class="btn btn-alternative btn-sm plant-btn" data-farmland-id="${farmland.id}" ${!isPlantingAllowed ? 'disabled' : ''}>
             ${taskManager.isTargetBusy(farmland) ? 'In Progress' : 'Plant'}
           </button>
+          <button class="btn btn-warning btn-sm clear-btn" data-farmland-id="${farmland.id}" ${!isClearingAllowed ? 'disabled' : ''}>
+            Clear
+          </button>
         </td>
     `;
     return row;
@@ -109,11 +109,16 @@ function createFarmlandRow(farmland, selectedUnit) {
 
 function setupFarmlandEventListeners(row, farmland) {
     const plantBtn = row.querySelector('.plant-btn');
+    const clearBtn = row.querySelector('.clear-btn');
     const farmlandCells = row.querySelectorAll('td:not(:last-child):not(.crop-column)');
     const cropColumn = row.querySelector('.crop-column');
 
     plantBtn.addEventListener('click', () => {
         showPlantingOverlay(farmland, () => displayFarmland());
+    });
+
+    clearBtn.addEventListener('click', () => {
+        showClearingOverlay(farmland, () => displayFarmland());
     });
 
     cropColumn.addEventListener('click', (event) => {

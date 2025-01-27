@@ -1,4 +1,3 @@
-
 // Common overlay utility functions 
 export function hideOverlay(overlay) {
     if (!overlay) return;
@@ -94,6 +93,46 @@ export function setupStandardOverlayClose(overlayContainer) {
             hideOverlay(overlayContainer);
         }
     });
+}
+
+export function showStatsOverlay(overlayId, content, setupEventListeners) {
+    let overlay = document.getElementById(overlayId);
+    
+    // If overlay doesn't exist, create it
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = overlayId;
+        overlay.className = 'overlay stats-overlay';
+        overlay.innerHTML = `
+            <div class="overlay-content text-center">
+                <div id="${overlayId}-details"></div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+    
+    const details = document.getElementById(`${overlayId}-details`);
+    if (!details) {
+        console.error(`${overlayId} details element not found.`);
+        return;
+    }
+    
+    details.innerHTML = content;
+
+    // Setup default close behavior using hideOverlay
+    overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+            hideOverlay(overlay);
+        }
+    });
+
+    // Setup custom event listeners if provided
+    if (setupEventListeners) {
+        setupEventListeners(details, overlay);
+    }
+
+    overlay.style.display = 'block';
+    return overlay;
 }
 
 // Alias for backward compatibility

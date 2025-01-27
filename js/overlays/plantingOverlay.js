@@ -15,6 +15,11 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
     return;
   }
 
+  if (farmland.canBeCleared === 'Ready to be cleared') {
+    addConsoleMessage(`Field <strong>${getFlagIconHTML(farmland.country)} ${farmland.name}</strong> needs to be cleared first.`);
+    return;
+  }
+
   const overlayContainer = showStandardOverlay(createPlantingOverlayHTML(farmland));
   setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback);
 }

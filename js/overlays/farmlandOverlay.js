@@ -9,17 +9,9 @@ import {calculateAgeContribution,
   calculatePrestigeRankingContribution, 
   calculateFragilityBonusContribution } from '/js/farmland.js';
 import { showResourceInfoOverlay } from './resourceInfoOverlay.js';
+import { showStatsOverlay } from './overlayUtils.js';
 
 export function showFarmlandOverlay(farmlandData) {
-  const overlay = document.getElementById('farmlandOverlay');
-  if (!overlay) {
-    console.error('Farmland overlay element not found.');
-    return;
-  }
-  
-  const details = document.getElementById('farmland-details');
-  details.innerHTML = ''; // Clear existing details
-
   // Calculate additional values needed for display
   const aspectRating = regionAspectRatings[farmlandData.country][farmlandData.region][farmlandData.aspect];
   const colorClass = getColorClass(aspectRating);
@@ -35,13 +27,15 @@ export function showFarmlandOverlay(farmlandData) {
   const prestigeColorClass = getColorClass(farmlandPrestige);
   const healthColorClass = getColorClass(farmlandData.farmlandHealth);
 
-  // Render the specific farmland data
-  if (details) {
-    details.innerHTML = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, finalPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution);
-    setupFarmlandOverlayEventListeners(details, overlay, farmlandData);
-  }
+  // Generate content
+  const content = getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, 
+    finalPrestige, formattedSize, prestigeColorClass, healthColorClass, 
+    ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution);
 
-  overlay.style.display = 'block';
+  // Show overlay using utility function
+  showStatsOverlay('farmlandOverlay', content, (details, overlay) => {
+    setupFarmlandOverlayEventListeners(details, overlay, farmlandData);
+  });
 }
 
 function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
