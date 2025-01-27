@@ -4,17 +4,30 @@ import { showHireStaffOverlay } from './hirestaffoverlay.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 import { addTransaction} from '../finance.js'
+import { getMoney } from '../database/adminFunctions.js';
 
-function calculateSearchCost(numberOfCandidates, experienceLevel) {
+// Add new constant for specialized roles
+export const specializedRoles = {
+    field: { title: "Vineyard Manager", description: "Expert in vineyard operations" },
+    winery: { title: "Master Winemaker", description: "Specialist in wine production" },
+    administration: { title: "Estate Administrator", description: "Expert in business operations" },
+    sales: { title: "Sales Director", description: "Specialist in wine marketing and sales" },
+    maintenance: { title: "Technical Director", description: "Expert in facility maintenance" }
+};
+
+function calculateSearchCost(numberOfCandidates, experienceLevel, selectedRoles) {
     const baseCost = 2000;
     const expMultiplier = experienceLevels[experienceLevel].costMultiplier;
     
-    // Exponential scaling based on both factors
-    const candidateScaling = Math.pow(numberOfCandidates, 1.5);  // More exponential with more candidates
-    const experienceScaling = Math.pow(expMultiplier, 1.8);      // More exponential with higher experience
+    // Exponential scaling based on candidates and experience
+    const candidateScaling = Math.pow(numberOfCandidates, 1.5);
+    const experienceScaling = Math.pow(expMultiplier, 1.8);
     
-    // Combine the scalings
-    const totalMultiplier = (candidateScaling * experienceScaling);
+    // Linear scaling for specialized roles (2x per role)
+    const specializationMultiplier = selectedRoles.length > 0 ? Math.pow(2, selectedRoles.length) : 1;
+    
+    // Combine all scalings
+    const totalMultiplier = (candidateScaling * experienceScaling * specializationMultiplier);
     
     return Math.round(baseCost * totalMultiplier);
 }
@@ -23,7 +36,7 @@ function calculateSearchCost(numberOfCandidates, experienceLevel) {
 function calculatePerCandidateCost(totalCandidates, experienceLevel) {
     // Calculate total cost and divide by number of candidates
     // This ensures the per-candidate cost also scales with the total number of candidates
-    const totalCost = calculateSearchCost(totalCandidates, experienceLevel);
+    const totalCost = calculateSearchCost(totalCandidates, experienceLevel, []);
     return Math.round(totalCost / totalCandidates);
 }
 
@@ -36,7 +49,7 @@ export function showHireStaffOptionsOverlay() {
 function createHireStaffOptionsHTML() {
     const initialCandidates = 5;
     const initialExperience = 3;
-    const initialCost = calculateSearchCost(initialCandidates, initialExperience);
+    const initialCost = calculateSearchCost(initialCandidates, initialExperience, []);
 
     return `
         <div class="overlay-content overlay-container">
@@ -66,12 +79,24 @@ function createHireStaffOptionsHTML() {
                         <div>Experience Level: <span id="experience-value">${experienceLevels[initialExperience].name}</span></div>
                     </div>
 
+                    <div class="form-group mb-4">
+                        <label class="form-label">Specialized Role Requirements:</label>
+                        <div class="specialized-roles-container">
+                            ${Object.entries(specializedRoles).map(([key, role]) => `
+                                <div class="role-checkbox">
+                                    <input type="checkbox" id="${key}-role" class="role-checkbox" data-role="${key}">
+                                    <label for="${key}-role" title="${role.description}">${role.title}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
                     <hr class="overlay-divider">
 
                     <div class="cost-details d-flex justify-content-between mt-3">
                         <div class="hiring-overlay-info-box">
                             <span>Cost per candidate: </span>
-                            <span>€${formatNumber(Math.round(calculateSearchCost(1, initialExperience)))}</span>
+                            <span>€${formatNumber(Math.round(calculateSearchCost(1, initialExperience, [])))}</span>
                         </div>
                         <div class="hiring-overlay-info-box">
                             <span>Total Cost: </span>
@@ -94,22 +119,34 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
     const candidatesValue = overlayContainer.querySelector('#candidates-value');
     const experienceValue = overlayContainer.querySelector('#experience-value');
     const totalCostDisplay = overlayContainer.querySelector('#total-cost');
+    const roleCheckboxes = overlayContainer.querySelectorAll('.role-checkbox');
 
     function updateDisplay() {
         const numberOfCandidates = parseInt(candidatesSlider.value);
         const experienceLevel = parseInt(experienceSlider.value);
-        const totalCost = calculateSearchCost(numberOfCandidates, experienceLevel);
+        const selectedRoles = Array.from(roleCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.dataset.role);
+
+        const totalCost = calculateSearchCost(numberOfCandidates, experienceLevel, selectedRoles);
+        const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, experienceLevel, selectedRoles);
 
         candidatesValue.textContent = numberOfCandidates;
         experienceValue.textContent = experienceLevels[experienceLevel].name;
         
         // Update cost per candidate using the new calculation
-        const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, experienceLevel);
         overlayContainer.querySelector('.hiring-overlay-info-box span:last-child').textContent = 
             `€${formatNumber(costPerCandidate)}`;
         
         // Update total cost
         totalCostDisplay.textContent = `€${formatNumber(totalCost)}`;
+
+        // Add role multiplier info if any roles are selected
+        if (selectedRoles.length > 0) {
+            const roleMultiplier = Math.pow(2, selectedRoles.length);
+            const rolesText = selectedRoles.map(role => specializedRoles[role].title).join(', ');
+            addConsoleMessage(`Specialized roles selected (${rolesText}) - Cost multiplier: ${roleMultiplier}x`);
+        }
     }
 
     candidatesSlider.addEventListener('input', updateDisplay);
@@ -119,8 +156,18 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
     searchBtn.addEventListener('click', () => {
         const numberOfCandidates = parseInt(candidatesSlider.value);
         const experienceLevel = parseInt(experienceSlider.value);
-        const totalCost = calculateSearchCost(numberOfCandidates, experienceLevel);
+        const selectedRoles = Array.from(roleCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.dataset.role);
+        const totalCost = calculateSearchCost(numberOfCandidates, experienceLevel, selectedRoles);
         const workRequired = 10 * numberOfCandidates;
+
+        // Check if player has enough money
+        const currentMoney = getMoney();
+        if (currentMoney < totalCost) {
+            addConsoleMessage(`Insufficient funds for staff search. Required: €${formatNumber(totalCost)}, Available: €${formatNumber(currentMoney)}`);
+            return;
+        }
 
         // Add transaction for search cost
         addTransaction('Expense', `Staff Search Cost (${numberOfCandidates} ${experienceLevels[experienceLevel].name} candidates)`, -totalCost);
@@ -130,15 +177,25 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
             TaskType.administration,
             workRequired,
             (target, params) => {
-                showHireStaffOverlay(params.numberOfCandidates, params.experienceModifier);
+                showHireStaffOverlay(
+                    params.numberOfCandidates, 
+                    params.experienceModifier,
+                    params.selectedRoles
+                );
             },
             null,
             { 
                 numberOfCandidates, 
-                experienceModifier: experienceLevels[experienceLevel].modifier 
+                experienceModifier: experienceLevels[experienceLevel].modifier,
+                selectedRoles
             },
             () => {
-                addConsoleMessage(`Started searching for ${numberOfCandidates} ${experienceLevels[experienceLevel].name}-level candidates (Cost: €${formatNumber(totalCost)})`);
+                const rolesText = selectedRoles.length > 0 
+                    ? ` specializing in ${selectedRoles.map(r => specializedRoles[r].title).join(', ')}`
+                    : '';
+                addConsoleMessage(
+                    `Started searching for ${numberOfCandidates} ${experienceLevels[experienceLevel].name}-level candidates${rolesText} (Cost: €${formatNumber(totalCost)})`
+                );
                 hideOverlay(overlayContainer);
             }
         );
@@ -147,5 +204,10 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
     const closeBtn = overlayContainer.querySelector('.close-btn');
     closeBtn.addEventListener('click', () => {
         hideOverlay(overlayContainer);
+    });
+
+    // Add event listeners for checkboxes
+    roleCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateDisplay);
     });
 }

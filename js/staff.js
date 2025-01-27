@@ -78,41 +78,52 @@ export class Staff {
   }
 }
 
-// Modify the randomizeSkills function to accept an experience modifier
-function randomizeSkills(experienceModifier = 0.5) {
-  // Base random value between 0 and 0.7
-  const baseValue = Math.random() * 0.7;
-  // Apply experience modifier to increase the minimum possible value
-  return (baseValue + experienceModifier).toFixed(2);
+// Modify the randomizeSkills function to accept an experience modifier and specialized roles
+function randomizeSkills(experienceModifier = 0.5, specializedRole = null) {
+    // Base random value between 0 and 0.7
+    const baseValue = Math.random() * 0.7;
+    // Apply experience modifier to base value
+    const baseWithExperience = baseValue + experienceModifier;
+    
+    // For specialized roles, ensure a higher minimum value
+    if (specializedRole) {
+        return Math.max(0.7 + experienceModifier, baseWithExperience).toFixed(2);
+    }
+    
+    return baseWithExperience.toFixed(2);
 }
 
-export function createNewStaff(experienceModifier = 0.5) {
-  const nationality = Staff.prototype.selectNationality();
-  const firstName = Staff.prototype.getNameForNationality(nationality);
-  const lastName = getLastNameForNationality(nationality);
-  const skills = {
-    field: { field: randomizeSkills(experienceModifier) },
-    winery: { winery: randomizeSkills(experienceModifier) },
-    administration: { administration: randomizeSkills(experienceModifier) },
-    sales: { sales: randomizeSkills(experienceModifier) },
-    maintenance: { maintenance: randomizeSkills(experienceModifier) }
-  };
+export function createNewStaff(experienceModifier = 0.5, specializedRoles = []) {
+    const nationality = Staff.prototype.selectNationality();
+    const firstName = Staff.prototype.getNameForNationality(nationality);
+    const lastName = getLastNameForNationality(nationality);
+    
+    const skills = {
+        field: { field: randomizeSkills(experienceModifier, specializedRoles.includes('field')) },
+        winery: { winery: randomizeSkills(experienceModifier, specializedRoles.includes('winery')) },
+        administration: { administration: randomizeSkills(experienceModifier, specializedRoles.includes('administration')) },
+        sales: { sales: randomizeSkills(experienceModifier, specializedRoles.includes('sales')) },
+        maintenance: { maintenance: randomizeSkills(experienceModifier, specializedRoles.includes('maintenance')) }
+    };
 
-  const skillMultiplier = 100;
+    const skillMultiplier = 100;
 
-  // Calculate wage based on skills
-  const calculateWage = (skills) => (
-    skills.field.field * skillMultiplier +
-    skills.winery.winery * skillMultiplier +
-    skills.administration.administration * skillMultiplier +
-    skills.sales.sales * skillMultiplier +
-    skills.maintenance.maintenance * skillMultiplier
-  );
+    // Calculate wage based on skills
+    const calculateWage = (skills) => (
+        skills.field.field * skillMultiplier +
+        skills.winery.winery * skillMultiplier +
+        skills.administration.administration * skillMultiplier +
+        skills.sales.sales * skillMultiplier +
+        skills.maintenance.maintenance * skillMultiplier
+    );
 
-  const newStaff = new Staff(firstName, lastName, skills);
-  newStaff.workforce = 50;
-  newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
-  return newStaff;
+    const newStaff = new Staff(firstName, lastName, skills);
+    newStaff.workforce = 50;
+    newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
+    // Add these properties to track the search parameters
+    newStaff.experienceLevel = Math.round(experienceModifier * 10); // Convert modifier back to level
+    newStaff.specializedRoles = specializedRoles;
+    return newStaff;
 }
 
 export function getLastNameForNationality(nationality) {

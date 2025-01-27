@@ -1,16 +1,16 @@
 import { createNewStaff, setupStaffWagesRecurringTransaction  } from '../staff.js';
-import { getFlagIconHTML } from '../utils.js';
+import { getFlagIconHTML, experienceLevels } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
+import { specializedRoles } from './hireStaffOptionsOverlay.js';
 
-
-export function showHireStaffOverlay(numberOfOptions = 5, experienceModifier = 0.5) {
+export function showHireStaffOverlay(numberOfOptions = 5, experienceModifier = 0.5, specializedRoles = []) {
     const createdStaffOptions = Array.from(
         {length: numberOfOptions}, 
-        () => createNewStaff(experienceModifier)
+        () => createNewStaff(experienceModifier, specializedRoles)
     );
     const overlayContainer = showStandardOverlay(createHireStaffHTML(createdStaffOptions));
     setupHireStaffEventListeners(overlayContainer, createdStaffOptions);
@@ -25,7 +25,13 @@ function createHireStaffHTML(createdStaffOptions) {
                 <button class="close-btn btn btn-alternative btn-sm">Close</button>
             </div>
             <div class="p-3 text-center">
-                <p>HR Department has completed search for candidates for our new staff addition. These are the possible candidates:</p>
+                <p>HR Department has completed the search for ${createdStaffOptions.length} ${experienceLevels[createdStaffOptions[0]?.experienceLevel || 1].name}-level candidates.
+                ${createdStaffOptions[0]?.specializedRoles?.length > 0 
+                    ? ` Specialized in: ${createdStaffOptions[0].specializedRoles.map(role => 
+                        specializedRoles[role].title).join(', ')}.`
+                    : ''
+                }</p>
+                <p>Here are the possible candidates:</p>
             </div>
             <div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; overflow-y: auto; max-height: 80vh;">
                 ${createdStaffOptions.map((staff, index) => `
