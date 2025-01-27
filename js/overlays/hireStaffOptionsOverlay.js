@@ -40,6 +40,15 @@ function calculatePerCandidateCost(totalCandidates, skillLevel) {
     return Math.round(totalCost / totalCandidates);
 }
 
+// Adjusted function to calculate total work required
+function calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
+    const baseWork = 10;
+    const skillWorkMultiplier = 1 + (skillLevel - 0.1) * 0.5; // Skill level has a moderate impact
+    const roleWorkMultiplier = 1 + selectedRoles.length * 0.3; // Specialized roles have a smaller impact
+
+    return Math.round(baseWork * numberOfCandidates * skillWorkMultiplier * roleWorkMultiplier);
+}
+
 export function showHireStaffOptionsOverlay() {
     const overlayContainer = showStandardOverlay(createHireStaffOptionsHTML());
     setupHireStaffOptionsEventListeners(overlayContainer);
@@ -165,7 +174,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
             .filter(cb => cb.checked)
             .map(cb => cb.dataset.role);
         const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
-        const workRequired = 10 * numberOfCandidates;
+        const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles); // Calculate total work
 
         // Check if player has enough money
         const currentMoney = getMoney();
@@ -180,7 +189,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
         taskManager.addCompletionTask(
             'Staff Search',
             TaskType.administration,
-            workRequired,
+            totalWork, // Use calculated total work
             (target, params) => {
                 showHireStaffOverlay(
                     params.numberOfCandidates, 
