@@ -313,12 +313,13 @@ input[type="radio"]:hover {
     grid-template-columns: 1fr 1fr 1fr;  /* Changed to three columns */
     gap: 20px;
     align-items: start;
+    margin-bottom: 20px;  /* Add space for the button below */
 }
 
 /* Add styles for the family picture container */
 .options-picture {
     background-color: var(--color-background);
-    border: 2px solid var(--color-primary);
+    border: 0px solid var(--color-primary);
     border-radius: var(--radius-md);
     padding: 20px;
     height: 400px; /* Set fixed height */
@@ -375,7 +376,7 @@ input[type="radio"]:hover {
 
 .options-info-box {
     background-color: var(--color-background);
-    border: 2px solid var(--color-primary);
+    border: 2px solid var(--color-accent);
     border-radius: var(--radius-md);
     padding: 20px;
 }
@@ -412,6 +413,17 @@ input[type="radio"]:hover {
 .confirm-selection {
     width: 100%;
     margin-top: 20px;
+}
+
+/* Add styles for the start button container */
+.start-button-container {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 2px solid var(--color-primary);
+}
+
+.start-button-container .btn {
+    min-width: 200px;
 }
 
 /* Starting Condition Overlay Styles */

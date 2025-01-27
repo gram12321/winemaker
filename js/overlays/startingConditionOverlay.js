@@ -48,9 +48,6 @@ function updateInfoBox(condition) {
                 <span class="info-label">Location:</span>
                 <span class="info-value">${condition.description}</span>
             </div>
-            <button class="btn btn-primary confirm-selection" data-country="${condition.name}">
-                Start in ${condition.name}
-            </button>
         </div>
     `;
 }
@@ -58,7 +55,7 @@ function updateInfoBox(condition) {
 function updateFamilyPicture(condition) {
     const pictureBox = document.querySelector('.options-picture');
     pictureBox.innerHTML = `
-        <h4>Family Portrait</h4>
+        
         <img src="assets/storypic/${condition.familyPicture}" 
              alt="${condition.name} family" 
              class="family-image">
@@ -73,13 +70,22 @@ export function showStartingConditionOverlay(companyName) {
     // Fade out main content
     mainContent.classList.add('fade-out');
 
-    // Clear existing content
+    // Clear existing content and remove any existing start button
     optionsContainer.innerHTML = '';
+    const existingStartButton = overlay.querySelector('.start-button-container');
+    if (existingStartButton) {
+        existingStartButton.remove();
+    }
 
     // Add options
     Object.values(startingConditions).forEach(condition => {
         optionsContainer.innerHTML += createStartingConditionCard(condition);
     });
+
+    // Create start button container
+    const startButton = document.createElement('div');
+    startButton.className = 'start-button-container';
+    overlay.querySelector('.card-body').appendChild(startButton);
 
     // Add click handlers
     optionsContainer.querySelectorAll('.option-card').forEach(card => {
@@ -93,16 +99,13 @@ export function showStartingConditionOverlay(companyName) {
             const country = card.dataset.country;
             updateInfoBox(startingConditions[country]);
             updateFamilyPicture(startingConditions[country]);
+            // Update start button text
+            startButton.innerHTML = `
+                <button class="btn btn-primary confirm-selection" data-country="${country}">
+                    Start in ${country}
+                </button>
+            `;
         });
-    });
-
-    // Handle confirm selection
-    overlay.addEventListener('click', (e) => {
-        if (e.target.classList.contains('confirm-selection')) {
-            const country = e.target.dataset.country;
-            const startingCondition = startingConditions[country];
-            storeCompanyName(companyName, startingCondition);
-        }
     });
 
     // Show first option by default
@@ -110,6 +113,11 @@ export function showStartingConditionOverlay(companyName) {
     updateInfoBox(firstOption);
     updateFamilyPicture(firstOption);
     optionsContainer.querySelector('.option-card').classList.add('active');
+    startButton.innerHTML = `
+        <button class="btn btn-primary confirm-selection" data-country="${firstOption.name}">
+            Start in ${firstOption.name}
+        </button>
+    `;
 
     // Show the overlay with fade effect
     overlay.style.display = 'flex';
