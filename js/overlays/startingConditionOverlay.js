@@ -6,13 +6,15 @@ const startingConditions = {
         name: 'France',
         description: 'Start your winery in the beautiful French countryside',
         startingMoney: 1000000,
-        flagCode: 'fr'
+        flagCode: 'fr',
+        familyPicture: 'pierrecamille.webp'
     },
     'Italy': {
         name: 'Italy',
         description: 'Begin your journey in the rolling hills of Italy',
         startingMoney: 5000000,
-        flagCode: 'it'
+        flagCode: 'it',
+        familyPicture: 'robertobianca.webp'
     }
 };
 
@@ -53,6 +55,16 @@ function updateInfoBox(condition) {
     `;
 }
 
+function updateFamilyPicture(condition) {
+    const pictureBox = document.querySelector('.options-picture');
+    pictureBox.innerHTML = `
+        <h4>Family Portrait</h4>
+        <img src="assets/storypic/${condition.familyPicture}" 
+             alt="${condition.name} family" 
+             class="family-image">
+    `;
+}
+
 export function showStartingConditionOverlay(companyName) {
     const overlay = document.getElementById('startingConditionOverlay');
     const optionsContainer = overlay.querySelector('.options-container');
@@ -77,9 +89,10 @@ export function showStartingConditionOverlay(companyName) {
                 c.classList.remove('active'));
             // Add active class to clicked card
             card.classList.add('active');
-            // Update info box
+            // Update info box and family picture
             const country = card.dataset.country;
             updateInfoBox(startingConditions[country]);
+            updateFamilyPicture(startingConditions[country]);
         });
     });
 
@@ -95,6 +108,7 @@ export function showStartingConditionOverlay(companyName) {
     // Show first option by default
     const firstOption = Object.values(startingConditions)[0];
     updateInfoBox(firstOption);
+    updateFamilyPicture(firstOption);
     optionsContainer.querySelector('.option-card').classList.add('active');
 
     // Show the overlay with fade effect
