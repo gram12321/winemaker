@@ -276,3 +276,29 @@
   transform: none;
   box-shadow: none;
 }
+
+/* Specialization Styles */
+.specialization {
+  font-size: 0.85em;
+  margin-right: 4px;
+}
+
+.specialization.field {
+  color: var(--skill-field);
+}
+
+.specialization.winery {
+  color: var(--skill-winery);
+}
+
+.specialization.administration {
+  color: var(--skill-admin);
+}
+
+.specialization.sales {
+  color: var(--skill-sales);
+}
+
+.specialization.maintenance {
+  color: var(--skill-maintenance);
+}
