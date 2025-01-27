@@ -77,13 +77,13 @@ async function storeCompanyName(companyName, startingCondition = null) {
 
       switch (country) {
         case 'Italy':
-          staff1 = createNewStaff();
+          staff1 = createNewStaff(0.5, ['winery']);
           staff1.firstName = 'Roberto';
           staff1.lastName = 'De Luca';
           staff1.nationality = 'Italy';
           staff1.name = 'Roberto De Luca';
           
-          staff2 = createNewStaff();
+          staff2 = createNewStaff(0.5);
           staff2.firstName = 'Bianca';
           staff2.lastName = 'De Luca';
           staff2.nationality = 'Italy';
@@ -91,13 +91,13 @@ async function storeCompanyName(companyName, startingCondition = null) {
           break;
 
         case 'France':
-          staff1 = createNewStaff();
+          staff1 = createNewStaff(0.5, ['winery']);
           staff1.firstName = 'Pierre';
           staff1.lastName = 'Latosha';
           staff1.nationality = 'France';
           staff1.name = 'Pierre Latosha';
           
-          staff2 = createNewStaff();
+          staff2 = createNewStaff(0.5);
           staff2.firstName = 'Camillé';
           staff2.lastName = 'Latosha';
           staff2.nationality = 'France';
@@ -105,13 +105,13 @@ async function storeCompanyName(companyName, startingCondition = null) {
           break;
 
         case 'Germany':
-          staff1 = createNewStaff();
+          staff1 = createNewStaff(0.5, ['winery']);
           staff1.firstName = 'Anna';
           staff1.lastName = 'Weber';
           staff1.nationality = 'Germany';
           staff1.name = 'Anna Weber';
           
-          staff2 = createNewStaff();
+          staff2 = createNewStaff(0.5);
           staff2.firstName = 'Hans';
           staff2.lastName = 'Weber';
           staff2.nationality = 'Germany';
@@ -119,13 +119,13 @@ async function storeCompanyName(companyName, startingCondition = null) {
           break;
 
         case 'Spain':
-          staff1 = createNewStaff();
+          staff1 = createNewStaff(0.5, ['winery']);
           staff1.firstName = 'Miguel';
           staff1.lastName = 'Torres';
           staff1.nationality = 'Spain';
           staff1.name = 'Miguel Torres';
           
-          staff2 = createNewStaff();
+          staff2 = createNewStaff(0.5);
           staff2.firstName = 'Isabella';
           staff2.lastName = 'Torres';
           staff2.nationality = 'Spain';
@@ -133,27 +133,19 @@ async function storeCompanyName(companyName, startingCondition = null) {
           break;
 
         case 'United States':
-          staff1 = createNewStaff();
+          staff1 = createNewStaff(0.5, ['winery']);
           staff1.firstName = 'Sarah';
           staff1.lastName = 'Mondavi';
           staff1.nationality = 'United States';
           staff1.name = 'Sarah Mondavi';
           
-          staff2 = createNewStaff();
+          staff2 = createNewStaff(0.5);
           staff2.firstName = 'Robert';
           staff2.lastName = 'Mondavi';
           staff2.nationality = 'United States';
           staff2.name = 'Robert Mondavi';
           break;
       }
-
-      // Ensure high skills for the winemaker (staff1)
-      staff1.skills.winery.winery = (0.8 + Math.random() * 0.2).toFixed(2); // 0.8-1.0
-      staff1.skills.field.field = (0.6 + Math.random() * 0.2).toFixed(2); // 0.6-0.8
-
-      // Ensure good administrative skills for the spouse (staff2)
-      staff2.skills.administration.administration = (0.7 + Math.random() * 0.2).toFixed(2); // 0.7-0.9
-      staff2.skills.sales.sales = (0.6 + Math.random() * 0.2).toFixed(2); // 0.6-0.8
 
       // Add staff to an array
       const staff = [staff1, staff2];
@@ -298,7 +290,7 @@ export function saveStaff(staffMembers) {
       workforce: staff.workforce,
       wage: staff.wage,
       skills: staff.skills,
-      experienceLevel: staff.experienceLevel,  // Save experience level
+      skillLevel: staff.skillLevel,  // Save skill level
       specializedRoles: staff.specializedRoles  // Save specialized roles
     }))));
   }
@@ -320,7 +312,7 @@ export function loadStaff() {
           item.name.split(' ')[0], 
           item.lastName, 
           item.skills, 
-          item.experienceLevel || 0.1  // Load experience level with fallback
+          item.skillLevel || 0.1  // Load skill level with fallback
         );
         staff.id = item.id;
         staff.nationality = item.nationality;

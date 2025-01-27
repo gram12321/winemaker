@@ -1,5 +1,5 @@
 import { createNewStaff, setupStaffWagesRecurringTransaction  } from '../staff.js';
-import { getFlagIconHTML, experienceLevels, getExperienceLevelInfo } from '../utils.js';
+import { getFlagIconHTML, skillLevels, getSkillLevelInfo  } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
@@ -7,10 +7,10 @@ import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 import { specializedRoles } from './hireStaffOptionsOverlay.js';
 
-export function showHireStaffOverlay(numberOfOptions = 5, experienceModifier = 0.5, specializedRoles = []) {
+export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, specializedRoles = []) {
     const createdStaffOptions = Array.from(
         {length: numberOfOptions}, 
-        () => createNewStaff(experienceModifier, specializedRoles)
+        () => createNewStaff(skillModifier, specializedRoles)
     );
     const overlayContainer = showStandardOverlay(createHireStaffHTML(createdStaffOptions));
     setupHireStaffEventListeners(overlayContainer, createdStaffOptions);
@@ -18,7 +18,7 @@ export function showHireStaffOverlay(numberOfOptions = 5, experienceModifier = 0
 }
 
 function createHireStaffHTML(createdStaffOptions) {
-    const expInfo = getExperienceLevelInfo(createdStaffOptions[0]?.experienceLevel || 0.1);
+    const skillInfo = getSkillLevelInfo(createdStaffOptions[0]?.skillLevel || 0.1);
     const specializationText = createdStaffOptions[0]?.specializedRoles?.length > 0 
         ? `We have been specifically looking for ${createdStaffOptions[0].specializedRoles.map(role => 
             `<span style="color: var(--skill-${role});">${specializedRoles[role].title}</span>`).join(', ')}.<br>`
@@ -33,7 +33,7 @@ function createHireStaffHTML(createdStaffOptions) {
             <div class="p-3 text-center">
                 <p>HR Department has completed the search for new Candidate:</p>
                 <p>We have found ${createdStaffOptions.length} candidates</p>
-                <p>We have been searching for ${expInfo.formattedName}</p>
+                <p>We have been searching for ${skillInfo.formattedName}</p>
                 ${specializationText}
                 <p>Here are the possible candidates:</p>
             </div>

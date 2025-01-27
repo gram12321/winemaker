@@ -49,7 +49,7 @@ export function getWineQualityCategory(quality) {
   return "Vintage Perfection";
 }
 
-export const experienceLevels = {
+export const skillLevels = {
     0.1: { name: 'Fresh Off the Vine', modifier: 0.2, costMultiplier: 1 },
     0.2: { name: 'Cork Puller', modifier: 0.3, costMultiplier: 1.5 },
     0.3: { name: 'Cellar Hand', modifier: 0.4, costMultiplier: 2 },
@@ -62,23 +62,23 @@ export const experienceLevels = {
     1.0: { name: 'Living Legend', modifier: 0.95, costMultiplier: 25 }
 };
 
-export function getExperienceLevelInfo(level) {
+export function getSkillLevelInfo(level) {
     // Convert level from 1-10 scale to 0.1-1.0 scale if needed
     const normalizedLevel = level > 1 ? level / 10 : level;
     
-    // Find the closest experience level
-    const levels = Object.keys(experienceLevels).map(Number);
+    // Find the closest skill level
+    const levels = Object.keys(skillLevels).map(Number);
     const closestLevel = levels.reduce((prev, curr) => 
         Math.abs(curr - normalizedLevel) < Math.abs(prev - normalizedLevel) ? curr : prev
     );
 
-    const expLevel = experienceLevels[closestLevel];
+    const skillLevel = skillLevels[closestLevel];
     const colorClass = getColorClass(closestLevel);
 
     return {
-        ...expLevel,
+        ...skillLevel,
         colorClass,
-        formattedName: `<span class="${colorClass}">${expLevel.name}</span>`
+        formattedName: `<span class="${colorClass}">${skillLevel.name}</span>`
     };
 }
 

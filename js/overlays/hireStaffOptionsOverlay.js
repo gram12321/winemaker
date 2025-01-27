@@ -1,5 +1,5 @@
 import { addConsoleMessage } from '../console.js';
-import { formatNumber, experienceLevels, getExperienceLevelInfo } from '../utils.js';
+import { formatNumber, skillLevels, getSkillLevelInfo  } from '../utils.js';
 import { showHireStaffOverlay } from './hirestaffoverlay.js';
 import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
@@ -15,28 +15,28 @@ export const specializedRoles = {
     maintenance: { title: "Technical Director", description: "Expert in facility maintenance" }
 };
 
-function calculateSearchCost(numberOfCandidates, experienceLevel, selectedRoles) {
+function calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles) {
     const baseCost = 2000;
-    const expMultiplier = experienceLevels[experienceLevel].costMultiplier;
+    const skillMultiplier = skillLevels[skillLevel].costMultiplier;
     
-    // Exponential scaling based on candidates and experience
+    // Exponential scaling based on candidates and skill
     const candidateScaling = Math.pow(numberOfCandidates, 1.5);
-    const experienceScaling = Math.pow(expMultiplier, 1.8);
+    const skillScaling = Math.pow(skillMultiplier, 1.8);
     
     // Linear scaling for specialized roles (2x per role)
     const specializationMultiplier = selectedRoles.length > 0 ? Math.pow(2, selectedRoles.length) : 1;
     
     // Combine all scalings
-    const totalMultiplier = (candidateScaling * experienceScaling * specializationMultiplier);
+    const totalMultiplier = (candidateScaling * skillScaling * specializationMultiplier);
     
     return Math.round(baseCost * totalMultiplier);
 }
 
 // Add new function to calculate per-candidate cost
-function calculatePerCandidateCost(totalCandidates, experienceLevel) {
+function calculatePerCandidateCost(totalCandidates, skillLevel) {
     // Calculate total cost and divide by number of candidates
     // This ensures the per-candidate cost also scales with the total number of candidates
-    const totalCost = calculateSearchCost(totalCandidates, experienceLevel, []);
+    const totalCost = calculateSearchCost(totalCandidates, skillLevel, []);
     return Math.round(totalCost / totalCandidates);
 }
 
@@ -48,9 +48,9 @@ export function showHireStaffOptionsOverlay() {
 
 function createHireStaffOptionsHTML() {
     const initialCandidates = 5;
-    const initialExperience = 0.3; // Updated to use 0.1-1.0 scale
-    const initialCost = calculateSearchCost(initialCandidates, initialExperience, []);
-    const expInfo = getExperienceLevelInfo(initialExperience);
+    const initialSkill = 0.3; // Updated to use 0.1-1.0 scale
+    const initialCost = calculateSearchCost(initialCandidates, initialSkill, []);
+    const skillInfo = getSkillLevelInfo(initialSkill);
 
     return `
         <div class="overlay-content overlay-container">
@@ -71,14 +71,14 @@ function createHireStaffOptionsHTML() {
                     </div>
 
                     <div class="form-group mb-4">
-                        <label for="experience-slider" class="form-label">Required Experience Level:</label>
+                        <label for="skill-slider" class="form-label">Required Skill Level:</label>
                         <div class="d-flex align-items-center">
-                            <span class="mr-2">${experienceLevels[0.1].name}</span>
-                            <input type="range" class="custom-range" id="experience-slider" 
-                                min="0.1" max="1.0" step="0.1" value="${initialExperience}">
-                            <span class="ml-2">${experienceLevels[1.0].name}</span>
+                            <span class="mr-2">${skillLevels[0.1].name}</span>
+                            <input type="range" class="custom-range" id="skill-slider" 
+                                min="0.1" max="1.0" step="0.1" value="${initialSkill}">
+                            <span class="ml-2">${skillLevels[1.0].name}</span>
                         </div>
-                        <div class="experience-level-container">Experience Level: <span id="experience-display">${expInfo.formattedName}</span></div>
+                        <div class="skill-level-container">Skill Level: <span id="skill-display">${skillInfo.formattedName}</span></div>
                     </div>
 
                     <div class="form-group mb-4">
@@ -98,7 +98,7 @@ function createHireStaffOptionsHTML() {
                     <div class="cost-details d-flex justify-content-between mt-3">
                         <div class="hiring-overlay-info-box">
                             <span>Cost per candidate: </span>
-                            <span>€${formatNumber(Math.round(calculateSearchCost(1, initialExperience, [])))}</span>
+                            <span>€${formatNumber(Math.round(calculateSearchCost(1, initialSkill, [])))}</span>
                         </div>
                         <div class="hiring-overlay-info-box">
                             <span>Total Cost: </span>
@@ -117,29 +117,29 @@ function createHireStaffOptionsHTML() {
 
 function setupHireStaffOptionsEventListeners(overlayContainer) {
     const candidatesSlider = overlayContainer.querySelector('#candidates-slider');
-    const experienceSlider = overlayContainer.querySelector('#experience-slider');
+    const skillSlider = overlayContainer.querySelector('#skill-slider');
     const candidatesValue = overlayContainer.querySelector('#candidates-value');
-    const experienceValue = overlayContainer.querySelector('#experience-display');  // Updated selector
+    const skillValue = overlayContainer.querySelector('#skill-display');  // Updated selector
     const totalCostDisplay = overlayContainer.querySelector('#total-cost');
     const roleCheckboxes = overlayContainer.querySelectorAll('.role-checkbox');
 
     function updateDisplay() {
         const numberOfCandidates = parseInt(candidatesSlider.value);
-        const experienceLevel = parseFloat(experienceSlider.value); // Updated to use float
+        const skillLevel = parseFloat(skillSlider.value); // Updated to use float
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.dataset.role);
 
-        const totalCost = calculateSearchCost(numberOfCandidates, experienceLevel, selectedRoles);
-        const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, experienceLevel, selectedRoles);
+        const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
+        const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, skillLevel, selectedRoles);
 
         // Update candidates
         candidatesValue.textContent = numberOfCandidates;
 
-        // Update experience level - using parent container to avoid element removal issues
-        const expInfo = getExperienceLevelInfo(experienceLevel);
-        const experienceLevelContainer = overlayContainer.querySelector('.experience-level-container');
-        experienceLevelContainer.innerHTML = `Experience Level: ${expInfo.formattedName}`;
+        // Update skill level - using parent container to avoid element removal issues
+        const skillInfo = getSkillLevelInfo(skillLevel);
+        const skillLevelContainer = overlayContainer.querySelector('.skill-level-container');
+        skillLevelContainer.innerHTML = `Skill Level: ${skillInfo.formattedName}`;
         
         // Update costs
         overlayContainer.querySelector('.hiring-overlay-info-box span:last-child').textContent = 
@@ -155,16 +155,16 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
     }
 
     candidatesSlider.addEventListener('input', updateDisplay);
-    experienceSlider.addEventListener('input', updateDisplay);
+    skillSlider.addEventListener('input', updateDisplay);
 
     const searchBtn = overlayContainer.querySelector('.search-btn');
     searchBtn.addEventListener('click', () => {
         const numberOfCandidates = parseInt(candidatesSlider.value);
-        const experienceLevel = parseFloat(experienceSlider.value); // Updated to use float
+        const skillLevel = parseFloat(skillSlider.value); // Updated to use float
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.dataset.role);
-        const totalCost = calculateSearchCost(numberOfCandidates, experienceLevel, selectedRoles);
+        const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
         const workRequired = 10 * numberOfCandidates;
 
         // Check if player has enough money
@@ -175,7 +175,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
         }
 
         // Add transaction for search cost
-        addTransaction('Expense', `Staff Search Cost (${numberOfCandidates} ${experienceLevels[experienceLevel].name} candidates)`, -totalCost);
+        addTransaction('Expense', `Staff Search Cost (${numberOfCandidates} ${skillLevels[skillLevel].name} candidates)`, -totalCost);
 
         taskManager.addCompletionTask(
             'Staff Search',
@@ -184,14 +184,14 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
             (target, params) => {
                 showHireStaffOverlay(
                     params.numberOfCandidates, 
-                    params.experienceModifier,
+                    params.skillModifier,
                     params.selectedRoles
                 );
             },
             null,
             { 
                 numberOfCandidates, 
-                experienceModifier: experienceLevels[experienceLevel].modifier,
+                skillModifier: skillLevels[skillLevel].modifier,
                 selectedRoles
             },
             () => {
@@ -199,7 +199,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
                     ? ` specializing in ${selectedRoles.map(r => specializedRoles[r].title).join(', ')}`
                     : '';
                 addConsoleMessage(
-                    `Started searching for ${numberOfCandidates} ${experienceLevels[experienceLevel].name}-level candidates${rolesText} (Cost: €${formatNumber(totalCost)})`
+                    `Started searching for ${numberOfCandidates} ${skillLevels[skillLevel].name}-level candidates${rolesText} (Cost: €${formatNumber(totalCost)})`
                 );
                 hideOverlay(overlayContainer);
             }

@@ -47,7 +47,7 @@ class Skills {
 export class Staff {
   static latestId = parseInt(localStorage.getItem('latestStaffId'), 10) || 0;
 
-  constructor(firstName, lastName, skills = {}, experienceLevel = 0.1) {
+  constructor(firstName, lastName, skills = {}, skillLevel = 0.1) {
     this.id = ++Staff.latestId; 
     localStorage.setItem('latestStaffId', Staff.latestId);
     this.firstName = firstName;
@@ -57,7 +57,7 @@ export class Staff {
     this.workforce = 50;
     this.wage = 600;
     this.skills = new Skills(skills);
-    this.experienceLevel = experienceLevel;  // Add experience level
+    this.skillLevel = skillLevel;  // Add skill level
     this.specializedRoles = [];  // Add specialized roles array
   }
 
@@ -80,16 +80,16 @@ export class Staff {
 }
 
 // Modify the randomizeSkills function to accept an experience modifier and specialized roles
-function randomizeSkills(experienceModifier = 0.5, specializedRole = null) {
+function randomizeSkills(skillModifier = 0.5, specializedRole = null) {
     // Calculate base skill value first
-    const baseValue = (Math.random() * 0.6) + (experienceModifier * 0.4);
+    const baseValue = (Math.random() * 0.6) + (skillModifier * 0.4);
     
-    // For specialized roles, add a percentage-based bonus that scales with experience
+    // For specialized roles, add a percentage-based bonus that scales with skill
     if (specializedRole) {
         // Bonus is 20-40% of remaining potential (1.0 - baseValue)
-        // Higher experience = bigger percentage of the remaining gap
+        // Higher skill = bigger percentage of the remaining gap
         const remainingPotential = 1.0 - baseValue;
-        const bonusPercentage = 0.2 + (experienceModifier * 0.2); // 20-40%
+        const bonusPercentage = 0.2 + (skillModifier * 0.2); // 20-40%
         const bonus = remainingPotential * bonusPercentage;
         return Math.min(1.0, baseValue + bonus).toFixed(2);
     }
@@ -97,17 +97,17 @@ function randomizeSkills(experienceModifier = 0.5, specializedRole = null) {
     return baseValue.toFixed(2);
 }
 
-export function createNewStaff(experienceModifier = 0.5, specializedRoles = []) {
+export function createNewStaff(skillModifier = 0.5, specializedRoles = []) {
     const nationality = Staff.prototype.selectNationality();
     const firstName = Staff.prototype.getNameForNationality(nationality);
     const lastName = getLastNameForNationality(nationality);
     
     const skills = {
-        field: { field: randomizeSkills(experienceModifier, specializedRoles.includes('field')) },
-        winery: { winery: randomizeSkills(experienceModifier, specializedRoles.includes('winery')) },
-        administration: { administration: randomizeSkills(experienceModifier, specializedRoles.includes('administration')) },
-        sales: { sales: randomizeSkills(experienceModifier, specializedRoles.includes('sales')) },
-        maintenance: { maintenance: randomizeSkills(experienceModifier, specializedRoles.includes('maintenance')) }
+        field: { field: randomizeSkills(skillModifier, specializedRoles.includes('field')) },
+        winery: { winery: randomizeSkills(skillModifier, specializedRoles.includes('winery')) },
+        administration: { administration: randomizeSkills(skillModifier, specializedRoles.includes('administration')) },
+        sales: { sales: randomizeSkills(skillModifier, specializedRoles.includes('sales')) },
+        maintenance: { maintenance: randomizeSkills(skillModifier, specializedRoles.includes('maintenance')) }
     };
 
     const skillMultiplier = 100;
@@ -121,7 +121,7 @@ export function createNewStaff(experienceModifier = 0.5, specializedRoles = []) 
         skills.maintenance.maintenance * skillMultiplier
     );
 
-    const newStaff = new Staff(firstName, lastName, skills, experienceModifier);
+    const newStaff = new Staff(firstName, lastName, skills, skillModifier);
     newStaff.specializedRoles = specializedRoles;  // Set specialized roles
     newStaff.workforce = 50;
     newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
