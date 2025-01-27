@@ -306,3 +306,91 @@ input[type="radio"]:hover {
   font-weight: bold;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
 }
+
+/* Starting Condition Grid Layout */
+.starting-condition-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.option-card {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.option-card.active {
+    border-color: var(--color-accent);
+    background-color: rgba(197, 165, 114, 0.2);
+}
+
+.option-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.country-flag {
+    width: 32px;
+    height: 24px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.options-info-box {
+    background-color: var(--color-background);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: 20px;
+}
+
+.info-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-accent);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.confirm-selection {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Starting Condition Overlay Styles */
+#startingConditionOverlay {
+    transition: opacity 0.3s ease;
+}
+
+#startingConditionOverlay .overlay-content {
+    max-width: 800px;
+    width: 90%;
+    transition: transform 0.3s ease;
+    transform: translateY(0);
+    margin: 0 auto;
+}
+
+#startingConditionOverlay.hiding .overlay-content {
+    transform: translateY(20px);
+}

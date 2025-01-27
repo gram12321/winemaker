@@ -50,45 +50,42 @@ async function clearLocalStorage() {
   console.log("Local storage cleared.");
 }
 
-async function storeCompanyName() {
-  const companyNameInput = document.getElementById('company-name');
-  if (companyNameInput) {
-    const companyName = companyNameInput.value;
-    if (companyName) {
-      const exists = await checkCompanyExists(companyName);
-      if (exists) {
-        await loadExistingCompanyData(companyName);
-        window.location.href = 'html/game.html'; // Forward to game.html directly
-      } else {
-        localStorage.setItem('companyName', companyName);
-        localStorage.setItem('money', 0); // Initialize money with 10000000, set to 0 will get 1000000 in a transaction
+async function storeCompanyName(companyName, startingCondition = null) {
+  if (companyName) {
+    const exists = await checkCompanyExists(companyName);
+    if (exists) {
+      await loadExistingCompanyData(companyName);
+      window.location.href = 'html/game.html'; // Forward to game.html directly
+    } else {
+      localStorage.setItem('companyName', companyName);
+      localStorage.setItem('money', startingCondition ? startingCondition.startingMoney : 1000000);
+      localStorage.setItem('startingCountry', startingCondition ? startingCondition.name : 'France');
 
-        // Set initial date values before logging the transaction
-        localStorage.setItem('week', 1); // Initialize week
-        localStorage.setItem('season', 'Spring'); // Initialize season
-        localStorage.setItem('year', 2025); // Initialize year
+      // Set initial date values before logging the transaction
+      localStorage.setItem('week', 1); // Initialize week
+      localStorage.setItem('season', 'Spring'); // Initialize season
+      localStorage.setItem('year', 2025); // Initialize year
 
-        // Log the initial income transaction
-        addTransaction('Income', 'Initial Company Setup', 10000000);
+      // Log the initial income transaction
+      addTransaction('Income', 'Initial Company Setup', 10000000);
 
-        // Create the first staff member
-        const staff1 = createNewStaff();
+      // Create the first staff member
+      const staff1 = createNewStaff();
 
-        // Create the second staff member and ensure the same nationality
-        const staff2 = createNewStaff();
-        staff2.nationality = staff1.nationality;
-        staff2.name = staff2.getNameForNationality(staff2.nationality);
-        staff2.lastName = getLastNameForNationality(staff2.nationality);
+      // Create the second staff member and ensure the same nationality
+      const staff2 = createNewStaff();
+      staff2.nationality = staff1.nationality;
+      staff2.name = staff2.getNameForNationality(staff2.nationality);
+      staff2.lastName = getLastNameForNationality(staff2.nationality);
 
-        // Add staff to an array
-        const staff = [staff1, staff2];
+      // Add staff to an array
+      const staff = [staff1, staff2];
 
-        // Save staff data using saveStaff
-        saveStaff(staff);
+      // Save staff data using saveStaff
+      saveStaff(staff);
 
-        await saveCompanyInfo(); // Save company info to Firestore
-        window.location.href = 'html/game.html'; // Redirect to game.html
-      }
+      await saveCompanyInfo(); // Save company info to Firestore
+      window.location.href = 'html/game.html'; // Redirect to game.html
     }
   }
 }
