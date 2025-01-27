@@ -444,7 +444,7 @@ input[type="radio"]:hover {
 }
 
 #startingConditionOverlay .overlay-content {
-    max-width: 800px;
+    max-width: 1200px;  /* Increased from 800px */
     width: 90%;
     transition: transform 0.3s ease;
     transform: translateY(0);
