@@ -19,7 +19,11 @@ export function showHireStaffOverlay(numberOfOptions = 5, experienceModifier = 0
 
 function createHireStaffHTML(createdStaffOptions) {
     const expInfo = getExperienceLevelInfo(createdStaffOptions[0]?.experienceLevel || 0.1);
-    
+    const specializationText = createdStaffOptions[0]?.specializedRoles?.length > 0 
+        ? `We have been specifically looking for ${createdStaffOptions[0].specializedRoles.map(role => 
+            `<span style="color: var(--skill-${role});">${specializedRoles[role].title}</span>`).join(', ')}.<br>`
+        : '';
+
     return `
         <section id="hiring-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -27,13 +31,10 @@ function createHireStaffHTML(createdStaffOptions) {
                 <button class="close-btn btn btn-alternative btn-sm">Close</button>
             </div>
             <div class="p-3 text-center">
-                <p>HR Department has completed the search for ${createdStaffOptions.length} 
-                   ${expInfo.formattedName} candidates.
-                ${createdStaffOptions[0]?.specializedRoles?.length > 0 
-                    ? ` Specialized in: ${createdStaffOptions[0].specializedRoles.map(role => 
-                        specializedRoles[role].title).join(', ')}.`
-                    : ''
-                }</p>
+                <p>HR Department has completed the search for new Candidate:</p>
+                <p>We have found ${createdStaffOptions.length} candidates</p>
+                <p>We have been searching for ${expInfo.formattedName}</p>
+                ${specializationText}
                 <p>Here are the possible candidates:</p>
             </div>
             <div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; overflow-y: auto; max-height: 80vh;">
