@@ -3,7 +3,7 @@ import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
 import { loadStaff, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { showStaffOverlay } from './overlays/showstaffoverlay.js'; // Import the new staff overlay
-import { loadBuildings } from './database/adminFunctions.js'; // Ensure the correct path
+
 
 //import { getBuildingTools } from './buildings.js'; // Ensure you're importing the tools 
 
@@ -48,16 +48,18 @@ class Skills {
 export class Staff {
   static latestId = parseInt(localStorage.getItem('latestStaffId'), 10) || 0;
 
-  constructor(firstName, lastName, skills = {}) {
+  constructor(firstName, lastName, skills = {}, experienceLevel = 0.1) {
     this.id = ++Staff.latestId; 
     localStorage.setItem('latestStaffId', Staff.latestId);
     this.firstName = firstName;
     this.lastName = lastName;
     this.nationality = this.selectNationality();
-    this.name = `${firstName} ${lastName}`; // Use the provided names instead
+    this.name = `${firstName} ${lastName}`;
     this.workforce = 50;
     this.wage = 600;
     this.skills = new Skills(skills);
+    this.experienceLevel = experienceLevel;  // Add experience level
+    this.specializedRoles = [];  // Add specialized roles array
   }
 
   selectNationality() {
@@ -120,12 +122,11 @@ export function createNewStaff(experienceModifier = 0.5, specializedRoles = []) 
         skills.maintenance.maintenance * skillMultiplier
     );
 
-    const newStaff = new Staff(firstName, lastName, skills);
+    const newStaff = new Staff(firstName, lastName, skills, experienceModifier);
+    newStaff.specializedRoles = specializedRoles;  // Set specialized roles
     newStaff.workforce = 50;
     newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
-    // Add these properties to track the search parameters
-    newStaff.experienceLevel = Math.round(experienceModifier * 10); // Convert modifier back to level
-    newStaff.specializedRoles = specializedRoles;
+    
     return newStaff;
 }
 

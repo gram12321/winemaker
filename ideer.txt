@@ -324,10 +324,35 @@ Density 2.0 (10000 vines):
   → Wine: 2,700 L
   → Bottles: 3,600
 
-// AI instructions
 
-We uses Json and localstorage several places in endday.js This should not be nessesart as we are a SPA and all storage between session is in adminfunctions. We allready have some function in place in adminfunctions for maniplulating farmland.
+// Skill calculations
 
-Lets try to eliminate JSON and localstorage in endday, prefeably using excisting function in aminfunctions or creating new to handle storing between sessions
+Fresh Off the Vine (0.1):
+- Base: (0-0.6) + (0.1 * 0.4) = 0.04 - 0.64
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.1 * 0.2)
+  Non-specialist: 0.04 - 0.64
+  Specialist: 0.15 - 0.71
 
+Cellar Hand (0.3):
+- Base: (0-0.6) + (0.3 * 0.4) = 0.12 - 0.72
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.3 * 0.2)
+  Non-specialist: 0.12 - 0.72
+  Specialist: 0.27 - 0.78
 
+Grape Sage (0.5):
+- Base: (0-0.6) + (0.5 * 0.4) = 0.20 - 0.80
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.5 * 0.2)
+  Non-specialist: 0.20 - 0.80
+  Specialist: 0.40 - 0.85
+
+Wine Wizard (0.7):
+- Base: (0-0.6) + (0.7 * 0.4) = 0.28 - 0.88
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.7 * 0.2)
+  Non-specialist: 0.28 - 0.88
+  Specialist: 0.52 - 0.92
+
+Living Legend (1.0):
+- Base: (0-0.6) + (1.0 * 0.4) = 0.40 - 1.00
+- Specialist bonus: (1 - baseValue) * (0.2 + 1.0 * 0.2)
+  Non-specialist: 0.40 - 1.00
+  Specialist: 0.70 - 1.00

@@ -297,7 +297,9 @@ export function saveStaff(staffMembers) {
       lastName: staff.lastName,
       workforce: staff.workforce,
       wage: staff.wage,
-      skills: staff.skills // Include skills in the saved data
+      skills: staff.skills,
+      experienceLevel: staff.experienceLevel,  // Save experience level
+      specializedRoles: staff.specializedRoles  // Save specialized roles
     }))));
   }
 }
@@ -314,14 +316,18 @@ export function loadStaff() {
     try {
       const parsedData = JSON.parse(savedStaffData);
       staffMembers = parsedData.map(item => {
-        const staff = new Staff();
+        const staff = new Staff(
+          item.name.split(' ')[0], 
+          item.lastName, 
+          item.skills, 
+          item.experienceLevel || 0.1  // Load experience level with fallback
+        );
         staff.id = item.id;
         staff.nationality = item.nationality;
         staff.name = item.name;
-        staff.lastName = item.lastName;
         staff.workforce = item.workforce;
         staff.wage = item.wage;
-        staff.skills = item.skills; // Load skills from parsed data
+        staff.specializedRoles = item.specializedRoles || [];  // Load specialized roles with fallback
         return staff;
       });
     } catch (error) {
