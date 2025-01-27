@@ -1,8 +1,9 @@
 import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames, italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry  } from './names.js'; // Adjust import path if necessary
-import { getFlagIconHTML } from './utils.js'; // Import the getFlagIcon function
+import { getFlagIconHTML, getSkillLevelInfo } from './utils.js'; // Import the getFlagIcon function and getSkillLevelInfo
 import { loadStaff, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { showStaffOverlay } from './overlays/showstaffoverlay.js'; // Import the new staff overlay
+import { specializedRoles } from './overlays/hireStaffOptionsOverlay.js'; // Import specializedRoles
 
 
 //import { getBuildingTools } from './buildings.js'; // Ensure you're importing the tools 
@@ -47,7 +48,7 @@ class Skills {
 export class Staff {
   static latestId = parseInt(localStorage.getItem('latestStaffId'), 10) || 0;
 
-  constructor(firstName, lastName, skills = {}, skillLevel = 0.1) {
+  constructor(firstName, lastName, skills = {}, skillLevel = 0.1, specializedRoles = []) {
     this.id = ++Staff.latestId; 
     localStorage.setItem('latestStaffId', Staff.latestId);
     this.firstName = firstName;
@@ -57,8 +58,9 @@ export class Staff {
     this.workforce = 50;
     this.wage = 600;
     this.skills = new Skills(skills);
+    this.experience = 0; // For future use in leveling up get experience from tasks completed / workapplyed 
     this.skillLevel = skillLevel;  // Add skill level
-    this.specializedRoles = [];  // Add specialized roles array
+    this.specializedRoles = specializedRoles.length > 0 ? specializedRoles : ['Wine Enthusiast'];  // Set default role
   }
 
   selectNationality() {
@@ -149,7 +151,8 @@ export function displayStaff() {
       <tr>
         <th scope="col">Name</th>
         <th scope="col">Nationality</th>
-        <th scope="col">Workforce</th>
+        <th scope="col">Skill Level</th>
+        <th scope="col">Specialization</th>
         <th scope="col">Wage (€)</th>
         <th scope="col">Assigned Tasks</th>
         <th scope="col" class="skills-column" style="min-width: 250px;">Skills</th>
@@ -195,12 +198,18 @@ export function displayStaff() {
           </div>
         `;
 
+        const skillInfo = getSkillLevelInfo(staff.skillLevel);
+        const specializationHTML = staff.specializedRoles.map(role => 
+          `<span class="specialization ${role}">${specializedRoles[role].title}</span>`
+        ).join(', ');
+
         const row = document.createElement('tr');
         row.style.cursor = 'pointer';
         row.innerHTML = `
           <td>${staff.name}</td>
           <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
-          <td>${staff.workforce}</td>
+          <td>${skillInfo.formattedName}</td>
+          <td>${specializationHTML}</td>
           <td>€${staff.wage}</td>
           <td>${assignedTaskDetail}</td>
           <td>${skillsHTML}</td>
@@ -209,7 +218,7 @@ export function displayStaff() {
 
         // Add event listener to open overlay on row click
         row.addEventListener('click', () => {
-            showStaffOverlay(staff);
+            showStaffOverlay(staff); // Pass the correct staff object
         });
     });
 

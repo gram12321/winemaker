@@ -278,11 +278,6 @@
 }
 
 /* Specialization Styles */
-.specialization {
-  font-size: 0.85em;
-  margin-right: 4px;
-}
-
 .specialization.field {
   color: var(--skill-field);
 }

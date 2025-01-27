@@ -1,4 +1,5 @@
-import { getFlagIconHTML, formatNumber, getColorClass } from '../utils.js';
+import { getFlagIconHTML, formatNumber, getColorClass, getSkillLevelInfo } from '../utils.js'; // Import getSkillLevelInfo
+import { specializedRoles } from '../overlays/hireStaffOptionsOverlay.js'; // Import specializedRoles
 
 export function showStaffOverlay(staffData) {
   const overlay = createOverlay();
@@ -25,6 +26,11 @@ function getStaffOverlayHTML(staffData) {
   const content = document.createElement('div');
   content.className = 'overlay-content';
 
+  const skillInfo = getSkillLevelInfo(staffData.skillLevel);
+  const specializationHTML = staffData.specializedRoles.map(role => 
+    `<span class="specialization ${role}">${specializedRoles[role].title}</span>`
+  ).join(', ');
+
   content.innerHTML = `
     <section id="staff-details-section" class="overlay-section card mb-4">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -40,6 +46,8 @@ function getStaffOverlayHTML(staffData) {
             <tr><td>Monthly Wage</td><td>€${staffData.wage}</td></tr>
             <tr><td>Annual Cost</td><td>€${staffData.wage * 12}</td></tr>
             <tr><td>Workforce</td><td>${staffData.workforce}</td></tr>
+            <tr><td>Skill Level</td><td>${skillInfo.formattedName}</td></tr>
+            <tr><td>Specialization</td><td>${specializationHTML}</td></tr>
           </tbody>
         </table>
       </div>
