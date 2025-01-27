@@ -48,8 +48,9 @@ export function showHireStaffOptionsOverlay() {
 
 function createHireStaffOptionsHTML() {
     const initialCandidates = 5;
-    const initialExperience = 3;
+    const initialExperience = 0.3; // Updated to use 0.1-1.0 scale
     const initialCost = calculateSearchCost(initialCandidates, initialExperience, []);
+    const expInfo = getExperienceLevelInfo(initialExperience);
 
     return `
         <div class="overlay-content overlay-container">
@@ -72,11 +73,12 @@ function createHireStaffOptionsHTML() {
                     <div class="form-group mb-4">
                         <label for="experience-slider" class="form-label">Required Experience Level:</label>
                         <div class="d-flex align-items-center">
-                            <span class="mr-2">${experienceLevels[1].name}</span>
-                            <input type="range" class="custom-range" id="experience-slider" min="1" max="10" step="1" value="${initialExperience}">
-                            <span class="ml-2">${experienceLevels[10].name}</span>
+                            <span class="mr-2">${experienceLevels[0.1].name}</span>
+                            <input type="range" class="custom-range" id="experience-slider" 
+                                min="0.1" max="1.0" step="0.1" value="${initialExperience}">
+                            <span class="ml-2">${experienceLevels[1.0].name}</span>
                         </div>
-                        <div>Experience Level: <span id="experience-value">${experienceLevels[initialExperience].name}</span></div>
+                        <div class="experience-level-container">Experience Level: <span id="experience-display">${expInfo.formattedName}</span></div>
                     </div>
 
                     <div class="form-group mb-4">
@@ -117,13 +119,13 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
     const candidatesSlider = overlayContainer.querySelector('#candidates-slider');
     const experienceSlider = overlayContainer.querySelector('#experience-slider');
     const candidatesValue = overlayContainer.querySelector('#candidates-value');
-    const experienceValue = overlayContainer.querySelector('#experience-value');
+    const experienceValue = overlayContainer.querySelector('#experience-display');  // Updated selector
     const totalCostDisplay = overlayContainer.querySelector('#total-cost');
     const roleCheckboxes = overlayContainer.querySelectorAll('.role-checkbox');
 
     function updateDisplay() {
         const numberOfCandidates = parseInt(candidatesSlider.value);
-        const experienceLevel = parseInt(experienceSlider.value);
+        const experienceLevel = parseFloat(experienceSlider.value); // Updated to use float
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.dataset.role);
@@ -131,14 +133,17 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
         const totalCost = calculateSearchCost(numberOfCandidates, experienceLevel, selectedRoles);
         const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, experienceLevel, selectedRoles);
 
+        // Update candidates
         candidatesValue.textContent = numberOfCandidates;
-        experienceValue.textContent = experienceLevels[experienceLevel].name;
+
+        // Update experience level - using parent container to avoid element removal issues
+        const expInfo = getExperienceLevelInfo(experienceLevel);
+        const experienceLevelContainer = overlayContainer.querySelector('.experience-level-container');
+        experienceLevelContainer.innerHTML = `Experience Level: ${expInfo.formattedName}`;
         
-        // Update cost per candidate using the new calculation
+        // Update costs
         overlayContainer.querySelector('.hiring-overlay-info-box span:last-child').textContent = 
             `€${formatNumber(costPerCandidate)}`;
-        
-        // Update total cost
         totalCostDisplay.textContent = `€${formatNumber(totalCost)}`;
 
         // Add role multiplier info if any roles are selected
@@ -155,7 +160,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
     const searchBtn = overlayContainer.querySelector('.search-btn');
     searchBtn.addEventListener('click', () => {
         const numberOfCandidates = parseInt(candidatesSlider.value);
-        const experienceLevel = parseInt(experienceSlider.value);
+        const experienceLevel = parseFloat(experienceSlider.value); // Updated to use float
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.dataset.role);

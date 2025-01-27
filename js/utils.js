@@ -49,6 +49,39 @@ export function getWineQualityCategory(quality) {
   return "Vintage Perfection";
 }
 
+export const experienceLevels = {
+    0.1: { name: 'Fresh Off the Vine', modifier: 0.2, costMultiplier: 1 },
+    0.2: { name: 'Cork Puller', modifier: 0.3, costMultiplier: 1.5 },
+    0.3: { name: 'Cellar Hand', modifier: 0.4, costMultiplier: 2 },
+    0.4: { name: 'Vine Whisperer', modifier: 0.5, costMultiplier: 3 },
+    0.5: { name: 'Grape Sage', modifier: 0.6, costMultiplier: 4 },
+    0.6: { name: 'Vintage Virtuoso', modifier: 0.7, costMultiplier: 6 },
+    0.7: { name: 'Wine Wizard', modifier: 0.8, costMultiplier: 8 },
+    0.8: { name: 'Terroir Master', modifier: 0.85, costMultiplier: 12 },
+    0.9: { name: 'Vineyard Virtuoso', modifier: 0.9, costMultiplier: 16 },
+    1.0: { name: 'Living Legend', modifier: 0.95, costMultiplier: 25 }
+};
+
+export function getExperienceLevelInfo(level) {
+    // Convert level from 1-10 scale to 0.1-1.0 scale if needed
+    const normalizedLevel = level > 1 ? level / 10 : level;
+    
+    // Find the closest experience level
+    const levels = Object.keys(experienceLevels).map(Number);
+    const closestLevel = levels.reduce((prev, curr) => 
+        Math.abs(curr - normalizedLevel) < Math.abs(prev - normalizedLevel) ? curr : prev
+    );
+
+    const expLevel = experienceLevels[closestLevel];
+    const colorClass = getColorClass(closestLevel);
+
+    return {
+        ...expLevel,
+        colorClass,
+        formattedName: `<span class="${colorClass}">${expLevel.name}</span>`
+    };
+}
+
 export function formatQualityDisplay(quality) {
   const qualityDescription = getWineQualityCategory(quality);
   const colorClass = getColorClass(quality);
@@ -121,19 +154,3 @@ export function getPreviousSeasonAndYear(currentSeason, currentYear) {
     return { previousSeason, previousYear };
 }
 
-export const experienceLevels = {
-    1: { name: 'Fresh Off the Vine', modifier: 0.2, costMultiplier: 1 },
-    2: { name: 'Cork Puller', modifier: 0.3, costMultiplier: 1.5 },
-    3: { name: 'Cellar Hand', modifier: 0.4, costMultiplier: 2 },
-    4: { name: 'Vine Whisperer', modifier: 0.5, costMultiplier: 3 },
-    5: { name: 'Grape Sage', modifier: 0.6, costMultiplier: 4 },
-    6: { name: 'Vintage Virtuoso', modifier: 0.7, costMultiplier: 6 },
-    7: { name: 'Wine Wizard', modifier: 0.8, costMultiplier: 8 },
-    8: { name: 'Terroir Master', modifier: 0.85, costMultiplier: 12 },
-    9: { name: 'Vineyard Virtuoso', modifier: 0.9, costMultiplier: 16 },
-    10: { name: 'Living Legend', modifier: 0.95, costMultiplier: 25 }
-};
-
-export function getExperienceLevelInfo(level) {
-    return experienceLevels[level] || experienceLevels[1];
-}

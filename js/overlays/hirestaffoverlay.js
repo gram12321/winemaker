@@ -1,5 +1,5 @@
 import { createNewStaff, setupStaffWagesRecurringTransaction  } from '../staff.js';
-import { getFlagIconHTML, experienceLevels } from '../utils.js';
+import { getFlagIconHTML, experienceLevels, getExperienceLevelInfo } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
@@ -18,6 +18,8 @@ export function showHireStaffOverlay(numberOfOptions = 5, experienceModifier = 0
 }
 
 function createHireStaffHTML(createdStaffOptions) {
+    const expInfo = getExperienceLevelInfo(createdStaffOptions[0]?.experienceLevel || 0.1);
+    
     return `
         <section id="hiring-section" class="overlay-section card mb-4">
             <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -25,7 +27,8 @@ function createHireStaffHTML(createdStaffOptions) {
                 <button class="close-btn btn btn-alternative btn-sm">Close</button>
             </div>
             <div class="p-3 text-center">
-                <p>HR Department has completed the search for ${createdStaffOptions.length} ${experienceLevels[createdStaffOptions[0]?.experienceLevel || 1].name}-level candidates.
+                <p>HR Department has completed the search for ${createdStaffOptions.length} 
+                   ${expInfo.formattedName} candidates.
                 ${createdStaffOptions[0]?.specializedRoles?.length > 0 
                     ? ` Specialized in: ${createdStaffOptions[0].specializedRoles.map(role => 
                         specializedRoles[role].title).join(', ')}.`
