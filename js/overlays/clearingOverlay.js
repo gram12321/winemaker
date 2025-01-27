@@ -22,9 +22,10 @@ function createClearingOverlayHTML(farmland) {
                     <div class="form-group">
                         <div class="clearing-options">
                             <div class="form-check mb-2">
-                                <input type="checkbox" class="form-check-input" id="remove-vines" ${!farmland.plantedResourceName ? 'disabled' : ''}>
+                                <input type="checkbox" class="form-check-input" id="remove-vines" 
+                                    ${!farmland.plantedResourceName ? 'disabled' : 'checked onclick="return false;"'}>
                                 <label class="form-check-label ${!farmland.plantedResourceName ? 'text-muted' : ''}" for="remove-vines">
-                                    Removal of old Vines ${!farmland.plantedResourceName ? '(No vines planted)' : ''}
+                                    Removal of old Vines ${!farmland.plantedResourceName ? '(No vines planted)' : '(Required)'}
                                 </label>
                             </div>
                             <div class="form-check mb-2">
@@ -57,8 +58,14 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
     const totalWorkSpan = overlayContainer.querySelector('#total-work');
     const healthImprovementSpan = overlayContainer.querySelector('#health-improvement');
     
+    // Always run initial calculation to account for default checked vine removal
+    updateWorkCalculations(checkboxes, selectedTasksSpan, totalWorkSpan, healthImprovementSpan);
+    
+    // Only add change listeners to non-vine-removal checkboxes
     checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => updateWorkCalculations(checkboxes, selectedTasksSpan, totalWorkSpan, healthImprovementSpan));
+        if (checkbox.id !== 'remove-vines') {
+            checkbox.addEventListener('change', () => updateWorkCalculations(checkboxes, selectedTasksSpan, totalWorkSpan, healthImprovementSpan));
+        }
     });
 
     setupClearButton(overlayContainer, farmland, checkboxes, onClearCallback);

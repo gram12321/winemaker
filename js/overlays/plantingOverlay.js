@@ -15,11 +15,6 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
     return;
   }
 
-  if (farmland.canBeCleared === 'Ready to be cleared') {
-    addConsoleMessage(`Field <strong>${getFlagIconHTML(farmland.country)} ${farmland.name}</strong> needs to be cleared first.`);
-    return;
-  }
-
   const overlayContainer = showStandardOverlay(createPlantingOverlayHTML(farmland));
   setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback);
 }
@@ -89,12 +84,13 @@ function setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback
 
 // Function to handle planting logic
 function plant(farmland, selectedResource, selectedDensity) {
+  // Validation checks
   if (!selectedResource) {
     addConsoleMessage('Please select a resource to plant', false, true);
     return false;
   }
 
-    // Calculate planting cost
+  // Calculate planting cost
   const totalCost = selectedDensity * 2 * farmland.acres;
   const currentMoney = parseFloat(localStorage.getItem('money') || '0');
 
@@ -104,23 +100,23 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Get the resource object to check its properties
+  // Get the resource object and calculate base modifiers
   const resourceObj = allResources.find(r => r.name === selectedResource);
-  // Calculate density multiplier: 1.0 at 1000 vines/acre, increasing by 0.1 for each 1000 additional vines
-  const densityMultiplier = 1 + Math.max(0, (selectedDensity - 1000) / 1000) * 0.1;
-  const fragilePenalty = (1 - resourceObj.fragile) * 0.5 * densityMultiplier; // More fragile = higher penalty, multiplied by density factor
+  const densityMultiplier = 1 + Math.max(0, (selectedDensity - 1000) / 1000) * 0.1;   // Calculate density multiplier: 1.0 at 1000 vines/acre, increasing by 0.1 for each 1000 additional vines
+  const fragilePenalty = (1 - resourceObj.fragile) * 0.5 * densityMultiplier;   // More fragile = higher penalty, multiplied by density factor
 
   // Calculate altitude penalty
   const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
   const medianAltitude = (minAltitude + maxAltitude) / 2;
   const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
-  const altitudePenalty = altitudeDeviation * 0.5; // 5% extra work for every 10% deviation above median, 5% less work for every 10% deviation below median
+  const altitudePenalty = altitudeDeviation * 0.5;   // 5% extra work for every 10% deviation above median, 5% less work for every 10% deviation below median
 
-  // Calculate total work based on density and acres, including altitude penalty
+  // Calculate total work based on density and acres, including penalties
   const vinesPerAcre = selectedDensity;
   const totalVines = vinesPerAcre * farmland.acres;
-  const totalStandardWorkWeek = totalVines / 3500; // How many weeks of work for a single worker capable of planting 500 vines per day (3500 per week)
-  const totalWork = totalStandardWorkWeek * 50 * (1 + altitudePenalty + fragilePenalty); // Multiply by 50 to convert standardWeekofWork into workunits, then apply altitude penalty
+
+  const totalStandardWorkWeek = totalVines / 3500;  // How many weeks of work for a single worker capable of planting 500 vines per day (3500 per week)
+  const totalWork = totalStandardWorkWeek * 50 * (1 + altitudePenalty + fragilePenalty);   // Multiply by 50 to convert standardWeekofWork into workunits, then apply penalties
 
   // Add detailed console message about work calculation
   addConsoleMessage(`Work calculation for ${getFlagIconHTML(farmland.country)} ${farmland.name}:
@@ -132,7 +128,7 @@ function plant(farmland, selectedResource, selectedDensity) {
     - Fragility penalty: +${formatNumber(fragilePenalty * 100, 1)}% (Base: ${formatNumber((1 - resourceObj.fragile) * 50, 1)}% × Density multiplier: ${formatNumber(densityMultiplier, 2)})
     - Final work units: ${formatNumber(totalWork, 1)} (${formatNumber(totalStandardWorkWeek * 50, 1)} × ${formatNumber(1 + altitudePenalty + fragilePenalty, 2)})`);
 
-  // Since planting is a progressive task, we use addProgressiveTask
+  // Create the progressive planting task
   taskManager.addProgressiveTask(
     'Planting',
     TaskType.field,
@@ -168,7 +164,8 @@ export function finalizePlanting(target, params) {
         density: selectedDensity,
         plantedResourceName: selectedResource,
         vineAge: 0,
-        status: 'No yield in first season'
+        status: 'No yield in first season',
+        canBeCleared: 'Ready to be cleared'  // Add this line to set clearing status
     });
     addTransaction('Expense', `Planting on ${getFlagIconHTML(target.country)} ${target.name}`, -totalCost);
     displayFarmland();
