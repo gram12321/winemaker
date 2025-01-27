@@ -19,29 +19,40 @@ function createClearingOverlayHTML(farmland) {
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
                 <div class="card-body">
-                    <div class="form-group">
-                        <div class="clearing-options">
-                            <div class="form-check mb-2">
-                                <input type="checkbox" class="form-check-input" id="remove-vines" 
-                                    ${!farmland.plantedResourceName ? 'disabled' : 'checked onclick="return false;"'}>
-                                <label class="form-check-label ${!farmland.plantedResourceName ? 'text-muted' : ''}" for="remove-vines">
-                                    Removal of old Vines ${!farmland.plantedResourceName ? '(No vines planted)' : '(Required)'}
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input type="checkbox" class="form-check-input" id="clear-vegetation">
-                                <label class="form-check-label" for="clear-vegetation">Clear Vegetation</label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input type="checkbox" class="form-check-input" id="remove-debris">
-                                <label class="form-check-label" for="remove-debris">Debris Removal</label>
-                            </div>
+                    <div class="clearing-options">
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="remove-vines" 
+                                ${!farmland.plantedResourceName ? 'disabled' : 'checked onclick="return false;"'}>
+                            <label class="form-check-label ${!farmland.plantedResourceName ? 'text-muted' : ''}" for="remove-vines">
+                                Removal of old Vines ${!farmland.plantedResourceName ? '(No vines planted)' : '(Required)'}
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="clear-vegetation">
+                            <label class="form-check-label" for="clear-vegetation">Clear Vegetation</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="remove-debris">
+                            <label class="form-check-label" for="remove-debris">Debris Removal</label>
                         </div>
                     </div>
-                    <div class="work-details mt-3">
-                        <div>Selected Tasks: <span id="selected-tasks">0</span>/3</div>
-                        <div>Estimated Work: <span id="total-work">0</span> units</div>
-                        <div>Health Improvement: +<span id="health-improvement">0</span></div>
+                    <hr class="overlay-divider">
+                    <div class="health-bar-container">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label>Farmland Health:</label>
+                            <span class="current-health">${formatNumber(farmland.farmlandHealth * 100)}%</span>
+                        </div>
+                        <div class="health-bar">
+                            <div class="health-bar-base" style="width: ${farmland.farmlandHealth * 100}%"></div>
+                            <div class="health-bar-current" style="width: ${farmland.farmlandHealth * 100}%"></div>
+                            <div class="health-bar-improvement"></div>
+                        </div>
+                        <div class="text-end mt-1">
+                            <span class="health-improvement"></span>
+                        </div>
+                    </div>
+                    <div class="work-details text-center mt-4">
+                        <div class="mb-3">Estimated Work: <span id="total-work">0</span> units</div>
                     </div>
                     <div class="d-flex justify-content-center mt-4">
                         <button class="btn btn-warning clear-btn">Clear Field</button>
@@ -54,17 +65,17 @@ function createClearingOverlayHTML(farmland) {
 
 function setupClearingEventListeners(overlayContainer, farmland, onClearCallback) {
     const checkboxes = overlayContainer.querySelectorAll('input[type="checkbox"]');
-    const selectedTasksSpan = overlayContainer.querySelector('#selected-tasks');
     const totalWorkSpan = overlayContainer.querySelector('#total-work');
-    const healthImprovementSpan = overlayContainer.querySelector('#health-improvement');
-    
+    const healthBar = overlayContainer.querySelector('.health-bar');
+    const currentHealth = farmland.farmlandHealth;
+
     // Always run initial calculation to account for default checked vine removal
-    updateWorkCalculations(checkboxes, selectedTasksSpan, totalWorkSpan, healthImprovementSpan);
+    updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth);
     
     // Only add change listeners to non-vine-removal checkboxes
     checkboxes.forEach(checkbox => {
         if (checkbox.id !== 'remove-vines') {
-            checkbox.addEventListener('change', () => updateWorkCalculations(checkboxes, selectedTasksSpan, totalWorkSpan, healthImprovementSpan));
+            checkbox.addEventListener('change', () => updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth));
         }
     });
 
@@ -72,14 +83,45 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
     setupCloseButton(overlayContainer);
 }
 
-function updateWorkCalculations(checkboxes, selectedTasksSpan, totalWorkSpan, healthImprovementSpan) {
+function updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth) {
     const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-    const totalWork = selectedCount * 100; // 100 work units per task
-    const healthImprovement = (selectedCount * 0.5 / 3).toFixed(2); // Dividing total possible improvement (0.5) by number of tasks
+    const totalWork = selectedCount * 100;
 
-    selectedTasksSpan.textContent = selectedCount;
-    totalWorkSpan.textContent = totalWork;
-    healthImprovementSpan.textContent = healthImprovement;
+    // Calculate health improvement per task
+    const healthImprovementPerTask = 0.17; // 17% per task
+    const totalHealthImprovement = selectedCount * healthImprovementPerTask;
+    const newHealth = Math.min(1.0, currentHealth + totalHealthImprovement);
+
+    if (totalWorkSpan) totalWorkSpan.textContent = totalWork;
+
+    // Update health bar visualization
+    if (healthBar) {
+        const currentHealthBar = healthBar.querySelector('.health-bar-current');
+        const improvementBar = healthBar.querySelector('.health-bar-improvement');
+        const currentHealthSpan = healthBar.parentElement.querySelector('.current-health');
+        const improvementSpan = healthBar.querySelector('.health-improvement');
+
+        // Update the current health display
+        if (currentHealthSpan) {
+            currentHealthSpan.textContent = `${formatNumber(newHealth * 100)}%`;
+        }
+
+        // Update the health bars
+        if (currentHealthBar) {
+            currentHealthBar.style.width = `${currentHealth * 100}%`;
+        }
+        if (improvementBar) {
+            improvementBar.style.width = `${(newHealth - currentHealth) * 100}%`;
+            improvementBar.style.left = `${currentHealth * 100}%`;
+        }
+
+        // Update the improvement text
+        if (improvementSpan) {
+            improvementSpan.textContent = totalHealthImprovement > 0 
+                ? `+${formatNumber(totalHealthImprovement * 100)}%` 
+                : '';
+        }
+    }
 }
 
 function setupClearButton(overlayContainer, farmland, checkboxes, onClearCallback) {

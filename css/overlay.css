@@ -53,6 +53,11 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     z-index: 1500;
 }
 
+.overlay-divider {
+    border-top: 2px solid var(--color-accent);
+    margin: 20px 0;
+}
+
 .standard-overlay .overlay-content {
     max-width: 80vw;
     max-height: 90vh;
@@ -547,5 +552,59 @@ input[type="range"]::-webkit-slider-thumb:hover {
   padding: 12px;
   border-color: rgba(197, 165, 114, 0.2);
   background: transparent;
+}
+
+/* Clearing Overlay Specific Styles */
+.clearing-options {
+    padding: 10px 0;
+}
+
+.health-bar-container {
+    margin-top: 15px;
+}
+
+.health-bar {
+    height: 20px;
+    background: var(--color-background);
+    border: 1px solid var(--color-accent);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    margin: 5px 0;
+}
+
+.health-bar-base {
+    height: 100%;
+    background: var(--color-background);
+    position: absolute;
+    width: 100%;
+}
+
+.health-bar-current {
+    height: 100%;
+    background: var(--color-primary);
+    position: absolute;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.health-bar-improvement {
+    height: 100%;
+    background: var(--color-accent);
+    position: absolute;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+}
+
+.health-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: var(--color-text);
+}
+
+.health-improvement {
+    color: var(--color-accent);
+    margin-left: 10px;
 }
 
