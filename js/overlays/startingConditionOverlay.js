@@ -34,12 +34,17 @@ function updateInfoBox(condition) {
     const infoBox = document.querySelector('.options-info-box');
     infoBox.innerHTML = `
         <div class="info-header">
+            ${getFlagIconHTML(condition.name)}
             <h4>${condition.name} Details</h4>
         </div>
         <div class="info-content">
             <div class="info-row">
                 <span class="info-label">Starting Money:</span>
                 <span class="info-value">€${condition.startingMoney.toLocaleString()}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Location:</span>
+                <span class="info-value">${condition.description}</span>
             </div>
             <button class="btn btn-primary confirm-selection" data-country="${condition.name}">
                 Start in ${condition.name}

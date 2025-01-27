@@ -365,12 +365,29 @@ input[type="radio"]:hover {
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--color-accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-content {
+    padding: 10px 0;
 }
 
 .info-row {
     display: flex;
     justify-content: space-between;
     margin-bottom: 15px;
+    padding: 5px 0;
+}
+
+.info-label {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.info-value {
+    color: var(--color-accent);
 }
 
 .confirm-selection {
@@ -393,4 +410,39 @@ input[type="radio"]:hover {
 
 #startingConditionOverlay.hiding .overlay-content {
     transform: translateY(20px);
+}
+
+/* Starting Condition Styles */
+.overlay-section {
+    background-color: var(--color-background);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.overlay-section .card-header {
+    background-color: var(--color-primary);
+    color: var(--panel-text);
+    padding: 1rem;
+    border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section .card-body {
+    background-color: var(--color-background);
+    padding: 20px;
+}
+
+.options-info-box .overlay-table {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.options-info-box .overlay-table thead th {
+    background-color: var(--color-primary);
+    color: var(--panel-text);
+    border-bottom: 2px solid var(--color-accent);
+}
+
+.options-info-box .overlay-table tbody td {
+    background-color: var(--color-background);
+    border: 1px solid rgba(197, 165, 114, 0.2);
 }
