@@ -24,6 +24,7 @@ function createInventoryOverlayHTML() {
             
             <div class="inventory-sections">
                 <section id="grapes-section" class="inventory-section card mb-4">
+                    <img src="/assets/pic/warehouse_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Warehouse">
                     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Warehouse</h3>
                         <span class="badge badge-light" id="grapes-total"></span>
@@ -48,6 +49,7 @@ function createInventoryOverlayHTML() {
                 </section>
 
                 <section id="must-section" class="inventory-section card mb-4">
+                    <img src="/assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Winery">
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Winery</h3>
                         <span class="badge badge-light" id="must-total"></span>
@@ -72,6 +74,7 @@ function createInventoryOverlayHTML() {
                 </section>
 
                 <section id="wine-section" class="inventory-section card">
+                    <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
                     <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Cellar</h3>
                         <span class="badge badge-light" id="wine-total"></span>
