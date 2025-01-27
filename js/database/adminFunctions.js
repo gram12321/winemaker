@@ -58,7 +58,7 @@ async function storeCompanyName(companyName, startingCondition = null) {
       window.location.href = 'html/game.html'; // Forward to game.html directly
     } else {
       localStorage.setItem('companyName', companyName);
-      localStorage.setItem('money', startingCondition ? startingCondition.startingMoney : 1000000);
+      localStorage.setItem('money', 0); // Set initial money to 0
       localStorage.setItem('startingCountry', startingCondition ? startingCondition.name : 'France');
 
       // Set initial date values before logging the transaction
@@ -67,7 +67,8 @@ async function storeCompanyName(companyName, startingCondition = null) {
       localStorage.setItem('year', 2025); // Initialize year
 
       // Log the initial income transaction
-      addTransaction('Income', 'Initial Company Setup', 10000000);
+      const startingMoney = startingCondition ? startingCondition.startingMoney : 1000000;
+      addTransaction('Income', 'Initial Company Setup', startingMoney);
 
       // Create the first staff member
       const staff1 = createNewStaff();

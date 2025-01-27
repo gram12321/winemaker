@@ -302,27 +302,10 @@
   overflow-x: hidden;
 }
 
-#companyInfo .info-content {
-  float: right;
-}
-
-#companyInfo .company-name {
-  font-family: 'Georgia', serif;
-  font-size: 1.5rem;
-  margin-bottom: 5px;
-  text-align: center;
-  color: var(--color-accent);
-}
-
-#companyInfo .styled-line {
-  width: 60%;
-  height: 3px;
-  background-color: var(--color-accent);
-  border-radius: 5px;
-  margin: 10px auto;
-}
-
 #companyInfo .info-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -330,11 +313,13 @@
 #companyInfo .info-label {
   font-weight: bold;
   color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 #companyInfo .info-content {
   font-weight: normal;
-  margin-left: 8px;
   color: var(--color-accent);
 }
 
@@ -380,4 +365,35 @@
 
 #sidebar-wrapper.collapsed .menu-title .company-name .full-name {
   display: none !important;
+}
+
+#companyInfo .company-name {
+  font-family: 'Georgia', serif;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  text-align: center;
+  color: var(--color-accent);
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 10px;
+}
+
+#companyInfo .company-name .full-name {
+  display: block !important;
+}
+
+#companyInfo .company-name .short-name {
+  display: none !important;
+}
+
+#sidebar-wrapper.collapsed #companyInfo .company-name {
+  font-size: 1.2rem;
+  padding-bottom: 5px;
+}
+
+#sidebar-wrapper.collapsed #companyInfo .company-name .full-name {
+  display: none !important;
+}
+
+#sidebar-wrapper.collapsed #companyInfo .company-name .short-name {
+  display: block !important;
 }
