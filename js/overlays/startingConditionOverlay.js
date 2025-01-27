@@ -15,6 +15,27 @@ const startingConditions = {
         startingMoney: 5000000,
         flagCode: 'it',
         familyPicture: 'robertobianca.webp'
+    },
+    'Germany': {
+        name: 'Germany',
+        description: 'Establish your vineyard in the Rhine Valley',
+        startingMoney: 3000000,
+        flagCode: 'de',
+        familyPicture: 'placeholder.webp' // Need to add actual image
+    },
+    'Spain': {
+        name: 'Spain',
+        description: 'Create your bodega in the Spanish wine country',
+        startingMoney: 2000000,
+        flagCode: 'es',
+        familyPicture: 'placeholder.webp' // Need to add actual image
+    },
+    'United States': {
+        name: 'United States',
+        description: 'Build your winery in Napa Valley, California',
+        startingMoney: 7000000,
+        flagCode: 'us',
+        familyPicture: 'placeholder.webp' // Need to add actual image
     }
 };
 
