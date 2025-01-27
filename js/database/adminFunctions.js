@@ -11,6 +11,7 @@ import { Building, updateBuildingCards, updateBuildButtonStates } from '../build
 import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { setupStaffWagesRecurringTransaction } from '../staff.js';
+import { Farmland, createFarmland } from '../farmland.js';
 
 async function clearFirestore() {
   if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -84,6 +85,18 @@ async function storeCompanyName(companyName, startingCondition = null) {
 
       // Save staff data using saveStaff
       saveStaff(staff);
+
+      // Create starting farmland if provided
+      if (startingCondition && startingCondition.startingFarmland) {
+        // Use the pre-generated farmland data directly
+        const farmland = startingCondition.startingFarmland;
+        const farmlands = [farmland];
+        localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+        farmlandsStore = farmlands; // Update the in-memory store
+      } else {
+        localStorage.setItem('ownedFarmlands', '[]');
+        farmlandsStore = []; // Clear the in-memory store
+      }
 
       await saveCompanyInfo(); // Save company info to Firestore
       window.location.href = 'html/game.html'; // Redirect to game.html

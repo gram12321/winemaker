@@ -2,7 +2,6 @@ import { getResourceByName } from './resource.js';
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
 
-
 class Farmland {
   constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = 5000, farmlandHealth = 0.5) {
     this.id = id; // Unique identifier for the farmland
@@ -149,10 +148,11 @@ export function getRandomAcres() {
         acres = 5 + Math.random() * 15;
     }
 
-    return parseFloat(acres.toFixed(2));
+    // Ensure we return a number, not a string
+    return Number(acres.toFixed(2));
 }
 
-function getRandomSoil(country, region) {
+export function getRandomSoil(country, region) {
   const soils = regionSoilTypes[country][region];
   const numberOfSoils = Math.floor(Math.random() * 5) + 1; // Randomly choose between 1 and 5 soils
   const selectedSoils = new Set();
@@ -165,7 +165,7 @@ function getRandomSoil(country, region) {
   return Array.from(selectedSoils).join(', '); // Convert set to array and return as comma-separated string
 }
 
-function getRandomAltitude(country, region) {
+export function getRandomAltitude(country, region) {
   const [min, max] = regionAltitudeRanges[country][region];
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -200,9 +200,40 @@ export function getRandomName(country, aspect) {
   return names[randomIndex];
 }
 
-function getRandomAspect() {
+export function getRandomAspect() {
   const aspects = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
   return getRandomItem(aspects);
+}
+
+// Add generateFarmlandPreview function to farmland.js
+export function generateFarmlandPreview(country, region) {
+    // First generate random aspect as it affects the name generation
+    const aspect = getRandomAspect();
+    
+    // Then get a name based on country and aspect
+    const name = getRandomName(country, aspect);
+    
+    // Get random soil and altitude based on country and region
+    const soil = getRandomSoil(country, region);
+    const altitude = getRandomAltitude(country, region);
+    
+    // Generate small random acres (under 1)
+    const acres = Number((0.1 + Math.random() * 0.4).toFixed(2));
+    
+    // Create farmland with all parameters in correct order
+    return new Farmland(
+        1,          // id
+        name,       // name
+        country,    // country
+        region,     // region
+        acres,      // acres
+        null,       // plantedResourceName
+        '',         // vineAge
+        '',         // grape
+        soil,       // soil
+        altitude,   // altitude
+        aspect      // aspect
+    );
 }
 
 export { Farmland, normalizeLandValue };

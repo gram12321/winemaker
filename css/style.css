@@ -319,7 +319,7 @@ input[type="radio"]:hover {
 /* Add styles for the family picture container */
 .options-picture {
     background-color: var(--color-background);
-    border: 0px solid var(--color-primary);
+    border: 2px solid var(--color-accent);
     border-radius: var(--radius-md);
     padding: 20px;
     height: 400px; /* Set fixed height */
@@ -385,7 +385,7 @@ input[type="radio"]:hover {
     border: 2px solid var(--color-accent);
     border-radius: var(--radius-md);
     padding: 20px;
-    max-height: 100%;  /* Set max height */
+    max-height: 400px;  /* Set max height */
     overflow-y: auto;   /* Enable scrolling if needed */
 }
 
@@ -399,23 +399,27 @@ input[type="radio"]:hover {
 }
 
 .info-content {
-    padding: 10px 0;
+    padding: 5px 0;  /* Reduced padding */
 }
 
 .info-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-    padding: 5px 0;
+    display: grid;
+    grid-template-columns: 80px 1fr;  /* Fixed width for labels, remaining space for values */
+    gap: 10px;  /* Space between label and value */
+    margin-bottom: 8px;  /* Reduced margin */
+    padding: 2px 0;  /* Reduced padding */
 }
 
 .info-label {
     color: var(--color-text);
     font-weight: 500;
+    font-size: 0.9em;  /* Slightly smaller font */
 }
 
 .info-value {
     color: var(--color-accent);
+    text-align: left;  /* Left align the value */
+    font-size: 0.9em;  /* Slightly smaller font */
 }
 
 .confirm-selection {
@@ -456,6 +460,7 @@ input[type="radio"]:hover {
     background-color: var(--color-background);
     border-radius: var(--radius-md);
     overflow: hidden;
+
 }
 
 .overlay-section .card-header {

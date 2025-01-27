@@ -1,13 +1,19 @@
 import { storeCompanyName } from '../database/adminFunctions.js';
 import { getFlagIconHTML } from '../utils.js';
+import { generateFarmlandPreview } from '../farmland.js';
 
+// Generate farmland previews when defining starting conditions
 const startingConditions = {
     'France': {
         name: 'France',
         description: 'Start your winery in the beautiful French countryside',
         startingMoney: 1000000,
         flagCode: 'fr',
-        familyPicture: 'pierrecamille.webp'
+        familyPicture: 'pierrecamille.webp',
+        startingFarmland: {
+            ...generateFarmlandPreview('France', 'Burgundy (Bourgogne)'),
+            region: 'Burgundy (Bourgogne)'  // Ensure correct region
+        }
     },
     'Italy': {
         name: 'Italy',
@@ -69,6 +75,23 @@ function updateInfoBox(condition) {
                 <span class="info-label">Location:</span>
                 <span class="info-value">${condition.description}</span>
             </div>
+            ${condition.startingFarmland ? `
+            <div class="info-row">
+                <span class="info-label">Starting Vineyard:</span>
+                <span class="info-value">${condition.startingFarmland.name} (${condition.startingFarmland.acres} acres)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Soil Type:</span>
+                <span class="info-value">${condition.startingFarmland.soil}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Altitude:</span>
+                <span class="info-value">${condition.startingFarmland.altitude}m</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Aspect:</span>
+                <span class="info-value">${condition.startingFarmland.aspect}</span>
+            </div>` : ''}
         </div>
     `;
 }
@@ -103,12 +126,22 @@ export function showStartingConditionOverlay(companyName) {
         optionsContainer.innerHTML += createStartingConditionCard(condition);
     });
 
+    // Handle confirm selection - Move this after creating the start button
+    const handleStartClick = (e) => {
+        if (e.target.classList.contains('confirm-selection')) {
+            const country = e.target.dataset.country;
+            const startingCondition = startingConditions[country];
+            storeCompanyName(companyName, startingCondition);
+        }
+    };
+
     // Create start button container
     const startButton = document.createElement('div');
     startButton.className = 'start-button-container';
+    startButton.addEventListener('click', handleStartClick); // Add click handler directly to the container
     overlay.querySelector('.card-body').appendChild(startButton);
 
-    // Add click handlers
+    // Add click handlers for options
     optionsContainer.querySelectorAll('.option-card').forEach(card => {
         card.addEventListener('click', () => {
             // Remove active class from all cards
@@ -154,6 +187,9 @@ export function showStartingConditionOverlay(companyName) {
             hideStartingConditionOverlay();
         }
     });
+
+    // Remove the old overlay click handler
+    overlay.removeEventListener('click', handleStartClick);
 }
 
 function hideStartingConditionOverlay() {
