@@ -80,17 +80,20 @@ export class Staff {
 
 // Modify the randomizeSkills function to accept an experience modifier and specialized roles
 function randomizeSkills(experienceModifier = 0.5, specializedRole = null) {
-    // Base random value between 0 and 0.7
-    const baseValue = Math.random() * 0.7;
-    // Apply experience modifier to base value
-    const baseWithExperience = baseValue + experienceModifier;
+    // Calculate base skill value first
+    const baseValue = (Math.random() * 0.6) + (experienceModifier * 0.4);
     
-    // For specialized roles, ensure a higher minimum value
+    // For specialized roles, add a percentage-based bonus that scales with experience
     if (specializedRole) {
-        return Math.max(0.7 + experienceModifier, baseWithExperience).toFixed(2);
+        // Bonus is 20-40% of remaining potential (1.0 - baseValue)
+        // Higher experience = bigger percentage of the remaining gap
+        const remainingPotential = 1.0 - baseValue;
+        const bonusPercentage = 0.2 + (experienceModifier * 0.2); // 20-40%
+        const bonus = remainingPotential * bonusPercentage;
+        return Math.min(1.0, baseValue + bonus).toFixed(2);
     }
     
-    return baseWithExperience.toFixed(2);
+    return baseValue.toFixed(2);
 }
 
 export function createNewStaff(experienceModifier = 0.5, specializedRoles = []) {
