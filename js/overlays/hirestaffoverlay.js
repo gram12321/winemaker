@@ -1,4 +1,3 @@
-
 import { createNewStaff, setupStaffWagesRecurringTransaction  } from '../staff.js';
 import { getFlagIconHTML } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
@@ -8,8 +7,11 @@ import taskManager, { TaskType } from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 
 
-export function showHireStaffOverlay(numberOfOptions = 5) {
-    const createdStaffOptions = Array.from({length: numberOfOptions}, () => createNewStaff());
+export function showHireStaffOverlay(numberOfOptions = 5, experienceModifier = 0.5) {
+    const createdStaffOptions = Array.from(
+        {length: numberOfOptions}, 
+        () => createNewStaff(experienceModifier)
+    );
     const overlayContainer = showStandardOverlay(createHireStaffHTML(createdStaffOptions));
     setupHireStaffEventListeners(overlayContainer, createdStaffOptions);
     return overlayContainer;

@@ -120,3 +120,20 @@ export function getPreviousSeasonAndYear(currentSeason, currentYear) {
 
     return { previousSeason, previousYear };
 }
+
+export const experienceLevels = {
+    1: { name: 'Fresh Off the Vine', modifier: 0.2, costMultiplier: 1 },
+    2: { name: 'Cork Puller', modifier: 0.3, costMultiplier: 1.5 },
+    3: { name: 'Cellar Hand', modifier: 0.4, costMultiplier: 2 },
+    4: { name: 'Vine Whisperer', modifier: 0.5, costMultiplier: 3 },
+    5: { name: 'Grape Sage', modifier: 0.6, costMultiplier: 4 },
+    6: { name: 'Vintage Virtuoso', modifier: 0.7, costMultiplier: 6 },
+    7: { name: 'Wine Wizard', modifier: 0.8, costMultiplier: 8 },
+    8: { name: 'Terroir Master', modifier: 0.85, costMultiplier: 12 },
+    9: { name: 'Vineyard Virtuoso', modifier: 0.9, costMultiplier: 16 },
+    10: { name: 'Living Legend', modifier: 0.95, costMultiplier: 25 }
+};
+
+export function getExperienceLevelInfo(level) {
+    return experienceLevels[level] || experienceLevels[1];
+}

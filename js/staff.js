@@ -78,20 +78,24 @@ export class Staff {
   }
 }
 
-function randomizeSkills() {
-  return Math.random().toFixed(2);
+// Modify the randomizeSkills function to accept an experience modifier
+function randomizeSkills(experienceModifier = 0.5) {
+  // Base random value between 0 and 0.7
+  const baseValue = Math.random() * 0.7;
+  // Apply experience modifier to increase the minimum possible value
+  return (baseValue + experienceModifier).toFixed(2);
 }
 
-export function createNewStaff() {
+export function createNewStaff(experienceModifier = 0.5) {
   const nationality = Staff.prototype.selectNationality();
   const firstName = Staff.prototype.getNameForNationality(nationality);
   const lastName = getLastNameForNationality(nationality);
   const skills = {
-    field: { field: randomizeSkills() },
-    winery: { winery: randomizeSkills() },
-    administration: { administration: randomizeSkills() },
-    sales: { sales: randomizeSkills() },
-    maintenance: { maintenance: randomizeSkills() }
+    field: { field: randomizeSkills(experienceModifier) },
+    winery: { winery: randomizeSkills(experienceModifier) },
+    administration: { administration: randomizeSkills(experienceModifier) },
+    sales: { sales: randomizeSkills(experienceModifier) },
+    maintenance: { maintenance: randomizeSkills(experienceModifier) }
   };
 
   const skillMultiplier = 100;

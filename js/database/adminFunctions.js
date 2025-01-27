@@ -71,14 +71,89 @@ async function storeCompanyName(companyName, startingCondition = null) {
       const startingMoney = startingCondition ? startingCondition.startingMoney : 1000000;
       addTransaction('Income', 'Initial Company Setup', startingMoney);
 
-      // Create the first staff member
-      const staff1 = createNewStaff();
+      // Create initial staff members based on starting country
+      let staff1, staff2;
+      const country = startingCondition ? startingCondition.name : 'France';
 
-      // Create the second staff member and ensure the same nationality
-      const staff2 = createNewStaff();
-      staff2.nationality = staff1.nationality;
-      staff2.name = staff2.getNameForNationality(staff2.nationality);
-      staff2.lastName = getLastNameForNationality(staff2.nationality);
+      switch (country) {
+        case 'Italy':
+          staff1 = createNewStaff();
+          staff1.firstName = 'Roberto';
+          staff1.lastName = 'De Luca';
+          staff1.nationality = 'Italy';
+          staff1.name = 'Roberto De Luca';
+          
+          staff2 = createNewStaff();
+          staff2.firstName = 'Bianca';
+          staff2.lastName = 'De Luca';
+          staff2.nationality = 'Italy';
+          staff2.name = 'Bianca De Luca';
+          break;
+
+        case 'France':
+          staff1 = createNewStaff();
+          staff1.firstName = 'Pierre';
+          staff1.lastName = 'Latosha';
+          staff1.nationality = 'France';
+          staff1.name = 'Pierre Latosha';
+          
+          staff2 = createNewStaff();
+          staff2.firstName = 'Camillé';
+          staff2.lastName = 'Latosha';
+          staff2.nationality = 'France';
+          staff2.name = 'Camillé Latosha';
+          break;
+
+        case 'Germany':
+          staff1 = createNewStaff();
+          staff1.firstName = 'Anna';
+          staff1.lastName = 'Weber';
+          staff1.nationality = 'Germany';
+          staff1.name = 'Anna Weber';
+          
+          staff2 = createNewStaff();
+          staff2.firstName = 'Hans';
+          staff2.lastName = 'Weber';
+          staff2.nationality = 'Germany';
+          staff2.name = 'Hans Weber';
+          break;
+
+        case 'Spain':
+          staff1 = createNewStaff();
+          staff1.firstName = 'Miguel';
+          staff1.lastName = 'Torres';
+          staff1.nationality = 'Spain';
+          staff1.name = 'Miguel Torres';
+          
+          staff2 = createNewStaff();
+          staff2.firstName = 'Isabella';
+          staff2.lastName = 'Torres';
+          staff2.nationality = 'Spain';
+          staff2.name = 'Isabella Torres';
+          break;
+
+        case 'United States':
+          staff1 = createNewStaff();
+          staff1.firstName = 'Sarah';
+          staff1.lastName = 'Mondavi';
+          staff1.nationality = 'United States';
+          staff1.name = 'Sarah Mondavi';
+          
+          staff2 = createNewStaff();
+          staff2.firstName = 'Robert';
+          staff2.lastName = 'Mondavi';
+          staff2.nationality = 'United States';
+          staff2.name = 'Robert Mondavi';
+          break;
+      }
+
+      // Ensure high skills for the winemaker (staff1)
+      staff1.skills.winery.winery = (0.8 + Math.random() * 0.2).toFixed(2); // 0.8-1.0
+      staff1.skills.field.field = (0.6 + Math.random() * 0.2).toFixed(2); // 0.6-0.8
+
+      // Ensure good administrative skills for the spouse (staff2)
+      staff2.skills.administration.administration = (0.7 + Math.random() * 0.2).toFixed(2); // 0.7-0.9
+      staff2.skills.sales.sales = (0.6 + Math.random() * 0.2).toFixed(2); // 0.6-0.8
 
       // Add staff to an array
       const staff = [staff1, staff2];
