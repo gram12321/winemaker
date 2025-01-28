@@ -192,21 +192,6 @@ function setupSaveTeamButton(overlay) {
     }
 }
 
-function saveTeam(name, members) {
-    const teamDescription = overlay.querySelector('#team-description').value;
-    const teamData = {
-        name: name,
-        description: teamDescription,
-        flagCode: name.toLowerCase().replace(/\s+/g, ''),
-        teamPicture: 'placeholder.webp',
-        members: members.map(id => staffMembers.find(staff => staff.id === id)).filter(staff => staff)
-    };
-
-    teams.push(teamData);
-    localStorage.setItem('teams', JSON.stringify(teams));
-    console.log("Saved teams:", teams);
-}
-
 function displayTeams() {
     const teamContainer = document.getElementById('team-entries');
     teamContainer.innerHTML = '';
