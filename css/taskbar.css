@@ -4,7 +4,7 @@
   right: 0;
   top: 0;
   width: var(--panel-width);
-  min-height: 100vh;
+  height: 100vh;
   z-index: 1000;
   overflow-y: auto;
 }
