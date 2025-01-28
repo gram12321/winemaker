@@ -1,5 +1,5 @@
 import { getFlagIconHTML } from '../utils.js';
-import { loadStaff } from '../database/adminFunctions.js';
+import { loadStaff, loadTeams } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { updateAllDisplays } from '../displayManager.js';
@@ -16,6 +16,36 @@ export function showAssignStaffOverlay(task) {
 function generateAssignStaffHTML(task) {
     const allStaff = loadStaff();
     const currentStaff = Array.isArray(task.assignedStaff) ? task.assignedStaff : [];
+    const teams = loadTeams();
+    
+    // Find teams that are set to auto-assign to this task type
+    const autoAssignedTeams = teams.filter(team => 
+        team.defaultTaskTypes?.includes(task.taskType)
+    );
+
+    const autoAssignedTeamsHTML = autoAssignedTeams.length > 0 ? `
+        <div class="auto-assigned-teams mb-3">
+            <h5>Auto-assigned Teams</h5>
+            <div class="team-badges">
+                ${autoAssignedTeams.map(team => {
+                    const memberNames = team.members.map(m => `${m.firstName} ${m.lastName}`).join('\n');
+                    const tooltipText = team.members.length > 0 
+                        ? `Team Members:\n${memberNames}`
+                        : 'No members assigned';
+                    
+                    return `
+                        <div class="team-badge" title="${tooltipText}">
+                            <img src="/assets/icon/icon_${team.flagCode}.webp" 
+                                 alt="${team.name}" 
+                                 style="width: 16px; height: 16px;"
+                                 onerror="this.style.display='none'">
+                            <span>${team.name}</span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        </div>
+    ` : '';
 
     const staffList = allStaff.map(staff => {
         const skillsHTML = `
@@ -52,8 +82,9 @@ function generateAssignStaffHTML(task) {
                     <button class="btn btn-light btn-sm close-btn">Close</button>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
+                ${autoAssignedTeamsHTML}
+                <div class=""card-header text-white d-flex justify-content-between align-items-center"">
+                    <table class="table table-hover justify-content-center w-100">
                         <thead>
                             <tr>
                                 <th>Name</th>

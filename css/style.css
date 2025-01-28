@@ -510,3 +510,31 @@ input[type="radio"]:hover {
     background-color: var(--color-background);
     border: 1px solid rgba(197, 165, 114, 0.2);
 }
+
+/* Auto Assigned Teams */
+.auto-assigned-teams {
+    background: rgba(0,0,0,0.05);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.team-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.team-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--color-accent);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.team-badge img {
+    margin-right: 4px;
+}
