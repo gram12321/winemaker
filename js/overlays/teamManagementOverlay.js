@@ -39,10 +39,10 @@ function updateInfoBox(team) {
             <div class="info-row">
                 <span class="info-label">Team Members:</span>
                 <div class="info-value">
-                    ${team.members.length > 0 
+                    ${Array.isArray(team.members) && team.members.length > 0 
                         ? team.members.map(member => `
                             <div class="team-member">
-                                ${member.name}
+                                ${member.firstName} ${member.lastName}
                             </div>`).join('')
                         : '<em>No members assigned</em>'}
                 </div>

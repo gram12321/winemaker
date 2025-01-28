@@ -185,13 +185,9 @@ function saveTeam(name, members) {
     const teamData = {
         name: name,
         description: `${name} coordination and management`,
-        flagCode: name.toLowerCase().includes('admin') ? 'bookkeeping' :
-                 name.toLowerCase().includes('sales') ? 'sales' :
-                 name.toLowerCase().includes('winery') ? 'crushing' :
-                 name.toLowerCase().includes('vineyard') ? 'harvesting' : 'maintain',
+        flagCode: name.toLowerCase().replace(/\s+/g, ''),
         teamPicture: 'placeholder.webp',
-        bonus: `${name} efficiency +10%`,
-        members: members
+        members: members.map(id => staffMembers.find(staff => staff.id === id)).filter(staff => staff)
     };
 
     teams.push(teamData);
