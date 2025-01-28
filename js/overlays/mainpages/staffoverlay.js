@@ -195,16 +195,7 @@ function updateTeamInfo(team) {
     }
 
 
-    // Setup delete buttons
-    teamContainer.querySelectorAll('.delete-team-btn').forEach(button => {
-        button.addEventListener('click', (e) => {
-            const teamName = e.target.dataset.team;
-            const teams = loadTeams().filter(t => t.name !== teamName);
-            saveTeams(teams);
-            addConsoleMessage(`Team "${teamName}" has been deleted`);
-            displayTeams();
-        });
-    });
+    
 }
 
 function setupHireStaffButton(overlay) {
