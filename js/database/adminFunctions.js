@@ -172,6 +172,18 @@ async function storeCompanyName(companyName, startingCondition = null) {
 
       // Save default teams to localStorage and in-memory storage
       const defaultTeams = getDefaultTeams();
+      
+      // Assign initial staff to their default teams
+      const wineryTeam = defaultTeams.find(team => team.name === 'Winery Team');
+      const adminTeam = defaultTeams.find(team => team.name === 'Administration Team');
+      
+      if (wineryTeam) {
+        wineryTeam.members = [staff1];  // Staff ID 1 goes to Winery Team
+      }
+      if (adminTeam) {
+        adminTeam.members = [staff2];    // Staff ID 2 goes to Administration Team
+      }
+
       teams.push(...defaultTeams);
       saveTeams(teams);
 
@@ -491,40 +503,40 @@ export function getDefaultTeams() {
       description: 'Handle company administration and paperwork',
       flagCode: 'bookkeeping',
       teamPicture: 'placeholder.webp',
-      bonus: 'Administration efficiency +10%',
-      members: []
+      members: [],
+      defaultTaskTypes: ['Administration']
     },
     {
       name: 'Building & Maintenance Team',
       description: 'Maintain and upgrade facilities',
       flagCode: 'maintain',
       teamPicture: 'placeholder.webp',
-      bonus: 'Maintenance efficiency +10%',
-      members: []
+      members: [],
+      defaultTaskTypes: ['Building & Maintenance']
     },
     {
       name: 'Vineyard Team',
       description: 'Coordinate vineyard operations',
       flagCode: 'harvesting',
       teamPicture: 'placeholder.webp',
-      bonus: 'Field work efficiency +10%',
-      members: []
+      members: [],
+      defaultTaskTypes: ['Field']
     },
     {
       name: 'Winery Team',
       description: 'Oversee winery processes',
       flagCode: 'crushing',
       teamPicture: 'placeholder.webp',
-      bonus: 'Winery efficiency +10%',
-      members: []
+      members: [],
+      defaultTaskTypes: ['Winery']
     },
     {
       name: 'Sales Team',
       description: 'Manage your sales force',
       flagCode: 'sales',
       teamPicture: 'placeholder.webp',
-      bonus: 'Sales efficiency +10%',
-      members: []
+      members: [],
+      defaultTaskTypes: ['Sales']
     }
   ];
 }
