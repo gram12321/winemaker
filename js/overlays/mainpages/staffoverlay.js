@@ -285,39 +285,9 @@ function setupSaveTeamButton(overlay) {
                 
                 addConsoleMessage(`Team "${teamName}" has been created`);
                 overlay.querySelector('#create-team-form').style.display = 'none';
-                displayTeams();
+                setupTeamSections(overlay);
             }
         });
     }
 }
 
-function displayTeams() {
-    const teamContainer = document.getElementById('team-entries');
-    teamContainer.innerHTML = '';
-    teams.forEach(team => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${team.name}</td>
-            <td>${team.members.map(id => {
-                const staff = staffMembers.find(staff => staff.id === id);
-                return staff ? staff.name : 'Unknown';
-            }).join(', ')}</td>
-            <td><button class="btn btn-danger btn-sm delete-team-btn" data-team-name="${team.name}">Delete</button></td>
-        `;
-        teamContainer.appendChild(row);
-    });
-
-    // Add event listeners for delete buttons
-    teamContainer.querySelectorAll('.delete-team-btn').forEach(button => {
-        button.addEventListener('click', (event) => {
-            const teamName = event.target.getAttribute('data-team-name');
-            deleteTeam(teamName);
-        });
-    });
-}
-
-function deleteTeam(name) {
-    teams = teams.filter(team => team.name !== name);
-    displayTeams();
-
-}
