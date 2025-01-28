@@ -12,6 +12,7 @@ import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { setupStaffWagesRecurringTransaction } from '../staff.js';
 
+let teams = []; // In-memory storage for teams
 
 async function clearFirestore() {
   if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -168,6 +169,11 @@ async function storeCompanyName(companyName, startingCondition = null) {
         localStorage.setItem('ownedFarmlands', '[]');
         farmlandsStore = []; // Clear the in-memory store
       }
+
+      // Save default teams to localStorage and in-memory storage
+      const defaultTeams = getDefaultTeams();
+      teams.push(...defaultTeams);
+      saveTeams(teams);
 
       await saveCompanyInfo(); // Save company info to Firestore
       window.location.href = 'html/game.html'; // Redirect to game.html
@@ -478,7 +484,6 @@ export function getPrestigeHit() {
   return prestigeHit === null ? 0 : Number(prestigeHit);
 }
 
-
 export function getDefaultTeams() {
   return [
     {
@@ -529,30 +534,42 @@ export function loadTeams() {
   const savedTeams = JSON.parse(localStorage.getItem('teams') || '[]');
   const deletedDefaultTeams = JSON.parse(localStorage.getItem('deletedDefaultTeams') || '[]');
   
-  // Create a map of team names to teams for easy lookup
-  const teamMap = new Map(defaultTeams
-    .filter(team => !deletedDefaultTeams.includes(team.name))
-    .map(team => [team.name, team]));
-  
-  // Override or add saved teams
-  savedTeams.forEach(team => {
-    teamMap.set(team.name, team);
+  // Filter out deleted default teams
+  const activeDefaultTeams = defaultTeams.filter(team => 
+      !deletedDefaultTeams.includes(team.name)
+  );
+
+  // First, get all saved versions of default teams (to preserve their members)
+  const savedDefaultTeams = savedTeams.filter(team => 
+      defaultTeams.some(defaultTeam => defaultTeam.name === team.name)
+  );
+
+  // Merge saved default teams with active default teams
+  const mergedDefaultTeams = activeDefaultTeams.map(defaultTeam => {
+      const savedVersion = savedDefaultTeams.find(t => t.name === defaultTeam.name);
+      return savedVersion || defaultTeam;
   });
-  
-  // Convert map back to array
-  return Array.from(teamMap.values());
+
+  // Get custom teams (non-default teams)
+  const customTeams = savedTeams.filter(team => 
+      !defaultTeams.some(defaultTeam => defaultTeam.name === team.name)
+  );
+
+  // Combine merged default teams with custom teams
+  return [...mergedDefaultTeams, ...customTeams];
 }
 
 export function saveTeams(teams) {
   const defaultTeams = getDefaultTeams();
   const defaultTeamNames = defaultTeams.map(t => t.name);
-  
-  // Save custom teams
-  const customTeams = teams.filter(team => !defaultTeamNames.includes(team.name));
-  localStorage.setItem('teams', JSON.stringify(customTeams));
+
+  // Save all teams, including modified default teams
+  localStorage.setItem('teams', JSON.stringify(teams));
   
   // Track deleted default teams
-  const deletedDefaultTeams = defaultTeamNames.filter(name => !teams.some(t => t.name === name));
+  const deletedDefaultTeams = defaultTeamNames.filter(name => 
+      !teams.some(t => t.name === name)
+  );
   localStorage.setItem('deletedDefaultTeams', JSON.stringify(deletedDefaultTeams));
 }
 

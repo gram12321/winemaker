@@ -10,6 +10,7 @@ let teams = []; // In-memory storage for teams
 let staffMembers = []; // In-memory storage for staff members
 
 export function showStaffOverlay() {
+    teams = loadTeams(); // Load teams once
     const overlay = showMainViewOverlay(createStaffOverlayHTML());
     setupStaffOverlayEventListeners(overlay);
 }
@@ -79,25 +80,13 @@ function createStaffOverlayHTML() {
                         <hr class="overlay-divider">
                         <div id="create-team-form">
                             <div class="form-group mb-3">
+                            <h4>Create team</h4>
                                 <label for="team-name">Team Name:</label>
                                 <input type="text" id="team-name" class="form-control" placeholder="Enter team name" required>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="team-description">Team Description:</label>
                                 <textarea id="team-description" class="form-control" rows="3" placeholder="Enter team description" required></textarea>
-                            </div>
-                            <div class="form-group mb-3">
-                                <label for="team-members">Select Members:</label>
-                                <div id="team-members" class="form-control" style="height: auto; max-height: 200px; overflow-y: auto;">
-                                    ${staffMembers.map(staff => `
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="${staff.id}" id="staff-${staff.id}">
-                                            <label class="form-check-label" for="staff-${staff.id}">
-                                                ${staff.firstName} ${staff.lastName}
-                                            </label>
-                                        </div>
-                                    `).join('')}
-                                </div>
                             </div>
                             <button class="btn btn-primary" id="save-team-btn">Save Team</button>
                         </div>
@@ -164,19 +153,28 @@ function setupTeamSections(overlay) {
 
 function updateTeamInfo(team) {
     const infoBox = document.querySelector('.options-info-box');
+    const memberSection = document.querySelector('#team-members-section');
 
-    // Update checkboxes based on team members
-    const checkboxes = document.querySelectorAll('#team-members input[type="checkbox"]');
+    // First, reset all checkboxes
+    const checkboxes = memberSection.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
-        const staffId = parseInt(checkbox.value);
-        checkbox.checked = team.members.some(member => member.id === staffId);
+        checkbox.checked = false;
     });
+
+    // Then set checked state based on current team members
+    if (team.members && Array.isArray(team.members)) {
+        team.members.forEach(member => {
+            const checkbox = memberSection.querySelector(`input[value="${member.id}"]`);
+            if (checkbox) {
+                checkbox.checked = true;
+            }
+        });
+    }
 
     // Add event listener for update button
     const updateBtn = document.getElementById('update-team-btn');
     updateBtn.onclick = () => {
-        const selectedStaffIds = Array.from(checkboxes)
-            .filter(cb => cb.checked)
+        const selectedStaffIds = Array.from(memberSection.querySelectorAll('input[type="checkbox"]:checked'))
             .map(cb => parseInt(cb.value));
 
         // Update team members based on checkbox state
@@ -184,22 +182,26 @@ function updateTeamInfo(team) {
         const teamIndex = teams.findIndex(t => t.name === team.name);
         if (teamIndex !== -1) {
             // Get all staff members that are checked
-            const updatedMembers = staffMembers.filter(staff => selectedStaffIds.includes(staff.id));
+            const updatedMembers = staffMembers.filter(staff => 
+                selectedStaffIds.includes(staff.id)
+            );
 
             // Create new team object with updated members
             const updatedTeam = {
                 ...teams[teamIndex],
                 members: updatedMembers
             };
-            teams[teamIndex] = updatedTeam;
 
+            teams[teamIndex] = updatedTeam;
             saveTeams(teams);
+            
             addConsoleMessage(`Team "${team.name}" members have been updated`);
             setupTeamSections(document.querySelector('.mainview-overlay-content'));
             updateTeamInfo(updatedTeam); // Refresh the current view
         }
     };
 
+    // Update info box display
     infoBox.innerHTML = `
         <div class="info-header">
             <img src="/assets/icon/icon_${team.flagCode}.webp" 
@@ -283,9 +285,6 @@ function updateTeamInfo(team) {
             setupTeamSections(document.querySelector('.mainview-overlay-content'));
         });
     }
-
-
-
 }
 
 function setupHireStaffButton(overlay) {
@@ -306,14 +305,7 @@ function setupTeamManagementButton(overlay) {
     }
 }
 
-function setupCreateTeamButton(overlay) {
-    const createTeamBtn = overlay.querySelector('#create-team-btn');
-    if (createTeamBtn) {
-        createTeamBtn.addEventListener('click', () => {
-            toggleCreateTeamForm(overlay);
-        });
-    }
-}
+
 
 function toggleCreateTeamForm(overlay) {
     const form = overlay.querySelector('#create-team-form');
@@ -329,19 +321,12 @@ function createNewTeam(overlay) {
         return null;
     }
 
-    const selectedMembers = Array.from(overlay.querySelectorAll('#team-members input:checked'))
-        .map(checkbox => {
-            const staffId = parseInt(checkbox.value);
-            return staffMembers.find(staff => staff.id === staffId);
-        })
-        .filter(staff => staff !== undefined);
-
     return {
         name: teamName,
         description: teamDescription,
         flagCode: teamName.toLowerCase().replace(/\s+/g, ''),
         teamPicture: 'placeholder.webp',
-        members: selectedMembers
+        members: [] // Initialize with empty members array
     };
 }
 
@@ -367,7 +352,6 @@ function setupSaveTeamButton(overlay) {
                 // Reset form
                 teamNameInput.value = '';
                 teamDescInput.value = '';
-                overlay.querySelectorAll('#team-members input[type="checkbox"]').forEach(cb => cb.checked = false);
 
                 addConsoleMessage(`Team "${teamName}" has been created`);
                 setupTeamSections(overlay);

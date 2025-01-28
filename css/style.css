@@ -319,7 +319,7 @@ input[type="radio"]:hover {
 /* Team Management Grid Layout */
 .team-management-grid {
     display: grid;
-      grid-template-columns: 40% 30% 30%;
+      grid-template-columns: 35% 30% 30%;
     gap: 20px;
     align-items: start;
     margin-bottom: 20px;
@@ -329,8 +329,10 @@ input[type="radio"]:hover {
     padding: 15px;
     background: var(--color-background);
     border-radius: 5px;
+    border: 2px solid var(--color-accent);
+    
 }
-}
+
 
 /* Add styles for the family picture container */
 .options-picture {
