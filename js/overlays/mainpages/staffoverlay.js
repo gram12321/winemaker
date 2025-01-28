@@ -203,7 +203,7 @@ function updateTeamInfo(team) {
             setupTeamSections(document.querySelector('.mainview-overlay-content'));
         });
     }
-}
+
 
     // Setup delete buttons
     teamContainer.querySelectorAll('.delete-team-btn').forEach(button => {
