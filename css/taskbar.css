@@ -18,7 +18,7 @@
 
 .panel-content {
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 #panel-wrapper::before {
