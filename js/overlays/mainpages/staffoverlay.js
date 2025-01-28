@@ -182,9 +182,10 @@ function setupStaffOverlayEventListeners(overlay) {
 }
 
 function saveTeam(name, members) {
+    const teamDescription = overlay.querySelector('#team-description').value;
     const teamData = {
         name: name,
-        description: `${name} coordination and management`,
+        description: teamDescription,
         flagCode: name.toLowerCase().replace(/\s+/g, ''),
         teamPicture: 'placeholder.webp',
         members: members.map(id => staffMembers.find(staff => staff.id === id)).filter(staff => staff)
