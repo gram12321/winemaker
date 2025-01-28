@@ -319,7 +319,7 @@ input[type="radio"]:hover {
 /* Team Management Grid Layout */
 .team-management-grid {
     display: grid;
-    grid-template-rows: auto auto auto;
+      grid-template-columns: 40% 30% 30%;
     gap: 20px;
     align-items: start;
     margin-bottom: 20px;
