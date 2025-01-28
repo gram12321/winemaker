@@ -71,18 +71,22 @@ function createStaffOverlayHTML() {
                             </table>
                         </div>
                         <div id="create-team-form" style="display: none;">
-                            <div class="form-group">
+                            <div class="form-group mb-3">
                                 <label for="team-name">Team Name:</label>
-                                <input type="text" id="team-name" class="form-control" placeholder="Enter team name">
+                                <input type="text" id="team-name" class="form-control" placeholder="Enter team name" required>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group mb-3">
+                                <label for="team-description">Team Description:</label>
+                                <textarea id="team-description" class="form-control" rows="3" placeholder="Enter team description" required></textarea>
+                            </div>
+                            <div class="form-group mb-3">
                                 <label for="team-members">Select Members:</label>
-                                <div id="team-members" class="form-control" style="height: auto;">
+                                <div id="team-members" class="form-control" style="height: auto; max-height: 200px; overflow-y: auto;">
                                     ${staffMembers.map(staff => `
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox" value="${staff.id}" id="staff-${staff.id}">
                                             <label class="form-check-label" for="staff-${staff.id}">
-                                                ${staff.name}
+                                                ${staff.firstName} ${staff.lastName}
                                             </label>
                                         </div>
                                     `).join('')}
@@ -123,6 +127,42 @@ function setupStaffOverlayEventListeners(overlay) {
             const form = overlay.querySelector('#create-team-form');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         });
+
+        const saveTeamBtn = overlay.querySelector('#save-team-btn');
+        if (saveTeamBtn) {
+            saveTeamBtn.addEventListener('click', () => {
+                const teamName = overlay.querySelector('#team-name').value;
+                const teamDescription = overlay.querySelector('#team-description').value;
+                const selectedMembers = Array.from(overlay.querySelectorAll('#team-members input:checked'))
+                    .map(checkbox => {
+                        const staffId = parseInt(checkbox.value);
+                        return staffMembers.find(staff => staff.id === staffId);
+                    })
+                    .filter(staff => staff !== undefined);
+
+                if (!teamName || !teamDescription) {
+                    addConsoleMessage('Please fill in all required fields');
+                    return;
+                }
+
+                const newTeam = {
+                    name: teamName,
+                    description: teamDescription,
+                    flagCode: teamName.toLowerCase().replace(/\s+/g, ''),
+                    teamPicture: 'placeholder.webp',
+                    members: selectedMembers
+                };
+
+                const teams = loadTeams();
+                teams.push(newTeam);
+                saveTeams(teams);
+                
+                addConsoleMessage(`Team "${teamName}" has been created`);
+                overlay.querySelector('#create-team-form').style.display = 'none';
+                displayTeams();
+            });
+        }
+    }
     }
 
     const saveTeamBtn = overlay.querySelector('#save-team-btn');
