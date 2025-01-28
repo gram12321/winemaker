@@ -53,23 +53,12 @@ function createStaffOverlayHTML() {
                     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
                         <h3 class="h5 mb-0">Team Management</h3>
                         <div class="btn-group">
-                            <button class="btn btn-light btn-sm" id="manage-team-btn">Team Management</button>
                             <button class="btn btn-light btn-sm" id="create-team-btn">Create Team</button>
                         </div>
                     </div>
                     <div class="card-body">
-                        <div id="team-container" class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Team Name</th>
-                                        <th>Members</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="team-entries">
-                                </tbody>
-                            </table>
+                        <div class="team-container">
+                            <!-- Team cards will be dynamically added here -->
                         </div>
                         <div id="create-team-form" style="display: none;">
                             <div class="form-group mb-3">
@@ -105,9 +94,57 @@ function createStaffOverlayHTML() {
 function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
     setupHireStaffButton(overlay);
-    setupTeamManagementButton(overlay);
+    setupTeamSections(overlay);
     setupCreateTeamButton(overlay);
     setupSaveTeamButton(overlay);
+    displayTeams();
+}
+
+function setupTeamSections(overlay) {
+    const teams = loadTeams();
+    const teamSection = overlay.querySelector('#team-section');
+    const teamContainer = teamSection.querySelector('.team-container');
+    
+    teams.forEach(team => {
+        const teamCard = document.createElement('div');
+        teamCard.className = 'team-card mb-3';
+        teamCard.innerHTML = `
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <img src="/assets/icon/icon_${team.flagCode}.webp" 
+                             alt="${team.name}" 
+                             style="width: 24px; height: 24px;"
+                             onerror="this.style.display='none'">
+                        <span>${team.name}</span>
+                    </div>
+                    <button class="btn btn-danger btn-sm delete-team-btn" data-team="${team.name}">Delete</button>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">${team.description}</p>
+                    <div class="team-members">
+                        <strong>Members:</strong>
+                        ${team.members.map(member => 
+                            `<div class="team-member">${member.firstName} ${member.lastName}</div>`
+                        ).join('')}
+                    </div>
+                    ${team.bonus ? `<div class="team-bonus mt-2"><strong>Bonus:</strong> ${team.bonus}</div>` : ''}
+                </div>
+            </div>
+        `;
+        teamContainer.appendChild(teamCard);
+    });
+
+    // Setup delete buttons
+    teamContainer.querySelectorAll('.delete-team-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const teamName = e.target.dataset.team;
+            const teams = loadTeams().filter(t => t.name !== teamName);
+            saveTeams(teams);
+            addConsoleMessage(`Team "${teamName}" has been deleted`);
+            displayTeams();
+        });
+    });
 }
 
 function setupHireStaffButton(overlay) {
