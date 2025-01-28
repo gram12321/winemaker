@@ -60,6 +60,7 @@ function createHireStaffOptionsHTML() {
     const initialSkill = 0.3; // Updated to use 0.1-1.0 scale
     const initialCost = calculateSearchCost(initialCandidates, initialSkill, []);
     const skillInfo = getSkillLevelInfo(initialSkill);
+    const initialWork = calculateTotalWork(initialCandidates, initialSkill, []);
 
     return `
         <div class="overlay-content overlay-container">
@@ -69,30 +70,26 @@ function createHireStaffOptionsHTML() {
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
                 <div class="card-body">
-                    <div class="form-group mb-4">
-                        <label for="candidates-slider" class="form-label">Number of Candidates:</label>
-                        <div class="d-flex align-items-center">
-                            <span class="mr-2">Min (3)</span>
-                            <input type="range" class="custom-range" id="candidates-slider" min="3" max="10" step="1" value="${initialCandidates}">
-                            <span class="ml-2">Max (10)</span>
+                    <div class="form-group mb-4 d-flex">
+                        <div class="slider-container">
+                            <label for="candidates-slider" class="form-label">Number of Candidates:</label>
+                            <div class="d-flex align-items-center">
+                                <span class="mr-2">Min (3)</span>
+                                <input type="range" class="custom-range" id="candidates-slider" min="3" max="10" step="1" value="${initialCandidates}">
+                                <span class="ml-2">Max (10)</span>
+                            </div>
+                            <div>Selected candidates: <span id="candidates-value">${initialCandidates}</span></div>
+                            <label for="skill-slider" class="form-label mt-3">Required Skill Level:</label>
+                            <div class="d-flex align-items-center">
+                                <span class="mr-2">${skillLevels[0.1].name}</span>
+                                <input type="range" class="custom-range" id="skill-slider" 
+                                    min="0.1" max="1.0" step="0.1" value="${initialSkill}">
+                                <span class="ml-2">${skillLevels[1.0].name}</span>
+                            </div>
+                            <div class="skill-level-container">Skill Level: <span id="skill-display">${skillInfo.formattedName}</span></div>
                         </div>
-                        <div>Selected candidates: <span id="candidates-value">${initialCandidates}</span></div>
-                    </div>
-
-                    <div class="form-group mb-4">
-                        <label for="skill-slider" class="form-label">Required Skill Level:</label>
-                        <div class="d-flex align-items-center">
-                            <span class="mr-2">${skillLevels[0.1].name}</span>
-                            <input type="range" class="custom-range" id="skill-slider" 
-                                min="0.1" max="1.0" step="0.1" value="${initialSkill}">
-                            <span class="ml-2">${skillLevels[1.0].name}</span>
-                        </div>
-                        <div class="skill-level-container">Skill Level: <span id="skill-display">${skillInfo.formattedName}</span></div>
-                    </div>
-
-                    <div class="form-group mb-4">
-                        <label class="form-label">Specialized Role Requirements:</label>
                         <div class="specialized-roles-container">
+                            <label class="form-label">Specialized Role Requirements:</label>
                             ${Object.entries(specializedRoles).map(([key, role]) => `
                                 <div class="role-checkbox">
                                     <input type="checkbox" id="${key}-role" class="role-checkbox" data-role="${key}">
@@ -105,13 +102,17 @@ function createHireStaffOptionsHTML() {
                     <hr class="overlay-divider">
 
                     <div class="cost-details d-flex justify-content-between mt-3">
-                        <div class="hiring-overlay-info-box">
-                            <span>Cost per candidate: </span>
+                        <div class="planting-overlay-info-box">
+                            <span>Cost per candidate:</span><br>
                             <span>€${formatNumber(Math.round(calculateSearchCost(1, initialSkill, [])))}</span>
                         </div>
-                        <div class="hiring-overlay-info-box">
-                            <span>Total Cost: </span>
+                        <div class="planting-overlay-info-box">
+                            <span>Total Cost:</span><br>
                             <span id="total-cost">€${formatNumber(initialCost)}</span>
+                        </div>
+                        <div class="planting-overlay-info-box">
+                            <span>Total Work:</span><br>
+                            <span id="total-work">${initialWork}</span>
                         </div>
                     </div>
 
@@ -131,6 +132,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
     const skillValue = overlayContainer.querySelector('#skill-display');  // Updated selector
     const totalCostDisplay = overlayContainer.querySelector('#total-cost');
     const roleCheckboxes = overlayContainer.querySelectorAll('.role-checkbox');
+    const totalWorkDisplay = overlayContainer.querySelector('#total-work');
 
     function updateDisplay() {
         const numberOfCandidates = parseInt(candidatesSlider.value);
@@ -141,26 +143,33 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
 
         const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
         const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, skillLevel, selectedRoles);
+        const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles);
 
         // Update candidates
-        candidatesValue.textContent = numberOfCandidates;
+        if (candidatesValue) {
+            candidatesValue.textContent = numberOfCandidates;
+        }
 
         // Update skill level - using parent container to avoid element removal issues
         const skillInfo = getSkillLevelInfo(skillLevel);
         const skillLevelContainer = overlayContainer.querySelector('.skill-level-container');
-        skillLevelContainer.innerHTML = `Skill Level: ${skillInfo.formattedName}`;
+        if (skillLevelContainer) {
+            skillLevelContainer.innerHTML = `Skill Level: ${skillInfo.formattedName}`;
+        }
         
         // Update costs
-        overlayContainer.querySelector('.hiring-overlay-info-box span:last-child').textContent = 
-            `€${formatNumber(costPerCandidate)}`;
-        totalCostDisplay.textContent = `€${formatNumber(totalCost)}`;
-
-        // Add role multiplier info if any roles are selected
-        if (selectedRoles.length > 0) {
-            const roleMultiplier = Math.pow(2, selectedRoles.length);
-            const rolesText = selectedRoles.map(role => specializedRoles[role].title).join(', ');
-            addConsoleMessage(`Specialized roles selected (${rolesText}) - Cost multiplier: ${roleMultiplier}x`);
+        const costPerCandidateElement = overlayContainer.querySelector('.planting-overlay-info-box span:last-child');
+        if (costPerCandidateElement) {
+            costPerCandidateElement.textContent = `€${formatNumber(costPerCandidate)}`;
         }
+        if (totalCostDisplay) {
+            totalCostDisplay.innerHTML = `€${formatNumber(totalCost)}`;
+        }
+        if (totalWorkDisplay) {
+            totalWorkDisplay.innerHTML = totalWork;
+        }
+
+       
     }
 
     candidatesSlider.addEventListener('input', updateDisplay);
