@@ -19,7 +19,7 @@ const teamOptions = {
     'Sales Team': {
         name: 'Sales Team',
         description: 'Manage your sales force',
-        flagCode: 'sales',
+        flagCode: 'sales1',
         teamPicture: 'placeholder.webp',
         bonus: 'Sales efficiency +10%'
     },
