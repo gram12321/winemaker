@@ -10,9 +10,18 @@ function loadTeamOptions() {
             bonus: 'Administration efficiency +10%',
             members: []
         },
-    'Building & Maintenance Team': {
-        name: 'Building & Maintenance Team',
-        description: 'Maintain and upgrade facilities',
+        'Building & Maintenance Team': {
+            name: 'Building & Maintenance Team',
+            description: 'Maintain and upgrade facilities',
+            flagCode: 'maintain',
+            teamPicture: 'placeholder.webp',
+            bonus: 'Maintenance efficiency +10%',
+            members: []
+        }
+    };
+    
+    return savedTeams.length > 0 ? savedTeams : defaultTeams;
+}
         flagCode: 'maintain',
         teamPicture: 'placeholder.webp',
         bonus: 'Maintenance efficiency +10%'
