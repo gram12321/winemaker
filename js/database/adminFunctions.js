@@ -526,9 +526,12 @@ export function getDefaultTeams() {
 export function loadTeams() {
   const defaultTeams = getDefaultTeams();
   const savedTeams = JSON.parse(localStorage.getItem('teams') || '[]');
+  const deletedDefaultTeams = JSON.parse(localStorage.getItem('deletedDefaultTeams') || '[]');
   
   // Create a map of team names to teams for easy lookup
-  const teamMap = new Map(defaultTeams.map(team => [team.name, team]));
+  const teamMap = new Map(defaultTeams
+    .filter(team => !deletedDefaultTeams.includes(team.name))
+    .map(team => [team.name, team]));
   
   // Override or add saved teams
   savedTeams.forEach(team => {
@@ -537,6 +540,19 @@ export function loadTeams() {
   
   // Convert map back to array
   return Array.from(teamMap.values());
+}
+
+export function saveTeams(teams) {
+  const defaultTeams = getDefaultTeams();
+  const defaultTeamNames = defaultTeams.map(t => t.name);
+  
+  // Save custom teams
+  const customTeams = teams.filter(team => !defaultTeamNames.includes(team.name));
+  localStorage.setItem('teams', JSON.stringify(customTeams));
+  
+  // Track deleted default teams
+  const deletedDefaultTeams = defaultTeamNames.filter(name => !teams.some(t => t.name === name));
+  localStorage.setItem('deletedDefaultTeams', JSON.stringify(deletedDefaultTeams));
 }
 
 export function setPrestigeHit(value) {

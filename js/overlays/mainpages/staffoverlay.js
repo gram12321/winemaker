@@ -187,7 +187,18 @@ function updateTeamInfo(team) {
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
             const teamName = deleteBtn.dataset.team;
-            const teams = loadTeams().filter(t => t.name !== teamName);
+            const defaultTeams = getDefaultTeams();
+            const isDefaultTeam = defaultTeams.some(t => t.name === teamName);
+
+            if (isDefaultTeam) {
+                const confirmed = confirm(`Warning: "${teamName}" is a default team. Deleting it cannot be undone. Are you sure you want to delete this team?`);
+                if (!confirmed) {
+                    return;
+                }
+            }
+
+            let teams = loadTeams();
+            teams = teams.filter(t => t.name !== teamName);
             saveTeams(teams);
             addConsoleMessage(`Team "${teamName}" has been deleted`);
             setupTeamSections(document.querySelector('.mainview-overlay-content'));
