@@ -46,7 +46,12 @@ async function clearLocalStorage() {
   localStorage.removeItem('transactions'); // Clear transactions data
   localStorage.removeItem('recurringTransactions'); // Clear recurring transactions data
   localStorage.removeItem('activeTasks'); // Clear active tasks
-
+  localStorage.removeItem('deletedDefaultTeams'); 
+  localStorage.removeItem('teams'); 
+  localStorage.removeItem('panelCollapsed'); 
+  localStorage.removeItem('sidebarCollapsed'); 
+  
+  
   console.log("Local storage cleared.");
 }
 
