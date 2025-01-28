@@ -182,12 +182,6 @@ function updateTeamInfo(team) {
         </div>
     `;
 
-    pictureBox.innerHTML = `
-        <img src="/assets/pic/staff_dalle.webp" 
-             alt="${team.name} team" 
-             class="team-picture">
-    `;
-
     // Setup delete button
     const deleteBtn = infoBox.querySelector('.delete-team-btn');
     if (deleteBtn) {

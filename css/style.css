@@ -319,7 +319,7 @@ input[type="radio"]:hover {
 /* Team Management Grid Layout */
 .team-management-grid {
     display: grid;
-    grid-template-columns: 60% 40%;
+    grid-template-columns: 50% 50%;
     gap: 20px;
     align-items: start;
     margin-bottom: 20px;
@@ -397,6 +397,7 @@ input[type="radio"]:hover {
     padding: 20px;
     max-height: 400px;  /* Set max height */
     overflow-y: auto;   /* Enable scrolling if needed */
+    
 }
 
 .info-header {
