@@ -163,8 +163,6 @@ function setupStaffOverlayEventListeners(overlay) {
             });
         }
     }
-    }
-
     const saveTeamBtn = overlay.querySelector('#save-team-btn');
     if (saveTeamBtn) {
         saveTeamBtn.addEventListener('click', () => {
