@@ -473,10 +473,6 @@ export function getPrestigeHit() {
   return prestigeHit === null ? 0 : Number(prestigeHit);
 }
 
-// Team management storage functions
-export function saveTeams(teams) {
-  localStorage.setItem('teams', JSON.stringify(teams));
-}
 
 export function getDefaultTeams() {
   return [
