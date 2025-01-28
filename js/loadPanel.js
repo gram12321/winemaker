@@ -1,11 +1,10 @@
+
 // Initialize Task Panel
 function initializePanel() {
     return fetch('/html/panel.html')
         .then(response => response.text())
         .then(data => {
-            const panelContainer = document.createElement('div');
-            panelContainer.innerHTML = data;
-            document.body.appendChild(panelContainer);
+            document.body.insertAdjacentHTML('beforeend', data);
 
             // Add panel collapse functionality
             const toggleButton = document.querySelector('.toggle-panel');
