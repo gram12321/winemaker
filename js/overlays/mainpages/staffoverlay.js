@@ -57,7 +57,7 @@ function createStaffOverlayHTML() {
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="starting-condition-grid">
+                        <div class="team-management-grid">
                             <div class="options-container">
                                 <!-- Team cards will be dynamically added here -->
                             </div>

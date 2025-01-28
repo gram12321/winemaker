@@ -310,6 +310,15 @@ input[type="radio"]:hover {
 /* Starting Condition Grid Layout */
 .starting-condition-grid {
     display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+/* Team Management Grid Layout */
+.team-management-grid {
+    display: grid;
     grid-template-columns: 40% 27% 33%;
     gap: 20px;
     align-items: start;
