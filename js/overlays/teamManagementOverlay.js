@@ -1,15 +1,7 @@
-import { loadTeams, getDefaultTeams } from '../database/adminFunctions.js';
+import { loadTeams } from '../database/adminFunctions.js';
 
-// Load saved teams or use defaults
 function loadTeamOptions() {
-    const savedTeams = loadTeams();
-    const defaultTeams = getDefaultTeams();
-    if (savedTeams.length === 0) {
-        // Save default teams if no teams exist
-        saveTeams(defaultTeams);
-        return defaultTeams;
-    }
-    return savedTeams;
+    return loadTeams();
 }
 
 function createTeamOptionCard(team) {

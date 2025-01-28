@@ -483,47 +483,56 @@ export function loadTeams() {
   return savedTeams ? JSON.parse(savedTeams) : [];
 }
 
-export function getDefaultTeams() {
-  return {
-    'Administration Team': {
-      name: 'Administration Team',
-      description: 'Handle company administration and paperwork',
-      flagCode: 'bookkeeping',
-      teamPicture: 'placeholder.webp',
-      bonus: 'Administration efficiency +10%',
-      members: []
-    },
-    'Building & Maintenance Team': {
-      name: 'Building & Maintenance Team',
-      description: 'Maintain and upgrade facilities',
-      flagCode: 'maintain',
-      teamPicture: 'placeholder.webp',
-      bonus: 'Maintenance efficiency +10%'
-    },
-    'Sales Team': {
-      name: 'Sales Team',
-      description: 'Manage your sales force',
-      flagCode: 'sales',
-      teamPicture: 'placeholder.webp',
-      bonus: 'Sales efficiency +10%'
-    },
-    'Vineyard Team': {
-      name: 'Vineyard Team',
-      description: 'Coordinate vineyard operations',
-      flagCode: 'harvesting',
-      teamPicture: 'placeholder.webp',
-      bonus: 'Field work efficiency +10%'
-    },
-    'Winery Team': {
-      name: 'Winery Team',
-      description: 'Oversee winery processes',
-      flagCode: 'crushing',
-      teamPicture: 'placeholder.webp',
-      bonus: 'Winery efficiency +10%'
-    }
-  };
+export function loadTeams() {
+  const savedTeams = localStorage.getItem('teams');
+  if (!savedTeams) {
+    const defaultTeams = [
+      {
+        name: 'Administration Team',
+        description: 'Handle company administration and paperwork',
+        flagCode: 'bookkeeping',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Administration efficiency +10%',
+        members: []
+      },
+      {
+        name: 'Building & Maintenance Team',
+        description: 'Maintain and upgrade facilities',
+        flagCode: 'maintain',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Maintenance efficiency +10%',
+        members: []
+      },
+      {
+        name: 'Sales Team',
+        description: 'Manage your sales force',
+        flagCode: 'sales',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Sales efficiency +10%',
+        members: []
+      },
+      {
+        name: 'Vineyard Team',
+        description: 'Coordinate vineyard operations',
+        flagCode: 'harvesting',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Field work efficiency +10%',
+        members: []
+      },
+      {
+        name: 'Winery Team',
+        description: 'Oversee winery processes',
+        flagCode: 'crushing',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Winery efficiency +10%',
+        members: []
+      }
+    ];
+    localStorage.setItem('teams', JSON.stringify(defaultTeams));
+    return defaultTeams;
+  }
+  return JSON.parse(savedTeams);
 }
-
 
 export function setPrestigeHit(value) {
   if (value === null || value === undefined) {
