@@ -61,6 +61,20 @@ function createStaffOverlayHTML() {
                             <div class="options-info-box">
                                 <!-- Team details will be shown here -->
                             </div>
+                            <div id="team-members-section">
+                                <h4>Team Members</h4>
+                                <div id="team-members" class="form-control" style="height: auto; max-height: 200px; overflow-y: auto;">
+                                    ${staffMembers.map(staff => `
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="${staff.id}" id="staff-${staff.id}">
+                                            <label class="form-check-label" for="staff-${staff.id}">
+                                                ${staff.firstName} ${staff.lastName}
+                                            </label>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <button class="btn btn-primary mt-3" id="update-team-btn">Update Team Members</button>
+                            </div>
                         </div>
                         <hr class="overlay-divider">
                         <div id="create-team-form">
@@ -150,6 +164,33 @@ function setupTeamSections(overlay) {
 
 function updateTeamInfo(team) {
     const infoBox = document.querySelector('.options-info-box');
+    
+    // Update checkboxes based on team members
+    const checkboxes = document.querySelectorAll('#team-members input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        const staffId = parseInt(checkbox.value);
+        checkbox.checked = team.members.some(member => member.id === staffId);
+    });
+
+    // Add event listener for update button
+    const updateBtn = document.getElementById('update-team-btn');
+    updateBtn.onclick = () => {
+        const selectedStaffIds = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => parseInt(cb.value));
+        
+        // Update team members
+        let teams = loadTeams();
+        const teamIndex = teams.findIndex(t => t.name === team.name);
+        if (teamIndex !== -1) {
+            teams[teamIndex].members = staffMembers.filter(staff => 
+                selectedStaffIds.includes(staff.id)
+            );
+            saveTeams(teams);
+            addConsoleMessage(`Team "${team.name}" members have been updated`);
+            setupTeamSections(document.querySelector('.mainview-overlay-content'));
+        }
+    };
 
     infoBox.innerHTML = `
         <div class="info-header">
