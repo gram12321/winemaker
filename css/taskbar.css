@@ -1,12 +1,12 @@
 /*  - --- --   Panel styles   - - - - - -*/
 #panel-wrapper {
-  position: fixed ;
-  right: 0 ;
-  top: 0 ;
+  position: fixed;
+  right: 0;
+  top: 0;
   width: var(--panel-width);
-  height: 100% ;
-  z-index: 1000 ;
-  overflow-y: auto ;
+  height: 100%;
+  z-index: 1000;
+  overflow-y: overlay;
 }
 
 #panel-wrapper::before {
