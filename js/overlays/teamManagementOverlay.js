@@ -1,13 +1,15 @@
 // Load saved teams or use defaults
-const teamOptions = {
-    'Administration Team': {
-        name: 'Administration Team',
-        description: 'Handle company administration and paperwork',
-        flagCode: 'bookkeeping',
-        teamPicture: 'placeholder.webp',
-        bonus: 'Administration efficiency +10%',
-        members: []
-    },
+function loadTeamOptions() {
+    const savedTeams = JSON.parse(localStorage.getItem('teams')) || [];
+    const defaultTeams = {
+        'Administration Team': {
+            name: 'Administration Team',
+            description: 'Handle company administration and paperwork',
+            flagCode: 'bookkeeping',
+            teamPicture: 'placeholder.webp',
+            bonus: 'Administration efficiency +10%',
+            members: []
+        },
     'Building & Maintenance Team': {
         name: 'Building & Maintenance Team',
         description: 'Maintain and upgrade facilities',
