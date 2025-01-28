@@ -1,6 +1,3 @@
-
-import { getFlagIconHTML } from '../utils.js';
-
 const teamOptions = {
     'Administration Team': {
         name: 'Administration Team',
