@@ -2,6 +2,20 @@
 import { getFlagIconHTML } from '../utils.js';
 
 const teamOptions = {
+    'Administration Team': {
+        name: 'Administration Team',
+        description: 'Handle company administration and paperwork',
+        flagCode: 'bookkeeping',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Administration efficiency +10%'
+    },
+    'Building & Maintenance Team': {
+        name: 'Building & Maintenance Team',
+        description: 'Maintain and upgrade facilities',
+        flagCode: 'maintain',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Maintenance efficiency +10%'
+    },
     'Sales Team': {
         name: 'Sales Team',
         description: 'Manage your sales force',
