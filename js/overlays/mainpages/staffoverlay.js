@@ -1,5 +1,6 @@
 import { displayStaff } from '/js/staff.js';
 import { showHireStaffOptionsOverlay } from '/js/overlays/hireStaffOptionsOverlay.js';
+import { showTeamManagementOverlay } from '/js/overlays/teamManagementOverlay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import taskManager, { TaskType } from '../../taskManager.js';
 import { addConsoleMessage } from '../../console.js';
@@ -19,7 +20,10 @@ function createStaffOverlayHTML() {
                     <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
                     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
                         <h3 class="h5 mb-0">Staff Overview</h3>
-                        <button class="btn btn-light btn-sm" id="hire-staff-btn">Hire Staff</button>
+                        <div class="btn-group">
+                            <button class="btn btn-light btn-sm" id="team-management-btn">Team Management</button>
+                            <button class="btn btn-light btn-sm" id="hire-staff-btn">Hire Staff</button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div id="staff-container" class="table-responsive">
@@ -49,9 +53,17 @@ function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
 
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
+    const teamManagementBtn = overlay.querySelector('#team-management-btn');
+    
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', () => {
             showHireStaffOptionsOverlay();
+        });
+    }
+    
+    if (teamManagementBtn) {
+        teamManagementBtn.addEventListener('click', () => {
+            showTeamManagementOverlay();
         });
     }
 }
