@@ -26,7 +26,6 @@ function createStaffOverlayHTML() {
                     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
                         <h3 class="h5 mb-0">Staff Overview</h3>
                         <div class="btn-group">
-                            <button class="btn btn-light btn-sm" id="team-management-btn">Team Management</button>
                             <button class="btn btn-light btn-sm" id="hire-staff-btn">Hire Staff</button>
                         </div>
                     </div>
