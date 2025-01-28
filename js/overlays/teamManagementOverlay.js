@@ -1,44 +1,11 @@
+import { loadTeams, getDefaultTeams } from '../database/adminFunctions.js';
+
 // Load saved teams or use defaults
 function loadTeamOptions() {
-    const savedTeams = JSON.parse(localStorage.getItem('teams')) || [];
-    const defaultTeams = {
-        'Administration Team': {
-            name: 'Administration Team',
-            description: 'Handle company administration and paperwork',
-            flagCode: 'bookkeeping',
-            teamPicture: 'placeholder.webp',
-            bonus: 'Administration efficiency +10%',
-            members: []
-        },
-    'Building & Maintenance Team': {
-        name: 'Building & Maintenance Team',
-        description: 'Maintain and upgrade facilities',
-        flagCode: 'maintain',
-        teamPicture: 'placeholder.webp',
-        bonus: 'Maintenance efficiency +10%'
-    },
-    'Sales Team': {
-        name: 'Sales Team',
-        description: 'Manage your sales force',
-        flagCode: 'sales',
-        teamPicture: 'placeholder.webp',
-        bonus: 'Sales efficiency +10%'
-    },
-    'Vineyard Team': {
-        name: 'Vineyard Team',
-        description: 'Coordinate vineyard operations',
-        flagCode: 'harvesting',
-        teamPicture: 'placeholder.webp',
-        bonus: 'Field work efficiency +10%'
-    },
-    'Winery Team': {
-        name: 'Winery Team',
-        description: 'Oversee winery processes',
-        flagCode: 'crushing',
-        teamPicture: 'placeholder.webp',
-        bonus: 'Winery efficiency +10%'
-    }
-};
+    const savedTeams = loadTeams();
+    const defaultTeams = getDefaultTeams();
+    return savedTeams.length > 0 ? savedTeams : defaultTeams;
+}
 
 function createTeamOptionCard(team) {
     return `
@@ -94,11 +61,11 @@ function updateTeamPicture(team) {
 }
 
 export function showTeamManagementOverlay() {
-    const savedTeams = JSON.parse(localStorage.getItem('teams')) || [];
+    const teamOptions = loadTeamOptions();
     const overlay = document.createElement('div');
     overlay.id = 'teamManagementOverlay';
     overlay.className = 'overlay active';
-    
+
     overlay.innerHTML = `
         <div class="overlay-content" style="max-width: 1200px">
             <h2>Team Management</h2>
@@ -109,7 +76,7 @@ export function showTeamManagementOverlay() {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(overlay);
     const optionsContainer = overlay.querySelector('.options-container');
 

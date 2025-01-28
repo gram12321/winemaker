@@ -473,6 +473,58 @@ export function getPrestigeHit() {
   return prestigeHit === null ? 0 : Number(prestigeHit);
 }
 
+// Team management storage functions
+export function saveTeams(teams) {
+  localStorage.setItem('teams', JSON.stringify(teams));
+}
+
+export function loadTeams() {
+  const savedTeams = localStorage.getItem('teams');
+  return savedTeams ? JSON.parse(savedTeams) : [];
+}
+
+export function getDefaultTeams() {
+  return {
+    'Administration Team': {
+      name: 'Administration Team',
+      description: 'Handle company administration and paperwork',
+      flagCode: 'bookkeeping',
+      teamPicture: 'placeholder.webp',
+      bonus: 'Administration efficiency +10%',
+      members: []
+    },
+    'Building & Maintenance Team': {
+      name: 'Building & Maintenance Team',
+      description: 'Maintain and upgrade facilities',
+      flagCode: 'maintain',
+      teamPicture: 'placeholder.webp',
+      bonus: 'Maintenance efficiency +10%'
+    },
+    'Sales Team': {
+      name: 'Sales Team',
+      description: 'Manage your sales force',
+      flagCode: 'sales',
+      teamPicture: 'placeholder.webp',
+      bonus: 'Sales efficiency +10%'
+    },
+    'Vineyard Team': {
+      name: 'Vineyard Team',
+      description: 'Coordinate vineyard operations',
+      flagCode: 'harvesting',
+      teamPicture: 'placeholder.webp',
+      bonus: 'Field work efficiency +10%'
+    },
+    'Winery Team': {
+      name: 'Winery Team',
+      description: 'Oversee winery processes',
+      flagCode: 'crushing',
+      teamPicture: 'placeholder.webp',
+      bonus: 'Winery efficiency +10%'
+    }
+  };
+}
+
+
 export function setPrestigeHit(value) {
   if (value === null || value === undefined) {
     localStorage.removeItem('prestigeHit');
