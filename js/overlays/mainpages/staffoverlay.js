@@ -225,9 +225,74 @@ function updateTeamInfo(team) {
                         : '<em>No members assigned</em>'}
                 </div>
             </div>
+            <div class="info-row mt-3">
+                <label class="form-label">Auto-assign to task types:</label>
+                <div class="task-type-checkboxes">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="field-tasks" 
+                               ${team.defaultTaskTypes?.includes('Field') ? 'checked' : ''}>
+                        <label class="form-check-label" for="field-tasks">Field Tasks</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="winery-tasks" 
+                               ${team.defaultTaskTypes?.includes('Winery') ? 'checked' : ''}>
+                        <label class="form-check-label" for="winery-tasks">Winery Tasks</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="administration-tasks" 
+                               ${team.defaultTaskTypes?.includes('Administration') ? 'checked' : ''}>
+                        <label class="form-check-label" for="administration-tasks">Administration Tasks</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="sales-tasks" 
+                               ${team.defaultTaskTypes?.includes('Sales') ? 'checked' : ''}>
+                        <label class="form-check-label" for="sales-tasks">Sales Tasks</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="maintenance-tasks" 
+                               ${team.defaultTaskTypes?.includes('Building & Maintenance') ? 'checked' : ''}>
+                        <label class="form-check-label" for="maintenance-tasks">Maintenance Tasks</label>
+                    </div>
+                </div>
+            </div>
             <button class="btn btn-danger btn-sm delete-team-btn mt-3" data-team="${team.name}">Delete Team</button>
         </div>
     `;
+
+    // Add event listeners for task type checkboxes
+    const taskTypeMap = {
+        'field-tasks': 'Field',
+        'winery-tasks': 'Winery',
+        'administration-tasks': 'Administration',
+        'sales-tasks': 'Sales',
+        'maintenance-tasks': 'Building & Maintenance'
+    };
+
+    Object.entries(taskTypeMap).forEach(([checkboxId, taskType]) => {
+        const checkbox = infoBox.querySelector(`#${checkboxId}`);
+        checkbox.addEventListener('change', () => {
+            let teams = loadTeams();
+            const teamIndex = teams.findIndex(t => t.name === team.name);
+            if (teamIndex !== -1) {
+                // Initialize defaultTaskTypes array if it doesn't exist
+                if (!teams[teamIndex].defaultTaskTypes) {
+                    teams[teamIndex].defaultTaskTypes = [];
+                }
+
+                // Add or remove the task type based on checkbox state
+                if (checkbox.checked) {
+                    if (!teams[teamIndex].defaultTaskTypes.includes(taskType)) {
+                        teams[teamIndex].defaultTaskTypes.push(taskType);
+                    }
+                } else {
+                    teams[teamIndex].defaultTaskTypes = teams[teamIndex].defaultTaskTypes.filter(t => t !== taskType);
+                }
+
+                saveTeams(teams);
+                addConsoleMessage(`Updated auto-assignment settings for "${team.name}"`);
+            }
+        });
+    });
 
     // Setup delete button
     const deleteBtn = infoBox.querySelector('.delete-team-btn');

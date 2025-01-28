@@ -1,4 +1,4 @@
-import { loadStaff, saveTasks, getGameState ,  loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
+import { loadStaff, saveTasks, getGameState ,  loadTasks as loadTasksFromStorage, loadTeams } from './database/adminFunctions.js';
 import { updateAllDisplays } from './displayManager.js';
 import { showStaffOverlay } from './overlays/showstaffoverlay.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
@@ -40,6 +40,23 @@ class TaskManager {
         this.updateTaskDisplay();
     }
 
+    getDefaultTeamMembers(taskType) {
+        const teams = loadTeams();
+        const matchingTeams = teams.filter(team => 
+            team.defaultTaskTypes?.includes(taskType)
+        );
+        
+        // Combine all unique members from matching teams
+        const allMembers = new Map(); // Use Map to ensure uniqueness by ID
+        matchingTeams.forEach(team => {
+            team.members.forEach(member => {
+                allMembers.set(member.id, member);
+            });
+        });
+        
+        return Array.from(allMembers.values());
+    }
+
     addProgressiveTask(name, taskType, totalWork, callback, target = null, params = {}, initialCallback = null) {
         const taskId = ++this.taskIdCounter;
         
@@ -48,7 +65,14 @@ class TaskManager {
             initialCallback(target, params);
         }
 
-        const task = new Task(taskId, name, 'progressive', taskType, totalWork, callback, target, { ...params, assignedStaff: [] });
+        // Get default team members for this task type
+        const defaultMembers = this.getDefaultTeamMembers(taskType);
+        
+        const task = new Task(taskId, name, 'progressive', taskType, totalWork, callback, target, { 
+            ...params, 
+            assignedStaff: defaultMembers 
+        });
+        
         this.tasks.set(taskId, task);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
@@ -63,7 +87,14 @@ class TaskManager {
             initialCallback(target, params);
         }
 
-        const task = new Task(taskId, name, 'completion', taskType, totalWork, callback, target, { ...params, assignedStaff: [] });
+        // Get default team members for this task type
+        const defaultMembers = this.getDefaultTeamMembers(taskType);
+        
+        const task = new Task(taskId, name, 'completion', taskType, totalWork, callback, target, { 
+            ...params, 
+            assignedStaff: defaultMembers 
+        });
+        
         this.tasks.set(taskId, task);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
