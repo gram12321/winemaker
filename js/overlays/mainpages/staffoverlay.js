@@ -64,9 +64,6 @@ function createStaffOverlayHTML() {
                             <div class="options-info-box">
                                 <!-- Team details will be shown here -->
                             </div>
-                            <div class="options-picture">
-                                <!-- Team picture will be shown here -->
-                            </div>
                         </div>
                         <div id="create-team-form" style="display: none;">
                             <div class="form-group mb-3">
@@ -157,7 +154,6 @@ function setupTeamSections(overlay) {
 
 function updateTeamInfo(team) {
     const infoBox = document.querySelector('.options-info-box');
-    const pictureBox = document.querySelector('.options-picture');
 
     infoBox.innerHTML = `
         <div class="info-header">

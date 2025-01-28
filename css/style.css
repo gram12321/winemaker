@@ -187,7 +187,7 @@ body.sidebar-collapsed #wrapper {
 .task-box .staff-line[title]:hover::after {
   left: 50%;
   top: 125px;
-  
+
 }
 
 /* Global Checkbox Styling */
@@ -319,7 +319,7 @@ input[type="radio"]:hover {
 /* Team Management Grid Layout */
 .team-management-grid {
     display: grid;
-    grid-template-columns: 50% 50%;
+    grid-template-columns: 60% 40%;
     gap: 20px;
     align-items: start;
     margin-bottom: 20px;
