@@ -57,8 +57,16 @@ function createStaffOverlayHTML() {
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="team-container">
-                            <!-- Team cards will be dynamically added here -->
+                        <div class="starting-condition-grid">
+                            <div class="options-container">
+                                <!-- Team cards will be dynamically added here -->
+                            </div>
+                            <div class="options-info-box">
+                                <!-- Team details will be shown here -->
+                            </div>
+                            <div class="options-picture">
+                                <!-- Team picture will be shown here -->
+                            </div>
                         </div>
                         <div id="create-team-form" style="display: none;">
                             <div class="form-group mb-3">
@@ -103,37 +111,99 @@ function setupStaffOverlayEventListeners(overlay) {
 function setupTeamSections(overlay) {
     const teams = loadTeams();
     const teamSection = overlay.querySelector('#team-section');
-    const teamContainer = teamSection.querySelector('.team-container');
+    const optionsContainer = teamSection.querySelector('.options-container');
     
+    optionsContainer.innerHTML = '';
     teams.forEach(team => {
-        const teamCard = document.createElement('div');
-        teamCard.className = 'team-card mb-3';
-        teamCard.innerHTML = `
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <img src="/assets/icon/icon_${team.flagCode}.webp" 
-                             alt="${team.name}" 
-                             style="width: 24px; height: 24px;"
-                             onerror="this.style.display='none'">
-                        <span>${team.name}</span>
-                    </div>
-                    <button class="btn btn-danger btn-sm delete-team-btn" data-team="${team.name}">Delete</button>
+        optionsContainer.innerHTML += `
+            <div class="option-card" data-team="${team.name}">
+                <div class="option-header">
+                    <img src="/assets/icon/icon_${team.flagCode}.webp" 
+                         alt="${team.name}" 
+                         style="width: 24px; height: 24px;"
+                         onerror="this.style.display='none'">
+                    <h4>${team.name}</h4>
                 </div>
-                <div class="card-body">
-                    <p class="card-text">${team.description}</p>
-                    <div class="team-members">
-                        <strong>Members:</strong>
-                        ${team.members.map(member => 
-                            `<div class="team-member">${member.firstName} ${member.lastName}</div>`
-                        ).join('')}
-                    </div>
-                    ${team.bonus ? `<div class="team-bonus mt-2"><strong>Bonus:</strong> ${team.bonus}</div>` : ''}
+                <div class="option-description">
+                    ${team.description}
                 </div>
             </div>
         `;
-        teamContainer.appendChild(teamCard);
     });
+
+    // Add click handlers for option cards
+    optionsContainer.querySelectorAll('.option-card').forEach(card => {
+        card.addEventListener('click', () => {
+            optionsContainer.querySelectorAll('.option-card').forEach(c => 
+                c.classList.remove('active'));
+            card.classList.add('active');
+            const teamName = card.dataset.team;
+            const selectedTeam = teams.find(t => t.name === teamName);
+            if (selectedTeam) {
+                updateTeamInfo(selectedTeam);
+            }
+        });
+    });
+
+    // Show first team by default
+    if (teams.length > 0) {
+        const firstCard = optionsContainer.querySelector('.option-card');
+        if (firstCard) {
+            firstCard.classList.add('active');
+            updateTeamInfo(teams[0]);
+        }
+    }
+}
+
+function updateTeamInfo(team) {
+    const infoBox = document.querySelector('.options-info-box');
+    const pictureBox = document.querySelector('.options-picture');
+
+    infoBox.innerHTML = `
+        <div class="info-header">
+            <img src="/assets/icon/icon_${team.flagCode}.webp" 
+                 alt="${team.name}" 
+                 style="width: 24px; height: 24px;"
+                 onerror="this.style.display='none'">
+            <h4>${team.name} Details</h4>
+        </div>
+        <div class="info-content">
+            <div class="info-row">
+                <span class="info-label">Description:</span>
+                <span class="info-value">${team.description}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Team Members:</span>
+                <div class="info-value">
+                    ${Array.isArray(team.members) && team.members.length > 0 
+                        ? team.members.map(member => 
+                            `<div class="team-member">${member.firstName} ${member.lastName}</div>`
+                        ).join('')
+                        : '<em>No members assigned</em>'}
+                </div>
+            </div>
+            <button class="btn btn-danger btn-sm delete-team-btn mt-3" data-team="${team.name}">Delete Team</button>
+        </div>
+    `;
+
+    pictureBox.innerHTML = `
+        <img src="/assets/pic/staff_dalle.webp" 
+             alt="${team.name} team" 
+             class="team-picture">
+    `;
+
+    // Setup delete button
+    const deleteBtn = infoBox.querySelector('.delete-team-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            const teamName = deleteBtn.dataset.team;
+            const teams = loadTeams().filter(t => t.name !== teamName);
+            saveTeams(teams);
+            addConsoleMessage(`Team "${teamName}" has been deleted`);
+            setupTeamSections(document.querySelector('.mainview-overlay-content'));
+        });
+    }
+}
 
     // Setup delete buttons
     teamContainer.querySelectorAll('.delete-team-btn').forEach(button => {
