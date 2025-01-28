@@ -1,12 +1,15 @@
-const teamOptions = {
-    'Administration Team': {
-        name: 'Administration Team',
-        description: 'Handle company administration and paperwork',
-        flagCode: 'bookkeeping',
-        teamPicture: 'placeholder.webp',
-        bonus: 'Administration efficiency +10%',
-        members: []
-    },
+// Load saved teams or use defaults
+function loadTeamOptions() {
+    const savedTeams = JSON.parse(localStorage.getItem('teams')) || [];
+    const defaultTeams = {
+        'Administration Team': {
+            name: 'Administration Team',
+            description: 'Handle company administration and paperwork',
+            flagCode: 'bookkeeping',
+            teamPicture: 'placeholder.webp',
+            bonus: 'Administration efficiency +10%',
+            members: []
+        },
     'Building & Maintenance Team': {
         name: 'Building & Maintenance Team',
         description: 'Maintain and upgrade facilities',
@@ -91,6 +94,7 @@ function updateTeamPicture(team) {
 }
 
 export function showTeamManagementOverlay() {
+    const savedTeams = JSON.parse(localStorage.getItem('teams')) || [];
     const overlay = document.createElement('div');
     overlay.id = 'teamManagementOverlay';
     overlay.className = 'overlay active';
