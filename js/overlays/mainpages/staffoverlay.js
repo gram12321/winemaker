@@ -119,7 +119,7 @@ function setupTeamSections(overlay) {
     const teams = loadTeams();
     const teamSection = overlay.querySelector('#team-section');
     const optionsContainer = teamSection.querySelector('.options-container');
-    
+
     optionsContainer.innerHTML = '';
     teams.forEach(team => {
         optionsContainer.innerHTML += `
@@ -164,7 +164,7 @@ function setupTeamSections(overlay) {
 
 function updateTeamInfo(team) {
     const infoBox = document.querySelector('.options-info-box');
-    
+
     // Update checkboxes based on team members
     const checkboxes = document.querySelectorAll('#team-members input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
@@ -178,18 +178,21 @@ function updateTeamInfo(team) {
         const selectedStaffIds = Array.from(checkboxes)
             .filter(cb => cb.checked)
             .map(cb => parseInt(cb.value));
-        
-        // Update team members
+
+        // Update team members based on checkbox state
         let teams = loadTeams();
         const teamIndex = teams.findIndex(t => t.name === team.name);
         if (teamIndex !== -1) {
+            // Get all staff members that are checked
+            const updatedMembers = staffMembers.filter(staff => selectedStaffIds.includes(staff.id));
+
             // Create new team object with updated members
             const updatedTeam = {
                 ...teams[teamIndex],
-                members: staffMembers.filter(staff => selectedStaffIds.includes(staff.id))
+                members: updatedMembers
             };
             teams[teamIndex] = updatedTeam;
-            
+
             saveTeams(teams);
             addConsoleMessage(`Team "${team.name}" members have been updated`);
             setupTeamSections(document.querySelector('.mainview-overlay-content'));
@@ -282,7 +285,7 @@ function updateTeamInfo(team) {
     }
 
 
-    
+
 }
 
 function setupHireStaffButton(overlay) {
@@ -320,7 +323,7 @@ function toggleCreateTeamForm(overlay) {
 function createNewTeam(overlay) {
     const teamName = overlay.querySelector('#team-name').value;
     const teamDescription = overlay.querySelector('#team-description').value;
-    
+
     if (!teamName || !teamDescription) {
         addConsoleMessage('Please fill in all required fields');
         return null;
@@ -350,7 +353,7 @@ function setupSaveTeamButton(overlay) {
             const teamDescInput = overlay.querySelector('#team-description');
             const teamName = teamNameInput.value;
             const teams = loadTeams();
-            
+
             if (teams.some(team => team.name === teamName)) {
                 addConsoleMessage('A team with this name already exists. Please choose a different name.');
                 return;
@@ -360,16 +363,15 @@ function setupSaveTeamButton(overlay) {
             if (newTeam) {
                 teams.push(newTeam);
                 saveTeams(teams);
-                
+
                 // Reset form
                 teamNameInput.value = '';
                 teamDescInput.value = '';
                 overlay.querySelectorAll('#team-members input[type="checkbox"]').forEach(cb => cb.checked = false);
-                
+
                 addConsoleMessage(`Team "${teamName}" has been created`);
                 setupTeamSections(overlay);
             }
         });
     }
 }
-
