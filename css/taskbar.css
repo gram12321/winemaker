@@ -6,7 +6,19 @@
   width: var(--panel-width);
   height: 100vh;
   z-index: 1000;
-  overflow-y: none ;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel {
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel-content {
+  height: 100%;
+  overflow-y: auto;
 }
 
 #panel-wrapper::before {
