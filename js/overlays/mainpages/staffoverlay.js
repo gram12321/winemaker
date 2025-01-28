@@ -143,8 +143,21 @@ function setupStaffOverlayEventListeners(overlay) {
 }
 
 function saveTeam(name, members) {
-    teams.push({ name, members });
-    console.log("Saved teams:", teams); // Debugging information
+    const teamData = {
+        name: name,
+        description: `${name} coordination and management`,
+        flagCode: name.toLowerCase().includes('admin') ? 'bookkeeping' :
+                 name.toLowerCase().includes('sales') ? 'sales' :
+                 name.toLowerCase().includes('winery') ? 'crushing' :
+                 name.toLowerCase().includes('vineyard') ? 'harvesting' : 'maintain',
+        teamPicture: 'placeholder.webp',
+        bonus: `${name} efficiency +10%`,
+        members: members
+    };
+
+    teams.push(teamData);
+    localStorage.setItem('teams', JSON.stringify(teams));
+    console.log("Saved teams:", teams);
 }
 
 function displayTeams() {
