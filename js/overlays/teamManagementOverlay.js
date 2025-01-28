@@ -1,21 +1,15 @@
 
 import { getFlagIconHTML } from '../utils.js';
 
-// Load teams from localStorage or use defaults
-function loadTeams() {
-    const savedTeams = localStorage.getItem('teams');
-    if (savedTeams) {
-        return JSON.parse(savedTeams);
-    }
-    return {
-        'Administration Team': {
-            name: 'Administration Team',
-            description: 'Handle company administration and paperwork',
-            flagCode: 'bookkeeping',
-            teamPicture: 'placeholder.webp',
-            bonus: 'Administration efficiency +10%',
-            members: []
-        },
+const teamOptions = {
+    'Administration Team': {
+        name: 'Administration Team',
+        description: 'Handle company administration and paperwork',
+        flagCode: 'bookkeeping',
+        teamPicture: 'placeholder.webp',
+        bonus: 'Administration efficiency +10%',
+        members: []
+    },
     'Building & Maintenance Team': {
         name: 'Building & Maintenance Team',
         description: 'Maintain and upgrade facilities',
