@@ -310,10 +310,10 @@ input[type="radio"]:hover {
 /* Starting Condition Grid Layout */
 .starting-condition-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;  /* Changed to three columns */
+    grid-template-columns: 40% 27% 33%;
     gap: 20px;
     align-items: start;
-    margin-bottom: 20px;  /* Add space for the button below */
+    margin-bottom: 20px;
 }
 
 /* Add styles for the family picture container */
@@ -322,11 +322,12 @@ input[type="radio"]:hover {
     border: 2px solid var(--color-accent);
     border-radius: var(--radius-md);
     padding: 20px;
-    height: 400px; /* Set fixed height */
+    height: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-height: 400px;  /* Match container height */
+    max-width: 100%;
+    max-height: 400px;
 }
 
 .family-image {
