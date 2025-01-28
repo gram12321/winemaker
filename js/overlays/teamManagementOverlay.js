@@ -86,7 +86,7 @@ function updateInfoBox(team) {
 function updateTeamPicture(team) {
     const pictureBox = document.querySelector('.options-picture');
     pictureBox.innerHTML = `
-        <img src="assets/pic/staff_dalle.webp" 
+        <img src="/assets/pic/staff_dalle.webp" 
              alt="${team.name} team" 
              class="family-image">
     `;
