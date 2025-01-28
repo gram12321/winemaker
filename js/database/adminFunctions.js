@@ -478,11 +478,6 @@ export function saveTeams(teams) {
   localStorage.setItem('teams', JSON.stringify(teams));
 }
 
-export function loadTeams() {
-  const savedTeams = localStorage.getItem('teams');
-  return savedTeams ? JSON.parse(savedTeams) : [];
-}
-
 export function getDefaultTeams() {
   return [
     {
