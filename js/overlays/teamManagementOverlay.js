@@ -92,7 +92,7 @@ export function showTeamManagementOverlay() {
     overlay.className = 'overlay active';
     
     overlay.innerHTML = `
-        <div class="overlay-content">
+        <div class="overlay-content" style="max-width: 1200px">
             <h2>Team Management</h2>
             <div class="starting-condition-grid">
                 <div class="options-container"></div>
