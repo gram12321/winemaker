@@ -80,9 +80,11 @@ export function showTeamManagementOverlay() {
     overlay.innerHTML = `
         <div class="overlay-content">
             <h2>Team Management</h2>
-            <div class="options-container"></div>
-            <div class="options-info-box"></div>
-            <div class="options-picture"></div>
+            <div class="starting-condition-grid">
+                <div class="options-container"></div>
+                <div class="options-info-box"></div>
+                <div class="options-picture"></div>
+            </div>
         </div>
     `;
     
