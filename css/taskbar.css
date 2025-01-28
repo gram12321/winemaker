@@ -4,9 +4,9 @@
   right: 0;
   top: 0;
   width: var(--panel-width);
-  height: 100%;
+  min-height: 100vh;
   z-index: 1000;
-  overflow-y: overlay;
+  overflow-y: auto;
 }
 
 #panel-wrapper::before {
