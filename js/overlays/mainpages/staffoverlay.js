@@ -101,7 +101,7 @@ function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
 
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
-    const teamManagementBtn = overlay.querySelector('#team-management-btn');
+
     
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', () => {
