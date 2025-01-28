@@ -33,16 +33,19 @@ function updateInfoBox(team) {
         </div>
         <div class="info-content">
             <div class="info-row">
-                <span class="info-label">Team Focus:</span>
-                <span class="info-value">${team.name}</span>
-            </div>
-            <div class="info-row">
                 <span class="info-label">Description:</span>
                 <span class="info-value">${team.description}</span>
             </div>
             <div class="info-row">
-                <span class="info-label">Team Bonus:</span>
-                <span class="info-value">${team.bonus}</span>
+                <span class="info-label">Team Members:</span>
+                <div class="info-value">
+                    ${team.members.length > 0 
+                        ? team.members.map(member => `
+                            <div class="team-member">
+                                ${member.name}
+                            </div>`).join('')
+                        : '<em>No members assigned</em>'}
+                </div>
             </div>
         </div>
     `;
