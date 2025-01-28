@@ -511,6 +511,8 @@ input[type="radio"]:hover {
     border: 1px solid rgba(197, 165, 114, 0.2);
 }
 
+
+
 /* Auto Assigned Teams */
 .auto-assigned-teams {
     background: rgba(0,0,0,0.05);
@@ -538,3 +540,4 @@ input[type="radio"]:hover {
 .team-badge img {
     margin-right: 4px;
 }
+

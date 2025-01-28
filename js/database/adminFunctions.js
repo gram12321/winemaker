@@ -503,14 +503,6 @@ export function getDefaultTeams() {
       members: []
     },
     {
-      name: 'Sales Team',
-      description: 'Manage your sales force',
-      flagCode: 'sales',
-      teamPicture: 'placeholder.webp',
-      bonus: 'Sales efficiency +10%',
-      members: []
-    },
-    {
       name: 'Vineyard Team',
       description: 'Coordinate vineyard operations',
       flagCode: 'harvesting',
@@ -524,6 +516,14 @@ export function getDefaultTeams() {
       flagCode: 'crushing',
       teamPicture: 'placeholder.webp',
       bonus: 'Winery efficiency +10%',
+      members: []
+    },
+    {
+      name: 'Sales Team',
+      description: 'Manage your sales force',
+      flagCode: 'sales',
+      teamPicture: 'placeholder.webp',
+      bonus: 'Sales efficiency +10%',
       members: []
     }
   ];

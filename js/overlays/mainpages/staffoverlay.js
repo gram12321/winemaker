@@ -74,13 +74,18 @@ function createStaffOverlayHTML() {
                                         </div>
                                     `).join('')}
                                 </div>
-                                <button class="btn btn-primary mt-3" id="update-team-btn">Update Team Members</button>
                             </div>
                         </div>
                         <hr class="overlay-divider">
-                        <div id="create-team-form">
+                        <div class="d-flex flex-column gap-2">
+                            <button class="btn btn-primary w-100" id="update-team-btn">Update Team</button>
+                            <button class="btn btn-danger w-100" id="delete-team-btn">Delete Team</button>
+                            <button class="btn btn-primary w-100" id="toggle-create-team">
+                                Create New Team <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <div id="create-team-form" style="display: none;">
                             <div class="form-group mb-3">
-                            <h4>Create team</h4>
                                 <label for="team-name">Team Name:</label>
                                 <input type="text" id="team-name" class="form-control" placeholder="Enter team name" required>
                             </div>
@@ -102,6 +107,7 @@ function setupStaffOverlayEventListeners(overlay) {
     setupHireStaffButton(overlay);
     setupTeamSections(overlay);
     setupSaveTeamButton(overlay);
+    setupCreateTeamToggle(overlay); // Add this line
 }
 
 function setupTeamSections(overlay) {
@@ -255,7 +261,6 @@ function updateTeamInfo(team) {
                     </div>
                 </div>
             </div>
-            <button class="btn btn-danger btn-sm delete-team-btn mt-3" data-team="${team.name}">Delete Team</button>
         </div>
     `;
 
@@ -294,11 +299,11 @@ function updateTeamInfo(team) {
         });
     });
 
-    // Setup delete button
-    const deleteBtn = infoBox.querySelector('.delete-team-btn');
+    // Add event listener for delete button
+    const deleteBtn = document.getElementById('delete-team-btn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
-            const teamName = deleteBtn.dataset.team;
+            const teamName = team.name; // Use the current team's name
             const defaultTeams = getDefaultTeams();
             const isDefaultTeam = defaultTeams.some(t => t.name === teamName);
 
@@ -370,11 +375,18 @@ function setupTeamManagementButton(overlay) {
     }
 }
 
+function setupCreateTeamToggle(overlay) {
+    const toggleBtn = overlay.querySelector('#toggle-create-team');
+    const createTeamForm = overlay.querySelector('#create-team-form');
+    const chevron = toggleBtn.querySelector('i');
 
-
-function toggleCreateTeamForm(overlay) {
-    const form = overlay.querySelector('#create-team-form');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (toggleBtn && createTeamForm) {
+        toggleBtn.addEventListener('click', () => {
+            const isVisible = createTeamForm.style.display !== 'none';
+            createTeamForm.style.display = isVisible ? 'none' : 'block';
+            chevron.className = isVisible ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+        });
+    }
 }
 
 function createNewTeam(overlay) {
