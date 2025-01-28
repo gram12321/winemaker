@@ -52,8 +52,8 @@ function createStaffOverlayHTML() {
                 <section id="team-section" class="overlay-section card mb-4">
                     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
                         <h3 class="h5 mb-0">Team Management</h3>
-                        <div class="btn-group">
-                            <button class="btn btn-light btn-sm" id="manage-team-btn">Team Management</button>
+                        <div>
+                            <button class="btn btn-light btn-sm me-2" id="team-management-btn">Team Management</button>
                             <button class="btn btn-light btn-sm" id="create-team-btn">Create Team</button>
                         </div>
                     </div>
@@ -110,9 +110,8 @@ function setupStaffOverlayEventListeners(overlay) {
         });
     }
 
-    const manageTeamBtn = overlay.querySelector('#manage-team-btn');
-    if (manageTeamBtn) {
-        manageTeamBtn.addEventListener('click', () => {
+    if (teamManagementBtn) {
+        teamManagementBtn.addEventListener('click', () => {
             showTeamManagementOverlay();
         });
     }
