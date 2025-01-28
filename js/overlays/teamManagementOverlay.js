@@ -26,14 +26,14 @@ const teamOptions = {
     'Vineyard Team': {
         name: 'Vineyard Team',
         description: 'Coordinate vineyard operations',
-        flagCode: 'field',
+        flagCode: 'harvesting',
         teamPicture: 'placeholder.webp',
         bonus: 'Field work efficiency +10%'
     },
     'Winery Team': {
         name: 'Winery Team',
         description: 'Oversee winery processes',
-        flagCode: 'winery',
+        flagCode: 'crushing',
         teamPicture: 'placeholder.webp',
         bonus: 'Winery efficiency +10%'
     }
@@ -43,7 +43,10 @@ function createTeamOptionCard(team) {
     return `
         <div class="option-card" data-team="${team.name}">
             <div class="option-header">
-                <img src="/assets/icon/icon_${team.flagCode}.webp" alt="${team.name}" style="width: 24px; height: 24px;">
+                <img src="/assets/icon/icon_${team.flagCode}.webp" 
+                     alt="${team.name}" 
+                     style="width: 24px; height: 24px;"
+                     onerror="this.style.display='none'">
                 <h4>${team.name}</h4>
             </div>
             <div class="option-description">
@@ -57,7 +60,10 @@ function updateInfoBox(team) {
     const infoBox = document.querySelector('.options-info-box');
     infoBox.innerHTML = `
         <div class="info-header">
-            <img src="/assets/icon/icon_${team.flagCode}.webp" alt="${team.name}" style="width: 24px; height: 24px;">
+            <img src="/assets/icon/icon_${team.flagCode}.webp" 
+                 alt="${team.name}" 
+                 style="width: 24px; height: 24px;"
+                 onerror="this.style.display='none'">
             <h4>${team.name} Details</h4>
         </div>
         <div class="info-content">
