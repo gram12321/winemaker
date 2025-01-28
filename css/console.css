@@ -36,8 +36,6 @@
   /* Ensure the width fits the content */
   font-size: 10px;
   /* Ensure consistent font-size */
-  min-width: 630px;
-  /* Minimum width */
 }
 
 /* Collapsed states */
