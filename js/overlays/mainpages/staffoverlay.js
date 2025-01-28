@@ -52,9 +52,6 @@ function createStaffOverlayHTML() {
                 <section id="team-section" class="overlay-section card mb-4">
                     <div class="card-header text-white d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, var(--color-accent), #8B4513);">
                         <h3 class="h5 mb-0">Team Management</h3>
-                        <div class="btn-group">
-                            <button class="btn btn-light btn-sm" id="create-team-btn">Create Team</button>
-                        </div>
                     </div>
                     <div class="card-body">
                         <div class="team-management-grid">
@@ -65,7 +62,8 @@ function createStaffOverlayHTML() {
                                 <!-- Team details will be shown here -->
                             </div>
                         </div>
-                        <div id="create-team-form" style="display: none;">
+                        <hr class="overlay-divider">
+                        <div id="create-team-form">
                             <div class="form-group mb-3">
                                 <label for="team-name">Team Name:</label>
                                 <input type="text" id="team-name" class="form-control" placeholder="Enter team name" required>
@@ -100,7 +98,6 @@ function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
     setupHireStaffButton(overlay);
     setupTeamSections(overlay);
-    setupCreateTeamButton(overlay);
     setupSaveTeamButton(overlay);
 }
 
