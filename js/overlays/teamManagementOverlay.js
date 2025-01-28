@@ -78,7 +78,7 @@ export function showTeamManagementOverlay() {
     const optionsContainer = overlay.querySelector('.options-container');
 
     // Add options
-    Object.values(teamOptions).forEach(team => {
+    teamOptions.forEach(team => {
         optionsContainer.innerHTML += createTeamOptionCard(team);
     });
 
@@ -89,15 +89,20 @@ export function showTeamManagementOverlay() {
                 c.classList.remove('active'));
             card.classList.add('active');
             const teamName = card.dataset.team;
-            updateInfoBox(teamOptions[teamName]);
-            updateTeamPicture(teamOptions[teamName]);
+            const selectedTeam = teamOptions.find(t => t.name === teamName);
+            if (selectedTeam) {
+                updateInfoBox(selectedTeam);
+                updateTeamPicture(selectedTeam);
+            }
         });
     });
 
     // Show first option by default
-    const firstOption = Object.values(teamOptions)[0];
-    updateInfoBox(firstOption);
-    updateTeamPicture(firstOption);
+    if (teamOptions.length > 0) {
+        const firstOption = teamOptions[0];
+        updateInfoBox(firstOption);
+        updateTeamPicture(firstOption);
+    }
     optionsContainer.querySelector('.option-card').classList.add('active');
 
     // Add click handler for closing
