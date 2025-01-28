@@ -190,10 +190,44 @@ function updateTeamInfo(team) {
             const isDefaultTeam = defaultTeams.some(t => t.name === teamName);
 
             if (isDefaultTeam) {
-                const confirmed = confirm(`Warning: "${teamName}" is a default team. Deleting it cannot be undone. Are you sure you want to delete this team?`);
-                if (!confirmed) {
-                    return;
-                }
+                const warningModal = document.createElement('div');
+                warningModal.className = 'modal fade';
+                warningModal.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content overlay-section">
+                            <div class="modal-header card-header">
+                                <h3 class="modal-title">Warning: Default Team Deletion</h3>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Warning: "${teamName}" is a default team. Deleting it cannot be undone.</p>
+                                <p>Are you sure you want to delete this team?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="overlay-section-btn" id="confirmDelete">Delete Team</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(warningModal);
+                $(warningModal).modal('show');
+
+                document.getElementById('confirmDelete').addEventListener('click', () => {
+                    let teams = loadTeams();
+                    teams = teams.filter(t => t.name !== teamName);
+                    saveTeams(teams);
+                    addConsoleMessage(`Team "${teamName}" has been deleted`);
+                    setupTeamSections(document.querySelector('.mainview-overlay-content'));
+                    $(warningModal).modal('hide');
+                    warningModal.remove();
+                });
+
+                warningModal.addEventListener('hidden.bs.modal', () => {
+                    warningModal.remove();
+                });
+                return;
             }
 
             let teams = loadTeams();
