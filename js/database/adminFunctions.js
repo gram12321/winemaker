@@ -1,6 +1,6 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js'; // Ensure this import is present
-import { Staff, createNewStaff, getLastNameForNationality } from '/js/staff.js';
+import { Staff, createNewStaff } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { inventoryInstance } from '/js/resource.js';
 import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
@@ -11,7 +11,7 @@ import { Building, updateBuildingCards, updateBuildButtonStates } from '../build
 import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { setupStaffWagesRecurringTransaction } from '../staff.js';
-import { Farmland, createFarmland } from '../farmland.js';
+
 
 async function clearFirestore() {
   if (confirm('Are you sure you want to delete all companies from Firestore?')) {
@@ -20,10 +20,9 @@ async function clearFirestore() {
       querySnapshot.forEach(async (docSnapshot) => {
         await deleteDoc(docSnapshot.ref);
       });
-      alert('All company data cleared from Firestore successfully.');
+      
     } catch (error) {
       console.error('Error clearing Firestore: ', error);
-      alert('An error occurred while clearing Firestore.');
     }
   }
 }
