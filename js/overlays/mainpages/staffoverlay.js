@@ -104,56 +104,82 @@ function createStaffOverlayHTML() {
 
 function setupStaffOverlayEventListeners(overlay) {
     displayStaff();
+    setupHireStaffButton(overlay);
+    setupTeamManagementButton(overlay);
+    setupCreateTeamButton(overlay);
+    setupSaveTeamButton(overlay);
+}
 
+function setupHireStaffButton(overlay) {
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
-
-    
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', () => {
             showHireStaffOptionsOverlay();
         });
     }
+}
 
+function setupTeamManagementButton(overlay) {
     const manageTeamBtn = overlay.querySelector('#manage-team-btn');
     if (manageTeamBtn) {
         manageTeamBtn.addEventListener('click', () => {
             showTeamManagementOverlay();
         });
     }
+}
 
-
+function setupCreateTeamButton(overlay) {
     const createTeamBtn = overlay.querySelector('#create-team-btn');
     if (createTeamBtn) {
         createTeamBtn.addEventListener('click', () => {
-            const form = overlay.querySelector('#create-team-form');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            toggleCreateTeamForm(overlay);
         });
+    }
+}
 
-        const saveTeamBtn = overlay.querySelector('#save-team-btn');
-        if (saveTeamBtn) {
-            saveTeamBtn.addEventListener('click', () => {
-                const teamName = overlay.querySelector('#team-name').value;
-                const teamDescription = overlay.querySelector('#team-description').value;
-                const selectedMembers = Array.from(overlay.querySelectorAll('#team-members input:checked'))
-                    .map(checkbox => {
-                        const staffId = parseInt(checkbox.value);
-                        return staffMembers.find(staff => staff.id === staffId);
-                    })
-                    .filter(staff => staff !== undefined);
+function toggleCreateTeamForm(overlay) {
+    const form = overlay.querySelector('#create-team-form');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
 
-                if (!teamName || !teamDescription) {
-                    addConsoleMessage('Please fill in all required fields');
-                    return;
-                }
+function createNewTeam(overlay) {
+    const teamName = overlay.querySelector('#team-name').value;
+    const teamDescription = overlay.querySelector('#team-description').value;
+    
+    if (!teamName || !teamDescription) {
+        addConsoleMessage('Please fill in all required fields');
+        return null;
+    }
 
-                const newTeam = {
-                    name: teamName,
-                    description: teamDescription,
-                    flagCode: teamName.toLowerCase().replace(/\s+/g, ''),
-                    teamPicture: 'placeholder.webp',
-                    members: selectedMembers
-                };
+    const selectedMembers = Array.from(overlay.querySelectorAll('#team-members input:checked'))
+        .map(checkbox => {
+            const staffId = parseInt(checkbox.value);
+            return staffMembers.find(staff => staff.id === staffId);
+        })
+        .filter(staff => staff !== undefined);
 
+    return {
+        name: teamName,
+        description: teamDescription,
+        flagCode: teamName.toLowerCase().replace(/\s+/g, ''),
+        teamPicture: 'placeholder.webp',
+        members: selectedMembers
+    };
+}
+
+function setupSaveTeamButton(overlay) {
+    const saveTeamBtn = overlay.querySelector('#save-team-btn');
+    if (saveTeamBtn) {
+        saveTeamBtn.addEventListener('click', () => {
+            const teamName = overlay.querySelector('#team-name').value;
+            
+            if (teams.some(team => team.name === teamName)) {
+                addConsoleMessage('A team with this name already exists. Please choose a different name.');
+                return;
+            }
+
+            const newTeam = createNewTeam(overlay);
+            if (newTeam) {
                 const teams = loadTeams();
                 teams.push(newTeam);
                 saveTeams(teams);
@@ -161,22 +187,7 @@ function setupStaffOverlayEventListeners(overlay) {
                 addConsoleMessage(`Team "${teamName}" has been created`);
                 overlay.querySelector('#create-team-form').style.display = 'none';
                 displayTeams();
-            });
-        }
-    }
-    const saveTeamBtn = overlay.querySelector('#save-team-btn');
-    if (saveTeamBtn) {
-        saveTeamBtn.addEventListener('click', () => {
-            const teamName = overlay.querySelector('#team-name').value;
-            if (teams.some(team => team.name === teamName)) {
-                addConsoleMessage('A team with this name already exists. Please choose a different name.');
-                return;
             }
-            const selectedMembers = Array.from(overlay.querySelectorAll('#team-members .form-check-input:checked')).map(input => parseInt(input.value, 10));
-            saveTeam(teamName, selectedMembers);
-            displayTeams();
-            const form = overlay.querySelector('#create-team-form');
-            form.style.display = 'none'; // Close the form after saving the team
         });
     }
 }
