@@ -6,7 +6,7 @@ import { getFarmlands, updateAllFarmlands } from './database/adminFunctions.js';
 import { updatePatentsList } from './overlays/mainpages/financeoverlay.js';
 
 // Predefined patents and research items
-const patents = [
+export const patents = [
   {
     id: 1,
     name: "Advanced Irrigation",
@@ -61,7 +61,7 @@ export function startPatentTask(patentId) {
 }
 
 // Function to apply benefits of a completed patent
-function applyPatentBenefits(patent) {
+export function applyPatentBenefits(patent) {
   // Apply the benefits to the relevant game entities
   // Example: Increase farmland health
   if (patent.benefits.farmlandHealth) {
@@ -91,4 +91,3 @@ export function getBenefitsDescription(benefits) {
   return descriptions.join(', ');
 }
 
-export { patents };

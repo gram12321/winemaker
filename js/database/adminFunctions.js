@@ -11,6 +11,8 @@ import { Building, updateBuildingCards, updateBuildButtonStates } from '../build
 import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { setupStaffWagesRecurringTransaction } from '../staff.js';
+import { applyPatentBenefits, patents } from '../research.js'; // Import the centralized function
+import {updatePatentsList} from '../overlays/mainpages/financeoverlay.js'; // Import the centralized function
 
 let teams = []; // In-memory storage for teams
 
@@ -632,6 +634,24 @@ export function loadTasks() {
 
 // Helper function to get the appropriate callback based on task name and type
 function getTaskCallback(taskName, taskType) {
+  const researchTasks = ['advanced irrigation', 'soil analysis']; // Add all research task names here
+
+  if (researchTasks.includes(taskName.toLowerCase())) {
+    return (target, params) => {
+      // Find the patent by name
+      const patent = patents.find(p => p.name.toLowerCase() === taskName.toLowerCase());
+      if (patent) {
+        // Apply benefits upon completion
+        applyPatentBenefits(patent);
+        patent.completed = true; // Mark as completed
+        addConsoleMessage(`Research on ${patent.name} completed. Benefits applied.`);
+        updatePatentsList(); // Refresh the patents list
+      } else {
+        console.warn(`Patent not found for task: ${taskName}`);
+      }
+    };
+  }
+
   switch (taskName.toLowerCase()) {
     case 'building & maintenance':
       return (target, params) => {
