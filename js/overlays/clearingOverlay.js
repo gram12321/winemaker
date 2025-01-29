@@ -26,7 +26,7 @@ function createClearingOverlayHTML(farmland) {
                             <label class="form-check-label ${!farmland.plantedResourceName ? 'text-muted' : ''}" for="remove-vines">
                                 Vine Replanting ${!farmland.plantedResourceName ? '(No vines planted)' : ''}
                             </label>
-                            <div class="slider-container mt-2 ${!farmland.plantedResourceName ? 'd-none' : ''}">
+                            <div class="slider-container mt-2 ${!farmland.plantedResourceName ? 'd-none' : ''}" id="replanting-slider-container">
                                 <div class="d-flex align-items-center">
                                     <span class="mr-2">Low</span>
                                     <input type="range" class="custom-range" id="replanting-slider" 
@@ -51,35 +51,17 @@ function createClearingOverlayHTML(farmland) {
                         <div class="form-check mb-3">
                             <input type="checkbox" class="form-check-input" id="soil-amendment">
                             <label class="form-check-label" for="soil-amendment">Soil Amendment</label>
-                            <div class="slider-container mt-2 d-none" id="amendment-slider-container">
+                            <div class="slider-container mt-2 d-none" id="amendment-method-container">
                                 <div class="d-flex align-items-center">
                                     <span class="mr-2">Synthetic</span>
-                                    <input type="range" class="custom-range" id="amendment-slider" 
+                                    <input type="range" class="custom-range" id="amendment-method-slider" 
                                         min="0" max="1" step="1" value="1">
                                     <span class="ml-2">Organic</span>
                                 </div>
                                 <div class="text-center">
-                                    <div>Method: <span id="amendment-value">Organic</span></div>
+                                    <div>Method: <span id="amendment-method-value">Organic</span></div>
                                     <div class="text-muted">Current Status: ${farmland.conventional} (${farmland.organicYears}/3 years organic)</div>
                                 </div>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="soil-amendment-section mb-3">
-                            <label class="form-label">Soil Amendment:</label>
-                            <div class="form-check">
-                                <input type="radio" class="form-check-input" name="amendment-type" id="organic" value="organic">
-                                <label class="form-check-label" for="organic">
-                                    Organic Amendment 
-                                    <small class="text-muted">(Progress to Ecological: ${farmland.organicYears}/3 years)</small>
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input type="radio" class="form-check-input" name="amendment-type" id="synthetic" value="synthetic">
-                                <label class="form-check-label" for="synthetic">
-                                    Synthetic Amendment
-                                    <small class="text-muted">(Resets Ecological progress)</small>
-                                </label>
                             </div>
                         </div>
                     </div>
@@ -159,7 +141,7 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
         // Auto-check the vine replanting checkbox when slider is moved
         if (!removeVinesCheckbox.checked && !removeVinesCheckbox.disabled) {
             removeVinesCheckbox.checked = true;
-            const sliderContainer = overlayContainer.querySelector('.slider-container');
+            const sliderContainer = overlayContainer.querySelector('#replanting-slider-container');
             sliderContainer.style.display = 'block';
         }
         
@@ -176,7 +158,7 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
 
     // Show/hide slider when vine replanting is checked/unchecked
     removeVinesCheckbox.addEventListener('change', (e) => {
-        const sliderContainer = overlayContainer.querySelector('.slider-container');
+        const sliderContainer = overlayContainer.querySelector('#replanting-slider-container');
         sliderContainer.style.display = e.target.checked ? 'block' : 'none';
         updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider, farmland);
     });
@@ -191,27 +173,23 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
     setupClearButton(overlayContainer, farmland, checkboxes, replantingSlider, onClearCallback);
     setupCloseButton(overlayContainer);
 
-    // Add radio button event listeners
-    const amendmentRadios = overlayContainer.querySelectorAll('input[name="amendment-type"]');
-    amendmentRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-            updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider, farmland);
-        });
-    });
-
     // Add soil amendment checkbox and slider handlers
     const soilAmendmentCheckbox = overlayContainer.querySelector('#soil-amendment');
-    const amendmentSlider = overlayContainer.querySelector('#amendment-slider');
-    const amendmentValue = overlayContainer.querySelector('#amendment-value');
-    const sliderContainer = overlayContainer.querySelector('#amendment-slider-container');
+    const amendmentMethodSlider = overlayContainer.querySelector('#amendment-method-slider');
+    const amendmentMethodValue = overlayContainer.querySelector('#amendment-method-value');
+    const amendmentMethodContainer = overlayContainer.querySelector('#amendment-method-container');
 
     soilAmendmentCheckbox.addEventListener('change', (e) => {
-        sliderContainer.style.display = e.target.checked ? 'block' : 'none';
+        if (amendmentMethodContainer) {
+            amendmentMethodContainer.classList.toggle('d-none', !e.target.checked);
+        }
         updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider, farmland);
     });
 
-    amendmentSlider.addEventListener('input', () => {
-        amendmentValue.textContent = amendmentSlider.value === "1" ? "Organic" : "Synthetic";
+    amendmentMethodSlider?.addEventListener('input', () => {
+        if (amendmentMethodValue) {
+            amendmentMethodValue.textContent = amendmentMethodSlider.value === "1" ? "Organic" : "Synthetic";
+        }
         updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider, farmland);
     });
 }
@@ -356,24 +334,24 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
             }
         });
 
-        const organicAmendment = overlayContainer.querySelector('#organic');
-        const syntheticAmendment = overlayContainer.querySelector('#synthetic');
+        // Add soil amendment health improvement
+        const amendmentMethodSlider = overlayContainer.querySelector('#amendment-method-slider');
+        const soilAmendmentCheckbox = overlayContainer.querySelector('#soil-amendment');
+        if (soilAmendmentCheckbox?.checked && amendmentMethodSlider) {
+            const isOrganic = amendmentMethodSlider.value === "1";
+            totalHealthImprovement += healthImprovementPerTask; // Add health improvement for soil amendment
+        }
 
-        // Update conventional status and organic years
+        // Create initial updates object with base properties
         let updates = {
-            canBeCleared: 'Not ready',
-            farmlandHealth: newHealth
+            canBeCleared: 'Not ready'
         };
 
-        if (organicAmendment && organicAmendment.checked) {
-            updates.organicYears = (farmland.organicYears || 0) + 1;
-            if (updates.organicYears >= 3) {
-                updates.conventional = 'Ecological';
-                addConsoleMessage(`${getFlagIconHTML(farmland.country)} ${farmland.name} is now certified Ecological!`);
-            }
-        } else if (syntheticAmendment && syntheticAmendment.checked) {
-            updates.conventional = 'Conventional';
-            updates.organicYears = 0;
+        // Check soil amendment method and update conventional status only
+        if (soilAmendmentCheckbox?.checked && amendmentMethodSlider) {
+            const isOrganic = amendmentMethodSlider.value === "1";
+            updates.conventional = isOrganic ? 'Non-Conventional' : 'Conventional';
+            // Remove organicYears update - will be handled by yearly update
         }
 
         taskManager.addProgressiveTask(
@@ -381,22 +359,18 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
             TaskType.field,
             totalWork,
             (target, progress, params) => {
-                // This callback runs on progress updates
                 const percentComplete = Math.floor(progress * 100);
                 addConsoleMessage(`Clearing ${getFlagIconHTML(target.country)} ${target.name}: ${percentComplete}% complete...`, true);
-                    const vineReplanting = selectedTasks.find(task => task.id === 'remove-vines');
 
                 if (progress >= 1) {
                     // Calculate new health value, capped at 1.0
                     const newHealth = Math.min(1.0, target.farmlandHealth + totalHealthImprovement);
                     const actualImprovement = newHealth - target.farmlandHealth;
                     
-                    // Calculate new vineage if vine replanting was selected
-                    let updates = {
-                        canBeCleared: 'Not ready',
-                        farmlandHealth: newHealth
-                    };
+                    // Add health to updates object
+                    updates.farmlandHealth = newHealth;
 
+                    // Add vineage to updates if vine replanting was selected
                     const vineReplanting = selectedTasks.find(task => task.id === 'remove-vines');
                     if (vineReplanting) {
                         const reductionFactor = parseInt(replantingSlider.value) / 100;
@@ -404,13 +378,16 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
                         updates.vineAge = parseFloat(newVineage);
                     }
                     
-                    // Update farmland
+                    // Update farmland with all accumulated changes
                     updateFarmland(target.id, updates);
 
                     // Final message
                     let message = `Clearing of ${getFlagIconHTML(target.country)} ${target.name} is done. Farmland health was improved by ${formatNumber(actualImprovement * 100)}%`;
                     if (vineReplanting) {
                         message += `. Vineage adjusted to ${updates.vineAge} years`;
+                    }
+                    if (updates.conventional === 'Ecological') {
+                        message += `. Field is now certified Ecological!`;
                     }
                     addConsoleMessage(message);
                     displayFarmland();

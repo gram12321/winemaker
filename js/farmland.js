@@ -41,7 +41,13 @@ export function farmlandYield(farmland) {
         const baseYieldPerAcre = 2400; // About 2.4 tons per acre
         const densityModifier = farmland.density / 5000; // Removed cap, baseline at 5000
         const qualityMultiplier = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
-        const expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor * densityModifier;
+        let expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor * densityModifier;
+        
+        // Apply bonus multiplier if conventional
+        if (farmland.conventional === 'Conventional') {
+            expectedYield *= 1.1;
+        }
+
         return expectedYield;
     }
     return 0;

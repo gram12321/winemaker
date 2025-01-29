@@ -157,9 +157,28 @@ export function updateNewYear(farmlands) {
     farmlands.forEach(field => {
         if (field.plantedResourceName) {
             field.vineAge += 1;
-            // Remove the status change from here since it's handled in updateFieldStatuses
-            // Only update other annual properties
+            
+            // Handle organic years progression
+            if (field.conventional === 'Non-Conventional' || field.conventional === 'Ecological') {
+                field.organicYears = (field.organicYears || 0) + 1;
+                
+                // Check if field qualifies for Ecological status
+                if (field.conventional === 'Non-Conventional' && field.organicYears >= 3) {
+                    field.conventional = 'Ecological';
+                    addConsoleMessage(`${getFlagIconHTML(field.country)} ${field.name} is now certified Ecological after ${field.organicYears} years of organic farming!`);
+                }
+
+                // Add bonus to farmland health
+                field.farmlandHealth = Math.min(1.0, field.farmlandHealth + 0.05);
+            }
         }
+
+        // Reset organic years if conventional
+        if (field.conventional === 'Conventional') {
+            field.organicYears = 0;
+        }
+        
+        // Update other annual properties
         field.landvalue = calculateLandvalue(field.country, field.region, field.altitude, field.aspect);
         field.farmlandPrestige = calculateFarmlandPrestige(field);
         field.annualYieldFactor = (0.5 + Math.random()) * 1.5;
