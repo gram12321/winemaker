@@ -22,10 +22,22 @@ function createClearingOverlayHTML(farmland) {
                     <div class="clearing-options">
                         <div class="form-check mb-3">
                             <input type="checkbox" class="form-check-input" id="remove-vines" 
-                                ${!farmland.plantedResourceName ? 'disabled' : 'checked onclick="return false;"'}>
+                                ${!farmland.plantedResourceName ? 'disabled' : ''}>
                             <label class="form-check-label ${!farmland.plantedResourceName ? 'text-muted' : ''}" for="remove-vines">
-                                Removal of old Vines ${!farmland.plantedResourceName ? '(No vines planted)' : '(Required)'}
+                                Vine Replanting ${!farmland.plantedResourceName ? '(No vines planted)' : ''}
                             </label>
+                            <div class="slider-container mt-2 ${!farmland.plantedResourceName ? 'd-none' : ''}">
+                                <div class="d-flex align-items-center">
+                                    <span class="mr-2">Low</span>
+                                    <input type="range" class="custom-range" id="replanting-slider" 
+                                        min="0" max="100" step="1" value="100" 
+                                        ${!farmland.plantedResourceName ? 'disabled' : ''}>
+                                    <span class="ml-2">High</span>
+                                </div>
+                                <div class="text-center">
+                                    Replanting intensity: <span id="replanting-value">100</span>%
+                                </div>
+                            </div>
                         </div>
                         <div class="form-check mb-3">
                             <input type="checkbox" class="form-check-input" id="clear-vegetation">
@@ -68,63 +80,88 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
     const totalWorkSpan = overlayContainer.querySelector('#total-work');
     const healthBar = overlayContainer.querySelector('.health-bar');
     const currentHealth = farmland.farmlandHealth;
+    const replantingSlider = overlayContainer.querySelector('#replanting-slider');
+    const replantingValue = overlayContainer.querySelector('#replanting-value');
+    const removeVinesCheckbox = overlayContainer.querySelector('#remove-vines');
 
-    // Always run initial calculation to account for default checked vine removal
-    updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth);
-    
-    // Only add change listeners to non-vine-removal checkboxes
+    // Handle slider updates
+    replantingSlider.addEventListener('input', () => {
+        replantingValue.textContent = replantingSlider.value;
+        updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider);
+    });
+
+    // Show/hide slider when vine replanting is checked/unchecked
+    removeVinesCheckbox.addEventListener('change', (e) => {
+        const sliderContainer = overlayContainer.querySelector('.slider-container');
+        sliderContainer.style.display = e.target.checked ? 'block' : 'none';
+        updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider);
+    });
+
     checkboxes.forEach(checkbox => {
         if (checkbox.id !== 'remove-vines') {
-            checkbox.addEventListener('change', () => updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth));
+            checkbox.addEventListener('change', () => 
+                updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider));
         }
     });
 
-    setupClearButton(overlayContainer, farmland, checkboxes, onClearCallback);
+    setupClearButton(overlayContainer, farmland, checkboxes, replantingSlider, onClearCallback);
     setupCloseButton(overlayContainer);
 }
 
-function updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth) {
-    const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-    const totalWork = selectedCount * 100;
+function updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider) {
+    const selectedTasks = Array.from(checkboxes).filter(cb => cb.checked);
+    const totalWork = selectedTasks.length * 100;
 
-    // Calculate health improvement per task
+    // Calculate health improvement
     const healthImprovementPerTask = 0.17; // 17% per task
-    const totalHealthImprovement = selectedCount * healthImprovementPerTask;
+    let totalHealthImprovement = 0;
+
+    selectedTasks.forEach(task => {
+        if (task.id === 'remove-vines') {
+            // Apply slider percentage to vine replanting health improvement
+            const sliderPercentage = parseInt(replantingSlider.value) / 100;
+            totalHealthImprovement += healthImprovementPerTask * sliderPercentage;
+        } else {
+            totalHealthImprovement += healthImprovementPerTask;
+        }
+    });
+
     const newHealth = Math.min(1.0, currentHealth + totalHealthImprovement);
 
+    // Update displays
     if (totalWorkSpan) totalWorkSpan.textContent = totalWork;
+    updateHealthBarDisplay(healthBar, currentHealth, newHealth);
+}
 
-    // Update health bar visualization
-    if (healthBar) {
-        const currentHealthBar = healthBar.querySelector('.health-bar-current');
-        const improvementBar = healthBar.querySelector('.health-bar-improvement');
-        const currentHealthSpan = healthBar.parentElement.querySelector('.current-health');
-        const improvementSpan = healthBar.querySelector('.health-improvement');
+function updateHealthBarDisplay(healthBar, currentHealth, newHealth) {
+    const currentHealthBar = healthBar.querySelector('.health-bar-current');
+    const improvementBar = healthBar.querySelector('.health-bar-improvement');
+    const currentHealthSpan = healthBar.parentElement.querySelector('.current-health');
+    const improvementSpan = healthBar.querySelector('.health-improvement');
 
-        // Update the current health display
-        if (currentHealthSpan) {
-            currentHealthSpan.textContent = `${formatNumber(newHealth * 100)}%`;
-        }
+    // Update the current health display
+    if (currentHealthSpan) {
+        currentHealthSpan.textContent = `${formatNumber(newHealth * 100)}%`;
+    }
 
-        // Update the health bars
-        if (currentHealthBar) {
-            currentHealthBar.style.width = `${currentHealth * 100}%`;
-        }
-        if (improvementBar) {
-            improvementBar.style.width = `${(newHealth - currentHealth) * 100}%`;
-            improvementBar.style.left = `${currentHealth * 100}%`;
-        }
+    // Update the health bars
+    if (currentHealthBar) {
+        currentHealthBar.style.width = `${currentHealth * 100}%`;
+    }
+    if (improvementBar) {
+        improvementBar.style.width = `${(newHealth - currentHealth) * 100}%`;
+        improvementBar.style.left = `${currentHealth * 100}%`;
+    }
 
-        // Update the improvement text
-        if (improvementSpan) {
-            improvementSpan.textContent = totalHealthImprovement > 0 
-                ? `+${formatNumber(totalHealthImprovement * 100)}%` 
-                : '';
-        }
+    // Update the improvement text
+    if (improvementSpan) {
+        improvementSpan.textContent = totalHealthImprovement > 0 
+            ? `+${formatNumber(totalHealthImprovement * 100)}%` 
+            : '';
     }
 }
 
-function setupClearButton(overlayContainer, farmland, checkboxes, onClearCallback) {
+function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlider, onClearCallback) {
     const clearButton = overlayContainer.querySelector('.clear-btn');
     clearButton.addEventListener('click', () => {
         const selectedTasks = Array.from(checkboxes).filter(cb => cb.checked);
@@ -134,8 +171,17 @@ function setupClearButton(overlayContainer, farmland, checkboxes, onClearCallbac
         }
 
         const totalWork = selectedTasks.length * 100;
-        const healthImprovementPerTask = 0.5 / 3; // Total improvement (0.5) divided by total possible tasks (3)
-        const totalHealthImprovement = selectedTasks.length * healthImprovementPerTask;
+        const healthImprovementPerTask = 0.5 / 3;
+        let totalHealthImprovement = 0;
+
+        selectedTasks.forEach(task => {
+            if (task.id === 'remove-vines') {
+                const sliderPercentage = parseInt(replantingSlider.value) / 100;
+                totalHealthImprovement += healthImprovementPerTask * sliderPercentage;
+            } else {
+                totalHealthImprovement += healthImprovementPerTask;
+            }
+        });
 
         taskManager.addProgressiveTask(
             'Clearing',
@@ -153,8 +199,6 @@ function setupClearButton(overlayContainer, farmland, checkboxes, onClearCallbac
                     
                     // Update farmland
                     updateFarmland(target.id, {
-                        plantedResourceName: null,
-                        status: 'Ready for planting',
                         canBeCleared: 'Not ready',
                         farmlandHealth: newHealth
                     });
