@@ -391,7 +391,7 @@ function crushing(overlayContainer) {
 
     // Initiate the crushing task using the taskManager system
     const taskName = `Crushing`;
-    const totalWork = mustAmount;
+    const totalWork = mustAmount/100;
 
     taskManager.addProgressiveTask(
         taskName,

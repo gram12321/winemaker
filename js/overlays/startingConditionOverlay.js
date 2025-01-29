@@ -7,7 +7,7 @@ const startingConditions = {
     'France': {
         name: 'France',
         description: 'Start your winery in the beautiful French countryside',
-        startingMoney: 1000000,
+        startingMoney: 7000000,
         flagCode: 'fr',
         familyPicture: 'pierrecamille.webp',
         startingFarmland: {
@@ -18,7 +18,7 @@ const startingConditions = {
     'Italy': {
         name: 'Italy',
         description: 'Begin your journey in the rolling hills of Italy',
-        startingMoney: 5000000,
+        startingMoney: 50000000,
         flagCode: 'it',
         familyPicture: 'robertobianca.webp'
     },
