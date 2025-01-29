@@ -1,5 +1,7 @@
 import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
+import { patents, startPatentTask, getBenefitsDescription } from '/js/research.js';
+import { getMoney } from '/js/company.js';
 
 export function showFinanceOverlay() {
     const overlay = showMainViewOverlay(createFinanceOverlayHTML());
@@ -90,11 +92,32 @@ function createFinanceOverlayHTML() {
 
                 <section id="research-patents-section" class="finance-section" style="display: none;">
                     <h2 class="h4 mb-4">Research and Patents</h2>
-                    <p>Details about research and patents will be displayed here.</p>
+                    <div id="patents-list" class="patents-list">
+                        ${createPatentsListHTML()}
+                    </div>
                 </section>
             </div>
         </div>
     `;
+}
+
+function createPatentsListHTML() {
+    return patents.map(patent => {
+        const money = getMoney();
+        const canResearch = money >= patent.requirements.money;
+        const statusClass = patent.completed ? 'research-completed' : (canResearch ? 'research-available' : 'research-unavailable');
+        const buttonText = patent.completed ? 'Completed' : 'Start Research';
+        const benefitsDescription = getBenefitsDescription(patent.benefits);
+        return `
+            <div class="patent-item ${statusClass}" data-patent-id="${patent.id}">
+                <h3>${patent.name}</h3>
+                <p>${patent.description}</p>
+                <p>Benefits: ${benefitsDescription}</p>
+                <p>Requirements: €${patent.requirements.money}</p>
+                <button class="btn btn-primary start-research-btn" ${canResearch && !patent.completed ? '' : 'disabled'}>${buttonText}</button>
+            </div>
+        `;
+    }).join('');
 }
 
 function setupFinanceEventListeners(overlay) {
@@ -122,6 +145,25 @@ function setupFinanceEventListeners(overlay) {
         }
     });
 
+    // Add event listeners for starting research
+    const researchSection = overlay.querySelector('#research-patents-section');
+    researchSection.addEventListener('click', (e) => {
+        if (e.target.matches('.start-research-btn')) {
+            const patentId = parseInt(e.target.closest('.patent-item').dataset.patentId, 10);
+            startPatentTask(patentId);
+            // Refresh the patents list to reflect the new status
+            const patentsList = researchSection.querySelector('#patents-list');
+            patentsList.innerHTML = createPatentsListHTML();
+        }
+    });
+
     loadCashFlow();
     updateIncomeStatement();
+}
+
+export function updatePatentsList() {
+    const patentsList = document.querySelector('#patents-list');
+    if (patentsList) {
+        patentsList.innerHTML = createPatentsListHTML();
+    }
 }

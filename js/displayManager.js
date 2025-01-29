@@ -8,6 +8,7 @@ import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.j
 import { updateVineyardTable } from './overlays/mainpages/vineyardoverlay.js';
 import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
 import { loadCashFlow, updateIncomeStatement } from './finance.js';
+import { updatePatentsList } from './overlays/mainpages/financeoverlay.js';
 
 // Central function to update all displays
 export function updateAllDisplays() {
@@ -70,6 +71,11 @@ export function updateAllDisplays() {
         }
         if (document.getElementById('weekly-income') && typeof updateIncomeStatement === 'function') {
             updateIncomeStatement();
+        }
+
+        // Update patents list
+        if (document.getElementById('patents-list') && typeof updatePatentsList === 'function') {
+            updatePatentsList();
         }
     } catch (error) {
         console.debug('Some display functions are not available in current context:', error);
