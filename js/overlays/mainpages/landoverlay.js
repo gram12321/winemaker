@@ -8,6 +8,7 @@ import { showPlantingOverlay } from '/js/overlays/plantingOverlay.js';
 import { showResourceInfoOverlay } from '/js/overlays/resourceInfoOverlay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import { showClearingOverlay } from '../clearingOverlay.js';
+import { showUprootOverlay } from '../uprootOverlay.js';  // Add this import
 
 export function showLandOverlay() {
     const overlay = showMainViewOverlay(createLandOverlayHTML());
@@ -87,6 +88,10 @@ function createFarmlandRow(farmland, selectedUnit) {
                              farmland.canBeCleared === 'Ready to be cleared' && // Only allow clearing if the farmland is ready IE After clearing there needs to be planted before clearing again
                              (!farmland.plantedResourceName || (farmland.plantedResourceName && farmland.vineAge > 0)); // No clearing first season after planting
     
+    const isUprootAllowed = !taskManager.isTargetBusy(farmland) && 
+                           farmland.plantedResourceName && 
+                           farmland.status !== 'Planting...';
+    
     const formattedSize = landSize < 10 ? landSize.toFixed(2) : formatNumber(landSize);
     const prestigeColorClass = getColorClass(farmland.farmlandPrestige || 0);
     const healthColorClass = getColorClass(farmland.farmlandHealth || 0);
@@ -109,6 +114,9 @@ function createFarmlandRow(farmland, selectedUnit) {
           <button class="btn btn-warning btn-sm clear-btn" data-farmland-id="${farmland.id}" ${!isClearingAllowed ? 'disabled' : ''}>
             Clear
           </button>
+          <button class="btn btn-danger btn-sm uproot-btn" data-farmland-id="${farmland.id}" ${!isUprootAllowed ? 'disabled' : ''}>
+            Uproot
+          </button>
         </td>
     `;
     return row;
@@ -117,6 +125,7 @@ function createFarmlandRow(farmland, selectedUnit) {
 function setupFarmlandEventListeners(row, farmland) {
     const plantBtn = row.querySelector('.plant-btn');
     const clearBtn = row.querySelector('.clear-btn');
+    const uprootBtn = row.querySelector('.uproot-btn');
     const farmlandCells = row.querySelectorAll('td:not(:last-child):not(.crop-column)');
     const cropColumn = row.querySelector('.crop-column');
 
@@ -126,6 +135,10 @@ function setupFarmlandEventListeners(row, farmland) {
 
     clearBtn.addEventListener('click', () => {
         showClearingOverlay(farmland, () => displayFarmland());
+    });
+
+    uprootBtn.addEventListener('click', () => {
+        showUprootOverlay(farmland, () => displayFarmland());
     });
 
     cropColumn.addEventListener('click', (event) => {

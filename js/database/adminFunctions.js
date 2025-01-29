@@ -703,6 +703,18 @@ function getTaskCallback(taskName, taskType) {
       return (target, progress, params) => {
         performFermentation(target, progress, params);
       };
+    case 'uprooting':
+      return (target, progress) => {
+        if (progress >= 1) {
+          updateFarmland(target.id, {
+            plantedResourceName: null,
+            status: 'Ready for planting',
+            canBeCleared: 'Not ready',
+            density: null
+          });
+          displayFarmland();
+        }
+      };
     // Add more cases for other task types
     default:
       return () => console.warn(`No callback found for task: ${taskName}`);
