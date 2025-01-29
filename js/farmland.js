@@ -24,6 +24,8 @@ class Farmland {
     this.canBeCleared = 'Ready to be cleared'; // State regarding field clearing
     this.annualYieldFactor = (0.75 + Math.random()) ; // Random yield factor calculation
     this.annualQualityFactor = Math.random(); // Random quality factor calculation
+    this.conventional = 'Non-Conventional';  // Can be: 'Conventional', 'Non-Conventional', or 'Ecological'
+    this.organicYears = 0;  // Counter for years using organic methods
   }
 }
 

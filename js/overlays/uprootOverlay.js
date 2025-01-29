@@ -44,7 +44,7 @@ function createUprootOverlayHTML(farmland) {
                                 <tbody>
                                     <tr>
                                         <td>Field Size:</td>
-                                        <td><span id="field-size">${formatNumber(farmland.acres)}</span> acres</td>
+                                        <td><span id="field-size">${farmland.acres.toFixed(2)}</span> acres</td>
                                     </tr>
                                     <tr>
                                         <td>Base Work per Acre:</td>
@@ -86,7 +86,7 @@ function setupUprootEventListeners(overlayContainer, farmland, onUprootCallback)
     
     // Calculate total work based on acres and density
     const baseWorkPerAcre = 50;  // Base work units per acre
-    const densityFactor = farmland.density / 1000;  // Density factor (e.g., 5000 vines/acre = 50x multiplier)
+    const densityFactor = farmland.density / 1000;  // Density factor (e.g., 5000 vines/acre = 5x multiplier)
     const totalWork = Math.ceil(farmland.acres * (baseWorkPerAcre * (densityFactor)));  // Total work units
 
     // Update all work-related displays

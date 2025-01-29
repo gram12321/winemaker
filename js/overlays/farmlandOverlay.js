@@ -113,6 +113,10 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
               <tr><td>Land Value</td><td>€${formatNumber(landValue)}</td></tr>
               <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
               <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
+              <tr><td>Farming Method</td><td>${farmlandData.conventional} ${farmlandData.conventional === 'Non-Conventional' ? 
+                `(${farmlandData.organicYears}/3 years organic)` : 
+                farmlandData.conventional === 'Ecological' ? 
+                '(Certified)' : ''}</td></tr>
               <tr><td>Farmland Prestige</td><td class="${prestigeColorClass} overlay-tooltip" title="${prestigeTooltip}">${formatNumber(farmlandPrestige * 100)}%</td></tr>
               <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
             </tbody>
