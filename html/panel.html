@@ -1,18 +1,19 @@
-
 <!-- panel.html -->
 <div id="panel-wrapper" class="bg-dark text-white">
   <button class="toggle-panel" title="Toggle Panel">
     <span>▶</span>
   </button>
-  <div class="panel">
-    <div class="panel-content">
-      <h5 class="text-uppercase p-3">Task Panel</h5>
-      <hr class="bg-secondary mx-3">
-      <div id="task-list" class="d-flex flex-column px-3">
+  <div class="panel p-3">
+    <h5 class="text-uppercase">Task Panel</h5>
+    <hr class="bg-secondary">
+    <div id="task-list" class="d-flex flex-column">
+
       <!-- New tasks will be dynamically added here -->
     </div>
   </div>
 </div>
+
+
 
 <script>
   const togglePanelButton = document.querySelector('.toggle-panel');

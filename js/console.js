@@ -67,7 +67,9 @@ export function initializeConsole() {
         return fetch('/html/consolePanel.html')
             .then(response => response.text())
             .then(data => {
-                document.body.insertAdjacentHTML('beforeend', data);
+                const consoleContainer = document.createElement('div');
+                consoleContainer.innerHTML = data;
+                document.body.appendChild(consoleContainer);
 
                 // Initialize console to display initial messages
                 updateConsoleOutputs();
