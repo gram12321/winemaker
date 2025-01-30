@@ -328,6 +328,6 @@ export function upgradeBuilding(buildingName) {
       }
     },
     buildingName,
-    { upgradeCost }
+    { buildingName, upgradeCost } // Ensure buildingName is passed in params
   );
 }
