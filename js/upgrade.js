@@ -35,7 +35,7 @@ export const upgrades = [
   {
     id: 2,
     name: "Ecological Certification",
-    upgradeType: "Decisions",
+    upgradeType: "Projects",
     description: "Provides certification of ecological farming.",
     requirements: { 
       money: 5000000
@@ -132,6 +132,31 @@ export function getBenefitsDescription(benefits) {
   }
   // Add more benefit descriptions as needed
   return descriptions.join(', ');
+}
+
+// Function to categorize upgrades
+export function categorizeUpgrades() {
+  const research = [];
+  const projects = [];
+  const upgradesList = [];
+
+  upgrades.forEach(upgrade => {
+    switch (upgrade.upgradeType) {
+      case 'Research':
+        research.push(upgrade);
+        break;
+      case 'Projects':
+        projects.push(upgrade);
+        break;
+      case 'Upgrade':
+        upgradesList.push(upgrade);
+        break;
+      default:
+        upgradesList.push(upgrade);
+    }
+  });
+
+  return { research, projects, upgradesList };
 }
 
 

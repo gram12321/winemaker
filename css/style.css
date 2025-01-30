@@ -554,6 +554,7 @@ input[type="radio"]:hover {
     border-radius: var(--radius-md);
     background-color: var(--color-background);
     transition: all 0.3s ease;
+    margin-bottom: 10px; /* Add spacing between items */
 }
 
 .patent-item.research-available {
@@ -581,5 +582,18 @@ input[type="radio"]:hover {
 
 .patent-item .start-research-btn {
     margin-top: 0.5rem;
+}
+
+/* Grid Layout for Upgrades */
+.upgrade-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.upgrade-grid-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px; /* Add spacing between items */
 }
 

@@ -2,10 +2,12 @@ import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import { upgrades, startUpgradeTask, getBenefitsDescription } from '/js/upgrade.js';
 import { getMoney } from '/js/company.js';
+import { categorizeUpgrades } from '../../upgrade.js';
 
 export function showFinanceOverlay() {
     const overlay = showMainViewOverlay(createFinanceOverlayHTML());
     setupFinanceEventListeners(overlay);
+    updateUpgradesList();
 }
 
 function createFinanceOverlayHTML() {
@@ -92,8 +94,19 @@ function createFinanceOverlayHTML() {
 
                 <section id="research-patents-section" class="finance-section" style="display: none;">
                     <h2 class="h4 mb-4">Research and Patents</h2>
-                    <div id="patents-list" class="patents-list">
-                        ${createPatentsListHTML()}
+                    <div class="upgrade-grid-container">
+                        <div class="upgrade-grid-item">
+                            <h2>Research</h2>
+                            <div id="research-list"></div>
+                        </div>
+                        <div class="upgrade-grid-item">
+                            <h2>Projects</h2>
+                            <div id="projects-list"></div>
+                        </div>
+                        <div class="upgrade-grid-item">
+                            <h2>Upgrades</h2>
+                            <div id="upgrades-list"></div>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -101,7 +114,7 @@ function createFinanceOverlayHTML() {
     `;
 }
 
-function createPatentsListHTML() {
+function createPatentsListHTML(upgrades) {
     return upgrades.map(upgrade => {
         const money = getMoney();
         const canResearch = money >= upgrade.requirements.money;
@@ -152,8 +165,7 @@ function setupFinanceEventListeners(overlay) {
             const upgradeId = parseInt(e.target.closest('.patent-item').dataset.patentId, 10);
             startUpgradeTask(upgradeId);
             // Refresh the patents list to reflect the new status
-            const patentsList = researchSection.querySelector('#patents-list');
-            patentsList.innerHTML = createPatentsListHTML();
+            updateUpgradesList();
         }
     });
 
@@ -162,8 +174,9 @@ function setupFinanceEventListeners(overlay) {
 }
 
 export function updateUpgradesList() {
-    const patentsList = document.querySelector('#patents-list');
-    if (patentsList) {
-        patentsList.innerHTML = createPatentsListHTML();
-    }
+    const { research, projects, upgradesList } = categorizeUpgrades();
+
+    document.getElementById('research-list').innerHTML = createPatentsListHTML(research);
+    document.getElementById('projects-list').innerHTML = createPatentsListHTML(projects);
+    document.getElementById('upgrades-list').innerHTML = createPatentsListHTML(upgradesList);
 }
