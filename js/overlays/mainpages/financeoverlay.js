@@ -18,7 +18,7 @@ function createFinanceOverlayHTML() {
             <div class="btn-group mb-4">
                 <button class="btn btn-outline-primary active" data-view="income-balance">Income/Balance</button>
                 <button class="btn btn-outline-primary" data-view="cash-flow">Cash Flow</button>
-                <button class="btn btn-outline-primary" data-view="research-patents">Research and Patents</button>
+                <button class="btn btn-outline-primary" data-view="research-upgrades">Research and Upgrades</button>
             </div>
             
             <div class="finance-sections">
@@ -92,8 +92,8 @@ function createFinanceOverlayHTML() {
                     </div>
                 </section>
 
-                <section id="research-patents-section" class="finance-section" style="display: none;">
-                    <h2 class="h4 mb-4">Research and Patents</h2>
+                <section id="research-upgrades-section" class="finance-section" style="display: none;">
+                    <h2 class="h4 mb-4">Research and Upgrades</h2>
                     <div class="upgrade-grid-container">
                         <div class="upgrade-grid-item">
                             <h2>Research</h2>
@@ -114,23 +114,31 @@ function createFinanceOverlayHTML() {
     `;
 }
 
-function createPatentsListHTML(upgrades) {
+function createUpgradeListHTML(upgrades) {
     return upgrades.map(upgrade => {
         const money = getMoney();
-        const canResearch = money >= upgrade.requirements.money;
-        const statusClass = upgrade.completed ? 'research-completed' : (canResearch ? 'research-available' : 'research-unavailable');
-        const buttonText = upgrade.completed ? 'Completed' : 'Start Research';
+        const canUpgrade = money >= upgrade.requirements.money;
+        const statusClass = upgrade.completed ? 'upgrade-completed' : (canUpgrade ? 'upgrade-available' : 'upgrade-unavailable');
+        const buttonText = upgrade.completed ? 'Completed' : 'Start Upgrade';
         const benefitsDescription = getBenefitsDescription(upgrade.benefits);
         return `
-            <div class="patent-item ${statusClass}" data-patent-id="${upgrade.id}">
+            <div class="upgrade-item ${statusClass}" data-upgrade-id="${upgrade.id}">
                 <h3>${upgrade.name}</h3>
                 <p>${upgrade.description}</p>
                 <p>Benefits: ${benefitsDescription}</p>
                 <p>Requirements: €${upgrade.requirements.money}</p>
-                <button class="btn btn-primary start-research-btn" ${canResearch && !upgrade.completed ? '' : 'disabled'}>${buttonText}</button>
+                <button class="btn btn-primary start-upgrade-btn" ${canUpgrade && !upgrade.completed ? '' : 'disabled'}>${buttonText}</button>
             </div>
         `;
     }).join('');
+}
+
+export function updateUpgradesList() {
+    const { research, projects, upgradesList } = categorizeUpgrades();
+
+    document.getElementById('research-list').innerHTML = createUpgradeListHTML(research);
+    document.getElementById('projects-list').innerHTML = createUpgradeListHTML(projects);
+    document.getElementById('upgrades-list').innerHTML = createUpgradeListHTML(upgradesList);
 }
 
 function setupFinanceEventListeners(overlay) {
@@ -158,13 +166,13 @@ function setupFinanceEventListeners(overlay) {
         }
     });
 
-    // Add event listeners for starting research
-    const researchSection = overlay.querySelector('#research-patents-section');
-    researchSection.addEventListener('click', (e) => {
-        if (e.target.matches('.start-research-btn')) {
-            const upgradeId = parseInt(e.target.closest('.patent-item').dataset.patentId, 10);
+    // Add event listeners for starting upgrades
+    const upgradeSection = overlay.querySelector('#research-upgrades-section');
+    upgradeSection.addEventListener('click', (e) => {
+        if (e.target.matches('.start-upgrade-btn')) {
+            const upgradeId = parseInt(e.target.closest('.upgrade-item').dataset.upgradeId, 10);
             startUpgradeTask(upgradeId);
-            // Refresh the patents list to reflect the new status
+            // Refresh the upgrades list to reflect the new status
             updateUpgradesList();
         }
     });
@@ -173,10 +181,3 @@ function setupFinanceEventListeners(overlay) {
     updateIncomeStatement();
 }
 
-export function updateUpgradesList() {
-    const { research, projects, upgradesList } = categorizeUpgrades();
-
-    document.getElementById('research-list').innerHTML = createPatentsListHTML(research);
-    document.getElementById('projects-list').innerHTML = createPatentsListHTML(projects);
-    document.getElementById('upgrades-list').innerHTML = createPatentsListHTML(upgradesList);
-}
