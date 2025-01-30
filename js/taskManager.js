@@ -5,7 +5,6 @@ import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass } from './utils.js';
 import { bookkeeping, maintenanceBuildings } from './administration.js'; // Update this line
 
-
 // Define task types as constants
 export const TaskType = {
     field: 'Field',

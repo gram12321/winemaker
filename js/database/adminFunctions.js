@@ -11,8 +11,8 @@ import { Building, updateBuildingCards, updateBuildButtonStates } from '../build
 import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { setupStaffWagesRecurringTransaction } from '../staff.js';
-import { applyPatentBenefits, patents } from '../research.js'; // Import the centralized function
-import {updatePatentsList} from '../overlays/mainpages/financeoverlay.js'; // Import the centralized function
+import { updateUpgradesList } from '../overlays/mainpages/financeoverlay.js'; // Import the centralized function
+import { applyUpgradeBenefits, upgrades } from '../upgrade.js'; // Import the centralized function
 
 let teams = []; // In-memory storage for teams
 
@@ -53,7 +53,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('teams'); 
   localStorage.removeItem('panelCollapsed'); 
   localStorage.removeItem('sidebarCollapsed'); 
-  
+  localStorage.removeItem('upgrades'); // Clear upgrades data
   
   console.log("Local storage cleared.");
 }
@@ -220,6 +220,7 @@ async function loadExistingCompanyData(companyName) {
     localStorage.setItem('transactions', JSON.stringify(data.transactions || [])); // Load transactions
     localStorage.setItem('recurringTransactions', JSON.stringify(data.recurringTransactions || [])); // Load recurring transactions
     localStorage.setItem('activeTasks', JSON.stringify(data.activeTasks || [])); // Load active tasks
+    localStorage.setItem('upgrades', JSON.stringify(data.upgrades || [])); // Load upgrades
   }
 }
 
@@ -235,6 +236,7 @@ async function saveCompanyInfo() {
   const transactions = JSON.parse(localStorage.getItem('transactions')) || []; // Retrieve transactions
   const recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || []; // Retrieve recurring transactions
   const activeTasks = JSON.parse(localStorage.getItem('activeTasks')) || []; // Retrieve active tasks
+  const upgrades = JSON.parse(localStorage.getItem('upgrades')) || []; // Retrieve upgrades
   const prestigeHit = localStorage.getItem('prestigeHit');
   const calculatedPrestige = localStorage.getItem('calculatedPrestige');
 
@@ -257,6 +259,7 @@ async function saveCompanyInfo() {
       transactions, // Save transactions
       recurringTransactions, // Save recurring transactions
       activeTasks, // Save active tasks
+      upgrades, // Save upgrades
       prestigeHit,
       calculatedPrestige,
     });
@@ -402,6 +405,19 @@ export function loadBuildings() {
   const buildingsJSON = localStorage.getItem('buildings');
   if (buildingsJSON) {
     return JSON.parse(buildingsJSON);
+  }
+  return [];
+}
+
+// Functions to save and load upgrades from localStorage
+export function storeUpgrades(upgrades) {
+  localStorage.setItem('upgrades', JSON.stringify(upgrades));
+}
+
+export function loadUpgrades() {
+  const upgradesJSON = localStorage.getItem('upgrades');
+  if (upgradesJSON) {
+    return JSON.parse(upgradesJSON);
   }
   return [];
 }
@@ -634,25 +650,21 @@ export function loadTasks() {
 
 // Helper function to get the appropriate callback based on task name and type
 function getTaskCallback(taskName, taskType) {
-  const researchTasks = ['advanced irrigation', 'soil analysis']; // Add all research task names here
-
-  if (researchTasks.includes(taskName.toLowerCase())) {
-    return (target, params) => {
-      // Find the patent by name
-      const patent = patents.find(p => p.name.toLowerCase() === taskName.toLowerCase());
-      if (patent) {
-        // Apply benefits upon completion
-        applyPatentBenefits(patent);
-        patent.completed = true; // Mark as completed
-        addConsoleMessage(`Research on ${patent.name} completed. Benefits applied.`);
-        updatePatentsList(); // Refresh the patents list
-      } else {
-        console.warn(`Patent not found for task: ${taskName}`);
-      }
-    };
-  }
-
   switch (taskName.toLowerCase()) {
+    case 'upgrade':
+      return (target, params) => {
+        // Find the upgrade by name
+        const upgrade = upgrades.find(p => p.name.toLowerCase() === target.toLowerCase());
+        if (upgrade) {
+          // Apply benefits upon completion
+          applyUpgradeBenefits(upgrade);
+          upgrade.completed = true; // Mark as completed
+          addConsoleMessage(`Upgrade on ${upgrade.name} completed. Benefits applied.`);
+          updateUpgradesList(); // Refresh the upgrades list
+        } else {
+          console.warn(`Upgrade not found for task: ${target}`);
+        }
+      };
     case 'building & maintenance':
       return (target, params) => {
         if (params.buildingCost) {  // This is a new building task

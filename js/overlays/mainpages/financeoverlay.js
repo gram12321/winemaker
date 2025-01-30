@@ -1,6 +1,6 @@
 import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
-import { patents, startPatentTask, getBenefitsDescription } from '/js/research.js';
+import { upgrades, startUpgradeTask, getBenefitsDescription } from '/js/upgrade.js';
 import { getMoney } from '/js/company.js';
 
 export function showFinanceOverlay() {
@@ -102,19 +102,19 @@ function createFinanceOverlayHTML() {
 }
 
 function createPatentsListHTML() {
-    return patents.map(patent => {
+    return upgrades.map(upgrade => {
         const money = getMoney();
-        const canResearch = money >= patent.requirements.money;
-        const statusClass = patent.completed ? 'research-completed' : (canResearch ? 'research-available' : 'research-unavailable');
-        const buttonText = patent.completed ? 'Completed' : 'Start Research';
-        const benefitsDescription = getBenefitsDescription(patent.benefits);
+        const canResearch = money >= upgrade.requirements.money;
+        const statusClass = upgrade.completed ? 'research-completed' : (canResearch ? 'research-available' : 'research-unavailable');
+        const buttonText = upgrade.completed ? 'Completed' : 'Start Research';
+        const benefitsDescription = getBenefitsDescription(upgrade.benefits);
         return `
-            <div class="patent-item ${statusClass}" data-patent-id="${patent.id}">
-                <h3>${patent.name}</h3>
-                <p>${patent.description}</p>
+            <div class="patent-item ${statusClass}" data-patent-id="${upgrade.id}">
+                <h3>${upgrade.name}</h3>
+                <p>${upgrade.description}</p>
                 <p>Benefits: ${benefitsDescription}</p>
-                <p>Requirements: €${patent.requirements.money}</p>
-                <button class="btn btn-primary start-research-btn" ${canResearch && !patent.completed ? '' : 'disabled'}>${buttonText}</button>
+                <p>Requirements: €${upgrade.requirements.money}</p>
+                <button class="btn btn-primary start-research-btn" ${canResearch && !upgrade.completed ? '' : 'disabled'}>${buttonText}</button>
             </div>
         `;
     }).join('');
@@ -149,8 +149,8 @@ function setupFinanceEventListeners(overlay) {
     const researchSection = overlay.querySelector('#research-patents-section');
     researchSection.addEventListener('click', (e) => {
         if (e.target.matches('.start-research-btn')) {
-            const patentId = parseInt(e.target.closest('.patent-item').dataset.patentId, 10);
-            startPatentTask(patentId);
+            const upgradeId = parseInt(e.target.closest('.patent-item').dataset.patentId, 10);
+            startUpgradeTask(upgradeId);
             // Refresh the patents list to reflect the new status
             const patentsList = researchSection.querySelector('#patents-list');
             patentsList.innerHTML = createPatentsListHTML();
@@ -161,7 +161,7 @@ function setupFinanceEventListeners(overlay) {
     updateIncomeStatement();
 }
 
-export function updatePatentsList() {
+export function updateUpgradesList() {
     const patentsList = document.querySelector('#patents-list');
     if (patentsList) {
         patentsList.innerHTML = createPatentsListHTML();
