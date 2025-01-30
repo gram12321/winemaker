@@ -1,4 +1,4 @@
-import { storeCompanyName } from '../database/adminFunctions.js';
+import { storeCompanyName, checkCompanyExists, loadExistingCompanyData } from '../database/adminFunctions.js';
 import { getFlagIconHTML } from '../utils.js';
 import { generateFarmlandPreview } from '../farmland.js';
 
@@ -106,7 +106,14 @@ function updateFamilyPicture(condition) {
     `;
 }
 
-export function showStartingConditionOverlay(companyName) {
+export async function showStartingConditionOverlay(companyName) {
+    const companyExists = await checkCompanyExists(companyName);
+    if (companyExists) {
+        await loadExistingCompanyData(companyName);
+        window.location.href = 'html/game.html';
+        return;
+    }
+
     const overlay = document.getElementById('startingConditionOverlay');
     const optionsContainer = overlay.querySelector('.options-container');
     const mainContent = document.querySelector('.login-box');

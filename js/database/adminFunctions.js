@@ -763,6 +763,8 @@ export {
   clearLocalStorage,
   clearFirestore,
   loadInventory,
+  checkCompanyExists,
+  loadExistingCompanyData,
   saveInventory
 };
 
