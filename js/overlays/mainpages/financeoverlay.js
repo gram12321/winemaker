@@ -1,8 +1,9 @@
 import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
-import { upgrades, startUpgradeTask, getBenefitsDescription } from '/js/upgrade.js';
+import { startUpgradeTask, getBenefitsDescription } from '/js/upgrade.js';
 import { getMoney } from '/js/company.js';
 import { categorizeUpgrades } from '../../upgrade.js';
+import { getFarmlands } from '/js/database/adminFunctions.js';
 
 export function showFinanceOverlay() {
     const overlay = showMainViewOverlay(createFinanceOverlayHTML());
@@ -118,18 +119,38 @@ function createUpgradeListHTML(upgrades) {
     return upgrades.map(upgrade => {
         const money = getMoney();
         const canUpgrade = money >= upgrade.requirements.money;
-        const statusClass = upgrade.completed ? 'upgrade-completed' : (canUpgrade ? 'upgrade-available' : 'upgrade-unavailable');
-        const buttonText = upgrade.completed ? 'Completed' : 'Start Upgrade';
+        const farmlands = getFarmlands();
+        const farmlandsWithoutUpgrade = farmlands.filter(f => !f.upgrades || !f.upgrades.includes(upgrade.id));
+        const statusClass = upgrade.completed && farmlandsWithoutUpgrade.length === 0 ? 'upgrade-completed' : (canUpgrade ? 'upgrade-available' : 'upgrade-unavailable');
+        const buttonText = upgrade.completed && farmlandsWithoutUpgrade.length === 0 ? 'Completed' : 'Start Upgrade';
         const benefitsDescription = getBenefitsDescription(upgrade.benefits);
-        return `
-            <div class="upgrade-item ${statusClass}" data-upgrade-id="${upgrade.id}">
-                <h3>${upgrade.name}</h3>
-                <p>${upgrade.description}</p>
-                <p>Benefits: ${benefitsDescription}</p>
-                <p>Requirements: €${upgrade.requirements.money}</p>
-                <button class="btn btn-primary start-upgrade-btn" ${canUpgrade && !upgrade.completed ? '' : 'disabled'}>${buttonText}</button>
-            </div>
-        `;
+
+        if (upgrade.applicableTo === 'farmland') {
+            const farmlandOptions = farmlandsWithoutUpgrade.map(farmland => `<option value="${farmland.id}">${farmland.name}</option>`).join('');
+            return `
+                <div class="upgrade-item ${statusClass}" data-upgrade-id="${upgrade.id}">
+                    <h3>${upgrade.name}</h3>
+                    <p>${upgrade.description}</p>
+                    <p>Benefits: ${benefitsDescription}</p>
+                    <p>Requirements: €${upgrade.requirements.money}</p>
+                    <select class="form-control-sm farmland-select">
+                        <option value="">Select Farmland</option>
+                        ${farmlandOptions}
+                    </select>
+                    <button class="btn btn-primary start-upgrade-btn" ${canUpgrade && farmlandOptions ? '' : 'disabled'}>${buttonText}</button>
+                </div>
+            `;
+        } else {
+            return `
+                <div class="upgrade-item ${statusClass}" data-upgrade-id="${upgrade.id}">
+                    <h3>${upgrade.name}</h3>
+                    <p>${upgrade.description}</p>
+                    <p>Benefits: ${benefitsDescription}</p>
+                    <p>Requirements: €${upgrade.requirements.money}</p>
+                    <button class="btn btn-primary start-upgrade-btn" ${canUpgrade && !upgrade.completed ? '' : 'disabled'}>${buttonText}</button>
+                </div>
+            `;
+        }
     }).join('');
 }
 
@@ -171,9 +192,16 @@ function setupFinanceEventListeners(overlay) {
     upgradeSection.addEventListener('click', (e) => {
         if (e.target.matches('.start-upgrade-btn')) {
             const upgradeId = parseInt(e.target.closest('.upgrade-item').dataset.upgradeId, 10);
-            startUpgradeTask(upgradeId);
-            // Refresh the upgrades list to reflect the new status
-            updateUpgradesList();
+            const farmlandSelect = e.target.closest('.upgrade-item').querySelector('.farmland-select');
+            const farmlandId = parseInt(farmlandSelect.value, 10);
+            if (farmlandId) {
+                const farmland = getFarmlands().find(f => f.id === farmlandId);
+                startUpgradeTask(upgradeId, farmland);
+                // Refresh the upgrades list to reflect the new status
+                updateUpgradesList();
+            } else {
+                addConsoleMessage('Please select a farmland to apply the upgrade.', false, true);
+            }
         }
     });
 
