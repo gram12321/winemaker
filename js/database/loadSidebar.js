@@ -11,6 +11,7 @@ import { incrementWeek } from '../endDay.js';
 import { renderCompanyInfo  } from '../company.js';
 import { showVineyardOverlay } from '../overlays/mainpages/vineyardoverlay.js';
 import { showAdminOverlay } from '../overlays/mainpages/adminoverlay.js';
+import { showSettingsOverlay } from '../overlays/mainpages/settingsoverlay.js';
 
 
 // Define a function to load and initialize the sidebar
@@ -75,6 +76,15 @@ export function initializeSidebar() {
                     });
                 } else {
                     console.error('Admin link element not found');
+                }
+
+                // Attach event listener to the settings link
+                const settingsLink = document.getElementById('settings-link');
+                if (settingsLink) {
+                    settingsLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        showSettingsOverlay();
+                    });
                 }
 
                 // Attach event listener to the buildings link after sidebar loads
