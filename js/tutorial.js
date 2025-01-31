@@ -28,6 +28,13 @@ class TutorialManager {
     this.tutorialsEnabled = localStorage.getItem('tutorialsEnabled') !== 'false';
   }
 
+  init() {
+    // Show welcome tutorial if it hasn't been seen
+    if (this.shouldShowTutorial('WELCOME')) {
+      this.showTutorial('WELCOME');
+    }
+  }
+
   shouldShowTutorial(tutorialId) {
     return this.tutorialsEnabled && !this.seenTutorials.has(tutorialId);
   }
