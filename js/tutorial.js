@@ -5,7 +5,7 @@ const TUTORIALS = {
     id: 'welcome',
     title: 'Welcome to Your Winery!',
     content: 'Welcome to your new winery! This tutorial will help you get started with managing your vineyard and wine production.',
-    page: 'game'
+    page: ['game', 'mainoffice']
   },
   VINEYARD: {
     id: 'vineyard',
@@ -17,18 +17,6 @@ const TUTORIALS = {
     id: 'winery',
     title: 'Winery Operations',
     content: 'Welcome to your winery! Here you can process your harvested grapes into wine. Start by crushing grapes into must, then ferment the must into wine.',
-    page: 'winery'
-  },
-  VINEYARD: {
-    id: 'vineyard',
-    title: 'Vineyard Management',
-    content: 'Here you can manage your vineyards, plant new vines, and monitor their growth.',
-    page: 'vineyard'
-  },
-  WINERY: {
-    id: 'winery',
-    title: 'Winery Operations',
-    content: 'In the winery, you can process your grapes and create different types of wine.',
     page: 'winery'
   }
   // Add more tutorials as needed
