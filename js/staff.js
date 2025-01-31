@@ -253,3 +253,48 @@ export function setupStaffWagesRecurringTransaction() {
         addRecurringTransaction('Expense', description, -totalWages, frequencyInWeeks);
     }
 }
+
+export function getDefaultTeams() {
+  return [
+    {
+      name: 'Administration Team',
+      description: 'Handle company administration and paperwork',
+      flagCode: 'bookkeeping',
+      teamPicture: 'placeholder.webp',
+      members: [],
+      defaultTaskTypes: ['administration']  // Changed from taskManager.ADMINISTRATION
+    },
+    {
+      name: 'Building & Maintenance Team',
+      description: 'Maintain and upgrade facilities',
+      flagCode: 'maintain',
+      teamPicture: 'placeholder.webp',
+      members: [],
+      defaultTaskTypes: ['maintenance']  // Changed from taskManager.MAINTENANCE
+    },
+    {
+      name: 'Vineyard Team',
+      description: 'Coordinate vineyard operations',
+      flagCode: 'harvesting',
+      teamPicture: 'placeholder.webp',
+      members: [],
+      defaultTaskTypes: ['field']  // Changed from taskManager.FIELD
+    },
+    {
+      name: 'Winery Team',
+      description: 'Oversee winery processes',
+      flagCode: 'crushing',
+      teamPicture: 'placeholder.webp',
+      members: [],
+      defaultTaskTypes: ['winery']  // Changed from taskManager.WINERY
+    },
+    {
+      name: 'Sales Team',
+      description: 'Manage your sales force',
+      flagCode: 'sales',
+      teamPicture: 'placeholder.webp',
+      members: [],
+      defaultTaskTypes: ['sales']  // Changed from taskManager.SALES
+    }
+  ];
+}

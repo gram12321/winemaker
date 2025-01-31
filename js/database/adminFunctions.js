@@ -1,10 +1,7 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
-
-import { Staff, createNewStaff } from '/js/staff.js';
+import { Staff, createNewStaff, getDefaultTeams } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { inventoryInstance } from '/js/resource.js';
-
-import taskManager from '../taskManager.js';
 
 let teams = []; // In-memory storage for teams
 
@@ -298,56 +295,7 @@ function saveInventory() {
   localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
 }
 
-// Function to save the list of staff members to localStorage
-export function saveStaff(staffMembers) {
-  if (Array.isArray(staffMembers)) {
-    localStorage.setItem('staffData', JSON.stringify(staffMembers.map(staff => ({
-      id: staff.id,
-      nationality: staff.nationality,
-      name: staff.name,
-      lastName: staff.lastName,
-      workforce: staff.workforce,
-      wage: staff.wage,
-      skills: staff.skills,
-      skillLevel: staff.skillLevel,  // Save skill level
-      specializedRoles: staff.specializedRoles  // Save specialized roles
-    }))));
-  }
-}
 
-/**
- * Loads staff members from localStorage.
- * @returns {Array} Array of Staff objects.
- */
-export function loadStaff() {
-  let staffMembers = [];
-  let savedStaffData = localStorage.getItem('staffData');
-
-  if (savedStaffData) {
-    try {
-      const parsedData = JSON.parse(savedStaffData);
-      staffMembers = parsedData.map(item => {
-        const staff = new Staff(
-          item.name.split(' ')[0], 
-          item.lastName, 
-          item.skills, 
-          item.skillLevel || 0.1  // Load skill level with fallback
-        );
-        staff.id = item.id;
-        staff.nationality = item.nationality;
-        staff.name = item.name;
-        staff.workforce = item.workforce;
-        staff.wage = item.wage;
-        staff.specializedRoles = item.specializedRoles || [];  // Load specialized roles with fallback
-        return staff;
-      });
-    } catch (error) {
-      console.error("Failed to parse staff data from localStorage.", error);
-    }
-  }
-
-  return staffMembers;
-}
 
 let currentWineOrders = [];
 
@@ -500,55 +448,55 @@ export function updateAllFarmlands(farmlands) {
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
-// Prestige storage functions
-export function getPrestigeHit() {
-  const prestigeHit = localStorage.getItem('prestigeHit');
-  return prestigeHit === null ? 0 : Number(prestigeHit);
+// Function to save the list of staff members to localStorage
+export function saveStaff(staffMembers) {
+  if (Array.isArray(staffMembers)) {
+    localStorage.setItem('staffData', JSON.stringify(staffMembers.map(staff => ({
+      id: staff.id,
+      nationality: staff.nationality,
+      name: staff.name,
+      lastName: staff.lastName,
+      workforce: staff.workforce,
+      wage: staff.wage,
+      skills: staff.skills,
+      skillLevel: staff.skillLevel,  // Save skill level
+      specializedRoles: staff.specializedRoles  // Save specialized roles
+    }))));
+  }
 }
 
-export function getDefaultTeams() {
-  return [
-    {
-      name: 'Administration Team',
-      description: 'Handle company administration and paperwork',
-      flagCode: 'bookkeeping',
-      teamPicture: 'placeholder.webp',
-      members: [],
-      defaultTaskTypes: ['administration']  // Changed from taskManager.ADMINISTRATION
-    },
-    {
-      name: 'Building & Maintenance Team',
-      description: 'Maintain and upgrade facilities',
-      flagCode: 'maintain',
-      teamPicture: 'placeholder.webp',
-      members: [],
-      defaultTaskTypes: ['maintenance']  // Changed from taskManager.MAINTENANCE
-    },
-    {
-      name: 'Vineyard Team',
-      description: 'Coordinate vineyard operations',
-      flagCode: 'harvesting',
-      teamPicture: 'placeholder.webp',
-      members: [],
-      defaultTaskTypes: ['field']  // Changed from taskManager.FIELD
-    },
-    {
-      name: 'Winery Team',
-      description: 'Oversee winery processes',
-      flagCode: 'crushing',
-      teamPicture: 'placeholder.webp',
-      members: [],
-      defaultTaskTypes: ['winery']  // Changed from taskManager.WINERY
-    },
-    {
-      name: 'Sales Team',
-      description: 'Manage your sales force',
-      flagCode: 'sales',
-      teamPicture: 'placeholder.webp',
-      members: [],
-      defaultTaskTypes: ['sales']  // Changed from taskManager.SALES
+/**
+ * Loads staff members from localStorage.
+ * @returns {Array} Array of Staff objects.
+ */
+export function loadStaff() {
+  let staffMembers = [];
+  let savedStaffData = localStorage.getItem('staffData');
+
+  if (savedStaffData) {
+    try {
+      const parsedData = JSON.parse(savedStaffData);
+      staffMembers = parsedData.map(item => {
+        const staff = new Staff(
+          item.name.split(' ')[0], 
+          item.lastName, 
+          item.skills, 
+          item.skillLevel || 0.1  // Load skill level with fallback
+        );
+        staff.id = item.id;
+        staff.nationality = item.nationality;
+        staff.name = item.name;
+        staff.workforce = item.workforce;
+        staff.wage = item.wage;
+        staff.specializedRoles = item.specializedRoles || [];  // Load specialized roles with fallback
+        return staff;
+      });
+    } catch (error) {
+      console.error("Failed to parse staff data from localStorage.", error);
     }
-  ];
+  }
+
+  return staffMembers;
 }
 
 export function loadTeams() {
@@ -593,6 +541,12 @@ export function saveTeams(teams) {
       !teams.some(t => t.name === name)
   );
   localStorage.setItem('deletedDefaultTeams', JSON.stringify(deletedDefaultTeams));
+}
+
+// Prestige storage functions
+export function getPrestigeHit() {
+  const prestigeHit = localStorage.getItem('prestigeHit');
+  return prestigeHit === null ? 0 : Number(prestigeHit);
 }
 
 export function setPrestigeHit(value) {
