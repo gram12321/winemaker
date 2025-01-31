@@ -682,18 +682,20 @@ input[type="range"]::-webkit-slider-thumb:hover {
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
     z-index: 1500;
     background-image: url('/assets/storypic/pierre.webp');
     background-repeat: no-repeat;
-    background-position: 40% 30%;
-    background-size: 15% auto;
+    background-position: center;
+    background-size: contain;
     border-radius: var(--radius-lg);
 }
 
 #tutorialContent {
+    grid-column: 2;
+    margin-right: 5vw;
     background-color: var(--color-background);
     padding: 2rem;
     border-radius: var(--radius-lg);
@@ -701,6 +703,21 @@ input[type="range"]::-webkit-slider-thumb:hover {
     border: 1px solid var(--color-accent);
     max-width: 400px;
     position: relative;
+}
+
+.tutorial-image {
+    grid-column: 1;
+    width: 300px;
+    height: 300px;
+    background-image: url('/assets/storypic/pierre.webp');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    justify-self: end;
+    margin-right: -50px;
+    border-radius: 50%;
+    mask-image: radial-gradient(circle at center, black 100%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 100%, transparent 100%);
 }
 
 #tutorialContent:before {
