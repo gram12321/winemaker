@@ -35,7 +35,7 @@ const COUNTRY_TUTORIALS = {
     }
   },
   ITALY: {
-    characterName: 'Roberto Conti',
+    characterName: 'Roberto De Luca',
     characterImage: '/assets/storypic/roberto.webp',
     welcomeTutorial: {
       id: 'welcome',
@@ -47,23 +47,23 @@ const COUNTRY_TUTORIALS = {
         },
         {
           title: 'Meeting Roberto',
-          content: 'A robust man with sun-tanned skin approaches you, his eyes twinkling with Mediterranean warmth. His Italian accent is thick but welcoming as he greets you.'
+          content: 'A distinguished gentleman approaches, his weathered hands and thoughtful expression speaking to years of experience among the vines. His refined manner carries both warmth and authority as he greets you with a gentle smile.'
         },
         {
           title: 'Roberto\'s Introduction',
-          content: '"Buongiorno! I am Roberto Conti, born and raised in the rolling hills of Tuscany. For generations, my family has crafted wines that speak of our terra, our beloved land. Each vintage tells the story of our passion and tradition."'
-        },
-        {
-          title: 'Roberto\'s Daily Life',
-          content: '"Every morning, before the sun touches our vines, I walk through the vineyard. Each vine is like family to me, each grape a promise of what\'s to come. This is not just work—it\'s a way of life that flows through our veins like the wines we create."'
+          content: '"Buongiorno! I am Roberto De Luca, winemaster and steward of my family\'s traditions. I grew up in these vineyards, learning to appreciate the soil, the vines, and the rhythm of each season. You see, winemaking is not just a process; it\'s an art, a delicate balance of nature and nurture."'
         },
         {
           title: 'Roberto\'s Philosophy',
-          content: '"You see, wine is not just a drink—it\'s the heart of our culture! It brings families together, turns strangers into friends, and makes every meal a celebration. When we share our wine, we share a piece of our history, our joy, our soul."'
+          content: '"When I taste a wine, I taste the year, the sun, the rain, the soil—all of it in one sip. I find immense joy in crafting each bottle, in watching our grapes turn from fruit to wine, in seeing the smile on someone\'s face when they taste our work."'
+        },
+        {
+          title: 'Roberto\'s Approach',
+          content: '"I suppose my approach is traditional; I prefer to listen to the land rather than bend it to my will. It\'s my belief that each vineyard speaks its own language, and my role is simply to bring its voice to life in each bottle. A winemaster, yes, but more than that, I am a caretaker of this land, of its story, and of my family\'s legacy."'
         },
         {
           title: 'Getting Started',
-          content: '"Now, let us write your chapter in this grand tradition. Together, we will create wines that honor the ancient ways while embracing new possibilities. Sei pronto? Are you ready to begin?"'
+          content: '"Now, let us begin writing your chapter in this grand tradition. Together, we will create wines that honor both innovation and heritage. Sei pronto? Are you ready to discover the voice of your vineyard?"'
         }
       ]
     }
