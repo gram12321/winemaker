@@ -362,14 +362,9 @@ export function loadUpgrades() {
   return [];
 }
 
-// In-memory storage for farmlands
+// Function to load farmlands from localStorage
 let farmlandsStore = [];
 
-// Function to load farmlands from localStorage
-/**
- * Loads all owned farmlands from localStorage
- * @returns {Array} Array of farmland objects, or empty array if none exist
- */
 export function loadFarmlands() {
   const farmlandsJSON = localStorage.getItem('ownedFarmlands');
   if (farmlandsJSON) {
@@ -378,29 +373,15 @@ export function loadFarmlands() {
   return farmlandsStore;
 }
 
-/**
- * Saves farmlands to localStorage
- * @private
- */
 function saveFarmlandsToStorage() {
   localStorage.setItem('ownedFarmlands', JSON.stringify(farmlandsStore));
 }
 
-/**
- * Adds a new farmland to the store
- * @param {Object} farmland - The farmland object to add
- */
 export function addFarmland(farmland) {
   farmlandsStore.push(farmland);
   saveFarmlandsToStorage();
 }
 
-/**
- * Updates specific properties of a farmland
- * @param {number} farmlandId - The ID of the farmland to update
- * @param {Object} updates - Object containing the properties to update
- * @returns {boolean} True if update successful, false if farmland not found
- */
 export function updateFarmland(farmlandId, updates) {
   const farmlands = loadFarmlands();
   const farmlandIndex = farmlands.findIndex(f => f.id === parseInt(farmlandId));
@@ -414,6 +395,15 @@ export function updateFarmland(farmlandId, updates) {
     return true;
   }
   return false;
+}
+
+// Farmland management functions
+export function getFarmlands() {
+  return JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+}
+
+export function updateAllFarmlands(farmlands) {
+  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
 }
 
 // Game state management functions
@@ -439,15 +429,6 @@ export function getCompanyName() {
   return localStorage.getItem('companyName');
 }
 
-// Farmland management functions
-export function getFarmlands() {
-  return JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-}
-
-export function updateAllFarmlands(farmlands) {
-  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-}
-
 // Function to save the list of staff members to localStorage
 export function saveStaff(staffMembers) {
   if (Array.isArray(staffMembers)) {
@@ -465,10 +446,7 @@ export function saveStaff(staffMembers) {
   }
 }
 
-/**
- * Loads staff members from localStorage.
- * @returns {Array} Array of Staff objects.
- */
+
 export function loadStaff() {
   let staffMembers = [];
   let savedStaffData = localStorage.getItem('staffData');
