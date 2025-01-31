@@ -80,7 +80,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
     border-radius: var(--radius-lg);
     margin-bottom: 20px;
     box-shadow: var(--shadow-sm);
-    
+
 }
 
 .overlay.active {
@@ -134,7 +134,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .mainview-overlay-content .table {
   margin: 0 auto;
   width: auto;
-  
+
   background-color: var(--color-background);
   text-align: center;
   margin-bottom: 1rem;
@@ -675,3 +675,40 @@ input[type="range"]::-webkit-slider-thumb:hover {
     flex-direction: column;
 }
 
+#tutorialOverlay {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 1500;
+    background-image: url('/assets/storypic/pierre.webp');
+    background-repeat: no-repeat;
+    background-position: 20% center;
+    background-size: contain;
+}
+
+#tutorialContent {
+    background-color: var(--color-background);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-accent);
+    max-width: 400px;
+    margin-right: 10%;
+    position: relative;
+}
+
+#tutorialContent:before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    border: 10px solid transparent;
+    border-right-color: var(--color-background);
+    transform: translateY(-50%);
+}
