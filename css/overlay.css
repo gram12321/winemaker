@@ -688,8 +688,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     z-index: 1500;
     background-image: url('/assets/storypic/pierre.webp');
     background-repeat: no-repeat;
-    background-position: 40% center;
-    background-size: 35% auto;
+    background-position: 60% center;
+    background-size: 15% auto;
 }
 
 #tutorialContent {
