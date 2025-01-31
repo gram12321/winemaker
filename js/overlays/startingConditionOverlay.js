@@ -6,7 +6,7 @@ import { generateFarmlandPreview } from '../farmland.js';
 const startingConditions = {
     'France': {
         name: 'France',
-        description: 'Start your winery in the beautiful French countryside',
+        description: 'Start your winery in the beautiful French countryside, you will start with a small vineyard in Burgundy',
         startingMoney: 7000000,
         flagCode: 'fr',
         familyPicture: 'pierrecamille.webp',
@@ -18,13 +18,13 @@ const startingConditions = {
     'Italy': {
         name: 'Italy',
         description: 'Begin your journey in the rolling hills of Italy',
-        startingMoney: 50000000,
+        startingMoney: 5000000,
         flagCode: 'it',
         familyPicture: 'robertobianca.webp'
     },
     'Germany': {
         name: 'Germany',
-        description: 'Establish your vineyard in the Rhine Valley',
+        description: 'Establish your vineyard along the Mosel River. The Weissburg family has been making wine here for generations, and all four people of the household will coorperate to turn the winery into a success.',
         startingMoney: 3000000,
         flagCode: 'de',
         familyPicture: 'weissburg.webp' 
