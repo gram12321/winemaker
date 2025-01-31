@@ -85,11 +85,10 @@ A web-based simulation game where players manage their own winery, from vineyard
 - `createTool()`: Instantiates new building tools
 
 ### Resource Management (resource.js - 247 lines)
-- `Resource` class: Base class for game resources
-- `Inventory` class: Manages game inventories
-- `sellWines()`: Handles wine sales
-- `populateStorageTable()`: Updates storage UI
-- `displayInventory()`: Shows current inventory
+- `Resource` class: Defines grape varieties and properties
+- `InventoryItem`: Tracks item state, vintage, quality
+- Inventory management with storage locations
+- Quality tracking across wine production stages
 
 ### Staff Management (staff.js - 236 lines)
 - `hireStaff()`: Handles staff recruitment
@@ -97,12 +96,22 @@ A web-based simulation game where players manage their own winery, from vineyard
 - `assignStaffToTask()`: Task management
 - `setupStaffWagesRecurringTransaction()`: Sets up payroll
 - `updateWagesAndRecurringTransaction()`: Updates staff payments
+- Staff creation with nationality and skills
+- Specialized role system with skill bonuses
+- Team management with default templates
+- Automatic wage calculation and payroll
+- Skill levels: Fresh Off the Vine to Living Legend
 
-### Financial System (finance.js - 132 lines)
+### Financial System (finance.js - 132 lines, upgrade.js - 176 lines)
 - `addTransaction()`: Records financial transactions
 - `updateCashflow()`: Manages money flow
 - `calculateBalance()`: Computes current balance
 - `processRecurringTransactions()`: Handles regular payments
+- Transaction and cash flow tracking
+- Income statements and balance sheets
+- Asset valuation (buildings, land, inventory)
+- Upgrades system for farmland improvements
+- Recurring transaction management
 
 ### Production System
 #### Crushing Process (crushingOverlay.js - 167 lines)
