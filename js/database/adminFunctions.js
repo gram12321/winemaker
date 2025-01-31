@@ -58,7 +58,10 @@ async function storeCompanyName(companyName, startingCondition = null) {
     } else {
       localStorage.setItem('companyName', companyName);
       localStorage.setItem('money', 0); // Set initial money to 0
-      localStorage.setItem('startingCountry', startingCondition ? startingCondition.name : 'France');
+      
+      // Fix: Ensure country is stored in uppercase for tutorial system
+      const countryName = startingCondition ? startingCondition.name.toUpperCase() : 'FRANCE';
+      localStorage.setItem('startingCountry', countryName);
 
       // Set initial date values before logging the transaction
       localStorage.setItem('week', 1); // Initialize week
