@@ -44,6 +44,16 @@
                         <option value="hectares">Hectares</option>
                     </select>
                 </div>
+                <div class="form-group mt-3">
+                    <label for="enable-tutorials">Tutorial Messages:</label>
+                    <div>
+                        <input type="checkbox" id="enable-tutorials" />
+                        <label for="enable-tutorials">Show tutorial messages</label>
+                    </div>
+                    <button type="button" class="btn btn-secondary mt-2" onclick="tutorialManager.resetTutorials()">
+                        Reset Tutorial Progress
+                    </button>
+                </div>
                 <button type="submit" class="btn btn-primary">Save Settings</button>
             </form>
             <p id="feedback" class="mt-2"></p>

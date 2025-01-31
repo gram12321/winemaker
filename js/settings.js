@@ -2,6 +2,8 @@
 import { addConsoleMessage } from '/js/console.js';
 
 
+import tutorialManager from './tutorial.js';
+
 document.addEventListener("DOMContentLoaded", () => {
     // Check if we are on the settings page by looking for a specific unique element
     const form = document.getElementById('settings-form');
@@ -35,6 +37,14 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem('timeFormat', selectedFormat);
             localStorage.setItem('showConsole', showConsole);
             localStorage.setItem('landUnit', selectedUnit);
+            
+            // Save tutorial settings
+            const enableTutorials = document.getElementById('enable-tutorials').checked;
+            if (enableTutorials) {
+                tutorialManager.enableTutorials();
+            } else {
+                tutorialManager.disableAllTutorials();
+            }
 
             // Console messages indicating changes
             addConsoleMessage(`Time format changed to ${selectedFormat === '24' ? '24-hour' : '12-hour (AM/PM)'} format.`);

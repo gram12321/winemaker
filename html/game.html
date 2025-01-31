@@ -32,6 +32,12 @@
     </div>
   </div>
 
+  <!-- Tutorial Overlay -->
+  <div id="tutorialOverlay" class="overlay">
+    <div class="overlay-content tutorial-content" id="tutorialContent">
+    </div>
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
@@ -45,6 +51,7 @@
 
   <script type="module">
 
+      import tutorialManager from '/js/tutorial.js';
       import { incrementWeek } from '/js/endDay.js'; 
       import { initializeSidebar } from '/js/database/loadSidebar.js';
       import { initializePanel } from '/js/loadPanel.js';
@@ -63,6 +70,7 @@
         setupStaffWagesRecurringTransaction();
         hideAllOverlays();
         showMainOfficeOverlay();
+        tutorialManager.init(); // Initialize the tutorial manager
       });
   </script>
   <!-- Building Detail Overlay -->
