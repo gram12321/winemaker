@@ -14,15 +14,19 @@ const TUTORIALS = {
       },
       {
         title: 'Pierre\'s Introduction',
-        content: '"Bonjour! I am Pierre Latosha, your vineyard manager. I come from the sun-soaked hills of Bordeaux, where my family has tended vines for generations. Wine farming isn\'t just my trade—it\'s my heritage, my passion."'
+        content: '"Bonjour! I am Pierre Latosha, a wine farmer by trade and by heart, from the sun-soaked hills of Bordeaux. My family has tended these vines for generations, each season bringing new lessons and challenges, but the vineyard remains our life\'s work, our heritage."'
+      },
+      {
+        title: 'Pierre\'s Daily Life',
+        content: '"I wake before dawn to walk the rows, checking each leaf, every budding grape, to make sure they\'re growing strong. It\'s a simple life, but I wouldn\'t have it any other way. There\'s a rhythm in this work, a calm that settles over you, knowing that each vine holds a piece of history."'
       },
       {
         title: 'Pierre\'s Philosophy',
-        content: '"Each morning, I walk these rows before dawn, checking every vine, every leaf. You see, a vineyard is like a living story—each grape holds the essence of the sun, soil, and the dedication we pour into it. I\'ll be here to guide you through every season, every challenge."'
+        content: '"Wine has a way of connecting people, don\'t you think? Every bottle tells a story—of the sun, the soil, and the hands that cared for it. When I pour a glass for someone, I feel like I\'m sharing a little piece of my soul, of our land, with them."'
       },
       {
         title: 'Getting Started',
-        content: '"Together, we\'ll manage your fields, plant new vines, and harvest the finest grapes. Remember, great wine begins in the vineyard. Shall we begin our journey into wine-making?"'
+        content: '"Together, we\'ll create wines that tell our own story. I\'ll guide you through every season, every challenge. Shall we begin this journey into wine-making?"'
       }
     ],
     page: ['game', 'mainoffice']
@@ -39,7 +43,6 @@ const TUTORIALS = {
     content: 'Welcome to your winery! Here you can process your harvested grapes into wine. Start by crushing grapes into must, then ferment the must into wine.',
     page: 'winery'
   }
-  // Add more tutorials as needed
 };
 
 class TutorialManager {
