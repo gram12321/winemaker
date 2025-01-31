@@ -9,6 +9,10 @@ import { inventoryInstance } from '/js/resource.js';
 export function showWineryOverlay() {
     const overlayContent = createWineryOverlayHTML();
     const overlay = showMainViewOverlay(overlayContent);
+    
+    if (tutorialManager.shouldShowTutorial('WINERY')) {
+        tutorialManager.showTutorial('WINERY');
+    }
     setupWineryOverlayEventListeners(overlay);
 }
 

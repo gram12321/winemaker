@@ -10,6 +10,18 @@ const TUTORIALS = {
   VINEYARD: {
     id: 'vineyard',
     title: 'Vineyard Management',
+    content: 'Welcome to your vineyard! Here you can manage your fields, plant vines, and harvest grapes. Monitor ripeness levels carefully to achieve the best quality harvest.',
+    page: 'vineyard'
+  },
+  WINERY: {
+    id: 'winery',
+    title: 'Winery Operations',
+    content: 'Welcome to your winery! Here you can process your harvested grapes into wine. Start by crushing grapes into must, then ferment the must into wine.',
+    page: 'winery'
+  },
+  VINEYARD: {
+    id: 'vineyard',
+    title: 'Vineyard Management',
     content: 'Here you can manage your vineyards, plant new vines, and monitor their growth.',
     page: 'vineyard'
   },

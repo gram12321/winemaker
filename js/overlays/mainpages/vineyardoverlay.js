@@ -13,6 +13,10 @@ import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 export function showVineyardOverlay() {
     const overlay = showMainViewOverlay(getVineyardOverlayHTML());
     
+    if (tutorialManager.shouldShowTutorial('VINEYARD')) {
+        tutorialManager.showTutorial('VINEYARD');
+    }
+    
     const container = overlay.querySelector('#vineyard-table-container');
     const table = createVineyardTable();
     container.appendChild(table);
