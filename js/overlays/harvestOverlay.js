@@ -5,7 +5,7 @@ import { inventoryInstance, allResources } from '../resource.js';
 import { farmlandYield, canHarvest } from '../vineyard.js';
 import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
-import taskManager, { TaskType } from '../taskManager.js';
+import taskManager from '../taskManager.js';
 import { regionAltitudeRanges, grapeSuitability } from '../names.js';
 import { loadFarmlands } from '../database/adminFunctions.js';
 import { showModalOverlay } from './overlayUtils.js';
@@ -219,16 +219,9 @@ export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     const altitudePenalty = altitudeDeviation * 0.5; 
     const totalWork = totalHarvest / 1000 * 25 * (1 + densityPenalty + altitudePenalty + fragilePenalty); 
 
-    addConsoleMessage(`Work calculation for harvesting ${getFlagIconHTML(farmland.country)} ${farmland.name}:
-    - Base work units: ${formatNumber(totalHarvest / 1000 * 25, 1)} (${formatNumber(totalHarvest)} kg ÷ 1000 × 25)
-    - Density penalty: +${formatNumber(densityPenalty * 100, 1)}%
-    - Altitude penalty: ${formatNumber(altitudeDeviation * 100, 1)}% (${altitudePenalty >= 0 ? '+' : '-'}${formatNumber(Math.abs(altitudePenalty * 100), 1)}% work)
-    - Fragility penalty: +${formatNumber(fragilePenalty * 100, 1)}% (${resourceObj.name} fragility: ${resourceObj.fragile})
-    - Final work units: ${formatNumber(totalWork, 1)}`);
-
     taskManager.addProgressiveTask(
         taskName,
-        TaskType.field,
+        'field',  // Changed from TaskType.field
         totalWork,
         (target, progress, params) => {
             const harvestedAmount = totalHarvest * (progress - (params.lastProgress || 0));

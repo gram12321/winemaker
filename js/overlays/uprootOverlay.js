@@ -1,7 +1,7 @@
 import { getFlagIconHTML, formatNumber } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { updateFarmland } from '../database/adminFunctions.js';
-import taskManager, { TaskType } from '../taskManager.js';
+import taskManager from '../taskManager.js';  // Remove TaskType import
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 
@@ -108,7 +108,7 @@ function setupUprootEventListeners(overlayContainer, farmland, onUprootCallback)
     uprootButton.addEventListener('click', () => {
         taskManager.addProgressiveTask(
             'Uprooting',
-            TaskType.field,
+            'field',  // Changed from TaskType.field
             totalWork,
             (target, progress) => {
                 const percentComplete = Math.floor(progress * 100);

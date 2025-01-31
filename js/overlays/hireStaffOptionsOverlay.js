@@ -1,7 +1,7 @@
 import { addConsoleMessage } from '../console.js';
 import { formatNumber, skillLevels, getSkillLevelInfo  } from '../utils.js';
 import { showHireStaffOverlay } from './hirestaffoverlay.js';
-import taskManager, { TaskType } from '../taskManager.js';
+import taskManager from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 import { addTransaction} from '../finance.js'
 import { getMoney } from '../database/adminFunctions.js';
@@ -197,7 +197,7 @@ function setupHireStaffOptionsEventListeners(overlayContainer) {
 
         taskManager.addCompletionTask(
             'Staff Search',
-            TaskType.administration,
+            'administration',
             totalWork, // Use calculated total work
             (target, params) => {
                 showHireStaffOverlay(

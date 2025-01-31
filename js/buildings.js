@@ -4,7 +4,7 @@ import { addConsoleMessage } from '/js/console.js';
 import { storeBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction} from '/js/finance.js';
 import { formatNumber } from '/js/utils.js';
-import taskManager, { TaskType } from '/js/taskManager.js';
+import taskManager from '/js/taskManager.js';
 
 export class Building {
   static BASE_COSTS = {
@@ -193,7 +193,7 @@ export function buildBuilding(buildingName) {
   // Create building task
   taskManager.addCompletionTask(
     'Building & Maintenance',
-    TaskType.maintenance,
+    'maintenance',
     buildingCost / 1000, // Total work required based on building cost
     (target, params) => {
       // Completion callback
@@ -307,7 +307,7 @@ export function upgradeBuilding(buildingName) {
   // Create upgrade task
   taskManager.addCompletionTask(
     'Building & Maintenance',
-    TaskType.maintenance,
+    'maintenance',
     upgradeCost / 1000, // Total work required based on upgrade cost
     (target, params) => {
       // Completion callback

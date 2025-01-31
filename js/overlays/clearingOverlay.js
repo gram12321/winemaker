@@ -1,7 +1,7 @@
 import { getFlagIconHTML, formatNumber } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { updateFarmland } from '../database/adminFunctions.js';
-import taskManager, { TaskType } from '../taskManager.js';
+import taskManager from '../taskManager.js';  // Remove TaskType from import
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 
@@ -356,7 +356,7 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
 
         taskManager.addProgressiveTask(
             'Clearing',
-            TaskType.field,
+            'field',  // Changed from TaskType.field
             totalWork,
             (target, progress, params) => {
                 const percentComplete = Math.floor(progress * 100);

@@ -5,13 +5,13 @@ import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass } from './utils.js';
 import { bookkeeping, maintenanceBuildings } from './administration.js'; // Update this line
 
-// Define task types as constants
-export const TaskType = {
-    field: 'Field',
-    winery: 'Winery',
-    administration: 'Administration',
-    sales: 'Sales',
-    maintenance: 'Building & Maintenance',
+// Internal mapping for display names
+const taskDisplayNames = {
+    'field': 'Field',
+    'winery': 'Winery',
+    'administration': 'Administration',
+    'sales': 'Sales',
+    'maintenance': 'Building & Maintenance'
 };
 
 class Task {
@@ -123,19 +123,19 @@ class TaskManager {
             task.assignedStaff.forEach(staff => {
                 let relevantSkill = 0;
                 switch (task.taskType) {
-                    case TaskType.field:
+                    case 'field':
                         relevantSkill = staff.skills.field.field;
                         break;
-                    case TaskType.winery:
+                    case 'winery':
                         relevantSkill = staff.skills.winery.winery;
                         break;
-                    case TaskType.administration:
+                    case 'administration':
                         relevantSkill = staff.skills.administration.administration;
                         break;
-                    case TaskType.sales:
+                    case 'sales':
                         relevantSkill = staff.skills.sales.sales;
                         break;
-                    case TaskType.maintenance:
+                    case 'maintenance':
                         relevantSkill = staff.skills.maintenance.maintenance;
                         break;
                     // Add more cases for other task types if needed
@@ -208,6 +208,7 @@ class TaskManager {
         
         this.getAllTasks().forEach(task => {
             const taskBox = document.createElement('div');
+            const displayName = taskDisplayNames[task.taskType.toLowerCase()] || task.taskType;
             taskBox.className = `task-box ${task.taskType.toLowerCase()}-task`;
             
             const progress = task.appliedWork / task.totalWork * 100;
@@ -234,7 +235,7 @@ class TaskManager {
                     ${task.name}
                 </div>
                 <div class="task-header">
-                    ${(task.target && task.target.name) ? `<div class="task-type">${task.taskType}</div>` : ''}
+                    ${(task.target && task.target.name) ? `<div class="task-type">${displayName}</div>` : ''}
                     <img src="../assets/icon/icon_${iconName}.webp" 
                          alt="${task.name}" 
                          class="task-icon"

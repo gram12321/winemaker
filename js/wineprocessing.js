@@ -1,7 +1,7 @@
 import { inventoryInstance } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
-import taskManager, { TaskType } from './taskManager.js';
+import taskManager from './taskManager.js';
 
 export function fermentation(selectedResource, storage, mustAmount) {
     // Check for existing fermentation tasks with the same storage
@@ -36,7 +36,7 @@ export function fermentation(selectedResource, storage, mustAmount) {
     // Add fermentation as a progressive task
     taskManager.addProgressiveTask(
         'Fermentation',
-        TaskType.winery,
+        'winery',
         100, // totalWork for fermentation
         (target, progress, params) => {
             performFermentation(target, progress, params);

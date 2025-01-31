@@ -1,4 +1,4 @@
-import taskManager, { TaskType } from './taskManager.js';
+import taskManager from './taskManager.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
 import { getMoney } from './company.js';
@@ -17,7 +17,7 @@ export const upgrades = [
       farmland: 1 // Require at least 1 available farmland
     },
     benefits: { farmlandHealth: 0.1 }, // Example benefits
-    taskParameters: { totalWork: 100, taskType: TaskType.field },
+    taskParameters: { totalWork: 100, taskType: 'field' },  // Changed from taskManager.FIELD
     completed: false, // Track completion status
     applicableTo: 'farmland' // Indicates this upgrade is applied to individual farmlands
   },
@@ -30,7 +30,7 @@ export const upgrades = [
       money: 5000000
     },
     benefits: { soilQuality: 0.2 },
-    taskParameters: { totalWork: 50, taskType: TaskType.field },
+    taskParameters: { totalWork: 50, taskType: taskManager.FIELD },
     completed: false // Track completion status
   },
   {
@@ -42,7 +42,7 @@ export const upgrades = [
       money: 5000000
     },
     benefits: { soilQuality: 0.2 },
-    taskParameters: { totalWork: 1500, taskType: TaskType.field },
+    taskParameters: { totalWork: 1500, taskType: taskManager.FIELD },
     completed: false // Track completion status
   }
   // Add more upgrades/research items as needed

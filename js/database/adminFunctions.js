@@ -13,6 +13,7 @@ import { addConsoleMessage } from '../console.js';
 import { setupStaffWagesRecurringTransaction } from '../staff.js';
 import { updateUpgradesList } from '../overlays/mainpages/financeoverlay.js'; // Import the centralized function
 import { applyUpgradeBenefits, upgrades } from '../upgrade.js'; // Import the centralized function
+import taskManager from '../taskManager.js';
 
 let teams = []; // In-memory storage for teams
 
@@ -522,7 +523,7 @@ export function getDefaultTeams() {
       flagCode: 'bookkeeping',
       teamPicture: 'placeholder.webp',
       members: [],
-      defaultTaskTypes: ['Administration']
+      defaultTaskTypes: ['administration']  // Changed from taskManager.ADMINISTRATION
     },
     {
       name: 'Building & Maintenance Team',
@@ -530,7 +531,7 @@ export function getDefaultTeams() {
       flagCode: 'maintain',
       teamPicture: 'placeholder.webp',
       members: [],
-      defaultTaskTypes: ['Building & Maintenance']
+      defaultTaskTypes: ['maintenance']  // Changed from taskManager.MAINTENANCE
     },
     {
       name: 'Vineyard Team',
@@ -538,7 +539,7 @@ export function getDefaultTeams() {
       flagCode: 'harvesting',
       teamPicture: 'placeholder.webp',
       members: [],
-      defaultTaskTypes: ['Field']
+      defaultTaskTypes: ['field']  // Changed from taskManager.FIELD
     },
     {
       name: 'Winery Team',
@@ -546,7 +547,7 @@ export function getDefaultTeams() {
       flagCode: 'crushing',
       teamPicture: 'placeholder.webp',
       members: [],
-      defaultTaskTypes: ['Winery']
+      defaultTaskTypes: ['winery']  // Changed from taskManager.WINERY
     },
     {
       name: 'Sales Team',
@@ -554,7 +555,7 @@ export function getDefaultTeams() {
       flagCode: 'sales',
       teamPicture: 'placeholder.webp',
       members: [],
-      defaultTaskTypes: ['Sales']
+      defaultTaskTypes: ['sales']  // Changed from taskManager.SALES
     }
   ];
 }

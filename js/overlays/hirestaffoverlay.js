@@ -3,7 +3,7 @@ import { getFlagIconHTML, skillLevels, getSkillLevelInfo, formatNumber, getColor
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
-import taskManager, { TaskType } from '../taskManager.js';
+import taskManager from '../taskManager.js';  // Changed this line - removed TaskType
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 import { specializedRoles } from './hireStaffOptionsOverlay.js';
 
@@ -114,7 +114,7 @@ function hireSelectedStaff(staff) {
 
     taskManager.addCompletionTask(
         'Hiring Process',
-        TaskType.administration,
+        'administration',  // Changed from taskManager.ADMINISTRATION
         20,
         (target, params) => {
             const { staff, hiringExpense } = params;

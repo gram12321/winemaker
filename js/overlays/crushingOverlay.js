@@ -2,7 +2,7 @@ import { formatNumber, getColorClass } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { inventoryInstance } from '../resource.js';
-import taskManager, { TaskType } from '../taskManager.js';
+import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 
 export function showCrushingOverlay() {
@@ -395,7 +395,7 @@ function crushing(overlayContainer) {
 
     taskManager.addProgressiveTask(
         taskName,
-        TaskType.winery,
+        'winery',  // Changed from TaskType.winery
         totalWork,
         (target, progress, params) => {
             if (!params.lastProgress) params.lastProgress = 0;

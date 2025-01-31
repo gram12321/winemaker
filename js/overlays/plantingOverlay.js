@@ -4,7 +4,7 @@ import { addConsoleMessage } from '../console.js';
 import { allResources } from '/js/resource.js';
 import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland } from '../database/adminFunctions.js';
-import taskManager, { TaskType } from '../taskManager.js';
+import taskManager from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 
@@ -131,7 +131,7 @@ function plant(farmland, selectedResource, selectedDensity) {
   // Create the progressive planting task
   taskManager.addProgressiveTask(
     'Planting',
-    TaskType.field,
+    'field',  // Changed from TaskType.field
     totalWork,
     (target, progress, params) => {
       // This will be called every week with updated progress

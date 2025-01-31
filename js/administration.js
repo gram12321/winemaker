@@ -1,8 +1,9 @@
 import { addConsoleMessage } from '/js/console.js';
 import { extractSeasonAndYear, formatNumber } from './utils.js';
-import taskManager, { TaskType } from './taskManager.js';
+import taskManager from './taskManager.js';
 import { getGameState, getTransactions } from './database/adminFunctions.js';
 import { calculateRealPrestige } from './company.js'; // Add this import
+
 
 export function bookkeeping() {
   const { week, season: currentSeason, year: currentYear } = getGameState();
@@ -58,8 +59,8 @@ export function bookkeeping() {
   const totalWork = baseWork + spilloverWork;
 
   taskManager.addCompletionTask(
-    'Bookkeeping',  // Changed from taskName to just 'Bookkeeping'
-    TaskType.administration,
+    'Bookkeeping',
+    'administration',  // Changed from TASK_TYPES.ADMINISTRATION
     totalWork,
     (target, params) => {
       addConsoleMessage(`Bookkeeping ${params.prevSeason} ${params.prevYear} completed successfully!`);
@@ -111,8 +112,8 @@ export function maintenanceBuildings() {
         const taskName = `Maintain ${building.name}`;
 
         taskManager.addCompletionTask(
-            'Maintain',  // Changed from taskName to just 'Maintain'
-            TaskType.maintenance,
+            'Maintain',
+            'maintenance',  // Changed from TASK_TYPES.MAINTENANCE
             totalWork,
             (target, params) => {
                 addConsoleMessage(`Maintenance of ${building.name} completed successfully!`);
