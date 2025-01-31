@@ -27,7 +27,7 @@ const startingConditions = {
         description: 'Establish your vineyard in the Rhine Valley',
         startingMoney: 3000000,
         flagCode: 'de',
-        familyPicture: 'placeholder.webp' // Need to add actual image
+        familyPicture: 'weissburg.webp' 
     },
     'Spain': {
         name: 'Spain',

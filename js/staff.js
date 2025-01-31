@@ -3,8 +3,10 @@ import { getFlagIconHTML, getSkillLevelInfo } from './utils.js'; // Import the g
 import { loadStaff, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { showStaffOverlay } from './overlays/showstaffoverlay.js'; // Import the new staff overlay
-import { specializedRoles } from './overlays/hireStaffOptionsOverlay.js'; // Import specializedRoles
+import { specializedRoles } from './overlays/hireStaffOptionsOverlay.js'; // Keep this import
 
+// Remove the duplicate declaration and just export the imported specializedRoles
+export { specializedRoles };
 
 //import { getBuildingTools } from './buildings.js'; // Ensure you're importing the tools 
 
@@ -199,9 +201,10 @@ export function displayStaff() {
         `;
 
         const skillInfo = getSkillLevelInfo(staff.skillLevel);
-        const specializationHTML = staff.specializedRoles.map(role => 
-          `<span class="specialization ${role}">${specializedRoles[role].title}</span>`
-        ).join(', ');
+        const specializationHTML = staff.specializedRoles.map(role => {
+            const roleInfo = specializedRoles[role] || { title: role }; // Fallback if role not found
+            return `<span class="specialization ${role}">${roleInfo.title}</span>`;
+        }).join(', ');
 
         const row = document.createElement('tr');
         row.style.cursor = 'pointer';

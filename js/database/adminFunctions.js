@@ -72,7 +72,8 @@ async function storeCompanyName(companyName, startingCondition = null) {
       const startingMoney = startingCondition ? startingCondition.startingMoney : 1000000;
       addTransaction('Income', 'Initial Company Setup', startingMoney);
 
-      // Create initial staff members based on starting country
+      // Initialize staff array at the top
+      let staff = [];
       let staff1, staff2;
       const country = startingCondition ? startingCondition.name : 'France';
 
@@ -107,16 +108,30 @@ async function storeCompanyName(companyName, startingCondition = null) {
 
         case 'Germany':
           staff1 = createNewStaff(0.5, ['winery']);
-          staff1.firstName = 'Anna';
-          staff1.lastName = 'Weber';
+          staff1.firstName = 'Johann';
+          staff1.lastName = 'Weissburg';
           staff1.nationality = 'Germany';
-          staff1.name = 'Anna Weber';
+          staff1.name = 'Johann Weissburg';
           
-          staff2 = createNewStaff(0.5);
-          staff2.firstName = 'Hans';
-          staff2.lastName = 'Weber';
+          staff2 = createNewStaff(0.5, ['maintenance']);
+          staff2.firstName = 'Lukas';
+          staff2.lastName = 'Weissburg';
           staff2.nationality = 'Germany';
-          staff2.name = 'Hans Weber';
+          staff2.name = 'Lukas Weissburg';
+          
+          const staff3 = createNewStaff(0.5, ['sales']);
+          staff3.firstName = 'Elsa';
+          staff3.lastName = 'Weissburg';
+          staff3.nationality = 'Germany';
+          staff3.name = 'Elsa Weissburg';
+          
+          const staff4 = createNewStaff(0.5, ['administration']);
+          staff4.firstName = 'Klara';
+          staff4.lastName = 'Weissburg';
+          staff4.nationality = 'Germany';
+          staff4.name = 'Klara Weissburg';
+          
+          staff = [staff1, staff2, staff3, staff4];
           break;
 
         case 'Spain':
@@ -146,10 +161,10 @@ async function storeCompanyName(companyName, startingCondition = null) {
           staff2.nationality = 'United States';
           staff2.name = 'Robert Mondavi';
           break;
-      }
 
-      // Add staff to an array
-      const staff = [staff1, staff2];
+        default:
+          staff = [staff1, staff2];
+      }
 
       // Save staff data using saveStaff
       saveStaff(staff);

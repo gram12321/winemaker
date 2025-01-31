@@ -67,6 +67,44 @@ const COUNTRY_TUTORIALS = {
         }
       ]
     }
+  },
+  GERMANY: {
+    characterName: 'Johann Weissburg',
+    characterImage: '/assets/storypic/johann.webp',
+    welcomeTutorial: {
+      id: 'welcome',
+      title: 'Welcome to Your Winery!',
+      pages: [
+        {
+          title: 'Welcome to Your Winery!',
+          content: 'Welcome to your new winery! As you begin your journey into wine-making, you\'ll be guided by experienced professionals who will help you understand the art and science of wine production.'
+        },
+        {
+          title: 'Meeting Johann',
+          content: 'A distinguished figure stands among the vines, his weathered hands resting on an old wooden post. His eyes, sharp and observant, carry decades of wisdom as he studies the steep slopes of the vineyard. When he speaks, his voice is deep and deliberate, carrying both pride and humility.'
+        },
+        {
+          title: 'Johann\'s Introduction',
+          content: '"Willkommen! I am Johann Weissburg. Winemaking is not just a craft, it is our legacy. My father, and his father before him, tended these vines along the Mosel, watching the steep slopes turn golden in the autumn sun. Every grape carries the weight of our ancestors."'
+        },
+        {
+          title: 'Johann\'s Philosophy',
+          content: '"Some say German wines should be clean and precise—I say they should be full of character, like the land itself. The river, the slate soil, the cool air—all of it sings through our Riesling and Pinot Noir. The vines know what they need, if only we listen carefully enough."'
+        },
+        {
+          title: 'Meeting Lukas',
+          content: 'A younger man approaches, his steps energetic but measured. Lukas Weissburg, Johann\'s eldest son, carries a tablet in one hand and a refractometer in the other. His enthusiasm is palpable as he greets you.'
+        },
+        {
+          title: 'Lukas\'s Vision',
+          content: '"The world of wine is changing, and we must change with it. While my father tends the traditional ways, I see the potential for innovation. Temperature-controlled tanks, new varietals, global markets—there\'s so much we can explore while honoring our heritage."'
+        },
+        {
+          title: 'Getting Started',
+          content: '"Together, we\'ll blend tradition with innovation, creating wines that speak of both our past and our future. Shall we begin this journey into German winemaking? The vines are waiting!"'
+        }
+      ]
+    }
   }
 };
 
