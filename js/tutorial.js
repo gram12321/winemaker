@@ -1,10 +1,30 @@
-
 // Tutorial messages configuration
 const TUTORIALS = {
   WELCOME: {
     id: 'welcome',
     title: 'Welcome to Your Winery!',
-    content: 'Welcome to your new winery! This tutorial will help you get started with managing your vineyard and wine production.',
+    pages: [
+      {
+        title: 'Welcome to Your Winery!',
+        content: 'Welcome to your new winery! As you begin your journey into wine-making, you\'ll be guided by experienced professionals who will help you understand the art and science of wine production.'
+      },
+      {
+        title: 'Meeting Pierre',
+        content: 'A man in well-worn work clothes approaches you, his weathered face breaking into a warm smile. He speaks with a gentle French accent, his voice carrying years of experience.'
+      },
+      {
+        title: 'Pierre\'s Introduction',
+        content: '"Bonjour! I am Pierre Latosha, your vineyard manager. I come from the sun-soaked hills of Bordeaux, where my family has tended vines for generations. Wine farming isn\'t just my trade—it\'s my heritage, my passion."'
+      },
+      {
+        title: 'Pierre\'s Philosophy',
+        content: '"Each morning, I walk these rows before dawn, checking every vine, every leaf. You see, a vineyard is like a living story—each grape holds the essence of the sun, soil, and the dedication we pour into it. I\'ll be here to guide you through every season, every challenge."'
+      },
+      {
+        title: 'Getting Started',
+        content: '"Together, we\'ll manage your fields, plant new vines, and harvest the finest grapes. Remember, great wine begins in the vineyard. Shall we begin our journey into wine-making?"'
+      }
+    ],
     page: ['game', 'mainoffice']
   },
   VINEYARD: {
@@ -26,6 +46,8 @@ class TutorialManager {
   constructor() {
     this.seenTutorials = new Set(JSON.parse(localStorage.getItem('seenTutorials') || '[]'));
     this.tutorialsEnabled = localStorage.getItem('tutorialsEnabled') !== 'false';
+    this.currentPage = 0;
+    this.activeTutorial = null;
   }
 
   init() {
@@ -50,17 +72,26 @@ class TutorialManager {
     const tutorial = TUTORIALS[tutorialId];
     if (!tutorial) return;
 
+    this.activeTutorial = tutorialId;
+    this.currentPage = 0;
+    this.showCurrentPage();
+  }
+
+  showCurrentPage() {
+    const tutorial = TUTORIALS[this.activeTutorial];
+    const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
+    const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
+
     const overlay = document.getElementById('tutorialOverlay');
-    const content = document.getElementById('tutorialContent');
     
     overlay.innerHTML = `
       <div class="tutorial-wrapper">
         <div class="tutorial-image"></div>
         <div id="tutorialContent">
-          <h3>${tutorial.title}</h3>
-          <p>${tutorial.content}</p>
+          <h3>${page.title || tutorial.title}</h3>
+          <p>${page.content || tutorial.content}</p>
           <div class="tutorial-buttons">
-            <button class="btn btn-primary" onclick="tutorialManager.closeTutorial('${tutorialId}')">Got it!</button>
+            <button class="btn btn-primary" onclick="tutorialManager.closeTutorial('${this.activeTutorial}')">${isLastPage ? 'Got it!' : 'Next'}</button>
             <button class="btn btn-secondary" onclick="tutorialManager.disableAllTutorials()">Don't show tutorials</button>
           </div>
         </div>
@@ -71,8 +102,16 @@ class TutorialManager {
   }
 
   closeTutorial(tutorialId) {
-    this.markAsSeen(tutorialId);
-    document.getElementById('tutorialOverlay').style.display = 'none';
+    const tutorial = TUTORIALS[tutorialId];
+    if (tutorial.pages && this.currentPage < tutorial.pages.length - 1) {
+      this.currentPage++;
+      this.showCurrentPage();
+    } else {
+      this.markAsSeen(tutorialId);
+      this.activeTutorial = null;
+      this.currentPage = 0;
+      document.getElementById('tutorialOverlay').style.display = 'none';
+    }
   }
 
   disableAllTutorials() {
