@@ -707,10 +707,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
     flex-shrink: 0;
     margin-right: -75px;
     transform: translateY(-30px);
-    z-index: 2;
+    z-index: 1;
 }
 
 #tutorialContent {
+    z-index: 2;
     background-color: var(--color-background);
     padding: 2rem;
     border-radius: var(--radius-lg);
