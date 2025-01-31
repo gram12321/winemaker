@@ -3,10 +3,10 @@
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 
 ## Project Statistics
-- Total Files: 47
-- Total Lines of Code: 8041 #Updated line count
-- Primary Language: JavaScript
-- Secondary Languages: HTML, CSS
+- Total Files: 61 files
+- Total Lines of Code: 12,322
+- Primary Language: JavaScript (9,091 lines)
+- Secondary Languages: CSS (2,517 lines), HTML (714 lines)
 
 ## Features
 
@@ -22,6 +22,25 @@ A web-based simulation game where players manage their own winery, from vineyard
 - **Wine Orders**: Order generation and fulfillment system
 - **Prestige System**: Company reputation based on assets and performance
 
+### New Features
+- **Team Management**: Create and manage specialized teams for different vineyard operations
+- **Upgrade System**: Research and implement vineyard improvements
+- **Enhanced Building System**: Expanded building maintenance and tool management
+- **Advanced Farmland Health**: Dynamic field health system affected by management decisions
+- **Improved Financial Tools**: Enhanced bookkeeping and transaction tracking
+
+### Team Management System (teamManagementOverlay.js)
+- Team creation and assignment
+- Specialized role management
+- Team performance tracking
+- Team-based task allocation
+
+### Upgrade System (upgrade.js)
+- Research and development options
+- Vineyard improvements
+- Building upgrades
+- Technology advancements
+- Production efficiency enhancements
 
 ## Project Structure & Functions
 
@@ -119,14 +138,13 @@ A web-based simulation game where players manage their own winery, from vineyard
 - `decayPrestigeHit()`: Manages prestige recovery
 
 
-
 ## Known Issues
+- Sidebar toggle collapse state issues with main window spacing
+- Tooltip display issues in collapsed sidebar
 - Save/load functionality for owned land and staff needs improvement
 - Multiple building/maintenance tasks can be created for same building
 - Building name display issues in task boxes
 - Winery tasks don't properly update UI without page refresh
-- Save/load functionality issues with owned land and staff
-- Building name only shows in taskbox after page reload
 - Missing prestige hit for incomplete bookkeeping tasks
 
 ## Planned Improvements
@@ -169,87 +187,32 @@ Phase 9: Final Deployment    Optimize the game for deployment and host it on a w
 
 ### Complete File List
 ```
-JavaScript Core:
-19 ./js/database/firebase.js
-482 ./js/database/adminFunctions.js
-187 ./js/database/loadSidebar.js
-447 ./js/names.js
-251 ./js/buildings.js
-119 ./js/resource.js
-230 ./js/staff.js
-242 ./js/farmland.js
-176 ./js/sales.js
-158 ./js/endDay.js
-185 ./js/finance.js
-245 ./js/taskManager.js
-124 ./js/utils.js
-11 ./js/loadPanel.js
-86 ./js/administration.js
-80 ./js/console.js
-75 ./js/settings.js
-68 ./js/vineyard.js
-53 ./js/wineprocessing.js
+JavaScript Core (9,091 lines):
+├── js/database/ (784 lines)
+│   ├── firebase.js (19)
+│   ├── loadSidebar.js (198)
+│   └── adminFunctions.js (567)
+├── js/overlays/mainpages/ (1,731 lines)
+│   └── [10 files]
+├── js/overlays/ (3,140 lines)
+│   └── [15 files]
+└── js/core/ (3,436 lines)
+    └── [16 files]
 
-Overlays:
-167 ./js/overlays/crushingOverlay.js
-144 ./js/overlays/harvestOverlay.js
-142 ./js/overlays/plantingOverlay.js
-135 ./js/overlays/buyLandOverlay.js
-112 ./js/overlays/buildingOverlay.js
-102 ./js/overlays/hirestaffoverlay.js
-97 ./js/overlays/mainpages/buildingsoverlay.js
-96 ./js/overlays/mainpages/vineyardoverlay.js
-89 ./js/overlays/mainpages/wineryoverlay.js
-87 ./js/overlays/mainpages/inventoryoverlay.js
-74 ./js/overlays/mainpages/landoverlay.js
-69 ./js/overlays/farmlandOverlay.js
-67 ./js/overlays/selectContainerOverlay.js
-64 ./js/overlays/mainpages/financeoverlay.js
-54 ./js/overlays/mainpages/staffoverlay.js
-38 ./js/overlays/mainpages/adminoverlay.js
-7 ./js/overlays/mainpages/hideOverlays.js
-93 ./js/overlays/mainpages/financeoverlay.js
-202 ./js/overlays/mainpages/inventoryoverlay.js
-137 ./js/overlays/mainpages/wineryoverlay.js
-97 ./js/overlays/mainpages/buildingsoverlay.js
-60 ./js/overlays/mainpages/landoverlay.js
-276 ./js/overlays/mainpages/salesoverlay.js
-58 ./js/overlays/mainpages/staffoverlay.js
-113 ./js/overlays/mainpages/vineyardoverlay.js
-67 ./js/overlays/selectContainerOverlay.js
-107 ./js/overlays/fermentationOverlay.js
-75 ./js/overlays/showstaffoverlay.js
-336 ./js/overlays/crushingOverlay.js
-93 ./js/overlays/assignStaffOverlay.js
-203 ./js/overlays/buildingOverlay.js
-140 ./js/overlays/buyLandOverlay.js
-90 ./js/overlays/farmlandOverlay.js
-344 ./js/overlays/harvestOverlay.js
-140 ./js/overlays/hirestaffoverlay.js
-190 ./js/overlays/plantingOverlay.js
+CSS (2,517 lines):
+├── buildings.css (316)
+├── console.css (57)
+├── finance.css (108)
+├── overlay.css (677)
+├── sidebar.css (398)
+├── style.css (599)
+├── taskbar.css (299)
+└── variables.css (63)
 
-
-HTML:
-107 ./html/game.html
-73 ./html/settings.html
-30 ./html/sidebar.html
-10 ./html/panel.html
-3 ./html/consolePanel.html
-34 ./index.html
-
-CSS:
-257 ./css/overlay.css
-167 ./css/taskbar.css
-129 ./css/sidebar.css
-78 ./css/style.css
-73 ./css/buildings.css
-46 ./css/finance.css
-42 ./css/console.css
-108 ./css/finance.css
-47 ./css/variables.css
-42 ./css/console.css
-303 ./css/buildings.css
-550 ./css/overlay.css
-188 ./css/sidebar.css
-193 ./css/style.css
-189 ./css/taskbar.css
+HTML (714 lines):
+├── consolePanel.html (3)
+├── game.html (93)
+├── index.html (119)
+├── panel.html (25)
+├── settings.html (73)
+└── sidebar.html (67)
