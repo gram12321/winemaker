@@ -17,7 +17,7 @@ export const upgrades = [
       farmland: 1 // Require at least 1 available farmland
     },
     benefits: { farmlandHealth: 0.1 }, // Example benefits
-    taskParameters: { totalWork: 100, taskType: 'field' },  // Changed from taskManager.FIELD
+    taskParameters: { totalWork: 100, taskType: 'field' },  // Already correct
     completed: false, // Track completion status
     applicableTo: 'farmland' // Indicates this upgrade is applied to individual farmlands
   },
@@ -30,7 +30,7 @@ export const upgrades = [
       money: 5000000
     },
     benefits: { soilQuality: 0.2 },
-    taskParameters: { totalWork: 50, taskType: taskManager.FIELD },
+    taskParameters: { totalWork: 50, taskType: 'field' },  // Changed from taskManager.FIELD
     completed: false // Track completion status
   },
   {
@@ -42,7 +42,7 @@ export const upgrades = [
       money: 5000000
     },
     benefits: { soilQuality: 0.2 },
-    taskParameters: { totalWork: 1500, taskType: taskManager.FIELD },
+    taskParameters: { totalWork: 1500, taskType: 'field' },  // Changed from taskManager.FIELD
     completed: false // Track completion status
   }
   // Add more upgrades/research items as needed

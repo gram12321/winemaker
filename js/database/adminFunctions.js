@@ -1,18 +1,9 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
-import { displayFarmland } from '../overlays/mainpages/landoverlay.js'; // Ensure this import is present
+
 import { Staff, createNewStaff } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { inventoryInstance } from '/js/resource.js';
-import { performHarvest } from '../overlays/harvestOverlay.js'; // Import the centralized function
-import { performCrushing } from '../overlays/crushingOverlay.js'; // Import the centralized function
-import { performFermentation } from '../wineprocessing.js'; // Import the centralized function
-import { showHireStaffOverlay } from '../overlays/hirestaffoverlay.js';
-import { Building, updateBuildingCards, updateBuildButtonStates } from '../buildings.js';
-import { formatNumber, getFlagIconHTML } from '../utils.js';
-import { addConsoleMessage } from '../console.js';
-import { setupStaffWagesRecurringTransaction } from '../staff.js';
-import { updateUpgradesList } from '../overlays/mainpages/financeoverlay.js'; // Import the centralized function
-import { applyUpgradeBenefits, upgrades } from '../upgrade.js'; // Import the centralized function
+
 import taskManager from '../taskManager.js';
 
 let teams = []; // In-memory storage for teams
@@ -643,124 +634,11 @@ export function loadTasks() {
   taskData.forEach(task => {
     tasks.set(task.id, {
       ...task,
-      callback: getTaskCallback(task.name, task.taskType)
+      // Remove the callback assignment here - it will be handled by TaskManager
+      callback: null
     });
   });
   return tasks;
-}
-
-// Helper function to get the appropriate callback based on task name and type
-function getTaskCallback(taskName, taskType) {
-  switch (taskName.toLowerCase()) {
-    case 'upgrade':
-      return (target, params) => {
-        // Find the upgrade by name
-        const upgrade = upgrades.find(p => p.name.toLowerCase() === target.toLowerCase());
-        if (upgrade) {
-          // Apply benefits upon completion
-          applyUpgradeBenefits(upgrade);
-          upgrade.completed = true; // Mark as completed
-          addConsoleMessage(`Upgrade on ${upgrade.name} completed. Benefits applied.`);
-          updateUpgradesList(); // Refresh the upgrades list
-        } else {
-          console.warn(`Upgrade not found for task: ${target}`);
-        }
-      };
-    case 'building & maintenance':
-      return (target, params) => {
-        if (params.buildingCost) {  // This is a new building task
-          const newBuilding = new Building(target);
-          const buildings = loadBuildings();
-          buildings.push(newBuilding);
-          storeBuildings(buildings);
-          addConsoleMessage(`${target} has been built successfully. Cost: €${formatNumber(params.buildingCost)}. Capacity: ${newBuilding.capacity}`);
-        } else if (params.upgradeCost) {  // This is an upgrade task
-          const buildings = loadBuildings();
-          const buildingToUpgrade = buildings.find(b => b.name === target);
-          if (buildingToUpgrade) {
-            const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.tools || []);
-            building.upgrade();
-            const updatedBuildings = buildings.map(b => b.name === target ? building : b);
-            storeBuildings(updatedBuildings);
-            addConsoleMessage(`${target} has been upgraded to level ${building.level}. Cost: €${formatNumber(params.upgradeCost)}. New Capacity: ${building.capacity}`);
-          }
-        }
-        updateBuildingCards();
-        updateBuildButtonStates();
-      };
-    case 'planting':
-      return (target, progress, params) => {
-        // Planting callback logic
-        if (progress >= 1) {
-          const { selectedResource, selectedDensity, totalCost } = params;
-          updateFarmland(target.id, {
-            density: selectedDensity,
-            plantedResourceName: selectedResource,
-            vineAge: 0,
-            status: 'No yield in first season'
-          });
-          addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
-          displayFarmland(); // Now properly imported
-        }
-      };
-    case 'staff search':
-      return (target, params) => {
-        showHireStaffOverlay(params.numberOfCandidates);
-      };
-    case 'hiring process':
-      return (target, params) => {
-        const { staff, hiringExpense } = params;
-        const staffMembers = loadStaff();
-        staffMembers.push(staff);
-        saveStaff(staffMembers);
-        addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
-        const flagIconHTML = getFlagIconHTML(staff.nationality);
-        addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
-        setupStaffWagesRecurringTransaction();
-      };
-    case 'harvesting':
-      return (target, progress, params) => {
-        const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
-        params.lastProgress = progress;
-        performHarvest(target, target.id, params.selectedTool, harvestedAmount);
-      };
-    case 'crushing':
-      return (target, progress, params = {}) => {
-        if (!params.lastProgress) params.lastProgress = 0;
-        const mustAmount = params.totalGrapes * 0.6;
-        const processedAmount = mustAmount * (progress - params.lastProgress);
-        params.lastProgress = progress;
-        performCrushing(params.selectedStorages, processedAmount, params.totalGrapes);
-      };
-    case 'fermentation':
-      return (target, progress, params) => {
-        performFermentation(target, progress, params);
-      };
-    case 'uprooting':
-      return (target, progress) => {
-        if (progress >= 1) {
-          updateFarmland(target.id, {
-            plantedResourceName: null,
-            status: 'Ready for planting',
-            canBeCleared: 'Not ready',
-            density: null
-          });
-          displayFarmland();
-        }
-      };
-    case 'maintain':
-      return (target, params) => {
-        addConsoleMessage(`Maintenance of ${target.name} completed successfully.`);
-      };
-    case 'bookkeeping':
-      return (target, params) => {
-        const { prevSeason, prevYear } = params;
-        addConsoleMessage(`Bookkeeping for ${prevSeason} ${prevYear} completed successfully.`);
-      };
-    // Add more cases for other task types
-    default:
-      return () => console.warn(`No callback found for task: ${taskName}`);
-  }
 }
 
 export function getTransactions() {
