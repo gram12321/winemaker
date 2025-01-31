@@ -691,8 +691,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
     background-position: 60% 30%;
     background-size: 15% auto;
     border-radius: var(--radius-lg);
-    mask-image: radial-gradient(circle at center, black 100%, transparent 100%);
-    -webkit-mask-image: radial-gradient(circle at center, black 100%, transparent 100%);
 }
 
 #tutorialContent {
@@ -702,7 +700,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     box-shadow: var(--shadow-md);
     border: 1px solid var(--color-accent);
     max-width: 400px;
-    margin-right: 25%;
+    margin-right: 15%;
     position: relative;
 }
 
