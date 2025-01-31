@@ -1,5 +1,5 @@
 import { createNewStaff, setupStaffWagesRecurringTransaction  } from '../staff.js';
-import { getFlagIconHTML, skillLevels, getSkillLevelInfo  } from '../utils.js';
+import { getFlagIconHTML, skillLevels, getSkillLevelInfo, formatNumber, getColorClass } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
@@ -61,6 +61,10 @@ function createHireStaffHTML(createdStaffOptions) {
                                             <td>Annual Cost</td>
                                             <td>€${staff.wage * 12}</td>
                                         </tr>
+                                        <tr>
+                                            <td>Skill Level</td>
+                                            <td>${getSkillLevelInfo(staff.skillLevel).formattedName}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -68,11 +72,11 @@ function createHireStaffHTML(createdStaffOptions) {
                                 <h4>Skills & Expertise</h4>
                                 <table class="skills-table">
                                     <tbody>
-                                        <tr><td>Field Work</td><td class="${getSkillLevelClass(staff.skills.field.field)}">${staff.skills.field.field}</td></tr>
-                                        <tr><td>Winery Operations</td><td class="${getSkillLevelClass(staff.skills.winery.winery)}">${staff.skills.winery.winery}</td></tr>
-                                        <tr><td>Administration</td><td class="${getSkillLevelClass(staff.skills.administration.administration)}">${staff.skills.administration.administration}</td></tr>
-                                        <tr><td>Sales Management</td><td class="${getSkillLevelClass(staff.skills.sales.sales)}">${staff.skills.sales.sales}</td></tr>
-                                        <tr><td>Maintenance</td><td class="${getSkillLevelClass(staff.skills.maintenance.maintenance)}">${staff.skills.maintenance.maintenance}</td></tr>
+                                        <tr><td>Field Work</td><td class="${getColorClass(staff.skills.field.field)}">${formatNumber(staff.skills.field.field * 100)}%</td></tr>
+                                        <tr><td>Winery Operations</td><td class="${getColorClass(staff.skills.winery.winery)}">${formatNumber(staff.skills.winery.winery * 100)}%</td></tr>
+                                        <tr><td>Administration</td><td class="${getColorClass(staff.skills.administration.administration)}">${formatNumber(staff.skills.administration.administration * 100)}%</td></tr>
+                                        <tr><td>Sales Management</td><td class="${getColorClass(staff.skills.sales.sales)}">${formatNumber(staff.skills.sales.sales * 100)}%</td></tr>
+                                        <tr><td>Maintenance</td><td class="${getColorClass(staff.skills.maintenance.maintenance)}">${formatNumber(staff.skills.maintenance.maintenance * 100)}%</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -134,12 +138,4 @@ function hireSelectedStaff(staff) {
             }
         }
     );
-}
-
-function getSkillLevelClass(skillValue) {
-    return skillValue > 0.75 ? 'high' : skillValue > 0.5 ? 'medium' : 'low';
-}
-
-function formatNumber(number) {
-    return number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 }

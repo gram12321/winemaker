@@ -56,14 +56,13 @@ export function bookkeeping() {
 
   // Create new task with combined work
   const totalWork = baseWork + spilloverWork;
-  const taskName = `Bookkeeping ${prevSeason} ${prevYear}`;
 
   taskManager.addCompletionTask(
-    taskName,
+    'Bookkeeping',  // Changed from taskName to just 'Bookkeeping'
     TaskType.administration,
     totalWork,
     (target, params) => {
-      addConsoleMessage(`${taskName} completed successfully!`);
+      addConsoleMessage(`Bookkeeping ${params.prevSeason} ${params.prevYear} completed successfully!`);
     },
     null,
     { prevSeason, prevYear }
@@ -112,11 +111,11 @@ export function maintenanceBuildings() {
         const taskName = `Maintain ${building.name}`;
 
         taskManager.addCompletionTask(
-            taskName,
+            'Maintain',  // Changed from taskName to just 'Maintain'
             TaskType.maintenance,
             totalWork,
             (target, params) => {
-                addConsoleMessage(`${taskName} completed successfully!`);
+                addConsoleMessage(`Maintenance of ${building.name} completed successfully!`);
             },
             building,
             { year }

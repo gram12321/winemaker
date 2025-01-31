@@ -747,6 +747,15 @@ function getTaskCallback(taskName, taskType) {
           displayFarmland();
         }
       };
+    case 'maintain':
+      return (target, params) => {
+        addConsoleMessage(`Maintenance of ${target.name} completed successfully.`);
+      };
+    case 'bookkeeping':
+      return (target, params) => {
+        const { prevSeason, prevYear } = params;
+        addConsoleMessage(`Bookkeeping for ${prevSeason} ${prevYear} completed successfully.`);
+      };
     // Add more cases for other task types
     default:
       return () => console.warn(`No callback found for task: ${taskName}`);
