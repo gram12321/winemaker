@@ -53,12 +53,17 @@ class TutorialManager {
     const overlay = document.getElementById('tutorialOverlay');
     const content = document.getElementById('tutorialContent');
     
-    content.innerHTML = `
-      <h3>${tutorial.title}</h3>
-      <p>${tutorial.content}</p>
-      <div class="tutorial-buttons">
-        <button class="btn btn-primary" onclick="tutorialManager.closeTutorial('${tutorialId}')">Got it!</button>
-        <button class="btn btn-secondary" onclick="tutorialManager.disableAllTutorials()">Don't show tutorials</button>
+    overlay.innerHTML = `
+      <div class="tutorial-wrapper">
+        <div class="tutorial-image"></div>
+        <div id="tutorialContent">
+          <h3>${tutorial.title}</h3>
+          <p>${tutorial.content}</p>
+          <div class="tutorial-buttons">
+            <button class="btn btn-primary" onclick="tutorialManager.closeTutorial('${tutorialId}')">Got it!</button>
+            <button class="btn btn-secondary" onclick="tutorialManager.disableAllTutorials()">Don't show tutorials</button>
+          </div>
+        </div>
       </div>
     `;
     
