@@ -2,10 +2,15 @@
 import { addTransaction } from '/js/finance.js';
 import { incrementWeek } from '/js/endDay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
+import tutorialManager from '/js/tutorial.js';
 
 export function showMainOfficeOverlay() {
     const overlay = showMainViewOverlay(createMainOfficeOverlayHTML());
     setupMainOfficeEventListeners(overlay);
+    
+    if (tutorialManager.shouldShowTutorial('WELCOME')) {
+        tutorialManager.showTutorial('WELCOME');
+    }
 }
 
 function createMainOfficeOverlayHTML() {
