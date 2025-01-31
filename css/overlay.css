@@ -688,9 +688,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
     z-index: 1500;
     background-image: url('/assets/storypic/pierre.webp');
     background-repeat: no-repeat;
-    background-position: 60% 30%;
+    background-position: 60% 20%;
     background-size: 15% auto;
-    border-radius: var(--radius-lg);
+    border-radius: 25px;
 }
 
 #tutorialContent {
@@ -700,7 +700,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     box-shadow: var(--shadow-md);
     border: 1px solid var(--color-accent);
     max-width: 400px;
-    margin-right: 15%;
+    margin-right: 25%;
     position: relative;
 }
 
