@@ -1,7 +1,6 @@
 import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
-import { calculateWinePrice } from '/js/sales.js';
+import { calculateWinePrice, sellWines, sellOrderWine } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
-import { sellWines, sellOrderWine } from '/js/sales.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 import { updateAllDisplays } from '/js/displayManager.js';
@@ -121,7 +120,7 @@ function refreshDisplay() {
 export function displayWineOrders() {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
-    currentOrders = loadWineOrders();
+    currentOrders = loadWineOrders();  // Changed from getCurrentWineOrders
 
     setupEventListeners();
     populateResourceFilter();

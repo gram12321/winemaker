@@ -296,44 +296,21 @@ function saveInventory() {
 }
 
 
-
-let currentWineOrders = [];
-
 export function saveWineOrders(wineOrders) {
-  currentWineOrders = wineOrders;
   localStorage.setItem('wineOrders', JSON.stringify(wineOrders));
 }
 
 export function loadWineOrders() {
-  if (currentWineOrders.length > 0) {
-    return currentWineOrders;
-  }
-
   const savedWineOrders = localStorage.getItem('wineOrders');
   if (savedWineOrders) {
     try {
-      currentWineOrders = JSON.parse(savedWineOrders);
+      return JSON.parse(savedWineOrders);
     } catch (error) {
       console.error("Failed to parse wine orders from localStorage.", error);
-      currentWineOrders = [];
+      return [];
     }
   }
-  return currentWineOrders;
-}
-
-export function removeWineOrder(index) {
-  const wineOrders = loadWineOrders();
-  if (index >= 0 && index < wineOrders.length) {
-    wineOrders.splice(index, 1);
-    saveWineOrders(wineOrders);
-    return true;
-  }
-  return false;
-}
-
-export function addWineOrder(order) {
-  currentWineOrders.push(order);
-  saveWineOrders(currentWineOrders);
+  return [];
 }
 
 // Functions to save and load buildings from localStorage

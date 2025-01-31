@@ -2,10 +2,31 @@ import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
 import { setPrestigeHit, getPrestigeHit } from './database/adminFunctions.js';
-import { loadWineOrders, removeWineOrder, addWineOrder } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { displayWineCellarInventory } from './overlays/mainpages/salesoverlay.js';
 import { calculateRealPrestige } from './company.js';
+import { loadWineOrders, saveWineOrders } from './database/adminFunctions.js';
+
+// In-memory cache of wine orders
+let currentWineOrders = [];
+
+// Remove getCurrentWineOrders function
+
+export function removeWineOrder(index) {
+    const wineOrders = loadWineOrders();
+    if (index >= 0 && index < wineOrders.length) {
+        wineOrders.splice(index, 1);
+        saveWineOrders(wineOrders);
+        return true;
+    }
+    return false;
+}
+
+export function addWineOrder(order) {
+    const wineOrders = loadWineOrders();
+    wineOrders.push(order);
+    saveWineOrders(wineOrders);
+}
 
 export function sellWines(resourceName) {
     const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
