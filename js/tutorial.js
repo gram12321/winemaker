@@ -2,18 +2,20 @@
 const COUNTRY_TUTORIALS = {
   FRANCE: {
     characterName: 'Pierre Latosha',
-    characterImage: '/assets/storypic/pierre.webp',
+    defaultImage: '/assets/storypic/pierre.webp',
     welcomeTutorial: {
       id: 'welcome',
       title: 'Welcome to Your Winery!',
       pages: [
         {
           title: 'Welcome to Your Winery!',
-          content: 'Welcome to your new winery! As you begin your journey into wine-making, you\'ll be guided by experienced professionals who will help you understand the art and science of wine production.'
+          content: 'Welcome to your new winery! As you begin your journey into wine-making, you\'ll be guided by experienced professionals who will help you understand the art and science of wine production.',
+          image: '/assets/storypic/camille.webp' // Optional custom image
         },
         {
           title: 'Meeting Pierre',
           content: 'A man in well-worn work clothes approaches you, his weathered face breaking into a warm smile. He speaks with a gentle French accent, his voice carrying years of experience.'
+          // No image specified - will use defaultImage
         },
         {
           title: 'Pierre\'s Introduction',
@@ -36,7 +38,7 @@ const COUNTRY_TUTORIALS = {
   },
   ITALY: {
     characterName: 'Roberto De Luca',
-    characterImage: '/assets/storypic/roberto.webp',
+    defaultImage: '/assets/storypic/roberto.webp',
     welcomeTutorial: {
       id: 'welcome',
       title: 'Welcome to Your Winery!',
@@ -70,7 +72,7 @@ const COUNTRY_TUTORIALS = {
   },
   GERMANY: {
     characterName: 'Johann Weissburg',
-    characterImage: '/assets/storypic/johann.webp',
+    defaultImage: '/assets/storypic/johann.webp',
     welcomeTutorial: {
       id: 'welcome',
       title: 'Welcome to Your Winery!',
@@ -93,7 +95,8 @@ const COUNTRY_TUTORIALS = {
         },
         {
           title: 'Meeting Lukas',
-          content: 'A younger man approaches, his steps energetic but measured. Lukas Weissburg, Johann\'s eldest son, carries a tablet in one hand and a refractometer in the other. His enthusiasm is palpable as he greets you.'
+          content: 'A younger man approaches, his steps energetic but measured. Lukas Weissburg, Johann\'s eldest son, carries a tablet in one hand and a refractometer in the other. His enthusiasm is palpable as he greets you.',
+          image: '/assets/storypic/lukas.webp' // Optional custom image
         },
         {
           title: 'Lukas\'s Vision',
@@ -180,9 +183,12 @@ class TutorialManager {
 
     const overlay = document.getElementById('tutorialOverlay');
     
+    // Use page-specific image if available, otherwise fall back to default country image
+    const imageUrl = page.image || this.countryConfig.defaultImage;
+    
     overlay.innerHTML = `
       <div class="tutorial-wrapper">
-        <div class="tutorial-image" style="background-image: url('${this.countryConfig.characterImage}')"></div>
+        <div class="tutorial-image" style="background-image: url('${imageUrl}')"></div>
         <div id="tutorialContent">
           <h3>${page.title || tutorial.title}</h3>
           <p>${page.content || tutorial.content}</p>
