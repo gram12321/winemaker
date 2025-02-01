@@ -743,3 +743,18 @@ input[type="range"]::-webkit-slider-thumb:hover {
     max-width: 400px;
     position: relative;
 }
+
+.buy-farmland-btn {
+    position: relative;
+    z-index: 2001;
+    background-color: var(--color-primary);
+    border-color: var(--color-accent);
+    isolation: isolate;
+}
+
+.buy-farmland-btn:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
