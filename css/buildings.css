@@ -22,6 +22,7 @@
   overflow-y: auto;
 }
 
+/* Layout Grid */
 .building-layout-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -33,33 +34,6 @@
   .building-layout-grid {
     grid-template-columns: 1fr;
   }
-}
-
-.tool-header {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Building Button Styles */
-.overlay-section-btn {
-  background-color: var(--color-accent) !important;
-  border-color: var(--color-primary) !important;
-  color: var(--panel-text) !important;
-}
-
-.overlay-section-btn:hover {
-  background-color: var(--color-primary) !important;
-  border-color: var(--color-accent) !important;
-  color: var(--panel-text) !important;
-}
-
-.overlay-section-btn:disabled {
-  background-color: rgba(197, 165, 114, 0.5) !important;
-  border-color: rgba(114, 47, 55, 0.3) !important;
-  color: rgba(255, 255, 255, 0.5) !important;
-  cursor: not-allowed !important;
 }
 
 /* Building Card Styles */
@@ -76,13 +50,6 @@
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   overflow: hidden;
-}
-
-.building-card h4 {
-  margin-top: 0;
-  font-size: 1.2em;
-  color: var(--accent-color);
-  font-weight: 600;
 }
 
 .building-card:hover {
@@ -106,7 +73,6 @@
   padding: 5px;
 }
 
-/* Buildings overlay */
 .unbuilt-card {
   opacity: 0.6;
   pointer-events: none;
@@ -114,19 +80,45 @@
   color: var(--panel-text);
 }
 
+/* Card Styles */
+.card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
 
+.card-header {
+  background-color: var(--color-primary) !important;
+  color: var(--panel-text);
+  padding: 1rem;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.card-header h3 {
+  color: var(--panel-text);
+  margin: 0;
+  font-weight: 500;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Tool Grid and Columns */
 .tool-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1rem;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
 }
 
 .tool-column {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  transition: all 0.3s ease;
+  gap: var(--spacing-md);
 }
 
 .tool-column-header {
@@ -152,6 +144,34 @@
   transform: rotate(-90deg);
 }
 
+.tool-column-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Tool Container and Stats */
+.tool-container {
+  text-align: left;
+  border: 2px solid var(--color-primary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s;
+  margin-bottom: var(--spacing-sm);
+}
+
+.tool-container:hover {
+  transform: translateY(-2px);
+}
+
+.tool-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+
 .collapsible-content {
   transition: all 0.3s ease;
   max-height: 1000px;
@@ -166,25 +186,6 @@
   padding: 0;
 }
 
-.tool-column-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.tool-container {
-  text-align: left;
-  border: 2px solid var(--color-primary);
-  padding: 15px;
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.05);
-  transition: transform 0.2s;
-}
-
-.tool-container:hover {
-  transform: translateY(-2px);
-}
-
 .tool-stats {
   color: #aaa;
   font-size: 0.85rem;
@@ -196,124 +197,23 @@
   padding: 0 4px;
 }
 
-/* Building simulator container */
-.building-simulator {
-  padding: 20px;
-  background-color: var(--color-background);
-  position: relative;
-  border-radius: var(--radius-md);
+/* Button Styles */
+.overlay-section-btn {
+  background-color: var(--color-accent) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--panel-text) !important;
 }
 
-.button-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+.overlay-section-btn:hover {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-accent) !important;
 }
 
-.card {
-  background-color: var(--color-background);
-  border: 1px solid var(--color-primary);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-}
-
-.card-header {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  padding: 1rem;
-  border-top-left-radius: var(--radius-md);
-  border-top-right-radius: var(--radius-md);
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-/* Capacity grid within the building */
-.capacity-grid {
-  padding: 15px;
-  background: rgba(114, 47, 55, 0.05);
-  border-radius: var(--radius-md);
-}
-
-.capacity-header {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: var(--color-text);
-  text-align: center;
-}
-
-.capacity-grid-container {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-}
-
-.capacity-cell {
-  aspect-ratio: 1;
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.capacity-cell:hover {
-  transform: scale(1.05);
-}
-
-.tool-info {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.tool-tooltip {
-  display: none;
-  position: absolute;
-  bottom: 120%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--color-background);
-  border: 1px solid var(--color-primary);
-  padding: 8px;
-  border-radius: 4px;
-  font-size: 0.85em;
-  white-space: nowrap;
-  z-index: 100;
-  color: var(--color-text);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.tool-info:hover .tool-tooltip {
-  display: block;
-}
-
-.empty-slot {
-  color: var(--color-text);
-  opacity: 0.5;
-  font-size: 0.8em;
-  text-align: center;
-}
-
-.tool-name {
-  color: var(--color-text);
-  font-size: 0.75em;
-  text-align: center;
-  margin-top: 4px;
-  opacity: 0.8;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2em;
-  max-height: 1.2em;
+.overlay-section-btn:disabled {
+  background-color: rgba(197, 165, 114, 0.5) !important;
+  border-color: rgba(114, 47, 55, 0.3) !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  cursor: not-allowed !important;
 }
 
 .add-tool-button {
@@ -337,7 +237,27 @@
   cursor: not-allowed;
 }
 
-/* Square cell styles */
+/* Capacity Grid */
+.capacity-grid {
+  padding: 15px;
+  background: rgba(114, 47, 55, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.capacity-header {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.capacity-grid-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
 .capacity-cell {
   display: flex;
   flex-direction: column;
@@ -350,6 +270,12 @@
   background-color: var(--color-background);
   width: 70px;
   height: 70px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.capacity-cell:hover {
+  transform: scale(1.05);
 }
 
 .cell-content {
@@ -360,11 +286,57 @@
   height: 40px;
 }
 
+/* Tool Info and Tooltips */
+.tool-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .tool-info img {
   width: 35px !important;
   height: 35px !important;
 }
 
-.tool-column h4 {
-  margin: 0;
+.tool-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-background);
+  border: 1px solid var(--color-primary);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  z-index: 100;
+  color: var(--color-text);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tool-info:hover .tool-tooltip {
+  display: block;
+}
+
+.tool-name {
+  color: var(--color-text);
+  font-size: 0.75em;
+  text-align: center;
+  margin-top: 4px;
+  opacity: 0.8;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2em;
+  max-height: 1.2em;
+}
+
+.empty-slot {
+  color: var(--color-text);
+  opacity: 0.5;
+  font-size: 0.8em;
+  text-align: center;
 }
