@@ -180,13 +180,11 @@ class TutorialManager {
     const tutorial = this.getTutorial(this.activeTutorial);
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
-
-    const overlay = document.getElementById('tutorialOverlay');
     
     // Use page-specific image if available, otherwise fall back to default country image
     const imageUrl = page.image || this.countryConfig.defaultImage;
     
-    overlay.innerHTML = `
+    const content = `
       <div class="tutorial-wrapper">
         <div class="tutorial-image" style="background-image: url('${imageUrl}')"></div>
         <div id="tutorialContent">
@@ -200,7 +198,10 @@ class TutorialManager {
       </div>
     `;
     
-    overlay.style.display = 'flex';
+    import('./overlays/overlayUtils.js').then(({ showStandardOverlay, hideOverlay }) => {
+      hideOverlay('#tutorialOverlay');
+      showStandardOverlay(content);
+    });
   }
 
   closeTutorial(tutorialId) {
@@ -212,7 +213,9 @@ class TutorialManager {
       this.markAsSeen(tutorialId);
       this.activeTutorial = null;
       this.currentPage = 0;
-      document.getElementById('tutorialOverlay').style.display = 'none';
+      import('./overlays/overlayUtils.js').then(({ hideOverlay }) => {
+        hideOverlay('#tutorialOverlay');
+      });
     }
   }
 

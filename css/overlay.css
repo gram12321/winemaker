@@ -675,14 +675,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
     flex-direction: column;
 }
 
-#tutorialOverlay {
+.tutorial-overlay {
     position: fixed;
     width: 100vw;
     height: 100vh;
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1500;
