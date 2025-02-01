@@ -210,6 +210,9 @@ class TutorialManager {
 
   highlightElement(elementId) {
     console.log('Highlighting element:', elementId);
+    // Remove any existing highlight overlays first
+    this.clearHighlight();
+    
     const highlightOverlay = document.createElement('div');
     highlightOverlay.className = 'highlight-overlay';
     document.body.appendChild(highlightOverlay);
@@ -219,23 +222,40 @@ class TutorialManager {
       console.warn('Element not found:', elementId);
       return;
     }
-    if (element) {
+
+    // Create a function to update highlight position
+    const updateHighlight = () => {
       const rect = element.getBoundingClientRect();
-      const highlight = document.createElement('div');
-      highlight.className = 'highlight-element';
       highlight.style.top = `${rect.top}px`;
       highlight.style.left = `${rect.left}px`;
       highlight.style.width = `${rect.width}px`;
       highlight.style.height = `${rect.height}px`;
-      highlightOverlay.appendChild(highlight);
-    }
+    };
+
+    const highlight = document.createElement('div');
+    highlight.className = 'highlight-element';
+    highlightOverlay.appendChild(highlight);
+    
+    // Initial position
+    updateHighlight();
+    
+    // Update position on resize and sidebar toggle
+    const resizeObserver = new ResizeObserver(updateHighlight);
+    resizeObserver.observe(element);
+    
+    // Store observer reference for cleanup
+    highlightOverlay.dataset.resizeObserver = resizeObserver;
   }
 
   clearHighlight() {
-    const highlightOverlay = document.querySelector('.highlight-overlay');
-    if (highlightOverlay) {
-      highlightOverlay.remove();
-    }
+    const highlightOverlays = document.querySelectorAll('.highlight-overlay');
+    highlightOverlays.forEach(overlay => {
+      // Disconnect any resize observers
+      if (overlay.dataset.resizeObserver) {
+        overlay.dataset.resizeObserver.disconnect();
+      }
+      overlay.remove();
+    });
   }
 
   showCurrentPage() {
