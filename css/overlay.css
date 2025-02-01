@@ -699,7 +699,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     align-items: center;
     max-width: 800px;
     margin: 0 20px;
-    background: none;
+    background: transparent;
     z-index: 2001;
 }
 
