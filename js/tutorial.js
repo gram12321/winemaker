@@ -262,9 +262,11 @@ class TutorialManager {
       document.body.appendChild(overlay);
     }
 
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.classList.add('tutorial-highlight');
+    // Handle sidebar specifically
+    if (elementId === 'sidebar-wrapper') {
+      const sidebarHighlight = document.createElement('div');
+      sidebarHighlight.className = 'tutorial-highlight-sidebar';
+      document.body.appendChild(sidebarHighlight);
     }
   }
 
@@ -275,9 +277,11 @@ class TutorialManager {
       overlay.remove();
     }
     
-    document.querySelectorAll('.tutorial-highlight').forEach(el => {
-      el.classList.remove('tutorial-highlight');
-    });
+    // Remove sidebar highlight
+    const sidebarHighlight = document.querySelector('.tutorial-highlight-sidebar');
+    if (sidebarHighlight) {
+      sidebarHighlight.remove();
+    }
   }
 
   disableAllTutorials() {
