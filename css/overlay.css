@@ -681,7 +681,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     height: 100vh;
     top: 0;
     left: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: transparent;
     display: none;
     justify-content: center;
     align-items: center;
@@ -740,6 +740,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
   pointer-events: none;
+}
+
+.highlight-element::before {
+  background: transparent;
 }
 
 .highlight-element {
