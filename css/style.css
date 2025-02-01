@@ -597,29 +597,3 @@ input[type="radio"]:hover {
     margin-top: 0.5rem;
 }
 
-/* Tutorial styles */
-.tutorial-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 1300;
-}
-
-.tutorial-highlight-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: var(--sidebar-width);
-  height: 100vh;
-  background: transparent;
-  z-index: 1400;
-  pointer-events: all;
-  box-shadow: 0 0 0 4px rgba(197, 165, 114, 0.5);
-}
-
-body.sidebar-collapsed .tutorial-highlight-sidebar {
-  width: var(--sidebar-collapsed-width);
-}

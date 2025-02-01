@@ -187,25 +187,63 @@ class TutorialManager {
   }
 
   showTutorial(tutorialId) {
-    if (!this.shouldShowTutorial(tutorialId)) return;
+    console.log('Attempting to show tutorial:', tutorialId);
+    console.log('Tutorials enabled:', this.tutorialsEnabled);
+    console.log('Tutorial seen:', this.seenTutorials.has(tutorialId));
+    
+    if (!this.shouldShowTutorial(tutorialId)) {
+      console.log('Tutorial skipped - already seen or tutorials disabled');
+      return;
+    }
 
     const tutorial = this.getTutorial(tutorialId);
-    if (!tutorial) return;
+    if (!tutorial) {
+      console.log('Tutorial not found:', tutorialId);
+      return;
+    }
 
+    console.log('Starting tutorial:', tutorialId);
     this.activeTutorial = tutorialId;
     this.currentPage = 0;
     this.showCurrentPage();
+  }
+
+  highlightElement(elementId) {
+    console.log('Highlighting element:', elementId);
+    const highlightOverlay = document.createElement('div');
+    highlightOverlay.className = 'highlight-overlay';
+    document.body.appendChild(highlightOverlay);
+
+    const element = document.getElementById(elementId);
+    if (!element) {
+      console.warn('Element not found:', elementId);
+      return;
+    }
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const highlight = document.createElement('div');
+      highlight.className = 'highlight-element';
+      highlight.style.top = `${rect.top}px`;
+      highlight.style.left = `${rect.left}px`;
+      highlight.style.width = `${rect.width}px`;
+      highlight.style.height = `${rect.height}px`;
+      highlightOverlay.appendChild(highlight);
+    }
+  }
+
+  clearHighlight() {
+    const highlightOverlay = document.querySelector('.highlight-overlay');
+    if (highlightOverlay) {
+      highlightOverlay.remove();
+    }
   }
 
   showCurrentPage() {
     const tutorial = this.getTutorial(this.activeTutorial);
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
-    
-    // Clear previous highlight
+
     this.clearHighlight();
-    
-    // Add highlight if specified
     if (page.highlightElement) {
       this.highlightElement(page.highlightElement);
     }
@@ -233,56 +271,34 @@ class TutorialManager {
   }
 
   closeTutorial(tutorialId) {
+    console.log('Closing tutorial:', tutorialId);
     const tutorial = this.getTutorial(tutorialId);
     if (tutorial.pages && this.currentPage < tutorial.pages.length - 1) {
+      console.log('Moving to next page in tutorial');
       this.currentPage++;
       this.showCurrentPage();
     } else {
+      console.log('Tutorial completed:', tutorialId);
       this.markAsSeen(tutorialId);
       this.activeTutorial = null;
       this.currentPage = 0;
-      const tutorialOverlay = document.getElementById('tutorialOverlay');
-      tutorialOverlay.style.display = 'none';
-      this.clearHighlight(); // Clear any existing overlays
+      document.getElementById('tutorialOverlay').style.display = 'none';
+      this.clearHighlight();
       
       // Start UI tutorial after welcome tutorial
-      if (tutorialId === 'WELCOME') {
+      if (tutorialId.toLowerCase() === 'welcome') {
+        console.log('Welcome tutorial completed, attempting to start UI_INTRO');
+        // Reset tutorial seen status for UI_INTRO to ensure it shows
+        this.seenTutorials.delete('UI_INTRO');
+        this.tutorialsEnabled = true; // Ensure tutorials are enabled
+        
         setTimeout(() => {
+          console.log('Attempting to start UI_INTRO tutorial');
+          console.log('Tutorial config:', this.getTutorial('UI_INTRO'));
+          console.log('Should show tutorial:', this.shouldShowTutorial('UI_INTRO'));
           this.showTutorial('UI_INTRO');
         }, 500);
       }
-    }
-  }
-
-  highlightElement(elementId) {
-    // Create or update overlay
-    let overlay = document.getElementById('tutorialBackgroundOverlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'tutorialBackgroundOverlay';
-      overlay.className = 'tutorial-overlay';
-      document.body.appendChild(overlay);
-    }
-
-    // Handle sidebar specifically
-    if (elementId === 'sidebar-wrapper') {
-      const sidebarHighlight = document.createElement('div');
-      sidebarHighlight.className = 'tutorial-highlight-sidebar';
-      document.body.appendChild(sidebarHighlight);
-    }
-  }
-
-  clearHighlight() {
-    // Remove overlay
-    const overlay = document.getElementById('tutorialBackgroundOverlay');
-    if (overlay) {
-      overlay.remove();
-    }
-    
-    // Remove sidebar highlight
-    const sidebarHighlight = document.querySelector('.tutorial-highlight-sidebar');
-    if (sidebarHighlight) {
-      sidebarHighlight.remove();
     }
   }
 
