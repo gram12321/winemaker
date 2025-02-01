@@ -160,11 +160,11 @@ class TutorialManager {
     }
     this.countryConfig = COUNTRY_TUTORIALS[this.country];
 
-    // Create single highlight overlay
-    this.highlightOverlay = document.createElement('div');
-    this.highlightOverlay.className = 'highlight-overlay fade-overlay';
-    this.highlightOverlay.style.display = 'none';
-    document.body.appendChild(this.highlightOverlay);
+    // Create single overlay for both fade and highlight effects
+    this.overlay = document.createElement('div');
+    this.overlay.className = 'fade-overlay';
+    this.overlay.style.display = 'none';
+    document.body.appendChild(this.overlay);
 
     console.log('Tutorial Manager initialized with country:', this.country);
   }
@@ -215,8 +215,9 @@ class TutorialManager {
   }
   highlightElement(elementId) {
     console.log('Highlighting element:', elementId);
-    this.highlightOverlay.innerHTML = ''; // Clear previous highlights
-    this.highlightOverlay.style.display = 'block';
+    this.overlay.innerHTML = ''; // Clear previous highlights
+    this.overlay.style.display = 'block';
+    this.overlay.classList.add('active');
 
     const element = document.getElementById(elementId);
     if (!element) {
@@ -235,8 +236,9 @@ class TutorialManager {
   }
 
   clearHighlight() {
-    this.highlightOverlay.style.display = 'none';
-    this.highlightOverlay.innerHTML = '';
+    this.overlay.style.display = 'none';
+    this.overlay.classList.remove('active');
+    this.overlay.innerHTML = '';
   }
 
   showCurrentPage() {

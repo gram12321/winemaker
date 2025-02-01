@@ -43,6 +43,17 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .fade-overlay {
     background-color: rgba(0, 0, 0, 0.7);
     pointer-events: none;
+    z-index: 1499;
+}
+
+.fade-overlay.active {
+    pointer-events: auto;
+}
+
+.highlight-element {
+    background: transparent;
+    box-shadow: none;
+    border: 2px solid var(--color-accent);
 }
 
 .overlay {
