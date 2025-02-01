@@ -113,42 +113,6 @@ const COUNTRY_TUTORIALS = {
 
 // General tutorials that don't change with country
 const GENERAL_TUTORIALS = {
-  UI_INTRO: {
-    id: 'ui_intro',
-    title: 'Getting Started',
-    pages: [
-      {
-        title: 'Navigation Menu',
-        content: 'This is your main navigation menu. Here you can access different areas of your winery. Let\'s explore what each section does.',
-        highlightElement: 'sidebar-wrapper'
-      },
-      {
-        title: 'Main Office',
-        content: 'The Main Office gives you an overview of your winery\'s current status and important notifications.',
-        highlightElement: 'main-office'
-      },
-      {
-        title: 'Vineyard Management',
-        content: 'In the Vineyard section, you\'ll manage your grape vines, from planting to harvesting.',
-        highlightElement: 'vineyard'
-      },
-      {
-        title: 'Winery Operations',
-        content: 'The Winery section is where your grapes become wine. Here you\'ll manage crushing, fermentation, and aging processes.',
-        highlightElement: 'winery'
-      },
-      {
-        title: 'Sales & Marketing',
-        content: 'In the Sales section, you\'ll manage your wine inventory and fulfill customer orders.',
-        highlightElement: 'sales'
-      },
-      {
-        title: 'Staff Management',
-        content: 'The Staff section lets you hire and manage your workforce. Skilled workers are crucial for quality wine production.',
-        highlightElement: 'staff'
-      }
-    ]
-  },
   VINEYARD: {
     id: 'vineyard',
     title: 'Vineyard Management',
@@ -202,66 +166,20 @@ class TutorialManager {
   }
 
   showTutorial(tutorialId) {
-    console.log('Attempting to show tutorial:', tutorialId);
-    console.log('Tutorials enabled:', this.tutorialsEnabled);
-    console.log('Tutorial seen:', this.seenTutorials.has(tutorialId));
-    
-    if (!this.shouldShowTutorial(tutorialId)) {
-      console.log('Tutorial skipped - already seen or tutorials disabled');
-      return;
-    }
+    if (!this.shouldShowTutorial(tutorialId)) return;
 
     const tutorial = this.getTutorial(tutorialId);
-    if (!tutorial) {
-      console.log('Tutorial not found:', tutorialId);
-      return;
-    }
+    if (!tutorial) return;
 
-    console.log('Starting tutorial:', tutorialId);
     this.activeTutorial = tutorialId;
     this.currentPage = 0;
     this.showCurrentPage();
-  }
-
-  highlightElement(elementId) {
-    console.log('Highlighting element:', elementId);
-    const highlightOverlay = document.createElement('div');
-    highlightOverlay.className = 'highlight-overlay';
-    document.body.appendChild(highlightOverlay);
-
-    const element = document.getElementById(elementId);
-    if (!element) {
-      console.warn('Element not found:', elementId);
-      return;
-    }
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      const highlight = document.createElement('div');
-      highlight.className = 'highlight-element';
-      highlight.style.top = `${rect.top}px`;
-      highlight.style.left = `${rect.left}px`;
-      highlight.style.width = `${rect.width}px`;
-      highlight.style.height = `${rect.height}px`;
-      highlightOverlay.appendChild(highlight);
-    }
-  }
-
-  clearHighlight() {
-    const highlightOverlay = document.querySelector('.highlight-overlay');
-    if (highlightOverlay) {
-      highlightOverlay.remove();
-    }
   }
 
   showCurrentPage() {
     const tutorial = this.getTutorial(this.activeTutorial);
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
-
-    this.clearHighlight();
-    if (page.highlightElement) {
-      this.highlightElement(page.highlightElement);
-    }
 
     const overlay = document.getElementById('tutorialOverlay');
     
@@ -286,43 +204,15 @@ class TutorialManager {
   }
 
   closeTutorial(tutorialId) {
-    console.log('Closing tutorial:', tutorialId);
     const tutorial = this.getTutorial(tutorialId);
-    
     if (tutorial.pages && this.currentPage < tutorial.pages.length - 1) {
-      console.log('Moving to next page in tutorial');
       this.currentPage++;
       this.showCurrentPage();
-      return;
-    }
-
-    console.log('Tutorial completed:', tutorialId);
-    this.markAsSeen(tutorialId);
-    this.activeTutorial = null;
-    this.currentPage = 0;
-    
-    const overlay = document.getElementById('tutorialOverlay');
-    if (overlay) {
-      overlay.style.display = 'none';
-      overlay.innerHTML = ''; // Clear content
-    }
-    this.clearHighlight();
-    
-    // Handle transition to UI tutorial
-    if (tutorialId.toLowerCase() === 'welcome') {
-      console.log('Welcome tutorial completed, preparing UI_INTRO');
-      this.seenTutorials.delete('UI_INTRO');
-      this.tutorialsEnabled = true;
-      
-      setTimeout(() => {
-        console.log('Starting UI_INTRO tutorial');
-        if (!document.getElementById('tutorialOverlay')) {
-          const newOverlay = document.createElement('div');
-          newOverlay.id = 'tutorialOverlay';
-          document.body.appendChild(newOverlay);
-        }
-        this.showTutorial('UI_INTRO');
-      }, 500);
+    } else {
+      this.markAsSeen(tutorialId);
+      this.activeTutorial = null;
+      this.currentPage = 0;
+      document.getElementById('tutorialOverlay').style.display = 'none';
     }
   }
 
