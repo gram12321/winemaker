@@ -221,7 +221,7 @@ class TutorialManager {
     
     // Create single highlight overlay
     this.highlightOverlay = document.createElement('div');
-    this.highlightOverlay.className = 'highlight-overlay fade-overlay';
+    this.highlightOverlay.className = 'highlight-overlay';
     this.highlightOverlay.style.display = 'none';
     document.body.appendChild(this.highlightOverlay);
     

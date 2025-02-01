@@ -40,25 +40,17 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 }
 
 /* 2. Standard Overlays (Task Overlays) */
-.fade-overlay {
-    background-color: rgba(0, 0, 0, 0.7);
-    pointer-events: none;
-}
-
 .overlay {
     position: fixed;
     width: 100vw;
     height: 100vh;
     top: 0;
     left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
     display: none;
     justify-content: center;
     align-items: center;
     z-index: 1500;
-}
-
-.overlay.fade-overlay {
-    pointer-events: auto;
 }
 
 .overlay-divider {
