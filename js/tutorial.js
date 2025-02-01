@@ -253,6 +253,15 @@ class TutorialManager {
   }
 
   highlightElement(elementId) {
+    // Create or update overlay
+    let overlay = document.getElementById('tutorialBackgroundOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'tutorialBackgroundOverlay';
+      overlay.className = 'tutorial-overlay';
+      document.body.appendChild(overlay);
+    }
+
     const element = document.getElementById(elementId);
     if (element) {
       element.classList.add('tutorial-highlight');
@@ -260,6 +269,12 @@ class TutorialManager {
   }
 
   clearHighlight() {
+    // Remove overlay
+    const overlay = document.getElementById('tutorialBackgroundOverlay');
+    if (overlay) {
+      overlay.remove();
+    }
+    
     document.querySelectorAll('.tutorial-highlight').forEach(el => {
       el.classList.remove('tutorial-highlight');
     });

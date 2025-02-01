@@ -597,10 +597,34 @@ input[type="radio"]:hover {
     margin-top: 0.5rem;
 }
 
+/* Tutorial styles */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1300;
+  pointer-events: none;
+}
+
 .tutorial-highlight {
   position: relative;
   z-index: 1400;
   box-shadow: 0 0 0 4px rgba(197, 165, 114, 0.5);
   border-radius: var(--radius-sm);
   transition: all 0.3s ease;
+}
+
+/* Create a "hole" in the overlay for highlighted elements */
+.tutorial-highlight::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: transparent;
+  z-index: 1350;
 }
