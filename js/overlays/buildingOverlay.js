@@ -8,20 +8,45 @@ import { showStandardOverlay, hideOverlay, setupStandardOverlayClose } from './o
 
 function createBuildingDetails(building) {
   const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
+  
+  // Group tools by their supported resources
+  const generalTools = tools.filter(tool => !tool.supportedResources || tool.supportedResources.length === 0);
+  const grapeTools = tools.filter(tool => tool.supportedResources?.includes('Grapes'));
+  const mustTools = tools.filter(tool => tool.supportedResources?.includes('Must'));
 
-  const toolButtons = `<div class="tool-grid">` + tools.map(tool => `
-    <div class="tool-container">
-      <div class="tool-header">
-        <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
-      </div>
-      <div class="tool-stats small">
-        <div>Cost: €${formatNumber(tool.cost)}</div>
-        ${tool.speedBonus !== 1.0 ? `<div>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%</div>` : ''}
-        ${tool.capacity > 0 ? `<div>Storage: ${formatNumber(tool.capacity)} kg</div>` : ''}
-        ${tool.supportedResources?.length ? `<div>Stores: ${tool.supportedResources.join(', ')}</div>` : ''}
+  const createToolSection = (tools, title) => `
+    <div class="tool-column collapsed">
+      <h4 class="tool-column-header h5 mb-0" onclick="this.closest('.tool-column').classList.toggle('collapsed')">
+        ${title}
+        <span class="expand-icon">▼</span>
+      </h4>
+      <div class="tool-column-content">
+        ${tools.map(tool => `
+          <div class="tool-container">
+            <div class="tool-header">
+              <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
+            </div>
+            <div class="collapsible-content">
+              <div class="tool-stats small">
+                <div>Cost: €${formatNumber(tool.cost)}</div>
+                ${tool.speedBonus !== 1.0 ? `<div>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%</div>` : ''}
+                ${tool.capacity > 0 ? `<div>Storage: ${formatNumber(tool.capacity)} kg</div>` : ''}
+                ${tool.supportedResources?.length ? `<div>Stores: ${tool.supportedResources.join(', ')}</div>` : ''}
+              </div>
+            </div>
+          </div>
+        `).join('')}
       </div>
     </div>
-  `).join('') + `</div>`;
+  `;
+
+  const toolButtons = `
+    <div class="tool-grid">
+      ${createToolSection(generalTools, 'General Tools')}
+      ${createToolSection(grapeTools, 'Grape Storage')}
+      ${createToolSection(mustTools, 'Must Storage')}
+    </div>
+  `;
 
   return `
     <div class="card">
