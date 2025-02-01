@@ -113,6 +113,27 @@ const COUNTRY_TUTORIALS = {
 
 // General tutorials that don't change with country
 const GENERAL_TUTORIALS = {
+  UI_INTRO: {
+    id: 'ui_intro',
+    title: 'Getting Started',
+    pages: [
+      {
+        title: 'Navigation Menu',
+        content: 'This is your main navigation menu. Here you can access different areas of your winery. Let's explore what each section does.',
+        highlightElement: 'sidebar-wrapper'
+      },
+      {
+        title: 'Main Office',
+        content: 'The Main Office gives you an overview of your winery's current status and important notifications.',
+        highlightElement: 'main-office'
+      },
+      {
+        title: 'Vineyard Management',
+        content: 'In the Vineyard section, you'll manage your grape vines, from planting to harvesting.',
+        highlightElement: 'vineyard'
+      }
+    ]
+  },
   VINEYARD: {
     id: 'vineyard',
     title: 'Vineyard Management',
@@ -181,8 +202,19 @@ class TutorialManager {
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
     
+    // Remove previous highlight if exists
+    if (this.lastHighlightedElement) {
+      this.removeHighlight(this.lastHighlightedElement);
+    }
+    
     // Use page-specific image if available, otherwise fall back to default country image
     const imageUrl = page.image || this.countryConfig.defaultImage;
+    
+    // Add highlight to new element if specified
+    if (page.highlightElement) {
+      this.highlightElement(page.highlightElement);
+      this.lastHighlightedElement = page.highlightElement;
+    }
     
     const content = `
       <div class="tutorial-wrapper">
@@ -216,7 +248,32 @@ class TutorialManager {
       import('./overlays/overlayUtils.js').then(({ hideOverlay }) => {
         hideOverlay('#tutorialOverlay');
         hideOverlay('.standard-overlay');
+        
+        // Start UI tutorial after welcome tutorial
+        if (tutorialId === 'WELCOME') {
+          setTimeout(() => {
+            this.showTutorial('UI_INTRO');
+          }, 500);
+        }
       });
+    }
+  }
+
+  highlightElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.style.position = 'relative';
+      element.style.zIndex = '2000';
+      element.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.5)';
+      element.style.transition = 'all 0.3s ease';
+    }
+  }
+
+  removeHighlight(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.style.boxShadow = '';
+      element.style.zIndex = '';
     }
   }
 
