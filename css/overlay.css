@@ -11,53 +11,7 @@
     display: none;
     z-index: 1000;
     transition: all var(--transition-speed) ease;
-}
-
-.mainview-overlay::before {
-    content: '';
-    position: absolute;
-    inset: 0;
     background: var(--color-background);
-    z-index: 1;
-    pointer-events: none;
-}
-
-.mainview-overlay > * {
-    position: relative;
-    z-index: 2;
-}
-
-/* Create a new stacking context for the table container */
-.overlay-section .table-responsive {
-    position: relative;
-    z-index: 1001;
-}
-
-/* Ensure the button container creates its own stacking context */
-.overlay-table td {
-    position: relative;
-    z-index: 1002;
-}
-
-/* Make the button pop through everything */
-.overlay-table .buy-farmland-btn {
-    position: relative;
-    z-index: 2002;
-    pointer-events: auto !important;
-    background-color: var(--color-primary);
-    border-color: var(--color-accent);
-}
-
-.overlay-table .buy-farmland-btn {
-    position: relative;
-    z-index: 2002;
-    background-color: var(--color-primary);
-    border-color: var(--color-accent);
-}
-
-.overlay-table .buy-farmland-btn:hover {
-    background-color: var(--color-accent);
-    border-color: var(--color-primary);
 }
 
 .mainview-overlay-content {
@@ -775,23 +729,4 @@ input[type="range"]::-webkit-slider-thumb:hover {
     border: 1px solid var(--color-accent);
     max-width: 400px;
     position: relative;
-}
-
-.overlay-table .buy-farmland-btn {
-    position: relative;
-    z-index: 2002;
-    background-color: var(--color-primary);
-    border-color: var(--color-accent);
-    pointer-events: auto;
-}
-
-.overlay-table td {
-    position: relative;
-}
-
-.overlay-table .buy-farmland-btn:hover {
-    background-color: var(--color-accent);
-    border-color: var(--color-primary);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
