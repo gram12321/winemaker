@@ -113,6 +113,27 @@ const COUNTRY_TUTORIALS = {
 
 // General tutorials that don't change with country
 const GENERAL_TUTORIALS = {
+  UI_INTRO: {
+    id: 'ui_intro',
+    title: 'Getting Started',
+    pages: [
+      {
+        title: 'Navigation Menu',
+        content: 'This is your main navigation menu. Here you can access different areas of your winery. Let\'s explore what each section does.',
+        highlightElement: 'sidebar-wrapper'
+      },
+      {
+        title: 'Main Office',
+        content: 'The Main Office gives you an overview of your winery\'s current status and important notifications.',
+        highlightElement: 'main-link'
+      },
+      {
+        title: 'Vineyard Management',
+        content: 'In the Vineyard section, you\'ll manage your grape vines, from planting to harvesting.',
+        highlightElement: 'vineyard-link'
+      }
+    ]
+  },
   VINEYARD: {
     id: 'vineyard',
     title: 'Vineyard Management',
@@ -176,10 +197,40 @@ class TutorialManager {
     this.showCurrentPage();
   }
 
+  highlightElement(elementId) {
+    const highlightOverlay = document.createElement('div');
+    highlightOverlay.className = 'highlight-overlay';
+    document.body.appendChild(highlightOverlay);
+
+    const element = document.getElementById(elementId);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const highlight = document.createElement('div');
+      highlight.className = 'highlight-element';
+      highlight.style.top = `${rect.top}px`;
+      highlight.style.left = `${rect.left}px`;
+      highlight.style.width = `${rect.width}px`;
+      highlight.style.height = `${rect.height}px`;
+      highlightOverlay.appendChild(highlight);
+    }
+  }
+
+  clearHighlight() {
+    const highlightOverlay = document.querySelector('.highlight-overlay');
+    if (highlightOverlay) {
+      highlightOverlay.remove();
+    }
+  }
+
   showCurrentPage() {
     const tutorial = this.getTutorial(this.activeTutorial);
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
+
+    this.clearHighlight();
+    if (page.highlightElement) {
+      this.highlightElement(page.highlightElement);
+    }
 
     const overlay = document.getElementById('tutorialOverlay');
     
@@ -213,6 +264,12 @@ class TutorialManager {
       this.activeTutorial = null;
       this.currentPage = 0;
       document.getElementById('tutorialOverlay').style.display = 'none';
+      this.clearHighlight();
+      
+      // Start UI tutorial after welcome tutorial
+      if (tutorialId === 'welcome') {
+        setTimeout(() => this.showTutorial('UI_INTRO'), 500);
+      }
     }
   }
 
