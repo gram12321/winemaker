@@ -675,6 +675,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     flex-direction: column;
 }
 
+/* Tutorial Specific Styles */
+
 .tutorial-overlay {
     position: fixed;
     width: 100vw;
@@ -686,10 +688,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
     align-items: center;
     z-index: 2000;
     pointer-events: none;
-}
-
-.tutorial-overlay > * {
-    pointer-events: auto;
 }
 
 .tutorial-wrapper {
