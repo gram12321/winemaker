@@ -731,28 +731,27 @@ input[type="range"]::-webkit-slider-thumb:hover {
   z-index: 1499;
 }
 
-.highlight-overlay::before {
-  content: '';
-  position: absolute;
+.highlight-overlay {
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.7);
   pointer-events: none;
-}
-
-.highlight-element::before {
-  background: transparent;
+  z-index: 1499;
 }
 
 .highlight-element {
   position: absolute;
   border: 2px solid var(--color-accent);
   border-radius: 4px;
-  z-index: 1;
-  background: transparent;
+  z-index: 1500;
+  background: none;
   pointer-events: all;
+  /* Cut out the highlighted element from the overlay */
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7);
+  clip-path: inset(-9999px);
 }
 
 #tutorialContent:before {
