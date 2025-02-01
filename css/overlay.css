@@ -696,6 +696,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
     margin: 0 20px;
     background: none;
     z-index: 2001;
+}
+
+.tutorial-wrapper,
+.overlay-content {
     opacity: 1 !important;
 }
 
