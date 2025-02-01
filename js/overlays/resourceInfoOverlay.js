@@ -10,8 +10,8 @@ export function showResourceInfoOverlay(resourceName) {
     return;
   }
 
-  // Changed overlayId to match the pattern used in farmlandOverlay
-  showStatsOverlay('resourceInfo', createResourceInfoOverlayHTML(resource), setupResourceInfoEventListeners);
+  // Use resourceInfoOverlay as ID to match DOM element
+  showStatsOverlay('resourceInfoOverlay', createResourceInfoOverlayHTML(resource), setupResourceInfoEventListeners);
 }
 
 function createResourceInfoOverlayHTML(resource) {
