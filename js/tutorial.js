@@ -286,13 +286,16 @@ class TutorialManager {
       this.clearHighlight();
       
       // Start UI tutorial after welcome tutorial
-      if (tutorialId === 'welcome') {
+      if (tutorialId.toLowerCase() === 'welcome') {
         console.log('Welcome tutorial completed, attempting to start UI_INTRO');
         // Reset tutorial seen status for UI_INTRO to ensure it shows
         this.seenTutorials.delete('UI_INTRO');
+        this.tutorialsEnabled = true; // Ensure tutorials are enabled
         
         setTimeout(() => {
-          console.log('Starting UI_INTRO tutorial');
+          console.log('Attempting to start UI_INTRO tutorial');
+          console.log('Tutorial config:', this.getTutorial('UI_INTRO'));
+          console.log('Should show tutorial:', this.shouldShowTutorial('UI_INTRO'));
           this.showTutorial('UI_INTRO');
         }, 500);
       }
