@@ -119,17 +119,17 @@ const GENERAL_TUTORIALS = {
     pages: [
       {
         title: 'Navigation Menu',
-        content: 'This is your main navigation menu. Here you can access different areas of your winery. Let's explore what each section does.',
+        content: 'This is your main navigation menu. Here you can access different areas of your winery. Lets explore what each section does.',
         highlightElement: 'sidebar-wrapper'
       },
       {
         title: 'Main Office',
-        content: 'The Main Office gives you an overview of your winery's current status and important notifications.',
+        content: 'The Main Office gives you an overview of your winerys current status and important notifications.',
         highlightElement: 'main-office'
       },
       {
         title: 'Vineyard Management',
-        content: 'In the Vineyard section, you'll manage your grape vines, from planting to harvesting.',
+        content: 'In the Vineyard section, youll manage your grape vines, from planting to harvesting.',
         highlightElement: 'vineyard'
       }
     ]
