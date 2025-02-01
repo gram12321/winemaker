@@ -9,8 +9,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     display: none;
-    isolation: isolate;
-    z-index: auto;
+    z-index: 1000;
     transition: all var(--transition-speed) ease;
 }
 
@@ -757,15 +756,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
     position: relative;
 }
 
-.buy-farmland-btn {
+.overlay-table .buy-farmland-btn {
     position: relative;
-    z-index: 2001;
+    z-index: 2002;
     background-color: var(--color-primary);
     border-color: var(--color-accent);
-    pointer-events: auto !important;
+    pointer-events: auto;
 }
 
-.buy-farmland-btn:hover {
+.overlay-table td {
+    position: relative;
+}
+
+.overlay-table .buy-farmland-btn:hover {
     background-color: var(--color-accent);
     border-color: var(--color-primary);
     transform: translateY(-1px);
