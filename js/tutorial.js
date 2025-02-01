@@ -282,22 +282,26 @@ class TutorialManager {
       this.markAsSeen(tutorialId);
       this.activeTutorial = null;
       this.currentPage = 0;
-      document.getElementById('tutorialOverlay').style.display = 'none';
+      
+      // Clean up all overlays
+      const tutorialOverlay = document.getElementById('tutorialOverlay');
+      tutorialOverlay.style.display = 'none';
+      tutorialOverlay.innerHTML = '';
       this.clearHighlight();
+      
+      // Remove any stray highlight overlays
+      document.querySelectorAll('.highlight-overlay').forEach(el => el.remove());
       
       // Start UI tutorial after welcome tutorial
       if (tutorialId.toLowerCase() === 'welcome') {
         console.log('Welcome tutorial completed, attempting to start UI_INTRO');
-        // Reset tutorial seen status for UI_INTRO to ensure it shows
         this.seenTutorials.delete('UI_INTRO');
-        this.tutorialsEnabled = true; // Ensure tutorials are enabled
+        this.tutorialsEnabled = true;
         
-        setTimeout(() => {
-          console.log('Attempting to start UI_INTRO tutorial');
-          console.log('Tutorial config:', this.getTutorial('UI_INTRO'));
-          console.log('Should show tutorial:', this.shouldShowTutorial('UI_INTRO'));
+        // Give time for DOM cleanup
+        requestAnimationFrame(() => {
           this.showTutorial('UI_INTRO');
-        }, 500);
+        });
       }
     }
   }
