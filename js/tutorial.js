@@ -136,7 +136,17 @@ const GENERAL_TUTORIALS = {
   },
   FARMLAND: {
     title: 'Farmland Overview',
-    content: 'Welcome to your farmland! Here you can manage your fields, plant various crops, and expand your agricultural operations. Choose your fields wisely to support your winery.',
+    pages: [
+      {
+        title: 'Welcome to Farmland Management',
+        content: 'Welcome to your farmland management area! Here you can manage your fields, plant various crops, and expand your agricultural operations. Choose your fields wisely to support your winery.',
+      },
+      {
+        title: 'Buying New Land',
+        content: 'To expand your operation, you\'ll need to acquire more land. Click the "Buy Land" button to see available properties in different regions.',
+        highlightElement: 'buy-land-btn'  // This will highlight the Buy Land button
+      }
+    ]
   },
   VINEYARD: {
     title: 'Vineyard Management',
