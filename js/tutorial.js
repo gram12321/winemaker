@@ -160,13 +160,7 @@ class TutorialManager {
     }
     this.countryConfig = COUNTRY_TUTORIALS[this.country];
     
-    // Create single overlay for fade and highlight effects
-    this.overlay = document.createElement('div');
-    this.overlay.className = 'fade-overlay';
-    this.overlay.style.display = 'none';
-    document.body.appendChild(this.overlay);
-
-    console.log('Tutorial Manager initialized with country:', this.country);
+    console.log('Tutorial Manager initialized with country:', this.country); // Debug line
   }
 
   init() {
@@ -196,7 +190,7 @@ class TutorialManager {
     console.log('Attempting to show tutorial:', tutorialId);
     console.log('Tutorials enabled:', this.tutorialsEnabled);
     console.log('Tutorial seen:', this.seenTutorials.has(tutorialId));
-
+    
     if (!this.shouldShowTutorial(tutorialId)) {
       console.log('Tutorial skipped - already seen or tutorials disabled');
       return;
@@ -213,32 +207,35 @@ class TutorialManager {
     this.currentPage = 0;
     this.showCurrentPage();
   }
+
   highlightElement(elementId) {
     console.log('Highlighting element:', elementId);
-    this.overlay.innerHTML = ''; // Clear previous highlights
-    this.overlay.style.display = 'block';
-    this.overlay.classList.add('active');
+    const highlightOverlay = document.createElement('div');
+    highlightOverlay.className = 'highlight-overlay';
+    document.body.appendChild(highlightOverlay);
 
     const element = document.getElementById(elementId);
     if (!element) {
       console.warn('Element not found:', elementId);
       return;
     }
-
-    const rect = element.getBoundingClientRect();
-    const highlight = document.createElement('div');
-    highlight.className = 'highlight-element';
-    highlight.style.top = `${rect.top}px`;
-    highlight.style.left = `${rect.left}px`;
-    highlight.style.width = `${rect.width}px`;
-    highlight.style.height = `${rect.height}px`;
-    this.overlay.appendChild(highlight);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const highlight = document.createElement('div');
+      highlight.className = 'highlight-element';
+      highlight.style.top = `${rect.top}px`;
+      highlight.style.left = `${rect.left}px`;
+      highlight.style.width = `${rect.width}px`;
+      highlight.style.height = `${rect.height}px`;
+      highlightOverlay.appendChild(highlight);
+    }
   }
 
   clearHighlight() {
-    this.overlay.style.display = 'none';
-    this.overlay.classList.remove('active');
-    this.overlay.innerHTML = '';
+    const highlightOverlay = document.querySelector('.highlight-overlay');
+    if (highlightOverlay) {
+      highlightOverlay.remove();
+    }
   }
 
   showCurrentPage() {
@@ -251,10 +248,12 @@ class TutorialManager {
       this.highlightElement(page.highlightElement);
     }
 
+    const overlay = document.getElementById('tutorialOverlay');
+    
     // Use page-specific image if available, otherwise fall back to default country image
     const imageUrl = page.image || this.countryConfig.defaultImage;
-
-    const content = `
+    
+    overlay.innerHTML = `
       <div class="tutorial-wrapper">
         <div class="tutorial-image" style="background-image: url('${imageUrl}')"></div>
         <div id="tutorialContent">
@@ -267,10 +266,8 @@ class TutorialManager {
         </div>
       </div>
     `;
-
-    import('./overlays/overlayUtils.js').then(({ showModalOverlay }) => {
-      showModalOverlay('tutorialOverlay', content);
-    });
+    
+    overlay.style.display = 'flex';
   }
 
   closeTutorial(tutorialId) {
@@ -287,14 +284,14 @@ class TutorialManager {
       this.currentPage = 0;
       document.getElementById('tutorialOverlay').style.display = 'none';
       this.clearHighlight();
-
+      
       // Start UI tutorial after welcome tutorial
       if (tutorialId.toLowerCase() === 'welcome') {
         console.log('Welcome tutorial completed, attempting to start UI_INTRO');
         // Reset tutorial seen status for UI_INTRO to ensure it shows
         this.seenTutorials.delete('UI_INTRO');
         this.tutorialsEnabled = true; // Ensure tutorials are enabled
-
+        
         setTimeout(() => {
           console.log('Attempting to start UI_INTRO tutorial');
           console.log('Tutorial config:', this.getTutorial('UI_INTRO'));
