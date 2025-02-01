@@ -20,11 +20,24 @@
     inset: 0;
     background: var(--color-background);
     z-index: 1;
+    pointer-events: none;
 }
 
 .mainview-overlay > * {
     position: relative;
     z-index: 2;
+}
+
+.overlay-table .buy-farmland-btn {
+    position: relative;
+    z-index: 2002;
+    background-color: var(--color-primary);
+    border-color: var(--color-accent);
+}
+
+.overlay-table .buy-farmland-btn:hover {
+    background-color: var(--color-accent);
+    border-color: var(--color-primary);
 }
 
 .mainview-overlay-content {
