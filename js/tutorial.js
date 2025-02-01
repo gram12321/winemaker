@@ -187,11 +187,22 @@ class TutorialManager {
   }
 
   showTutorial(tutorialId) {
-    if (!this.shouldShowTutorial(tutorialId)) return;
+    console.log('Attempting to show tutorial:', tutorialId);
+    console.log('Tutorials enabled:', this.tutorialsEnabled);
+    console.log('Tutorial seen:', this.seenTutorials.has(tutorialId));
+    
+    if (!this.shouldShowTutorial(tutorialId)) {
+      console.log('Tutorial skipped - already seen or tutorials disabled');
+      return;
+    }
 
     const tutorial = this.getTutorial(tutorialId);
-    if (!tutorial) return;
+    if (!tutorial) {
+      console.log('Tutorial not found:', tutorialId);
+      return;
+    }
 
+    console.log('Starting tutorial:', tutorialId);
     this.activeTutorial = tutorialId;
     this.currentPage = 0;
     this.showCurrentPage();
@@ -260,11 +271,14 @@ class TutorialManager {
   }
 
   closeTutorial(tutorialId) {
+    console.log('Closing tutorial:', tutorialId);
     const tutorial = this.getTutorial(tutorialId);
     if (tutorial.pages && this.currentPage < tutorial.pages.length - 1) {
+      console.log('Moving to next page in tutorial');
       this.currentPage++;
       this.showCurrentPage();
     } else {
+      console.log('Tutorial completed:', tutorialId);
       this.markAsSeen(tutorialId);
       this.activeTutorial = null;
       this.currentPage = 0;
@@ -273,7 +287,11 @@ class TutorialManager {
       
       // Start UI tutorial after welcome tutorial
       if (tutorialId === 'welcome') {
-        setTimeout(() => this.showTutorial('UI_INTRO'), 500);
+        console.log('Welcome tutorial completed, attempting to start UI_INTRO');
+        setTimeout(() => {
+          console.log('Starting UI_INTRO tutorial');
+          this.showTutorial('UI_INTRO');
+        }, 500);
       }
     }
   }
