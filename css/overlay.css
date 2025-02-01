@@ -699,8 +699,13 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .tutorial-wrapper,
-.overlay-content {
+.tutorial-wrapper * {
     opacity: 1 !important;
+}
+
+#tutorialContent {
+    opacity: 1 !important;
+    background-color: var(--color-background);
 }
 
 .tutorial-image {
