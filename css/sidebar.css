@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   border-right: 2px solid var(--color-accent);
-  overflow-y: auto;
+  overflow-y: hidden;  /* Changed from auto to hidden */
   overflow-x: hidden;
   transition: all var(--transition-speed) ease;
 }
@@ -223,6 +223,7 @@
   gap: 4px;
   padding: 10px;
   margin-bottom: auto;
+  max-height: calc(100vh - 300px); /* Reserve space for company info and other elements */
 }
 
 .dropdown {
@@ -300,6 +301,7 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--color-accent);
   overflow-x: hidden;
+  max-height: 250px; /* Limit height to prevent overflow */
 }
 
 #companyInfo .info-item {
