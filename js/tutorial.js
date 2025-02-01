@@ -272,7 +272,7 @@ class TutorialManager {
     if (element) {
       element.style.position = 'relative';
       element.style.zIndex = '2000';
-      element.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.5)';
+      element.style.boxShadow = '0 0 15px rgba(197, 165, 114, 0.8)';
       element.style.transition = 'all 0.3s ease';
     }
   }
