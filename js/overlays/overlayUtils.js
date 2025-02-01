@@ -108,19 +108,17 @@ export function showStatsOverlay(overlayId, content, setupEventListeners) {
         overlay.className = 'overlay stats-overlay';
         overlay.innerHTML = `
             <div class="overlay-content text-center">
-                <div id="${overlayId}-details"></div>
+                <div id="${overlayId}-content">${content}</div>
             </div>
         `;
         document.body.appendChild(overlay);
+    } else {
+        // If overlay exists, update its content
+        const contentDiv = overlay.querySelector('.overlay-content');
+        if (contentDiv) {
+            contentDiv.innerHTML = content;
+        }
     }
-    
-    const details = document.getElementById(`${overlayId}-details`);
-    if (!details) {
-        console.error(`${overlayId} details element not found.`);
-        return;
-    }
-    
-    details.innerHTML = content;
 
     // Setup default close behavior using hideOverlay
     overlay.addEventListener('click', (event) => {
@@ -131,7 +129,7 @@ export function showStatsOverlay(overlayId, content, setupEventListeners) {
 
     // Setup custom event listeners if provided
     if (setupEventListeners) {
-        setupEventListeners(details, overlay);
+        setupEventListeners(overlay.querySelector('.overlay-content'), overlay);
     }
 
     overlay.style.display = 'block';
