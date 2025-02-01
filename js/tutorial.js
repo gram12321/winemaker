@@ -120,17 +120,17 @@ const GENERAL_TUTORIALS = {
       {
         title: 'Navigation Menu',
         content: 'This is your main navigation menu. Here you can access different areas of your winery. Let\'s explore what each section does.',
-        highlightElement: 'sidebar-wrapper'
+        highlightElement: 'sidebar'
       },
       {
         title: 'Main Office',
         content: 'The Main Office gives you an overview of your winery\'s current status and important notifications.',
-        highlightElement: 'main-link'
+        highlightElement: 'main-office'
       },
       {
         title: 'Vineyard Management',
         content: 'In the Vineyard section, you\'ll manage your grape vines, from planting to harvesting.',
-        highlightElement: 'vineyard-link'
+        highlightElement: 'vineyard'
       }
     ]
   },
@@ -198,11 +198,16 @@ class TutorialManager {
   }
 
   highlightElement(elementId) {
+    console.log('Highlighting element:', elementId);
     const highlightOverlay = document.createElement('div');
     highlightOverlay.className = 'highlight-overlay';
     document.body.appendChild(highlightOverlay);
 
     const element = document.getElementById(elementId);
+    if (!element) {
+      console.warn('Element not found:', elementId);
+      return;
+    }
     if (element) {
       const rect = element.getBoundingClientRect();
       const highlight = document.createElement('div');
