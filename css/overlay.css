@@ -676,8 +676,16 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .tutorial-overlay {
-    composes: standard-overlay;
-    z-index: 2000;
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1500;
 }
 
 .tutorial-wrapper {
@@ -688,13 +696,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
     margin: 0 20px;
     background: none;
     z-index: 2001;
-    opacity: 1 !important;
-}
-
-.tutorial-overlay .overlay-content {
-    background: none;
-    border: none;
-    box-shadow: none;
 }
 
 .tutorial-wrapper,
