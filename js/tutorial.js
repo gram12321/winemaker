@@ -241,7 +241,9 @@ class TutorialManager {
       this.markAsSeen(tutorialId);
       this.activeTutorial = null;
       this.currentPage = 0;
-      document.getElementById('tutorialOverlay').style.display = 'none';
+      const tutorialOverlay = document.getElementById('tutorialOverlay');
+      tutorialOverlay.style.display = 'none';
+      this.clearHighlight(); // Clear any existing overlays
       
       // Start UI tutorial after welcome tutorial
       if (tutorialId === 'WELCOME') {
