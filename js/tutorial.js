@@ -160,7 +160,13 @@ class TutorialManager {
     }
     this.countryConfig = COUNTRY_TUTORIALS[this.country];
     
-    console.log('Tutorial Manager initialized with country:', this.country); // Debug line
+    // Create single highlight overlay
+    this.highlightOverlay = document.createElement('div');
+    this.highlightOverlay.className = 'highlight-overlay fade-overlay';
+    this.highlightOverlay.style.display = 'none';
+    document.body.appendChild(this.highlightOverlay);
+    
+    console.log('Tutorial Manager initialized with country:', this.country);
   }
 
   init() {
@@ -207,8 +213,6 @@ class TutorialManager {
     this.currentPage = 0;
     this.showCurrentPage();
   }
-
-  constructor() {
     this.seenTutorials = new Set(JSON.parse(localStorage.getItem('seenTutorials') || '[]'));
     this.tutorialsEnabled = localStorage.getItem('tutorialsEnabled') !== 'false';
     this.currentPage = 0;
