@@ -685,7 +685,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1500;
+    z-index: 2000;
+    pointer-events: none;
+}
+
+.tutorial-overlay > * {
+    pointer-events: auto;
 }
 
 .tutorial-wrapper {
