@@ -120,7 +120,7 @@ const GENERAL_TUTORIALS = {
       {
         title: 'Navigation Menu',
         content: 'This is your main navigation menu. Here you can access different areas of your winery. Let\'s explore what each section does.',
-        highlightElement: 'sidebar'
+        highlightElement: 'sidebar-wrapper'
       },
       {
         title: 'Main Office',
