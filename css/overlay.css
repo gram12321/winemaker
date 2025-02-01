@@ -16,7 +16,7 @@
 
 .mainview-overlay::before {
     content: '';
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: var(--color-background);
     z-index: 1;
@@ -33,12 +33,6 @@
     z-index: 2002;
     background-color: var(--color-primary);
     border-color: var(--color-accent);
-    mix-blend-mode: normal;
-    isolation: isolate;
-}
-
-.overlay-table td {
-    position: relative;
 }
 
 .overlay-table .buy-farmland-btn:hover {
