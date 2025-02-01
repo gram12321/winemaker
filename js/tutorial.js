@@ -159,13 +159,13 @@ class TutorialManager {
       this.country = 'FRANCE';
     }
     this.countryConfig = COUNTRY_TUTORIALS[this.country];
-    
+
     // Create single highlight overlay
     this.highlightOverlay = document.createElement('div');
     this.highlightOverlay.className = 'highlight-overlay fade-overlay';
     this.highlightOverlay.style.display = 'none';
     document.body.appendChild(this.highlightOverlay);
-    
+
     console.log('Tutorial Manager initialized with country:', this.country);
   }
 
@@ -196,7 +196,7 @@ class TutorialManager {
     console.log('Attempting to show tutorial:', tutorialId);
     console.log('Tutorials enabled:', this.tutorialsEnabled);
     console.log('Tutorial seen:', this.seenTutorials.has(tutorialId));
-    
+
     if (!this.shouldShowTutorial(tutorialId)) {
       console.log('Tutorial skipped - already seen or tutorials disabled');
       return;
@@ -213,25 +213,6 @@ class TutorialManager {
     this.currentPage = 0;
     this.showCurrentPage();
   }
-    this.seenTutorials = new Set(JSON.parse(localStorage.getItem('seenTutorials') || '[]'));
-    this.tutorialsEnabled = localStorage.getItem('tutorialsEnabled') !== 'false';
-    this.currentPage = 0;
-    this.activeTutorial = null;
-    this.country = (localStorage.getItem('startingCountry') || 'FRANCE').toUpperCase();
-    if (!COUNTRY_TUTORIALS[this.country]) {
-      this.country = 'FRANCE';
-    }
-    this.countryConfig = COUNTRY_TUTORIALS[this.country];
-    
-    // Create single highlight overlay
-    this.highlightOverlay = document.createElement('div');
-    this.highlightOverlay.className = 'highlight-overlay fade-overlay';
-    this.highlightOverlay.style.display = 'none';
-    document.body.appendChild(this.highlightOverlay);
-    
-    console.log('Tutorial Manager initialized with country:', this.country);
-  }
-
   highlightElement(elementId) {
     console.log('Highlighting element:', elementId);
     this.highlightOverlay.innerHTML = ''; // Clear previous highlights
@@ -242,7 +223,7 @@ class TutorialManager {
       console.warn('Element not found:', elementId);
       return;
     }
-    
+
     const rect = element.getBoundingClientRect();
     const highlight = document.createElement('div');
     highlight.className = 'highlight-element';
@@ -269,10 +250,10 @@ class TutorialManager {
     }
 
     const overlay = document.getElementById('tutorialOverlay');
-    
+
     // Use page-specific image if available, otherwise fall back to default country image
     const imageUrl = page.image || this.countryConfig.defaultImage;
-    
+
     overlay.innerHTML = `
       <div class="tutorial-wrapper">
         <div class="tutorial-image" style="background-image: url('${imageUrl}')"></div>
@@ -286,7 +267,7 @@ class TutorialManager {
         </div>
       </div>
     `;
-    
+
     overlay.style.display = 'flex';
   }
 
@@ -304,14 +285,14 @@ class TutorialManager {
       this.currentPage = 0;
       document.getElementById('tutorialOverlay').style.display = 'none';
       this.clearHighlight();
-      
+
       // Start UI tutorial after welcome tutorial
       if (tutorialId.toLowerCase() === 'welcome') {
         console.log('Welcome tutorial completed, attempting to start UI_INTRO');
         // Reset tutorial seen status for UI_INTRO to ensure it shows
         this.seenTutorials.delete('UI_INTRO');
         this.tutorialsEnabled = true; // Ensure tutorials are enabled
-        
+
         setTimeout(() => {
           console.log('Attempting to start UI_INTRO tutorial');
           console.log('Tutorial config:', this.getTutorial('UI_INTRO'));
