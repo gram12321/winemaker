@@ -9,23 +9,18 @@ export function hideOverlay(overlay) {
         return;
     }
 
-    // Clean up any existing overlays of the same type
-    const overlayClass = overlay.classList[0];
-    if (overlayClass) {
-        document.querySelectorAll(`.${overlayClass}`).forEach(el => {
-            if (el !== overlay && el.parentNode) {
-                el.parentNode.removeChild(el);
-            }
-        });
+    // Remove all existing overlays of the same type
+    if (overlay.classList.contains('mainview-overlay')) {
+        document.querySelectorAll('.mainview-overlay').forEach(el => el.remove());
+    } else if (overlay.classList.contains('modal-overlay')) {
+        document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
+    } else if (overlay.classList.contains('standard-overlay')) {
+        document.querySelectorAll('.standard-overlay').forEach(el => el.remove());
     }
 
-    // Handle different overlay types
-    if (overlay.classList.contains('mainview-overlay')) {
-        overlay.remove();
-    } else {
-        if (overlay.parentNode) {
-            overlay.parentNode.removeChild(overlay);
-        }
+    // Remove the specific overlay if it still exists
+    if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
     }
 }
 
@@ -66,6 +61,9 @@ export function showModalOverlay(overlayId, content) {
 
 // Standard overlay for major features (planting, harvesting, etc)
 export function showStandardOverlay(content) {
+    // Hide any existing standard overlays first
+    document.querySelectorAll('.standard-overlay').forEach(el => hideOverlay(el));
+    
     const overlayContainer = document.createElement('div');
     overlayContainer.classList.add('overlay', 'standard-overlay');
     
