@@ -224,9 +224,13 @@ class TutorialManager {
       this.lastHighlightedElement = page.highlightElement;
     }
     
-    const content = `
-      <div class="tutorial-wrapper" >
-        <div class="tutorial-image" style="background-image: url('${imageUrl}');"></div> 
+    const overlay = document.createElement('div');
+    overlay.id = 'tutorialOverlay';
+    overlay.className = 'tutorial-overlay';
+    
+    overlay.innerHTML = `
+      <div class="tutorial-wrapper">
+        <div class="tutorial-image" style="background-image: url('${imageUrl}')"></div>
         <div id="tutorialContent">
           <h3>${page.title || tutorial.title}</h3>
           <p>${page.content || tutorial.content}</p>
@@ -238,9 +242,9 @@ class TutorialManager {
       </div>
     `;
     
-    import('./overlays/overlayUtils.js').then(({ showStandardOverlay, hideOverlay }) => {
-      hideOverlay('#tutorialOverlay');
-      showStandardOverlay(content);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => {
+      overlay.style.display = 'flex';
     });
   }
 
