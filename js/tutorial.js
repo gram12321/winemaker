@@ -238,9 +238,10 @@ class TutorialManager {
       </div>
     `;
     
-    import('./overlays/overlayUtils.js').then(({ showStandardOverlay, hideOverlay }) => {
+    import('./overlays/overlayUtils.js').then(({ showMainViewOverlay, hideOverlay }) => {
       hideOverlay('#tutorialOverlay');
-      showStandardOverlay(content);
+      const overlay = showMainViewOverlay(content);
+      overlay.id = 'tutorialOverlay';
     });
   }
 
@@ -255,7 +256,6 @@ class TutorialManager {
       this.currentPage = 0;
       import('./overlays/overlayUtils.js').then(({ hideOverlay }) => {
         hideOverlay('#tutorialOverlay');
-        hideOverlay('.standard-overlay');
         
         // Start UI tutorial after welcome tutorial
         if (tutorialId === 'WELCOME') {
