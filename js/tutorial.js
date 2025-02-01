@@ -119,12 +119,12 @@ const GENERAL_TUTORIALS = {
     pages: [
       {
         title: 'Navigation Menu',
-        content: 'This is your main navigation menu. Here you can access different areas of your winery. Lets explore what each section does.',
+        content: 'Okay, I will show you around. To the left of the screen, we can acces the most important places. Ill should you a few of them now.',
         highlightElement: 'sidebar-wrapper'  // Element ID to highlight
       },
       {
         title: 'Farmland Overview',
-        content: 'Click here to manage your land parcels. You can buy new farmland, plant different grape varieties, and manage your vineyards.',
+        content: 'This is the Farmland Overview. Here is a list of our current fields. You can buy new fields, plant crops, and manage your land from here, i will tell you more about this the first time you visit this page.',
         highlightElement: 'land-link'  // Using the existing ID of the land menu item
       },
       {
@@ -133,6 +133,12 @@ const GENERAL_TUTORIALS = {
         highlightElement: 'vineyard-link'
       }
     ]
+  },
+  FARMLAND: {
+    id: 'land',
+    title: 'Farmland Overview',
+    content: 'Welcome to your farmland! Here you can manage your fields, plant various crops, and expand your agricultural operations. Choose your fields wisely to support your winery.',
+    page: 'land'  // Changed to match the exact function name case (showLandOverlay)
   },
   VINEYARD: {
     id: 'vineyard',

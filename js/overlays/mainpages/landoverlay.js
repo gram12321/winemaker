@@ -12,6 +12,12 @@ import { showUprootOverlay } from '../uprootOverlay.js';  // Add this import
 
 export function showLandOverlay() {
     const overlay = showMainViewOverlay(createLandOverlayHTML());
+    
+    // Add tutorial check
+    if (tutorialManager.shouldShowTutorial('FARMLAND')) {
+        tutorialManager.showTutorial('FARMLAND');
+    }
+    
     setupLandEventListeners(overlay);
     displayFarmland();
 }
