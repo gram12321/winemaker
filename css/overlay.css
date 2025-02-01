@@ -699,7 +699,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
     max-width: 800px;
     margin: 0 20px;
     z-index: 2001;
-    background: transparent;
+    pointer-events: none;
+}
+
+.tutorial-wrapper > * {
+    pointer-events: auto;
 }
 
 .tutorial-image {
