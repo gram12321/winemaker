@@ -159,6 +159,12 @@ class TutorialManager {
       this.country = 'FRANCE';
     }
     this.countryConfig = COUNTRY_TUTORIALS[this.country];
+    
+    // Create single overlay for fade and highlight effects
+    this.overlay = document.createElement('div');
+    this.overlay.className = 'fade-overlay';
+    this.overlay.style.display = 'none';
+    document.body.appendChild(this.overlay);
 
     console.log('Tutorial Manager initialized with country:', this.country);
   }
@@ -226,7 +232,7 @@ class TutorialManager {
     highlight.style.left = `${rect.left}px`;
     highlight.style.width = `${rect.width}px`;
     highlight.style.height = `${rect.height}px`;
-    this.highlightOverlay.appendChild(highlight);
+    this.overlay.appendChild(highlight);
   }
 
   clearHighlight() {
