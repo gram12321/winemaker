@@ -160,12 +160,6 @@ class TutorialManager {
     }
     this.countryConfig = COUNTRY_TUTORIALS[this.country];
 
-    // Create single overlay for both fade and highlight effects
-    this.overlay = document.createElement('div');
-    this.overlay.className = 'fade-overlay';
-    this.overlay.style.display = 'none';
-    document.body.appendChild(this.overlay);
-
     console.log('Tutorial Manager initialized with country:', this.country);
   }
 
@@ -251,12 +245,10 @@ class TutorialManager {
       this.highlightElement(page.highlightElement);
     }
 
-    const overlay = document.getElementById('tutorialOverlay');
-
     // Use page-specific image if available, otherwise fall back to default country image
     const imageUrl = page.image || this.countryConfig.defaultImage;
 
-    overlay.innerHTML = `
+    const content = `
       <div class="tutorial-wrapper">
         <div class="tutorial-image" style="background-image: url('${imageUrl}')"></div>
         <div id="tutorialContent">
@@ -270,7 +262,9 @@ class TutorialManager {
       </div>
     `;
 
-    overlay.style.display = 'flex';
+    import('./overlays/overlayUtils.js').then(({ showModalOverlay }) => {
+      showModalOverlay('tutorialOverlay', content);
+    });
   }
 
   closeTutorial(tutorialId) {
