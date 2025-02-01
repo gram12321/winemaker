@@ -215,6 +215,7 @@ class TutorialManager {
       this.currentPage = 0;
       import('./overlays/overlayUtils.js').then(({ hideOverlay }) => {
         hideOverlay('#tutorialOverlay');
+        hideOverlay('.standard-overlay');
       });
     }
   }
