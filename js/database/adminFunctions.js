@@ -74,100 +74,124 @@ async function storeCompanyName(companyName, startingCondition = null) {
 
       // Initialize staff array at the top
       let staff = [];
-      let staff1, staff2;
       const country = startingCondition ? startingCondition.name : 'France';
 
       switch (country) {
         case 'Italy':
-          staff1 = createNewStaff(0.5, ['winery']);
-          staff1.firstName = 'Roberto';
-          staff1.lastName = 'De Luca';
-          staff1.nationality = 'Italy';
-          staff1.name = 'Roberto De Luca';
+          const italyStaff1 = createNewStaff(0.5, ['winery']);
+          italyStaff1.firstName = 'Roberto';
+          italyStaff1.lastName = 'De Luca';
+          italyStaff1.nationality = 'Italy';
+          italyStaff1.name = 'Roberto De Luca';
           
-          staff2 = createNewStaff(0.5);
-          staff2.firstName = 'Bianca';
-          staff2.lastName = 'De Luca';
-          staff2.nationality = 'Italy';
-          staff2.name = 'Bianca De Luca';
+          const italyStaff2 = createNewStaff(0.5);
+          italyStaff2.firstName = 'Bianca';
+          italyStaff2.lastName = 'De Luca';
+          italyStaff2.nationality = 'Italy';
+          italyStaff2.name = 'Bianca De Luca';
+          
+          staff = [italyStaff1, italyStaff2];
           break;
 
         case 'France':
-          staff1 = createNewStaff(0.5, ['winery']);
-          staff1.firstName = 'Pierre';
-          staff1.lastName = 'Latosha';
-          staff1.nationality = 'France';
-          staff1.name = 'Pierre Latosha';
+          const franceStaff1 = createNewStaff(0.5, ['winery']);
+          franceStaff1.firstName = 'Pierre';
+          franceStaff1.lastName = 'Latosha';
+          franceStaff1.nationality = 'France';
+          franceStaff1.name = 'Pierre Latosha';
           
-          staff2 = createNewStaff(0.5);
-          staff2.firstName = 'Camillé';
-          staff2.lastName = 'Latosha';
-          staff2.nationality = 'France';
-          staff2.name = 'Camillé Latosha';
+          const franceStaff2 = createNewStaff(0.5);
+          franceStaff2.firstName = 'Camillé';
+          franceStaff2.lastName = 'Latosha';
+          franceStaff2.nationality = 'France';
+          franceStaff2.name = 'Camillé Latosha';
+          
+          staff = [franceStaff1, franceStaff2];
           break;
 
         case 'Germany':
-          staff1 = createNewStaff(0.5, ['winery']);
-          staff1.firstName = 'Johann';
-          staff1.lastName = 'Weissburg';
-          staff1.nationality = 'Germany';
-          staff1.name = 'Johann Weissburg';
+          const germanStaff1 = createNewStaff(0.5, ['winery']);
+          germanStaff1.firstName = 'Johann';
+          germanStaff1.lastName = 'Weissburg';
+          germanStaff1.nationality = 'Germany';
+          germanStaff1.name = 'Johann Weissburg';
           
-          staff2 = createNewStaff(0.5, ['maintenance']);
-          staff2.firstName = 'Lukas';
-          staff2.lastName = 'Weissburg';
-          staff2.nationality = 'Germany';
-          staff2.name = 'Lukas Weissburg';
+          const germanStaff2 = createNewStaff(0.5, ['maintenance']);
+          germanStaff2.firstName = 'Lukas';
+          germanStaff2.lastName = 'Weissburg';
+          germanStaff2.nationality = 'Germany';
+          germanStaff2.name = 'Lukas Weissburg';
           
-          const staff3 = createNewStaff(0.5, ['sales']);
-          staff3.firstName = 'Elsa';
-          staff3.lastName = 'Weissburg';
-          staff3.nationality = 'Germany';
-          staff3.name = 'Elsa Weissburg';
+          const germanStaff3 = createNewStaff(0.5, ['sales']);
+          germanStaff3.firstName = 'Elsa';
+          germanStaff3.lastName = 'Weissburg';
+          germanStaff3.nationality = 'Germany';
+          germanStaff3.name = 'Elsa Weissburg';
           
-          const staff4 = createNewStaff(0.5, ['administration']);
-          staff4.firstName = 'Klara';
-          staff4.lastName = 'Weissburg';
-          staff4.nationality = 'Germany';
-          staff4.name = 'Klara Weissburg';
+          const germanStaff4 = createNewStaff(0.5, ['administration']);
+          germanStaff4.firstName = 'Klara';
+          germanStaff4.lastName = 'Weissburg';
+          germanStaff4.nationality = 'Germany';
+          germanStaff4.name = 'Klara Weissburg';
           
-          staff = [staff1, staff2, staff3, staff4];
+          staff = [germanStaff1, germanStaff2, germanStaff3, germanStaff4];
           break;
 
         case 'Spain':
-          staff1 = createNewStaff(0.5, ['winery']);
-          staff1.firstName = 'Miguel';
-          staff1.lastName = 'Torres';
-          staff1.nationality = 'Spain';
-          staff1.name = 'Miguel Torres';
+          const spainStaff1 = createNewStaff(0.5, ['winery']);
+          spainStaff1.firstName = 'Miguel';
+          spainStaff1.lastName = 'Torres';
+          spainStaff1.nationality = 'Spain';
+          spainStaff1.name = 'Miguel Torres';
           
-          staff2 = createNewStaff(0.5);
-          staff2.firstName = 'Isabella';
-          staff2.lastName = 'Torres';
-          staff2.nationality = 'Spain';
-          staff2.name = 'Isabella Torres';
+          const spainStaff2 = createNewStaff(0.5);
+          spainStaff2.firstName = 'Isabella';
+          spainStaff2.lastName = 'Torres';
+          spainStaff2.nationality = 'Spain';
+          spainStaff2.name = 'Isabella Torres';
+          
+          staff = [spainStaff1, spainStaff2];
           break;
 
         case 'United States':
-          staff1 = createNewStaff(0.5, ['winery']);
-          staff1.firstName = 'Sarah';
-          staff1.lastName = 'Mondavi';
-          staff1.nationality = 'United States';
-          staff1.name = 'Sarah Mondavi';
+          const usStaff1 = createNewStaff(0.5, ['winery']);
+          usStaff1.firstName = 'Sarah';
+          usStaff1.lastName = 'Mondavi';
+          usStaff1.nationality = 'United States';
+          usStaff1.name = 'Sarah Mondavi';
           
-          staff2 = createNewStaff(0.5);
-          staff2.firstName = 'Robert';
-          staff2.lastName = 'Mondavi';
-          staff2.nationality = 'United States';
-          staff2.name = 'Robert Mondavi';
+          const usStaff2 = createNewStaff(0.5);
+          usStaff2.firstName = 'Robert';
+          usStaff2.lastName = 'Mondavi';
+          usStaff2.nationality = 'United States';
+          usStaff2.name = 'Robert Mondavi';
+          
+          staff = [usStaff1, usStaff2];
           break;
 
         default:
-          staff = [staff1, staff2];
+          const defaultStaff1 = createNewStaff(0.5, ['winery']);
+          const defaultStaff2 = createNewStaff(0.5);
+          staff = [defaultStaff1, defaultStaff2];
       }
 
-      // Save staff data using saveStaff
+      // Save staff data
       saveStaff(staff);
+
+      // Assign initial staff to teams
+      const defaultTeams = getDefaultTeams();
+      const wineryTeam = defaultTeams.find(team => team.name === 'Winery Team');
+      const adminTeam = defaultTeams.find(team => team.name === 'Administration Team');
+      
+      if (wineryTeam) {
+        wineryTeam.members = [staff[0]];  // First staff member goes to Winery Team
+      }
+      if (adminTeam && staff.length > 1) {
+        adminTeam.members = [staff[1]];    // Second staff member goes to Administration Team
+      }
+
+      teams.push(...defaultTeams);
+      saveTeams(teams);
 
       // Create starting farmland if provided
       if (startingCondition && startingCondition.startingFarmland) {
@@ -180,23 +204,6 @@ async function storeCompanyName(companyName, startingCondition = null) {
         localStorage.setItem('ownedFarmlands', '[]');
         farmlandsStore = []; // Clear the in-memory store
       }
-
-      // Save default teams to localStorage and in-memory storage
-      const defaultTeams = getDefaultTeams();
-      
-      // Assign initial staff to their default teams
-      const wineryTeam = defaultTeams.find(team => team.name === 'Winery Team');
-      const adminTeam = defaultTeams.find(team => team.name === 'Administration Team');
-      
-      if (wineryTeam) {
-        wineryTeam.members = [staff1];  // Staff ID 1 goes to Winery Team
-      }
-      if (adminTeam) {
-        adminTeam.members = [staff2];    // Staff ID 2 goes to Administration Team
-      }
-
-      teams.push(...defaultTeams);
-      saveTeams(teams);
 
       await saveCompanyInfo(); // Save company info to Firestore
       window.location.href = 'html/game.html'; // Redirect to game.html
