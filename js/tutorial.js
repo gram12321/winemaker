@@ -225,9 +225,9 @@ class TutorialManager {
     }
     
     const content = `
-      <div class="tutorial-wrapper">
-        <div class="tutorial-image" style="background-image: url('${imageUrl}')"></div>
-        <div id="tutorialContent">
+      <div class="tutorial-wrapper" style="z-index: 2001; opacity: 1 !important;">
+        <div class="tutorial-image" style="background-image: url('${imageUrl}'); opacity: 1 !important;"></div>
+        <div id="tutorialContent" style="opacity: 1 !important;">
           <h3>${page.title || tutorial.title}</h3>
           <p>${page.content || tutorial.content}</p>
           <div class="tutorial-buttons">
