@@ -131,6 +131,21 @@ const GENERAL_TUTORIALS = {
         title: 'Vineyard Management',
         content: 'In the Vineyard section, you\'ll manage your grape vines, from planting to harvesting.',
         highlightElement: 'vineyard'
+      },
+      {
+        title: 'Winery Operations',
+        content: 'The Winery section is where your grapes become wine. Here you\'ll manage crushing, fermentation, and aging processes.',
+        highlightElement: 'winery'
+      },
+      {
+        title: 'Sales & Marketing',
+        content: 'In the Sales section, you\'ll manage your wine inventory and fulfill customer orders.',
+        highlightElement: 'sales'
+      },
+      {
+        title: 'Staff Management',
+        content: 'The Staff section lets you hire and manage your workforce. Skilled workers are crucial for quality wine production.',
+        highlightElement: 'staff'
       }
     ]
   },
@@ -273,32 +288,41 @@ class TutorialManager {
   closeTutorial(tutorialId) {
     console.log('Closing tutorial:', tutorialId);
     const tutorial = this.getTutorial(tutorialId);
+    
     if (tutorial.pages && this.currentPage < tutorial.pages.length - 1) {
       console.log('Moving to next page in tutorial');
       this.currentPage++;
       this.showCurrentPage();
-    } else {
-      console.log('Tutorial completed:', tutorialId);
-      this.markAsSeen(tutorialId);
-      this.activeTutorial = null;
-      this.currentPage = 0;
-      document.getElementById('tutorialOverlay').style.display = 'none';
-      this.clearHighlight();
+      return;
+    }
+
+    console.log('Tutorial completed:', tutorialId);
+    this.markAsSeen(tutorialId);
+    this.activeTutorial = null;
+    this.currentPage = 0;
+    
+    const overlay = document.getElementById('tutorialOverlay');
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.innerHTML = ''; // Clear content
+    }
+    this.clearHighlight();
+    
+    // Handle transition to UI tutorial
+    if (tutorialId.toLowerCase() === 'welcome') {
+      console.log('Welcome tutorial completed, preparing UI_INTRO');
+      this.seenTutorials.delete('UI_INTRO');
+      this.tutorialsEnabled = true;
       
-      // Start UI tutorial after welcome tutorial
-      if (tutorialId.toLowerCase() === 'welcome') {
-        console.log('Welcome tutorial completed, attempting to start UI_INTRO');
-        // Reset tutorial seen status for UI_INTRO to ensure it shows
-        this.seenTutorials.delete('UI_INTRO');
-        this.tutorialsEnabled = true; // Ensure tutorials are enabled
-        
-        setTimeout(() => {
-          console.log('Attempting to start UI_INTRO tutorial');
-          console.log('Tutorial config:', this.getTutorial('UI_INTRO'));
-          console.log('Should show tutorial:', this.shouldShowTutorial('UI_INTRO'));
-          this.showTutorial('UI_INTRO');
-        }, 500);
-      }
+      setTimeout(() => {
+        console.log('Starting UI_INTRO tutorial');
+        if (!document.getElementById('tutorialOverlay')) {
+          const newOverlay = document.createElement('div');
+          newOverlay.id = 'tutorialOverlay';
+          document.body.appendChild(newOverlay);
+        }
+        this.showTutorial('UI_INTRO');
+      }, 500);
     }
   }
 
