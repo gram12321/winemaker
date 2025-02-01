@@ -202,6 +202,14 @@ class TutorialManager {
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
     
+    // Debug logging
+    console.log('Active Tutorial:', this.activeTutorial);
+    console.log('Current Page:', this.currentPage);
+    console.log('Active Overlays:', document.querySelectorAll('.overlay').length);
+    document.querySelectorAll('.overlay').forEach(overlay => {
+      console.log('Overlay:', overlay.id || 'unnamed', 'Display:', getComputedStyle(overlay).display, 'Z-index:', getComputedStyle(overlay).zIndex);
+    });
+    
     // Remove previous highlight if exists
     if (this.lastHighlightedElement) {
       this.removeHighlight(this.lastHighlightedElement);
