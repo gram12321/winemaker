@@ -5,12 +5,16 @@ import { showMainViewOverlay } from '../overlayUtils.js';
 import tutorialManager from '/js/tutorial.js';
 
 export function showMainOfficeOverlay() {
-    const overlay = showMainViewOverlay(createMainOfficeOverlayHTML());
-    setupMainOfficeEventListeners(overlay);
+    console.log('Checking tutorial status:', tutorialManager.shouldShowTutorial('WELCOME'));
     
+    // Check and show tutorial first
     if (tutorialManager.shouldShowTutorial('WELCOME')) {
         tutorialManager.showTutorial('WELCOME');
     }
+    
+    // Then create and show the overlay
+    const overlay = showMainViewOverlay(createMainOfficeOverlayHTML());
+    setupMainOfficeEventListeners(overlay);
 }
 
 function createMainOfficeOverlayHTML() {
