@@ -26,18 +26,6 @@
 
   <!-- Properly order JS dependencies -->
 
-  <!-- Assign Staff Overlay -->
-  <div id="assignStaffOverlay" class="overlay">
-    <div class="overlay-content">
-    </div>
-  </div>
-
-  <!-- Tutorial Overlay -->
-  <div id="tutorialOverlay" class="overlay">
-    <div class="overlay-content tutorial-content" id="tutorialContent">
-    </div>
-  </div>
-
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
@@ -50,53 +38,27 @@
   <script type="module" src="/js/loadPanel.js"></script>
 
   <script type="module">
-
       import tutorialManager from '/js/tutorial.js';
       import { incrementWeek } from '/js/endDay.js'; 
       import { initializeSidebar } from '/js/database/loadSidebar.js';
       import { initializePanel } from '/js/loadPanel.js';
       import { initializeConsole } from '/js/console.js';
-    import { addTransaction} from '/js/finance.js';
-    import {setupStaffWagesRecurringTransaction} from '/js/staff.js';
-    import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
-    import { showMainOfficeOverlay } from '/js/overlays/mainpages/mainofficeoverlay.js';
-    import { hideAllOverlays } from '/js/overlays/overlayUtils.js';
+      import { addTransaction} from '/js/finance.js';
+      import {setupStaffWagesRecurringTransaction} from '/js/staff.js';
+      import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
+      import { showMainOfficeOverlay } from '/js/overlays/mainpages/mainofficeoverlay.js';
+      import { hideAllOverlays } from '/js/overlays/overlayUtils.js';
 
       document.addEventListener('DOMContentLoaded', function () {
           initializePanel();
           initializeSidebar();
           initializeConsole();
-        // Setop initial staff wage. Hereafter use updateWagesAndRecurringTransaction (in staff.js) to make any change to staff wagesCall this function during initialization of the game or after adding staff
-        setupStaffWagesRecurringTransaction();
-        hideAllOverlays();
-        showMainOfficeOverlay();
-        tutorialManager.init(); // Initialize the tutorial manager
+          setupStaffWagesRecurringTransaction();
+          hideAllOverlays();
+          showMainOfficeOverlay();
+          tutorialManager.init();
       });
   </script>
-  <!-- Building Detail Overlay -->
-  <div id="buildingOverlay" class="overlay" style="display: none;">
-    <div class="overlay-content">
-      <div id="building-details"></div>
-    </div>
-  </div>
-
-  <!-- Hire Staff Overlay -->
-  <div id="hireStaffOverlay" class="overlay" style="display: none;">
-    <div class="overlay-content text-center">
-      <span id="closeHireStaffOverlay" class="close-btn">&times;</span>
-      <h3>Hire Staff</h3>
-      <!-- Additional content for hiring staff will go here -->
-    </div>
-  </div>
-
-  <!-- Remove the farmlandOverlay div since it will be created dynamically -->
-
-  <!-- Resource Info Overlay -->
-  <div id="resourceInfoOverlay" class="overlay" style="display: none;">
-    <div id="resource-details" class="overlay-content">
-      <!-- Resource details will be dynamically inserted here -->
-    </div>
-  </div>
 
   </body>
 </html>
