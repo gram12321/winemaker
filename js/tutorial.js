@@ -120,17 +120,17 @@ const GENERAL_TUTORIALS = {
       {
         title: 'Navigation Menu',
         content: 'This is your main navigation menu. Here you can access different areas of your winery. Lets explore what each section does.',
-        highlightElement: 'sidebar-wrapper'
+        highlightElement: 'sidebar-wrapper'  // Element ID to highlight
       },
       {
-        title: 'Main Office',
-        content: 'The Main Office gives you an overview of your winerys current status and important notifications.',
-        highlightElement: 'main-office'
+        title: 'Farmland Overview',
+        content: 'Click here to manage your land parcels. You can buy new farmland, plant different grape varieties, and manage your vineyards.',
+        highlightElement: 'land-link'  // Using the existing ID of the land menu item
       },
       {
         title: 'Vineyard Management',
         content: 'In the Vineyard section, youll manage your grape vines, from planting to harvesting.',
-        highlightElement: 'vineyard'
+        highlightElement: 'vineyard-link'
       }
     ]
   },
