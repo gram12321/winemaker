@@ -676,15 +676,26 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 /* Tutorial Specific Styles */
+.tutorial-overlay .overlay-content {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
 .tutorial-wrapper {
     position: relative;
     display: flex;
     align-items: center;
     max-width: 800px;
     margin: 0 20px;
-    background-color: transparent !important; /* does not affect the overlay since its the contentoverlay that gives the baggroind color*/
     z-index: 2001;
-    pointer-events: none;
 }
 
 .tutorial-wrapper > * {

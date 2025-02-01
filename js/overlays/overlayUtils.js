@@ -60,12 +60,17 @@ export function showModalOverlay(overlayId, content) {
 }
 
 // Standard overlay for major features (planting, harvesting, etc)
-export function showStandardOverlay(content) {
+export function showStandardOverlay(content, additionalClass) {
     // Hide any existing standard overlays first
     document.querySelectorAll('.standard-overlay').forEach(el => hideOverlay(el));
     
     const overlayContainer = document.createElement('div');
     overlayContainer.classList.add('overlay', 'standard-overlay');
+    
+    // Only add additional class if it's provided and not empty
+    if (additionalClass && additionalClass.trim()) {
+        overlayContainer.classList.add(additionalClass);
+    }
     
     overlayContainer.innerHTML = `
         <div class="overlay-content">

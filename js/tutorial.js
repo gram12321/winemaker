@@ -231,7 +231,7 @@ class TutorialManager {
     
     import('./overlays/overlayUtils.js').then(({ showStandardOverlay, hideOverlay }) => {
       hideOverlay('#tutorialOverlay');
-      showStandardOverlay(content);
+      showStandardOverlay(content, 'tutorial-overlay'); // Pass additional class name
     });
   }
 
