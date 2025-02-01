@@ -9,9 +9,22 @@
     overflow-y: auto;
     overflow-x: hidden;
     display: none;
-    z-index: 1000;
+    isolation: isolate;
+    z-index: auto;
     transition: all var(--transition-speed) ease;
+}
+
+.mainview-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
     background: var(--color-background);
+    z-index: 1;
+}
+
+.mainview-overlay > * {
+    position: relative;
+    z-index: 2;
 }
 
 .mainview-overlay-content {
