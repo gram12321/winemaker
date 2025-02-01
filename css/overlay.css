@@ -700,6 +700,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
     pointer-events: none;
 }
 
+.tutorial-wrapper > * {
+    pointer-events: auto;
+}
 
 .tutorial-image {
     width: 300px;
