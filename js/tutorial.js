@@ -135,22 +135,16 @@ const GENERAL_TUTORIALS = {
     ]
   },
   FARMLAND: {
-    id: 'land',
     title: 'Farmland Overview',
     content: 'Welcome to your farmland! Here you can manage your fields, plant various crops, and expand your agricultural operations. Choose your fields wisely to support your winery.',
-    page: 'land'  // Changed to match the exact function name case (showLandOverlay)
   },
   VINEYARD: {
-    id: 'vineyard',
     title: 'Vineyard Management',
     content: 'Welcome to your vineyard! Here you can manage your fields, plant vines, and harvest grapes. Monitor ripeness levels carefully to achieve the best quality harvest.',
-    page: 'vineyard'
   },
   WINERY: {
-    id: 'winery',
     title: 'Winery Operations',
     content: 'Welcome to your winery! Here you can process your harvested grapes into wine. Start by crushing grapes into must, then ferment the must into wine.',
-    page: 'winery'
   }
 };
 
@@ -207,6 +201,9 @@ class TutorialManager {
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
     
+    // Add specific class for farmland tutorial
+    const extraClass = this.activeTutorial === 'FARMLAND' ? 'tutorial-wrapper-moved' : '';
+    
     // Remove previous highlight if exists
     if (this.lastHighlightedElement) {
       this.removeHighlight(this.lastHighlightedElement);
@@ -222,7 +219,7 @@ class TutorialManager {
     }
     
     const content = `
-      <div class="tutorial-wrapper" >
+      <div class="tutorial-wrapper ${extraClass}" >
         <div class="tutorial-image" style="background-image: url('${imageUrl}');"></div> 
         <div id="tutorialContent">
           <h3>${page.title || tutorial.title}</h3>
