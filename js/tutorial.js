@@ -113,6 +113,27 @@ const COUNTRY_TUTORIALS = {
 
 // General tutorials that don't change with country
 const GENERAL_TUTORIALS = {
+  UI_INTRO: {
+    id: 'ui_intro',
+    title: 'Getting Started',
+    pages: [
+      {
+        title: 'Navigation Menu',
+        content: 'This is your main navigation menu. Here you can access different areas of your winery. Let\'s explore what each section does.',
+        highlightElement: 'sidebar-wrapper'
+      },
+      {
+        title: 'Main Office',
+        content: 'The Main Office gives you an overview of your winery\'s current status and important notifications.',
+        highlightElement: 'main-office'
+      },
+      {
+        title: 'Vineyard Management',
+        content: 'In the Vineyard section, you\'ll manage your grape vines, from planting to harvesting.',
+        highlightElement: 'vineyard'
+      }
+    ]
+  },
   VINEYARD: {
     id: 'vineyard',
     title: 'Vineyard Management',
@@ -180,6 +201,14 @@ class TutorialManager {
     const tutorial = this.getTutorial(this.activeTutorial);
     const page = tutorial.pages ? tutorial.pages[this.currentPage] : tutorial;
     const isLastPage = !tutorial.pages || this.currentPage === tutorial.pages.length - 1;
+    
+    // Clear previous highlight
+    this.clearHighlight();
+    
+    // Add highlight if specified
+    if (page.highlightElement) {
+      this.highlightElement(page.highlightElement);
+    }
 
     const overlay = document.getElementById('tutorialOverlay');
     
@@ -213,7 +242,27 @@ class TutorialManager {
       this.activeTutorial = null;
       this.currentPage = 0;
       document.getElementById('tutorialOverlay').style.display = 'none';
+      
+      // Start UI tutorial after welcome tutorial
+      if (tutorialId === 'WELCOME') {
+        setTimeout(() => {
+          this.showTutorial('UI_INTRO');
+        }, 500);
+      }
     }
+  }
+
+  highlightElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.classList.add('tutorial-highlight');
+    }
+  }
+
+  clearHighlight() {
+    document.querySelectorAll('.tutorial-highlight').forEach(el => {
+      el.classList.remove('tutorial-highlight');
+    });
   }
 
   disableAllTutorials() {

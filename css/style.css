@@ -597,3 +597,10 @@ input[type="radio"]:hover {
     margin-top: 0.5rem;
 }
 
+.tutorial-highlight {
+  position: relative;
+  z-index: 1400;
+  box-shadow: 0 0 0 4px rgba(197, 165, 114, 0.5);
+  border-radius: var(--radius-sm);
+  transition: all 0.3s ease;
+}
