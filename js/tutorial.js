@@ -208,34 +208,50 @@ class TutorialManager {
     this.showCurrentPage();
   }
 
+  constructor() {
+    this.seenTutorials = new Set(JSON.parse(localStorage.getItem('seenTutorials') || '[]'));
+    this.tutorialsEnabled = localStorage.getItem('tutorialsEnabled') !== 'false';
+    this.currentPage = 0;
+    this.activeTutorial = null;
+    this.country = (localStorage.getItem('startingCountry') || 'FRANCE').toUpperCase();
+    if (!COUNTRY_TUTORIALS[this.country]) {
+      this.country = 'FRANCE';
+    }
+    this.countryConfig = COUNTRY_TUTORIALS[this.country];
+    
+    // Create single highlight overlay
+    this.highlightOverlay = document.createElement('div');
+    this.highlightOverlay.className = 'highlight-overlay';
+    this.highlightOverlay.style.display = 'none';
+    document.body.appendChild(this.highlightOverlay);
+    
+    console.log('Tutorial Manager initialized with country:', this.country);
+  }
+
   highlightElement(elementId) {
     console.log('Highlighting element:', elementId);
-    const highlightOverlay = document.createElement('div');
-    highlightOverlay.className = 'highlight-overlay';
-    document.body.appendChild(highlightOverlay);
+    this.highlightOverlay.innerHTML = ''; // Clear previous highlights
+    this.highlightOverlay.style.display = 'block';
 
     const element = document.getElementById(elementId);
     if (!element) {
       console.warn('Element not found:', elementId);
       return;
     }
-    if (element) {
-      const rect = element.getBoundingClientRect();
-      const highlight = document.createElement('div');
-      highlight.className = 'highlight-element';
-      highlight.style.top = `${rect.top}px`;
-      highlight.style.left = `${rect.left}px`;
-      highlight.style.width = `${rect.width}px`;
-      highlight.style.height = `${rect.height}px`;
-      highlightOverlay.appendChild(highlight);
-    }
+    
+    const rect = element.getBoundingClientRect();
+    const highlight = document.createElement('div');
+    highlight.className = 'highlight-element';
+    highlight.style.top = `${rect.top}px`;
+    highlight.style.left = `${rect.left}px`;
+    highlight.style.width = `${rect.width}px`;
+    highlight.style.height = `${rect.height}px`;
+    this.highlightOverlay.appendChild(highlight);
   }
 
   clearHighlight() {
-    const highlightOverlay = document.querySelector('.highlight-overlay');
-    if (highlightOverlay) {
-      highlightOverlay.remove();
-    }
+    this.highlightOverlay.style.display = 'none';
+    this.highlightOverlay.innerHTML = '';
   }
 
   showCurrentPage() {
