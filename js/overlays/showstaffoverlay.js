@@ -37,8 +37,8 @@ function getStaffOverlayHTML(staffData) {
         <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
         <button class="btn btn-light btn-sm close-btn">Close</button>
       </div>
-      <div class="staff-options-container">
-      <div class="staff-option">
+      <div class="staff-details-section">
+      <div class="staff-details-section">
         <h4>Personal Details</h4>
         <table class="skills-table">
           <tbody>
@@ -52,7 +52,7 @@ function getStaffOverlayHTML(staffData) {
         </table>
       </div>
 
-      <div class="staff-option">
+      <div class="staff-details-section">
         <h4>Skills & Expertise</h4>
         <table class="skills-table">
           <tbody>

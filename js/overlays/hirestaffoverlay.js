@@ -37,7 +37,7 @@ function createHireStaffHTML(createdStaffOptions) {
                 ${specializationText}
                 <p>Here are the possible candidates:</p>
             </div>
-            <div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 20px; overflow-y: auto; max-height: 80vh;">
+            <div class="staff-options-container" >
                 ${createdStaffOptions.map((staff, index) => `
                     <div class="staff-option">
                         <div class="card-header text-white d-flex justify-content-between align-items-center">
