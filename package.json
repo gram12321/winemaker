@@ -2,8 +2,5 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "serve": "^14.2.4"
-  },
-  "devDependencies": {
-    "purify-css": "^1.2.5"
   }
 }

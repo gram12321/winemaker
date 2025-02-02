@@ -1,0 +1,599 @@
+/* General Layout */
+body {
+  display: flex;
+  margin-bottom: 220px;  /* Space for the fixed console */
+}
+
+#wrapper {
+  display: flex;
+  width: 100%;
+  transition: margin-left var(--transition-speed) ease;
+}
+
+#page-content-wrapper {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  margin-left: var(--sidebar-width);
+  margin-right: 450px;
+  transition: all var(--transition-speed) ease;
+}
+
+body.sidebar-collapsed #wrapper {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+#wrapper.collapsed #page-content-wrapper {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Not sure these image styles is in use in anyplace in the project maybe leftover from before SPA */
+/* Image Styles Used for above tables images*/
+.process-image {
+  width: 100%;
+  height: 200px;
+  padding: 0;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.status-image {
+  max-width: 100px;
+  height: auto;
+  padding: 10px;
+  border-radius: 30px;
+}
+
+/* Iused for status image in inventoryoverlay*/ 
+.status-icon {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    vertical-align: middle;
+    border-radius: 10px;
+}
+
+/* Global Styles */
+
+/* Quality Color Classes */
+.color-class-9 { color: #006400 !important; }  /* Dark Green */
+.color-class-8 { color: #228B22 !important; }  /* Forest Green */
+.color-class-7 { color: #32CD32 !important; }  /* Lime Green */
+.color-class-6 { color: #90EE90 !important; }  /* Light Green */
+.color-class-5 { color: #FFD700 !important; }  /* Gold */
+.color-class-4 { color: #FFA500 !important; }  /* Orange */
+.color-class-3 { color: #FF8C00 !important; }  /* Dark Orange */
+.color-class-2 { color: #FF4500 !important; }  /* Orange Red */
+.color-class-1 { color: #FF0000 !important; }  /* Red */
+.color-class-0 { color: #8B0000 !important; }  /* Dark Red */
+
+/* General button styles */
+.btn {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  color: var(--panel-text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.btn:disabled {
+  background-color: rgba(197, 165, 114, 0.5);
+  border-color: rgba(197, 165, 114, 0.3);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+/* Alternative button styles */
+.btn-alternative {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  color: var(--panel-text);
+  border-radius: var(--radius-md);
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.btn-alternative:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Dropdown Styling */
+.form-control-sm {
+  background-color: #722F37;
+  border: 1px solid #C5A572;
+  color: #FAF9F7;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  height: auto; /* Ensure height is auto to match content */
+}
+
+.form-control-sm:focus {
+  background-color: #8B4513;
+  border-color: #C5A572;
+  color: #FAF9F7;
+  box-shadow: 0 0 0 0.2rem rgba(197, 165, 114, 0.25);
+}
+
+.form-control-sm option {
+  background-color: #722F37;
+  color: #FAF9F7;
+}
+
+.form-control-sm:hover {
+  border-color: #8B4513;
+}
+
+/* Tooltip styling */
+[title]:hover::after {
+  content: attr(title);
+  position: absolute; /* Change to absolute positioning */
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  background: var(--panel-bg);
+  color: var(--color-accent);
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-accent);
+  white-space: nowrap;
+  z-index: 10000;
+  pointer-events: none;
+  max-width: none; /* Remove width limitation */
+  overflow: visible; /* Ensure tooltip is fully visible */
+  max-height: 200px; /* Allow for more height */
+  overflow-y: auto; /* Enable vertical scrolling if needed */
+}
+
+/* Specific tooltip styling for overlays */
+.overlay-tooltip[title]:hover::after {
+  background: var(--panel-bg);
+  color: var(--color-accent);
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-accent);
+  white-space: pre; /* Allow line breaks */
+  z-index: 10000;
+  pointer-events: none;
+  max-width: 700px; /* Set a max width */
+  max-height: 200px;
+  overflow-y: none;
+  padding: 2px 5px; /* Adjust padding to reduce space */
+}
+
+#companyInfo [title]:hover::after {
+  left: 125px;
+  top: auto;
+}
+
+.task-box .staff-line[title]:hover::after {
+  left: 50%;
+  top: 125px;
+
+}
+
+/* Global Checkbox Styling */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--checkbox-border);
+  border-radius: 3px;
+  background-color: var(--checkbox-bg);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--checkbox-checked);
+  border-color: var(--checkbox-bg);
+}
+
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  color: var(--checkbox-bg);
+  font-size: 14px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+input[type="checkbox"]:hover {
+  border-color: var(--checkbox-hover);
+}
+
+/* Global Radio Styling */
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--checkbox-border);
+  border-radius: 50%;
+  background-color: var(--checkbox-bg);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="radio"]:checked {
+  border-color: var(--checkbox-checked);
+}
+
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: var(--checkbox-checked);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+input[type="radio"]:hover {
+  border-color: var(--checkbox-hover);
+}
+
+/* Global Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 3px solid var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+.skill-bar-outer {
+  width: 100%;
+  background-color: var(--color-background);
+  border: 0px solid var(--color-accent);
+  height: 22px;
+  position: relative;
+}
+
+.skill-bar-container {
+  height: 20px;
+  display: flex;
+  transition: width 0.3s ease;
+}
+
+.skill-bar {
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Starting Condition Grid Layout */
+.starting-condition-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+/* Team Management Grid Layout */
+.team-management-grid {
+    display: grid;
+      grid-template-columns: 35% 30% 30%;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 20px;
+}
+
+#team-members-section {
+    padding: 15px;
+    background: var(--color-background);
+    border-radius: 5px;
+    border: 2px solid var(--color-accent);
+    
+}
+
+
+/* Add styles for the family picture container */
+.options-picture {
+    background-color: var(--color-background);
+    border: 2px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 400px;
+}
+
+.family-image {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+}
+
+.options-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-height: 400px;  /* Set max height */
+    overflow-y: auto;   /* Enable vertical scrolling */
+    padding-right: 10px; /* Add some padding for the scrollbar */
+}
+
+.option-card {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;  /* Prevent cards from shrinking */
+}
+
+.option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.option-card.active {
+    border-color: var(--color-accent);
+    background-color: rgba(197, 165, 114, 0.2);
+}
+
+.option-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.country-flag {
+    width: 32px;
+    height: 24px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.options-info-box {
+    background-color: var(--color-background);
+    border: 2px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    padding: 20px;
+    max-height: 400px;  /* Set max height */
+    overflow-y: auto;   /* Enable scrolling if needed */
+    
+}
+
+.info-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--color-accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-content {
+    padding: 5px 0;  /* Reduced padding */
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;  /* Fixed width for labels, remaining space for values */
+    gap: 10px;  /* Space between label and value */
+    margin-bottom: 8px;  /* Reduced margin */
+    padding: 2px 0;  /* Reduced padding */
+}
+
+.info-label {
+    color: var(--color-text);
+    font-weight: 500;
+    font-size: 0.9em;  /* Slightly smaller font */
+}
+
+.info-value {
+    color: var(--color-accent);
+    text-align: left;  /* Left align the value */
+    font-size: 0.9em;  /* Slightly smaller font */
+}
+
+.confirm-selection {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Add styles for the start button container */
+.start-button-container {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 2px solid var(--color-primary);
+}
+
+.start-button-container .btn {
+    min-width: 200px;
+}
+
+/* Starting Condition Overlay Styles */
+#startingConditionOverlay {
+    transition: opacity 0.3s ease;
+}
+
+#startingConditionOverlay .overlay-content {
+    max-width: 1200px;  /* Increased from 800px */
+    width: 90%;
+    transition: transform 0.3s ease;
+    transform: translateY(0);
+    margin: 0 auto;
+}
+
+#startingConditionOverlay.hiding .overlay-content {
+    transform: translateY(20px);
+}
+
+/* Starting Condition Styles */
+.overlay-section {
+    background-color: var(--color-background);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+
+}
+
+.overlay-section .card-header {
+    background-color: var(--color-primary);
+    color: var(--panel-text);
+    padding: 1rem;
+    border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section .card-body {
+    background-color: var(--color-background);
+    padding: 20px;
+}
+
+.options-info-box .overlay-table {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.options-info-box .overlay-table thead th {
+    background-color: var(--color-primary);
+    color: var(--panel-text);
+    border-bottom: 2px solid var(--color-accent);
+}
+
+.options-info-box .overlay-table tbody td {
+    background-color: var(--color-background);
+    border: 1px solid rgba(197, 165, 114, 0.2);
+}
+
+
+
+/* Auto Assigned Teams */
+.auto-assigned-teams {
+    background: rgba(0,0,0,0.05);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.team-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.team-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--color-accent);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.team-badge img {
+    margin-right: 4px;
+}
+
+/* Grid Layout for Upgrades */
+.upgrade-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+
+.upgrade-grid-item {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px; /* Add spacing between items */
+}
+
+/* Upgrade Items Section */
+.upgrade-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.upgrade-item {
+    padding: 1rem;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background-color: var(--color-background);
+    transition: all 0.3s ease;
+    margin-bottom: 10px; /* Add spacing between items */
+}
+
+.upgrade-item.upgrade-available {
+    border-color: var(--color-primary);
+    background-color: rgba(0, 128, 0, 0.1);
+}
+
+.upgrade-item.upgrade-unavailable {
+    border-color: var(--color-danger);
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+.upgrade-item.upgrade-completed {
+    border-color: var(--color-success);
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.upgrade-item h3 {
+    margin-top: 0;
+}
+
+.upgrade-item p {
+    margin: 0.5rem 0;
+}
+
+.upgrade-item .start-upgrade-btn {
+    margin-top: 0.5rem;
+}
+
