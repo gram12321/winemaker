@@ -70,16 +70,19 @@ function createBuildingDetails(building) {
   `;
 }
 
-function setupToolButtons(building, tools, overlayContainer) {
-  let buildingInstance;
+function ensureBuildingInstance(building) {
   if (building instanceof Building) {
-    buildingInstance = building;
-  } else {
-    buildingInstance = new Building(building.name, building.level);
-    if (building.tools && Array.isArray(building.tools)) {
-      buildingInstance.tools = [...building.tools];
-    }
+    return building;
   }
+  const instance = new Building(building.name, building.level);
+  if (building.slots) {
+    instance.slots = building.slots;
+  }
+  return instance;
+}
+
+function setupToolButtons(building, tools, overlayContainer) {
+  const buildingInstance = ensureBuildingInstance(building);
 
   tools.forEach(tool => {
     const button = overlayContainer.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
@@ -118,21 +121,13 @@ function setupToolButtons(building, tools, overlayContainer) {
 }
 
 export function showBuildingOverlay(building) {
-  // Ensure we have a proper Building instance with slots
-  let buildingInstance;
-  if (building instanceof Building) {
-    buildingInstance = building;
-  } else {
-    buildingInstance = new Building(building.name, building.level);
-    if (building.slots) {
-      buildingInstance.slots = building.slots;
-    }
-  }
-
+  const buildingInstance = ensureBuildingInstance(building);
+  
   // Clean up any existing building overlays first
   document.querySelectorAll('.overlay').forEach(el => {
     if (el.parentNode) el.parentNode.removeChild(el);
   });
+  
   const overlayContainer = showStandardOverlay(createBuildingDetails(buildingInstance));
   renderCapacityVisual(buildingInstance);
   const tools = getBuildingTools().filter(tool => tool.buildingType === buildingInstance.name);

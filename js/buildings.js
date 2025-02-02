@@ -84,18 +84,16 @@ export class Building {
     return false;
   }
 
-  removeTool(toolName) {
-    const toolIndex = this.tools.findIndex(tool => tool.name === toolName);
-    if (toolIndex >= 0) {
-      this.tools.splice(toolIndex, 1);
-      return true;
-    }
-    return false;
-  }
-
   upgrade() {
     this.level += 1;
-    this.capacity = this.calculateCapacity();
+    const newCapacity = this.calculateCapacity();
+    // Add new empty slots for the increased capacity
+    const additionalSlots = newCapacity - this.capacity;
+    this.slots = [
+      ...this.slots,
+      ...Array(additionalSlots).fill().map(() => ({ tools: [], currentWeight: 0 }))
+    ];
+    this.capacity = newCapacity;
     return true;
   }
 

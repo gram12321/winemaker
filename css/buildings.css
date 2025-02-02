@@ -209,32 +209,33 @@
   border-color: var(--color-accent) !important;
 }
 
-.overlay-section-btn:disabled {
-  background-color: rgba(197, 165, 114, 0.5) !important;
-  border-color: rgba(114, 47, 55, 0.3) !important;
-  color: rgba(255, 255, 255, 0.5) !important;
-  cursor: not-allowed !important;
-}
-
 .add-tool-button {
   background-color: var(--accent-color);
   color: var(--button-text);
+}
+
+.add-tool-button:hover {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  transform: translateY(-1px);
+}
+
+/* Common button styles */
+.overlay-section-btn,
+.add-tool-button {
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  margin: 5px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-xs);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.add-tool-button:hover {
-  background-color: var(--hover-bg);
-  transform: translateY(-1px);
-}
-
+.overlay-section-btn:disabled,
 .add-tool-button:disabled {
-  background-color: var(--disabled-bg);
+  background-color: var(--disabled-bg) !important;
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 /* Capacity Grid */
@@ -258,6 +259,17 @@
   gap: 10px;
 }
 
+.capacity-cell,
+.tool-container {
+  border-radius: var(--radius-md);
+  transition: transform 0.2s ease;
+}
+
+.capacity-cell:hover,
+.tool-container:hover {
+  transform: scale(1.05);
+}
+
 .capacity-cell {
   display: flex;
   flex-direction: column;
@@ -270,12 +282,7 @@
   background-color: var(--color-background);
   width: 70px;
   height: 70px;
-  transition: all 0.2s ease;
   position: relative;
-}
-
-.capacity-cell:hover {
-  transform: scale(1.05);
 }
 
 .cell-content {
