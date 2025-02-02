@@ -34,6 +34,7 @@ function createBuildingDetails(building) {
                 ${tool.speedBonus !== 1.0 ? `<div>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%</div>` : ''}
                 ${tool.capacity > 0 ? `<div>Storage: ${formatNumber(tool.capacity)} kg</div>` : ''}
                 ${tool.supportedResources?.length ? `<div>Stores: ${tool.supportedResources.join(', ')}</div>` : ''}
+                <div>Weight: ${tool.weight} units</div>
               </div>
             </div>
           </div>

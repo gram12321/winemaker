@@ -6,7 +6,7 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1500; /* Above buildingsoverlay but below console */
+  z-index: 3000; /* Increased to be well above console (2000) */
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -198,29 +198,6 @@
 }
 
 /* Button Styles */
-.overlay-section-btn {
-  background-color: var(--color-accent) !important;
-  border-color: var(--color-primary) !important;
-  color: var(--panel-text) !important;
-}
-
-.overlay-section-btn:hover {
-  background-color: var(--color-primary) !important;
-  border-color: var(--color-accent) !important;
-}
-
-.add-tool-button {
-  background-color: var(--accent-color);
-  color: var(--button-text);
-}
-
-.add-tool-button:hover {
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-  transform: translateY(-1px);
-}
-
-/* Common button styles */
 .overlay-section-btn,
 .add-tool-button {
   border: none;
@@ -229,13 +206,23 @@
   margin: var(--spacing-xs);
   cursor: pointer;
   transition: all 0.2s ease;
+  background-color: var(--color-accent);
+  color: var(--panel-text);
+}
+
+.overlay-section-btn:hover:not(:disabled),
+.add-tool-button:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .overlay-section-btn:disabled,
 .add-tool-button:disabled {
-  background-color: var(--disabled-bg) !important;
-  cursor: not-allowed;
+  background-color: var(--color-accent) !important;
   opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--panel-text) !important;
+  border: 1px solid rgba(114, 47, 55, 0.3) !important;
 }
 
 /* Capacity Grid */
@@ -318,7 +305,7 @@
   border-radius: 4px;
   font-size: 0.85em;
   white-space: nowrap;
-  z-index: 100;
+  z-index: 3100; /* Ensure tooltips stay above the building overlay */
   color: var(--color-text);
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
