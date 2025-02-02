@@ -7,9 +7,11 @@ import { updateAllDisplays } from '/js/displayManager.js';
 import { showStandardOverlay, hideOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 
 function createBuildingDetails(building) {
-  const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
+  const tools = getBuildingTools()
+    .filter(tool => tool.buildingType === building.name)
+    .sort((a, b) => a.cost - b.cost); // Sort all tools by cost first
   
-  // Group tools by their supported resources
+  // Group pre-sorted tools by their supported resources
   const generalTools = tools.filter(tool => !tool.supportedResources || tool.supportedResources.length === 0);
   const grapeTools = tools.filter(tool => tool.supportedResources?.includes('Grapes'));
   const mustTools = tools.filter(tool => tool.supportedResources?.includes('Must'));
@@ -85,7 +87,9 @@ function setupToolButtons(building, tools, overlayContainer) {
       button.addEventListener('click', () => {
         const newToolInstance = createTool(tool.name);
         if (newToolInstance && buildingInstance.addTool(newToolInstance)) {
-          const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Weight: ${newToolInstance.weight} units`;
+          // Find the slot where the tool was added
+          const slot = buildingInstance.slots.find(s => s.tools.includes(newToolInstance));
+          const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Weight: ${slot.currentWeight}/${buildingInstance.slotWeightCapacity} units in slot`;
           addConsoleMessage(expenseMessage);
           addTransaction('Expense', `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber}`, -newToolInstance.cost);
 
@@ -114,14 +118,14 @@ function setupToolButtons(building, tools, overlayContainer) {
 }
 
 export function showBuildingOverlay(building) {
-  // Ensure we have a proper Building instance
+  // Ensure we have a proper Building instance with slots
   let buildingInstance;
   if (building instanceof Building) {
     buildingInstance = building;
   } else {
     buildingInstance = new Building(building.name, building.level);
-    if (building.tools && Array.isArray(building.tools)) {
-      buildingInstance.tools = [...building.tools];
+    if (building.slots) {
+      buildingInstance.slots = building.slots;
     }
   }
 
@@ -195,6 +199,34 @@ function renderCapacityVisual(building) {
 
       cell.appendChild(cellContent);
       cell.appendChild(toolName);
+
+      // Add click handler for selling
+      cell.style.cursor = 'pointer';
+      cell.addEventListener('click', () => {
+        const result = building.sellToolFromSlot(i);
+        if (result) {
+          const { tool, refundAmount } = result;
+          addConsoleMessage(`Sold ${tool.name} #${tool.instanceNumber} for <span style="color: green">€${formatNumber(refundAmount)}</span> (50% of original price)`);
+          addTransaction('Income', `Sold ${tool.name} #${tool.instanceNumber}`, refundAmount);
+
+          // Update building in storage
+          const buildings = loadBuildings();
+          const buildingToUpdate = buildings.find(b => b.name === building.name);
+          if (buildingToUpdate) {
+            buildingToUpdate.slots = building.slots;
+            const updatedBuildings = buildings.map(b => b.name === building.name ? buildingToUpdate : b);
+            storeBuildings(updatedBuildings);
+          }
+
+          // Refresh display
+          renderCapacityVisual(building);
+          updateAllDisplays();
+        }
+      });
+      
+      // Add sell hint to tooltip
+      const tooltipDiv = cell.querySelector('.tool-tooltip');
+      tooltipDiv.innerHTML += '<br><span style="color: #aaa">Click to sell for 50% refund</span>';
     } else {
       cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty, 0/${building.slotWeightCapacity} units)</div>`;
     }

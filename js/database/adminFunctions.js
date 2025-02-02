@@ -2,6 +2,8 @@ import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './fireb
 import { Staff, createNewStaff, getDefaultTeams } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { inventoryInstance } from '/js/resource.js';
+import { Building } from '/js/buildings.js';
+import { Tool } from '/js/buildings.js';  // Add Tool import
 
 let teams = []; // In-memory storage for teams
 
@@ -342,15 +344,64 @@ export function loadWineOrders() {
 
 // Functions to save and load buildings from localStorage
 export function storeBuildings(buildings) {
-  localStorage.setItem('buildings', JSON.stringify(buildings));
+  // Convert building instances to plain objects for storage
+  const buildingsToStore = buildings.map(building => ({
+    name: building.name,
+    level: building.level,
+    slots: building.slots.map(slot => ({
+      tools: slot.tools.map(tool => ({
+        name: tool.name,
+        buildingType: tool.buildingType,
+        speedBonus: tool.speedBonus,
+        cost: tool.cost,
+        capacity: tool.capacity,
+        supportedResources: tool.supportedResources || [],
+        instanceNumber: tool.instanceNumber,
+        weight: tool.weight
+      })),
+      currentWeight: slot.currentWeight
+    }))
+  }));
+
+  localStorage.setItem('buildings', JSON.stringify(buildingsToStore));
 }
 
 export function loadBuildings() {
   const buildingsJSON = localStorage.getItem('buildings');
-  if (buildingsJSON) {
-    return JSON.parse(buildingsJSON);
+  if (!buildingsJSON) return [];
+
+  try {
+    const buildingsData = JSON.parse(buildingsJSON);
+    // Convert stored objects back to Building instances
+    return buildingsData.map(buildingData => {
+      const building = new Building(buildingData.name, buildingData.level);
+      
+      // Restore slots and tools
+      if (buildingData.slots) {
+        building.slots = buildingData.slots.map(slotData => ({
+          tools: slotData.tools.map(toolData => {
+            const tool = new Tool(
+              toolData.name,
+              toolData.buildingType,
+              toolData.speedBonus,
+              toolData.cost,
+              toolData.capacity,
+              toolData.supportedResources,
+              toolData.weight
+            );
+            tool.instanceNumber = toolData.instanceNumber;
+            return tool;
+          }),
+          currentWeight: slotData.currentWeight
+        }));
+      }
+
+      return building;
+    });
+  } catch (error) {
+    console.error('Error loading buildings:', error);
+    return [];
   }
-  return [];
 }
 
 // Functions to save and load upgrades from localStorage

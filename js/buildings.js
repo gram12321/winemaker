@@ -128,9 +128,22 @@ export class Building {
   getAllTools() {
     return this.slots.flatMap(slot => slot.tools);
   }
+
+  sellToolFromSlot(slotIndex) {
+    const slot = this.slots[slotIndex];
+    if (slot && slot.tools.length > 0) {
+      const tool = slot.tools.pop(); // Remove last tool from slot
+      slot.currentWeight -= tool.weight;
+      return {
+        tool,
+        refundAmount: Math.floor(tool.cost / 2) // 50% refund
+      };
+    }
+    return null;
+  }
 }
 
-class Tool {
+export class Tool {
   static instanceCount = {};
 
   constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1) {
@@ -325,7 +338,10 @@ export function updateBuildingCards() {
     const isBuilt = buildingData !== undefined;
 
     // Create proper Building instance if building exists
-    const building = isBuilt ? new Building(buildingData.name, buildingData.level, buildingData.tools || []) : null;
+    const building = isBuilt ? new Building(buildingData.name, buildingData.level) : null;
+    if (building && buildingData.slots) {
+      building.slots = buildingData.slots;
+    }
 
     cardDiv.classList.toggle('unbuilt-card', !isBuilt);
 
@@ -335,7 +351,7 @@ export function updateBuildingCards() {
       <p>Level: ${isBuilt ? building.level : 0}</p>
       <p>Upgrade Cost: ${isBuilt ? `€${building.getUpgradeCost()}` : "N/A"}</p>
       <p>Capacity: ${isBuilt ? building.capacity : 0}</p>
-      <p>Content: <br> ${isBuilt && building.tools && building.tools.length > 0 ? building.listContents() : "No tools stored."}</p>
+      <p>Content: <br> ${isBuilt ? building.listContents() : "No tools stored."}</p>
     `;
 
     if (isBuilt) {
