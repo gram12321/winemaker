@@ -13,3 +13,14 @@ deploymentTarget = "static"
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[workflows]
+runButton = "Purify CSS"
+
+[[workflows.workflow]]
+name = "Purify CSS"
+author = 34895096
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node purify.js"
