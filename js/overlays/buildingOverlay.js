@@ -85,14 +85,14 @@ function setupToolButtons(building, tools, overlayContainer) {
       button.addEventListener('click', () => {
         const newToolInstance = createTool(tool.name);
         if (newToolInstance && buildingInstance.addTool(newToolInstance)) {
-          const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Remaining Capacity: ${building.capacity - buildingInstance.tools.length} spaces`;
+          const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Weight: ${newToolInstance.weight} units`;
           addConsoleMessage(expenseMessage);
           addTransaction('Expense', `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber}`, -newToolInstance.cost);
 
           const buildings = loadBuildings();
           const buildingToUpdate = buildings.find(b => b.name === building.name);
           if (buildingToUpdate) {
-            buildingToUpdate.tools = buildingInstance.tools;
+            buildingToUpdate.slots = buildingInstance.slots;
             const updatedBuildings = buildings.map(b => b.name === building.name ? buildingToUpdate : b);
             storeBuildings(updatedBuildings);
           }
@@ -101,12 +101,12 @@ function setupToolButtons(building, tools, overlayContainer) {
           const updatedBuilding = updatedBuildings.find(b => b.name === building.name);
           if (updatedBuilding) {
             const buildingInstance = new Building(updatedBuilding.name, updatedBuilding.level);
-            buildingInstance.tools = updatedBuilding.tools;
+            buildingInstance.slots = updatedBuilding.slots;
             renderCapacityVisual(buildingInstance);
             updateAllDisplays();
           }
         } else {
-          addConsoleMessage(`Cannot add ${tool.name}. ${building.name} is full!`);
+          addConsoleMessage(`Cannot add ${tool.name}. No suitable slot available in ${building.name}!`);
         }
       });
     }
@@ -114,14 +114,25 @@ function setupToolButtons(building, tools, overlayContainer) {
 }
 
 export function showBuildingOverlay(building) {
+  // Ensure we have a proper Building instance
+  let buildingInstance;
+  if (building instanceof Building) {
+    buildingInstance = building;
+  } else {
+    buildingInstance = new Building(building.name, building.level);
+    if (building.tools && Array.isArray(building.tools)) {
+      buildingInstance.tools = [...building.tools];
+    }
+  }
+
   // Clean up any existing building overlays first
   document.querySelectorAll('.overlay').forEach(el => {
     if (el.parentNode) el.parentNode.removeChild(el);
   });
-  const overlayContainer = showStandardOverlay(createBuildingDetails(building));
-  renderCapacityVisual(building);
-  const tools = getBuildingTools().filter(tool => tool.buildingType === building.name);
-  setupToolButtons(building, tools, overlayContainer);
+  const overlayContainer = showStandardOverlay(createBuildingDetails(buildingInstance));
+  renderCapacityVisual(buildingInstance);
+  const tools = getBuildingTools().filter(tool => tool.buildingType === buildingInstance.name);
+  setupToolButtons(buildingInstance, tools, overlayContainer);
   setupStandardOverlayClose(overlayContainer);
   setupStatsToggles();
   return overlayContainer;
@@ -142,50 +153,54 @@ function renderCapacityVisual(building) {
   const capacityGrid = document.getElementById('capacity-grid');
   if (!capacityGrid) return;
 
-  const totalCapacity = building.capacity;
-  const usedCapacity = building.tools ? building.tools.length : 0;
-
   const headerText = document.createElement('div');
   headerText.className = 'capacity-header';
-  headerText.textContent = `Building Slots (${usedCapacity}/${totalCapacity} used)`;
+  headerText.innerHTML = `
+    Building Capacity<br>
+    Slots: ${building.slots.filter(slot => slot.tools.length > 0).length}/${building.capacity}
+  `;
   capacityGrid.innerHTML = '';
   capacityGrid.appendChild(headerText);
 
   const gridContainer = document.createElement('div');
   gridContainer.className = 'capacity-grid-container';
 
-  for (let i = 0; i < totalCapacity; i++) {
+  building.slots.forEach((slot, i) => {
     const cell = document.createElement('div');
     cell.className = 'capacity-cell';
 
-    if (i < usedCapacity) {
-      const tool = building.tools[i];
+    if (slot.tools.length > 0) {
+      const tool = slot.tools[0]; // Get first tool for icon and name
       const iconPath = `/assets/icon/buildings/${tool.name.toLowerCase()}.png`;
       const cellContent = document.createElement('div');
       cellContent.className = 'cell-content';
+      
+      const toolCount = slot.tools.length;
+      const weightUsed = slot.currentWeight;
+      
       cellContent.innerHTML = `
         <div class="tool-info">
           <img src="${iconPath}" alt="${tool.name}" style="width: 24px; height: 24px;" />
+          ${toolCount > 1 ? `<span class="tool-count">${toolCount}x</span>` : ''}
           <div class="tool-tooltip">
-            <strong>Slot ${i + 1}:</strong> ${tool.name} #${tool.instanceNumber}
-            ${tool.capacity ? `<br>Storage: ${formatNumber(tool.capacity)} kg` : ''}
-            ${tool.speedBonus !== 1.0 ? `<br>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%` : ''}
+            <strong>Slot ${i + 1}:</strong> ${tool.name}<br>
+            Count: ${toolCount}x<br>
+            Weight: ${weightUsed}/${building.slotWeightCapacity} units
           </div>
         </div>`;
 
       const toolName = document.createElement('div');
       toolName.className = 'tool-name';
-      toolName.textContent = tool.name;
+      toolName.textContent = `${tool.name}${toolCount > 1 ? ` (${toolCount}x)` : ''}`;
 
       cell.appendChild(cellContent);
       cell.appendChild(toolName);
     } else {
-      const defaultUnit = building.name === 'Fermentation Tank' ? 'l' : 'kg';
-      cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty, 0 ${defaultUnit})</div>`;
+      cell.innerHTML = `<div class="empty-slot">Slot ${i + 1}<br>(Empty, 0/${building.slotWeightCapacity} units)</div>`;
     }
 
     gridContainer.appendChild(cell);
-  }
+  });
 
   capacityGrid.appendChild(gridContainer);
 }

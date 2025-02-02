@@ -12,21 +12,73 @@ export class Building {
     'Warehouse': 1000000
   };
 
+  static WEIGHT_CAPACITY = {
+    'Tool Shed': 10,  // Each slot can hold 10 weight units
+    'Warehouse': 15   // Warehouse slots can hold more weight
+  };
+
+  static SLOT_WEIGHT_CAPACITY = {
+    'Tool Shed': 5,  // Each slot can hold 5 weight units
+    'Warehouse': 8   // Warehouse slots can hold more weight
+  };
+
   constructor(name, level = 1, tools = []) {
     this.name = name;
     this.level = level;
     this.baseCost = Building.BASE_COSTS[name] || 500000;
     this.capacity = this.calculateCapacity();
-    this.tools = tools;
+    this.slotWeightCapacity = Building.SLOT_WEIGHT_CAPACITY[name] || 5;
+    this.slots = Array(this.capacity).fill().map(() => ({ tools: [], currentWeight: 0 }));
+
+    // Initialize slots with existing tools
+    if (tools && tools.length > 0) {
+      tools.forEach(tool => {
+        // Create proper Tool instance if it's a plain object
+        const toolInstance = tool instanceof Tool ? tool : 
+          new Tool(tool.name, tool.buildingType, tool.speedBonus, tool.cost, 
+                  tool.capacity, tool.supportedResources, tool.weight);
+        toolInstance.instanceNumber = tool.instanceNumber;
+        this.addTool(toolInstance);
+      });
+    }
   }
 
   calculateCapacity() {
     return this.level * 3;
   }
 
+  getCurrentWeight() {
+    return this.slots.reduce((total, slot) => total + slot.currentWeight, 0);
+  }
+
+  getRemainingWeight() {
+    return this.totalWeightCapacity - this.getCurrentWeight();
+  }
+
+  findAvailableSlot(tool) {
+    // First, try to find a slot that already has the same type of tool
+    let slot = this.slots.find(slot => 
+      slot.tools.length > 0 && 
+      slot.tools[0].name === tool.name && 
+      slot.currentWeight + tool.weight <= this.slotWeightCapacity
+    );
+
+    // If no matching slot found, try to find an empty slot
+    if (!slot) {
+      slot = this.slots.find(slot => 
+        slot.tools.length === 0 && 
+        tool.weight <= this.slotWeightCapacity
+      );
+    }
+
+    return slot;
+  }
+
   addTool(tool) {
-    if (this.tools.length < this.capacity) {
-      this.tools.push(tool);
+    const slot = this.findAvailableSlot(tool);
+    if (slot) {
+      slot.tools.push(tool);
+      slot.currentWeight += tool.weight;
       return true;
     }
     return false;
@@ -52,10 +104,12 @@ export class Building {
   }
 
   listContents() {
-    if (this.tools.length === 0) {
+    const allTools = this.getAllTools();
+    if (allTools.length === 0) {
       return "No tools stored.";
     }
-    const toolCounts = this.tools.reduce((acc, tool) => {
+
+    const toolCounts = allTools.reduce((acc, tool) => {
       acc[tool.name] = (acc[tool.name] || 0) + 1;
       return acc;
     }, {});
@@ -65,17 +119,21 @@ export class Building {
         const iconPath = `/assets/icon/buildings/${name.toLowerCase()}.png`;
         return `<div>
                   <img src="${iconPath}" alt="${name}" style="width: 24px; height: 24px; vertical-align: middle;" />
-                  ${count} 
+                  ${count}x ${name}
                 </div>`;
       })
       .join('<br>');
+  }
+
+  getAllTools() {
+    return this.slots.flatMap(slot => slot.tools);
   }
 }
 
 class Tool {
   static instanceCount = {};
 
-  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = []) {
+  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1) {
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
@@ -83,6 +141,7 @@ class Tool {
     this.capacity = capacity; // capacity in kg or liters
     this.supportedResources = supportedResources;
     this.instanceNumber = 1; // Default value, will be overridden by ToolManager
+    this.weight = weight; // Default weight of 1 if not specified
   }
 
   getStorageId() {
@@ -114,15 +173,15 @@ const ToolManager = (() => {
       toolInstanceCounts = {};
 
       tools = [
-        new Tool('Tractor', 'Tool Shed', 1.2, 500, 0),
-        new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0),
-        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0),
-        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0),
-        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes']),
-        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must']),
-        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes']),
-        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes']),
-        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'])
+        new Tool('Tractor', 'Tool Shed', 1.2, 500, 0, [], 5),      // Takes full slot
+        new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0, [], 1),      // Can fit multiple
+        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0, [], 6),   // Takes full slot
+        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0, [], 3),
+        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes'], 1), // Can fit multiple
+        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8), // Takes full slot
+        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes'], 2),
+        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes'], 1), // Can fit multiple
+        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'], 7)
       ];
       toolsInitialized = true;
     }
@@ -145,7 +204,8 @@ const ToolManager = (() => {
         toolTemplate.speedBonus,
         toolTemplate.cost,
         toolTemplate.capacity,
-        toolTemplate.supportedResources || []
+        toolTemplate.supportedResources || [],
+        toolTemplate.weight
       );
       // Override the instance number with our managed count
       newTool.instanceNumber = toolInstanceCounts[toolName];
