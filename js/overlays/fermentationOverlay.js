@@ -1,4 +1,3 @@
-
 import { fermentation } from '../wineprocessing.js';
 import { addConsoleMessage } from '../console.js';
 import { formatNumber, getColorClass } from '../utils.js';
@@ -58,35 +57,37 @@ function setupFermentationEventListeners(overlayContainer) {
     const storageBody = document.getElementById('fermentation-storage-body');
     
     buildings.forEach(building => {
-        if (!building.tools) return;
+        if (!building.slots) return;
         
-        building.tools.forEach(tool => {
-            if (tool.supportedResources?.includes('Must')) {
-                const toolId = `${tool.name} #${tool.instanceNumber}`;
-                const matchingInventoryItems = inventoryInstance.items.filter(item => 
-                    item.storage === toolId && 
-                    item.state === 'Must'
-                );
-                
-                matchingInventoryItems.forEach(item => {
-                    const row = document.createElement('tr');
-                    const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
+        building.slots.forEach(slot => {
+            slot.tools.forEach(tool => {
+                if (tool.supportedResources?.includes('Must')) {
+                    const toolId = `${tool.name} #${tool.instanceNumber}`;
+                    const matchingInventoryItems = inventoryInstance.items.filter(item => 
+                        item.storage === toolId && 
+                        item.state === 'Must'
+                    );
                     
-                    row.innerHTML = `
-                        <td><input type="radio" name="must-select" data-resource="${item.resource.name}" 
-                            data-storage="${toolId}" data-vintage="${item.vintage}"
-                            data-quality="${item.quality}" data-field="${item.fieldName}"
-                            data-prestige="${item.fieldPrestige}"
-                            data-amount="${item.amount}"></td>
-                        <td>${toolId}</td>
-                        <td>${tool.capacity}</td>
-                        <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
-                        <td>${formatNumber(item.amount)} l</td>
-                        <td>${qualityDisplay}</td>
-                    `;
-                    storageBody.appendChild(row);
-                });
-            }
+                    matchingInventoryItems.forEach(item => {
+                        const row = document.createElement('tr');
+                        const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
+                        
+                        row.innerHTML = `
+                            <td><input type="radio" name="must-select" data-resource="${item.resource.name}" 
+                                data-storage="${toolId}" data-vintage="${item.vintage}"
+                                data-quality="${item.quality}" data-field="${item.fieldName}"
+                                data-prestige="${item.fieldPrestige}"
+                                data-amount="${item.amount}"></td>
+                            <td>${toolId}</td>
+                            <td>${formatNumber(tool.capacity)} l</td>
+                            <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
+                            <td>${formatNumber(item.amount)} l</td>
+                            <td>${qualityDisplay}</td>
+                        `;
+                        storageBody.appendChild(row);
+                    });
+                }
+            });
         });
     });
 

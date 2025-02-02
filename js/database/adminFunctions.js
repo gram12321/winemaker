@@ -390,8 +390,6 @@ export function loadBuildings() {
               toolData.weight
             );
             tool.instanceNumber = toolData.instanceNumber;
-            // Debug log to check tool reconstruction
-            console.log('Reconstructed tool:', tool);
             return tool;
           }),
           currentWeight: slotData.currentWeight
