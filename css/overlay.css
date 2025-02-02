@@ -265,41 +265,36 @@ border-color: var(--color-accent);
 transform: scale(1.1);
 }
 
-/* 4. Skills tables style */
-
-.skills-table {
-width: fit-content;
-table-layout: auto;
-border-collapse: collapse;
-margin: 15px auto;
-font-size: 0.9em;
-background-color: var(--color-background);
-border: 1px solid var(--color-accent);
-box-shadow: var(--shadow-sm);
-min-width: 200px;
+/* 4. Skills tables style - Update to be more specific and consistent */
+.skills-table,
+.staff-option .skills-table,
+.hire-staff-content .skills-table {
+  width: fit-content;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 15px auto;
+  font-size: 0.9em;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  font-family: var(--font-primary); /* Add explicit font family */
+  -webkit-font-smoothing: antialiased; /* Add font smoothing */
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .skills-table th,
-.skills-table td {
-padding: 8px 12px;
-border: 1px solid var(--color-accent);
-text-align: left;
-color: var(--color-text);
-}
-
-.skills-table th {
-background-color: var(--color-primary);
-color: var(--panel-text);
-font-weight: 500;
-}
-
-.skills-table tr:nth-child(even) {
-background-color: rgba(197, 165, 114, 0.05);
-}
-
-.skills-table tr:hover {
-background-color: rgba(197, 165, 114, 0.1);
-transition: background-color 0.2s ease;
+.skills-table td,
+.staff-option .skills-table th,
+.staff-option .skills-table td,
+.hire-staff-content .skills-table th,
+.hire-staff-content .skills-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal; /* Ensure consistent font weight */
+  font-size: 0.9em;
 }
 
 /* Base grid layout for staff options containers IE Hirestaff */
