@@ -194,9 +194,17 @@ export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     const buildings = loadBuildings();
     const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
     
-    const tool = buildings.flatMap(b => b.tools).find(t => 
-        `${t.name} #${t.instanceNumber}` === selectedTool
-    );
+    // Updated to find tool in slots
+    const tool = buildings.flatMap(b => 
+        b.slots.flatMap(slot => 
+            slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
+        )
+    ).find(t => t); // Find first non-null result
+
+    if (!tool) {
+        console.error('Tool not found:', selectedTool);
+        return false;
+    }
 
     const existingGrapes = inventoryInstance.items.find(item => 
         item.storage === selectedTool && 
@@ -241,35 +249,41 @@ export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
 function populateStorageOptions(farmland) {
     const storageBody = document.getElementById('storage-display-body');
     const buildings = loadBuildings();
-    const playerInventory = inventoryInstance.items;
 
     buildings.forEach(building => {
-        if (building.tools) {
-            building.tools.forEach(tool => {
-                if (tool.supportedResources?.includes('Grapes')) {
-                    const toolId = `${tool.name} #${tool.instanceNumber}`;
-                    const matchingInventoryItems = playerInventory.filter(item => 
-                        item.storage === toolId && 
-                        item.state === 'Grapes'
-                    );
-                    const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
+        if (building.slots) {
+            building.slots.forEach(slot => {
+                slot.tools.forEach(tool => {
+                    if (tool.supportedResources?.includes('Grapes')) {
+                        const toolId = `${tool.name} #${tool.instanceNumber}`;
+                        // Debug log to check tool properties
+                        console.log('Found grape storage tool:', tool);
+                        
+                        // Rest of the existing code for displaying the tool
+                        const playerInventory = inventoryInstance.items;
+                        const matchingInventoryItems = playerInventory.filter(item => 
+                            item.storage === toolId && 
+                            item.state === 'Grapes'
+                        );
+                        const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
 
-                    const row = document.createElement('tr');
-                    const firstItem = matchingInventoryItems[0];
+                        const row = document.createElement('tr');
+                        const firstItem = matchingInventoryItems[0];
 
-                    row.innerHTML = `
-                        <td><input type="checkbox" class="storage-checkbox" data-capacity="${tool.capacity - currentAmount}" value="${toolId}" style="accent-color: var(--color-primary);"></td>
-                        <td>${toolId}</td>
-                        <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
-                        <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
-                        <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
-                    `;
-                    storageBody.appendChild(row);
+                        row.innerHTML = `
+                            <td><input type="checkbox" class="storage-checkbox" data-capacity="${tool.capacity - currentAmount}" value="${toolId}" style="accent-color: var(--color-primary);"></td>
+                            <td>${toolId}</td>
+                            <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
+                            <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
+                            <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
+                        `;
+                        storageBody.appendChild(row);
 
-                    row.querySelector('.storage-checkbox').addEventListener('change', function() {
-                        updateSelectedCapacity(farmland);
-                    });
-                }
+                        row.querySelector('.storage-checkbox').addEventListener('change', function() {
+                            updateSelectedCapacity(farmland);
+                        });
+                    }
+                });
             });
         }
     });

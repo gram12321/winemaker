@@ -138,15 +138,17 @@ function updateStorageTable(type, buildings, resourceType) {
     tableBody.innerHTML = '';
     
     buildings.forEach(building => {
-        if (!building.tools) return;
+        if (!building.slots) return;
         
-        building.tools.forEach(tool => {
-            if (tool.supportedResources?.includes(resourceType)) {
-                const storageId = `${tool.name} #${tool.instanceNumber}`;
-                const items = inventoryInstance.getStorageContents(storageId);
-                const row = createStorageRow(tool, items);
-                tableBody.appendChild(row);
-            }
+        building.slots.forEach(slot => {
+            slot.tools.forEach(tool => {
+                if (tool.supportedResources?.includes(resourceType)) {
+                    const storageId = `${tool.name} #${tool.instanceNumber}`;
+                    const items = inventoryInstance.getStorageContents(storageId);
+                    const row = createStorageRow(tool, items);
+                    tableBody.appendChild(row);
+                }
+            });
         });
     });
 }

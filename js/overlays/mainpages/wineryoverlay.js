@@ -1,4 +1,3 @@
-
 import { formatNumber, formatQualityDisplay } from '/js/utils.js';
 import { showCrushingOverlay } from '/js/overlays/crushingOverlay.js';
 import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
@@ -86,15 +85,19 @@ export function updateWineryStorage() {
         
         tableBody.innerHTML = '';
         buildings.forEach(building => {
-            if (!building.tools) return;
-            building.tools.forEach(tool => {
-                if (tool.supportedResources?.includes(resourceType)) {
-                    const matchingInventoryItems = playerInventory.filter(item => 
-                        item.storage === `${tool.name} #${tool.instanceNumber}` && 
-                        item.state === resourceType
-                    );
-                    populateStorageRow(tableBody, tool, matchingInventoryItems);
-                }
+            if (!building.slots) return;
+            
+            building.slots.forEach(slot => {
+                slot.tools.forEach(tool => {
+                    if (tool.supportedResources?.includes(resourceType)) {
+                        const toolId = `${tool.name} #${tool.instanceNumber}`;
+                        const matchingInventoryItems = playerInventory.filter(item => 
+                            item.storage === toolId && 
+                            item.state === resourceType
+                        );
+                        populateStorageRow(tableBody, tool, matchingInventoryItems);
+                    }
+                });
             });
         });
     });

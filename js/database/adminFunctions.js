@@ -386,10 +386,12 @@ export function loadBuildings() {
               toolData.speedBonus,
               toolData.cost,
               toolData.capacity,
-              toolData.supportedResources,
+              toolData.supportedResources || [], // Ensure supportedResources is always an array
               toolData.weight
             );
             tool.instanceNumber = toolData.instanceNumber;
+            // Debug log to check tool reconstruction
+            console.log('Reconstructed tool:', tool);
             return tool;
           }),
           currentWeight: slotData.currentWeight

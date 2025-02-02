@@ -51,6 +51,7 @@ export class Inventory {
   }
 
   getStorageContents(storageId) {
+    if (!storageId) return [];
     return this.items.filter(item => item.storage === storageId);
   }
 

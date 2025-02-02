@@ -148,40 +148,41 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory, 
   mustStorageBody.innerHTML = '';
 
   buildings.forEach(building => {
-    if (!building.tools) return;
+    if (!building.slots) return;
 
-    building.tools.forEach(tool => {
-      if (tool.supportedResources?.includes('Must')) {
-        const toolId = `${tool.name} #${tool.instanceNumber}`;
-        const matchingInventoryItems = playerInventory.filter(item => item.storage === toolId);
-        const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
-        const availableSpace = tool.capacity - currentAmount;
-        const firstItem = matchingInventoryItems[0];
+    building.slots.forEach(slot => {
+      slot.tools.forEach(tool => {
+        if (tool.supportedResources?.includes('Must')) {
+          const toolId = `${tool.name} #${tool.instanceNumber}`;
+          const matchingInventoryItems = playerInventory.filter(item => item.storage === toolId);
+          const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
+          const availableSpace = tool.capacity - currentAmount;
+          const firstItem = matchingInventoryItems[0];
 
-        // Check if the storage already contains a different resource or vintage
-        const isDifferentResourceOrVintage = selectedGrape && firstItem && (
-          firstItem.resource.name !== selectedGrape.dataset.resource ||
-          firstItem.vintage !== parseInt(selectedGrape.dataset.vintage)
-        );
+          // Check if the storage already contains a different resource or vintage
+          const isDifferentResourceOrVintage = selectedGrape && firstItem && (
+            firstItem.resource.name !== selectedGrape.dataset.resource ||
+            firstItem.vintage !== parseInt(selectedGrape.dataset.vintage)
+          );
 
-        if (availableSpace > 0 && !isDifferentResourceOrVintage) {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td><input type="checkbox" name="must-storage" value="${toolId}" 
-                data-capacity="${tool.capacity}" data-available="${availableSpace}"></td>
-            <td>${toolId}</td>
-            <td>${firstItem ? `<strong>${firstItem.fieldName}</strong>, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
-            <td>${formatNumber(tool.capacity)} l</td>
-            <td>${formatNumber(availableSpace)} l</td>
-          `;
-          mustStorageBody.appendChild(row);
+          if (availableSpace > 0 && !isDifferentResourceOrVintage) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td><input type="checkbox" name="must-storage" value="${toolId}" 
+                  data-capacity="${tool.capacity}" data-available="${availableSpace}"></td>
+              <td>${toolId}</td>
+              <td>${firstItem ? `<strong>${firstItem.fieldName}</strong>, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
+              <td>${formatNumber(tool.capacity)} l</td>
+              <td>${formatNumber(availableSpace)} l</td>
+            `;
+            mustStorageBody.appendChild(row);
 
-          // Add event listener to update storage progress
-          row.querySelector('input[name="must-storage"]').addEventListener('change', function() {
-            updateStorageProgress();
-          });
+            row.querySelector('input[name="must-storage"]').addEventListener('change', function() {
+              updateStorageProgress();
+            });
+          }
         }
-      }
+      });
     });
   });
 }
@@ -206,46 +207,49 @@ function updateStorageProgress() {
 function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
   buildings.forEach(building => {
-    if (!building.tools) return;
+    if (!building.slots) return;
 
-    building.tools.forEach(tool => {
-      if (tool.supportedResources?.includes('Grapes')) {
-        const matchingInventoryItems = playerInventory.filter(item => 
-          item.storage === `${tool.name} #${tool.instanceNumber}` &&
-          item.state === 'Grapes'
-        );
+    building.slots.forEach(slot => {
+      slot.tools.forEach(tool => {
+        if (tool.supportedResources?.includes('Grapes')) {
+          const toolId = `${tool.name} #${tool.instanceNumber}`;
+          const matchingInventoryItems = playerInventory.filter(item => 
+            item.storage === toolId &&
+            item.state === 'Grapes'
+          );
 
-        matchingInventoryItems.forEach(item => {
-          const row = document.createElement('tr');
-          const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
-          const formattedAmount = item.amount >= 1000 ? 
-            `${formatNumber(item.amount / 1000, 2)} t` : 
-            `${formatNumber(item.amount)} kg`;
+          matchingInventoryItems.forEach(item => {
+            const row = document.createElement('tr');
+            const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
+            const formattedAmount = item.amount >= 1000 ? 
+              `${formatNumber(item.amount / 1000, 2)} t` : 
+              `${formatNumber(item.amount)} kg`;
 
-          row.innerHTML = `
-            <td><input type="radio" name="grape-select" class="grape-select" data-storage="${item.storage}" 
-                data-resource="${item.resource.name}" data-vintage="${item.vintage}" 
-                data-quality="${item.quality}" data-field="${item.fieldName}"
-                data-amount="${item.amount}"
-                data-prestige="${item.fieldPrestige}"></td>
-            <td>${item.storage}</td>
-            <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
-            <td>${formattedAmount}</td>
-            <td>${qualityDisplay}</td>
-          `;
-          storageTableBody.appendChild(row);
+            row.innerHTML = `
+              <td><input type="radio" name="grape-select" class="grape-select" data-storage="${item.storage}" 
+                  data-resource="${item.resource.name}" data-vintage="${item.vintage}" 
+                  data-quality="${item.quality}" data-field="${item.fieldName}"
+                  data-amount="${item.amount}"
+                  data-prestige="${item.fieldPrestige}"></td>
+              <td>${item.storage}</td>
+              <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
+              <td>${formattedAmount}</td>
+              <td>${qualityDisplay}</td>
+            `;
+            storageTableBody.appendChild(row);
 
-          // Add event listener to update selected grapes
-          row.querySelector('.grape-select').addEventListener('change', function() {
-            const selectedGrapes = parseFloat(this.dataset.amount);
-            const grapesDisplay = document.getElementById('selected-grapes');
-            grapesDisplay.textContent = selectedGrapes >= 1000 ? 
-              formatNumber(selectedGrapes / 1000, 2) + ' t' : 
-              formatNumber(selectedGrapes) + ' kg';
-            updateStorageProgress();
+            // Add event listener to update selected grapes
+            row.querySelector('.grape-select').addEventListener('change', function() {
+              const selectedGrapes = parseFloat(this.dataset.amount);
+              const grapesDisplay = document.getElementById('selected-grapes');
+              grapesDisplay.textContent = selectedGrapes >= 1000 ? 
+                formatNumber(selectedGrapes / 1000, 2) + ' t' : 
+                formatNumber(selectedGrapes) + ' kg';
+              updateStorageProgress();
+            });
           });
-        });
-      }
+        }
+      });
     });
   });
 }
