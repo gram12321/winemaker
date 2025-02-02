@@ -3,7 +3,14 @@ const purify = require('purify-css');
 const fs = require('fs');
 const path = require('path');
 
-const content = ['js/**/*.js', 'index.html', 'html/game.html'];
+const content = [
+  'js/**/*.js', 
+  'index.html', 
+  'html/game.html',
+  'html/consolePanel.html',
+  'html/panel.html',
+  'html/sidebar.html'
+];
 const css = ['css/**/*.css'];
 
 const options = {
