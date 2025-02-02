@@ -238,6 +238,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 /* Custom range input styling */
 input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 8px;
   border-radius: 4px;
@@ -324,6 +325,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .staff-options-container .staff-option {
   border: 2px solid var(--color-accent);
   border-radius: 12px;
+  background-color: var(--color-background);
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+
+}
 
 /* 5. Stats Overlays */
 .stats-overlay {
@@ -406,11 +413,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .skill-bar.sales-skill-bar { background-color: var(--skill-sales); }
 .skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
 
-  background-color: var(--color-background);
-  margin-bottom: 15px;
-  padding: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
+  
 
 .staff-options-container .staff-option .staff-option {
   border: 1px solid var(--color-accent);

@@ -63,24 +63,24 @@ function createHireStaffOptionsHTML() {
     const initialWork = calculateTotalWork(initialCandidates, initialSkill, []);
 
     return `
-        <div class="overlay-content overlay-container">
+        <div class="overlay-content overlay-container" style="text-align: center; padding: 10px;">
             <section class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Staff Search Options</h3>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
                 <div class="card-body">
-                    <div class="form-group mb-4 d-flex">
+                    <div class="form-group mb-4 d-flex justify-content-center">
                         <div class="slider-container">
                             <label for="candidates-slider" class="form-label">Number of Candidates:</label>
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="mr-2">Min (3)</span>
                                 <input type="range" class="custom-range" id="candidates-slider" min="3" max="10" step="1" value="${initialCandidates}">
                                 <span class="ml-2">Max (10)</span>
                             </div>
                             <div>Selected candidates: <span id="candidates-value">${initialCandidates}</span></div>
                             <label for="skill-slider" class="form-label mt-3">Required Skill Level:</label>
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center">
                                 <span class="mr-2">${skillLevels[0.1].name}</span>
                                 <input type="range" class="custom-range" id="skill-slider" 
                                     min="0.1" max="1.0" step="0.1" value="${initialSkill}">
@@ -88,7 +88,7 @@ function createHireStaffOptionsHTML() {
                             </div>
                             <div class="skill-level-container">Skill Level: <span id="skill-display">${skillInfo.formattedName}</span></div>
                         </div>
-                        <div class="specialized-roles-container">
+                        <div class="specialized-roles-container" style="padding-left: 10px;">
                             <label class="form-label">Specialized Role Requirements:</label>
                             ${Object.entries(specializedRoles).map(([key, role]) => `
                                 <div class="role-checkbox">
@@ -101,16 +101,16 @@ function createHireStaffOptionsHTML() {
 
                     <hr class="overlay-divider">
 
-                    <div class="cost-details d-flex justify-content-between mt-3">
-                        <div class="planting-overlay-info-box">
+                    <div class="cost-details d-flex justify-content-sm-around">
+                        <div class="planting-overlay-info-box" style="padding-right: 10px;">
                             <span>Cost per candidate:</span><br>
                             <span>€${formatNumber(Math.round(calculateSearchCost(1, initialSkill, [])))}</span>
                         </div>
-                        <div class="planting-overlay-info-box">
+                        <div class="planting-overlay-info-box" style="padding-right: 10px;">
                             <span>Total Cost:</span><br>
                             <span id="total-cost">€${formatNumber(initialCost)}</span>
                         </div>
-                        <div class="planting-overlay-info-box">
+                        <div class="planting-overlay-info-box" style="padding-right: 10px;">
                             <span>Total Work:</span><br>
                             <span id="total-work">${initialWork}</span>
                         </div>
