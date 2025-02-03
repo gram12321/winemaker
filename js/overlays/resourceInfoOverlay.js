@@ -1,7 +1,7 @@
 import { getResourceByName } from '../resource.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { grapeSuitability } from '../names.js';
-import { hideOverlay, showStatsOverlay } from './overlayUtils.js';
+import { hideOverlay, showModalOverlay } from './overlayUtils.js';
 
 export function showResourceInfoOverlay(resourceName) {
   const resource = getResourceByName(resourceName);
@@ -10,8 +10,9 @@ export function showResourceInfoOverlay(resourceName) {
     return;
   }
 
-  // Use resourceInfoOverlay as ID to match DOM element
-  showStatsOverlay('resourceInfoOverlay', createResourceInfoOverlayHTML(resource), setupResourceInfoEventListeners);
+  const overlayContainer = showModalOverlay('resourceInfoOverlay', createResourceInfoOverlayHTML(resource));
+  setupResourceInfoEventListeners(overlayContainer, overlayContainer);
+  return overlayContainer;
 }
 
 function createResourceInfoOverlayHTML(resource) {
@@ -43,13 +44,13 @@ function createResourceInfoOverlayHTML(resource) {
   });
 
   return `
-    <div id="resourceInfo-details">
-      <div class="hire-staff-content">
-        <div class="card-header text-white d-flex justify-content-between align-items-center">
-          <h3 class="h5 mb-0">${resource.name}</h3>
-          <button class="btn btn-light btn-sm close-btn">Close</button>  <!-- Changed to match other overlays -->
-        </div>
-        <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
+    <div class="hire-staff-content">
+      <div class="card-header text-white d-flex justify-content-between align-items-center">
+        <h3 class="h5 mb-0">${resource.name}</h3>
+        <button class="btn btn-light btn-sm close-btn">Close</button>
+      </div>
+      <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
+      <div class="overlay-section-wrapper">
         <div class="staff-options-container">
           <div class="staff-option">
             <h4>Resource Information</h4>
@@ -77,13 +78,20 @@ function createResourceInfoOverlayHTML(resource) {
 }
 
 function setupResourceInfoEventListeners(details, overlay) {
-  // Handle close button click
+  // Add close button functionality
   const closeBtn = details.querySelector('.close-btn');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
-      hideOverlay(overlay);
+      overlay.remove();
     });
   }
+
+  // Add click outside to close
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) {
+      overlay.remove();
+    }
+  });
 
   // Setup toggle button event listeners for countries
   const toggleButtons = details.querySelectorAll('.toggle-country');
