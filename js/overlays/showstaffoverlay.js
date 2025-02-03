@@ -1,78 +1,72 @@
 import { getFlagIconHTML, formatNumber, getColorClass, getSkillLevelInfo } from '../utils.js'; // Import getSkillLevelInfo
 import { specializedRoles } from '../overlays/hireStaffOptionsOverlay.js'; // Import specializedRoles
+import { showModalOverlay } from './overlayUtils.js';
 
 export function showStaffOverlay(staffData) {
-  const overlay = createOverlay();
   const content = getStaffOverlayHTML(staffData);
-  overlay.appendChild(content);
-  document.body.appendChild(overlay);
-  setupStaffOverlayEventListeners(overlay, content);
-  overlay.style.display = 'block';
-}
-
-function createOverlay() {
-  const existingOverlay = document.getElementById('staffOverlay');
-  if (existingOverlay) {
-    existingOverlay.remove();
-  }
-
-  const overlay = document.createElement('div');
-  overlay.id = 'staffOverlay';
-  overlay.className = 'overlay';
-  return overlay;
+  
+  // Convert DOM element to its HTML string
+  const overlayContainer = showModalOverlay('staffOverlay', content.outerHTML);
+  
+  // Setup any required event listeners using overlayContainer
+  setupStaffOverlayEventListeners(overlayContainer, staffData);
+  
+  return overlayContainer;
 }
 
 function getStaffOverlayHTML(staffData) {
   const content = document.createElement('div');
-  content.className = 'overlay-content';
-
   const skillInfo = getSkillLevelInfo(staffData.skillLevel);
   const specializationHTML = staffData.specializedRoles.map(role => 
     `<span class="specialization ${role}">${specializedRoles[role].title}</span>`
   ).join(', ');
 
   content.innerHTML = `
-    <section id="staff-details-section" class="overlay-section card mb-4">
+    <div class="hire-staff-content">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
         <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
         <button class="btn btn-light btn-sm close-btn">Close</button>
       </div>
-      <div class="staff-details-section">
-      <div class="staff-details-section">
-        <h4>Personal Details</h4>
-        <table class="skills-table">
-          <tbody>
-            <tr><td>Nationality</td><td>${getFlagIconHTML(staffData.nationality)} ${staffData.nationality}</td></tr>
-            <tr><td>Monthly Wage</td><td>€${staffData.wage}</td></tr>
-            <tr><td>Annual Cost</td><td>€${staffData.wage * 12}</td></tr>
-            <tr><td>Workforce</td><td>${staffData.workforce}</td></tr>
-            <tr><td>Skill Level</td><td>${skillInfo.formattedName}</td></tr>
-            <tr><td>Specialization</td><td>${specializationHTML}</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+      <div class="overlay-section-wrapper">
+        <div class="staff-options-container">
+          <div class="staff-option">
+            <h4>Personal Details</h4>
+            <table class="skills-table">
+              <tbody>
+                <tr><td>Nationality</td><td>${getFlagIconHTML(staffData.nationality)} ${staffData.nationality}</td></tr>
+                <tr><td>Monthly Wage</td><td>€${staffData.wage}</td></tr>
+                <tr><td>Annual Cost</td><td>€${staffData.wage * 12}</td></tr>
+                <tr><td>Workforce</td><td>${staffData.workforce}</td></tr>
+                <tr><td>Skill Level</td><td>${skillInfo.formattedName}</td></tr>
+                <tr><td>Specialization</td><td>${specializationHTML}</td></tr>
+              </tbody>
+            </table>
+          </div>
 
-      <div class="staff-details-section">
-        <h4>Skills & Expertise</h4>
-        <table class="skills-table">
-          <tbody>
-            <tr><td>Field Work</td><td class="${getColorClass(staffData.skills.field.field)}">${formatNumber(staffData.skills.field.field * 100)}%</td></tr>
-            <tr><td>Winery Operations</td><td class="${getColorClass(staffData.skills.winery.winery)}">${formatNumber(staffData.skills.winery.winery * 100)}%</td></tr>
-            <tr><td>Administration</td><td class="${getColorClass(staffData.skills.administration.administration)}">${formatNumber(staffData.skills.administration.administration * 100)}%</td></tr>
-            <tr><td>Sales Management</td><td class="${getColorClass(staffData.skills.sales.sales)}">${formatNumber(staffData.skills.sales.sales * 100)}%</td></tr>
-            <tr><td>Maintenance</td><td class="${getColorClass(staffData.skills.maintenance.maintenance)}">${formatNumber(staffData.skills.maintenance.maintenance * 100)}%</td></tr>
-          </tbody>
-        </table>
+          <div class="staff-option">
+            <h4>Skills & Expertise</h4>
+            <table class="skills-table">
+              <tbody>
+                <tr><td>Field Work</td><td class="${getColorClass(staffData.skills.field.field)}">${formatNumber(staffData.skills.field.field * 100)}%</td></tr>
+                <tr><td>Winery Operations</td><td class="${getColorClass(staffData.skills.winery.winery)}">${formatNumber(staffData.skills.winery.winery * 100)}%</td></tr>
+                <tr><td>Administration</td><td class="${getColorClass(staffData.skills.administration.administration)}">${formatNumber(staffData.skills.administration.administration * 100)}%</td></tr>
+                <tr><td>Sales Management</td><td class="${getColorClass(staffData.skills.sales.sales)}">${formatNumber(staffData.skills.sales.sales * 100)}%</td></tr>
+                <tr><td>Maintenance</td><td class="${getColorClass(staffData.skills.maintenance.maintenance)}">${formatNumber(staffData.skills.maintenance.maintenance * 100)}%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   `;
 
   return content;
 }
 
-function setupStaffOverlayEventListeners(overlay, content) {
+function setupStaffOverlayEventListeners(overlay, staffData) {
   // Add close button functionality
-  const closeBtn = content.querySelector('.close-btn');
+  const closeBtn = overlay.querySelector('.close-btn');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => {
       overlay.remove();
@@ -84,5 +78,5 @@ function setupStaffOverlayEventListeners(overlay, content) {
     if (event.target === overlay) {
       overlay.remove();
     }
-  });
+  }); // fixed syntax error here
 }

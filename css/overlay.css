@@ -266,6 +266,7 @@ transform: scale(1.1);
 }
 
 /* 4. Skills tables style - Update to be more specific and consistent */
+/* Table styles */
 .skills-table,
 .staff-option .skills-table,
 .hire-staff-content .skills-table {
@@ -278,23 +279,78 @@ transform: scale(1.1);
   border: 1px solid var(--color-accent);
   box-shadow: var(--shadow-sm);
   min-width: 200px;
-  font-family: var(--font-primary); /* Add explicit font family */
-  -webkit-font-smoothing: antialiased; /* Add font smoothing */
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .skills-table th,
-.skills-table td,
 .staff-option .skills-table th,
+.hire-staff-content .skills-table th {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+}
+
+.skills-table td,
 .staff-option .skills-table td,
-.hire-staff-content .skills-table th,
 .hire-staff-content .skills-table td {
   padding: 8px 12px;
   border: 1px solid var(--color-accent);
   text-align: left;
   color: var(--color-text);
-  font-weight: normal; /* Ensure consistent font weight */
+  font-weight: normal;
   font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+/* Alternating rows and hover effects */
+.skills-table tr:nth-child(even),
+.staff-option .skills-table tr:nth-child(even),
+.hire-staff-content .skills-table tr:nth-child(even) {
+  background-color: rgba(197, 165, 114, 0.05);
+}
+
+.skills-table tr:hover,
+.staff-option .skills-table tr:hover,
+.hire-staff-content .skills-table tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+  cursor: default;
+}
+
+/* Staff option containers and nesting */
+.staff-options-container .staff-option .staff-option {
+  border: 1px solid var(--color-accent);
+  border-radius: 8px;
+  margin: 10px 0;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Staff option buttons */
+.staff-option .btn-primary,
+.staff-option .hire-staff-button,
+#closeHireStaffOverlay {
+  background-color: var(--color-primary);
+  border-color: var(--color-accent);
+  color: var(--panel-text);
+  padding: 0.375rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.staff-option .btn-primary:hover,
+.staff-option .hire-staff-button:hover,
+#closeHireStaffOverlay:hover {
+  background-color: var(--color-accent);
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Base grid layout for staff options containers IE Hirestaff */
@@ -409,36 +465,6 @@ justify-content: center;
 .skill-bar.admin-skill-bar { background-color: var(--skill-admin); }
 .skill-bar.sales-skill-bar { background-color: var(--skill-sales); }
 .skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
-
-
-
-.staff-options-container .staff-option .staff-option {
-border: 1px solid var(--color-accent);
-border-radius: 8px;
-margin: 10px 0;
-padding: 10px;
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.staff-option .btn-primary,
-.staff-option .hire-staff-button,
-#closeHireStaffOverlay {
-background-color: var(--color-primary);
-border-color: var(--color-accent);
-color: var(--panel-text);
-padding: 0.375rem 1rem;
-font-weight: 500;
-transition: all 0.2s ease;
-}
-
-.staff-option .btn-primary:hover,
-.staff-option .hire-staff-button:hover,
-#closeHireStaffOverlay:hover {
-background-color: var(--color-accent);
-border-color: var(--color-primary);
-transform: translateY(-1px);
-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
 /* Quality Color Classes */
 .staff-option .color-class-9 { color: #006400 !important; }  /* Dark Green */

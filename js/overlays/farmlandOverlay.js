@@ -9,7 +9,7 @@ import {calculateAgeContribution,
   calculatePrestigeRankingContribution, 
   calculateFragilityBonusContribution } from '/js/farmland.js';
 import { showResourceInfoOverlay } from './resourceInfoOverlay.js';
-import { showStatsOverlay } from './overlayUtils.js';
+import { showModalOverlay } from './overlayUtils.js';
 
 export function showFarmlandOverlay(farmlandData) {
   // Calculate additional values needed for display
@@ -33,9 +33,9 @@ export function showFarmlandOverlay(farmlandData) {
     ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution);
 
   // Show overlay using utility function
-  showStatsOverlay('farmlandOverlay', content, (details, overlay) => {
-    setupFarmlandOverlayEventListeners(details, overlay, farmlandData);
-  });
+  const overlayContainer = showModalOverlay('farmlandOverlay', content);
+  setupFarmlandOverlayEventListeners(overlayContainer, overlayContainer, farmlandData);
+  return overlayContainer;
 }
 
 function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
