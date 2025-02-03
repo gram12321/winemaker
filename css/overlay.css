@@ -392,7 +392,37 @@ background-color: var(--color-background);
 margin-bottom: 15px;
 padding: 15px;
 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
 
+/* Special handling for hire staff modal */
+#hireStaffOverlay.modal-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 2000;
+}
+
+#hireStaffOverlay .overlay-content {
+  width: 95%;
+  max-width: 1200px;  /* This was already correct */
+  margin: 2rem auto;
+  padding: 0;
+}
+
+#hireStaffOverlay .hire-staff-content {
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  margin: 0;
+  width: 100%;
+  height: auto;
+}
+
+/* Ensure staff options grid works in modal */
+#hireStaffOverlay .staff-options-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
 }
 
 /* 5. Stats Overlays */
@@ -757,33 +787,3 @@ transform: translate(100%, 90%);
   position: relative;
 }
 
-/* Special handling for hire staff modal */
-#hireStaffOverlay.modal-overlay {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  z-index: 2000;
-}
-
-#hireStaffOverlay .overlay-content {
-  width: 95%;
-  max-width: 1200px;  /* This was already correct */
-  margin: 2rem auto;
-  padding: 0;
-}
-
-#hireStaffOverlay .hire-staff-content {
-  background-color: var(--color-background);
-  border-radius: var(--radius-lg);
-  margin: 0;
-  width: 100%;
-  height: auto;
-}
-
-/* Ensure staff options grid works in modal */
-#hireStaffOverlay .staff-options-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 20px;
-}
