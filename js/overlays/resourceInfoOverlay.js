@@ -45,11 +45,13 @@ function createResourceInfoOverlayHTML(resource) {
 
   return `
     <div class="overlay-card resource-overlay">
-      <div class="card-header text-white d-flex justify-content-between align-items-center">
-        <h3 class="h5 mb-0">${resource.name}</h3>
-        <button class="btn btn-light btn-sm close-btn">Close</button>
-      </div>
-      <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
+      <div class="imgbox">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">${resource.name}</h3>
+          <button class="btn btn-light btn-sm close-btn">Close</button>
+        </div>
+        <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
+      </div>  
       <div class="info-grid">
         <div class="info-section">
           <h4>Resource Information</h4>

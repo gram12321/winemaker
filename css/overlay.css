@@ -313,9 +313,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   flex-direction: column;
 }
 
-
-
-/* Shared Modal Overlay Components */
+/* Shared Modal Overlay Components for dataoverlays */
 .overlay-card {
   background-color: var(--color-background);
   border: 1px solid var(--color-accent);
@@ -325,6 +323,15 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   width: 95%;
   max-width: 1200px;
   overflow: hidden; /* Ensure inner elements don't break border radius */
+}
+/* box around image and header */
+.imgbox {
+  background-color: #fff;
+  margin: 60px auto;
+  width: 90%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
 }
 
 .info-grid {
@@ -340,8 +347,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   border: 2px solid var(--color-accent);
   border-radius: 12px;
   background-color: var(--color-background);
-  margin-bottom: 15px;
-  padding: 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
@@ -472,7 +477,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   cursor: default;
 }
 
-
 /* specific staffoverlay tweaks */
 .staff-overlay .overlay-card {
   padding-bottom: 25px;  /* Add padding at bottom of staff overlay */
@@ -483,18 +487,10 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   max-width: 1200px;
   overflow-y: auto;   /* Remove scroll from card */
   padding: 0;
-  
 }
 
 .hire-staff-overlay .info-grid {
   overflow-y: none;     /* Move scroll to grid */
-  
-}
-
-/* Modal Content Spacing */
-.modal-overlay .overlay-card > .info-grid {
-  margin-top: 20px;  /* Space after header/image */
-  margin-bottom: 20px;  /* Space at bottom */
 }
 
 /* Resource overlay specific styles */
@@ -505,10 +501,6 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   border: 1px solid var(--color-accent);
 }
 
-.resource-overlay .country-section .data-table {
-  width: 100%;  /* Make tables fill the country section */
-}
-
 .resource-overlay .country-buttons {
   display: flex;
   gap: 10px;
@@ -517,7 +509,4 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   margin-bottom: 15px;
 }
 
-.resource-overlay .overlay-card {
-  padding-bottom: 25px;  /* Add padding at bottom of resource overlay */
-}
 

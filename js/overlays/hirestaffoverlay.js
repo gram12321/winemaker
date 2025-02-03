@@ -33,17 +33,19 @@ function createHireStaffHTML(createdStaffOptions) {
 
     return `
     <div class="overlay-card hire-staff-overlay">
-        <div class="card-header text-white d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0">Hire Staff</h3>
-            <button class="btn btn-light btn-sm close-btn">Close</button>
-        </div>
-        <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
-        <div class="p-3 text-center">
-            <p>HR Department has completed the search for new Candidate:</p>
-            <p>We have found ${createdStaffOptions.length} candidates</p>
-            <p>We have been searching for ${skillInfo.formattedName}</p>
-            ${specializationText}
-            <p>Here are the possible candidates:</p>
+        <div class="imgbox">
+            <div class="card-header text-white d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">Hire Staff</h3>
+                <button class="btn btn-light btn-sm close-btn">Close</button>
+            </div>
+            <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+            <div class="p-3 text-center">
+                <p>HR Department has completed the search for new Candidate:</p>
+                <p>We have found ${createdStaffOptions.length} candidates</p>
+                <p>We have been searching for ${skillInfo.formattedName}</p>
+                ${specializationText}
+                <p>Here are the possible candidates:</p>
+            </div>
         </div>
         <div class="info-grid">
             ${createdStaffOptions.map((staff, index) => `

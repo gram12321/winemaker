@@ -75,14 +75,17 @@ function getFarmlandOverlayHTML(farmlandData, ...params) {
 
   return `
     <div class="overlay-card farmland-overlay">
-      <div class="card-header text-white d-flex justify-content-between align-items-center">
-        <h3 class="h5 mb-0">
-          ${flagIcon} ${farmlandData.name}, ${farmlandData.region}, ${farmlandData.country} 
-          ${farmlandData.plantedResourceName ? `| ${farmlandData.plantedResourceName}` : ''}
-        </h3>
-        <button id="closeFarmlandOverlay" class="btn btn-primary btn-sm">Close</button>
-      </div>
-      <img src="/assets/pic/farming_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Farming">
+      <div class="imgbox">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">
+            ${flagIcon} ${farmlandData.name}, ${farmlandData.region}, ${farmlandData.country} 
+            ${farmlandData.plantedResourceName ? `| ${farmlandData.plantedResourceName}` : ''}
+          </h3>
+          <button id="closeFarmlandOverlay" class="btn btn-primary btn-sm">Close</button>
+        </div>
+       
+      <img src="/assets/pic/farming_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Farming" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+      </div> 
       <div class="overlay-section-wrapper">
         <div class="info-grid">
           <div class="info-section">

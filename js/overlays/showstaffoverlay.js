@@ -23,11 +23,13 @@ function getStaffOverlayHTML(staffData) {
 
   content.innerHTML = `
     <div class="overlay-card staff-overlay">
-      <div class="card-header text-white d-flex justify-content-between align-items-center">
-        <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
-        <button class="btn btn-light btn-sm close-btn">Close</button>
-      </div>
-      <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+      <div class="imgbox">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+          <h3 class="h5 mb-0">${staffData.name} ${staffData.lastName}</h3>
+          <button class="btn btn-light btn-sm close-btn">Close</button>
+        </div>
+        <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+      </div>  
       <div class="info-grid">
         <div class="info-section">
           <h4>Personal Details</h4>
