@@ -32,7 +32,7 @@ body.sidebar-collapsed .mainview-overlay {
 
 body.panel-collapsed .mainview-overlay {
   right: var(--panel-collapsed-width);
-  width: calc(100% - (var(--sidebar-width) + var(--panel-collapsed-width)));
+  width: calc(100% - (var (--sidebar-width) + var(--panel-collapsed-width)));
 }
 
 body.sidebar-collapsed.panel-collapsed .mainview-overlay {
@@ -75,12 +75,9 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 }
 
 .overlay-section-wrapper {
-  background-color: #fff;
   padding: 25px;
-  border-radius: var(--radius-lg);
+  background: var(--color-background);
   margin-bottom: 20px;
-  box-shadow: var(--shadow-sm);
-
 }
 
 .overlay.active {
@@ -132,41 +129,40 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .overlay-table,
 .overlay-content .table,
 .mainview-overlay-content .table {
-margin: 0 auto;
-width: auto;
-
-background-color: var(--color-background);
-text-align: center;
-margin-bottom: 1rem;
+  margin: 0 auto;
+  width: auto;
+  background-color: var(--color-background);
+  text-align: center;
+  margin-bottom: 1rem;
 }
 
 .overlay-table th,
 .overlay-content .table th,
 .mainview-overlay-content .table th {
-background-color: rgba(197, 165, 114, 0.2);
-color: var(--color-text);
-padding: 12px;
-border-bottom: 2px solid var(--color-accent);
+  background-color: rgba(197, 165, 114, 0.2);
+  color: var(--color-text);
+  padding: 12px;
+  border-bottom: 2px solid var(--color-accent);
 }
 
 .overlay-table td,
 .overlay-content .table td,
 .mainview-overlay-content .table td {
-padding: 12px;
-border-color: rgba(197, 165, 114, 0.2);
-vertical-align: middle;
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+  vertical-align: middle;
 }
 
 .overlay-table tbody tr:hover,
 .overlay-content .table tbody tr:hover,
 .mainview-overlay-content .table tbody tr:hover {
-background-color: rgba(197, 165, 114, 0.1);
+  background-color: rgba(197, 165, 114, 0.1);
 }
 
 .table-responsive {
-width: fit-content;
-max-width: 100%;
-margin: 0 auto;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 /* Section Styling */
@@ -179,159 +175,91 @@ margin: 0 auto;
 }
 
 .overlay-section .card-header {
-background-color: var(--color-primary);
-color: var(--panel-text);
-padding: 1rem;
-border-bottom: 2px solid var(--color-accent);
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  padding: 1rem;
+  border-bottom: 2px solid var(--color-accent);
 }
 
 /* Keep gradient only for multi-section overlays */
 .overlay-section:not(:only-child) .card-header {
-background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
 }
-
 
 /* Overlay Container Styles */
 .overlay-container {
-background-color: var(--color-background);
-padding: 2rem;
-max-width: 1200px;
-margin: 0 auto;
+  background-color: var(--color-background);
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Section-specific Header Styles */
 #vineyard-section .card-header {
-background: linear-gradient(135deg, var(--color-accent), #8B4513);
-border-bottom: 2px solid var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
 }
 
 /* Section-specific Header Gradients */
 #grapes-section .card-header {
-background: linear-gradient(135deg, var(--color-accent), #8B4513);
-border-bottom: 2px solid var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
 }
 
 #must-section .card-header {
-background: linear-gradient(135deg, #8B4513, #491809);
-border-bottom: 2px solid var(--color-accent);
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
 }
 
 #wine-section .card-header {
-background: linear-gradient(135deg, #491809, #23143E);
-border-bottom: 2px solid var(--color-accent);
+  background: linear-gradient(135deg, #491809, #23143E);
+  border-bottom: 2px solid var(--color-accent);
 }
-
 
 /* Planting - - - - - -*/
 .planting-overlay-info-box {
-background-color: var(--color-background);
-border-radius: var(--radius-md);
-padding: 15px;
-margin: 10px 0;
-text-align: center;
-border: 1px solid var(--color-accent);
-box-shadow: var(--shadow-sm);
-width: 120px;
-color: var(--color-text);
+  background-color: var(--color-background);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  margin: 10px 0;
+  text-align: center;
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  width: 120px;
+  color: var(--color-text);
 }
 
 /* Custom range input styling */
 input[type="range"] {
--webkit-appearance: none;
-appearance: none;
-width: 100%;
-height: 8px;
-border-radius: 4px;
-background: var(--color-primary);
-outline: none;
-margin: 15px 0;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-primary);
+  outline: none;
+  margin: 15px 0;
 }
 
 input[type="range"]::-webkit-slider-thumb {
--webkit-appearance: none;
-appearance: none;
-width: 20px;
-height: 20px;
-border-radius: 50%;
-background: var(--color-accent);
-cursor: pointer;
-border: 2px solid var(--color-primary);
-transition: all 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  border: 2px solid var(--color-primary);
+  transition: all 0.2s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-background: var(--color-primary);
-border-color: var(--color-accent);
-transform: scale(1.1);
+  background: var(--color-primary);
+  border-color: var(--color-accent);
+  transform: scale(1.1);
 }
 
 /* 4. Skills tables style - Update to be more specific and consistent */
-/* Table styles */
-.skills-table,
-.staff-option .skills-table,
-.hire-staff-content .skills-table {
-  width: fit-content;
-  table-layout: auto;
-  border-collapse: collapse;
-  margin: 15px auto;
-  font-size: 0.9em;
-  background-color: var(--color-background);
-  border: 1px solid var(--color-accent);
-  box-shadow: var(--shadow-sm);
-  min-width: 200px;
-  font-family: var(--font-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.skills-table th,
-.staff-option .skills-table th,
-.hire-staff-content .skills-table th {
-  padding: 8px 12px;
-  border: 1px solid var(--color-accent);
-  text-align: left;
-  color: var(--color-text);
-  font-weight: normal;
-  font-size: 0.9em;
-  background-color: var(--color-primary);
-  color: var(--panel-text);
-}
-
-.skills-table td,
-.staff-option .skills-table td,
-.hire-staff-content .skills-table td {
-  padding: 8px 12px;
-  border: 1px solid var(--color-accent);
-  text-align: left;
-  color: var(--color-text);
-  font-weight: normal;
-  font-size: 0.9em;
-  transition: background-color 0.2s ease;
-}
-
-/* Alternating rows and hover effects */
-.skills-table tr:nth-child(even),
-.staff-option .skills-table tr:nth-child(even),
-.hire-staff-content .skills-table tr:nth-child(even) {
-  background-color: rgba(197, 165, 114, 0.05);
-}
-
-.skills-table tr:hover,
-.staff-option .skills-table tr:hover,
-.hire-staff-content .skills-table tr:hover {
-  background-color: rgba(197, 165, 114, 0.1);
-  cursor: default;
-}
-
-/* Staff option containers and nesting */
-.staff-options-container .staff-option .staff-option {
-  border: 1px solid var(--color-accent);
-  border-radius: 8px;
-  margin: 10px 0;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 /* Staff option buttons */
 .staff-option .btn-primary,
 .staff-option .hire-staff-button,
@@ -353,45 +281,14 @@ transform: scale(1.1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Base grid layout for staff options containers */
-.staff-options-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  text-align: center;
-  width: 100%;  /* Add this to ensure full width */
-  max-width: none;  /* Remove any max-width limitation */
-  padding: 20px;
-}
-
-/* More specific rule for hire staff overlay */
-#hireStaffOverlay .staff-options-container {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-}
-
-/* Staff details. IE showstaff */
-
-#staff-details-section  {
-display: block;
-max-width: 800px;
-margin: 0 auto;
-text-align: center;
-}
-
-#staff-details-section .staff-option {
-margin-bottom: 20px;
-}
-
 /* Box around 'Staff option' */
 .staff-options-container .staff-option {
-border: 2px solid var(--color-accent);
-border-radius: 12px;
-background-color: var(--color-background);
-margin-bottom: 15px;
-padding: 15px;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  background-color: var(--color-background);
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Special handling for hire staff modal */
@@ -402,237 +299,54 @@ box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   z-index: 2000;
 }
 
-#hireStaffOverlay .overlay-content {
-  width: 95%;
-  max-width: 1200px;  /* This was already correct */
-  margin: 2rem auto;
-  padding: 0;
-}
-
-#hireStaffOverlay .hire-staff-content {
-  background-color: var(--color-background);
-  border-radius: var(--radius-lg);
-  margin: 0;
-  width: 100%;
-  height: auto;
-}
-
-/* Ensure staff options grid works in modal */
-#hireStaffOverlay .staff-options-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 20px;
-}
-
 /* 5. Stats Overlays */
-.stats-overlay {
-position: fixed;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-background: var(--color-background);
-padding: 2rem;
-border-radius: var(--radius-lg);
-box-shadow: var(--shadow-lg);
-z-index: 1500;
-max-width: 800px;
-width: 90%;
-max-height: 90vh;
-overflow-y: auto;
-border: 1px solid var(--color-accent);
-}
-
-.stats-overlay .stats-header {
-background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
-color: var(--panel-text);
-padding: 1rem;
-border-radius: var(--radius-md);
-margin-bottom: 1.5rem;
-}
-
-.stats-overlay .stats-table {
-width: 100%;
-margin-bottom: 1rem;
-border: 1px solid var(--color-accent);
-}
-
-.stats-overlay .stats-table th {
-background-color: var(--color-primary);
-color: var(--panel-text);
-padding: 12px;
-border-bottom: 2px solid var(--color-accent);
-}
-
-.stats-overlay .stats-table td {
-padding: 12px;
-border-color: rgba(197, 165, 114, 0.2);
-}
-
-.stats-overlay .stats-table tbody tr:hover {
-background-color: rgba(197, 165, 114, 0.1);
-}
-
-.stats-overlay .stats-options-container {
-display: grid;
-grid-template-columns: repeat(2, 1fr);
-gap: 20px;
-}
-
-.stats-overlay .stats-option {
-border: 2px solid var(--color-accent);
-border-radius: 12px;
-background-color: var(--color-background);
-padding: 15px;
-box-shadow: var(--shadow-sm);
-}
-
 /* Skill Bar Implementation */
-.skill-bar {
-height: 20px;
-flex-grow: 1;
-border-radius: 3px;
-margin-top: 3px;
-color: #fff;
-font-weight: bold;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-
+.skill-bar-container { display: flex; gap: 5px; }
+.skill-bar { height: 20px; flex-grow: 1; border-radius: 3px; margin-top: 3px; color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; }
 .skill-bar.field-skill-bar { background-color: var(--skill-field); }
 .skill-bar.winery-skill-bar { background-color: var(--skill-winery); }
 .skill-bar.admin-skill-bar { background-color: var(--skill-admin); }
 .skill-bar.sales-skill-bar { background-color: var(--skill-sales); }
 .skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
-
-/* Quality Color Classes */
-.staff-option .color-class-9 { color: #006400 !important; }  /* Dark Green */
-.staff-option .color-class-8 { color: #228B22 !important; }  /* Forest Green */
-.staff-option .color-class-7 { color: #32CD32 !important; }  /* Lime Green */
-.staff-option .color-class-6 { color: #90EE90 !important; }  /* Light Green */
-.staff-option .color-class-5 { color: #FFD700 !important; }  /* Gold */
-.staff-option .color-class-4 { color: #FFA500 !important; }  /* Orange */
-.staff-option .color-class-3 { color: #FF8C00 !important; }  /* Dark Orange */
-.staff-option .color-class-2 { color: #FF4500 !important; }  /* Orange Red */
-.staff-option .color-class-1 { color: #FF0000 !important; }  /* Red */
-.staff-option .color-class-0 { color: #8B0000 !important; }  /* Dark Red */
-
-#hireStaffOverlay {
-display: none;
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background-color: rgba(0, 0, 0, 0.7);
-z-index: 1100;
-overflow-y: hidden;
-}
-
-.hire-staff-content {
-background-color: #fff;
-padding: 20px;
-margin: 60px auto;
-width: 90%;
-max-width: 1200px;  /* Change from 1000px to 1200px to match modal width */
-border-radius: 10px;
-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-position: relative;
-max-height: 80vh;
-overflow-y: auto;
-}
-
-.hire-staff-content h3 {
-margin-top: 20px;
-margin-bottom: 40px;
-}
-
-.hire-staff-container {
-display: block;
-}
-
-.hire-staff-option {
-margin-bottom: 20px;
-border: 2px solid var(--color-accent);
-border-radius: var(--radius-lg);
-padding: 15px;
-background: var(--color-background);
-box-shadow: var(--shadow-sm);
-}
-
-.table.table-bordered {
-width: 100%;
-}
-
-.skill-bar-container {
-display: flex;
-gap: 5px;
-}
-
-.skill-bar {
-height: 20px;
-flex-grow: 1;
-border-radius: 3px;
-margin-top: 3px;
-color: #fff;
-font-weight: bold;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-
-.skill-bar.field-skill-bar { background-color: var(--skill-field); }
-.skill-bar.winery-skill-bar { background-color: var(--skill-winery); }
-.skill-bar.admin-skill-bar { background-color: var(--skill-admin); }
-.skill-bar.sales-skill-bar { background-color: var(--skill-sales); }
-.skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
-
-.skills-column {
-min-width: 150px;
-}
-
-
+.skills-column { min-width: 150px; }
 
 .overlay-section .table tbody tr:hover {
-background-color: rgba(197, 165, 114, 0.1);
+  background-color: rgba(197, 165, 114, 0.1);
 }
 
 .overlay-section .badge,
 .inventory-section .badge,
 .overlay-section .badge-light {
-background-color: var(--color-accent);
-color: var(--panel-text);
-padding: 0.5rem 1rem;
-font-size: 0.9rem;
-margin-left: 1rem;
+  background-color: var(--color-accent);
+  color: var(--panel-text);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin-left: 1rem;
 }
 
-
-
 #orders-section .card-header {
-background: linear-gradient(135deg, #8B4513, #491809);
-border-bottom: 2px solid var(--color-accent);
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
 }
 
 .overlay-section .table,
 .overlay-table {
-margin: 0;
-background-color: transparent;
+  margin: 0;
+  background-color: transparent;
 }
 
 .overlay-section .table th,
 .overlay-table th {
-background-color: rgba(0, 0, 0, 0.05);
-padding: 12px;
-border-bottom: 2px solid var(--color-accent);
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  border-bottom: 2px solid var(--color-accent);
 }
 
 .overlay-table td,
 .overlay-section .table td {
-padding: 12px;
-border-color: rgba(197, 165, 114, 0.2);
-background: transparent;
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+  background: transparent;
 }
 
 /* Clearing Overlay Specific Styles */
@@ -755,7 +469,7 @@ background: transparent;
 }
 
 .tutorial-wrapper-moved {
-transform: translate(100%, 90%);
+  transform: translate(100%, 90%);
 }
 
 .tutorial-wrapper > * {
@@ -785,5 +499,211 @@ transform: translate(100%, 90%);
   border: 1px solid var(--color-accent);
   max-width: 400px;
   position: relative;
+}
+
+/* Shared Modal Overlay Components */
+.overlay-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin: 0 auto;
+  width: 95%;
+  max-width: 1200px;
+  overflow: hidden; /* Ensure inner elements don't break border radius */
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  width: 100%;
+  padding: 25px;  /* Add padding around the entire grid */
+}
+
+/* Info Section Styles */
+.info-section {
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  background-color: var(--color-background);
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+/* Nested info sections should have lighter borders */
+.info-section .info-section {
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px 0;
+}
+
+.data-table {
+  width: fit-content;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 15px auto;
+  font-size: 0.9em;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.data-table th,
+.info-section .data-table th {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--panel-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  background-color: var(--color-primary);
+}
+
+.data-table td,
+.info-section .data-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+/* Make sure all table cells have borders */
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--color-accent);
+  border-right: 1px solid var(--color-accent);
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  border-right: none;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Consistent alternating rows and hover effects */
+.data-table tr:nth-child(even),
+.info-section .data-table tr:nth-child(even) {
+  background-color: rgba(197, 165, 114, 0.05);
+}
+
+.data-table tr:hover,
+.info-section .data-table tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+  cursor: default;
+}
+
+.info-section {
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  background-color: var(--color-background);
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.data-table {
+  width: fit-content;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 15px auto;
+  font-size: 0.9em;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.data-table th {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--panel-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  background-color: var(--color-primary);
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+/* Alternating rows and hover effects */
+.data-table tr:nth-child(even) {
+  background-color: rgba(197, 165, 114, 0.05);
+}
+
+.data-table tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+  cursor: default;
+}
+
+
+/* specific staffoverlay tweaks */
+.staff-overlay .overlay-card {
+  padding-bottom: 25px;  /* Add padding at bottom of staff overlay */
+}
+
+/* specific hirestaff tweaks */
+.hire-staff-overlay .overlay-card {
+  max-width: 1200px;
+  overflow-y: auto;   /* Remove scroll from card */
+  padding: 0;
+  
+}
+
+.hire-staff-overlay .info-grid {
+  overflow-y: none;     /* Move scroll to grid */
+  
+}
+
+/* Modal Content Spacing */
+.modal-overlay .overlay-card > .info-grid {
+  margin-top: 20px;  /* Space after header/image */
+  margin-bottom: 20px;  /* Space at bottom */
+}
+
+/* Resource overlay specific styles */
+.resource-overlay .country-section {
+  background: var(--color-background);
+  padding: 15px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
+}
+
+.resource-overlay .country-section .data-table {
+  width: 100%;  /* Make tables fill the country section */
+}
+
+.resource-overlay .country-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.resource-overlay .overlay-card {
+  padding-bottom: 25px;  /* Add padding at bottom of resource overlay */
 }
 

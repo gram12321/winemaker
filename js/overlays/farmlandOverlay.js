@@ -64,7 +64,8 @@ function setupFarmlandOverlayEventListeners(details, overlay, farmlandData) {
   });
 }
 
-function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution) {
+function getFarmlandOverlayHTML(farmlandData, ...params) {
+  const [aspectRating, colorClass, landValue, flagIcon, farmlandPrestige, formattedSize, prestigeColorClass, healthColorClass, ageContribution, landValueContribution, prestigeRankingContribution, fragilityBonusContribution] = params;
   const prestigeTooltip = `
     Age Contribution: ${formatNumber(ageContribution * 100)}%
     Land Value Contribution: ${formatNumber(landValueContribution * 100)}%
@@ -73,7 +74,7 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
   `;
 
   return `
-    <div class="hire-staff-content">
+    <div class="overlay-card farmland-overlay">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
         <h3 class="h5 mb-0">
           ${flagIcon} ${farmlandData.name}, ${farmlandData.region}, ${farmlandData.country} 
@@ -82,45 +83,46 @@ function getFarmlandOverlayHTML(farmlandData, aspectRating, colorClass, landValu
         <button id="closeFarmlandOverlay" class="btn btn-primary btn-sm">Close</button>
       </div>
       <img src="/assets/pic/farming_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Farming">
-      </div>
-      <div class="staff-options-container">
-        <div class="staff-option">
-          <h4>Location & Size</h4>
-          <table class="skills-table">
-            <tbody>
-              <tr><td>Country</td><td>${flagIcon} ${farmlandData.country}</td></tr>
-              <tr><td>Region</td><td>${farmlandData.region}</td></tr>
-              <tr><td>Acres</td><td>${formattedSize}</td></tr>
-            </tbody>
-          </table>
+      <div class="overlay-section-wrapper">
+        <div class="info-grid">
+          <div class="info-section">
+          <h4>Land Details</h4>
+            <table class="data-table">
+              <tbody>
+                <tr><td>Country</td><td>${flagIcon} ${farmlandData.country}</td></tr>
+                <tr><td>Region</td><td>${farmlandData.region}</td></tr>
+                <tr><td>Acres</td><td>${formattedSize}</td></tr>
+              </tbody>
+            </table>
 
-          <h4>Terrain Details</h4>
-          <table class="skills-table">
-            <tbody>
-              <tr><td>Soil</td><td>${farmlandData.soil}</td></tr>
-              <tr><td>Altitude</td><td>${farmlandData.altitude}m</td></tr>
-              <tr><td>Aspect</td><td class="${colorClass}">${farmlandData.aspect} (${formatNumber(aspectRating * 100)}%)</td></tr>
-            </tbody>
-          </table>
-        </div>
+            <h4>Terrain Details</h4>
+            <table class="data-table">
+              <tbody>
+                <tr><td>Soil</td><td>${farmlandData.soil}</td></tr>
+                <tr><td>Altitude</td><td>${farmlandData.altitude}m</td></tr>
+                <tr><td>Aspect</td><td class="${colorClass}">${farmlandData.aspect} (${formatNumber(aspectRating * 100)}%)</td></tr>
+              </tbody>
+            </table>
+          </div>
 
-        <div class="staff-option">
-          <h4>Field Status</h4>
-          <table class="skills-table">
-            <tbody>
-              <tr><td>Status</td><td>${farmlandData.status}</td></tr>
-              <tr><td>Ripeness</td><td>${formatNumber(farmlandData.ripeness ?? 0, 2)}</td></tr>
-              <tr><td>Land Value</td><td>€${formatNumber(landValue)}</td></tr>
-              <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
-              <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
-              <tr><td>Farming Method</td><td>${farmlandData.conventional} ${farmlandData.conventional === 'Non-Conventional' ? 
-                `(${farmlandData.organicYears}/3 years organic)` : 
-                farmlandData.conventional === 'Ecological' ? 
-                '(Certified)' : ''}</td></tr>
-              <tr><td>Farmland Prestige</td><td class="${prestigeColorClass} overlay-tooltip" title="${prestigeTooltip}">${formatNumber(farmlandPrestige * 100)}%</td></tr>
-              <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
-            </tbody>
-          </table>
+          <div class="info-section">
+            <h4>Field Status</h4>
+            <table class="data-table">
+              <tbody>
+                <tr><td>Status</td><td>${farmlandData.status}</td></tr>
+                <tr><td>Ripeness</td><td>${formatNumber(farmlandData.ripeness ?? 0, 2)}</td></tr>
+                <tr><td>Land Value</td><td>€${formatNumber(landValue)}</td></tr>
+                <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
+                <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
+                <tr><td>Farming Method</td><td>${farmlandData.conventional} ${farmlandData.conventional === 'Non-Conventional' ? 
+                  `(${farmlandData.organicYears}/3 years organic)` : 
+                  farmlandData.conventional === 'Ecological' ? 
+                  '(Certified)' : ''}</td></tr>
+                <tr><td>Farmland Prestige</td><td class="${prestigeColorClass} overlay-tooltip" title="${prestigeTooltip}">${formatNumber(farmlandPrestige * 100)}%</td></tr>
+                <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

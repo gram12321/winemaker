@@ -32,10 +32,10 @@ function createHireStaffHTML(createdStaffOptions) {
         : '';
 
     return `
-    <div class="hire-staff-content">
+    <div class="overlay-card hire-staff-overlay">
         <div class="card-header text-white d-flex justify-content-between align-items-center">
             <h3 class="h5 mb-0">Hire Staff</h3>
-            <button class="close-btn btn btn-light btn-sm">Close</button>
+            <button class="btn btn-light btn-sm close-btn">Close</button>
         </div>
         <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
         <div class="p-3 text-center">
@@ -45,54 +45,52 @@ function createHireStaffHTML(createdStaffOptions) {
             ${specializationText}
             <p>Here are the possible candidates:</p>
         </div>
-        <div class="overlay-section-wrapper">
-            <div class="staff-options-container">
-                ${createdStaffOptions.map((staff, index) => `
-                    <div class="staff-option">
-                        <div class="card-header text-white d-flex justify-content-between align-items-center">
-                            <h3 class="h5 mb-0">${staff.firstName} ${staff.lastName}</h3>
-                            <button class="btn btn-alternative btn-sm hire-staff-button" data-staff-index="${index}">Hire</button>
-                        </div>
-                        <div class="staff-options-container">
-                            <div class="staff-option">
-                                <h4>Personal Details</h4>
-                                <table class="skills-table">
-                                    <tbody>
-                                        <tr>
-                                            <td>Nationality</td>
-                                            <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Monthly Wage</td>
-                                            <td>€${staff.wage}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Annual Cost</td>
-                                            <td>€${staff.wage * 12}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Skill Level</td>
-                                            <td>${getSkillLevelInfo(staff.skillLevel).formattedName}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="staff-option">
-                                <h4>Skills & Expertise</h4>
-                                <table class="skills-table">
-                                    <tbody>
-                                        <tr><td>Field Work</td><td class="${getColorClass(staff.skills.field.field)}">${formatNumber(staff.skills.field.field * 100)}%</td></tr>
-                                        <tr><td>Winery Operations</td><td class="${getColorClass(staff.skills.winery.winery)}">${formatNumber(staff.skills.winery.winery * 100)}%</td></tr>
-                                        <tr><td>Administration</td><td class="${getColorClass(staff.skills.administration.administration)}">${formatNumber(staff.skills.administration.administration * 100)}%</td></tr>
-                                        <tr><td>Sales Management</td><td class="${getColorClass(staff.skills.sales.sales)}">${formatNumber(staff.skills.sales.sales * 100)}%</td></tr>
-                                        <tr><td>Maintenance</td><td class="${getColorClass(staff.skills.maintenance.maintenance)}">${formatNumber(staff.skills.maintenance.maintenance * 100)}%</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+        <div class="info-grid">
+            ${createdStaffOptions.map((staff, index) => `
+                <div class="info-section">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">${staff.firstName} ${staff.lastName}</h3>
+                        <button class="btn btn-alternative btn-sm hire-staff-button" data-staff-index="${index}">Hire</button>
                     </div>
-                `).join('')}
-            </div>
+                    
+                        <div class="info-section">
+                            <h4>Personal Details</h4>
+                            <table class="data-table">
+                                <tbody>
+                                    <tr>
+                                        <td>Nationality</td>
+                                        <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Monthly Wage</td>
+                                        <td>€${staff.wage}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Annual Cost</td>
+                                        <td>€${staff.wage * 12}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Skill Level</td>
+                                        <td>${getSkillLevelInfo(staff.skillLevel).formattedName}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="info-section">
+                            <h4>Skills & Expertise</h4>
+                            <table class="data-table">
+                                <tbody>
+                                    <tr><td>Field Work</td><td class="${getColorClass(staff.skills.field.field)}">${formatNumber(staff.skills.field.field * 100)}%</td></tr>
+                                    <tr><td>Winery Operations</td><td class="${getColorClass(staff.skills.winery.winery)}">${formatNumber(staff.skills.winery.winery * 100)}%</td></tr>
+                                    <tr><td>Administration</td><td class="${getColorClass(staff.skills.administration.administration)}">${formatNumber(staff.skills.administration.administration * 100)}%</td></tr>
+                                    <tr><td>Sales Management</td><td class="${getColorClass(staff.skills.sales.sales)}">${formatNumber(staff.skills.sales.sales * 100)}%</td></tr>
+                                    <tr><td>Maintenance</td><td class="${getColorClass(staff.skills.maintenance.maintenance)}">${formatNumber(staff.skills.maintenance.maintenance * 100)}%</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    
+                </div>
+            `).join('')}
         </div>
     </div>`;
 }

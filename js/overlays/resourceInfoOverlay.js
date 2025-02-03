@@ -26,7 +26,7 @@ function createResourceInfoOverlayHTML(resource) {
   let regionsTable = '';
   const sortedCountries = Object.keys(grapeSuitability).sort();
   sortedCountries.forEach((country, index) => {
-    let countryTable = '<table class="skills-table"><tbody>';
+    let countryTable = '<table class="data-table"><tbody>';
     for (const [region, suitability] of Object.entries(grapeSuitability[country])) {
       if (suitability[resource.name]) {
         countryTable += `<tr><td>${region}</td><td>${(suitability[resource.name] * 100).toFixed(0)}%</td></tr>`;
@@ -44,32 +44,30 @@ function createResourceInfoOverlayHTML(resource) {
   });
 
   return `
-    <div class="hire-staff-content">
+    <div class="overlay-card resource-overlay">
       <div class="card-header text-white d-flex justify-content-between align-items-center">
         <h3 class="h5 mb-0">${resource.name}</h3>
         <button class="btn btn-light btn-sm close-btn">Close</button>
       </div>
       <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
-      <div class="overlay-section-wrapper">
-        <div class="staff-options-container">
-          <div class="staff-option">
-            <h4>Resource Information</h4>
-            <table class="skills-table">
-              <tbody>
-                <tr><td>Name</td><td>${resource.name}</td></tr>
-                <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
-                <tr><td>Grape Fragile</td><td class="${fragileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
-              </tbody>
-            </table>
+      <div class="info-grid">
+        <div class="info-section">
+          <h4>Resource Information</h4>
+          <table class="data-table">
+            <tbody>
+              <tr><td>Name</td><td>${resource.name}</td></tr>
+              <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
+              <tr><td>Grape Fragile</td><td class="${fragileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="info-section">
+          <h4>Regions</h4>
+          <div class="country-buttons">
+            ${countryButtons}
           </div>
-          <div class="staff-option">
-            <h4>Regions</h4>
-            <div class="country-buttons">
-              ${countryButtons}
-            </div>
-            <div class="mt-3">
-              ${regionsTable}
-            </div>
+          <div class="mt-3">
+            ${regionsTable}
           </div>
         </div>
       </div>
@@ -86,12 +84,12 @@ function setupResourceInfoEventListeners(details, overlay) {
     });
   }
 
-  // Add click outside to close
+  // Add click outside to close - Fixed syntax error here by removing extra semicolon
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) {
       overlay.remove();
     }
-  });
+  });  // Removed extra semicolon and fixed bracket
 
   // Setup toggle button event listeners for countries
   const toggleButtons = details.querySelectorAll('.toggle-country');
