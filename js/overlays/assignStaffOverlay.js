@@ -117,18 +117,29 @@ function generateAssignStaffHTML(task) {
                 <div class="card-body">
                     ${autoAssignedTeamsHTML}
                     ${toolsHTML}
-                    <table class="table table-hover justify-content-center w-100">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Nationality</th>
-                                <th>Skills</th>
-                                <th class="text-right">Wage</th>
-                                <th>Select</th>
-                            </tr>
-                        </thead>
-                        <tbody>${staffList}</tbody>
-                    </table>
+                    <div class="staff-section mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5>Available Staff</h5>
+
+                        </div>
+                        <table class="table table-hover justify-content-center w-100">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Nationality</th>
+                                    <th>Skills</th>
+                                    <th class="text-right">Wage</th>
+                                    <th>Select
+                                        <br>
+                                        <label class="select-all-label">
+                                            <input type="checkbox" id="select-all-staff" class="me-2">
+                                         </label>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>${staffList}</tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="btn-group mt-3">
                     <button class="btn save-staff-btn">Save Assignments</button>
@@ -143,7 +154,29 @@ function setupAssignStaffEventListeners(overlayContent, task) {
     
     const saveBtn = overlayContent.querySelector('.save-staff-btn');
     const closeBtn = overlayContent.querySelector('.close-btn');
+    const selectAllCheckbox = overlayContent.querySelector('#select-all-staff');
     const overlay = document.getElementById('assignStaffOverlay');
+
+    // Add select all functionality
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', (e) => {
+            const staffCheckboxes = overlay.querySelectorAll('.staff-select');
+            staffCheckboxes.forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+            });
+        });
+
+        // Update select all checkbox when individual checkboxes change
+        const staffCheckboxes = overlay.querySelectorAll('.staff-select');
+        staffCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const allChecked = Array.from(staffCheckboxes).every(cb => cb.checked);
+                const someChecked = Array.from(staffCheckboxes).some(cb => cb.checked);
+                selectAllCheckbox.checked = allChecked;
+                selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            });
+        });
+    }
 
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
