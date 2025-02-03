@@ -63,10 +63,9 @@ function generateAssignStaffHTML(task, validTools) {
     const allStaff = loadStaff();
     const currentStaff = Array.isArray(task.assignedStaff) ? task.assignedStaff : [];
     const teams = loadTeams();
-    
-    // Remove validTools calculation from here since it's now passed in
     const selectedTools = task.params.selectedTools || [];
 
+    // Remove validTools calculation from here since it's now passed in
     const toolsHTML = validTools.length > 0 ? `
         <div class="tools-section mb-3">
             <h5>Available Tools</h5>
@@ -153,11 +152,10 @@ function generateAssignStaffHTML(task, validTools) {
                 </div>
                 <div class="card-body">
                     ${autoAssignedTeamsHTML}
-                    ${toolsHTML}
+                    ${autoAssignedTeamsHTML ? '<div class="overlay-divider"></div>' : ''}
                     <div class="staff-section mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>Available Staff</h5>
-
                         </div>
                         <table class="table table-hover justify-content-center w-100">
                             <thead>
@@ -177,6 +175,8 @@ function generateAssignStaffHTML(task, validTools) {
                             <tbody>${staffList}</tbody>
                         </table>
                     </div>
+                    ${validTools.length > 0 ? '<div class="overlay-divider"></div>' : ''}
+                    ${toolsHTML}
                 </div>
                 <div class="btn-group mt-3">
                     <button class="btn save-staff-btn">Save Assignments</button>

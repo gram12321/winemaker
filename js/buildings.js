@@ -190,16 +190,16 @@ const ToolManager = (() => {
       // Reset tool instance counts
       toolInstanceCounts = {};
 
-      tools = [
-        new Tool('Tractor', 'Tool Shed', 1.2, 500, 0, [], 5, ['field'], 'task'),      // Takes full slot
-        new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0, [], 1, ['field'], 'individual'),      // Can fit multiple
-        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0, [], 6, ['winery'], 'task'),   // Takes full slot
-        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0, [], 3, ['winery'], 'individual'),
-        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes'], 1, ['field', 'winery'], 'individual'), // Can fit multiple
+      tools = [ // name, buildingType, speedBonus, cost, capacity, supportedResources, weight, validTasks, toolType
+        new Tool('Tractor', 'Tool Shed', 1.2, 2500, 0, [], 5, ['field'], 'task'),      // Takes full slot
+        new Tool('Trimmer', 'Tool Shed', 1.1, 1300, 0, [], 1, ['field'], 'task'),      // Can fit multiple
+        new Tool('Forklift', 'Warehouse', 1.5, 2000, 0, [], 6, ['winery'], 'task'),   // Takes full slot
+        new Tool('Pallet Jack', 'Warehouse', 1.7, 1500, 0, [], 3, ['winery'], 'individual'),
+        new Tool('Harvest Bins', 'Tool Shed', 1.2, 700, 500, ['Grapes'], 1, ['field', 'winery'], 'individual'), // Can fit multiple
         new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['winery'], 'task'), // Takes full slot
-        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes'], 2, ['field', 'winery'], 'individual'),
-        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes'], 1, ['field', 'winery'], 'individual'), // Can fit multiple
-        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'], 8, ['field', 'winery'], 'task')
+        new Tool('Macro Bin', 'Warehouse', 1.1, 1050, 1000, ['Grapes'], 2, ['field', 'winery'], 'individual'),
+        new Tool('Lug Box', 'Tool Shed', 1.3, 500, 200, ['Grapes'], 1, ['field', 'winery'], 'individual'), // Can fit multiple
+        new Tool('Grape Gondola', 'Warehouse', 1.0, 10000, 8000, ['Grapes'], 8, ['field', 'winery'], 'task')
       ];
       toolsInitialized = true;
     }
