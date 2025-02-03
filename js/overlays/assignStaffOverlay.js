@@ -1,33 +1,70 @@
 import { getFlagIconHTML } from '../utils.js';
 import { loadStaff, loadTeams, loadBuildings } from '../database/adminFunctions.js';
-import { Building } from '../buildings.js';
+import { Building, Tool } from '../buildings.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { updateAllDisplays } from '../displayManager.js';
 
+
 export function showAssignStaffOverlay(task) {
-    const overlayContent = generateAssignStaffHTML(task);
+    // Get validTools here so it can be passed to the event listeners
+    const buildings = loadBuildings();
+    console.log('All buildings:', buildings);
+    
+    const validTools = buildings.flatMap(buildingData => {
+        const building = new Building(buildingData.name, buildingData.level);
+        // Copy slots from stored data with their tools
+        building.slots = buildingData.slots.map(slot => ({
+            tools: slot.tools.map(toolData => {
+                const tool = new Tool(
+                    toolData.name,
+                    toolData.buildingType,
+                    toolData.speedBonus,
+                    toolData.cost,
+                    toolData.capacity,
+                    toolData.supportedResources || [],
+                    toolData.weight,
+                    toolData.validTasks || [],
+                    toolData.toolType // Make sure toolType is passed here
+                );
+                tool.instanceNumber = toolData.instanceNumber;
+                return tool;
+            }),
+            currentWeight: slot.currentWeight
+        }));
+
+        // Log tools for debugging
+        const tools = building.getAllTools();
+        console.log(`Building ${building.name} tools:`, tools.map(t => ({
+            name: t.name,
+            toolType: t.toolType,
+            validTasks: t.validTasks
+        })));
+
+        return building.getAllTools().filter(tool => tool.isValidForTask(task.taskType));
+    });
+
+    // Log filtered tools
+    console.log('Filtered valid tools for task type:', task.taskType, validTools.map(t => ({
+        name: t.name,
+        toolType: t.toolType,
+        validTasks: t.validTasks
+    })));
+
+    const overlayContent = generateAssignStaffHTML(task, validTools);
     const overlay = showModalOverlay('assignStaffOverlay', overlayContent);
     if (overlay) {
-        setupAssignStaffEventListeners(overlay.querySelector('.overlay-content'), task);
+        setupAssignStaffEventListeners(overlay.querySelector('.overlay-content'), task, validTools);
     }
     return overlay;
 }
 
-function generateAssignStaffHTML(task) {
+function generateAssignStaffHTML(task, validTools) {
     const allStaff = loadStaff();
     const currentStaff = Array.isArray(task.assignedStaff) ? task.assignedStaff : [];
     const teams = loadTeams();
     
-    // Get available tools for this task
-    const buildings = loadBuildings();
-    const validTools = buildings.flatMap(buildingData => {
-        const building = new Building(buildingData.name, buildingData.level);
-        // Copy slots from stored data
-        building.slots = buildingData.slots || [];
-        return building.getAllTools().filter(tool => tool.isValidForTask(task.taskType));
-    });
-
+    // Remove validTools calculation from here since it's now passed in
     const selectedTools = task.params.selectedTools || [];
 
     const toolsHTML = validTools.length > 0 ? `
@@ -149,7 +186,7 @@ function generateAssignStaffHTML(task) {
     `;
 }
 
-function setupAssignStaffEventListeners(overlayContent, task) {
+function setupAssignStaffEventListeners(overlayContent, task, validTools) {
     if (!overlayContent) return;
     
     const saveBtn = overlayContent.querySelector('.save-staff-btn');
@@ -177,6 +214,102 @@ function setupAssignStaffEventListeners(overlayContent, task) {
             });
         });
     }
+
+    // Add this function to handle tool selection logic
+    const handleToolSelection = (checkbox) => {
+        const toolId = checkbox.value;
+        const tool = validTools.find(t => t.getStorageId() === toolId);
+        
+        if (!tool) return;
+    
+        console.log('Tool selected:', {
+            name: tool.name,
+            toolType: tool.toolType,
+            id: toolId
+        });
+    
+        const toolCheckboxes = overlay.querySelectorAll('.tool-select');
+        
+        if (tool.toolType === 'task') {
+            console.log('Processing task type tool');
+            // If it's a task tool, uncheck all other tools
+            toolCheckboxes.forEach(cb => {
+                if (cb !== checkbox && cb.checked) {
+                    cb.checked = false;
+                }
+            });
+        } else if (tool.toolType === 'individual') {
+            console.log('Processing individual type tool');
+            // For individual tools, check if we have more tools selected than staff
+            const selectedStaffCount = Array.from(overlay.querySelectorAll('.staff-select:checked')).length;
+            const selectedIndividualTools = Array.from(toolCheckboxes)
+                .filter(cb => {
+                    const t = validTools.find(vt => vt.getStorageId() === cb.value);
+                    const isIndividual = t && t.toolType === 'individual';
+                    console.log('Checking tool:', t?.name, 'Is individual:', isIndividual);
+                    return cb.checked && isIndividual;
+                }).length;
+            
+            console.log('Staff count:', selectedStaffCount, 'Individual tools:', selectedIndividualTools);
+            
+            if (selectedIndividualTools > selectedStaffCount) {
+                checkbox.checked = false;
+                alert('You cannot assign more individual tools than selected staff members.');
+            }
+        } else {
+            console.log('Unknown tool type:', tool.toolType);
+        }
+    };
+
+    // Also log the available tools when overlay opens
+    console.log('Available tools:', validTools.map(t => ({
+        name: t.name,
+        toolType: t.toolType,
+        id: t.getStorageId()
+    })));
+
+    // Update staff selection event listener to handle tool type correctly
+    overlay.querySelectorAll('.staff-select').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const selectedStaffCount = Array.from(overlay.querySelectorAll('.staff-select:checked')).length;
+            const individualToolCheckboxes = Array.from(overlay.querySelectorAll('.tool-select'))
+                .filter(cb => {
+                    const tool = validTools.find(t => t.getStorageId() === cb.value);
+                    return tool && tool.toolType === 'individual' && cb.checked;
+                });
+            
+            // Only uncheck individual tools if staff count is too low
+            if (individualToolCheckboxes.length > selectedStaffCount) {
+                individualToolCheckboxes.forEach(cb => cb.checked = false);
+                alert('Some individual tools were unselected because there are not enough staff members.');
+            }
+        });
+    });
+
+    // Add tool selection event listeners
+    overlay.querySelectorAll('.tool-select').forEach(checkbox => {
+        checkbox.addEventListener('change', () => handleToolSelection(checkbox));
+    });
+    
+    // Add staff selection event listener to update tool limits
+    overlay.querySelectorAll('.staff-select').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+          const selectedStaffCount = Array.from(overlay.querySelectorAll('.staff-select:checked')).length;
+          const individualToolCheckboxes = Array.from(overlay.querySelectorAll('.tool-select')).filter(cb => {
+            const tool = validTools.find(t => t.getStorageId() === cb.value);
+            return tool && tool.toolType === 'individual';
+          });
+          
+          // Uncheck excess individual tools if staff count decreases
+          if (individualToolCheckboxes.filter(cb => cb.checked).length > selectedStaffCount) {
+            individualToolCheckboxes.forEach(cb => {
+              if (cb.checked) {
+                cb.checked = false;
+              }
+            });
+          }
+        });
+      });
 
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {

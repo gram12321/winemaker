@@ -357,7 +357,9 @@ export function storeBuildings(buildings) {
         capacity: tool.capacity,
         supportedResources: tool.supportedResources || [],
         instanceNumber: tool.instanceNumber,
-        weight: tool.weight
+        weight: tool.weight,
+        validTasks: tool.validTasks,
+        toolType: tool.toolType  // Add toolType to storage
       })),
       currentWeight: slot.currentWeight
     }))
@@ -387,7 +389,9 @@ export function loadBuildings() {
               toolData.cost,
               toolData.capacity,
               toolData.supportedResources || [], // Ensure supportedResources is always an array
-              toolData.weight
+              toolData.weight,
+              toolData.validTasks || [],
+              toolData.toolType || 'individual'  // Load toolType with fallback
             );
             tool.instanceNumber = toolData.instanceNumber;
             return tool;

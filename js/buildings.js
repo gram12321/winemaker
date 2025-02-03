@@ -36,7 +36,7 @@ export class Building {
         // Create proper Tool instance if it's a plain object
         const toolInstance = tool instanceof Tool ? tool : 
           new Tool(tool.name, tool.buildingType, tool.speedBonus, tool.cost, 
-                  tool.capacity, tool.supportedResources, tool.weight, tool.validTasks);
+                  tool.capacity, tool.supportedResources, tool.weight, tool.validTasks, tool.toolType);
         toolInstance.instanceNumber = tool.instanceNumber;
         this.addTool(toolInstance);
       });
@@ -144,7 +144,8 @@ export class Building {
 export class Tool {
   static instanceCount = {};
 
-  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1, validTasks = []) {
+  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1, validTasks = [], toolType = 'individual') {
+    console.log(`Creating tool: ${name} with type: ${toolType}`); // Add debug log
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
@@ -154,6 +155,7 @@ export class Tool {
     this.instanceNumber = 1; // Default value, will be overridden by ToolManager
     this.weight = weight; // Default weight of 1 if not specified
     this.validTasks = validTasks; // Array of task types this tool can be used for
+    this.toolType = toolType;  // Add new property
   }
 
   getStorageId() {
@@ -189,15 +191,15 @@ const ToolManager = (() => {
       toolInstanceCounts = {};
 
       tools = [
-        new Tool('Tractor', 'Tool Shed', 1.2, 500, 0, [], 5, ['field']),      // Takes full slot
-        new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0, [], 1, ['field']),      // Can fit multiple
-        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0, [], 6, ['winery']),   // Takes full slot
-        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0, [], 3, ['winery']),
-        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes'], 1, ['field', 'winery']), // Can fit multiple
-        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['winery']), // Takes full slot
-        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes'], 2, ['field', 'winery']),
-        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes'], 1, ['field', 'winery']), // Can fit multiple
-        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'], 8, ['field', 'winery'])
+        new Tool('Tractor', 'Tool Shed', 1.2, 500, 0, [], 5, ['field'], 'task'),      // Takes full slot
+        new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0, [], 1, ['field'], 'individual'),      // Can fit multiple
+        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0, [], 6, ['winery'], 'task'),   // Takes full slot
+        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0, [], 3, ['winery'], 'individual'),
+        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes'], 1, ['field', 'winery'], 'individual'), // Can fit multiple
+        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['winery'], 'task'), // Takes full slot
+        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes'], 2, ['field', 'winery'], 'individual'),
+        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes'], 1, ['field', 'winery'], 'individual'), // Can fit multiple
+        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'], 8, ['field', 'winery'], 'task')
       ];
       toolsInitialized = true;
     }
@@ -222,7 +224,8 @@ const ToolManager = (() => {
         toolTemplate.capacity,
         toolTemplate.supportedResources || [],
         toolTemplate.weight,
-        toolTemplate.validTasks
+        toolTemplate.validTasks,
+        toolTemplate.toolType
       );
       // Override the instance number with our managed count
       newTool.instanceNumber = toolInstanceCounts[toolName];
