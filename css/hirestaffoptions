@@ -1,0 +1,41 @@
+.specialized-roles-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 15px 0;
+  margin-left: 20px;
+}
+
+.role-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-background);
+}
+
+.role-checkbox:hover {
+  background: rgba(197, 165, 114, 0.1);
+}
+
+.role-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.role-checkbox label {
+  cursor: pointer;
+  margin: 0;
+  font-size: 0.9em;
+  color: var(--color-text);
+}
+
+.slider-container {
+  flex: 1;
+  margin-right: 20px;
+  display: flex;
+  flex-direction: column;
+}
