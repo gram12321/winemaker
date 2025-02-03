@@ -353,12 +353,22 @@ transform: scale(1.1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Base grid layout for staff options containers IE Hirestaff */
-.staff-options-container  {
-display: grid;
-grid-template-columns: repeat(2, 1fr);
-gap: 20px;
-text-align: center;
+/* Base grid layout for staff options containers */
+.staff-options-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  text-align: center;
+  width: 100%;  /* Add this to ensure full width */
+  max-width: none;  /* Remove any max-width limitation */
+  padding: 20px;
+}
+
+/* More specific rule for hire staff overlay */
+#hireStaffOverlay .staff-options-container {
+  width: 100%;
+  max-width: none;
+  margin: 0;
 }
 
 /* Staff details. IE showstaff */
@@ -495,7 +505,7 @@ background-color: #fff;
 padding: 20px;
 margin: 60px auto;
 width: 90%;
-max-width: 1000px;
+max-width: 1200px;  /* Change from 1000px to 1200px to match modal width */
 border-radius: 10px;
 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 position: relative;
@@ -745,4 +755,35 @@ transform: translate(100%, 90%);
   border: 1px solid var(--color-accent);
   max-width: 400px;
   position: relative;
+}
+
+/* Special handling for hire staff modal */
+#hireStaffOverlay.modal-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 2000;
+}
+
+#hireStaffOverlay .overlay-content {
+  width: 95%;
+  max-width: 1200px;  /* This was already correct */
+  margin: 2rem auto;
+  padding: 0;
+}
+
+#hireStaffOverlay .hire-staff-content {
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  margin: 0;
+  width: 100%;
+  height: auto;
+}
+
+/* Ensure staff options grid works in modal */
+#hireStaffOverlay .staff-options-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
 }

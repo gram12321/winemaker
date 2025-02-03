@@ -1,10 +1,10 @@
-import { createNewStaff, setupStaffWagesRecurringTransaction  } from '../staff.js';
+import { createNewStaff, setupStaffWagesRecurringTransaction } from '../staff.js';
 import { getFlagIconHTML, skillLevels, getSkillLevelInfo, formatNumber, getColorClass } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/adminFunctions.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
 import taskManager from '../taskManager.js';  // Changed this line - removed TaskType
-import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
+import { showModalOverlay, showStandardOverlay, hideOverlay } from './overlayUtils.js'; // Change this import
 import { specializedRoles } from './hireStaffOptionsOverlay.js';
 
 export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, specializedRoles = []) {
@@ -12,7 +12,14 @@ export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, s
         {length: numberOfOptions}, 
         () => createNewStaff(skillModifier, specializedRoles)
     );
-    const overlayContainer = showStandardOverlay(createHireStaffHTML(createdStaffOptions));
+    
+    // Add console.log to debug content creation
+    const content = createHireStaffHTML(createdStaffOptions);
+    console.log('Generated content:', content);
+    
+    const overlayContainer = showModalOverlay('hireStaffOverlay', content);
+    console.log('Created overlay container:', overlayContainer);
+    
     setupHireStaffEventListeners(overlayContainer, createdStaffOptions);
     return overlayContainer;
 }
@@ -25,19 +32,21 @@ function createHireStaffHTML(createdStaffOptions) {
         : '';
 
     return `
-        <section id="hiring-section" class="overlay-section card mb-4">
-            <div class="card-header text-white d-flex justify-content-between align-items-center">
-                <h3 class="h5 mb-0">Hire Staff</h3>
-                <button class="close-btn btn btn-alternative btn-sm">Close</button>
-            </div>
-            <div class="p-3 text-center">
-                <p>HR Department has completed the search for new Candidate:</p>
-                <p>We have found ${createdStaffOptions.length} candidates</p>
-                <p>We have been searching for ${skillInfo.formattedName}</p>
-                ${specializationText}
-                <p>Here are the possible candidates:</p>
-            </div>
-            <div class="staff-options-container" >
+    <div class="hire-staff-content">
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0">Hire Staff</h3>
+            <button class="close-btn btn btn-light btn-sm">Close</button>
+        </div>
+        <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+        <div class="p-3 text-center">
+            <p>HR Department has completed the search for new Candidate:</p>
+            <p>We have found ${createdStaffOptions.length} candidates</p>
+            <p>We have been searching for ${skillInfo.formattedName}</p>
+            ${specializationText}
+            <p>Here are the possible candidates:</p>
+        </div>
+        <div class="overlay-section-wrapper">
+            <div class="staff-options-container">
                 ${createdStaffOptions.map((staff, index) => `
                     <div class="staff-option">
                         <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -84,8 +93,8 @@ function createHireStaffHTML(createdStaffOptions) {
                     </div>
                 `).join('')}
             </div>
-        </section>
-    `;
+        </div>
+    </div>`;
 }
 
 function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
@@ -114,7 +123,7 @@ function hireSelectedStaff(staff) {
 
     taskManager.addCompletionTask(
         'Hiring Process',
-        'administration',  // Changed from taskManager.ADMINISTRATION
+        'administration', 
         20,
         (target, params) => {
             const { staff, hiringExpense } = params;
