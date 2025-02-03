@@ -29,7 +29,12 @@ function createResourceInfoOverlayHTML(resource) {
     let countryTable = '<table class="data-table"><tbody>';
     for (const [region, suitability] of Object.entries(grapeSuitability[country])) {
       if (suitability[resource.name]) {
-        countryTable += `<tr><td>${region}</td><td>${(suitability[resource.name] * 100).toFixed(0)}%</td></tr>`;
+        const suitabilityValue = suitability[resource.name];
+        const colorClass = getColorClass(suitabilityValue);
+        countryTable += `<tr>
+          <td>${region}</td>
+          <td class="${colorClass}">${(suitabilityValue * 100).toFixed(0)}%</td>
+        </tr>`;
       }
     }
     countryTable += '</tbody></table>';
