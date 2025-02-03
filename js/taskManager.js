@@ -40,6 +40,7 @@ class Task {
         this.progress = 0;
         this.initialState = initialState;
         this.assignedStaff = params.assignedStaff || [];
+        this.params.selectedTools = params.selectedTools || [];
     }
 }
 
@@ -161,6 +162,10 @@ class TaskManager {
                 const taskCount = staffTaskCount.get(staff.id) || 1;
                 appliedWork += (staff.workforce / taskCount) * relevantSkill;
             });
+
+            // Apply tool bonus if any tools are assigned
+            const toolBonus = this.calculateToolSpeedBonus(task.params.selectedTools || []);
+            appliedWork *= toolBonus;
 
             task.appliedWork += appliedWork;
             task.progress = task.appliedWork / task.totalWork;
@@ -382,7 +387,12 @@ class TaskManager {
                 return (target, progress, params) => {
                     const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
                     params.lastProgress = progress;
-                    performHarvest(target, target.id, params.selectedTool, harvestedAmount);
+                    
+                    // Calculate speedBonus from selected tools
+                    const speedBonus = this.calculateToolSpeedBonus(params.selectedTools || []);
+                    const adjustedAmount = harvestedAmount * speedBonus;
+                    
+                    performHarvest(target, target.id, params.selectedTools, adjustedAmount);
                 };
             case 'crushing':
                 return (target, progress, params = {}) => {
@@ -420,6 +430,25 @@ class TaskManager {
             default:
                 return () => console.warn(`No callback found for task: ${taskName}`);
         }
+    }
+
+    calculateToolSpeedBonus(toolIds) {
+        if (!toolIds || toolIds.length === 0) return 1.0;
+
+        const buildings = loadBuildings();
+        const allTools = buildings.flatMap(buildingData => {
+            const building = new Building(buildingData.name, buildingData.level);
+            building.slots = buildingData.slots || [];
+            return building.getAllTools();
+        });
+
+        // Find selected tools and calculate combined bonus
+        const selectedTools = allTools.filter(tool => 
+            toolIds.includes(tool.getStorageId())
+        );
+
+        // Combine tool bonuses (multiplicative)
+        return selectedTools.reduce((bonus, tool) => bonus * tool.speedBonus, 1.0);
     }
 
     // ...rest of existing code...

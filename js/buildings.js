@@ -36,7 +36,7 @@ export class Building {
         // Create proper Tool instance if it's a plain object
         const toolInstance = tool instanceof Tool ? tool : 
           new Tool(tool.name, tool.buildingType, tool.speedBonus, tool.cost, 
-                  tool.capacity, tool.supportedResources, tool.weight);
+                  tool.capacity, tool.supportedResources, tool.weight, tool.validTasks);
         toolInstance.instanceNumber = tool.instanceNumber;
         this.addTool(toolInstance);
       });
@@ -144,7 +144,7 @@ export class Building {
 export class Tool {
   static instanceCount = {};
 
-  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1) {
+  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1, validTasks = []) {
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
@@ -153,6 +153,7 @@ export class Tool {
     this.supportedResources = supportedResources;
     this.instanceNumber = 1; // Default value, will be overridden by ToolManager
     this.weight = weight; // Default weight of 1 if not specified
+    this.validTasks = validTasks; // Array of task types this tool can be used for
   }
 
   getStorageId() {
@@ -171,6 +172,10 @@ export class Tool {
   getAvailableSpace(inventory) {
     return this.capacity - this.getCurrentAmount(inventory);
   }
+
+  isValidForTask(taskType) {
+    return this.validTasks.length === 0 || this.validTasks.includes(taskType);
+  }
 }
 
 const ToolManager = (() => {
@@ -184,15 +189,15 @@ const ToolManager = (() => {
       toolInstanceCounts = {};
 
       tools = [
-        new Tool('Tractor', 'Tool Shed', 1.2, 500, 0, [], 5),      // Takes full slot
-        new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0, [], 1),      // Can fit multiple
-        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0, [], 6),   // Takes full slot
-        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0, [], 3),
-        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes'], 1), // Can fit multiple
-        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8), // Takes full slot
-        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes'], 2),
-        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes'], 1), // Can fit multiple
-        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'], 7)
+        new Tool('Tractor', 'Tool Shed', 1.2, 500, 0, [], 5, ['field']),      // Takes full slot
+        new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0, [], 1, ['field']),      // Can fit multiple
+        new Tool('Forklift', 'Warehouse', 1.5, 40000, 0, [], 6, ['winery']),   // Takes full slot
+        new Tool('Pallet Jack', 'Warehouse', 1.7, 111500, 0, [], 3, ['winery']),
+        new Tool('Harvest Bins', 'Warehouse', 1.2, 1000, 500, ['Grapes'], 1, ['field', 'winery']), // Can fit multiple
+        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['winery']), // Takes full slot
+        new Tool('Macro Bin', 'Warehouse', 1.1, 750, 1000, ['Grapes'], 2, ['field', 'winery']),
+        new Tool('Lug Box', 'Warehouse', 1.3, 50, 200, ['Grapes'], 1, ['field', 'winery']), // Can fit multiple
+        new Tool('Grape Gondola', 'Warehouse', 1.0, 200000, 18000, ['Grapes'], 8, ['field', 'winery'])
       ];
       toolsInitialized = true;
     }
@@ -216,7 +221,8 @@ const ToolManager = (() => {
         toolTemplate.cost,
         toolTemplate.capacity,
         toolTemplate.supportedResources || [],
-        toolTemplate.weight
+        toolTemplate.weight,
+        toolTemplate.validTasks
       );
       // Override the instance number with our managed count
       newTool.instanceNumber = toolInstanceCounts[toolName];
@@ -376,7 +382,7 @@ export function upgradeBuilding(buildingName) {
   addTransaction('Expense', `Upgrade of ${buildingName}`, -upgradeCost);
 
   // Add initial message
-  addConsoleMessage(`Upgrade of ${buildingName} has begun. <span style="color: red">€${formatNumber(upgradeCost)}</span> has been deducted from your account. When complete, capacity will be ${building.calculateCapacity() + 2} spaces.`);
+  addConsoleMessage(`Upgrade of ${buildingName} has begun. <span style="color: red">€${formatNumber(upgradeCost)}</span> has been deducted from your account.`);
 
   // Create upgrade task
   taskManager.addCompletionTask(

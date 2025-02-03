@@ -1,5 +1,6 @@
 import { getFlagIconHTML } from '../utils.js';
-import { loadStaff, loadTeams } from '../database/adminFunctions.js';
+import { loadStaff, loadTeams, loadBuildings } from '../database/adminFunctions.js';
+import { Building } from '../buildings.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { updateAllDisplays } from '../displayManager.js';
@@ -18,6 +19,38 @@ function generateAssignStaffHTML(task) {
     const currentStaff = Array.isArray(task.assignedStaff) ? task.assignedStaff : [];
     const teams = loadTeams();
     
+    // Get available tools for this task
+    const buildings = loadBuildings();
+    const validTools = buildings.flatMap(buildingData => {
+        const building = new Building(buildingData.name, buildingData.level);
+        // Copy slots from stored data
+        building.slots = buildingData.slots || [];
+        return building.getAllTools().filter(tool => tool.isValidForTask(task.taskType));
+    });
+
+    const selectedTools = task.params.selectedTools || [];
+
+    const toolsHTML = validTools.length > 0 ? `
+        <div class="tools-section mb-3">
+            <h5>Available Tools</h5>
+            <div class="tool-list">
+                ${validTools.map(tool => `
+                    <div class="tool-item">
+                        <input type="checkbox" 
+                               class="tool-select" 
+                               value="${tool.getStorageId()}"
+                               ${selectedTools.includes(tool.getStorageId()) ? 'checked' : ''}>
+                        <img src="../assets/icon/buildings/${tool.name.toLowerCase()}.png" 
+                             alt="${tool.name}" 
+                             style="width: 24px; height: 24px;">
+                        <span>${tool.name} #${tool.instanceNumber}</span>
+                        <span class="tool-bonus">(+${((tool.speedBonus - 1) * 100).toFixed(0)}% speed)</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    ` : '';
+
     // Find teams that are set to auto-assign to this task type
     const autoAssignedTeams = teams.filter(team => 
         team.defaultTaskTypes?.includes(task.taskType)
@@ -78,12 +111,12 @@ function generateAssignStaffHTML(task) {
         <div class="overlay-section-wrapper">
             <section class="overlay-section card">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h2 class="mb-0">Assign Staff to ${task.name}</h2>
+                    <h2 class="mb-0">Assign Staff & Tools to ${task.name}</h2>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
-            </div>
-            <div class="card-body">
-                ${autoAssignedTeamsHTML}
-                <div class=""card-header text-white d-flex justify-content-between align-items-center"">
+                </div>
+                <div class="card-body">
+                    ${autoAssignedTeamsHTML}
+                    ${toolsHTML}
                     <table class="table table-hover justify-content-center w-100">
                         <thead>
                             <tr>
@@ -97,12 +130,11 @@ function generateAssignStaffHTML(task) {
                         <tbody>${staffList}</tbody>
                     </table>
                 </div>
-            </div>
-            <div class="btn-group mt-3">
-                <button class="btn save-staff-btn">Save Assignments</button>
-            </div>
-        </section>
-    </div>
+                <div class="btn-group mt-3">
+                    <button class="btn save-staff-btn">Save Assignments</button>
+                </div>
+            </section>
+        </div>
     `;
 }
 
@@ -117,7 +149,15 @@ function setupAssignStaffEventListeners(overlayContent, task) {
         saveBtn.addEventListener('click', () => {
             const selectedStaff = Array.from(overlay.querySelectorAll('.staff-select:checked'))
                 .map(checkbox => parseInt(checkbox.value));
+            
+            // Get selected tools
+            const selectedTools = Array.from(overlay.querySelectorAll('.tool-select:checked'))
+                .map(checkbox => checkbox.value);
+
+            // Update task with both staff and tools
+            task.params.selectedTools = selectedTools;
             taskManager.assignStaffToTask(task.id, selectedStaff);
+            
             updateAllDisplays();
             hideOverlay(overlay);
         });

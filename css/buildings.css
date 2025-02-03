@@ -346,3 +346,25 @@
   font-size: 0.75em;
   font-weight: bold;
 }
+
+.tool-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.tool-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.tool-bonus {
+    color: #28a745;
+    font-size: 0.9em;
+    margin-left: auto;
+}
