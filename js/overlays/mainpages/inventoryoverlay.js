@@ -142,7 +142,8 @@ function updateStorageTable(type, buildings, resourceType) {
         
         building.slots.forEach(slot => {
             slot.tools.forEach(tool => {
-                if (tool.supportedResources?.includes(resourceType)) {
+                // Only show tools that have storage capacity
+                if (tool.supportedResources?.includes(resourceType) && tool.capacity > 0) {
                     const storageId = `${tool.name} #${tool.instanceNumber}`;
                     const items = inventoryInstance.getStorageContents(storageId);
                     const row = createStorageRow(tool, items);
