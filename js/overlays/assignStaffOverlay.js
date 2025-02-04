@@ -9,7 +9,7 @@ import { updateAllDisplays } from '../displayManager.js';
 export function showAssignStaffOverlay(task) {
     // Get validTools here so it can be passed to the event listeners
     const buildings = loadBuildings();
-    console.log('All buildings:', buildings);
+    console.log('Task name for tool filtering:', task.name); // Add debug log
     
     const validTools = buildings.flatMap(buildingData => {
         const building = new Building(buildingData.name, buildingData.level);
@@ -41,7 +41,7 @@ export function showAssignStaffOverlay(task) {
             validTasks: t.validTasks
         })));
 
-        return building.getAllTools().filter(tool => tool.isValidForTask(task.taskType));
+        return building.getAllTools().filter(tool => tool.isValidForTask(task.name));
     });
 
     // Log filtered tools
