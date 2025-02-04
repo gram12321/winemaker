@@ -176,7 +176,9 @@ export class Tool {
   }
 
   isValidForTask(taskName) {
-    return this.validTasks.length === 0 || this.validTasks.includes(taskName.toLowerCase());
+    return this.validTasks.some(task => 
+      task.toLowerCase() === taskName.toLowerCase()
+    );
   }
 
   isAvailable() {
@@ -209,8 +211,8 @@ const ToolManager = (() => {
       tools = [ // name, buildingType, speedBonus, cost, capacity, supportedResources, weight, validTasks, toolType
         new Tool('Tractor', 'Tool Shed', 1.2, 2500, 0, [], 5, ['planting', 'harvesting', 'clearing', 'uprooting' ], 'task'),      // Takes full slot
         new Tool('Trimmer', 'Tool Shed', 1.1, 1300, 0, [], 1, ['planting', 'clearing'], 'task'),      // Can fit multiple
-        new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation', 'maintenance'], 'task'),   // Takes full slot
-        new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'maintenance'], 'individual'),
+        new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation', 'Building & Maintenance'], 'task'),   // Takes full slot
+        new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'Building & Maintenance'], 'individual'),
         new Tool('Harvest Bins', 'Tool Shed', 1.1, 700, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
         new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['fermentation'], 'task'), // Takes full slot
         new Tool('Macro Bin', 'Warehouse', 1.05, 1050, 1000, ['Grapes'], 2, ['crushing'], 'individual'),

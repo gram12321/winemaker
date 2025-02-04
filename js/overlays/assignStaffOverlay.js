@@ -7,7 +7,6 @@ import { updateAllDisplays } from '../displayManager.js';
 
 export function showAssignStaffOverlay(task) {
     const buildings = loadBuildings();
-    
     const validTools = buildings.flatMap(buildingData => {
         const building = new Building(buildingData.name, buildingData.level);
         building.slots = buildingData.slots.map(slot => ({
@@ -25,7 +24,6 @@ export function showAssignStaffOverlay(task) {
                 );
                 tool.instanceNumber = toolData.instanceNumber;
                 tool.assignedTaskId = toolData.assignedTaskId; // Make sure we copy the assignedTaskId
-
                 return tool;
             }),
             currentWeight: slot.currentWeight
@@ -33,7 +31,8 @@ export function showAssignStaffOverlay(task) {
 
         // Only filter by task validity, not availability
         const tools = building.getAllTools();
-        return tools.filter(tool => tool.isValidForTask(task.name));
+        const filteredTools = tools.filter(tool => tool.isValidForTask(task.name));
+        return filteredTools;
     });
 
     const overlayContent = generateAssignStaffHTML(task, validTools);
@@ -253,13 +252,6 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
             console.log('Unknown tool type:', tool.toolType);
         }
     };
-
-    // Also log the available tools when overlay opens
-    console.log('Available tools:', validTools.map(t => ({
-        name: t.name,
-        toolType: t.toolType,
-        id: t.getStorageId()
-    })));
 
     // Update staff selection event listener to handle tool type correctly
     overlay.querySelectorAll('.staff-select').forEach(checkbox => {
