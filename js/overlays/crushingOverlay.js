@@ -46,16 +46,16 @@ function createCrushingHTML() {
                     <h3 class="h5 mb-0">Crushing Progress</h3>
                 </div>
                 <div class="card-body">
-                    <div class="button-container d-flex flex-column align-items-center px-3">
-                        <div class="w-100 mb-2">
+                    <div class="button-container">
+                        <div class="selected-wrapper">
                             <span>Selected Storage: </span>
                             <span id="selected-grapes">0 t</span>
                             <span> / </span>
                             <span id="selected-storage">0 l</span>
                         </div>
                         <div class="w-100">
-                            <div class="progress" style="height: 20px; background-color: var(--color-background); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">
-                                <div id="selected-storage-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--color-primary);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress">
+                                <div id="selected-storage-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
                         <div class="d-flex justify-content-end mt-3 w-100">

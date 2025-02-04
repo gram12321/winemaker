@@ -42,19 +42,19 @@ function createHarvestHTML(farmland) {
                         </tbody>
                     </table>
                 </div>
-                <div class="button-container d-flex flex-column align-items-center mt-3 mb-3 px-3">
-                    <div class="mb-2">
+                <div class="button-container">
+                    <div class="selected-wrapper">
                         <span>Expected Yield: </span>
                         <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span>
                     </div>
                     <div class="w-100">
                         <span>Selected Capacity: </span>
                         <span id="selected-capacity">0 kg</span>
-                        <div class="progress" style="height: 20px; background-color: var(--color-background); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">
-                            <div id="selected-capacity-progress" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--color-primary);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress">
+                            <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
-                    <button class="overlay-section-btn harvest-btn mt-3" style="background-color: var(--color-primary); color: var(--panel-text); border: 1px solid var(--color-accent); border-radius: var(--radius-md);">Harvest Selected</button>
+                    <button class="overlay-section-btn harvest-btn mt-3">Harvest Selected</button>
                 </div>
             </section>
         </div>

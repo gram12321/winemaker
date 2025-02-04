@@ -265,3 +265,63 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
 .skills-column { min-width: 150px; }
 
+/* Progress Bar Styles */
+.progress {
+    height: 20px !important;
+    background-color: var(--color-background) !important;
+    border: 1px solid var(--color-accent) !important;
+    border-radius: var(--radius-md) !important;
+    margin: 10px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--color-primary) !important;
+    transition: width 0.3s ease;
+}
+
+/* Progress Info Display */
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+/* Container for progress bar and related elements */
+.progress-container {
+    margin: 15px 0;
+}
+
+/* Selected capacity/storage display wrapper */
+.selected-wrapper {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.selected-wrapper span {
+    margin-right: 10px;
+}
+
+/* Button container below progress */
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 0 15px;
+}
+
+.button-container .w-100 {
+    width: 100%;
+}
+
+/* Quality color classes */
+.quality-poor { color: var(--quality-poor); }
+.quality-below-average { color: var(--quality-below-average); }
+.quality-average { color: var(--quality-average); }
+.quality-good { color: var(--quality-good); }
+.quality-excellent { color: var(--quality-excellent); }
+
+
