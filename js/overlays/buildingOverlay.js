@@ -26,15 +26,42 @@ function createBuildingDetails(building) {
         ${tools.map(tool => `
           <div class="tool-container">
             <div class="tool-header">
-              <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">Add ${tool.name}</button>
+              <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">
+                Add ${tool.name}
+              </button>
             </div>
             <div class="collapsible-content">
-              <div class="tool-stats small">
-                <div>Cost: €${formatNumber(tool.cost)}</div>
-                ${tool.speedBonus !== 1.0 ? `<div>Speed Bonus: ${(tool.speedBonus * 100 - 100).toFixed(0)}%</div>` : ''}
-                ${tool.capacity > 0 ? `<div>Storage: ${formatNumber(tool.capacity)} kg</div>` : ''}
-                ${tool.supportedResources?.length ? `<div>Stores: ${tool.supportedResources.join(', ')}</div>` : ''}
-                <div>Weight: ${tool.weight} units</div>
+              <div class="tool-stats">
+                <div>
+                  <img src="/assets/icon/small/gold_black.png" alt="Cost" class="stat-icon" title="Cost">
+                  €${formatNumber(tool.cost)}
+                </div>
+                ${tool.speedBonus !== 1.0 ? `
+                <div>
+                  <img src="/assets/icon/small/speed.png" alt="Speed Bonus" class="stat-icon" title="Speed Bonus">
+                  ${(tool.speedBonus * 100 - 100).toFixed(0)}%
+                </div>` : ''}
+                ${tool.capacity > 0 ? `
+                <div>
+                  <img src="/assets/icon/small/storage.png" alt="Storage" class="stat-icon" title="Storage">
+                  ${formatNumber(tool.capacity)} kg
+                </div>` : ''}
+                ${tool.supportedResources?.length ? `
+                <div>
+                  <img src="/assets/icon/small/store.png" alt="Stores" class="stat-icon" title="Stores">
+                  ${tool.supportedResources.join(', ')}
+                </div>` : ''}
+                <div>
+                  <img src="/assets/icon/small/weight.png" alt="Weight" class="stat-icon" title="Weight">
+                  ${tool.weight} units
+                </div>
+                ${tool.validTasks?.length ? `
+                <div>
+                  
+                  ${tool.validTasks.map(task => 
+                    `<img src="/assets/icon/icon_${task}.webp" alt="${task}" class="tool-tasktype-icon " title="${task.charAt(0).toUpperCase() + task.slice(1)}">`
+                  ).join('')}
+                </div>` : ''}
               </div>
             </div>
           </div>
