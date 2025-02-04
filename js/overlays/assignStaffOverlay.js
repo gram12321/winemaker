@@ -132,6 +132,28 @@ function generateAssignStaffHTML(task, validTools) {
         `;
     }).join('');
 
+    const workPreviewHTML = `
+        <div class="work-preview mb-3">
+            <h5>Work Progress Preview</h5>
+            <div class="work-stats-wrapper">
+                <span>Work per Week: <span id="work-per-week">0</span> units</span>
+                <span>Work Progress: <span id="work-progress-text">0/${Math.round(task.totalWork)}</span> units</span>
+                <span>Weeks to Complete: <span id="estimated-weeks">N/A</span></span>
+            </div>
+            <div class="progress">
+                <div id="work-progress" class="progress-bar" role="progressbar" 
+                     aria-valuenow="${(task.appliedWork || 0) / task.totalWork * 100}"
+                     aria-valuemin="0" 
+                     aria-valuemax="100"
+                     style="width: ${(task.appliedWork || 0) / task.totalWork * 100}%">
+                </div>
+            </div>
+            <div id="work-blocks" class="progress mt-2" style="height: 30px !important;">
+                <div class="progress-segments"></div>
+            </div>
+        </div>
+    `;
+
     return `
         <div class="overlay-section-wrapper">
             <section class="overlay-section card">
@@ -143,14 +165,7 @@ function generateAssignStaffHTML(task, validTools) {
                     ${autoAssignedTeamsHTML}
                     ${autoAssignedTeamsHTML ? '<div class="overlay-divider"></div>' : ''}
                     
-                    <div class="work-preview mb-3">
-                        <h5>Work Preview</h5>
-                        <div class="work-stats">
-                            <div>Total Work Required: ${Math.round(task.totalWork)} units</div>
-                            <div>Work Per Week: <span id="work-per-week">0</span> units</div>
-                            <div>Estimated Time: <span id="estimated-weeks">N/A</span></div>
-                        </div>
-                    </div>
+                    ${workPreviewHTML}
                     <div class="overlay-divider"></div>
                     
                     
@@ -383,13 +398,56 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
     function updateWorkPreview() {
         const staffCheckboxes = overlay.querySelectorAll('.staff-select');
         const toolCheckboxes = overlay.querySelectorAll('.tool-select');
-        
         const workPerWeek = calculateWorkPerWeek(staffCheckboxes, toolCheckboxes, validTools, task);
-        const estimatedWeeks = workPerWeek > 0 ? Math.ceil(task.totalWork / workPerWeek) : 'N/A';
+        const totalWork = task.totalWork;
+        const estimatedWeeks = workPerWeek > 0 ? Math.ceil(totalWork / workPerWeek) : 'N/A';
         
+        // Update basic info
         document.getElementById('work-per-week').textContent = Math.round(workPerWeek);
-        document.getElementById('estimated-weeks').textContent = 
-            estimatedWeeks === 'N/A' ? 'N/A' : `${estimatedWeeks} weeks`;
+        document.getElementById('estimated-weeks').textContent = estimatedWeeks === 'N/A' ? 'N/A' : estimatedWeeks;
+
+        // Update main progress bar showing current progress
+        const progressBar = document.getElementById('work-progress');
+        const progressText = document.getElementById('work-progress-text');
+        const appliedWork = Math.round(task.appliedWork || 0);
+        
+        // Update progress text
+        progressText.textContent = `${appliedWork}/${Math.round(totalWork)}`;
+        
+        // Update progress bar only if it exists (when appliedWork > 0)
+        if (progressBar) {
+            const progress = (appliedWork / totalWork) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressBar.setAttribute('aria-valuenow', progress);
+            // Add this line to mark if there's any applied work
+            progressBar.setAttribute('data-has-work', appliedWork > 0);
+        }
+
+        // Update progress bar segments
+        const workBlocksContainer = document.querySelector('.progress-segments');
+        if (workBlocksContainer && workPerWeek > 0) {
+            workBlocksContainer.innerHTML = '';
+            const numberOfWeeks = Math.ceil(totalWork / workPerWeek);
+            const segmentWidth = (100 / numberOfWeeks).toFixed(2);
+
+            // Create container for the glowing background
+            const glowContainer = document.createElement('div');
+            glowContainer.className = 'progress-glow';
+            workBlocksContainer.appendChild(glowContainer);
+
+            let remainingWork = totalWork;
+            for (let i = 0; i < numberOfWeeks; i++) {
+                const weekWork = Math.min(workPerWeek, remainingWork);
+                const segment = document.createElement('div');
+                segment.className = 'progress-segment';
+                segment.style.width = `${segmentWidth}%`;
+                segment.style.left = `${i * segmentWidth}%`;
+                segment.title = `Week ${i + 1}: ${Math.round(weekWork)} units`;
+                
+                workBlocksContainer.appendChild(segment);
+                remainingWork -= weekWork;
+            }
+        }
     }
 
     // Add event listeners for work preview updates
