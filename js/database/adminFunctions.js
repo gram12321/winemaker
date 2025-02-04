@@ -359,7 +359,8 @@ export function storeBuildings(buildings) {
         instanceNumber: tool.instanceNumber,
         weight: tool.weight,
         validTasks: tool.validTasks,
-        toolType: tool.toolType  // Add toolType to storage
+        toolType: tool.toolType,  // Add toolType to storage
+        assignedTaskId: tool.assignedTaskId, // Add this line
       })),
       currentWeight: slot.currentWeight
     }))
@@ -394,6 +395,7 @@ export function loadBuildings() {
               toolData.toolType || 'individual'  // Load toolType with fallback
             );
             tool.instanceNumber = toolData.instanceNumber;
+            tool.assignedTaskId = toolData.assignedTaskId; // Add this line
             return tool;
           }),
           currentWeight: slotData.currentWeight

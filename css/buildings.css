@@ -368,3 +368,16 @@
     font-size: 0.9em;
     margin-left: auto;
 }
+
+/* Tool item styles for assign staff overlay */
+.tool-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.tool-item.disabled input {
+    cursor: not-allowed;
+}

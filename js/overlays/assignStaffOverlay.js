@@ -5,15 +5,11 @@ import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { updateAllDisplays } from '../displayManager.js';
 
-
 export function showAssignStaffOverlay(task) {
-    // Get validTools here so it can be passed to the event listeners
     const buildings = loadBuildings();
-    console.log('Task name for tool filtering:', task.name); // Add debug log
     
     const validTools = buildings.flatMap(buildingData => {
         const building = new Building(buildingData.name, buildingData.level);
-        // Copy slots from stored data with their tools
         building.slots = buildingData.slots.map(slot => ({
             tools: slot.tools.map(toolData => {
                 const tool = new Tool(
@@ -28,28 +24,17 @@ export function showAssignStaffOverlay(task) {
                     toolData.toolType // Make sure toolType is passed here
                 );
                 tool.instanceNumber = toolData.instanceNumber;
+                tool.assignedTaskId = toolData.assignedTaskId; // Make sure we copy the assignedTaskId
+
                 return tool;
             }),
             currentWeight: slot.currentWeight
         }));
 
-        // Log tools for debugging
+        // Only filter by task validity, not availability
         const tools = building.getAllTools();
-        console.log(`Building ${building.name} tools:`, tools.map(t => ({
-            name: t.name,
-            toolType: t.toolType,
-            validTasks: t.validTasks
-        })));
-
-        return building.getAllTools().filter(tool => tool.isValidForTask(task.name));
+        return tools.filter(tool => tool.isValidForTask(task.name));
     });
-
-    // Log filtered tools
-    console.log('Filtered valid tools for task type:', task.taskType, validTools.map(t => ({
-        name: t.name,
-        toolType: t.toolType,
-        validTasks: t.validTasks
-    })));
 
     const overlayContent = generateAssignStaffHTML(task, validTools);
     const overlay = showModalOverlay('assignStaffOverlay', overlayContent);
@@ -70,19 +55,24 @@ function generateAssignStaffHTML(task, validTools) {
         <div class="tools-section mb-3">
             <h5>Available Tools</h5>
             <div class="tool-list">
-                ${validTools.map(tool => `
-                    <div class="tool-item">
+                ${validTools.map(tool => {
+                    const isDisabled = tool.assignedTaskId && tool.assignedTaskId !== task.id;
+                    
+                    return `
+                    <div class="tool-item ${isDisabled ? 'disabled' : ''}">
                         <input type="checkbox" 
                                class="tool-select" 
                                value="${tool.getStorageId()}"
-                               ${selectedTools.includes(tool.getStorageId()) ? 'checked' : ''}>
+                               ${isDisabled ? 'disabled' : ''}
+                               ${!isDisabled && task.params.selectedTools?.includes(tool.getStorageId()) ? 'checked' : ''}>
                         <img src="../assets/icon/buildings/${tool.name.toLowerCase()}.png" 
                              alt="${tool.name}" 
                              style="width: 24px; height: 24px;">
                         <span>${tool.name} #${tool.instanceNumber}</span>
                         <span class="tool-bonus">(+${((tool.speedBonus - 1) * 100).toFixed(0)}% speed)</span>
                     </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         </div>
     ` : '';
@@ -220,7 +210,10 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
         const toolId = checkbox.value;
         const tool = validTools.find(t => t.getStorageId() === toolId);
         
-        if (!tool) return;
+        if (!tool || (tool.assignedTaskId && tool.assignedTaskId !== task.id)) {
+            checkbox.checked = false;
+            return;
+        }
     
         console.log('Tool selected:', {
             name: tool.name,
@@ -340,4 +333,5 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
             hideOverlay(overlay);
         }
     });
+
 }

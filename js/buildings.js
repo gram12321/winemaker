@@ -145,7 +145,6 @@ export class Tool {
   static instanceCount = {};
 
   constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1, validTasks = [], toolType = 'individual') {
-    console.log(`Creating tool: ${name} with type: ${toolType}`); // Add debug log
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
@@ -156,6 +155,7 @@ export class Tool {
     this.weight = weight; // Default weight of 1 if not specified
     this.validTasks = validTasks; // Now this will contain task names like 'harvest', 'planting' instead of types
     this.toolType = toolType;  // Add new property
+    this.assignedTaskId = null; // Add this property to track which task the tool is assigned to
   }
 
   getStorageId() {
@@ -178,6 +178,22 @@ export class Tool {
   isValidForTask(taskName) {
     return this.validTasks.length === 0 || this.validTasks.includes(taskName.toLowerCase());
   }
+
+  isAvailable() {
+    return this.assignedTaskId === null;
+  }
+
+  assignToTask(taskId) {
+    if (this.isAvailable()) {
+      this.assignedTaskId = taskId;
+      return true;
+    }
+    return false;
+  }
+
+  releaseFromTask() {
+    this.assignedTaskId = null;
+  }
 }
 
 const ToolManager = (() => {
@@ -194,7 +210,7 @@ const ToolManager = (() => {
         new Tool('Tractor', 'Tool Shed', 1.2, 2500, 0, [], 5, ['planting', 'harvesting', 'clearing', 'uprooting' ], 'task'),      // Takes full slot
         new Tool('Trimmer', 'Tool Shed', 1.1, 1300, 0, [], 1, ['planting', 'clearing'], 'task'),      // Can fit multiple
         new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation'], 'task'),   // Takes full slot
-        new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'maintain'], 'individual'),
+        new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'maintain', 'maintenance'], 'individual'),
         new Tool('Harvest Bins', 'Tool Shed', 1.1, 700, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
         new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['fermentation'], 'task'), // Takes full slot
         new Tool('Macro Bin', 'Warehouse', 1.05, 1050, 1000, ['Grapes'], 2, ['crushing'], 'individual'),

@@ -188,6 +188,20 @@ class TaskManager {
     }
 
     removeTask(taskId) {
+        const task = this.tasks.get(taskId);
+        if (task) {
+            // Release assigned tools
+            const buildings = loadBuildings();
+            if (task.params.selectedTools) {
+                task.params.selectedTools.forEach(toolId => {
+                    const tool = this.findToolById(buildings, toolId);
+                    if (tool) {
+                        tool.releaseFromTask();
+                    }
+                });
+                storeBuildings(buildings);
+            }
+        }
         this.tasks.delete(taskId);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
@@ -301,19 +315,38 @@ class TaskManager {
     assignStaffToTask(taskId, staffIds) {
         const task = this.tasks.get(taskId);
         if (task) {
+            // First release any previously assigned tools
+            if (task.params.selectedTools) {
+                const buildings = loadBuildings();
+                task.params.selectedTools.forEach(toolId => {
+                    const tool = this.findToolById(buildings, toolId);
+                    if (tool) {
+                        tool.releaseFromTask();
+                    }
+                });
+            }
+
             // Load actual staff objects
             const allStaff = loadStaff();
             const assignedStaff = staffIds.map(id => 
                 allStaff.find(s => s.id === parseInt(id))
-            ).filter(s => s); // Filter out any undefined staff
+            ).filter(s => s);
 
             // Update task params with assigned staff
             task.assignedStaff = assignedStaff;
             
-            // Save tasks to persist changes
-            saveTasks(this.tasks);
+            // Assign new tools
+            const selectedTools = task.params.selectedTools || [];
+            const buildings = loadBuildings();
+            selectedTools.forEach(toolId => {
+                const tool = this.findToolById(buildings, toolId);
+                if (tool && tool.isAvailable()) {
+                    tool.assignToTask(taskId);
+                }
+            });
+            storeBuildings(buildings);
             
-            // Update display
+            saveTasks(this.tasks);
             this.updateTaskDisplay();
             return true;
         }
@@ -451,7 +484,14 @@ class TaskManager {
         return selectedTools.reduce((bonus, tool) => bonus * tool.speedBonus, 1.0);
     }
 
-    // ...rest of existing code...
+    findToolById(buildings, toolId) {
+        return buildings.flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => t.getStorageId() === toolId)
+            )
+        ).find(t => t);
+    }
+
 }
 
 const taskManager = new TaskManager();
