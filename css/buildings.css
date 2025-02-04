@@ -193,6 +193,12 @@
   padding: 8px 0;
 }
 
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
 .tool-stats > div:last-child {
   display: flex;
   justify-content: center;
@@ -202,19 +208,12 @@
   border-top: 1px solid var(--color-accent);
 }
 
-.stat-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
-}
+
 
 .tool-tasktype-icon {
-  margin-top: 10px;
-  margin-left: -1px;
   width: 36px;
   height: 36px;
   object-fit: contain;
-  padding: 2px;
 }
 
 /* Button Styles */
