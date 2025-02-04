@@ -262,6 +262,11 @@ class TaskManager {
             const defaultStaff = loadStaff().find(s => s.id === 1);
             const defaultFlag = defaultStaff ? getFlagIconHTML(defaultStaff.nationality) : '';
             
+            // Fix the target display by checking if it's an object
+            const targetDisplay = task.target ? 
+                (task.target.name || task.target) : // Use name if available, otherwise use target directly
+                task.taskType;
+
             taskBox.innerHTML = `
                 <div class="task-name">
                     ${task.target && task.target.name ? 
@@ -279,7 +284,7 @@ class TaskManager {
                 </div>
                 ${task.name !== task.taskType ? `
                 <div class="task-target">
-                    ${task.target && task.target.name ? task.target.name : task.taskType}
+                    ${targetDisplay}
                 </div>
                 ` : ''}
                 <div class="progress-container">

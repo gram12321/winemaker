@@ -142,6 +142,18 @@ function generateAssignStaffHTML(task, validTools) {
                 <div class="card-body">
                     ${autoAssignedTeamsHTML}
                     ${autoAssignedTeamsHTML ? '<div class="overlay-divider"></div>' : ''}
+                    
+                    <div class="work-preview mb-3">
+                        <h5>Work Preview</h5>
+                        <div class="work-stats">
+                            <div>Total Work Required: ${Math.round(task.totalWork)} units</div>
+                            <div>Work Per Week: <span id="work-per-week">0</span> units</div>
+                            <div>Estimated Time: <span id="estimated-weeks">N/A</span></div>
+                        </div>
+                    </div>
+                    <div class="overlay-divider"></div>
+                    
+                    
                     <div class="staff-section mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>Available Staff</h5>
@@ -175,6 +187,46 @@ function generateAssignStaffHTML(task, validTools) {
     `;
 }
 
+function calculateWorkPerWeek(staffCheckboxes, toolCheckboxes, validTools, task) {
+    const allStaff = loadStaff();
+    const allTasks = taskManager.getAllTasks();
+    let totalWorkforce = 0;
+    
+    // Calculate staff contribution with task count adjustment
+    Array.from(staffCheckboxes).forEach(checkbox => {
+        if (checkbox.checked) {
+            const staff = allStaff.find(s => s.id === parseInt(checkbox.value));
+            if (staff) {
+                const relevantSkill = getRelevantSkill(staff, task.taskType);
+                
+                // Count how many tasks this staff member is assigned to
+                const staffTaskCount = allTasks.reduce((count, t) => {
+                    if (t.id !== task.id && t.assignedStaff?.some(s => s.id === staff.id)) {
+                        return count + 1;
+                    }
+                    return count;
+                }, 1); // Start at 1 to include this task
+
+                // Divide workforce by number of tasks
+                totalWorkforce += (staff.workforce / staffTaskCount) * relevantSkill;
+            }
+        }
+    });
+
+    // Calculate tool bonus
+    let toolSpeedBonus = 1.0;
+    Array.from(toolCheckboxes).forEach(checkbox => {
+        if (checkbox.checked) {
+            const tool = validTools.find(t => t.getStorageId() === checkbox.value);
+            if (tool) {
+                toolSpeedBonus *= tool.speedBonus;
+            }
+        }
+    });
+
+    return totalWorkforce * toolSpeedBonus;
+}
+
 function setupAssignStaffEventListeners(overlayContent, task, validTools) {
     if (!overlayContent) return;
     
@@ -190,6 +242,8 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
             staffCheckboxes.forEach(checkbox => {
                 checkbox.checked = e.target.checked;
             });
+            // Add this line to update work preview when using select all
+            updateWorkPreview();
         });
 
         // Update select all checkbox when individual checkboxes change
@@ -326,4 +380,34 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
         }
     });
 
+    function updateWorkPreview() {
+        const staffCheckboxes = overlay.querySelectorAll('.staff-select');
+        const toolCheckboxes = overlay.querySelectorAll('.tool-select');
+        
+        const workPerWeek = calculateWorkPerWeek(staffCheckboxes, toolCheckboxes, validTools, task);
+        const estimatedWeeks = workPerWeek > 0 ? Math.ceil(task.totalWork / workPerWeek) : 'N/A';
+        
+        document.getElementById('work-per-week').textContent = Math.round(workPerWeek);
+        document.getElementById('estimated-weeks').textContent = 
+            estimatedWeeks === 'N/A' ? 'N/A' : `${estimatedWeeks} weeks`;
+    }
+
+    // Add event listeners for work preview updates
+    overlay.querySelectorAll('.staff-select, .tool-select').forEach(checkbox => {
+        checkbox.addEventListener('change', updateWorkPreview);
+    });
+
+    // Initialize work preview when overlay opens
+    updateWorkPreview();
+}
+
+function getRelevantSkill(staff, taskType) {
+    switch (taskType) {
+        case 'field': return staff.skills.field.field;
+        case 'winery': return staff.skills.winery.winery;
+        case 'administration': return staff.skills.administration.administration;
+        case 'sales': return staff.skills.sales.sales;
+        case 'maintenance': return staff.skills.maintenance.maintenance;
+        default: return 0;
+    }
 }

@@ -401,3 +401,23 @@
 .tool-item.disabled input {
     cursor: not-allowed;
 }
+.work-preview {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    border-radius: var(--radius-md);
+    margin-top: 10px;
+}
+
+.work-stats {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.work-stats div {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-sm);
+}

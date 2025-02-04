@@ -110,42 +110,46 @@ function ensureBuildingInstance(building) {
 }
 
 function setupToolButtons(building, tools, overlayContainer) {
-  const buildingInstance = ensureBuildingInstance(building);
+    const buildingInstance = ensureBuildingInstance(building);
 
-  tools.forEach(tool => {
-    const button = overlayContainer.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
-    if (button) {
-      button.addEventListener('click', () => {
-        const newToolInstance = createTool(tool.name);
-        if (newToolInstance && buildingInstance.addTool(newToolInstance)) {
-          // Find the slot where the tool was added
-          const slot = buildingInstance.slots.find(s => s.tools.includes(newToolInstance));
-          const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Weight: ${slot.currentWeight}/${buildingInstance.slotWeightCapacity} units in slot`;
-          addConsoleMessage(expenseMessage);
-          addTransaction('Expense', `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber}`, -newToolInstance.cost);
+    tools.forEach(tool => {
+        const button = overlayContainer.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
+        if (button) {
+            button.addEventListener('click', () => {
+                // Reload the building data to get fresh state
+                const buildings = loadBuildings();
+                const currentBuilding = buildings.find(b => b.name === buildingInstance.name);
+                const freshBuildingInstance = new Building(
+                    currentBuilding.name,
+                    currentBuilding.level,
+                    currentBuilding.slots?.flatMap(slot => slot.tools) || []
+                );
 
-          const buildings = loadBuildings();
-          const buildingToUpdate = buildings.find(b => b.name === building.name);
-          if (buildingToUpdate) {
-            buildingToUpdate.slots = buildingInstance.slots;
-            const updatedBuildings = buildings.map(b => b.name === building.name ? buildingToUpdate : b);
-            storeBuildings(updatedBuildings);
-          }
+                const newToolInstance = createTool(tool.name);
+                if (newToolInstance && freshBuildingInstance.addTool(newToolInstance)) {
+                    // Find the slot where the tool was added
+                    const slot = freshBuildingInstance.slots.find(s => s.tools.includes(newToolInstance));
+                    const expenseMessage = `${newToolInstance.name} #${newToolInstance.instanceNumber} added to ${building.name}. <span style="color: red">Cost: €${formatNumber(newToolInstance.cost)}</span>. Weight: ${slot.currentWeight}/${freshBuildingInstance.slotWeightCapacity} units in slot`;
+                    addConsoleMessage(expenseMessage);
+                    addTransaction('Expense', `Purchased ${newToolInstance.name} #${newToolInstance.instanceNumber}`, -newToolInstance.cost);
 
-          const updatedBuildings = loadBuildings();
-          const updatedBuilding = updatedBuildings.find(b => b.name === building.name);
-          if (updatedBuilding) {
-            const buildingInstance = new Building(updatedBuilding.name, updatedBuilding.level);
-            buildingInstance.slots = updatedBuilding.slots;
-            renderCapacityVisual(buildingInstance);
-            updateAllDisplays();
-          }
-        } else {
-          addConsoleMessage(`Cannot add ${tool.name}. No suitable slot available in ${building.name}!`);
+                    // Update buildings storage
+                    const buildingToUpdate = buildings.find(b => b.name === building.name);
+                    if (buildingToUpdate) {
+                        buildingToUpdate.slots = freshBuildingInstance.slots;
+                        const updatedBuildings = buildings.map(b => b.name === building.name ? buildingToUpdate : b);
+                        storeBuildings(updatedBuildings);
+                    }
+
+                    // Update display
+                    renderCapacityVisual(freshBuildingInstance);
+                    updateAllDisplays();
+                } else {
+                    addConsoleMessage(`Cannot add ${tool.name}. No suitable slot available in ${building.name}!`);
+                }
+            });
         }
-      });
-    }
-  });
+    });
 }
 
 export function showBuildingOverlay(building) {

@@ -132,6 +132,13 @@ export class Building {
     if (slot && slot.tools.length > 0) {
       const tool = slot.tools.pop(); // Remove last tool from slot
       slot.currentWeight -= tool.weight;
+      
+      // Add this check to clear slot if empty
+      if (slot.tools.length === 0) {
+        // Reset slot to empty state
+        slot.currentWeight = 0;
+      }
+      
       return {
         tool,
         refundAmount: Math.floor(tool.cost / 2) // 50% refund
@@ -416,11 +423,16 @@ export function upgradeBuilding(buildingName) {
       const buildingToUpgrade = buildings.find(b => b.name === params.buildingName);
 
       if (buildingToUpgrade) {
-        const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.tools || []);
+        const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.slots?.flatMap(slot => slot.tools) || []);
         building.upgrade();
-        building.tools = buildingToUpgrade.tools || []; // Preserve existing tools after upgrade
+        // Remove this line as it's incorrect:
+        // building.tools = buildingToUpgrade.tools || []; 
+        
+        // The tools are already preserved through the constructor and slots
 
-        const updatedBuildings = buildings.map(b => b.name === params.buildingName ? building : b);
+        const updatedBuildings = buildings.map(b => 
+          b.name === params.buildingName ? building : b
+        );
         storeBuildings(updatedBuildings);
 
         addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}. <span style="color: red">Cost: €${formatNumber(upgradeCost)}</span>. New Capacity: ${building.capacity} (${building.capacity - (building.tools ? building.tools.length : 0)} spaces available)`);
