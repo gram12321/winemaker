@@ -209,14 +209,14 @@ const ToolManager = (() => {
       tools = [ // name, buildingType, speedBonus, cost, capacity, supportedResources, weight, validTasks, toolType
         new Tool('Tractor', 'Tool Shed', 1.2, 2500, 0, [], 5, ['planting', 'harvesting', 'clearing', 'uprooting' ], 'task'),      // Takes full slot
         new Tool('Trimmer', 'Tool Shed', 1.1, 1300, 0, [], 1, ['planting', 'clearing'], 'task'),      // Can fit multiple
-        new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation'], 'task'),   // Takes full slot
-        new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'maintain', 'maintenance'], 'individual'),
+        new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation', 'maintenance'], 'task'),   // Takes full slot
+        new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'maintenance'], 'individual'),
         new Tool('Harvest Bins', 'Tool Shed', 1.1, 700, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
         new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['fermentation'], 'task'), // Takes full slot
         new Tool('Macro Bin', 'Warehouse', 1.05, 1050, 1000, ['Grapes'], 2, ['crushing'], 'individual'),
         new Tool('Lug Box', 'Tool Shed', 1.05, 500, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
         new Tool('Grape Gondola', 'Warehouse', 1.0, 10000, 8000, ['Grapes'], 8, ['crushing'], 'task')
-      ];
+      ];  
       toolsInitialized = true;
     }
     return tools;
@@ -307,7 +307,7 @@ export function buildBuilding(buildingName) {
       updateBuildingCards();
       updateBuildButtonStates();
     },
-    buildingName,
+    { name: buildingName }, // Change: Pass building name as an object with name property
     { buildingCost }
   );
 }
@@ -426,7 +426,7 @@ export function upgradeBuilding(buildingName) {
         updateBuildButtonStates();
       }
     },
-    buildingName,
+    { name: buildingName }, // Change: Pass building name as an object with name property
     { buildingName, upgradeCost } // Ensure buildingName is passed in params
   );
 }

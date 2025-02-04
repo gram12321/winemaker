@@ -112,7 +112,7 @@ export function maintenanceBuildings() {
         const taskName = `Maintain ${building.name}`;
 
         taskManager.addCompletionTask(
-            'Maintain',
+            'Building & Maintenance',
             'maintenance',  // Changed from TASK_TYPES.MAINTENANCE
             totalWork,
             (target, params) => {
