@@ -115,20 +115,24 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
     $(warningModal).modal('show');
 
     document.getElementById('confirmHarvest').addEventListener('click', () => {
-        let remainingYield = totalAvailableCapacity;
+        let remainingCapacity = totalAvailableCapacity;
         let success = true;
 
-        // Distribute harvest among containers
+        // Distribute harvest among containers, limited by available capacity
         for (const checkbox of selectedCheckboxes) {
             const selectedTool = checkbox.value;
             const harvestCheck = canHarvest(farmland, selectedTool);
-            const amount = Math.min(remainingYield, harvestCheck.availableCapacity || expectedYield);
             
-            if (amount > 0) {
-                harvest(farmland, farmlandId, selectedTool, amount);
+            // Only harvest up to the available capacity
+            const amountToHarvest = Math.min(remainingCapacity, harvestCheck.availableCapacity);
+            
+            if (amountToHarvest > 0) {
+                harvest(farmland, farmlandId, selectedTool, amountToHarvest);
+                remainingCapacity -= amountToHarvest;
             }
-            remainingYield -= amount;
-            if (remainingYield <= 0) break;
+
+            // Stop if we've used all available capacity
+            if (remainingCapacity <= 0) break;
         }
 
         if (success) {
@@ -145,6 +149,27 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
 
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
     if (harvestedAmount <= 0) return false;
+
+    // Check container capacity before processing
+    const tool = loadBuildings().flatMap(b => 
+        b.slots.flatMap(slot => 
+            slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
+        )
+    ).find(t => t);
+
+    // Calculate available capacity
+    const currentAmount = inventoryInstance.items
+        .filter(item => item.storage === selectedTool)
+        .reduce((sum, item) => sum + item.amount, 0);
+    const availableCapacity = tool.capacity - currentAmount;
+
+    // Limit harvest amount to available capacity
+    const limitedHarvestAmount = Math.min(harvestedAmount, availableCapacity);
+
+    if (limitedHarvestAmount <= 0) {
+        addConsoleMessage(`No capacity available in ${selectedTool}`);
+        return false;
+    }
 
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
@@ -168,15 +193,15 @@ export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmou
 
     if (matchingGrapes) {
         // Combine with existing grapes
-        const totalAmount = matchingGrapes.amount + harvestedAmount;
-        const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * harvestedAmount)) / totalAmount;
+        const totalAmount = matchingGrapes.amount + limitedHarvestAmount;
+        const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * limitedHarvestAmount)) / totalAmount;
         matchingGrapes.amount = totalAmount;
         matchingGrapes.quality = newQuality.toFixed(2);
     } else {
         // Create new inventory entry
         inventoryInstance.addResource(
             { name: farmland.plantedResourceName, naturalYield: 1 },
-            harvestedAmount,
+            limitedHarvestAmount,
             'Grapes',
             gameYear,
             quality,
@@ -187,7 +212,7 @@ export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmou
     }
 
     saveInventory();
-    addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
+    addConsoleMessage(`Harvested ${formatNumber(limitedHarvestAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
 }
 
 // New helper function for grape compatibility check
