@@ -5,12 +5,7 @@ import { setPrestigeHit, getPrestigeHit } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { displayWineCellarInventory } from './overlays/mainpages/salesoverlay.js';
 import { calculateRealPrestige } from './company.js';
-import { loadWineOrders, saveWineOrders } from './database/adminFunctions.js';
-
-// In-memory cache of wine orders
-let currentWineOrders = [];
-
-// Remove getCurrentWineOrders function
+import { loadWineOrders, saveWineOrders, getFarmlands } from './database/adminFunctions.js';
 
 export function removeWineOrder(index) {
     const wineOrders = loadWineOrders();
@@ -32,7 +27,7 @@ export function sellWines(resourceName) {
     const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
 
     if (bottledWine && bottledWine.amount > 0) {
-        const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+        const farmlands = getFarmlands();
         const farmland = farmlands.find(field => field.name === bottledWine.fieldName);
 
         if (!farmland) {
@@ -58,7 +53,7 @@ export function sellWines(resourceName) {
 
             addTransaction('Income', 'Wine Sale', sellingPrice);
             setPrestigeHit(getPrestigeHit() + sellingPrice / 1000);
-            calculateRealPrestige(); // Recalculate after changing prestige hit
+            calculateRealPrestige();
             inventoryInstance.save();
         }
     }
@@ -73,7 +68,7 @@ Total impact: approximately 41.6% of the final wine price */
 
 export function calculateWinePrice(quality, wine) {
     const baseValue = 1; // Base value for wine pricing
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmlands = getFarmlands();
     // Find the farmland that produced this wine
     const farmland = farmlands.find(field => field.name === wine.fieldName);
 
@@ -101,7 +96,7 @@ export function generateWineOrder() {
     };
 
     const selectedWine = bottledWines[Math.floor(Math.random() * bottledWines.length)];
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+    const farmlands = getFarmlands();
     const farmland = farmlands.find(field => field.name === selectedWine.fieldName);
 
     if (!farmland) {

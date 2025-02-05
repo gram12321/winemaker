@@ -25,7 +25,6 @@ export function displayWineCellarInventory() {
     bottledWines.forEach(wine => {
         const row = document.createElement('tr');
         const displayInfo = wine.getDisplayInfo();
-
         const sellingPrice = calculateWinePrice(wine.quality, wine);
 
         row.innerHTML = `
@@ -35,13 +34,12 @@ export function displayWineCellarInventory() {
             <td>${formatQualityDisplay(wine.quality)}</td>
             <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
             <td>€${sellingPrice.toFixed(2)}</td>
-            <td><button class="btn-alternative sell-wine-btn" data-resource="${displayInfo.resource.name}">Sell</button></td>
+            <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}">Sell</button></td>
         `;
 
         const sellButton = row.querySelector('.sell-wine-btn');
         sellButton.addEventListener('click', () => {
-            const wineName = wine.name ? wine.name.split(', ')[1] : wine.resource.name;
-            sellWines(wineName);
+            sellWines(sellButton.dataset.wineName);
             displayWineCellarInventory();
         });
 
