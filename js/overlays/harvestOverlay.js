@@ -144,9 +144,7 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
 }
 
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
-    if (harvestedAmount <= 0) {
-        return false; // Skip if no grapes were actually harvested
-    }
+    if (harvestedAmount <= 0) return false;
 
     const gameYear = parseInt(localStorage.getItem('year'), 10);
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
@@ -160,20 +158,22 @@ export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmou
 
     const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
 
-    const existingItem = inventoryInstance.items.find(item =>
-        item.resource.name === farmland.plantedResourceName &&
+    // Find matching grapes to combine with (same type, vintage, and storage)
+    const matchingGrapes = inventoryInstance.items.find(item =>
+        item.storage === selectedTool && 
         item.state === 'Grapes' &&
-        item.vintage === gameYear &&
-        item.storage === selectedTool
+        item.resource.name === farmland.plantedResourceName &&
+        item.vintage === gameYear
     );
 
-    if (existingItem) {
-        const totalAmount = existingItem.amount + harvestedAmount;
-        const newQuality = ((existingItem.quality * existingItem.amount) + (quality * harvestedAmount)) / totalAmount;
-
-        existingItem.amount = totalAmount;
-        existingItem.quality = newQuality.toFixed(2);
+    if (matchingGrapes) {
+        // Combine with existing grapes
+        const totalAmount = matchingGrapes.amount + harvestedAmount;
+        const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * harvestedAmount)) / totalAmount;
+        matchingGrapes.amount = totalAmount;
+        matchingGrapes.quality = newQuality.toFixed(2);
     } else {
+        // Create new inventory entry
         inventoryInstance.addResource(
             { name: farmland.plantedResourceName, naturalYield: 1 },
             harvestedAmount,
@@ -190,22 +190,8 @@ export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmou
     addConsoleMessage(`Harvested ${formatNumber(harvestedAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
 }
 
-export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
-    const buildings = loadBuildings();
-    const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
-    
-    // Updated to find tool in slots
-    const tool = buildings.flatMap(b => 
-        b.slots.flatMap(slot => 
-            slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
-        )
-    ).find(t => t); // Find first non-null result
-
-    if (!tool) {
-        console.error('Tool not found:', selectedTool);
-        return false;
-    }
-
+// New helper function for grape compatibility check
+function checkGrapeCompatibility(selectedTool, farmland) {
     const existingGrapes = inventoryInstance.items.find(item => 
         item.storage === selectedTool && 
         item.state === 'Grapes' &&
@@ -214,7 +200,34 @@ export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
     );
 
     if (existingGrapes) {
-        addConsoleMessage(`Cannot mix different grapes or vintages in the same container. ${selectedTool} contains ${existingGrapes.resource.name} from ${existingGrapes.vintage}`);
+        return {
+            compatible: false,
+            message: `Cannot mix different grapes or vintages in container ${selectedTool}. Contains ${existingGrapes.resource.name} from ${existingGrapes.vintage}`
+        };
+    }
+
+    return { compatible: true };
+}
+
+// Update harvest function to use the helper
+export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
+    const buildings = loadBuildings();
+    const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
+    
+    const tool = buildings.flatMap(b => 
+        b.slots.flatMap(slot => 
+            slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
+        )
+    ).find(t => t);
+
+    if (!tool) {
+        console.error('Tool not found:', selectedTool);
+        return false;
+    }
+
+    const compatibility = checkGrapeCompatibility(selectedTool, farmland);
+    if (!compatibility.compatible) {
+        addConsoleMessage(compatibility.message);
         return false;
     }
 
@@ -309,42 +322,54 @@ function updateSelectedCapacity(farmland) {
 
 function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
     const selectedCheckboxes = overlayContainer.querySelectorAll('.storage-checkbox:checked');
-        if (selectedCheckboxes.length === 0) {
-            addConsoleMessage('Please select at least one storage container for harvesting');
+    if (selectedCheckboxes.length === 0) {
+        addConsoleMessage('Please select at least one storage container for harvesting');
+        return;
+    }
+
+    const expectedYield = farmlandYield(farmland);
+    
+    // Check compatibility for all selected containers first
+    for (const checkbox of selectedCheckboxes) {
+        const selectedTool = checkbox.value;
+        const compatibility = checkGrapeCompatibility(selectedTool, farmland);
+        if (!compatibility.compatible) {
+            addConsoleMessage(compatibility.message);
             return;
         }
+    }
 
-        const expectedYield = farmlandYield(farmland);
-        let totalAvailableCapacity = 0;
-        let harvestWarning = false;
+    // Then check capacity
+    let totalAvailableCapacity = 0;
+    let harvestWarning = false;
 
-        selectedCheckboxes.forEach(checkbox => {
+    selectedCheckboxes.forEach(checkbox => {
+        const selectedTool = checkbox.value;
+        const harvestCheck = canHarvest(farmland, selectedTool);
+        totalAvailableCapacity += harvestCheck.availableCapacity;
+        if (harvestCheck.warning) {
+            harvestWarning = true;
+        }
+    });
+
+    // Show warning only if capacity is insufficient
+    if (totalAvailableCapacity < expectedYield) {
+        showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer);
+    } else {
+        let remainingYield = expectedYield;
+        for (const checkbox of selectedCheckboxes) {
             const selectedTool = checkbox.value;
             const harvestCheck = canHarvest(farmland, selectedTool);
-            if (harvestCheck && harvestCheck.warning) {
-                totalAvailableCapacity += harvestCheck.availableCapacity;
-                harvestWarning = true;
-            } else if (!harvestCheck.warning) {
-                totalAvailableCapacity += expectedYield;
+            // Limit harvest amount to available capacity
+            const amountToHarvest = Math.min(remainingYield, harvestCheck.availableCapacity);
+            if (amountToHarvest > 0) {
+                harvest(farmland, farmlandId, selectedTool, amountToHarvest);
             }
-        });
-
-        if (harvestWarning && totalAvailableCapacity < expectedYield) {
-            showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer);
-        } else {
-            let remainingYield = expectedYield;
-            for (const checkbox of selectedCheckboxes) {
-                const selectedTool = checkbox.value;
-                const amountToHarvest = Math.min(remainingYield, canHarvest(farmland, selectedTool).availableCapacity || expectedYield);
-                if (amountToHarvest > 0) {
-                    harvest(farmland, farmlandId, selectedTool, amountToHarvest);
-                }
-                remainingYield -= amountToHarvest;
-                if (remainingYield <= 0) break;
-            }
-            removeOverlay(overlayContainer);
+            remainingYield -= amountToHarvest;
+            if (remainingYield <= 0) break;
         }
-    ;
+        removeOverlay(overlayContainer);
+    }
 }
 
 function removeOverlay(overlayContainer) {
