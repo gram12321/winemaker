@@ -4,6 +4,7 @@ import { addTransaction } from './finance.js';
 import { getMoney } from './company.js';
 import { getFarmlands, updateAllFarmlands, storeUpgrades } from './database/adminFunctions.js';
 import { updateUpgradesList } from './overlays/mainpages/financeoverlay.js';
+import { loadBuildings, storeBuildings } from './database/adminFunctions.js';
 
 // Predefined upgrades and research items
 export const upgrades = [
@@ -44,8 +45,21 @@ export const upgrades = [
     benefits: { soilQuality: 0.2 },
     taskParameters: { totalWork: 1500, taskType: 'field' },  // Changed from taskManager.FIELD
     completed: false // Track completion status
+  },
+  {
+    id: 4,
+    name: "Efficient Building Organization",
+    upgradeType: "Upgrade",
+    description: "Optimizes tool placement and storage efficiency in buildings, reducing tool weight by 20%.",
+    requirements: { 
+        money: 2500000,
+        buildings: 1  // Require at least 1 building
+    },
+    benefits: { toolWeightReduction: 0.2 }, // 20% weight reduction
+    taskParameters: { totalWork: 800, taskType: 'maintenance' },
+    completed: false,
+    applicableTo: 'buildings'
   }
-  // Add more upgrades/research items as needed
 ];
 
 // Function to check if the requirements for an upgrade are met
@@ -86,6 +100,9 @@ export function startUpgradeTask(upgradeId, target = null) {
   // Deduct the required money
   addTransaction('Expense', `Started upgrade on ${upgrade.name}`, -upgrade.requirements.money);
 
+  // Set target based on upgrade type
+  const upgradeTarget = upgrade.applicableTo === 'farmland' ? target : upgrade.name;
+
   // Start the task using taskManager
   taskManager.addCompletionTask(
     'Upgrade',
@@ -94,15 +111,20 @@ export function startUpgradeTask(upgradeId, target = null) {
     (target, params) => {
       // Apply benefits upon completion
       applyUpgradeBenefits(upgrade, target);
-      // Check if all farmlands have the upgrade
-      const farmlands = getFarmlands();
-      const allFarmlandsUpgraded = farmlands.every(f => f.upgrades && f.upgrades.includes(upgrade.id));
-      upgrade.completed = allFarmlandsUpgraded; // Mark as completed only if all farmlands have the upgrade
+      // Mark upgrade as completed if it's not farmland-specific
+      if (upgrade.applicableTo !== 'farmland') {
+        upgrade.completed = true;
+      } else {
+        // For farmland upgrades, check if all farmlands have it
+        const farmlands = getFarmlands();
+        const allFarmlandsUpgraded = farmlands.every(f => f.upgrades && f.upgrades.includes(upgrade.id));
+        upgrade.completed = allFarmlandsUpgraded;
+      }
       addConsoleMessage(`Upgrade on ${upgrade.name} completed. Benefits applied.`);
-      updateUpgradesList(); // Refresh the upgrades list
-      storeUpgrades(upgrades); // Save upgrades to localStorage
+      updateUpgradesList();
+      storeUpgrades(upgrades);
     },
-    target // Pass the target (e.g., farmland) as the target
+    upgradeTarget
   );
 }
 
@@ -129,6 +151,21 @@ export function applyUpgradeBenefits(upgrade, target = null) {
     }
   }
 
+  // Add new case for tool weight reduction
+  if (upgrade.benefits.toolWeightReduction) {
+    const buildings = loadBuildings();
+    buildings.forEach(building => {
+        building.slots.forEach(slot => {
+            slot.tools.forEach(tool => {
+                // Apply 20% weight reduction
+                tool.weight = tool.weight * (1 - upgrade.benefits.toolWeightReduction);
+            });
+        });
+    });
+    storeBuildings(buildings);
+    addConsoleMessage(`Building storage efficiency improved. All tool weights reduced by ${upgrade.benefits.toolWeightReduction * 100}%.`);
+  }
+
   // Add more benefit applications as needed
 }
 
@@ -140,6 +177,9 @@ export function getBenefitsDescription(benefits) {
   }
   if (benefits.soilQuality) {
     descriptions.push(`Soil Quality: +${benefits.soilQuality * 100}%`);
+  }
+  if (benefits.toolWeightReduction) {
+    descriptions.push(`Tool Weight Reduction: ${benefits.toolWeightReduction * 100}%`);
   }
   // Add more benefit descriptions as needed
   return descriptions.join(', ');

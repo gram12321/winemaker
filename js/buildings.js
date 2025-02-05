@@ -56,18 +56,20 @@ export class Building {
   }
 
   findAvailableSlot(tool) {
+    const adjustedWeight = tool.getAdjustedWeight();
+    
     // First, try to find a slot that already has the same type of tool
     let slot = this.slots.find(slot => 
       slot.tools.length > 0 && 
       slot.tools[0].name === tool.name && 
-      slot.currentWeight + tool.weight <= this.slotWeightCapacity
+      slot.currentWeight + adjustedWeight <= this.slotWeightCapacity
     );
 
     // If no matching slot found, try to find an empty slot
     if (!slot) {
       slot = this.slots.find(slot => 
         slot.tools.length === 0 && 
-        tool.weight <= this.slotWeightCapacity
+        adjustedWeight <= this.slotWeightCapacity
       );
     }
 
@@ -78,7 +80,8 @@ export class Building {
     const slot = this.findAvailableSlot(tool);
     if (slot) {
       slot.tools.push(tool);
-      slot.currentWeight += tool.weight;
+      // Use adjusted weight instead of base weight
+      slot.currentWeight += tool.getAdjustedWeight();
       return true;
     }
     return false;
@@ -131,7 +134,8 @@ export class Building {
     const slot = this.slots[slotIndex];
     if (slot && slot.tools.length > 0) {
       const tool = slot.tools.pop(); // Remove last tool from slot
-      slot.currentWeight -= tool.weight;
+      // Use adjusted weight for removal too
+      slot.currentWeight -= tool.getAdjustedWeight();
       
       // Add this check to clear slot if empty
       if (slot.tools.length === 0) {
@@ -202,6 +206,17 @@ export class Tool {
 
   releaseFromTask() {
     this.assignedTaskId = null;
+  }
+
+  getAdjustedWeight() {
+    // Get completed upgrades that affect weight
+    const completedUpgrades = JSON.parse(localStorage.getItem('upgrades') || '[]');
+    const weightReduction = completedUpgrades
+        .filter(u => u.completed && u.benefits.toolWeightReduction)
+        .reduce((total, upgrade) => total + upgrade.benefits.toolWeightReduction, 0);
+
+    // Apply weight reduction
+    return this.weight * (1 - weightReduction);
   }
 }
 

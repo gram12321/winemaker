@@ -120,7 +120,6 @@ function setupToolButtons(building, tools, overlayContainer) {
         const button = overlayContainer.querySelector(`.add-tool-button[data-tool-name="${tool.name}"]`);
         if (button) {
             button.addEventListener('click', () => {
-                // Reload the building data to get fresh state
                 const buildings = loadBuildings();
                 const currentBuilding = buildings.find(b => b.name === buildingInstance.name);
                 const freshBuildingInstance = new Building(
@@ -130,6 +129,7 @@ function setupToolButtons(building, tools, overlayContainer) {
                 );
 
                 const newToolInstance = createTool(tool.name);
+
                 if (newToolInstance && freshBuildingInstance.addTool(newToolInstance)) {
                     // Find the slot where the tool was added
                     const slot = freshBuildingInstance.slots.find(s => s.tools.includes(newToolInstance));

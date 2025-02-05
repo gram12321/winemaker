@@ -1,4 +1,4 @@
-import { loadStaff, saveTasks,  updateFarmland, loadBuildings, storeBuildings,  loadTasks as loadTasksFromStorage, loadTeams } from './database/adminFunctions.js';
+import { loadStaff, saveTasks, saveStaff, updateFarmland, loadBuildings, storeBuildings,  loadTasks as loadTasksFromStorage, loadTeams } from './database/adminFunctions.js';
 import { updateAllDisplays } from './displayManager.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass, formatNumber } from './utils.js';

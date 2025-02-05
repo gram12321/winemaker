@@ -4,6 +4,8 @@ import { startUpgradeTask, getBenefitsDescription } from '/js/upgrade.js';
 import { getMoney } from '/js/company.js';
 import { categorizeUpgrades } from '../../upgrade.js';
 import { getFarmlands } from '/js/database/adminFunctions.js';
+import { addConsoleMessage } from '/js/console.js';
+import { upgrades } from '../../upgrade.js';
 
 export function showFinanceOverlay() {
     const overlay = showMainViewOverlay(createFinanceOverlayHTML());
@@ -156,10 +158,18 @@ function createUpgradeListHTML(upgrades) {
 
 export function updateUpgradesList() {
     const { research, projects, upgradesList } = categorizeUpgrades();
+    
+    // Check if elements exist before updating
+    const researchList = document.getElementById('research-list');
+    const projectsList = document.getElementById('projects-list');
+    const upgradesListElement = document.getElementById('upgrades-list');
 
-    document.getElementById('research-list').innerHTML = createUpgradeListHTML(research);
-    document.getElementById('projects-list').innerHTML = createUpgradeListHTML(projects);
-    document.getElementById('upgrades-list').innerHTML = createUpgradeListHTML(upgradesList);
+    // Only update if elements exist (we're on the finance overlay)
+    if (researchList && projectsList && upgradesListElement) {
+        researchList.innerHTML = createUpgradeListHTML(research);
+        projectsList.innerHTML = createUpgradeListHTML(projects);
+        upgradesListElement.innerHTML = createUpgradeListHTML(upgradesList);
+    }
 }
 
 function setupFinanceEventListeners(overlay) {
@@ -193,15 +203,24 @@ function setupFinanceEventListeners(overlay) {
         if (e.target.matches('.start-upgrade-btn')) {
             const upgradeId = parseInt(e.target.closest('.upgrade-item').dataset.upgradeId, 10);
             const farmlandSelect = e.target.closest('.upgrade-item').querySelector('.farmland-select');
-            const farmlandId = parseInt(farmlandSelect.value, 10);
-            if (farmlandId) {
+            
+            // Add null check and handle upgrades that don't require farmland
+            const upgrade = upgrades.find(u => u.id === upgradeId);
+            if (upgrade.applicableTo === 'farmland') {
+                if (!farmlandSelect || !farmlandSelect.value) {
+                    addConsoleMessage('Please select a farmland to apply the upgrade.', false, true);
+                    return;
+                }
+                const farmlandId = parseInt(farmlandSelect.value, 10);
                 const farmland = getFarmlands().find(f => f.id === farmlandId);
                 startUpgradeTask(upgradeId, farmland);
-                // Refresh the upgrades list to reflect the new status
-                updateUpgradesList();
             } else {
-                addConsoleMessage('Please select a farmland to apply the upgrade.', false, true);
+                // For non-farmland upgrades, just start the task without a target
+                startUpgradeTask(upgradeId);
             }
+            
+            // Refresh the upgrades list to reflect the new status
+            updateUpgradesList();
         }
     });
 

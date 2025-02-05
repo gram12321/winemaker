@@ -15,7 +15,6 @@ export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, s
     
     // Add console.log to debug content creation
     const content = createHireStaffHTML(createdStaffOptions);
-    console.log('Generated content:', content);
     
     const overlayContainer = showModalOverlay('hireStaffOverlay', content);
 
