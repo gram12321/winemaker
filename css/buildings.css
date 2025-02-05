@@ -369,7 +369,7 @@
 
 .tool-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Increased from 200px */
     gap: 10px;
     margin-top: 10px;
 }
@@ -377,16 +377,50 @@
 .tool-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    gap: 4px;
+    padding: 4px 12px; /* Increased padding */
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.1);
+    min-height: 40px;
+    flex-wrap: wrap;
+    font-size: 0.7em !important; 
+
 }
 
+/* Make the badge more compact with higher specificity */
+.tool-item .tool-count-badge {
+    font-size: 0.7em !important; 
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--panel-text);
+    display: inline-flex;
+    align-items: center;
+    height: fit-content;
+    min-width: fit-content;
+    white-space: nowrap;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* Compact speed bonus display */
 .tool-bonus {
-    color: #28a745;
-    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 2px;
     margin-left: auto;
+    font-size: 0.8em;
+    padding: 2px 4px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.tool-bonus img {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
 }
 
 /* Tool item styles for assign staff overlay */

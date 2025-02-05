@@ -50,25 +50,59 @@ function generateAssignStaffHTML(task, validTools) {
     const selectedTools = task.params.selectedTools || [];
 
     // Remove validTools calculation from here since it's now passed in
+    // Group tools by name and count occurrences
+    const groupedTools = validTools.reduce((acc, tool) => {
+        const key = tool.name;
+        if (!acc[key]) {
+            acc[key] = {
+                tool: tool,
+                count: 1,
+                instances: [tool],
+                isIndividual: tool.toolType === 'individual'
+            };
+        } else {
+            acc[key].count++;
+            acc[key].instances.push(tool);
+        }
+        return acc;
+    }, {});
+
     const toolsHTML = validTools.length > 0 ? `
         <div class="tools-section mb-3">
             <h5>Available Tools</h5>
             <div class="tool-list">
-                ${validTools.map(tool => {
-                    const isDisabled = tool.assignedTaskId && tool.assignedTaskId !== task.id;
+                ${Object.values(groupedTools).map(({ tool, count, instances, isIndividual }) => {
+                    const isDisabled = instances.every(t => t.assignedTaskId && t.assignedTaskId !== task.id);
+                    const availableCount = instances.filter(t => !t.assignedTaskId || t.assignedTaskId === task.id).length;
                     
                     return `
                     <div class="tool-item ${isDisabled ? 'disabled' : ''}">
                         <input type="checkbox" 
                                class="tool-select" 
-                               value="${tool.getStorageId()}"
+                               value="${tool.name}"
                                ${isDisabled ? 'disabled' : ''}
-                               ${!isDisabled && task.params.selectedTools?.includes(tool.getStorageId()) ? 'checked' : ''}>
+                               data-is-individual="${isIndividual}">
                         <img src="../assets/icon/buildings/${tool.name.toLowerCase()}.png" 
                              alt="${tool.name}" 
                              style="width: 24px; height: 24px;">
-                        <span>${tool.name} #${tool.instanceNumber}</span>
-                        <span class="tool-bonus">(+${((tool.speedBonus - 1) * 100).toFixed(0)}% speed)</span>
+                        <span>${tool.name}</span>
+                        ${count > 1 ? `
+                            <span class="tool-count-badge">${availableCount} available</span>
+                            ${isIndividual && !isDisabled ? `
+                                <div class="tool-quantity-selector">
+                                    <input type="number" 
+                                           class="tool-quantity" 
+                                           min="0" 
+                                           max="${availableCount}" 
+                                           value="0"
+                                           data-tool-name="${tool.name}">
+                                </div>
+                            ` : ''}
+                        ` : ''}
+                        <span class="tool-bonus">
+                            <img src="../assets/icon/small/speed.png" alt="Speed bonus">
+                            ${((tool.speedBonus - 1) * 100).toFixed(0)}%
+                        </span>
                     </div>
                     `;
                 }).join('')}
@@ -168,10 +202,6 @@ function generateAssignStaffHTML(task, validTools) {
                     ${autoAssignedTeamsHTML}
                     ${autoAssignedTeamsHTML ? '<div class="overlay-divider"></div>' : ''}
                     
-                    ${workPreviewHTML}
-                    <div class="overlay-divider"></div>
-                    
-                    
                     <div class="staff-section mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5>Available Staff</h5>
@@ -194,8 +224,12 @@ function generateAssignStaffHTML(task, validTools) {
                             <tbody>${staffList}</tbody>
                         </table>
                     </div>
+
                     ${validTools.length > 0 ? '<div class="overlay-divider"></div>' : ''}
                     ${toolsHTML}
+
+                    <div class="overlay-divider"></div>
+                    ${workPreviewHTML}
                 </div>
                 <div class="btn-group mt-3">
                     <button class="btn save-staff-btn">Save Assignments</button>
@@ -278,50 +312,33 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
 
     // Add this function to handle tool selection logic
     const handleToolSelection = (checkbox) => {
-        const toolId = checkbox.value;
-        const tool = validTools.find(t => t.getStorageId() === toolId);
-        
-        if (!tool || (tool.assignedTaskId && tool.assignedTaskId !== task.id)) {
+        const toolName = checkbox.value;
+        const isIndividual = checkbox.dataset.isIndividual === 'true';
+        const groupedTools = validTools.filter(t => t.name === toolName);
+        const availableTools = groupedTools.filter(t => !t.assignedTaskId || t.assignedTaskId === task.id);
+
+        if (availableTools.length === 0) {
             checkbox.checked = false;
             return;
         }
-    
-        console.log('Tool selected:', {
-            name: tool.name,
-            toolType: tool.toolType,
-            id: toolId
-        });
-    
-        const toolCheckboxes = overlay.querySelectorAll('.tool-select');
-        
-        if (tool.toolType === 'task') {
-            console.log('Processing task type tool');
-            // If it's a task tool, uncheck all other tools
+
+        if (isIndividual) {
+            // For individual tools, let the quantity selector handle the logic
+            const quantityInput = checkbox.closest('.tool-item').querySelector('.tool-quantity');
+            if (checkbox.checked) {
+                quantityInput.disabled = false;
+            } else {
+                quantityInput.value = '0';
+                quantityInput.disabled = true;
+            }
+        } else {
+            // For task tools, keep existing logic
+            const toolCheckboxes = overlay.querySelectorAll('.tool-select');
             toolCheckboxes.forEach(cb => {
                 if (cb !== checkbox && cb.checked) {
                     cb.checked = false;
                 }
             });
-        } else if (tool.toolType === 'individual') {
-            console.log('Processing individual type tool');
-            // For individual tools, check if we have more tools selected than staff
-            const selectedStaffCount = Array.from(overlay.querySelectorAll('.staff-select:checked')).length;
-            const selectedIndividualTools = Array.from(toolCheckboxes)
-                .filter(cb => {
-                    const t = validTools.find(vt => vt.getStorageId() === cb.value);
-                    const isIndividual = t && t.toolType === 'individual';
-                    console.log('Checking tool:', t?.name, 'Is individual:', isIndividual);
-                    return cb.checked && isIndividual;
-                }).length;
-            
-            console.log('Staff count:', selectedStaffCount, 'Individual tools:', selectedIndividualTools);
-            
-            if (selectedIndividualTools > selectedStaffCount) {
-                checkbox.checked = false;
-                alert('You cannot assign more individual tools than selected staff members.');
-            }
-        } else {
-            console.log('Unknown tool type:', tool.toolType);
         }
     };
 
@@ -368,16 +385,43 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
         });
       });
 
+    // Add event listeners for quantity selectors
+    overlay.querySelectorAll('.tool-quantity').forEach(input => {
+        input.addEventListener('change', () => {
+            const toolName = input.dataset.toolName;
+            const selectedCount = parseInt(input.value);
+            const checkbox = input.closest('.tool-item').querySelector('.tool-select');
+            
+            // Update checkbox state based on quantity
+            checkbox.checked = selectedCount > 0;
+            
+            const selectedStaffCount = Array.from(overlay.querySelectorAll('.staff-select:checked')).length;
+            if (selectedCount > selectedStaffCount) {
+                input.value = selectedStaffCount;
+                alert('You cannot select more individual tools than staff members.');
+            }
+        });
+    });
+
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
             const selectedStaff = Array.from(overlay.querySelectorAll('.staff-select:checked'))
                 .map(checkbox => parseInt(checkbox.value));
             
-            // Get selected tools
-            const selectedTools = Array.from(overlay.querySelectorAll('.tool-select:checked'))
-                .map(checkbox => checkbox.value);
+            // Get selected tools with quantities
+            const selectedTools = [];
+            overlay.querySelectorAll('.tool-select:checked').forEach(checkbox => {
+                const toolName = checkbox.value;
+                const tools = validTools.filter(t => t.name === toolName && (!t.assignedTaskId || t.assignedTaskId === task.id));
+                
+                if (checkbox.dataset.isIndividual === 'true') {
+                    const quantity = parseInt(checkbox.closest('.tool-item').querySelector('.tool-quantity').value);
+                    tools.slice(0, quantity).forEach(tool => selectedTools.push(tool.getStorageId()));
+                } else {
+                    selectedTools.push(tools[0].getStorageId());
+                }
+            });
 
-            // Update task with both staff and tools
             task.params.selectedTools = selectedTools;
             taskManager.assignStaffToTask(task.id, selectedStaff);
             

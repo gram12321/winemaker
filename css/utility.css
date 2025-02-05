@@ -101,3 +101,35 @@
     margin-bottom: 15px;
     font-size: 1em;
 }
+
+/* Tool Count Badge */
+.tool-count-badge {
+    background: var(--color-accent);
+    color: var(--panel-text);
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+/* Tool Quantity Selector */
+.tool-quantity-selector {
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.tool-quantity {
+    width: 50px;
+    padding: 2px 4px;
+    border: 1px solid var(--color-accent);
+    border-radius: 4px;
+    background: var(--color-background);
+    color: var(--color-text);
+    text-align: center;
+}
+
+.tool-quantity:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
