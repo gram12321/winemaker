@@ -64,7 +64,13 @@ export function sellWines(resourceName) {
     }
 }
 
-// Calculate wine price based on quality, land value, and field prestige
+// Calculate wine price based on quality, land value, and field prestige // Capped at 100€ for non-top3 regions. As quality 0-1, land value 0-1, field prestige 0-1, thus maximum baseprice is 100€. (Ie we ware multiplying 3 normalized values of 0-1 by 100 
+/*
+Landvalue is aprox 41% of price as it is in both normalized value (1/3) and field prestige (1/4) each contributing 1/3 to baseprice) 
+33.3% (direct contribution)
+8.3% (through field prestige: 25% of 33.3%)
+Total impact: approximately 41.6% of the final wine price */
+
 export function calculateWinePrice(quality, wine) {
     const baseValue = 1; // Base value for wine pricing
     const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
