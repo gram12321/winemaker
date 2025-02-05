@@ -57,10 +57,14 @@ function createBuildingDetails(building) {
                 </div>
                 ${tool.validTasks?.length ? `
                 <div>
-                  
-                  ${tool.validTasks.map(task => 
-                    `<img src="/assets/icon/icon_${task}.webp" alt="${task}" class="tool-tasktype-icon " title="${task.charAt(0).toUpperCase() + task.slice(1)}">`
-                  ).join('')}
+                  ${tool.validTasks.map(task => {
+                    // Get only the first word and convert to lowercase
+                    const iconName = task.split(' ')[0].toLowerCase();
+                    return `<img src="/assets/icon/icon_${iconName}.webp" 
+                              alt="${task}" 
+                              class="tool-tasktype-icon" 
+                              title="${task}">`;
+                  }).join('')}
                 </div>` : ''}
               </div>
             </div>
