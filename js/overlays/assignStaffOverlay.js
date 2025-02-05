@@ -240,41 +240,63 @@ function generateAssignStaffHTML(task, validTools) {
 }
 
 function calculateWorkPerWeek(staffCheckboxes, toolCheckboxes, validTools, task) {
+
+    
     const allStaff = loadStaff();
     const allTasks = taskManager.getAllTasks();
     let totalWorkforce = 0;
     
-    // Calculate staff contribution with task count adjustment
+    // Log staff contributions
     Array.from(staffCheckboxes).forEach(checkbox => {
         if (checkbox.checked) {
             const staff = allStaff.find(s => s.id === parseInt(checkbox.value));
             if (staff) {
                 const relevantSkill = getRelevantSkill(staff, task.taskType);
-                
-                // Count how many tasks this staff member is assigned to
                 const staffTaskCount = allTasks.reduce((count, t) => {
                     if (t.id !== task.id && t.assignedStaff?.some(s => s.id === staff.id)) {
                         return count + 1;
                     }
                     return count;
-                }, 1); // Start at 1 to include this task
+                }, 1);
 
-                // Divide workforce by number of tasks
-                totalWorkforce += (staff.workforce / staffTaskCount) * relevantSkill;
+                const staffContribution = (staff.workforce / staffTaskCount) * relevantSkill;
+                                
+                totalWorkforce += staffContribution;
             }
         }
     });
 
-    // Calculate tool bonus
+    // Calculate and log tool bonuses
     let toolSpeedBonus = 1.0;
     Array.from(toolCheckboxes).forEach(checkbox => {
         if (checkbox.checked) {
-            const tool = validTools.find(t => t.getStorageId() === checkbox.value);
-            if (tool) {
-                toolSpeedBonus *= tool.speedBonus;
+            const toolName = checkbox.value;
+            const tools = validTools.filter(t => t.name === toolName);
+            
+            if (checkbox.dataset.isIndividual === 'true') {
+                const quantityInput = checkbox.closest('.tool-item').querySelector('.tool-quantity');
+                const quantity = parseInt(quantityInput?.value || '0');
+                const tool = tools[0];
+                if (tool) {
+                    const bonus = Math.pow(tool.speedBonus, quantity);
+                    console.log(`Individual Tool: ${tool.name}`, {
+                        quantity,
+                        singleBonus: tool.speedBonus,
+                        combinedBonus: bonus
+                    });
+                    toolSpeedBonus *= bonus;
+                }
+            } else {
+                const tool = tools[0];
+                if (tool) {
+                    
+                    toolSpeedBonus *= tool.speedBonus;
+                }
             }
         }
     });
+
+    
 
     return totalWorkforce * toolSpeedBonus;
 }
@@ -312,6 +334,7 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
 
     // Add this function to handle tool selection logic
     const handleToolSelection = (checkbox) => {
+
         const toolName = checkbox.value;
         const isIndividual = checkbox.dataset.isIndividual === 'true';
         const groupedTools = validTools.filter(t => t.name === toolName);
@@ -340,6 +363,7 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
                 }
             });
         }
+        updateWorkPreview();
     };
 
     // Update staff selection event listener to handle tool type correctly
@@ -400,8 +424,57 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
                 input.value = selectedStaffCount;
                 alert('You cannot select more individual tools than staff members.');
             }
+            
+            // Add this line to update work preview when quantity changes
+            updateWorkPreview();
+        });
+
+        // Also add input event for real-time updates while typing/scrolling
+        input.addEventListener('input', updateWorkPreview);
+    });
+
+    // Add this new function to optimally select tools
+    function updateOptimalToolSelection(staffCount) {
+        const toolCheckboxes = overlay.querySelectorAll('.tool-select');
+        
+        toolCheckboxes.forEach(checkbox => {
+            const isIndividual = checkbox.dataset.isIndividual === 'true';
+            const toolName = checkbox.value;
+            const availableTools = validTools.filter(t => 
+                t.name === toolName && 
+                (!t.assignedTaskId || t.assignedTaskId === task.id)
+            );
+
+            if (isIndividual) {
+                // For individual tools, select as many as we have staff
+                const quantityInput = checkbox.closest('.tool-item').querySelector('.tool-quantity');
+                const maxTools = Math.min(availableTools.length, staffCount);
+                checkbox.checked = maxTools > 0;
+                if (quantityInput) {
+                    quantityInput.value = maxTools;
+                    quantityInput.disabled = !checkbox.checked;
+                }
+            } else {
+                // For task tools, select one if available
+                checkbox.checked = availableTools.length > 0;
+            }
+        });
+
+        // Update work preview after changing tool selection
+        updateWorkPreview();
+    }
+
+    // Modify staff checkbox event listener to include optimal tool selection
+    overlay.querySelectorAll('.staff-select').forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const selectedStaffCount = Array.from(overlay.querySelectorAll('.staff-select:checked')).length;
+            updateOptimalToolSelection(selectedStaffCount);
         });
     });
+
+    // Initialize optimal tool selection based on current staff selection
+    const initialStaffCount = Array.from(overlay.querySelectorAll('.staff-select:checked')).length;
+    updateOptimalToolSelection(initialStaffCount);
 
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
@@ -443,8 +516,12 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
     });
 
     function updateWorkPreview() {
+
         const staffCheckboxes = overlay.querySelectorAll('.staff-select');
         const toolCheckboxes = overlay.querySelectorAll('.tool-select');
+        
+
+
         const workPerWeek = calculateWorkPerWeek(staffCheckboxes, toolCheckboxes, validTools, task);
         const totalWork = task.totalWork;
         const estimatedWeeks = workPerWeek > 0 ? Math.ceil(totalWork / workPerWeek) : 'N/A';
