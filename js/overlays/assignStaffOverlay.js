@@ -355,10 +355,10 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
                 quantityInput.disabled = true;
             }
         } else {
-            // For task tools, keep existing logic
+            // For task tools, only uncheck other instances of the SAME tool type
             const toolCheckboxes = overlay.querySelectorAll('.tool-select');
             toolCheckboxes.forEach(cb => {
-                if (cb !== checkbox && cb.checked) {
+                if (cb !== checkbox && cb.value === toolName && cb.checked) {
                     cb.checked = false;
                 }
             });
