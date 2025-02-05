@@ -32,7 +32,7 @@ export function displayWineCellarInventory() {
             <td>${displayInfo.storage}</td>
             <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${formatQualityDisplay(wine.quality)}</td>
-            <td style="text-align: center;"><strong><img src="/assets/icon/icon_privateorder.webp" alt="Available" class="status-image"> <br> ${wine.type || 'Private Order'}</strong></td>
+            <td style="text-align: center;"><strong>Bulk Sale</strong></td>
             <td>€${sellingPrice.toFixed(2)}</td>
             <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}">Sell</button></td>
         `;
