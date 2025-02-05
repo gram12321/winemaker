@@ -140,14 +140,17 @@ function generateAssignStaffHTML(task, validTools) {
                 <span>Work Progress: <span id="work-progress-text">0/${Math.round(task.totalWork)}</span> units</span>
                 <span>Weeks to Complete: <span id="estimated-weeks">N/A</span></span>
             </div>
-            <div class="progress">
-                <div id="work-progress" class="progress-bar" role="progressbar" 
-                     aria-valuenow="${(task.appliedWork || 0) / task.totalWork * 100}"
-                     aria-valuemin="0" 
-                     aria-valuemax="100"
-                     style="width: ${(task.appliedWork || 0) / task.totalWork * 100}%">
+            ${task.appliedWork > 0 ? `
+                <div class="progress">
+                    <div id="work-progress" class="progress-bar" role="progressbar" 
+                         aria-valuenow="${(task.appliedWork / task.totalWork * 100)}"
+                         aria-valuemin="0" 
+                         aria-valuemax="100"
+                         data-has-work="true"
+                         style="width: ${(task.appliedWork / task.totalWork * 100)}%">
+                    </div>
                 </div>
-            </div>
+            ` : ''}
             <div id="work-blocks" class="progress mt-2" style="height: 30px !important;">
                 <div class="progress-segments"></div>
             </div>
