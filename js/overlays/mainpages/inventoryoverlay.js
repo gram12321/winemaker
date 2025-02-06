@@ -2,6 +2,8 @@ import { loadBuildings } from '/js/database/adminFunctions.js';
 import { inventoryInstance } from '/js/resource.js';
 import { formatNumber, formatQualityDisplay } from '/js/utils.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
+import { addConsoleMessage } from '/js/console.js';
+import { addTransaction } from '/js/finance.js';
 
 export function showInventoryOverlay() {
     const overlay = showMainViewOverlay(createInventoryOverlayHTML());
@@ -40,6 +42,7 @@ function createInventoryOverlayHTML() {
                                         <th>Amount</th>
                                         <th>Quality</th>
                                         <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="grape-storage-body"></tbody>
@@ -174,6 +177,14 @@ function createStorageRow(tool, items) {
         ? '<span class="text-muted">Empty</span>'
         : `<img src="/assets/pic/${status.toLowerCase()}.webp" alt="${status}" title="${status}" class="status-icon">`;
 
+    // Add sell button for warehouse items (Grapes state)
+    const sellButton = firstItem && firstItem.state === 'Grapes' ? 
+        `<button class="btn-alternative sell-grapes-btn" 
+            data-resource="${firstItem.resource.name}"
+            data-storage="${tool.name} #${tool.instanceNumber}">
+            Sell (€5/kg)
+        </button>` : '';
+
     row.innerHTML = `
         <td>${tool.name} #${tool.instanceNumber}</td>
         <td>${formatNumber(tool.capacity)}</td>
@@ -181,9 +192,50 @@ function createStorageRow(tool, items) {
         <td>${firstItem ? formattedAmount : (tool.supportedResources.includes('Must') ? '0 l' : '0 kg')}</td>
         <td>${firstItem ? formatQualityDisplay(firstItem.quality) : 'N/A'}</td>
         <td>${statusDisplay}</td>
+        <td>${sellButton}</td>
     `;
 
+    // Add event listener for sell button if it exists
+    const sellBtn = row.querySelector('.sell-grapes-btn');
+    if (sellBtn) {
+        sellBtn.addEventListener('click', () => {
+            const resourceName = sellBtn.dataset.resource;
+            const storage = sellBtn.dataset.storage;
+            sellGrapes(resourceName, storage);
+            populateInventoryTables(); // Refresh tables after selling
+        });
+    }
+
     return row;
+}
+
+// Add new helper function to sell grapes
+function sellGrapes(resourceName, storage) {
+    const item = inventoryInstance.items.find(item => 
+        item.resource.name === resourceName && 
+        item.storage === storage &&
+        item.state === 'Grapes'
+    );
+
+    if (item && item.amount > 0) {
+        const amount = item.amount;  // Store amount before removing resource
+        const sellingPrice = amount * 5; // €5 per kg
+        if (inventoryInstance.removeResource(
+            { name: resourceName },
+            amount,
+            'Grapes',
+            item.vintage,
+            storage
+        )) {
+            const formattedAmount = amount >= 1000 ? 
+                `${formatNumber(amount / 1000, 2)} tonnes` : 
+                `${formatNumber(amount)} kg`;
+            
+            addConsoleMessage(`Sold ${formattedAmount} of ${resourceName} grapes for €${formatNumber(sellingPrice)}`);
+            addTransaction('Income', 'Grape Sale', sellingPrice);
+            inventoryInstance.save();
+        }
+    }
 }
 
 function updateWineTable() {

@@ -118,6 +118,9 @@ export function setupWineryOverlayEventListeners(overlay) {
 }
 
 function populateStorageRow(tableBody, tool, inventoryItems) {
+    // Only proceed if tool has capacity
+    if (!tool || tool.capacity <= 0) return;
+
     const firstItem = inventoryItems[0];
     const totalAmount = inventoryItems.reduce((sum, item) => sum + item.amount, 0);
 
