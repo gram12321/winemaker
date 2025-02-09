@@ -26,6 +26,7 @@ class Farmland {
     this.annualQualityFactor = Math.random(); // Random quality factor calculation
     this.conventional = 'Non-Conventional';  // Can be: 'Conventional', 'Non-Conventional', or 'Ecological'
     this.organicYears = 0;  // Counter for years using organic methods
+    this.remainingYield = null;  // null means no harvest started
   }
 }
 
@@ -51,6 +52,16 @@ export function farmlandYield(farmland) {
         return expectedYield;
     }
     return 0;
+}
+
+// New function to get actual remaining yield
+export function getRemainingYield(farmland) {
+    // If harvest hasn't started yet, return full yield
+    if (farmland.remainingYield === null) {
+        return farmlandYield(farmland);
+    }
+    // Otherwise return what's left
+    return farmland.remainingYield;
 }
 
 // Refactored standalone function for land value calculation

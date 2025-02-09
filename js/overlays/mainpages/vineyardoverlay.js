@@ -1,4 +1,4 @@
-import { farmlandYield } from '../../farmland.js';
+import { farmlandYield, getRemainingYield } from '../../farmland.js';
 import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
 import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
@@ -79,13 +79,17 @@ function createVineyardTable() {
                 <th>Crop</th>
                 <th>Status</th>
                 <th>Ripeness</th>
-                <th>Expected Yield</th>
+                <th>Remaining Yield</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             ${farmlands.map(farmland => {
-                const canHarvest = farmland.plantedResourceName && farmland.ripeness >= 0.10;
+                const totalYield = farmlandYield(farmland);
+                const remainingYield = getRemainingYield(farmland);
+                const canHarvest = farmland.plantedResourceName && 
+                                 farmland.ripeness >= 0.10 && 
+                                 remainingYield > 0;
                 const formattedSize = farmland.acres < 10 ? farmland.acres.toFixed(2) : formatNumber(farmland.acres);
                 const ripenessColorClass = getColorClass(farmland.ripeness);
                 return `
@@ -96,7 +100,13 @@ function createVineyardTable() {
                         <td class="crop-column">${farmland.plantedResourceName || 'None'}</td>
                         <td>${farmland.status}</td>
                         <td class="${ripenessColorClass}">${farmland.plantedResourceName ? formatNumber(farmland.ripeness * 100, 0) + '%' : 'Not Planted'}</td>
-                        <td>${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland), 2) + ' kg'}</td>
+                        <td>${remainingYield >= 1000 ? 
+                            formatNumber(remainingYield/1000, 2) + ' t' : 
+                            formatNumber(remainingYield, 2) + ' kg'}
+                            ${remainingYield !== totalYield ? 
+                                `<small class="text-muted">(of ${formatNumber(totalYield/1000, 2)} t)</small>` : 
+                                ''}
+                        </td>
                         <td>
                             <button class="btn btn-alternative btn-sm harvest-btn" 
                                     data-farmland-id="${farmland.id}"

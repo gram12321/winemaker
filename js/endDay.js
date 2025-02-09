@@ -157,6 +157,8 @@ export function updateNewYear(farmlands) {
     farmlands.forEach(field => {
         if (field.plantedResourceName) {
             field.vineAge += 1;
+            // Reset remaining yield at start of new year
+            field.remainingYield = null;
             
             // Handle organic years progression
             if (field.conventional === 'Non-Conventional' || field.conventional === 'Ecological') {

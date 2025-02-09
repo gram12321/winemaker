@@ -88,21 +88,34 @@ function setupHarvestEventListeners(overlayContainer, farmland, farmlandId) {
 }
 
 function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer) {
+    console.log('[showWarningModal] Showing warning:', {
+        farmland,
+        farmlandId,
+        selectedCheckboxes,
+        totalAvailableCapacity,
+        expectedYield
+    });
+
     const warningModal = document.createElement('div');
     warningModal.className = 'modal fade modal-overlay';
     warningModal.style.display = 'block';
     warningModal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
     warningModal.innerHTML = `
-        <div class="modal-dialog">
-            <div class="modal-content overlay-section">
-                <div class="modal-header card-header">
-                    <h3 class="modal-title">Warning: Limited Container Capacity</h3>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Selected containers only have total capacity for ${totalAvailableCapacity >= 1000 ? formatNumber(totalAvailableCapacity/1000, 2) + ' t' : formatNumber(totalAvailableCapacity) + ' kg'} out of expected ${expectedYield >= 1000 ? formatNumber(expectedYield/1000, 2) + ' t' : formatNumber(expectedYield) + ' kg'}.</p>
-                    <p>Do you want to harvest what fits in the containers?</p>
-                </div>
+    <div class="modal-dialog">
+        <div class="modal-content overlay-section">
+            <div class="modal-header card-header">
+                <h3 class="modal-title">Warning: Limited Container Capacity</h3>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Selected containers have capacity for ${totalAvailableCapacity >= 1000 ? 
+                    formatNumber(totalAvailableCapacity/1000, 2) + ' t' : 
+                    formatNumber(totalAvailableCapacity) + ' kg'} 
+                   of the remaining ${expectedYield >= 1000 ? 
+                    formatNumber(expectedYield/1000, 2) + ' t' : 
+                    formatNumber(expectedYield) + ' kg'} to harvest.</p>
+                <p>Do you want to harvest what fits in the containers?</p>
+            </div>
                 <div class="modal-footer">
                     <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
                     <button type="button" class="overlay-section-btn" id="confirmHarvest">Harvest Available</button>
@@ -148,6 +161,13 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
 }
 
 export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+    console.log('[performHarvest] Starting harvest:', {
+        farmland,
+        farmlandId,
+        selectedTool,
+        harvestedAmount
+    });
+
     if (harvestedAmount <= 0) return false;
 
     // Check container capacity before processing
@@ -236,52 +256,88 @@ function checkGrapeCompatibility(selectedTool, farmland) {
 
 // Update harvest function to use the helper
 export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
-    const buildings = loadBuildings();
-    const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
-    
-    const tool = buildings.flatMap(b => 
-        b.slots.flatMap(slot => 
-            slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
-        )
-    ).find(t => t);
-
-    if (!tool) {
-        console.error('Tool not found:', selectedTool);
-        return false;
-    }
-
-    const compatibility = checkGrapeCompatibility(selectedTool, farmland);
-    if (!compatibility.compatible) {
-        addConsoleMessage(compatibility.message);
-        return false;
-    }
-
-    const taskName = `Harvesting`;
-    const densityPenalty = Math.max(0, (farmland.density - 1000) / 1000) * 0.05;
-    const fragilePenalty = (1 - resourceObj.fragile) * 0.5; 
-    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
-    const medianAltitude = (minAltitude + maxAltitude) / 2;
-    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
-    const altitudePenalty = altitudeDeviation * 0.5; 
-    const totalWork = totalHarvest / 1000 * 25 * (1 + densityPenalty + altitudePenalty + fragilePenalty); 
-
-    taskManager.addProgressiveTask(
-        taskName,
-        'field',  // Changed from TaskType.field
-        totalWork,
-        (target, progress, params) => {
-            const harvestedAmount = totalHarvest * (progress - (params.lastProgress || 0));
-            params.lastProgress = progress;
-            performHarvest(target, farmlandId, params.selectedTool, harvestedAmount);
-            if (progress >= 1) {
-                updateFarmland(farmlandId, { ripeness: 0, status: 'Harvested' });
-            }
-        },
+    console.log('[harvest] Initiating harvest for field:', {
         farmland,
-        { selectedTool, totalHarvest, lastProgress: 0 }
-    );
+        currentRemainingYield: farmland.remainingYield,
+        requestedHarvest: totalHarvest
+    });
 
-    return true;
+    try {
+        const buildings = loadBuildings();
+        const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
+        
+        const tool = buildings.flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
+            )
+        ).find(t => t);
+
+        if (!tool) {
+            console.error('Tool not found:', selectedTool);
+            return false;
+        }
+
+        const compatibility = checkGrapeCompatibility(selectedTool, farmland);
+        if (!compatibility.compatible) {
+            addConsoleMessage(compatibility.message);
+            return false;
+        }
+
+        const taskName = `Harvesting`;
+        const densityPenalty = Math.max(0, (farmland.density - 1000) / 1000) * 0.05;
+        const fragilePenalty = (1 - resourceObj.fragile) * 0.5; 
+        const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+        const medianAltitude = (minAltitude + maxAltitude) / 2;
+        const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+        const altitudePenalty = altitudeDeviation * 0.5; 
+        const totalWork = totalHarvest / 1000 * 25 * (1 + densityPenalty + altitudePenalty + fragilePenalty); 
+
+        taskManager.addProgressiveTask(
+            taskName,
+            'field',
+            totalWork,
+            (target, progress, params) => {
+                // Initialize remaining yield if this is first harvest ever
+                if (target.remainingYield === null) {
+                    target.remainingYield = farmlandYield(target);
+                }
+
+                const harvestedAmount = Math.min(
+                    target.remainingYield, // Use current remaining yield from target
+                    totalHarvest * (progress - (params.lastProgress || 0))
+                );
+                
+                console.log('[harvest:callback] Processing harvest increment:', {
+                    progress,
+                    harvestedAmount,
+                    remainingBefore: target.remainingYield,
+                    remainingAfter: target.remainingYield - harvestedAmount
+                });
+
+                params.lastProgress = progress;
+                target.remainingYield -= harvestedAmount;
+                
+                performHarvest(target, farmlandId, params.selectedTool, harvestedAmount);
+                
+                updateFarmland(farmlandId, { 
+                    remainingYield: target.remainingYield,
+                    status: target.remainingYield <= 0 ? 'Harvested' : 'Partially Harvested',
+                    ripeness: target.remainingYield <= 0 ? 0 : target.ripeness
+                });
+            },
+            farmland,
+            { 
+                selectedTool, 
+                totalHarvest, 
+                lastProgress: 0
+            }
+        );
+
+        return true;
+    } catch (error) {
+        console.error('[harvest] Error during harvest initiation:', error);
+        throw error;
+    }
 }
 
 function populateStorageOptions(farmland) {
@@ -377,11 +433,16 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
         }
     });
 
-    // Show warning only if capacity is insufficient
-    if (totalAvailableCapacity < expectedYield) {
-        showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer);
+    // Get remaining yield instead of total yield for capacity check
+    const remainingToHarvest = farmland.remainingYield === null ? 
+        farmlandYield(farmland) : 
+        farmland.remainingYield;
+
+    // Show warning only if capacity is insufficient for remaining yield
+    if (totalAvailableCapacity < remainingToHarvest) {
+        showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, remainingToHarvest, overlayContainer);
     } else {
-        let remainingYield = expectedYield;
+        let remainingYield = remainingToHarvest;  // Use remaining yield here too
         for (const checkbox of selectedCheckboxes) {
             const selectedTool = checkbox.value;
             const harvestCheck = canHarvest(farmland, selectedTool);

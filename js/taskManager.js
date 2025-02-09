@@ -177,10 +177,9 @@ class TaskManager {
 
             if (task.appliedWork >= task.totalWork) {
                 if (task.type === 'completion') {
-                    // Call callback only on completion
                     task.callback(task.target, task.params);
                 }
-                this.removeTask(task.id);
+                this.removeTask(task.id);  // Task is removed when complete
             }
         });
         saveTasks(this.tasks);
@@ -423,12 +422,25 @@ class TaskManager {
                 };
             case 'harvesting':
                 return (target, progress, params) => {
+                    console.log('[taskCallback:harvesting] Processing harvest:', {
+                        target,
+                        progress,
+                        params,
+                        lastProgress: params.lastProgress || 0
+                    });
+
                     const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
                     params.lastProgress = progress;
                     
                     // Calculate speedBonus from selected tools
                     const speedBonus = this.calculateToolSpeedBonus(params.selectedTools || []);
                     const adjustedAmount = harvestedAmount * speedBonus;
+
+                    console.log('[taskCallback:harvesting] Calculated amounts:', {
+                        harvestedAmount,
+                        speedBonus,
+                        adjustedAmount
+                    });
                     
                     performHarvest(target, target.id, params.selectedTools, adjustedAmount);
                 };
