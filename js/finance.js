@@ -1,11 +1,11 @@
-
 // Import required utilities and functions
 import { formatNumber } from './utils.js';
 import { renderCompanyInfo } from './company.js';
-import { saveCompanyInfo } from './database/adminFunctions.js';
-import { Building} from './buildings.js';
+import { getTransactions, getMoney, getGameState, loadBuildings, getFarmlands, storeTransactions, updateMoney, getRecurringTransactions, updateRecurringTransactions } from './database/adminFunctions.js';
+import { Building } from './buildings.js';
 import { inventoryInstance } from './resource.js';
 import { calculateWinePrice } from './sales.js';
+import { saveCompanyInfo } from './database/initiation.js';
 
 /**
  * Loads and renders the cash flow table with transaction history
@@ -18,7 +18,7 @@ export function loadCashFlow() {
   cashFlowTableBody.innerHTML = '';
   
   // Get transactions from storage
-  const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+  const transactions = getTransactions();
   
   // Calculate running balance for each transaction
   let runningBalance = 0;
@@ -47,32 +47,52 @@ export function loadCashFlow() {
 /**
  * Updates the income statement display with current financial data
  */
-export function updateIncomeStatement() {
-  const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  const currentWeek = localStorage.getItem('week');
-  const currentSeason = localStorage.getItem('season');
-  const currentYear = localStorage.getItem('year');
-  
-  // Filter transactions for current week
-  const weeklyTransactions = transactions.filter(t => {
-    return t.date === `Week ${currentWeek}, ${currentSeason}, ${currentYear}`;
-  });
-  
-  // Calculate weekly income and expenses
-  const weeklyIncome = weeklyTransactions.reduce((sum, t) => 
-    t.type === 'Income' ? sum + t.amount : sum, 0);
-  const weeklyExpenses = weeklyTransactions.reduce((sum, t) => 
-    t.type === 'Expense' ? sum + Math.abs(t.amount) : sum, 0);
+export function updateIncomeStatement(period = 'weekly') {
+  const transactions = getTransactions();
+  const { week, season, year } = getGameState();
 
-  // Update income statement
-  document.getElementById('weekly-income').textContent = `€${formatNumber(weeklyIncome)}`;
-  document.getElementById('weekly-expenses').textContent = `€${formatNumber(weeklyExpenses)}`;
-  document.getElementById('net-income').textContent = `€${formatNumber(weeklyIncome - weeklyExpenses)}`;
+  // Filter transactions based on selected period
+  const periodTransactions = filterTransactionsByPeriod(transactions, period, { week, season, year });
+  
+  // Calculate income and expenses for the period
+  const periodIncome = periodTransactions.reduce((sum, t) => 
+      t.type === 'Income' ? sum + t.amount : sum, 0);
+  const periodExpenses = periodTransactions.reduce((sum, t) => 
+      t.type === 'Expense' ? sum + Math.abs(t.amount) : sum, 0);
+
+  // Update period labels based on selected time period - Add null checks
+  const periodLabel = getPeriodLabel(period);
+  const incomeLabel = document.querySelector('.stat-card:nth-child(1) .stat-label');
+  const expenseLabel = document.querySelector('.stat-card:nth-child(2) .stat-label');
+  
+  if (incomeLabel) incomeLabel.textContent = `${periodLabel} Income`;
+  if (expenseLabel) expenseLabel.textContent = `${periodLabel} Expenses`;
+
+  // Update values - Add null checks for all DOM updates
+  const elements = {
+      weeklyIncome: document.getElementById('weekly-income'),
+      weeklyExpenses: document.getElementById('weekly-expenses'),
+      netIncome: document.getElementById('net-income'),
+      netIncomeWeekly: document.getElementById('net-income-weekly'),
+      netIncomeExpenses: document.getElementById('net-income-expenses')
+  };
+
+  // Safe update helper
+  const safeUpdateElement = (element, value) => {
+      if (element) element.textContent = `€${formatNumber(value)}`;
+  };
+
+  // Update all values safely
+  safeUpdateElement(elements.weeklyIncome, periodIncome);
+  safeUpdateElement(elements.weeklyExpenses, periodExpenses);
+  safeUpdateElement(elements.netIncome, periodIncome - periodExpenses);
+  safeUpdateElement(elements.netIncomeWeekly, periodIncome);
+  safeUpdateElement(elements.netIncomeExpenses, periodExpenses);
 
   // Update balance sheet
-  const currentMoney = parseInt(localStorage.getItem('money')) || 0;
-  const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-  const ownedFarmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
+  const currentMoney = getMoney();
+  const buildings = loadBuildings();
+  const ownedFarmlands = getFarmlands();
   
   // Calculate fixed assets (buildings + farmland)
   const buildingValue = buildings.reduce((sum, building) => {
@@ -98,51 +118,140 @@ export function updateIncomeStatement() {
   const fixedAssets = buildingValue + farmlandValue;
   
   // Update balance sheet display
-  // Calculate wine inventory value
+  // Calculate wine inventory value - Fix the calculation
   const wineInventoryValue = inventoryInstance.items
-    .filter(item => item.state === 'Bottles')
-    .reduce((sum, wine) => {
-      const farmland = JSON.parse(localStorage.getItem('ownedFarmlands')).find(f => f.name === wine.fieldName);
-      if (!farmland) return sum;
-      const basePrice = calculateWinePrice(wine.quality, farmland.landvalue, wine.fieldPrestige);
-      return sum + (basePrice * wine.amount);
+    .filter(item => item.state === 'Bottles' || item.state === 'Grapes') // Include both bottles and grapes
+    .reduce((sum, item) => {
+        // Get the farmland data safely
+        const farmland = ownedFarmlands.find(f => f.name === item.fieldName);
+        
+        let value = 0;
+        // Pass the item itself as second parameter to calculateWinePrice
+        const basePrice = calculateWinePrice(item.quality, item);
+        
+        if (item.state === 'Bottles') {
+            value = basePrice * item.amount;
+        } else if (item.state === 'Grapes') {
+            // Value grapes at a fraction of potential wine value (considering processing costs and risks)
+            value = (basePrice * 0.25) * item.amount;
+        }
+        return sum + value;
     }, 0);
 
   document.getElementById('cash-balance').textContent = `€${formatNumber(currentMoney)}`;
   document.getElementById('fixed-assets').textContent = `€${formatNumber(fixedAssets)}`;
   document.getElementById('current-assets').textContent = `€${formatNumber(wineInventoryValue)}`;
   document.getElementById('total-assets').textContent = `€${formatNumber(currentMoney + fixedAssets + wineInventoryValue)}`;
+
+  // Update Total Assets details
+  document.getElementById('total-assets-cash').textContent = `€${formatNumber(currentMoney)}`;
+  document.getElementById('total-assets-fixed').textContent = `€${formatNumber(fixedAssets)}`;
+  document.getElementById('total-assets-current').textContent = `€${formatNumber(wineInventoryValue)}`;
+  
+  // Update Cash details
+  document.getElementById('cash-available').textContent = `€${formatNumber(currentMoney)}`;
+
+  // Update detailed breakdowns
+  const buildingsValue = buildingValue;
+  const farmlandsValue = farmlandValue;
+  document.getElementById('buildings-value').textContent = `€${formatNumber(buildingsValue)}`;
+  document.getElementById('farmland-value').textContent = `€${formatNumber(farmlandsValue)}`;
+
+  const bottlesValue = calculateWineValueByType('Bottles', wineInventoryValue);
+  const grapesValue = calculateWineValueByType('Grapes', wineInventoryValue);
+  document.getElementById('bottles-value').textContent = `€${formatNumber(bottlesValue)}`;
+  document.getElementById('grapes-value').textContent = `€${formatNumber(grapesValue)}`;
+
+  // Update transaction details for the selected period
+  updateTransactionDetails(periodTransactions);
 }
 
-/**
- * Adds a new transaction to the system
- * @param {string} type - Transaction type (Income/Expense)
- * @param {string} description - Transaction description
- * @param {number} amount - Transaction amount
- */
+function filterTransactionsByPeriod(transactions, period, currentDate) {
+  const { week, season, year } = currentDate;
+
+  switch (period) {
+      case 'weekly':
+          return transactions.filter(t => 
+              t.date === `Week ${week}, ${season}, ${year}`
+          );
+      
+      case 'season':
+          return transactions.filter(t => 
+              t.date.includes(`${season}, ${year}`)
+          );
+      
+      case 'year':
+          return transactions.filter(t => 
+              t.date.includes(`${year}`)
+          );
+      
+      default:
+          return transactions;
+  }
+}
+
+function getPeriodLabel(period) {
+  switch (period) {
+      case 'weekly':
+          return 'Weekly';
+      case 'season':
+          return 'Seasonal';
+      case 'year':
+          return 'Annual';
+      default:
+          return 'Weekly';
+  }
+}
+
+function updateTransactionDetails(transactions) {
+  const incomeDetails = document.getElementById('weeklyIncomeDetails');
+  const expenseDetails = document.getElementById('weeklyExpensesDetails');
+  
+  const incomeTransactions = transactions.filter(t => t.type === 'Income');
+  const expenseTransactions = transactions.filter(t => t.type === 'Expense');
+
+  incomeDetails.innerHTML = createTransactionList(incomeTransactions);
+  expenseDetails.innerHTML = createTransactionList(expenseTransactions);
+}
+
+function createTransactionList(transactions) {
+    return transactions.map(t => `
+        <div>
+            <span>${t.description}</span>
+            <span class="${t.type === 'Income' ? 'transaction-income' : 'transaction-expense'}">
+                €${formatNumber(Math.abs(t.amount))}
+            </span>
+        </div>
+    `).join('');
+}
+
+function calculateWineValueByType(type, totalValue) {
+  return inventoryInstance.items
+      .filter(item => item.state === type)
+      .reduce((sum, item) => {
+          const basePrice = calculateWinePrice(item.quality, item);
+          return sum + (type === 'Bottles' ? basePrice * item.amount : basePrice * 0.25 * item.amount);
+      }, 0);
+}
+
 export function addTransaction(type, description, amount) {
-  const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  const date = `Week ${localStorage.getItem('week')}, ${localStorage.getItem('season')}, ${localStorage.getItem('year')}`;
+  const transactions = getTransactions();
+  const { week, season, year } = getGameState();
+  const date = `Week ${week}, ${season}, ${year}`;
 
   // Add new transaction
   transactions.push({ date, type, description, amount });
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-
-  // Update company money
-  const currentMoney = parseInt(localStorage.getItem('money'), 10) || 0;
-  localStorage.setItem('money', currentMoney + amount);
+  storeTransactions(transactions);
+  updateMoney(amount);
 
   // Update UI and save
   renderCompanyInfo();
   saveCompanyInfo();
 }
 
-/**
- * Processes recurring transactions based on current week
- * @param {number} currentWeek - Current game week
- */
+
 export function processRecurringTransactions(currentWeek) {
-  const recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
+  const recurringTransactions = getRecurringTransactions();
 
   recurringTransactions.forEach(transaction => {
     if (currentWeek >= transaction.nextDueWeek) {
@@ -152,34 +261,14 @@ export function processRecurringTransactions(currentWeek) {
     }
   });
 
-  localStorage.setItem('recurringTransactions', JSON.stringify(recurringTransactions));
+  updateRecurringTransactions(recurringTransactions);
 }
 
-/**
- * Adds or updates a recurring transaction
- * @param {string} type - Transaction type
- * @param {string} description - Transaction description
- * @param {number} amount - Transaction amount
- * @param {number} frequencyInWeeks - Frequency of recurrence
- */
+
 export function addRecurringTransaction(type, description, amount, frequencyInWeeks) {
-  const recurringTransactions = JSON.parse(localStorage.getItem('recurringTransactions')) || [];
-  const currentWeek = parseInt(localStorage.getItem('week'), 10) || 1;
-  const nextDueWeek = currentWeek + frequencyInWeeks;
+  const recurringTransactions = getRecurringTransactions();
+  const { week } = getGameState();
+  const nextDueWeek = week + frequencyInWeeks;
 
   // Check if transaction already exists
-  const existingIndex = recurringTransactions.findIndex(t => 
-    t.type === type && t.description === description);
-
-  if (existingIndex !== -1) {
-    recurringTransactions[existingIndex] = { 
-      type, description, amount, frequencyInWeeks, nextDueWeek 
-    };
-  } else {
-    recurringTransactions.push({ 
-      type, description, amount, frequencyInWeeks, nextDueWeek 
-    });
-  }
-
-  localStorage.setItem('recurringTransactions', JSON.stringify(recurringTransactions));
-}
+  const existingIndex = recurringTransactions.findIndex(t =>     t.type === type && t.description === description);  if (existingIndex !== -1) {    recurringTransactions[existingIndex] = {       type, description, amount, frequencyInWeeks, nextDueWeek     };  } else {    recurringTransactions.push({       type, description, amount, frequencyInWeeks, nextDueWeek     });  }  updateRecurringTransactions(recurringTransactions);}

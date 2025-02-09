@@ -1,6 +1,6 @@
 import { createNewStaff, setupStaffWagesRecurringTransaction } from '../staff.js';
 import { getFlagIconHTML, skillLevels, getSkillLevelInfo, formatNumber, getColorClass } from '../utils.js';
-import { saveStaff, loadStaff } from '../database/adminFunctions.js';
+import { saveStaff, loadStaff } from '../database/initiation.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
 import taskManager from '../taskManager.js';  // Changed this line - removed TaskType

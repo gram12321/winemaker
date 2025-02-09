@@ -1,4 +1,4 @@
-import { storeCompanyName, checkCompanyExists, loadExistingCompanyData } from '../database/adminFunctions.js';
+import { storeCompanyName, checkCompanyExists, loadExistingCompanyData } from '../database/initiation.js';
 import { getFlagIconHTML } from '../utils.js';
 import { generateFarmlandPreview } from '../farmland.js';
 

@@ -18,10 +18,18 @@ function createFinanceOverlayHTML() {
         <div class="mainview-overlay-content finance-container">
             <h1 class="mb-4">Finance Management</h1>
             
-            <div class="btn-group mb-4">
-                <button class="btn btn-outline-primary active" data-view="income-balance">Income/Balance</button>
-                <button class="btn btn-outline-primary" data-view="cash-flow">Cash Flow</button>
-                <button class="btn btn-outline-primary" data-view="research-upgrades">Research and Upgrades</button>
+            <div class="d-flex flex-column">
+                <div class="btn-group mb-4">
+                    <button class="btn btn-outline-primary active" data-view="income-balance">Income/Balance</button>
+                    <button class="btn btn-outline-primary" data-view="cash-flow">Cash Flow</button>
+                    <button class="btn btn-outline-primary" data-view="research-upgrades">Research and Upgrades</button>
+                </div>
+
+                <div id="period-selector" class="btn-group mb-4" style="display: none;">
+                    <button class="btn btn-outline-primary active" data-period="weekly">Weekly</button>
+                    <button class="btn btn-outline-primary" data-period="season">Season</button>
+                    <button class="btn btn-outline-primary" data-period="year">Year</button>
+                </div>
             </div>
             
             <div class="finance-sections">
@@ -31,17 +39,42 @@ function createFinanceOverlayHTML() {
                         <div class="col-md-6">
                             <div class="finance-section income-statement">
                                 <h2 class="h4">Income Statement</h2>
-                                <div class="stat-card">
-                                    <div class="stat-label">Weekly Income</div>
-                                    <div id="weekly-income" class="stat-value transaction-income">€0</div>
+                                <div class="stat-card collapsible">
+                                    <div class="stat-header" data-bs-toggle="collapse" data-bs-target="#weeklyIncomeDetails">
+                                        <div class="stat-label">Weekly Income</div>
+                                        <div id="weekly-income" class="stat-value transaction-income">€0</div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="weeklyIncomeDetails" class="collapse stat-details">
+                                        <!-- Details will be populated by JS -->
+                                    </div>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Weekly Expenses</div>
-                                    <div id="weekly-expenses" class="stat-value transaction-expense">€0</div>
+                                <div class="stat-card collapsible">
+                                    <div class="stat-header" data-bs-toggle="collapse" data-bs-target="#weeklyExpensesDetails">
+                                        <div class="stat-label">Weekly Expenses</div>
+                                        <div id="weekly-expenses" class="stat-value transaction-expense">€0</div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="weeklyExpensesDetails" class="collapse stat-details">
+                                        <!-- Details will be populated by JS -->
+                                    </div>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Net Income</div>
-                                    <div id="net-income" class="stat-value">€0</div>
+                                <div class="stat-card collapsible">
+                                    <div class="stat-header" data-bs-toggle="collapse" data-bs-target="#netIncomeDetails">
+                                        <div class="stat-label">Net Income</div>
+                                        <div id="net-income" class="stat-value">€0</div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="netIncomeDetails" class="collapse stat-details">
+                                        <div>
+                                            <span>Weekly Income</span>
+                                            <span id="net-income-weekly" class="transaction-income">€0</span>
+                                        </div>
+                                        <div>
+                                            <span>Weekly Expenses</span>
+                                            <span id="net-income-expenses" class="transaction-expense">€0</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -49,21 +82,61 @@ function createFinanceOverlayHTML() {
                         <div class="col-md-6">
                             <div class="finance-section balance-sheet">
                                 <h2 class="h4">Balance Sheet</h2>
-                                <div class="stat-card">
-                                    <div class="stat-label">Total Assets</div>
-                                    <div id="total-assets" class="stat-value">€0</div>
+                                <div class="stat-card collapsible">
+                                    <div class="stat-header" data-bs-toggle="collapse" data-bs-target="#totalAssetsDetails">
+                                        <div class="stat-label">Total Assets</div>
+                                        <div id="total-assets" class="stat-value transaction-income">€0</div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="totalAssetsDetails" class="collapse stat-details">
+                                        <div>
+                                            <span>Cash</span>
+                                            <span id="total-assets-cash" class="transaction-income">€0</span>
+                                        </div>
+                                        <div>
+                                            <span>Fixed Assets</span>
+                                            <span id="total-assets-fixed" class="transaction-income">€0</span>
+                                        </div>
+                                        <div>
+                                            <span>Current Assets</span>
+                                            <span id="total-assets-current" class="transaction-income">€0</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-label">Cash</div>
-                                    <div id="cash-balance" class="stat-value">€0</div>
+                                    <div class="stat-header" data-bs-toggle="collapse" data-bs-target="#cashDetails">
+                                        <div class="stat-label">Cash</div>
+                                        <div id="cash-balance" class="stat-value transaction-income">€0</div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="cashDetails" class="collapse stat-details">
+                                        <div>
+                                            <span>Available Cash</span>
+                                            <span id="cash-available" class="transaction-income">€0</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-label">Fixed Assets</div>
-                                    <div id="fixed-assets" class="stat-value">€0</div>
+                                    <div class="stat-header" data-bs-toggle="collapse" data-bs-target="#fixedAssetsDetails">
+                                        <div class="stat-label">Fixed Assets</div>
+                                        <div id="fixed-assets" class="stat-value transaction-income">€0</div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="fixedAssetsDetails" class="collapse stat-details">
+                                        <div>Buildings: <span id="buildings-value">€0</span></div>
+                                        <div>Farmland: <span id="farmland-value">€0</span></div>
+                                    </div>
                                 </div>
                                 <div class="stat-card">
-                                    <div class="stat-label">Current Assets (Wine)</div>
-                                    <div id="current-assets" class="stat-value">€0</div>
+                                    <div class="stat-header" data-bs-toggle="collapse" data-bs-target="#currentAssetsDetails">
+                                        <div class="stat-label">Current Assets (Wine)</div>
+                                        <div id="current-assets" class="stat-value transaction-income">€0</div>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                    <div id="currentAssetsDetails" class="collapse stat-details">
+                                        <div>Bottles: <span id="bottles-value">€0</span></div>
+                                        <div>Grapes: <span id="grapes-value">€0</span></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -173,29 +246,56 @@ export function updateUpgradesList() {
 }
 
 function setupFinanceEventListeners(overlay) {
-    const btnGroup = overlay.querySelector('.btn-group');
-    btnGroup.addEventListener('click', (e) => {
-        if (!e.target.matches('button')) return;
-        
-        // Update active button
-        btnGroup.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-        e.target.classList.add('active');
+    const btnGroup = overlay.querySelector('.btn-group:first-child');
+    const periodSelector = overlay.querySelector('#period-selector');
+    
+    // Show period selector by default since income-balance is the default tab
+    if (periodSelector) {
+        periodSelector.style.display = 'flex';
+    }
 
-        // Show/hide sections based on selected view
-        const view = e.target.dataset.view;
-        const sections = overlay.querySelectorAll('.finance-section');
-        sections.forEach(section => {
-            section.style.display = section.id.startsWith(view) ? 'block' : 'none';
+    if (btnGroup) {
+        btnGroup.addEventListener('click', (e) => {
+            if (!e.target.matches('button')) return;
+            
+            btnGroup.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            const view = e.target.dataset.view;
+            const sections = overlay.querySelectorAll('.finance-section');
+            sections.forEach(section => {
+                section.style.display = section.id.startsWith(view) ? 'block' : 'none';
+            });
+
+            // Show/hide period selector based on view
+            if (periodSelector) {
+                periodSelector.style.display = view === 'income-balance' ? 'flex' : 'none';
+            }
+
+            if (view === 'income-balance') {
+                const currentPeriod = periodSelector?.querySelector('.active')?.dataset.period || 'weekly';
+                updateIncomeStatement(currentPeriod);
+                const incomeBalanceSection = overlay.querySelector('#income-balance-section');
+                if (incomeBalanceSection) {
+                    incomeBalanceSection.querySelectorAll('.finance-section').forEach(el => el.style.display = 'block');
+                }
+            }
         });
+    }
 
-        // Update income statement when switching back to income/balance
-        if (view === 'income-balance') {
-            updateIncomeStatement();
-            // Ensure all child elements are displayed
-            const incomeBalanceSection = overlay.querySelector('#income-balance-section');
-            incomeBalanceSection.querySelectorAll('.finance-section').forEach(el => el.style.display = 'block');
-        }
-    });
+    // Time period selector - Use better selector
+    const timePeriodSelector = overlay.querySelector('.btn-group:nth-child(2)');
+    if (timePeriodSelector) {
+        timePeriodSelector.addEventListener('click', (e) => {
+            if (!e.target.matches('button')) return;
+            
+            timePeriodSelector.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+
+            const period = e.target.dataset.period;
+            updateIncomeStatement(period);
+        });
+    }
 
     // Add event listeners for starting upgrades
     const upgradeSection = overlay.querySelector('#research-upgrades-section');
@@ -225,6 +325,6 @@ function setupFinanceEventListeners(overlay) {
     });
 
     loadCashFlow();
-    updateIncomeStatement();
+    updateIncomeStatement('weekly'); // Pass default period
 }
 

@@ -1,9 +1,10 @@
 import { italianMaleNames, frenchFemaleNames, spanishFemaleNames, usFemaleNames, germanFemaleNames, italianFemaleNames, frenchMaleNames, spanishMaleNames, usMaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry  } from './names.js'; // Adjust import path if necessary
 import { getFlagIconHTML, getSkillLevelInfo } from './utils.js'; // Import the getFlagIcon function and getSkillLevelInfo
-import { loadStaff, loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
+import { loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { addRecurringTransaction } from './finance.js'; // Assume you have addRecurringTransaction implemented
 import { showStaffOverlay } from './overlays/showstaffoverlay.js'; // Import the new staff overlay
 import { specializedRoles } from './overlays/hireStaffOptionsOverlay.js'; // Keep this import
+import { loadStaff } from './database/initiation.js';
 
 // Remove the duplicate declaration and just export the imported specializedRoles
 export { specializedRoles };

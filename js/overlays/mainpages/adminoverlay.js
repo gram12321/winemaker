@@ -1,4 +1,5 @@
-import { clearLocalStorage, clearFirestore, saveCompanyInfo } from '/js/database/adminFunctions.js'; // Import functions from adminFunctions.js
+
+import { clearFirestore, saveCompanyInfo, clearLocalStorage } from '/js/database/initiation.js'; 
 
 export function showAdminOverlay() {
     // Check if an instance of the overlay already exists and remove it

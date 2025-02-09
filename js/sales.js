@@ -66,17 +66,23 @@ Landvalue is aprox 41% of price as it is in both normalized value (1/3) and fiel
 8.3% (through field prestige: 25% of 33.3%)
 Total impact: approximately 41.6% of the final wine price */
 
+export function calculateBaseWinePrice(quality, landValue, prestige) {
+    // Normalize our inputs
+    const normalizedLandValue = normalizeLandValue(landValue);
+    
+    // Calculate base price exactly as before:
+    // Average of three factors, each multiplied by 100
+    // This gives us the same 1-100€ range as before
+    const basePrice = (quality * 100 + normalizedLandValue * 100 + prestige * 100) / 3;
+    return basePrice;
+}
+
 export function calculateWinePrice(quality, wine) {
-    const baseValue = 1; // Base value for wine pricing
     const farmlands = getFarmlands();
-    // Find the farmland that produced this wine
     const farmland = farmlands.find(field => field.name === wine.fieldName);
-
     if (!farmland) return 0;
-
-    const normalizedLandValue = normalizeLandValue(farmland.landvalue);
-    const wineValueModifier = (quality * 100 + normalizedLandValue * 100 + wine.fieldPrestige * 100) / 3;
-    return baseValue * wineValueModifier;
+    
+    return calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige);
 }
 
 // Generate a random wine order based on available inventory and company prestige

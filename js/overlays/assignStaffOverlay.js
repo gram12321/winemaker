@@ -1,9 +1,10 @@
 import { getFlagIconHTML } from '../utils.js';
-import { loadStaff, loadTeams, loadBuildings } from '../database/adminFunctions.js';
+import { loadBuildings } from '../database/adminFunctions.js';
 import { Building, Tool } from '../buildings.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { updateAllDisplays } from '../displayManager.js';
+import { loadTeams, loadStaff } from '../database/initiation.js';
 
 export function showAssignStaffOverlay(task) {
     const buildings = loadBuildings();
@@ -346,13 +347,12 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
         }
 
         if (isIndividual) {
-            // For individual tools, let the quantity selector handle the logic
-            const quantityInput = checkbox.closest('.tool-item').querySelector('.tool-quantity');
-            if (checkbox.checked) {
-                quantityInput.disabled = false;
-            } else {
-                quantityInput.value = '0';
-                quantityInput.disabled = true;
+            const quantityInput = checkbox.closest('.tool-item')?.querySelector('.tool-quantity');
+            if (quantityInput) {  // Only modify if element exists
+                quantityInput.disabled = !checkbox.checked;
+                if (!checkbox.checked) {
+                    quantityInput.value = '0';
+                }
             }
         } else {
             // For task tools, only uncheck other instances of the SAME tool type
@@ -488,10 +488,14 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
                 const tools = validTools.filter(t => t.name === toolName && (!t.assignedTaskId || t.assignedTaskId === task.id));
                 
                 if (checkbox.dataset.isIndividual === 'true') {
-                    const quantity = parseInt(checkbox.closest('.tool-item').querySelector('.tool-quantity').value);
+                    const quantityInput = checkbox.closest('.tool-item')?.querySelector('.tool-quantity');
+                    const quantity = quantityInput ? parseInt(quantityInput.value) || 0 : 0;
                     tools.slice(0, quantity).forEach(tool => selectedTools.push(tool.getStorageId()));
                 } else {
-                    selectedTools.push(tools[0].getStorageId());
+                    // For non-individual tools, just take the first available one
+                    if (tools.length > 0) {
+                        selectedTools.push(tools[0].getStorageId());
+                    }
                 }
             });
 
