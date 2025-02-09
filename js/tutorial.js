@@ -292,7 +292,14 @@ class TutorialManager {
   disableAllTutorials() {
     this.tutorialsEnabled = false;
     localStorage.setItem('tutorialsEnabled', 'false');
-    document.getElementById('tutorialOverlay').style.display = 'none';
+    const tutorialOverlay = document.getElementById('tutorialOverlay');
+    if (tutorialOverlay) {
+      tutorialOverlay.style.display = 'none';
+    }
+    import('./overlays/overlayUtils.js').then(({ hideOverlay }) => {
+      hideOverlay('#tutorialOverlay');
+      hideOverlay('.standard-overlay');
+    });
   }
 
   enableTutorials() {

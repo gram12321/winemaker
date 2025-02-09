@@ -127,7 +127,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('sidebarCollapsed'); 
   localStorage.removeItem('upgrades'); // Clear upgrades data
   localStorage.removeItem('seenTutorials'); // Clear tutorial progress
-  localStorage.removeItem('tutorialsEnabled'); // Clear tutorial settings
+  //localStorage.removeItem('tutorialsEnabled'); // Clear tutorial settings
   
   console.log("Local storage cleared.");
 }
