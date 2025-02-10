@@ -15,6 +15,18 @@ export function showStaffOverlay() {
     setupStaffOverlayEventListeners(overlay);
 }
 
+export function renderTeamMembersHTML() {
+    staffMembers = loadStaff(); // Refresh staff members
+    return staffMembers.map(staff => `
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="${staff.id}" id="staff-${staff.id}">
+            <label class="form-check-label" for="staff-${staff.id}">
+                ${staff.firstName} ${staff.lastName}
+            </label>
+        </div>
+    `).join('');
+}
+
 function createStaffOverlayHTML() {
     staffMembers = loadStaff(); // Load staff members once
 
@@ -65,14 +77,7 @@ function createStaffOverlayHTML() {
                             <div id="team-members-section">
                                 <h4>Team Members</h4>
                                 <div id="team-members" class="form-control" style="height: auto; max-height: 200px; overflow-y: auto;">
-                                    ${staffMembers.map(staff => `
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="${staff.id}" id="staff-${staff.id}">
-                                            <label class="form-check-label" for="staff-${staff.id}">
-                                                ${staff.firstName} ${staff.lastName}
-                                            </label>
-                                        </div>
-                                    `).join('')}
+                                    ${renderTeamMembersHTML()}
                                 </div>
                             </div>
                         </div>
@@ -110,7 +115,7 @@ function setupStaffOverlayEventListeners(overlay) {
     setupCreateTeamToggle(overlay); // Add this line
 }
 
-function setupTeamSections(overlay) {
+export function setupTeamSections(overlay) {
     const teams = loadTeams();
     const teamSection = overlay.querySelector('#team-section');
     const optionsContainer = teamSection.querySelector('.options-container');
@@ -405,6 +410,23 @@ function createNewTeam(overlay) {
         teamPicture: 'placeholder.webp',
         members: [] // Initialize with empty members array
     };
+}
+
+export function updateTeamMembersSection() {
+    const teamMembersDiv = document.querySelector('#team-members');
+    if (teamMembersDiv) {
+        teamMembersDiv.innerHTML = renderTeamMembersHTML();
+        // If there's an active team, refresh its checked state
+        const activeTeamCard = document.querySelector('.option-card.active');
+        if (activeTeamCard) {
+            const teamName = activeTeamCard.dataset.team;
+            const teams = loadTeams();
+            const selectedTeam = teams.find(t => t.name === teamName);
+            if (selectedTeam) {
+                updateTeamInfo(selectedTeam);
+            }
+        }
+    }
 }
 
 function setupSaveTeamButton(overlay) {

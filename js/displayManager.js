@@ -8,6 +8,7 @@ import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.j
 import { updateVineyardTable } from './overlays/mainpages/vineyardoverlay.js';
 import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
 import { loadCashFlow, updateIncomeStatement } from './finance.js';
+import { setupTeamSections, updateTeamMembersSection } from './overlays/mainpages/staffoverlay.js';
 import { updateUpgradesList } from './overlays/mainpages/financeoverlay.js';
 
 // Central function to update all displays
@@ -36,6 +37,12 @@ export function updateAllDisplays() {
         // Staff display
         if (typeof displayStaff === 'function' && document.getElementById('staff-entries')) {
             displayStaff();
+            // Update team sections if the overlay is open
+            const teamSection = document.querySelector('.mainview-overlay-content');
+            if (teamSection && typeof setupTeamSections === 'function') {
+                setupTeamSections(teamSection);
+                updateTeamMembersSection();
+            }
         }
 
         // Vineyard table
