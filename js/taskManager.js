@@ -40,7 +40,7 @@ class Task {
         this.progress = 0;
         this.initialState = initialState;
         this.assignedStaff = params.assignedStaff || [];
-        this.params.selectedTools = params.selectedTools || [];
+        this.params.selectedTools = Array.isArray(params.selectedTools) ? params.selectedTools : [];
     }
 }
 
@@ -191,7 +191,7 @@ class TaskManager {
         if (task) {
             // Release assigned tools
             const buildings = loadBuildings();
-            if (task.params.selectedTools) {
+            if (Array.isArray(task.params.selectedTools)) {
                 task.params.selectedTools.forEach(toolId => {
                     const tool = this.findToolById(buildings, toolId);
                     if (tool) {
@@ -426,10 +426,20 @@ class TaskManager {
                         target,
                         progress,
                         params,
-                        lastProgress: params.lastProgress || 0
+                        lastProgress: params.lastProgress || 0,
+                        increment: progress - (params.lastProgress || 0)
                     });
 
-                    const harvestedAmount = params.totalHarvest * (progress - (params.lastProgress || 0));
+                    // Initialize lastProgress to 0 if undefined
+                    if (params.lastProgress === undefined) {
+                        params.lastProgress = 0;
+                    }
+
+                    // Calculate harvested amount based on progress increment
+                    const progressIncrement = progress - params.lastProgress;
+                    const harvestedAmount = params.totalHarvest * progressIncrement;
+                    
+                    // Update lastProgress for next time
                     params.lastProgress = progress;
                     
                     // Calculate speedBonus from selected tools
@@ -437,10 +447,22 @@ class TaskManager {
                     const adjustedAmount = harvestedAmount * speedBonus;
 
                     console.log('[taskCallback:harvesting] Calculated amounts:', {
+                        progressIncrement,
                         harvestedAmount,
                         speedBonus,
-                        adjustedAmount
+                        adjustedAmount,
+                        selectedTools: params.selectedTools
                     });
+                    
+                    if (adjustedAmount <= 0) {
+                        console.warn('No harvest amount for this increment');
+                        return;
+                    }
+                    
+                    if (!params.selectedTools || params.selectedTools.length === 0) {
+                        console.error('No tools available for harvest');
+                        return;
+                    }
                     
                     performHarvest(target, target.id, params.selectedTools, adjustedAmount);
                 };
@@ -483,7 +505,7 @@ class TaskManager {
     }
 
     calculateToolSpeedBonus(toolIds) {
-        if (!toolIds || toolIds.length === 0) return 1.0;
+        if (!Array.isArray(toolIds) || toolIds.length === 0) return 1.0;
 
         const buildings = loadBuildings();
         const allTools = buildings.flatMap(buildingData => {

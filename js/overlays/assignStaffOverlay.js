@@ -481,8 +481,19 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
             const selectedStaff = Array.from(overlay.querySelectorAll('.staff-select:checked'))
                 .map(checkbox => parseInt(checkbox.value));
             
-            // Get selected tools with quantities
-            const selectedTools = [];
+            // Get selected tools with quantities, preserving existing tools that aren't being modified
+            const existingTools = Array.isArray(task.params.selectedTools) ? task.params.selectedTools : [];
+            const selectedTools = new Set(); // Use Set to ensure uniqueness
+            
+            // Add existing tools that are still valid
+            existingTools.forEach(toolId => {
+                const tool = validTools.find(t => t.getStorageId() === toolId);
+                if (tool && (!tool.assignedTaskId || tool.assignedTaskId === task.id)) {
+                    selectedTools.add(toolId);
+                }
+            });
+
+            // Add newly selected tools
             overlay.querySelectorAll('.tool-select:checked').forEach(checkbox => {
                 const toolName = checkbox.value;
                 const tools = validTools.filter(t => t.name === toolName && (!t.assignedTaskId || t.assignedTaskId === task.id));
@@ -490,18 +501,19 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
                 if (checkbox.dataset.isIndividual === 'true') {
                     const quantityInput = checkbox.closest('.tool-item')?.querySelector('.tool-quantity');
                     const quantity = quantityInput ? parseInt(quantityInput.value) || 0 : 0;
-                    tools.slice(0, quantity).forEach(tool => selectedTools.push(tool.getStorageId()));
+                    tools.slice(0, quantity).forEach(tool => selectedTools.add(tool.getStorageId()));
                 } else {
                     // For non-individual tools, just take the first available one
                     if (tools.length > 0) {
-                        selectedTools.push(tools[0].getStorageId());
+                        selectedTools.add(tools[0].getStorageId());
                     }
                 }
             });
 
-            task.params.selectedTools = selectedTools;
-            taskManager.assignStaffToTask(task.id, selectedStaff);
+            // Update task with both existing and new tools
+            task.params.selectedTools = Array.from(selectedTools);
             
+            taskManager.assignStaffToTask(task.id, selectedStaff);
             updateAllDisplays();
             hideOverlay(overlay);
         });

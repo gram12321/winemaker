@@ -260,7 +260,12 @@ export function saveTasks(tasks) {
     appliedWork: task.appliedWork, // Save appliedWork
     progress: task.progress,
     target: task.target,
-    params: task.params,
+    params: {
+      ...task.params,
+      selectedTools: Array.isArray(task.params.selectedTools) ? 
+        task.params.selectedTools.map(t => t.toString()) : 
+        []
+    },
     assignedStaff: task.assignedStaff // Include assigned staff
   }));
   localStorage.setItem('activeTasks', JSON.stringify(taskData));
@@ -272,6 +277,12 @@ export function loadTasks() {
   taskData.forEach(task => {
     tasks.set(task.id, {
       ...task,
+      params: {
+        ...task.params,
+        selectedTools: Array.isArray(task.params.selectedTools) ? 
+          task.params.selectedTools.map(t => t.toString()) : 
+          []
+      },
       callback: null
     });
   });
