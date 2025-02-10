@@ -88,14 +88,6 @@ function setupHarvestEventListeners(overlayContainer, farmland, farmlandId) {
 }
 
 function showWarningModal(farmland, farmlandId, selectedTools, totalAvailableCapacity, expectedYield, overlayContainer) {
-    console.log('[showWarningModal] Showing warning:', {
-        farmland,
-        farmlandId,
-        selectedTools,
-        totalAvailableCapacity,
-        expectedYield
-    });
-
     const warningModal = document.createElement('div');
     warningModal.className = 'modal fade modal-overlay';
     warningModal.style.display = 'block';
@@ -140,96 +132,41 @@ function showWarningModal(farmland, farmlandId, selectedTools, totalAvailableCap
 }
 
 export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmount) {
-    console.log('[performHarvest] Starting harvest:', {
-        farmland,
-        farmlandId,
-        selectedTools,
-        harvestedAmount,
-        selectedToolsType: typeof selectedTools,
-        isArray: Array.isArray(selectedTools)
-    });
+    if (!Array.isArray(selectedTools) || selectedTools.length === 0 || harvestedAmount <= 0) return false;
 
-    // Ensure selectedTools is always an array of strings
-    const toolsArray = Array.isArray(selectedTools) ? 
-        selectedTools.map(t => t.toString()) : 
-        [];
-    
-    if (harvestedAmount <= 0) {
-        console.warn('No harvest amount specified');
-        return false;
-    }
-
-    if (toolsArray.length === 0) {
-        console.warn('No tools selected for harvest');
-        return false;
-    }
-
-    // Get available capacity for all selected tools
+    const toolsArray = selectedTools.map(t => t.toString());
     const buildings = loadBuildings();
     let remainingHarvest = harvestedAmount;
     let totalStoredAmount = 0;
 
-    // Calculate quality factors once to ensure consistency
     const gameYear = parseInt(localStorage.getItem('year'), 10);
+    const currentFarmland = loadFarmlands().find(f => f.id === parseInt(farmlandId));
+    if (!currentFarmland) return false;
+
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
-    const farmlands = loadFarmlands();
-    const currentFarmland = farmlands.find(f => f.id === parseInt(farmlandId));
-    
-    if (!currentFarmland) {
-        console.error('Farmland not found:', farmlandId);
-        return false;
-    }
-
     const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
-
-    console.log('[performHarvest] Quality calculation:', {
-        quality,
-        annualQualityFactor: farmland.annualQualityFactor,
-        ripeness: currentFarmland.ripeness,
-        suitability
-    });
 
     // Process each tool in sequence
     for (const selectedTool of toolsArray) {
         if (remainingHarvest <= 0) break;
 
-        console.log('[performHarvest] Processing tool:', selectedTool);
-
-        // Find the actual tool object
         const tool = buildings.flatMap(b => 
             b.slots.flatMap(slot => 
                 slot.tools.find(t => t.getStorageId() === selectedTool)
             )
         ).find(t => t);
 
-        if (!tool) {
-            console.warn('Tool not found:', selectedTool);
-            continue;
-        }
+        if (!tool) continue;
 
-        // Calculate available capacity for this tool
         const currentAmount = inventoryInstance.items
             .filter(item => item.storage === selectedTool)
             .reduce((sum, item) => sum + item.amount, 0);
         const availableCapacity = tool.capacity - currentAmount;
 
-        console.log('[performHarvest] Tool capacity check:', {
-            tool: selectedTool,
-            capacity: tool.capacity,
-            currentAmount,
-            availableCapacity
-        });
+        if (availableCapacity <= 0) continue;
 
-        if (availableCapacity <= 0) {
-            console.warn('No capacity available in tool:', selectedTool);
-            continue;
-        }
-
-        // Calculate how much to store in this tool
         const amountForTool = Math.min(remainingHarvest, availableCapacity);
-
         try {
-            // Find matching grapes for this tool
             const matchingGrapes = inventoryInstance.items.find(item =>
                 item.storage === selectedTool && 
                 item.state === 'Grapes' &&
@@ -237,20 +174,12 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                 item.vintage === gameYear
             );
 
-            console.log('[performHarvest] Adding to inventory:', {
-                tool: selectedTool,
-                amount: amountForTool,
-                existing: matchingGrapes ? matchingGrapes.amount : 0
-            });
-
             if (matchingGrapes) {
-                // Combine with existing grapes
                 const totalAmount = matchingGrapes.amount + amountForTool;
                 const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
                 matchingGrapes.amount = totalAmount;
                 matchingGrapes.quality = newQuality.toFixed(2);
             } else {
-                // Create new inventory entry
                 inventoryInstance.addResource(
                     { name: farmland.plantedResourceName, naturalYield: 1 },
                     amountForTool,
@@ -265,21 +194,16 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
 
             totalStoredAmount += amountForTool;
             remainingHarvest -= amountForTool;
-            
             addConsoleMessage(`Harvested ${formatNumber(amountForTool)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name} to ${selectedTool}`);
         } catch (error) {
-            console.error('Error storing harvest in inventory:', error);
-            console.error(error.stack);
+            addConsoleMessage(`Error storing harvest: ${error.message}`);
         }
     }
 
     if (totalStoredAmount > 0) {
         saveInventory();
-        console.log('[performHarvest] Successfully stored total:', totalStoredAmount);
         return true;
     }
-
-    console.warn('[performHarvest] No grapes were stored');
     return false;
 }
 
@@ -304,26 +228,10 @@ function checkGrapeCompatibility(selectedTool, farmland) {
 
 // Update harvest function to use the helper
 export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
-    console.log('[harvest] Initiating harvest for field:', {
-        farmland,
-        currentRemainingYield: farmland.remainingYield,
-        requestedHarvest: totalHarvest,
-        selectedTools,
-        selectedToolsType: typeof selectedTools,
-        isArray: Array.isArray(selectedTools)
-    });
+    if (!Array.isArray(selectedTools) || selectedTools.length === 0) return false;
 
     try {
-        // Ensure selectedTools is always an array of strings
-        const toolsArray = Array.isArray(selectedTools) ? 
-            selectedTools.map(t => t.toString()) : 
-            [];
-        
-        if (toolsArray.length === 0) {
-            console.error('No tools provided for harvest');
-            return false;
-        }
-
+        const toolsArray = selectedTools.map(t => t.toString());
         const buildings = loadBuildings();
         const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
         
@@ -367,14 +275,6 @@ export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
                     totalHarvest * progressIncrement
                 );
                 
-                console.log('[harvest:callback] Processing harvest increment:', {
-                    progress,
-                    progressIncrement,
-                    harvestedAmount,
-                    remainingBefore: target.remainingYield,
-                    remainingAfter: target.remainingYield - harvestedAmount,
-                    tools: params.selectedTools
-                });
 
                 if (harvestedAmount > 0) {
                     params.lastProgress = progress;
@@ -399,8 +299,8 @@ export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
 
         return true;
     } catch (error) {
-        console.error('[harvest] Error during harvest initiation:', error);
-        throw error;
+        addConsoleMessage(`Failed to start harvest: ${error.message}`);
+        return false;
     }
 }
 

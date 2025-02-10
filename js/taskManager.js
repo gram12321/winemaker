@@ -422,49 +422,15 @@ class TaskManager {
                 };
             case 'harvesting':
                 return (target, progress, params) => {
-                    console.log('[taskCallback:harvesting] Processing harvest:', {
-                        target,
-                        progress,
-                        params,
-                        lastProgress: params.lastProgress || 0,
-                        increment: progress - (params.lastProgress || 0)
-                    });
-
-                    // Initialize lastProgress to 0 if undefined
-                    if (params.lastProgress === undefined) {
-                        params.lastProgress = 0;
-                    }
-
-                    // Calculate harvested amount based on progress increment
+                    if (!params.lastProgress) params.lastProgress = 0;
                     const progressIncrement = progress - params.lastProgress;
                     const harvestedAmount = params.totalHarvest * progressIncrement;
-                    
-                    // Update lastProgress for next time
                     params.lastProgress = progress;
-                    
-                    // Calculate speedBonus from selected tools
-                    const speedBonus = this.calculateToolSpeedBonus(params.selectedTools || []);
-                    const adjustedAmount = harvestedAmount * speedBonus;
 
-                    console.log('[taskCallback:harvesting] Calculated amounts:', {
-                        progressIncrement,
-                        harvestedAmount,
-                        speedBonus,
-                        adjustedAmount,
-                        selectedTools: params.selectedTools
-                    });
-                    
-                    if (adjustedAmount <= 0) {
-                        console.warn('No harvest amount for this increment');
-                        return;
+                    if (harvestedAmount > 0 && params.selectedTools?.length > 0) {
+                        const speedBonus = this.calculateToolSpeedBonus(params.selectedTools);
+                        performHarvest(target, target.id, params.selectedTools, harvestedAmount);
                     }
-                    
-                    if (!params.selectedTools || params.selectedTools.length === 0) {
-                        console.error('No tools available for harvest');
-                        return;
-                    }
-                    
-                    performHarvest(target, target.id, params.selectedTools, adjustedAmount);
                 };
             case 'crushing':
                 return (target, progress, params = {}) => {
@@ -535,4 +501,3 @@ class TaskManager {
 
 const taskManager = new TaskManager();
 export default taskManager;
-
