@@ -126,9 +126,9 @@ function createCrushingHTML() {
                     <div class="button-container">
                         <div class="selected-wrapper">
                             <span>Selected Storage: </span>
-                            <span id="selected-grapes">0 t</span>
+                            <span id="selected-grapes">0 L</span>
                             <span> / </span>
-                            <span id="selected-storage">0 l</span>
+                            <span id="selected-storage">0 L</span>
                         </div>
                         <div class="w-100">
                             <div class="progress">
@@ -179,7 +179,7 @@ function createGrapesTable() {
                     <tr>
                         <th>Select</th>
                         <th>Container</th>
-                        <th>Wine in Storage</th>
+                        <th>Grapes in Storage</th>
                         <th>Amount</th>
                         <th>Quality</th>
                     </tr>
@@ -199,7 +199,7 @@ function createMustStorageTable() {
                     <tr>
                         <th>Select</th>
                         <th>Container</th>
-                        <th>Wine in Storage</th>
+                        <th>Must in Storage</th>
                         <th>Capacity</th>
                         <th>Available Space</th>
                     </tr>
