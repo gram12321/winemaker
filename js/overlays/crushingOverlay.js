@@ -15,6 +15,30 @@ export function showCrushingOverlay() {
     return overlay;
 }
 
+function updateGrapeImage(resourceName) {
+    const grapeImage = document.querySelector('.crushing-input-image');
+    if (!grapeImage) return;
+
+    if (resourceName) {
+        // Try to load specific grape icon
+        const specificPath = `/assets/icon/grape/icon_${resourceName.toLowerCase()}.webp`;
+        // Test if specific image exists
+        fetch(specificPath)
+            .then(response => {
+                if (response.ok) {
+                    grapeImage.src = specificPath;
+                } else {
+                    grapeImage.src = '/assets/pic/grapes.webp'; // Fallback to generic
+                }
+            })
+            .catch(() => {
+                grapeImage.src = '/assets/pic/grapes.webp'; // Fallback to generic
+            });
+    } else {
+        grapeImage.src = '/assets/pic/grapes.webp'; // Default generic image
+    }
+}
+
 function createCrushingHTML() {
     return `
         <div class="overlay-section-wrapper">
@@ -23,7 +47,56 @@ function createCrushingHTML() {
                     <h3 class="h5 mb-0">Grape Crushing</h3>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
-                <div class="card-body"></div>
+                <div class="card-body">
+                    <div class="crushing-process">
+                        <!-- Left: Grapes Input -->
+                        <div class="crushing-stage">
+                            <img src="/assets/pic/grapes.webp" class="crushing-input-image" alt="Input Grapes">
+                            <div class="crushing-data">
+                                <div class="crushing-data-item">
+                                    <span class="crushing-data-label">Amount:</span>
+                                    <span id="grape-amount">0 kg</span>
+                                </div>
+                                <div class="crushing-data-item">
+                                    <span class="crushing-data-label">Quality:</span>
+                                    <span id="grape-quality">0%</span>
+                                </div>
+                                <div class="crushing-data-item">
+                                    <span class="crushing-data-label">Field:</span>
+                                    <span id="grape-field">None</span>
+                                </div>
+                            </div>
+                            <div class="crushing-arrow left-arrow"></div>
+                        </div>
+
+                        <!-- Center: Crushing Process -->
+                        <div class="crushing-stage center-stage">
+                            <img src="/assets/pic/crushing_dalle.webp" class="crushing-machine-image" alt="Crushing Machine">
+                            <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
+                        </div>
+
+                        <!-- Right: Must Output -->
+                        <div class="crushing-stage">
+                            <img src="/assets/pic/must.webp" class="crushing-output-image" alt="Output Must">
+                            <div class="crushing-data">
+                                <div class="crushing-data-item">
+                                    <span class="crushing-data-label">Expected:</span>
+                                    <span id="must-expected">0 L</span>
+                                </div>
+                                <div class="crushing-data-item">
+                                    <span class="crushing-data-label">Storage:</span>
+                                    <span id="must-storage">None</span>
+                                </div>
+                                <div class="crushing-data-item">
+                                    <span class="crushing-data-label">Available:</span>
+                                    <span id="must-available">0 L</span>
+                                </div>
+                            </div>
+                            <div class="crushing-arrow right-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Select Grapes to Crush</h3>
                 </div>
@@ -241,6 +314,8 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
             // Add event listener to update selected grapes
             row.querySelector('.grape-select').addEventListener('change', function() {
               const selectedGrapes = parseFloat(this.dataset.amount);
+              const resourceName = this.dataset.resource;
+              updateGrapeImage(resourceName);
               const grapesDisplay = document.getElementById('selected-grapes');
               grapesDisplay.textContent = selectedGrapes >= 1000 ? 
                 formatNumber(selectedGrapes / 1000, 2) + ' t' : 
@@ -506,5 +581,3 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
     }
     return success;
 }
-
-//removeOverlay function is replaced by hideOverlay from overlayUtils.js

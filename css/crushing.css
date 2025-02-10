@@ -1,0 +1,145 @@
+.crushing-process {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0.5rem;  /* Reduced from 1rem */
+    padding: 0.25rem;  /* Further reduce padding */
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.crushing-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;  /* Reduced from 1rem */
+    padding: 0.5rem;  /* Reduced from 1rem */
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.2);
+    min-height: 200px;  /* Reduced from 300px */
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.crushing-stage.center-stage {
+    width: 200px;  /* Reduced from 300px */
+}
+
+.crushing-input-image,
+.crushing-output-image {
+    width: 100px;  /* Reduced from 150px */
+    height: 100px;  /* Reduced from 150px */
+    object-fit: contain;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.crushing-machine-image {
+    width: 100%;
+    max-width: 150px;  /* Reduced from 250px */
+    margin: 0 auto;
+    display: block;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+.crushing-arrow {
+    position: absolute;
+    top: 50%;
+    width: 40px;  /* Reduced from 60px */
+    height: 3px;  /* Reduced from 4px */
+    background: linear-gradient(90deg,
+        transparent 0%,
+        #000000 20%,
+        #000000 80%,
+        transparent 100%
+    );
+    background-size: 80px 3px;  /* Adjusted for new width */
+    animation: flowEffect 2s linear infinite;
+    opacity: 1;  /* Changed from 0 to 1 to always show arrows */
+    transition: opacity 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.crushing-arrow.left-arrow {
+    right: -20px;  /* Adjusted for new width */
+}
+
+.crushing-arrow.right-arrow {
+    left: -20px;  /* Adjusted for new width */
+}
+
+.crushing-arrow::after {
+    content: '';
+    position: absolute;
+    top: -5px;  /* Adjusted for new size */
+    width: 12px;  /* Reduced from 20px */
+    height: 12px;  /* Reduced from 20px */
+    border-top: 3px solid #000000;  /* Reduced from 4px */
+    border-right: 3px solid #000000;  /* Reduced from 4px */
+}
+
+/* Update arrow directions */
+.crushing-arrow.left-arrow::after {
+    right: -2px;
+    transform: rotate(45deg);  /* Points right */
+}
+
+.crushing-arrow.right-arrow::after {
+    right: -2px;  /* Change from left: -2px to right: -2px */
+    transform: rotate(45deg);  /* Use same rotation as left arrow */
+}
+
+/* Add glowing effect on hover */
+.crushing-stage:hover ~ .crushing-stage .crushing-arrow,
+.crushing-stage:hover .crushing-arrow {
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        #000000 20%,
+        #000000 80%,
+        transparent 100%
+    );
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+}
+
+.crushing-stage:hover ~ .crushing-stage .crushing-arrow::after,
+.crushing-stage:hover .crushing-arrow::after {
+    box-shadow: 2px -2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.crushing-data {
+    font-size: 0.9em;
+    color: var(--color-text);
+}
+
+.crushing-data-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.crushing-data-label {
+    color: var(--color-accent);
+}
+
+/* Animation for the flowing effect */
+@keyframes flowEffect {
+    0% {
+        background-position: -60px 0;
+    }
+    100% {
+        background-position: 60px 0;
+    }
+}
+
+/* Sync hover effects between button and image */
+.crushing-stage.center-stage:hover .crushing-machine-image,
+.crushing-stage.center-stage:hover .crush-btn,
+.crush-btn:hover ~ .crushing-machine-image {
+    transform: scale(1.05);
+
+}
+
