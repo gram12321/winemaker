@@ -3,13 +3,13 @@ import { showFarmlandOverlay } from '../farmlandOverlay.js';
 import { showHarvestOverlay } from '../harvestOverlay.js';
 import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
 import { formatNumber, getColorClass } from '../../utils.js';
-import { loadFarmlands } from '../../database/adminFunctions.js';
+import { loadFarmlands, loadBuildings } from '../../database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
+import { inventoryInstance } from '../../resource.js';
+import taskManager from '../../taskManager.js';
 
-/**
- * Creates and displays the vineyard management overlay
- * Shows a table of all farmlands with their current status, crops, and actions
- */
+
+
 export function showVineyardOverlay() {
     const overlay = showMainViewOverlay(getVineyardOverlayHTML());
     
@@ -65,6 +65,51 @@ export function updateVineyardTable() {
     setupVineyardEventListeners(table);
 }
 
+export function canHarvest(farmland, selectedTool) {
+    // Basic checks first
+    if (farmland.status === 'No yield in first season' || taskManager.isTargetBusy(farmland)) {
+        return false;
+    }
+
+    // If no selectedTool is provided, just check if harvesting is possible
+    if (!selectedTool) {
+        return farmland.plantedResourceName && 
+               farmland.ripeness >= 0.10 && 
+               getRemainingYield(farmland) > 0;
+    }
+
+    // Tool-specific checks
+    const buildings = loadBuildings();
+    const tool = buildings.flatMap(b => 
+        b.slots.flatMap(slot => 
+            slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
+        )
+    ).find(t => t);
+
+    if (!tool) {
+        return { warning: true, availableCapacity: 0 };
+    }
+
+    // Check container capacity
+    const currentAmount = inventoryInstance.items
+        .filter(item => item.storage === selectedTool)
+        .reduce((sum, item) => sum + item.amount, 0);
+    const availableCapacity = tool.capacity - currentAmount;
+
+    // Check for mixing different grapes
+    const existingGrapes = inventoryInstance.items.find(item => 
+        item.storage === selectedTool && 
+        item.state === 'Grapes' &&
+        (item.resource.name !== farmland.plantedResourceName || 
+         parseInt(item.vintage) !== parseInt(localStorage.getItem('year')))
+    );
+
+    return {
+        warning: existingGrapes !== undefined || availableCapacity <= 0,
+        availableCapacity: availableCapacity > 0 ? availableCapacity : 0
+    };
+}
+
 function createVineyardTable() {
     const farmlands = loadFarmlands();
     const table = document.createElement('table');
@@ -87,9 +132,13 @@ function createVineyardTable() {
             ${farmlands.map(farmland => {
                 const totalYield = farmlandYield(farmland);
                 const remainingYield = getRemainingYield(farmland);
+                const isFarmlandBusy = taskManager.isTargetBusy(farmland);
+                
                 const canHarvest = farmland.plantedResourceName && 
                                  farmland.ripeness >= 0.10 && 
-                                 remainingYield > 0;
+                                 remainingYield > 0 &&
+                                 !isFarmlandBusy;
+
                 const formattedSize = farmland.acres < 10 ? farmland.acres.toFixed(2) : formatNumber(farmland.acres);
                 const ripenessColorClass = getColorClass(farmland.ripeness);
                 return `
@@ -110,7 +159,8 @@ function createVineyardTable() {
                         <td>
                             <button class="btn btn-alternative btn-sm harvest-btn" 
                                     data-farmland-id="${farmland.id}"
-                                    ${!canHarvest ? 'disabled' : ''}>
+                                    ${!canHarvest ? 'disabled' : ''}
+                                    title="${!canHarvest && isFarmlandBusy ? 'Field is busy with another task' : ''}">
                                 Harvest
                             </button>
                         </td>

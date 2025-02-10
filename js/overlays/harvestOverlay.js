@@ -1,7 +1,7 @@
 import { addConsoleMessage } from '../console.js';
-import { showVineyardOverlay } from './mainpages/vineyardoverlay.js';
+import { showVineyardOverlay, canHarvest } from './mainpages/vineyardoverlay.js';
 import { inventoryInstance, allResources } from '../resource.js';
-import { farmlandYield, canHarvest } from '../vineyard.js';
+import { farmlandYield } from '../farmland.js';
 import { formatNumber, getFlagIconHTML } from '../utils.js';
 import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
