@@ -59,7 +59,10 @@ function generateAssignStaffHTML(task, validTools) {
                 tool: tool,
                 count: 1,
                 instances: [tool],
-                isIndividual: tool.toolType === 'individual'
+                isIndividual: tool.toolType === 'individual',
+                selectedCount: task.params.selectedTools?.filter(id => 
+                    id.startsWith(tool.name)
+                ).length || 0
             };
         } else {
             acc[key].count++;
@@ -72,7 +75,7 @@ function generateAssignStaffHTML(task, validTools) {
         <div class="tools-section mb-3">
             <h5>Available Tools</h5>
             <div class="tool-list">
-                ${Object.values(groupedTools).map(({ tool, count, instances, isIndividual }) => {
+                ${Object.values(groupedTools).map(({ tool, count, instances, isIndividual, selectedCount }) => {
                     const isDisabled = instances.every(t => t.assignedTaskId && t.assignedTaskId !== task.id);
                     const availableCount = instances.filter(t => !t.assignedTaskId || t.assignedTaskId === task.id).length;
                     
@@ -82,6 +85,7 @@ function generateAssignStaffHTML(task, validTools) {
                                class="tool-select" 
                                value="${tool.name}"
                                ${isDisabled ? 'disabled' : ''}
+                               ${selectedCount > 0 ? 'checked' : ''}
                                data-is-individual="${isIndividual}">
                         <img src="../assets/icon/buildings/${tool.name.toLowerCase()}.png" 
                              alt="${tool.name}" 
@@ -95,7 +99,7 @@ function generateAssignStaffHTML(task, validTools) {
                                            class="tool-quantity" 
                                            min="0" 
                                            max="${availableCount}" 
-                                           value="0"
+                                           value="${selectedCount}"
                                            data-tool-name="${tool.name}">
                                 </div>
                             ` : ''}
@@ -485,20 +489,25 @@ function setupAssignStaffEventListeners(overlayContent, task, validTools) {
             const selectedTools = [];
             overlay.querySelectorAll('.tool-select:checked').forEach(checkbox => {
                 const toolName = checkbox.value;
-                const tools = validTools.filter(t => t.name === toolName && (!t.assignedTaskId || t.assignedTaskId === task.id));
+                const availableTools = validTools
+                    .filter(t => t.name === toolName && (!t.assignedTaskId || t.assignedTaskId === task.id))
+                    .sort((a, b) => a.instanceNumber - b.instanceNumber); // Sort by instance number for consistency
                 
                 if (checkbox.dataset.isIndividual === 'true') {
                     const quantityInput = checkbox.closest('.tool-item')?.querySelector('.tool-quantity');
-                    const quantity = quantityInput ? parseInt(quantityInput.value) || 0 : 0;
-                    tools.slice(0, quantity).forEach(tool => selectedTools.push(tool.getStorageId()));
+                    const quantity = parseInt(quantityInput?.value) || 0;
+                    availableTools.slice(0, quantity).forEach(tool => {
+                        selectedTools.push(tool.getStorageId());
+                    });
                 } else {
-                    // For non-individual tools, just take the first available one
-                    if (tools.length > 0) {
-                        selectedTools.push(tools[0].getStorageId());
+                    // For task tools, take the first available one
+                    if (availableTools.length > 0) {
+                        selectedTools.push(availableTools[0].getStorageId());
                     }
                 }
             });
 
+            // Update task with new selections
             task.params.selectedTools = selectedTools;
             taskManager.assignStaffToTask(task.id, selectedStaff);
             

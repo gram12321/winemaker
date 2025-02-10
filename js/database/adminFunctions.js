@@ -260,7 +260,11 @@ export function saveTasks(tasks) {
     appliedWork: task.appliedWork, // Save appliedWork
     progress: task.progress,
     target: task.target,
-    params: task.params,
+    params: {
+      ...task.params,
+      selectedTools: Array.isArray(task.params.selectedTools) ? 
+        task.params.selectedTools : []
+    },
     assignedStaff: task.assignedStaff // Include assigned staff
   }));
   localStorage.setItem('activeTasks', JSON.stringify(taskData));

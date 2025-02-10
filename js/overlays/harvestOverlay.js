@@ -87,11 +87,11 @@ function setupHarvestEventListeners(overlayContainer, farmland, farmlandId) {
     });
 }
 
-function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, expectedYield, overlayContainer) {
+function showWarningModal(farmland, farmlandId, selectedTools, totalAvailableCapacity, expectedYield, overlayContainer) {
     console.log('[showWarningModal] Showing warning:', {
         farmland,
         farmlandId,
-        selectedCheckboxes,
+        selectedTools,
         totalAvailableCapacity,
         expectedYield
     });
@@ -128,31 +128,12 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
     $(warningModal).modal('show');
 
     document.getElementById('confirmHarvest').addEventListener('click', () => {
-        let remainingCapacity = totalAvailableCapacity;
-        let success = true;
-
-        // Distribute harvest among containers, limited by available capacity
-        for (const checkbox of selectedCheckboxes) {
-            const selectedTool = checkbox.value;
-            const harvestCheck = canHarvest(farmland, selectedTool);
-            
-            // Only harvest up to the available capacity
-            const amountToHarvest = Math.min(remainingCapacity, harvestCheck.availableCapacity);
-            
-            if (amountToHarvest > 0) {
-                harvest(farmland, farmlandId, selectedTool, amountToHarvest);
-                remainingCapacity -= amountToHarvest;
-            }
-
-            // Stop if we've used all available capacity
-            if (remainingCapacity <= 0) break;
-        }
-
-        if (success) {
-            $(warningModal).modal('hide');
-            warningModal.remove();
-            removeOverlay(overlayContainer); 
-        }
+        // Start single harvest task with all selected tools and limited harvest amount
+        harvest(farmland, farmlandId, selectedTools, totalAvailableCapacity);
+        
+        $(warningModal).modal('hide');
+        warningModal.remove();
+        removeOverlay(overlayContainer);
     });
 
     warningModal.addEventListener('hidden.bs.modal', () => {
@@ -160,79 +141,89 @@ function showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailab
     });
 }
 
-export function performHarvest(farmland, farmlandId, selectedTool, harvestedAmount) {
+export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmount) {
     console.log('[performHarvest] Starting harvest:', {
         farmland,
         farmlandId,
-        selectedTool,
+        selectedTools,
         harvestedAmount
     });
 
     if (harvestedAmount <= 0) return false;
 
-    // Check container capacity before processing
-    const tool = loadBuildings().flatMap(b => 
-        b.slots.flatMap(slot => 
-            slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
-        )
-    ).find(t => t);
+    // Fix: Ensure selectedTools is an array
+    const toolsArray = Array.isArray(selectedTools) ? selectedTools : [selectedTools];
 
-    // Calculate available capacity
-    const currentAmount = inventoryInstance.items
-        .filter(item => item.storage === selectedTool)
-        .reduce((sum, item) => sum + item.amount, 0);
-    const availableCapacity = tool.capacity - currentAmount;
+    // Process harvest sequentially through available tools
+    let remainingHarvest = harvestedAmount;
+    let success = false;
 
-    // Limit harvest amount to available capacity
-    const limitedHarvestAmount = Math.min(harvestedAmount, availableCapacity);
+    for (const selectedTool of toolsArray) {
+        // Find the tool
+        const tool = loadBuildings().flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
+            )
+        ).find(t => t);
 
-    if (limitedHarvestAmount <= 0) {
-        addConsoleMessage(`No capacity available in ${selectedTool}`);
-        return false;
-    }
+        if (!tool) {
+            console.error(`Tool not found: ${selectedTool}`);
+            continue;
+        }
 
-    const gameYear = parseInt(localStorage.getItem('year'), 10);
-    const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
-    const farmlands = loadFarmlands();
-    const currentFarmland = farmlands.find(f => f.id === parseInt(farmlandId));
+        // Calculate available capacity for current tool
+        const currentAmount = inventoryInstance.items
+            .filter(item => item.storage === selectedTool)
+            .reduce((sum, item) => sum + item.amount, 0);
+        const availableCapacity = tool.capacity - currentAmount;
 
-    if (!currentFarmland) {
-        console.error(`Farmland with ID ${farmlandId} not found in ${farmlands.length} farmlands.`);
-        return;
-    }
+        // Calculate how much to put in this tool
+        const amountForTool = Math.min(remainingHarvest, availableCapacity);
+        
+        if (amountForTool <= 0) continue;
 
-    const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
+        // Add to inventory
+        const gameYear = parseInt(localStorage.getItem('year'), 10);
+        const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
+        const quality = ((farmland.annualQualityFactor + farmland.ripeness + suitability) / 3).toFixed(2);
 
-    // Find matching grapes to combine with (same type, vintage, and storage)
-    const matchingGrapes = inventoryInstance.items.find(item =>
-        item.storage === selectedTool && 
-        item.state === 'Grapes' &&
-        item.resource.name === farmland.plantedResourceName &&
-        item.vintage === gameYear
-    );
-
-    if (matchingGrapes) {
-        // Combine with existing grapes
-        const totalAmount = matchingGrapes.amount + limitedHarvestAmount;
-        const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * limitedHarvestAmount)) / totalAmount;
-        matchingGrapes.amount = totalAmount;
-        matchingGrapes.quality = newQuality.toFixed(2);
-    } else {
-        // Create new inventory entry
-        inventoryInstance.addResource(
-            { name: farmland.plantedResourceName, naturalYield: 1 },
-            limitedHarvestAmount,
-            'Grapes',
-            gameYear,
-            quality,
-            farmland.name,
-            farmland.farmlandPrestige,
-            selectedTool
+        const matchingGrapes = inventoryInstance.items.find(item =>
+            item.storage === selectedTool && 
+            item.state === 'Grapes' &&
+            item.resource.name === farmland.plantedResourceName &&
+            item.vintage === gameYear
         );
+
+        if (matchingGrapes) {
+            const totalAmount = matchingGrapes.amount + amountForTool;
+            const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
+            matchingGrapes.amount = totalAmount;
+            matchingGrapes.quality = newQuality.toFixed(2);
+        } else {
+            inventoryInstance.addResource(
+                { name: farmland.plantedResourceName, naturalYield: 1 },
+                amountForTool,
+                'Grapes',
+                gameYear,
+                quality,
+                farmland.name,
+                farmland.farmlandPrestige,
+                selectedTool
+            );
+        }
+
+        remainingHarvest -= amountForTool;
+        success = true;
+
+        addConsoleMessage(`Harvested ${formatNumber(amountForTool)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name} into ${selectedTool}`);
+        
+        if (remainingHarvest <= 0) break;
     }
 
-    saveInventory();
-    addConsoleMessage(`Harvested ${formatNumber(limitedHarvestAmount)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name}`);
+    if (success) {
+        saveInventory();
+    }
+    return success;
 }
 
 // New helper function for grape compatibility check
@@ -255,34 +246,18 @@ function checkGrapeCompatibility(selectedTool, farmland) {
 }
 
 // Update harvest function to use the helper
-export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
+export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
     console.log('[harvest] Initiating harvest for field:', {
         farmland,
         currentRemainingYield: farmland.remainingYield,
-        requestedHarvest: totalHarvest
+        requestedHarvest: totalHarvest,
+        selectedTools
     });
 
     try {
         const buildings = loadBuildings();
         const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
         
-        const tool = buildings.flatMap(b => 
-            b.slots.flatMap(slot => 
-                slot.tools.find(t => `${t.name} #${t.instanceNumber}` === selectedTool)
-            )
-        ).find(t => t);
-
-        if (!tool) {
-            console.error('Tool not found:', selectedTool);
-            return false;
-        }
-
-        const compatibility = checkGrapeCompatibility(selectedTool, farmland);
-        if (!compatibility.compatible) {
-            addConsoleMessage(compatibility.message);
-            return false;
-        }
-
         const taskName = `Harvesting`;
         const densityPenalty = Math.max(0, (farmland.density - 1000) / 1000) * 0.05;
         const fragilePenalty = (1 - resourceObj.fragile) * 0.5; 
@@ -317,7 +292,34 @@ export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
                 params.lastProgress = progress;
                 target.remainingYield -= harvestedAmount;
                 
-                performHarvest(target, farmlandId, params.selectedTool, harvestedAmount);
+                // Process harvest for current active tool
+                if (harvestedAmount > 0) {
+                    let remainingHarvest = harvestedAmount;
+                    let currentToolIndex = params.currentToolIndex || 0;
+
+                    while (remainingHarvest > 0 && currentToolIndex < params.selectedTools.length) {
+                        const currentTool = params.selectedTools[currentToolIndex];
+                        const harvestCheck = canHarvest(target, currentTool);
+                        
+                        if (!harvestCheck) {
+                            currentToolIndex++;
+                            continue;
+                        }
+
+                        const amountForTool = Math.min(remainingHarvest, harvestCheck.availableCapacity);
+                        if (amountForTool > 0) {
+                            // Fix: Pass the current tool as a single value, not an array
+                            if (performHarvest(target, farmlandId, currentTool, amountForTool)) {
+                                remainingHarvest -= amountForTool;
+                            }
+                        }
+
+                        if (remainingHarvest > 0) {
+                            currentToolIndex++;
+                        }
+                    }
+                    params.currentToolIndex = currentToolIndex;
+                }
                 
                 updateFarmland(farmlandId, { 
                     remainingYield: target.remainingYield,
@@ -327,9 +329,10 @@ export function harvest(farmland, farmlandId, selectedTool, totalHarvest) {
             },
             farmland,
             { 
-                selectedTool, 
+                selectedTools, 
                 totalHarvest, 
-                lastProgress: 0
+                lastProgress: 0,
+                currentToolIndex: 0
             }
         );
 
@@ -409,10 +412,10 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
     }
 
     const expectedYield = farmlandYield(farmland);
+    const selectedTools = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
     
     // Check compatibility for all selected containers first
-    for (const checkbox of selectedCheckboxes) {
-        const selectedTool = checkbox.value;
+    for (const selectedTool of selectedTools) {
         const compatibility = checkGrapeCompatibility(selectedTool, farmland);
         if (!compatibility.compatible) {
             addConsoleMessage(compatibility.message);
@@ -420,40 +423,23 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
         }
     }
 
-    // Then check capacity
+    // Calculate total available capacity across all containers
     let totalAvailableCapacity = 0;
-    let harvestWarning = false;
-
-    selectedCheckboxes.forEach(checkbox => {
-        const selectedTool = checkbox.value;
+    selectedTools.forEach(selectedTool => {
         const harvestCheck = canHarvest(farmland, selectedTool);
         totalAvailableCapacity += harvestCheck.availableCapacity;
-        if (harvestCheck.warning) {
-            harvestWarning = true;
-        }
     });
 
-    // Get remaining yield instead of total yield for capacity check
     const remainingToHarvest = farmland.remainingYield === null ? 
         farmlandYield(farmland) : 
         farmland.remainingYield;
 
-    // Show warning only if capacity is insufficient for remaining yield
+    // Show warning if total capacity is insufficient
     if (totalAvailableCapacity < remainingToHarvest) {
-        showWarningModal(farmland, farmlandId, selectedCheckboxes, totalAvailableCapacity, remainingToHarvest, overlayContainer);
+        showWarningModal(farmland, farmlandId, selectedTools, totalAvailableCapacity, remainingToHarvest, overlayContainer);
     } else {
-        let remainingYield = remainingToHarvest;  // Use remaining yield here too
-        for (const checkbox of selectedCheckboxes) {
-            const selectedTool = checkbox.value;
-            const harvestCheck = canHarvest(farmland, selectedTool);
-            // Limit harvest amount to available capacity
-            const amountToHarvest = Math.min(remainingYield, harvestCheck.availableCapacity);
-            if (amountToHarvest > 0) {
-                harvest(farmland, farmlandId, selectedTool, amountToHarvest);
-            }
-            remainingYield -= amountToHarvest;
-            if (remainingYield <= 0) break;
-        }
+        // Start single harvest task with all selected tools
+        harvest(farmland, farmlandId, selectedTools, remainingToHarvest);
         removeOverlay(overlayContainer);
     }
 }
