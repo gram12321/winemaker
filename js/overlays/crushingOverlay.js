@@ -266,20 +266,25 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory, 
 }
 
 function updateStorageProgress() {
-  const checkboxes = document.querySelectorAll('input[name="must-storage"]:checked');
-  let totalStorage = 0;
-  checkboxes.forEach(checkbox => {
-    totalStorage += parseFloat(checkbox.dataset.available);
-  });
+    const checkboxes = document.querySelectorAll('input[name="must-storage"]:checked');
+    let totalStorage = 0;
+    checkboxes.forEach(checkbox => {
+        totalStorage += parseFloat(checkbox.dataset.available);
+    });
 
-  const storageDisplay = document.getElementById('selected-storage');
-  storageDisplay.textContent = `${formatNumber(totalStorage)} l`;
+    const selectedGrapes = parseFloat(document.querySelector('.grape-select:checked')?.dataset.amount || 0);
+    const estimatedMust = calculateMustAmount(selectedGrapes, true);
 
-  const selectedGrapes = parseFloat(document.querySelector('.grape-select:checked')?.dataset.amount || 0);
-  const storageProgress = document.getElementById('selected-storage-progress');
-  const progressPercentage = Math.min((totalStorage / (selectedGrapes * 0.6)) * 100, 100);
-  storageProgress.style.width = `${progressPercentage}%`;
-  storageProgress.setAttribute('aria-valuenow', progressPercentage);
+    const storageDisplay = document.getElementById('selected-storage');
+    const grapesDisplay = document.getElementById('selected-grapes');
+    
+    storageDisplay.textContent = `${formatNumber(totalStorage)} L`;
+    grapesDisplay.textContent = `≈ ${formatNumber(estimatedMust)} L`;  // Added ≈ symbol
+
+    const progressPercentage = Math.min((totalStorage / estimatedMust) * 100, 100);
+    const storageProgress = document.getElementById('selected-storage-progress');
+    storageProgress.style.width = `${progressPercentage}%`;
+    storageProgress.setAttribute('aria-valuenow', progressPercentage);
 }
 
 function populateGrapesTable(overlayContainer, buildings, playerInventory) {
@@ -335,6 +340,17 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   });
 }
 
+function calculateMustAmount(grapeAmount, isEstimate = false) {
+    if (isEstimate) {
+        // For display purposes, return rounded estimate
+        return Math.round((grapeAmount * 0.6) / 10) * 10;
+    } else {
+        // For actual conversion, add small random variation (±2%)
+        const variation = 1 + (Math.random() * 0.04 - 0.02);
+        return grapeAmount * 0.6 * variation;
+    }
+}
+
 function updateCrushingData(selectedGrape, selectedStorage) {
     if (selectedGrape) {
         const amount = parseFloat(selectedGrape.dataset.amount);
@@ -352,9 +368,9 @@ function updateCrushingData(selectedGrape, selectedStorage) {
         document.getElementById('grape-info').textContent = `${resourceName}, ${vintage}`;
 
         const grapeAmount = parseFloat(selectedGrape.dataset.amount);
-        const expectedMust = grapeAmount * 0.6; // Use the conversion rate from crushing function
+        const estimatedMust = calculateMustAmount(grapeAmount, true); // Use rounded estimate
         document.getElementById('must-expected').textContent = 
-            `${formatNumber(expectedMust)} L`;
+            `≈ ${formatNumber(estimatedMust)} L`;  // Added ≈ symbol
 
         const selectedStorages = document.querySelectorAll('input[name="must-storage"]:checked');
         let totalStorage = 0;
@@ -471,7 +487,7 @@ function crushing(overlayContainer) {
         return false;
     }
 
-    const mustAmount = totalGrapes * 0.6;  // 60% of grapes become must
+    const mustAmount = calculateMustAmount(totalGrapes);
 
     if (mustAmount > totalAvailableSpace) {
         const warningModal = document.createElement('div');
