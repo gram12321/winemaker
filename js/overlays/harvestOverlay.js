@@ -1,4 +1,3 @@
-import { getBuildingTools } from '../buildings.js';
 import { addConsoleMessage } from '../console.js';
 import { showVineyardOverlay } from './mainpages/vineyardoverlay.js';
 import { inventoryInstance, allResources } from '../resource.js';
@@ -230,78 +229,68 @@ function checkGrapeCompatibility(selectedTool, farmland) {
 export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
     if (!Array.isArray(selectedTools) || selectedTools.length === 0) return false;
 
-    try {
-        const toolsArray = selectedTools.map(t => t.toString());
-        const buildings = loadBuildings();
-        const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
-        
-        // Check compatibility for all selected tools
-        for (const toolId of toolsArray) {
-            const compatibility = checkGrapeCompatibility(toolId, farmland);
-            if (!compatibility.compatible) {
-                addConsoleMessage(compatibility.message);
-                return false;
-            }
+    const toolsArray = selectedTools.map(t => t.toString());
+    const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
+    
+    // Check compatibility for all selected tools
+    for (const toolId of toolsArray) {
+        const compatibility = checkGrapeCompatibility(toolId, farmland);
+        if (!compatibility.compatible) {
+            addConsoleMessage(compatibility.message);
+            return false;
         }
+    }
 
-        const taskName = 'Harvesting';
-        const densityPenalty = Math.max(0, (farmland.density - 1000) / 1000) * 0.05;
-        const fragilePenalty = (1 - resourceObj.fragile) * 0.5;
-        const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
-        const medianAltitude = (minAltitude + maxAltitude) / 2;
-        const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
-        const altitudePenalty = altitudeDeviation * 0.5;
-        const totalWork = totalHarvest / 1000 * 25 * (1 + densityPenalty + altitudePenalty + fragilePenalty);
+    // Calculate work penalties
+    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+    const medianAltitude = (minAltitude + maxAltitude) / 2;
+    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
 
-        taskManager.addProgressiveTask(
-            taskName,
-            'field',
-            totalWork,
-            (target, progress, params) => {
-                // Initialize remaining yield if null
-                if (target.remainingYield === null) {
-                    target.remainingYield = farmlandYield(target);
-                }
+    const penalties = {
+        density: Math.max(0, (farmland.density - 1000) / 1000) * 0.05,
+        fragile: (1 - resourceObj.fragile) * 0.5,
+        altitude: altitudeDeviation * 0.5
+    };
+    
+    const totalWork = totalHarvest / 1000 * 25 * (1 + Object.values(penalties).reduce((a, b) => a + b, 0));
 
-                // Initialize lastProgress if undefined
-                if (params.lastProgress === undefined) {
-                    params.lastProgress = 0;
-                }
+    taskManager.addProgressiveTask(
+        'Harvesting',
+        'field',
+        totalWork,
+        (target, progress, params) => {
+            // These two checks are necessary because the values might be undefined when the task starts
+            target.remainingYield ??= farmlandYield(target);
+            params.lastProgress ??= 0;
 
-                // Calculate harvest amount based on progress increment
-                const progressIncrement = progress - params.lastProgress;
-                const harvestedAmount = Math.min(
-                    target.remainingYield,
-                    totalHarvest * progressIncrement
-                );
+            const progressIncrement = progress - params.lastProgress;
+            const harvestedAmount = Math.min(
+                target.remainingYield,
+                totalHarvest * progressIncrement
+            );
+
+            if (harvestedAmount > 0) {
+                params.lastProgress = progress;
+                target.remainingYield -= harvestedAmount;
                 
-
-                if (harvestedAmount > 0) {
-                    params.lastProgress = progress;
-                    target.remainingYield -= harvestedAmount;
-                    
-                    performHarvest(target, farmlandId, toolsArray, harvestedAmount);
-                    
+                if (performHarvest(target, farmlandId, toolsArray, harvestedAmount)) {
                     updateFarmland(farmlandId, {
                         remainingYield: target.remainingYield,
                         status: target.remainingYield <= 0 ? 'Harvested' : 'Partially Harvested',
                         ripeness: target.remainingYield <= 0 ? 0 : target.ripeness
                     });
                 }
-            },
-            farmland,
-            {
-                selectedTools: toolsArray, // Store as array of strings
-                totalHarvest,
-                lastProgress: 0
             }
-        );
+        },
+        farmland,
+        {
+            selectedTools: toolsArray,
+            totalHarvest,
+            lastProgress: 0
+        }
+    );
 
-        return true;
-    } catch (error) {
-        addConsoleMessage(`Failed to start harvest: ${error.message}`);
-        return false;
-    }
+    return true;
 }
 
 function populateStorageOptions(farmland) {
