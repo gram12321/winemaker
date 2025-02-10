@@ -42,65 +42,23 @@ function updateGrapeImage(resourceName) {
 function createCrushingHTML() {
     return `
         <div class="overlay-section-wrapper">
-            <section id="vineyard-section" class="overlay-section card mb-4">
+            <section id="grape-crushing-section" class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Grape Crushing</h3>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
                 <div class="card-body">
                     <div class="crushing-process">
-                        <!-- Left: Grapes Input -->
-                        <div class="crushing-stage">
-                            <img src="/assets/pic/grapes.webp" class="crushing-input-image" alt="Input Grapes">
-                            <div class="crushing-data">
-                                <div class="crushing-data-item">
-                                    <span class="crushing-data-label">Amount:</span>
-                                    <span id="grape-amount">0 kg</span>
-                                </div>
-                                <div class="crushing-data-item">
-                                    <span class="crushing-data-label">Quality:</span>
-                                    <span id="grape-quality">0%</span>
-                                </div>
-                                <div class="crushing-data-item">
-                                    <span class="crushing-data-label">Field:</span>
-                                    <span id="grape-field">None</span>
-                                </div>
-                                <div class="crushing-data-item">
-                                    <span class="crushing-data-label">Grape:</span>
-                                    <span id="grape-info">None</span>
-                                </div>
-                            </div>
-                            <div class="crushing-arrow left-arrow"></div>
-                        </div>
-
-                        <!-- Center: Crushing Process -->
-                        <div class="crushing-stage center-stage">
-                            <img src="/assets/pic/crushing_dalle.webp" class="crushing-machine-image" alt="Crushing Machine">
-                            <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
-                        </div>
-
-                        <!-- Right: Must Output -->
-                        <div class="crushing-stage">
-                            <img src="/assets/pic/must.webp" class="crushing-output-image" alt="Output Must">
-                            <div class="crushing-data">
-                                <div class="crushing-data-item">
-                                    <span class="crushing-data-label">Expected:</span>
-                                    <span id="must-expected">0 L</span>
-                                </div>
-                                <div class="crushing-data-item">
-                                    <span class="crushing-data-label">Storage:</span>
-                                    <span id="must-storage">None</span>
-                                </div>
-                                <div class="crushing-data-item">
-                                    <span class="crushing-data-label">Available:</span>
-                                    <span id="must-available">0 L</span>
-                                </div>
-                            </div>
-                            <div class="crushing-arrow right-arrow"></div>
-                        </div>
+                        <!-- Crushing process visualization (unchanged) -->
+                        ${createCrushingProcess()}
                     </div>
                 </div>
+                <!-- Progress section not in div to make spacing as small as possible -->
+                <!-- Progress section (unchanged) -->
+                ${createProgressSection()}
+            </section>
 
+            <section id="select-grape-section" class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Select Grapes to Crush</h3>
                 </div>
@@ -118,29 +76,82 @@ function createCrushingHTML() {
                 </div>
             </section>
 
-            <section id="crushing-progress" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Crushing Progress</h3>
+
+        </div>
+    `;
+}
+
+// New helper function to keep the code organized
+function createCrushingProcess() {
+    return `
+        <!-- Left: Grapes Input -->
+        <div class="crushing-stage">
+            <img src="/assets/pic/grapes.webp" class="crushing-input-image" alt="Input Grapes">
+            <div class="crushing-data">
+                <div class="crushing-data-item">
+                    <span class="crushing-data-label">Amount:</span>
+                    <span id="grape-amount">0 kg</span>
                 </div>
-                <div class="card-body">
-                    <div class="button-container">
-                        <div class="selected-wrapper">
-                            <span>Selected Storage: </span>
-                            <span id="selected-grapes">0 L</span>
-                            <span> / </span>
-                            <span id="selected-storage">0 L</span>
-                        </div>
-                        <div class="w-100">
-                            <div class="progress">
-                                <div id="selected-storage-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-end mt-3 w-100">
-                            <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
-                        </div>
+                <div class="crushing-data-item">
+                    <span class="crushing-data-label">Quality:</span>
+                    <span id="grape-quality">0%</span>
+                </div>
+                <div class="crushing-data-item">
+                    <span class="crushing-data-label">Field:</span>
+                    <span id="grape-field">None</span>
+                </div>
+                <div class="crushing-data-item">
+                    <span class="crushing-data-label">Grape:</span>
+                    <span id="grape-info">None</span>
+                </div>
+            </div>
+            <div class="crushing-arrow left-arrow"></div>
+        </div>
+
+        <!-- Center: Crushing Process -->
+        <div class="crushing-stage center-stage">
+            <img src="/assets/pic/crushing_dalle.webp" class="crushing-machine-image" alt="Crushing Machine">
+            <button class="btn btn-light btn-sm crush-btn">Crush Selected Grapes</button>
+        </div>
+
+        <!-- Right: Must Output -->
+        <div class="crushing-stage">
+            <img src="/assets/pic/must.webp" class="crushing-output-image" alt="Output Must">
+            <div class="crushing-data">
+                <div class="crushing-data-item">
+                    <span class="crushing-data-label">Expected:</span>
+                    <span id="must-expected">0 L</span>
+                </div>
+                <div class="crushing-data-item">
+                    <span class="crushing-data-label">Storage:</span>
+                    <span id="must-storage">None</span>
+                </div>
+                <div class="crushing-data-item">
+                    <span class="crushing-data-label">Available:</span>
+                    <span id="must-available">0 L</span>
+                </div>
+            </div>
+            <div class="crushing-arrow right-arrow"></div>
+        </div>
+    `;
+}
+
+function createProgressSection() {
+    return `
+        <div class="card-body">
+            <div class="button-container">
+                <div class="selected-wrapper">
+                    <span>Selected Storage: </span>
+                    <span id="selected-grapes">0 L</span>
+                    <span> / </span>
+                    <span id="selected-storage">0 L</span>
+                </div>
+                <div class="w-100">
+                    <div class="progress">
+                        <div id="selected-storage-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                 </div>
-            </section>
+            </div>
         </div>
     `;
 }
@@ -458,7 +469,7 @@ function crushing(overlayContainer) {
     }
 
     let totalAvailableSpace = 0;
-    let invalidStorage = false;
+    let invalidStorages = []; // Change to array to collect all invalid storages
 
     selectedStorages.forEach(storage => {
         const availableSpace = parseFloat(storage.dataset.available);
@@ -473,8 +484,7 @@ function crushing(overlayContainer) {
             if (firstItem.resource.name !== selectedGrape.dataset.resource || 
                 firstItem.vintage !== parseInt(selectedGrape.dataset.vintage) ||
                 firstItem.fieldName !== selectedGrape.dataset.field) {
-                invalidStorage = true;
-                addConsoleMessage(`Cannot use ${storageId} as it contains must from a different field, resource or vintage.`);
+                invalidStorages.push(storageId); // Collect invalid storages
             } else {
                 totalAvailableSpace += availableSpace;
             }
@@ -483,7 +493,11 @@ function crushing(overlayContainer) {
         }
     });
 
-    if (invalidStorage) {
+    // Show messages for all invalid storages
+    if (invalidStorages.length > 0) {
+        invalidStorages.forEach(storageId => {
+            addConsoleMessage(`Cannot use ${storageId} as it contains must from a different field, resource or vintage.`);
+        });
         return false;
     }
 

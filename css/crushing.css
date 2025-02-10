@@ -17,7 +17,7 @@
     border: 1px solid var(--color-accent);
     border-radius: var(--radius-md);
     background: rgba(0, 0, 0, 0.2);
-    min-height: 200px;  /* Base height for side stages */
+    min-height: 240px;  /* Base height for side stages */
     justify-content: center;
     text-align: center;
     position: relative;
@@ -25,7 +25,7 @@
 
 .crushing-stage.center-stage {
     width: 250px;  /* Reduced from 300px */
-    min-height: 250px;  /* Increased height for center stage */
+    min-height: 275px;  /* Increased height for center stage */
 }
 
 .crushing-input-image,
@@ -141,6 +141,16 @@
 .crushing-stage.center-stage:hover .crush-btn,
 .crush-btn:hover ~ .crushing-machine-image {
     transform: scale(1.05);
+}
 
+/* Update section-specific header gradients */
+#grape-crushing-section .card-header {
+    background: linear-gradient(135deg, var(--color-accent), #8B4513);
+    border-bottom: 2px solid var(--color-accent);
+}
+
+#select-grape-section .card-header {
+    background: linear-gradient(135deg, #8B4513, #491809);
+    border-bottom: 2px solid var(--color-accent);
 }
 
