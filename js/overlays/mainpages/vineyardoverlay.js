@@ -65,20 +65,21 @@ export function updateVineyardTable() {
     setupVineyardEventListeners(table);
 }
 
-export function canHarvest(farmland, selectedTool) {
-    // Basic checks first
-    if (farmland.status === 'No yield in first season' || taskManager.isTargetBusy(farmland)) {
+export function canHarvest(farmland) {
+    // Basic validation for harvest button
+    if (farmland.status === 'No yield in first season' || 
+        taskManager.isTargetBusy(farmland) ||
+        !farmland.plantedResourceName || 
+        farmland.ripeness < 0.10 || 
+        getRemainingYield(farmland) <= 0) {
         return false;
     }
+    return true;
+}
 
-    // If no selectedTool is provided, just check if harvesting is possible
-    if (!selectedTool) {
-        return farmland.plantedResourceName && 
-               farmland.ripeness >= 0.10 && 
-               getRemainingYield(farmland) > 0;
-    }
+export function validateStorage(farmland, selectedTool) {
+    if (!selectedTool) return { warning: true, availableCapacity: 0 };
 
-    // Tool-specific checks
     const buildings = loadBuildings();
     const tool = buildings.flatMap(b => 
         b.slots.flatMap(slot => 
@@ -86,9 +87,7 @@ export function canHarvest(farmland, selectedTool) {
         )
     ).find(t => t);
 
-    if (!tool) {
-        return { warning: true, availableCapacity: 0 };
-    }
+    if (!tool) return { warning: true, availableCapacity: 0 };
 
     // Check container capacity
     const currentAmount = inventoryInstance.items
@@ -132,12 +131,7 @@ function createVineyardTable() {
             ${farmlands.map(farmland => {
                 const totalYield = farmlandYield(farmland);
                 const remainingYield = getRemainingYield(farmland);
-                const isFarmlandBusy = taskManager.isTargetBusy(farmland);
-                
-                const canHarvest = farmland.plantedResourceName && 
-                                 farmland.ripeness >= 0.10 && 
-                                 remainingYield > 0 &&
-                                 !isFarmlandBusy;
+                const canStartHarvest = canHarvest(farmland);
 
                 const formattedSize = farmland.acres < 10 ? farmland.acres.toFixed(2) : formatNumber(farmland.acres);
                 const ripenessColorClass = getColorClass(farmland.ripeness);
@@ -159,8 +153,7 @@ function createVineyardTable() {
                         <td>
                             <button class="btn btn-alternative btn-sm harvest-btn" 
                                     data-farmland-id="${farmland.id}"
-                                    ${!canHarvest ? 'disabled' : ''}
-                                    title="${!canHarvest && isFarmlandBusy ? 'Field is busy with another task' : ''}">
+                                    ${!canStartHarvest ? 'disabled' : ''}>
                                 Harvest
                             </button>
                         </td>

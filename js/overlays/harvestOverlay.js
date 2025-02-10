@@ -1,5 +1,5 @@
 import { addConsoleMessage } from '../console.js';
-import { showVineyardOverlay, canHarvest } from './mainpages/vineyardoverlay.js';
+import { showVineyardOverlay, canHarvest, validateStorage } from './mainpages/vineyardoverlay.js';
 import { inventoryInstance, allResources } from '../resource.js';
 import { farmlandYield } from '../farmland.js';
 import { formatNumber, getFlagIconHTML } from '../utils.js';
@@ -364,8 +364,8 @@ function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
     // Get all selected tools and their capacities
     const selectedTools = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
     let totalAvailableCapacity = Array.from(selectedCheckboxes).reduce((total, checkbox) => {
-        const harvestCheck = canHarvest(farmland, checkbox.value);
-        return total + harvestCheck.availableCapacity;
+        const storageCheck = validateStorage(farmland, checkbox.value);
+        return total + storageCheck.availableCapacity;
     }, 0);
 
     const expectedYield = farmlandYield(farmland);
