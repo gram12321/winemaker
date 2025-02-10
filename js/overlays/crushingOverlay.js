@@ -65,6 +65,10 @@ function createCrushingHTML() {
                                     <span class="crushing-data-label">Field:</span>
                                     <span id="grape-field">None</span>
                                 </div>
+                                <div class="crushing-data-item">
+                                    <span class="crushing-data-label">Grape:</span>
+                                    <span id="grape-info">None</span>
+                                </div>
                             </div>
                             <div class="crushing-arrow left-arrow"></div>
                         </div>
@@ -252,6 +256,7 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory, 
 
             row.querySelector('input[name="must-storage"]').addEventListener('change', function() {
               updateStorageProgress();
+              updateCrushingData(document.querySelector('.grape-select:checked'), this);
             });
           }
         }
@@ -321,6 +326,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
                 formatNumber(selectedGrapes / 1000, 2) + ' t' : 
                 formatNumber(selectedGrapes) + ' kg';
               updateStorageProgress();
+              updateCrushingData(this, null);
             });
           });
         }
@@ -329,6 +335,51 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   });
 }
 
+function updateCrushingData(selectedGrape, selectedStorage) {
+    // Update grape data (left side)
+    if (selectedGrape) {
+        const amount = parseFloat(selectedGrape.dataset.amount);
+        const quality = parseFloat(selectedGrape.dataset.quality);
+        const fieldName = selectedGrape.dataset.field;
+        const resourceName = selectedGrape.dataset.resource;
+        const vintage = selectedGrape.dataset.vintage;
+        
+        document.getElementById('grape-amount').textContent = amount >= 1000 ? 
+            `${formatNumber(amount / 1000, 2)} t` : 
+            `${formatNumber(amount)} kg`;
+        document.getElementById('grape-quality').textContent = 
+            `${(quality * 100).toFixed(0)}%`;
+        document.getElementById('grape-field').textContent = 
+            `${fieldName}`;
+        document.getElementById('grape-info').textContent = 
+            `${resourceName}, ${vintage}`;
+
+        // Update must data (right side)
+        const grapeAmount = parseFloat(selectedGrape.dataset.amount);
+        const expectedMust = grapeAmount * 0.6; // Use the conversion rate from crushing function
+        document.getElementById('must-expected').textContent = 
+            `${formatNumber(expectedMust)} L`;
+
+        const selectedStorages = document.querySelectorAll('input[name="must-storage"]:checked');
+        let totalStorage = 0;
+        let availableSpace = 0;
+        let storageName = 'None';
+
+        if (selectedStorages.length > 0) {
+            selectedStorages.forEach(storage => {
+                totalStorage += parseFloat(storage.dataset.capacity);
+                availableSpace += parseFloat(storage.dataset.available);
+            });
+            storageName = selectedStorages.length === 1 ? 
+                selectedStorages[0].value : 
+                `${selectedStorages.length} containers`;
+        }
+
+        document.getElementById('must-storage').textContent = storageName;
+        document.getElementById('must-available').textContent = 
+            `${formatNumber(availableSpace)} L`;
+    }
+}
 
 function crushing(overlayContainer) {
     const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
