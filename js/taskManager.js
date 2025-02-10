@@ -40,7 +40,7 @@ class Task {
         this.progress = 0;
         this.initialState = initialState;
         this.assignedStaff = params.assignedStaff || [];
-        this.params.selectedTools = Array.isArray(params.selectedTools) ? params.selectedTools : [];
+        this.params.selectedTools = params.selectedTools || [];
     }
 }
 
