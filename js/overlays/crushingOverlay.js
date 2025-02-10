@@ -336,7 +336,6 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
 }
 
 function updateCrushingData(selectedGrape, selectedStorage) {
-    // Update grape data (left side)
     if (selectedGrape) {
         const amount = parseFloat(selectedGrape.dataset.amount);
         const quality = parseFloat(selectedGrape.dataset.quality);
@@ -347,14 +346,11 @@ function updateCrushingData(selectedGrape, selectedStorage) {
         document.getElementById('grape-amount').textContent = amount >= 1000 ? 
             `${formatNumber(amount / 1000, 2)} t` : 
             `${formatNumber(amount)} kg`;
-        document.getElementById('grape-quality').textContent = 
-            `${(quality * 100).toFixed(0)}%`;
-        document.getElementById('grape-field').textContent = 
-            `${fieldName}`;
-        document.getElementById('grape-info').textContent = 
-            `${resourceName}, ${vintage}`;
+        document.getElementById('grape-quality').innerHTML = 
+            `<span class="${getColorClass(quality)}">${(quality * 100).toFixed(0)}%</span>`;
+        document.getElementById('grape-field').textContent = fieldName;
+        document.getElementById('grape-info').textContent = `${resourceName}, ${vintage}`;
 
-        // Update must data (right side)
         const grapeAmount = parseFloat(selectedGrape.dataset.amount);
         const expectedMust = grapeAmount * 0.6; // Use the conversion rate from crushing function
         document.getElementById('must-expected').textContent = 
