@@ -17,14 +17,15 @@
     border: 1px solid var(--color-accent);
     border-radius: var(--radius-md);
     background: rgba(0, 0, 0, 0.2);
-    min-height: 200px;  /* Reduced from 300px */
+    min-height: 200px;  /* Base height for side stages */
     justify-content: center;
     text-align: center;
     position: relative;
 }
 
 .crushing-stage.center-stage {
-    width: 200px;  /* Reduced from 300px */
+    width: 250px;  /* Reduced from 300px */
+    min-height: 250px;  /* Increased height for center stage */
 }
 
 .crushing-input-image,
