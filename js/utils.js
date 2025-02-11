@@ -1,7 +1,6 @@
 import { convertToCurrentUnit, getUnit } from './settings.js';
 import { regionSoilTypes } from './names.js';
 
-
 export function getFlagIcon(countryName) {
   const countryToFlagCode = {
     "Italy": "it",
@@ -18,6 +17,10 @@ export function getFlagIcon(countryName) {
   return flagCode 
     ? `<span class="flag-icon flag-icon-${flagCode}" style="vertical-align: middle; margin-right: 5px;"></span>`
     : ''; // Return an empty string if no flag is found
+}
+
+export function getFlagIconHTML(country) {
+    return getFlagIcon(country);
 }
 
 export function getColorClass(value) {
@@ -46,29 +49,73 @@ export function getWineQualityCategory(quality) {
   return "Vintage Perfection";
 }
 
+export const skillLevels = {
+    0.1: { name: 'Fresh Off the Vine', modifier: 0.2, costMultiplier: 1 },
+    0.2: { name: 'Cork Puller', modifier: 0.3, costMultiplier: 1.5 },
+    0.3: { name: 'Cellar Hand', modifier: 0.4, costMultiplier: 2 },
+    0.4: { name: 'Vine Whisperer', modifier: 0.5, costMultiplier: 3 },
+    0.5: { name: 'Grape Sage', modifier: 0.6, costMultiplier: 4 },
+    0.6: { name: 'Vintage Virtuoso', modifier: 0.7, costMultiplier: 6 },
+    0.7: { name: 'Wine Wizard', modifier: 0.8, costMultiplier: 8 },
+    0.8: { name: 'Terroir Master', modifier: 0.85, costMultiplier: 12 },
+    0.9: { name: 'Vineyard Virtuoso', modifier: 0.9, costMultiplier: 16 },
+    1.0: { name: 'Living Legend', modifier: 0.95, costMultiplier: 25 }
+};
+
+export function getSkillLevelInfo(level) {
+    // Convert level from 1-10 scale to 0.1-1.0 scale if needed
+    const normalizedLevel = level > 1 ? level / 10 : level;
+    
+    // Find the closest skill level
+    const levels = Object.keys(skillLevels).map(Number);
+    const closestLevel = levels.reduce((prev, curr) => 
+        Math.abs(curr - normalizedLevel) < Math.abs(prev - normalizedLevel) ? curr : prev
+    );
+
+    const skillLevel = skillLevels[closestLevel];
+    const colorClass = getColorClass(closestLevel);
+
+    return {
+        ...skillLevel,
+        colorClass,
+        formattedName: `<span class="${colorClass}">${skillLevel.name}</span>`
+    };
+}
+
+export function formatQualityDisplay(quality) {
+  const qualityDescription = getWineQualityCategory(quality);
+  const colorClass = getColorClass(quality);
+  return `${qualityDescription} <span class="${colorClass}">(${(quality * 100).toFixed(0)}%)</span>`;
+}
+
 export function getRandomSoil(country, region) {
   const soils = regionSoilTypes[country][region];
   return soils[Math.floor(Math.random() * soils.length)];
 }
 
 export function formatNumber(value, decimals = 0) {
-    if (value >= 1_000_000) {
+    // Check if value is effectively zero (very small number)
+    if (Math.abs(value) < 0.0005) return "0";
+    
+    const isNegative = value < 0;
+    const absValue = Math.abs(value);
+    let formattedValue;
+    
+    if (absValue >= 1_000_000) {
         // For values of one million or more
-        return `${(value / 1_000_000).toLocaleString('de-DE', {
+        formattedValue = `${(absValue / 1_000_000).toLocaleString('de-DE', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })} Mio`;
     } else {
         // For smaller amounts
-        return value.toLocaleString('de-DE', {
+        formattedValue = absValue.toLocaleString('de-DE', {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals
         });
     }
-}
-
-export function getFlagIconHTML(country) {
-    return getFlagIcon(country);
+    
+    return isNegative ? `-${formattedValue}` : formattedValue;
 }
 
 export function formatLandSizeWithUnit(acres) {
@@ -76,8 +123,6 @@ export function formatLandSizeWithUnit(acres) {
     const convertedSize = convertToCurrentUnit(acres);
     return `${formatNumber(convertedSize)} ${selectedUnit}`;
 }
-
-
 
 export function extractSeasonAndYear(dateString) {
     const [week, season, year] = dateString.split(', ');
@@ -108,3 +153,4 @@ export function getPreviousSeasonAndYear(currentSeason, currentYear) {
 
     return { previousSeason, previousYear };
 }
+

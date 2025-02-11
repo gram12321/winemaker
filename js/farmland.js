@@ -1,17 +1,68 @@
-import { addConsoleMessage  } from '/js/console.js';
+import { getResourceByName } from './resource.js';
 import { countryRegionMap, regionSoilTypes, regionAltitudeRanges, calculateAndNormalizePriceFactor, regionPrestigeRankings   } from '/js/names.js'; // Import names and country-region map
 import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames, normalizeLandValue } from './names.js';
-import { allResources, getResourceByName, inventoryInstance  } from '/js/resource.js';
-import { saveInventory, saveTask, activeTasks } from '/js/database/adminFunctions.js';
-import { Task } from './loadPanel.js'; 
-import { getFlagIcon, formatNumber } from './utils.js';
-import { getUnit, convertToCurrentUnit } from './settings.js';
-import { showFarmlandOverlay } from './overlays/farmlandOverlay.js';
-import {calculateWorkApplied } from './staff.js';
-import { handleGenericTask } from './administration.js';
-import { showPlantingOverlay } from './overlays/plantingOverlay.js';
-import { harvestAcres } from './vineyard.js';
 
+class Farmland {
+  constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = 5000, farmlandHealth = 0.5) {
+    this.id = id; // Unique identifier for the farmland
+    this.name = name; // Name of the farmland
+    this.country = country; // Country where the farmland is located
+    this.region = region; // Region within the country
+    this.acres = acres; // Size in acres
+    this.plantedResourceName = plantedResourceName; // Type of crop/resource planted
+    this.vineAge = vineAge; // Age of the vines (if applicable)
+    this.grape = grape; // Type of grape (if specific to vineyards)
+    this.soil = soil; // Soil type
+    this.altitude = altitude; // Altitude of the location
+    this.aspect = aspect; // Aspect (slope direction)
+    this.density = density; // Planting density
+    this.farmlandHealth = farmlandHealth; // Current health state of the farmland
+    this.landvalue = calculateLandvalue(this.country, this.region, this.altitude, this.aspect); // Calculate and set land value
+    this.status = 'No yield in first season'; // Always start with no yield
+    this.ripeness = 0.0; // Initial ripeness level
+    this.farmlandPrestige = calculateFarmlandPrestige(this); // Calculate and set farmland prestige
+    this.canBeCleared = 'Ready to be cleared'; // State regarding field clearing
+    this.annualYieldFactor = (0.75 + Math.random()) ; // Random yield factor calculation
+    this.annualQualityFactor = Math.random(); // Random quality factor calculation
+    this.conventional = 'Non-Conventional';  // Can be: 'Conventional', 'Non-Conventional', or 'Ecological'
+    this.organicYears = 0;  // Counter for years using organic methods
+    this.remainingYield = null;  // null means no harvest started
+  }
+}
+
+export function farmlandYield(farmland) {
+    if (!farmland.plantedResourceName || 
+        farmland.annualYieldFactor === 0 || 
+        farmland.status === 'Harvested') {
+        return 0;
+    }
+
+    const resource = getResourceByName(farmland.plantedResourceName);
+    if (resource) {
+        const baseYieldPerAcre = 2400; // About 2.4 tons per acre
+        const densityModifier = farmland.density / 5000; // Removed cap, baseline at 5000
+        const qualityMultiplier = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
+        let expectedYield = baseYieldPerAcre * farmland.acres * qualityMultiplier * farmland.annualYieldFactor * densityModifier;
+        
+        // Apply bonus multiplier if conventional
+        if (farmland.conventional === 'Conventional') {
+            expectedYield *= 1.1;
+        }
+
+        return expectedYield;
+    }
+    return 0;
+}
+
+// New function to get actual remaining yield
+export function getRemainingYield(farmland) {
+    // If harvest hasn't started yet, return full yield
+    if (farmland.remainingYield === null) {
+        return farmlandYield(farmland);
+    }
+    // Otherwise return what's left
+    return farmland.remainingYield;
+}
 
 // Refactored standalone function for land value calculation
 export function calculateLandvalue(country, region, altitude, aspect) {
@@ -33,59 +84,44 @@ export function farmlandAgePrestigeModifier(vineAge) {
     return 0.95;
   }
 }
+// Calculate farmland prestige with contributions from age, land value, prestige ranking, and fragility bonus in separate functions (for export to farmlandoverlay.js)
 
-// Refactored calculateFarmlandPrestige function using standalone prestige modifier
+export function calculateAgeContribution(vineAge) {
+  const ageModifier = farmlandAgePrestigeModifier(vineAge);
+  return ageModifier * 0.30;
+}
+
+export function calculateLandValueContribution(landvalue) {
+  const landvalueNormalized = normalizeLandValue(landvalue);
+  return landvalueNormalized * 0.25;
+}
+
+export function calculatePrestigeRankingContribution(region, country) {
+  const prestigeRanking = regionPrestigeRankings[`${region}, ${country}`] || 0;
+  return prestigeRanking * 0.25;
+}
+
+export function calculateFragilityBonusContribution(plantedResourceName) {
+  const fragilityBonus = (typeof plantedResourceName === 'string' && plantedResourceName.trim()) 
+    ? (1 - getResourceByName(plantedResourceName).fragile) 
+    : 0;
+  return fragilityBonus * 0.20;
+}
+
 export function calculateFarmlandPrestige(farmland) {
-  const ageModifier = farmlandAgePrestigeModifier(farmland.vineAge); // Use standalone function
-  const landvalueNormalized = normalizeLandValue(farmland.landvalue);
-  const prestigeRanking = regionPrestigeRankings[`${farmland.region}, ${farmland.country}`] || 0;
+  const ageContribution = calculateAgeContribution(farmland.vineAge);
+  const landValueContribution = calculateLandValueContribution(farmland.landvalue);
+  const prestigeRankingContribution = calculatePrestigeRankingContribution(farmland.region, farmland.country);
+  const fragilityBonusContribution = calculateFragilityBonusContribution(farmland.plantedResourceName);
 
-  const finalPrestige = (ageModifier + landvalueNormalized + prestigeRanking) / 3 || 0.01;
+  const finalPrestige = (
+    ageContribution +
+    landValueContribution +
+    prestigeRankingContribution +
+    fragilityBonusContribution
+  ) || 0.01;
 
   return finalPrestige;
-}
-
-class Farmland {
-  constructor(id, name, country, region, acres, plantedResourceName = null, vineAge = '', grape = '', soil = '', altitude = '', aspect = '', density = 5000, farmlandHealth = 0.5) {
-    this.id = id; // Unique identifier for the farmland
-    this.name = name; // Name of the farmland
-    this.country = country; // Country where the farmland is located
-    this.region = region; // Region within the country
-    this.acres = acres; // Size in acres
-    this.plantedResourceName = plantedResourceName; // Type of crop/resource planted
-    this.vineAge = vineAge; // Age of the vines (if applicable)
-    this.grape = grape; // Type of grape (if specific to vineyards)
-    this.soil = soil; // Soil type
-    this.altitude = altitude; // Altitude of the location
-    this.aspect = aspect; // Aspect (slope direction)
-    this.density = density; // Planting density
-    this.farmlandHealth = farmlandHealth; // Current health state of the farmland
-    this.landvalue = calculateLandvalue(this.country, this.region, this.altitude, this.aspect); // Calculate and set land value
-    this.status = 'Dormancy'; // Initial status, assuming starting in a dormant state
-    this.ripeness = 0.1; // Initial ripeness level
-    this.farmlandPrestige = calculateFarmlandPrestige(this); // Calculate and set farmland prestige
-    this.canBeCleared = 'Ready to be cleared'; // State regarding field clearing
-    this.annualYieldFactor = (0.5 + Math.random()) * 1.5; // Random yield factor calculation
-    this.annualQualityFactor = Math.random(); // Random quality factor calculation
-  }
-}
-
-
-
-export function farmlandYield(farmland) {
-  if (farmland.plantedResourceName) {
-    const resource = getResourceByName(farmland.plantedResourceName);
-    if (resource) {
-      // Calculate the theoretical yield
-      const theoreticalYield = (farmland.ripeness + resource.naturalYield + farmland.farmlandHealth) / 3;
-
-      // Use the existing annualYieldFactor
-      const expectedYield = theoreticalYield * farmland.annualYieldFactor * (farmland.density / 1000);
-
-      return expectedYield;
-    }
-  }
-  return 0; // No yield if nothing is planted
 }
 
 export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude = '', aspect = '') {
@@ -100,7 +136,6 @@ export function createFarmland(id, acres = getRandomAcres(), soil = '', altitude
   return new Farmland(id, name, country, region, acres, null, '', '', soil, altitude, aspect);
 }
 
-
 function getRandomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
@@ -111,10 +146,32 @@ export function getLastId(farmlands) {
 }
 
 export function getRandomAcres() {
-  return Math.floor(Math.random() * 200) + 1;
+    const rand = Math.random() * 100;
+    let acres;
+
+    if (rand < 25) { // Very Small: 25%
+        acres = 0.1 + Math.random() * 0.9;
+    } else if (rand < 60) { // Small: 35%
+        acres = 1 + Math.random() * 4;
+    } else if (rand < 85) { // Medium: 25%
+        acres = 5 + Math.random() * 15;
+    } else if (rand < 93) { // Large: 8%
+        acres = 20 + Math.random() * 30;
+    } else if (rand < 96) { // Very Large: 3%
+        acres = 50 + Math.random() * 450;
+    } else if (rand < 96.5) { // Extra Large: 0.5%
+        acres = 500 + Math.random() * 500;
+    } else if (rand < 96.6) { // Ultra Large: 0.1%
+        acres = 1000 + Math.random() * 4000;
+    } else { // Fallback to medium size
+        acres = 5 + Math.random() * 15;
+    }
+
+    // Ensure we return a number, not a string
+    return Number(acres.toFixed(2));
 }
 
-function getRandomSoil(country, region) {
+export function getRandomSoil(country, region) {
   const soils = regionSoilTypes[country][region];
   const numberOfSoils = Math.floor(Math.random() * 5) + 1; // Randomly choose between 1 and 5 soils
   const selectedSoils = new Set();
@@ -127,7 +184,7 @@ function getRandomSoil(country, region) {
   return Array.from(selectedSoils).join(', '); // Convert set to array and return as comma-separated string
 }
 
-function getRandomAltitude(country, region) {
+export function getRandomAltitude(country, region) {
   const [min, max] = regionAltitudeRanges[country][region];
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -162,335 +219,40 @@ export function getRandomName(country, aspect) {
   return names[randomIndex];
 }
 
-function getRandomAspect() {
+export function getRandomAspect() {
   const aspects = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
   return getRandomItem(aspects);
 }
 
-
-export function displayOwnedFarmland() {
-  const farmlandEntries = document.querySelector('#farmland-entries');
-  farmlandEntries.innerHTML = ''; // Clear existing entries
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const resourceOptions = allResources.map(resource => `<option value="${resource.name}">${resource.name}</option>`).join('');
-  const selectedUnit = getUnit(); // Get the current unit setting
-
-  farmlands.forEach((farmland, index) => {
-    const landSize = convertToCurrentUnit(farmland.acres);
-    const row = document.createElement('tr');
-
-    // Check if there's an active task on this field
-    const isTaskActiveOnField = activeTasks.some(task => task.fieldId === index);
-    const canPlant = !isTaskActiveOnField && !farmland.plantedResourceName;
-    const canUproot = !isTaskActiveOnField && farmland.plantedResourceName;
-    const canClear = !isTaskActiveOnField && !farmland.plantedResourceName && farmland.canBeCleared !== 'Cleared';
-
-    row.innerHTML = `
-      <td><img src="/assets/pic/vineyard_dalle.webp" alt="Vineyard Image" style="width: 100px; height: auto;"></td>
-      <td>${farmland.name}</td>
-      <td>
-        ${getFlagIcon(farmland.country)}
-        ${farmland.country}, ${farmland.region}
-      </td>
-      <td>${formatNumber(landSize)} ${selectedUnit}</td>
-      <td>${farmland.plantedResourceName || 'None'}</td>
-      <td class="planting-options-column">
-        <select class="form-control resource-select">
-          ${resourceOptions}
-        </select>
-      </td>
-      <td>
-        <button class="btn btn-warning plant-field-btn mt-2 ${canPlant ? '' : 'disabled-btn'}" ${canPlant ? '' : 'disabled'}>Plant</button>
-        <button class="btn btn-danger uproot-field-btn mt-2 ${canUproot ? '' : 'disabled-btn'}" ${canUproot ? '' : 'disabled'}>Uproot</button>
-        <button class="btn btn-info clear-field-btn mt-2 ${canClear ? '' : 'disabled-btn'}" ${canClear ? '' : 'disabled'}>Clear</button>
-      </td>
-    `;
-
-    farmlandEntries.appendChild(row);
-
-    // Add event listener to open overlay on non-interactive element click
-    row.addEventListener('click', (event) => {
-      const isInteractiveElement = event.target.classList.contains('resource-select')
-        || event.target.classList.contains('plant-field-btn')
-        || event.target.classList.contains('uproot-field-btn')
-        || event.target.classList.contains('clear-field-btn');
-
-      if (!isInteractiveElement) {
-        showFarmlandOverlay(farmland); // Pass only the current farmland's data
-      }
-    });
-
-    // Adjusted Planting Logic to show the planting overlay
-    const plantButton = row.querySelector('.plant-field-btn');
-    plantButton.addEventListener('click', (event) => {
-      if (!plantButton.disabled) {
-        event.stopPropagation();
-
-        // Open the planting overlay
-        showPlantingOverlay(farmland, () => {
-          const resourceSelect = row.querySelector('.resource-select');
-          const selectedResource = resourceSelect.value;
-          const additionalTaskParams = { fieldId: index, resourceName: selectedResource };
-          handleGenericTask("Planting", (task, mode) => fieldTaskFunction(task, mode, "Planting", additionalTaskParams), additionalTaskParams);
-          displayOwnedFarmland();
-        });
-      }
-    });
-
-    // Updated Uprooting Logic
-    const uprootButton = row.querySelector('.uproot-field-btn');
-    uprootButton.addEventListener('click', (event) => {
-      if (!uprootButton.disabled) {
-        event.stopPropagation();
-        handleGenericTask('Uprooting', (task, mode) => fieldTaskFunction(task, mode, "Uprooting", { fieldId: index }), { fieldId: index });
-        displayOwnedFarmland();
-      }
-    });
-
-    // Clear field button logic
-    const clearButton = row.querySelector('.clear-field-btn');
-    clearButton.addEventListener('click', (event) => {
-      if (!clearButton.disabled) {
-        event.stopPropagation();
-        handleGenericTask('Clearing', (task, mode) => fieldTaskFunction(task, mode, "Clearing", { fieldId: index }), { fieldId: index });
-        displayOwnedFarmland();
-      }
-    });
-  });
+// Add generateFarmlandPreview function to farmland.js
+export function generateFarmlandPreview(country, region) {
+    // First generate random aspect as it affects the name generation
+    const aspect = getRandomAspect();
+    
+    // Then get a name based on country and aspect
+    const name = getRandomName(country, aspect);
+    
+    // Get random soil and altitude based on country and region
+    const soil = getRandomSoil(country, region);
+    const altitude = getRandomAltitude(country, region);
+    
+    // Generate small random acres (under 1)
+    const acres = Number((0.1 + Math.random() * 0.4).toFixed(2));
+    
+    // Create farmland with all parameters in correct order
+    return new Farmland(
+        1,          // id
+        name,       // name
+        country,    // country
+        region,     // region
+        acres,      // acres
+        null,       // plantedResourceName
+        '',         // vineAge
+        '',         // grape
+        soil,       // soil
+        altitude,   // altitude
+        aspect      // aspect
+    );
 }
 
-export function fieldTaskFunction(task, mode, taskType, { fieldId, resourceName } = {}) {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const field = farmlands[fieldId];
-  const fieldName = field.name || `Field ${fieldId}`;
-  const gameYear = localStorage.getItem('year') || '';
-  const vintage = field.vintage || '';
-
-  // Check if any task is already active on this field
-  const isAnyTaskActiveOnField = activeTasks.some(task => task.fieldId === fieldId);
-
-  // Check specifically if a harvest task is active on this field
-  const isHarvestTaskActive = activeTasks.some(task => task.fieldId === fieldId && task.taskName === "Harvesting");
-
-  if (mode === 'initialize') {
-    if (taskType === "Planting") {
-      if (isAnyTaskActiveOnField) {
-        addConsoleMessage(`Another task is already active on field <strong>${fieldName}</strong>.`);
-        return null;
-      }
-
-      field.plantedResourceName = "Currently being planted";
-      field.status = "No yield in first season";
-      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-      return {
-        taskName: "Planting",
-        workTotal: field.acres,
-        iconPath: '/assets/icon/icon_planting.webp',
-        taskType: 'Field',
-        fieldName,
-        resourceName,
-        vintage: gameYear
-      };
-    } else if (taskType === "Uprooting") {
-      if (isAnyTaskActiveOnField) {
-        addConsoleMessage(`Another task is already active on field <strong>${fieldName}</strong>.`);
-        return null;
-      }
-
-      return {
-        taskName: "Uprooting",
-        workTotal: field.acres,
-        iconPath: '/assets/icon/icon_uprooting.webp',
-        taskType: 'Field',
-        fieldName,
-        resourceName: resourceName || '',
-        vintage
-      };
-    } else if (taskType === "Harvesting") {
-      if (isAnyTaskActiveOnField || field.currentAcresHarvested >= field.acres) {
-        const message = isAnyTaskActiveOnField 
-          ? `Another task is already active on field <strong>${fieldName}</strong>.`
-          : `The field is already fully harvested for <strong>${fieldName}</strong>.`;
-        addConsoleMessage(message);
-        return null;
-      }
-
-      if (!field.plantedResourceName) {
-        addConsoleMessage(`No planted resource found for Field ID ${field.id || 'unknown'}.`);
-        return null;
-      }
-
-      field.status = "Being harvested";
-      localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-
-      addConsoleMessage(`Harvesting task started for <strong>${fieldName}</strong> with <strong>${field.plantedResourceName}</strong>, Vintage <strong>${gameYear}</strong>.`);
-
-      return {
-        taskName: "Harvesting",
-        workTotal: field.acres,
-        iconPath: '/assets/icon/icon_harvesting.webp',
-        taskType: 'Field',
-        fieldName,
-        resourceName: field.plantedResourceName,
-        vintage: gameYear
-      };
-    } else if (taskType === "Clearing") {
-      if (isAnyTaskActiveOnField) {
-        addConsoleMessage(`Another task is already active on field <strong>${fieldName}</strong>.`);
-        return null;
-      }
-
-      if (field.plantedResourceName) {
-        addConsoleMessage(`Cannot start clearing on field <strong>${fieldName}</strong> as it is not empty.`);
-        return null;
-      }
-
-      return {
-        taskName: "Clearing",
-        workTotal: field.acres,
-        iconPath: '/assets/icon/icon_clearing.webp',
-        taskType: 'Field',
-        fieldName,
-      };
-    }
-  } else if (mode === 'update') {
-    if (taskType === "Planting") {
-      return plantAcres(fieldId, resourceName);
-    } else if (taskType === "Uprooting") {
-      if (isHarvestTaskActive) {
-        addConsoleMessage(`Cannot uproot while a harvesting task is active on field <strong>${fieldName}</strong>.`);
-        return 0;
-      }
-      return uproot(fieldId);
-    } else if (taskType === "Harvesting") {
-      return harvestAcres(fieldId);
-    } else if (taskType === "Clearing") {
-      return clearing(fieldId);
-    }
-  }
-
-  return 0;
-}
-
-export function plantAcres(index, resourceName) {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const field = farmlands[index];
-  const fieldName = field.name || `Field ${index}`;
-  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  const currentTask = tasks.find(task => task.taskName === "Planting" && task.fieldId === index);
-
-  // Allow planting if the field is ready or has been cleared
-  if (field.canBeCleared === 'Ready to be cleared') {
-    field.canBeCleared = 'Planted without Clearing';
-  } else if (field.canBeCleared !== 'Planted without Clearing' && field.canBeCleared !== 'Cleared') {
-    addConsoleMessage(`Field <strong>${fieldName}</strong> cannot be planted. It has not been cleared.`);
-    return 0;
-  }
-
-  const workApplied = calculateWorkApplied(currentTask?.staff || [], 'plantAcres');
-
-  console.log(`Work applied for planting on ${fieldName}: ${workApplied}`);
-
-  const workRemaining = field.acres - (field.currentAcresPlanted || 0);
-  const acresToPlant = Math.min(workApplied, workRemaining);
-
-  if (acresToPlant <= 0) {
-    addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully planted.`);
-    return 0;
-  }
-
-  field.currentAcresPlanted = (field.currentAcresPlanted || 0) + acresToPlant;
-
-  if (field.currentAcresPlanted >= field.acres) {
-    field.plantedResourceName = resourceName;
-    field.vineAge = 0;
-    field.currentAcresUprooted = 0; // Reset uprooted acres on planting completion
-    addConsoleMessage(`Field <strong>${fieldName}</strong> fully planted with <strong>${resourceName}.</strong>`);
-  } else {
-    addConsoleMessage(`${acresToPlant} acres planted with <strong>${resourceName}</strong> on field <strong>${fieldName}</strong>. Total planted: <strong>${field.currentAcresPlanted} out of ${field.acres}</strong> acres.`);
-  }
-
-  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-  return acresToPlant;
-}
-
-export function uproot(index) {
-  const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-  const field = farmlands[index];
-  const fieldName = field.name || `Field ${index}`;
-  const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-  const currentTask = tasks.find(task => task.taskName === "Uprooting" && task.fieldId === index);
-
-  const workApplied = calculateWorkApplied(currentTask?.staff || [], 'uproot');
-
-  const workRemaining = field.acres - (field.currentAcresUprooted || 0);
-  const acresToUproot = Math.min(workApplied, workRemaining);
-
-  if (acresToUproot <= 0) {
-    addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully uprooted.`);
-    return 0;
-  }
-
-  field.currentAcresUprooted = (field.currentAcresUprooted || 0) + acresToUproot;
-
-  if (field.currentAcresUprooted >= field.acres) {
-    field.plantedResourceName = null; 
-    field.vineAge = null; 
-    field.currentAcresPlanted = 0; 
-    field.canBeCleared = 'Ready to be cleared'; // Reset state after uproot
-    addConsoleMessage(`Field <strong>${fieldName}</strong> fully uprooted.`);
-  } else {
-    addConsoleMessage(`Uprooted ${acresToUproot} acres from field <strong>${fieldName}</strong>. Total uprooted: <strong>${field.currentAcresUprooted} out of ${field.acres}</strong> acres.`);
-  }
-
-  localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-  saveInventory();
-
-  return acresToUproot;
-}
-
-export function clearing(index) {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const field = farmlands[index];
-    const fieldName = field.name || `Field ${index}`;
-
-    if (field.canBeCleared !== 'Ready to be cleared') {
-        addConsoleMessage(`Field <strong>${fieldName}</strong> cannot be cleared. It needs to be uprooted first or has already been cleared.`);
-        return 0;
-    }
-
-    if (field.plantedResourceName) {
-        addConsoleMessage(`Cannot clear field <strong>${fieldName}</strong> as it is not empty.`);
-        return 0;
-    }
-
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    const currentTask = tasks.find(task => task.taskName === "Clearing" && task.fieldId === index);
-
-    const workApplied = calculateWorkApplied(currentTask?.staff || [], 'clearing');
-
-    const workRemaining = field.acres - (field.currentAcresCleared || 0);
-    const acresToClear = Math.min(workApplied, workRemaining);
-
-    if (acresToClear <= 0) {
-        addConsoleMessage(`Field <strong>${fieldName}</strong> is already fully cleared.`);
-        return 0;
-    }
-
-    field.currentAcresCleared = (field.currentAcresCleared || 0) + acresToClear;
-
-    if (field.currentAcresCleared >= field.acres) {
-        field.farmlandHealth = Math.min(field.farmlandHealth + 0.25, 1.0);
-        field.currentAcresCleared = 0; 
-        field.canBeCleared = 'Cleared'; // Update state after clearing
-        addConsoleMessage(`Field <strong>${fieldName}</strong> fully cleared and health improved.`);
-    } else {
-        addConsoleMessage(`Cleared ${acresToClear} acres from field <strong>${fieldName}</strong>. Total cleared: <strong>${field.currentAcresCleared} out of ${field.acres}</strong> acres.`);
-    }
-
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
-    return acresToClear;
-}
-
-export { Farmland };
+export { Farmland, normalizeLandValue };

@@ -2,14 +2,12 @@
 #console-bar {
   position: fixed;
   bottom: 0;
-  left: 250px;
-  /* Space for the sidebar */
-  right: 250px;
-  /* Space for the task panel */
-  height: 100px;
-  /* Adjust height as needed */
+  left: var(--sidebar-width);
+  right: var(--panel-width);
+  height: var(--console-height);
+  width: var(--console-width);
+  transition: all var(--transition-speed) ease;
   overflow-y: scroll;
-  /* Ensure vertical scroll is visible when needed */
   overflow-x: hidden;
   /* Hide horizontal scroll to maintain layout integrity */
   background-color: #888;
@@ -24,7 +22,7 @@
   /* Rounded corners */
   padding: 10px;
   /* Padding inside the console area */
-  z-index: 1000;
+  z-index: 1001;
   /* Ensure it stays on top of other elements */
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
   /* Subtle shadow for depth */
@@ -40,4 +38,21 @@
   /* Ensure consistent font-size */
   min-width: 630px;
   /* Minimum width */
+}
+
+/* Collapsed states */
+body.sidebar-collapsed #console-bar {
+  left: var(--sidebar-collapsed-width);
+  width: var(--console-width-sidebar-collapsed);
+}
+
+body.panel-collapsed #console-bar {
+  right: var(--panel-collapsed-width);
+  width: var(--console-width-panel-collapsed);
+}
+
+body.sidebar-collapsed.panel-collapsed #console-bar {
+  left: var(--sidebar-collapsed-width);
+  right: var(--panel-collapsed-width);
+  width: var(--console-width-both-collapsed);
 }

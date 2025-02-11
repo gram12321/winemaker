@@ -1,191 +1,290 @@
-import { buildings, storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
-import { showBuildingOverlay } from './overlays/buildingOverlay.js'; // Import the showBuildingOverlay function
+import { loadBuildings } from '/js/database/adminFunctions.js';
+import { showBuildingOverlay } from './overlays/buildingOverlay.js';
 import { addConsoleMessage } from '/js/console.js';
-import { handleGenericTask, maintenanceTaskFunction } from './administration.js'; // Import the task logic
+import { storeBuildings } from '/js/database/adminFunctions.js';
+import { addTransaction} from '/js/finance.js';
+import { formatNumber } from '/js/utils.js';
+import taskManager from '/js/taskManager.js';
 
 export class Building {
-  constructor(name, level = 1) {
+  static BASE_COSTS = {
+    'Tool Shed': 500000,
+    'Warehouse': 1000000
+  };
+
+  static WEIGHT_CAPACITY = {
+    'Tool Shed': 10,  // Each slot can hold 10 weight units
+    'Warehouse': 15   // Warehouse slots can hold more weight
+  };
+
+  static SLOT_WEIGHT_CAPACITY = {
+    'Tool Shed': 5,  // Each slot can hold 5 weight units
+    'Warehouse': 8   // Warehouse slots can hold more weight
+  };
+
+  constructor(name, level = 1, tools = []) {
     this.name = name;
     this.level = level;
+    this.baseCost = Building.BASE_COSTS[name] || 500000;
     this.capacity = this.calculateCapacity();
-    this.contents = [];
+    this.slotWeightCapacity = Building.SLOT_WEIGHT_CAPACITY[name] || 5;
+    this.slots = Array(this.capacity).fill().map(() => ({ tools: [], currentWeight: 0 }));
+
+    // Initialize slots with existing tools
+    if (tools && tools.length > 0) {
+      tools.forEach(tool => {
+        // Create proper Tool instance if it's a plain object
+        const toolInstance = tool instanceof Tool ? tool : 
+          new Tool(tool.name, tool.buildingType, tool.speedBonus, tool.cost, 
+                  tool.capacity, tool.supportedResources, tool.weight, tool.validTasks, tool.toolType);
+        toolInstance.instanceNumber = tool.instanceNumber;
+        this.addTool(toolInstance);
+      });
+    }
   }
 
   calculateCapacity() {
-    return this.level * 2;
+    return this.level * 3;
   }
 
-  addContent(item) {
-    if (this.contents.length < this.capacity) {
-      this.contents.push(item);
+  getCurrentWeight() {
+    return this.slots.reduce((total, slot) => total + slot.currentWeight, 0);
+  }
+
+  getRemainingWeight() {
+    return this.totalWeightCapacity - this.getCurrentWeight();
+  }
+
+  findAvailableSlot(tool) {
+    const adjustedWeight = tool.getAdjustedWeight();
+    
+    // First, try to find a slot that already has the same type of tool
+    let slot = this.slots.find(slot => 
+      slot.tools.length > 0 && 
+      slot.tools[0].name === tool.name && 
+      slot.currentWeight + adjustedWeight <= this.slotWeightCapacity
+    );
+
+    // If no matching slot found, try to find an empty slot
+    if (!slot) {
+      slot = this.slots.find(slot => 
+        slot.tools.length === 0 && 
+        adjustedWeight <= this.slotWeightCapacity
+      );
+    }
+
+    return slot;
+  }
+
+  addTool(tool) {
+    const slot = this.findAvailableSlot(tool);
+    if (slot) {
+      slot.tools.push(tool);
+      // Use adjusted weight instead of base weight
+      slot.currentWeight += tool.getAdjustedWeight();
       return true;
-    } else {
-      console.log(`${this.name} is full! Upgrade to store more items.`);
-      return false;
     }
-  }
-
-  removeContent(itemName) {
-    const itemIndex = this.contents.findIndex(item => item.name === itemName);
-    if (itemIndex >= 0) {
-      this.contents.splice(itemIndex, 1);
-      console.log(`${itemName} removed from ${this.name}.`);
-    } else {
-      console.log(`${itemName} not found in ${this.name}.`);
-    }
+    return false;
   }
 
   upgrade() {
     this.level += 1;
-    this.capacity = this.calculateCapacity();
-    console.log(`${this.name} upgraded! New level is ${this.level} and capacity is ${this.capacity}.`);
+    const newCapacity = this.calculateCapacity();
+    // Add new empty slots for the increased capacity
+    const additionalSlots = newCapacity - this.capacity;
+    this.slots = [
+      ...this.slots,
+      ...Array(additionalSlots).fill().map(() => ({ tools: [], currentWeight: 0 }))
+    ];
+    this.capacity = newCapacity;
+    return true;
+  }
+
+  getUpgradeCost() {
+    return Math.floor(this.baseCost * Math.pow(1.5, this.level));
   }
 
   listContents() {
-    if (this.contents.length === 0) {
-      return "No items stored.";
+    const allTools = this.getAllTools();
+    if (allTools.length === 0) {
+      return "No tools stored.";
     }
-    const itemCounts = this.contents.reduce((acc, item) => {
-      acc[item.name] = (acc[item.name] || 0) + 1;
+
+    const toolCounts = allTools.reduce((acc, tool) => {
+      acc[tool.name] = (acc[tool.name] || 0) + 1;
       return acc;
     }, {});
-    // Generate HTML with icons and counts
-    return Object.entries(itemCounts)
+
+    return Object.entries(toolCounts)
       .map(([name, count]) => {
         const iconPath = `/assets/icon/buildings/${name.toLowerCase()}.png`;
         return `<div>
                   <img src="${iconPath}" alt="${name}" style="width: 24px; height: 24px; vertical-align: middle;" />
-                  ${count} 
+                  ${count}x ${name}
                 </div>`;
       })
       .join('<br>');
   }
-  
 
-  toJSON() {
-    return {
-      name: this.name,
-      level: this.level,
-      capacity: this.capacity,
-      contents: this.contents.map(content => content.toJSON())
-    };
+  getAllTools() {
+    return this.slots.flatMap(slot => slot.tools);
   }
 
-  static fromJSON(json) {
-    const building = new Building(json.name, json.level);
-    building.contents = (json.contents || []).map(Tool.fromJSON);
-    return building;
-  }
-
-  // New methods to get building details for display
-  getStatus() {
-    return this.level > 0 ? "Operational" : "Unbuilt";
-  }
-
-  getUpgradeCost() {
-    return this.level * 10; // Example calculation for upgrade cost
-  }
-
-  getContentDescription() {
-    return this.contents.length > 0 ? this.listContents() : "No items stored.";
+  sellToolFromSlot(slotIndex) {
+    const slot = this.slots[slotIndex];
+    if (slot && slot.tools.length > 0) {
+      const tool = slot.tools.pop(); // Remove last tool from slot
+      // Use adjusted weight for removal too
+      slot.currentWeight -= tool.getAdjustedWeight();
+      
+      // Add this check to clear slot if empty
+      if (slot.tools.length === 0) {
+        // Reset slot to empty state
+        slot.currentWeight = 0;
+      }
+      
+      return {
+        tool,
+        refundAmount: Math.floor(tool.cost / 2) // 50% refund
+      };
+    }
+    return null;
   }
 }
 
-class Tool {
-  static instanceCount = {}; // Static map to hold instance counts for each tool type
+export class Tool {
+  static instanceCount = {};
 
-  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = []) {
+  constructor(name, buildingType, speedBonus = 1.0, cost = 0, capacity = 0, supportedResources = [], weight = 1, validTasks = [], toolType = 'individual') {
     this.name = name;
     this.buildingType = buildingType;
     this.speedBonus = speedBonus;
-    this.cost = cost; // Add cost property
-    this.capacity = capacity; // Add capacity property
-    this.supportedResources = supportedResources; // Add supportedResources property
-    this.instanceNumber = this.getNextInstanceNumber(); // Assign instance number
+    this.cost = cost;
+    this.capacity = capacity; // capacity in kg or liters
+    this.supportedResources = supportedResources;
+    this.instanceNumber = 1; // Default value, will be overridden by ToolManager
+    this.weight = weight; // Default weight of 1 if not specified
+    this.validTasks = validTasks; // Now this will contain task names like 'harvest', 'planting' instead of types
+    this.toolType = toolType;  // Add new property
+    this.assignedTaskId = null; // Add this property to track which task the tool is assigned to
   }
 
-  getNextInstanceNumber() {
-    // Initialize count if it doesn't exist
-    if (!Tool.instanceCount[this.name]) {
-      Tool.instanceCount[this.name] = 0;
-    }
-    Tool.instanceCount[this.name] += 1; // Increment the count for this tool type
-    return Tool.instanceCount[this.name]; // Return the current instance number
+  getStorageId() {
+    return `${this.name} #${this.instanceNumber}`;
   }
 
-  toJSON() {
-    return {
-      name: this.name,
-      buildingType: this.buildingType,
-      speedBonus: this.speedBonus,
-      cost: this.cost,
-      capacity: this.capacity,
-      instanceNumber: this.instanceNumber,
-      supportedResources: this.supportedResources // Include supportedResources in serialization
-    };
+  canStore(resourceName) {
+    return this.supportedResources.length === 0 || this.supportedResources.includes(resourceName);
   }
 
-  static fromJSON(json) {
-    const tool = new Tool(
-      json.name, 
-      json.buildingType, 
-      json.speedBonus, 
-      json.cost, 
-      json.capacity,
-      json.supportedResources // Include supportedResources in deserialization
+  getCurrentAmount(inventory) {
+    const contents = inventory.getStorageContents(this.getStorageId());
+    return contents.reduce((sum, item) => sum + item.amount, 0);
+  }
+
+  getAvailableSpace(inventory) {
+    return this.capacity - this.getCurrentAmount(inventory);
+  }
+
+  isValidForTask(taskName) {
+    return this.validTasks.some(task => 
+      task.toLowerCase() === taskName.toLowerCase()
     );
-    tool.instanceNumber = json.instanceNumber; // Include instance number in deserialization
-    return tool;
+  }
+
+  isAvailable() {
+    return this.assignedTaskId === null;
+  }
+
+  assignToTask(taskId) {
+    if (this.isAvailable()) {
+      this.assignedTaskId = taskId;
+      return true;
+    }
+    return false;
+  }
+
+  releaseFromTask() {
+    this.assignedTaskId = null;
+  }
+
+  getAdjustedWeight() {
+    // Get completed upgrades that affect weight
+    const completedUpgrades = JSON.parse(localStorage.getItem('upgrades') || '[]');
+    const weightReduction = completedUpgrades
+        .filter(u => u.completed && u.benefits.toolWeightReduction)
+        .reduce((total, upgrade) => total + upgrade.benefits.toolWeightReduction, 0);
+
+    // Apply weight reduction
+    return this.weight * (1 - weightReduction);
   }
 }
 
-// Singleton pattern for tool initialization
 const ToolManager = (() => {
   let toolsInitialized = false;
   let tools = [];
+  let toolInstanceCounts = {};
 
   function initializeTools() {
     if (!toolsInitialized) {
-      // Specify the capacity and supported resources for each tool
-      const tractor = new Tool('Tractor', 'Tool Shed', 1.2, 500, 0); 
-      const trimmer = new Tool('Trimmer', 'Tool Shed', 1.1, 300, 0); 
-      const forklift = new Tool('Forklift', 'Warehouse', 1.0, 400, 0); 
-      const palletJack = new Tool('Pallet Jack', 'Warehouse', 1.0, 150, 0); 
-      const harvestbins = new Tool('Harvest Bins', 'Warehouse', 1.0, 1000, 3000, ['Grapes']); 
-      const fermentationTank = new Tool('Fermentation Tank', 'Warehouse', 1.0, 6000, 2000, ['Must']);
-      tools = [tractor, trimmer, forklift, palletJack, harvestbins, fermentationTank];
+      // Reset tool instance counts
+      toolInstanceCounts = {};
+
+      tools = [ // name, buildingType, speedBonus, cost, capacity, supportedResources, weight, validTasks, toolType
+        new Tool('Tractor', 'Tool Shed', 1.2, 2500, 0, [], 5, ['planting', 'harvesting', 'clearing', 'uprooting' ], 'task'),      // Takes full slot
+        new Tool('Trimmer', 'Tool Shed', 1.1, 1300, 0, [], 1, ['planting', 'clearing'], 'task'),      // Can fit multiple
+        new Tool('Harvest Bins', 'Tool Shed', 1.1, 700, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
+        new Tool('Lug Box', 'Tool Shed', 1.05, 500, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
+        new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation', 'Building & Maintenance'], 'task'),   // Takes full slot
+        new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'Building & Maintenance'], 'individual'),
+        new Tool('Macro Bin', 'Warehouse', 1.05, 1050, 1000, ['Grapes'], 2, ['crushing'], 'individual'),
+        new Tool('Grape Gondola', 'Warehouse', 1.0, 10000, 8000, ['Grapes'], 8, ['crushing'], 'task'),
+        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['fermentation'], 'task') // Takes full slot
+      ];
       toolsInitialized = true;
     }
     return tools;
   }
 
-  // New function to create tool instances based on their name
   function createToolInstance(toolName) {
     const toolTemplate = tools.find(tool => tool.name === toolName);
     if (toolTemplate) {
-      return new Tool(toolTemplate.name, toolTemplate.buildingType, 
-                       toolTemplate.speedBonus, toolTemplate.cost, 
-                       toolTemplate.capacity, 
-                       toolTemplate.supportedResources || []); // Add supportedResources if available
-    } else {
-      console.log('Tool template not found');
-      return null; // Handle error gracefully
+      // Initialize counter if not exists
+      if (!toolInstanceCounts[toolName]) {
+        toolInstanceCounts[toolName] = 0;
+      }
+      // Increment counter
+      toolInstanceCounts[toolName]++;
+
+      const newTool = new Tool(
+        toolTemplate.name,
+        toolTemplate.buildingType,
+        toolTemplate.speedBonus,
+        toolTemplate.cost,
+        toolTemplate.capacity,
+        toolTemplate.supportedResources || [],
+        toolTemplate.weight,
+        toolTemplate.validTasks,
+        toolTemplate.toolType
+      );
+      // Override the instance number with our managed count
+      newTool.instanceNumber = toolInstanceCounts[toolName];
+      return newTool;
     }
+    console.log('Tool template not found');
+    return null;
   }
 
   return {
     getTools: initializeTools,
-    createToolInstance // Expose the function to create tool instances
+    createToolInstance
   };
 })();
 
-// Export the more generalized functions
 export const getBuildingTools = () => ToolManager.getTools();
 export const createTool = (toolName) => ToolManager.createToolInstance(toolName);
 
-
 export function buildBuilding(buildingName) {
-  // Load existing buildings to check if the building already exists
   const buildings = loadBuildings();
   const existingBuilding = buildings.find(b => b.name === buildingName);
 
@@ -194,108 +293,169 @@ export function buildBuilding(buildingName) {
     return;
   }
 
-  // Start a maintenance task for the building rather than building it immediately
-  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName });
+  const buildingCost = Building.BASE_COSTS[buildingName] || 500000;
 
-  // UI feedback that a build process has started
+  // Initial state changes
   const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
   const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
 
   if (buildButton && upgradeButton) {
     buildButton.disabled = true;
     buildButton.textContent = "Building...";
-    upgradeButton.disabled = true; // Disable upgrade until the building is complete
   }
 
-  addConsoleMessage(`Started building process for ${buildingName}.`);
+  // Add to transaction history
+  addTransaction('Expense', `Construction of ${buildingName}`, -buildingCost);
+
+  // Add initial message
+  addConsoleMessage(`Construction of ${buildingName} has begun. <span style="color: red">€${formatNumber(buildingCost)}</span> has been deducted from your account. When complete, capacity will be ${new Building(buildingName).calculateCapacity()} spaces.`);
+
+  // Create building task
+  taskManager.addCompletionTask(
+    'Building & Maintenance',
+    'maintenance',
+    buildingCost / 1000, // Total work required based on building cost
+    (target, params) => {
+      // Completion callback
+      const newBuilding = new Building(buildingName);
+      const buildings = loadBuildings();
+      buildings.push(newBuilding);
+      storeBuildings(buildings);
+
+      if (buildButton && upgradeButton) {
+        buildButton.textContent = "Built";
+        upgradeButton.disabled = false;
+      }
+
+      addConsoleMessage(`${buildingName} has been built successfully. <span style="color: red">Cost: €${formatNumber(buildingCost)}</span>. Capacity: ${newBuilding.capacity} (${newBuilding.capacity} spaces available)`);
+      updateBuildingCards();
+      updateBuildButtonStates();
+    },
+    { name: buildingName }, // Change: Pass building name as an object with name property
+    { buildingCost }
+  );
 }
 
+export function updateBuildButtonStates() { // Disable build and upgrade buttons if not allowed (No money or already built)
+  const buildings = loadBuildings();
+  const currentMoney = parseInt(localStorage.getItem('money')) || 0;
+  const activeTasks = taskManager.getAllTasks();
 
-// Function to upgrade a building including updating eventlisteners
-document.addEventListener('DOMContentLoaded', function () {
-  updateBuildingCards(); // Update UI when the page is initially loaded
-  attachUpgradeButtonListeners(); // Attach listeners to buttons
-});
+  const buildButtons = document.querySelectorAll('.build-button');
+  const upgradeButtons = document.querySelectorAll('.upgrade-button');
 
-export function updateBuildingCards() {
-  document.querySelectorAll('.building-card').forEach(cardDiv => {
-    const detailDiv = cardDiv.querySelector('.building-details');
-    const buildingName = detailDiv.getAttribute('data-building-name');
-    const buildings = loadBuildings();
-    const building = buildings.find(b => b.name === buildingName);
+  buildButtons.forEach((button, index) => {
+    const buildingName = button.getAttribute('data-building-name');
+    const upgradeButton = upgradeButtons[index];
+    const existingBuilding = buildings.find(b => b.name === buildingName);
+    const buildCost = Building.BASE_COSTS[buildingName] || 500000;
+    const hasBuildingTask = activeTasks.some(task => 
+      task.name === 'Building & Maintenance' && 
+      task.params.buildingName === buildingName
+    );
 
-    // Update the building name in the card
-    const nameDiv = cardDiv.querySelector('.building-name');
-    if (nameDiv) {
-      nameDiv.textContent = buildingName;
-    }
+    if (existingBuilding) {
+      button.disabled = true;
+      button.textContent = "Built";
 
-    const status = building ? building.getStatus() : "Unbuilt";
-    const level = building ? building.level : 0;
-    const capacity = building ? building.capacity : 0;
-    const upgradeCost = building ? building.getUpgradeCost() : "N/A";
-    const content = building ? building.getContentDescription() : "No items stored.";
-
-    // Apply the unbuilt-card class if status is "Unbuilt"
-    if (status === "Unbuilt") {
-      cardDiv.classList.add('unbuilt-card');
+      const building = new Building(buildingName, existingBuilding.level);
+      const upgradeCost = building.getUpgradeCost();
+      upgradeButton.disabled = currentMoney < upgradeCost;
+    } else if (hasBuildingTask) {
+      button.disabled = true;
+      button.textContent = "Building...";
     } else {
-      cardDiv.classList.remove('unbuilt-card');
+      button.disabled = currentMoney < buildCost;
+      button.textContent = "Build";
     }
-
-    detailDiv.innerHTML = `
-      <p><strong>${buildingName}</strong></p>  <!-- Add Building Name here -->
-      <p>Status: ${status}</p>
-      <p>Level: ${level}</p>
-      <p>Upgrade Cost: ${upgradeCost}</p>
-      <p>Capacity: ${capacity}</p>
-      <p>Content: <br> ${content}</p>
-    `;
-
-    // Add event listener to open building overlay on card click
-    cardDiv.addEventListener('click', () => {
-      if (building) {
-        showBuildingOverlay(building);
-      }
-    });
   });
 }
 
-function attachUpgradeButtonListeners() {
-  document.querySelectorAll('.upgrade-button').forEach(button => {
-    button.addEventListener('click', function (event) {
-      event.stopPropagation(); // Prevent the click from bubbling up to the card
-      const buildingName = this.getAttribute('data-building-name');
-      if (buildingName) {
-        upgradeBuilding(buildingName);
-        updateBuildingCards(); // Ensure cards are updated to reflect the new state
-      }
-    });
+export function updateBuildingCards() {
+  const buildings = loadBuildings();
+
+  document.querySelectorAll('.building-card').forEach(cardDiv => {
+    const detailDiv = cardDiv.querySelector('.building-details');
+    if (!detailDiv) return;
+
+    const buildingName = detailDiv.getAttribute('data-building-name');
+    if (!buildingName) return;
+
+    const buildingData = buildings.find(b => b.name === buildingName);
+    const isBuilt = buildingData !== undefined;
+
+    // Create proper Building instance if building exists
+    const building = isBuilt ? new Building(buildingData.name, buildingData.level) : null;
+    if (building && buildingData.slots) {
+      building.slots = buildingData.slots;
+    }
+
+    cardDiv.classList.toggle('unbuilt-card', !isBuilt);
+
+    detailDiv.innerHTML = `
+      <p><strong>${buildingName}</strong></p>
+      <p>Status: ${isBuilt ? "Operational" : "Unbuilt"}</p>
+      <p>Level: ${isBuilt ? building.level : 0}</p>
+      <p>Upgrade Cost: ${isBuilt ? `€${building.getUpgradeCost()}` : "N/A"}</p>
+      <p>Capacity: ${isBuilt ? building.capacity : 0}</p>
+      <p>Content: <br> ${isBuilt ? building.listContents() : "No tools stored."}</p>
+    `;
+
+    if (isBuilt) {
+      cardDiv.onclick = () => showBuildingOverlay(building);
+    } else {
+      cardDiv.onclick = null;
+    }
   });
 }
 
 export function upgradeBuilding(buildingName) {
   const buildings = loadBuildings();
-  const building = buildings.find(b => b.name === buildingName);
+  const buildingData = buildings.find(b => b.name === buildingName);
 
-  if (!building) {
-    console.error(`Building ${buildingName} not found.`);
+  if (!buildingData) {
+    addConsoleMessage(`Building ${buildingName} not found.`);
     return;
   }
 
-  // Calculate upgrade cost
+  const building = new Building(buildingData.name, buildingData.level, buildingData.tools || []);
   const upgradeCost = building.getUpgradeCost();
 
-  // Initiate the upgrade as a task
-  const taskName = `Upgrading ${buildingName}`;
-  handleGenericTask('Building & Maintenance', maintenanceTaskFunction, { buildingName, taskName, upgradeCost });
+  // Add to transaction history
+  addTransaction('Expense', `Upgrade of ${buildingName}`, -upgradeCost);
 
-  // UI feedback that an upgrade process has started
-  const upgradeButton = document.querySelector(`.upgrade-button[data-building-name="${buildingName}"]`);
-  if (upgradeButton) {
-    upgradeButton.disabled = true;
-    upgradeButton.textContent = "Upgrading...";
-  }
+  // Add initial message
+  addConsoleMessage(`Upgrade of ${buildingName} has begun. <span style="color: red">€${formatNumber(upgradeCost)}</span> has been deducted from your account.`);
 
-  addConsoleMessage(`Started upgrade process for ${buildingName}.`);
+  // Create upgrade task
+  taskManager.addCompletionTask(
+    'Building & Maintenance',
+    'maintenance',
+    upgradeCost / 1000, // Total work required based on upgrade cost
+    (target, params) => {
+      // Completion callback
+      const buildings = loadBuildings();
+      const buildingToUpgrade = buildings.find(b => b.name === params.buildingName);
+
+      if (buildingToUpgrade) {
+        const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.slots?.flatMap(slot => slot.tools) || []);
+        building.upgrade();
+        // Remove this line as it's incorrect:
+        // building.tools = buildingToUpgrade.tools || []; 
+        
+        // The tools are already preserved through the constructor and slots
+
+        const updatedBuildings = buildings.map(b => 
+          b.name === params.buildingName ? building : b
+        );
+        storeBuildings(updatedBuildings);
+
+        addConsoleMessage(`${buildingName} has been upgraded to level ${building.level}. <span style="color: red">Cost: €${formatNumber(upgradeCost)}</span>. New Capacity: ${building.capacity} (${building.capacity - (building.tools ? building.tools.length : 0)} spaces available)`);
+        updateBuildingCards();
+        updateBuildButtonStates();
+      }
+    },
+    { name: buildingName }, // Change: Pass building name as an object with name property
+    { buildingName, upgradeCost } // Ensure buildingName is passed in params
+  );
 }

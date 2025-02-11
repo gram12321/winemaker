@@ -1,235 +1,371 @@
-/*  - --- --   Overlay   - - - - - -*/
+/* 1. Mainview Overlays (Main Pages) */
+.mainview-overlay {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: var(--panel-width);
+  width: calc(100% - (var(--sidebar-width) + var(--panel-width)));
+  height: calc(100vh - var(--console-height));
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: none;
+  z-index: 1000;
+  transition: all var(--transition-speed) ease;
+  background: var(--color-background);
+}
 
-/* General Overlay Styles */
+.mainview-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 30px;
+  min-height: 100%;
+}
+
+/* Collapsed states for mainview */
+body.sidebar-collapsed .mainview-overlay {
+  left: var(--sidebar-collapsed-width);
+  width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-width)));
+}
+
+body.panel-collapsed .mainview-overlay {
+  right: var(--panel-collapsed-width);
+  width: calc(100% - (var (--sidebar-width) + var(--panel-collapsed-width)));
+}
+
+body.sidebar-collapsed.panel-collapsed .mainview-overlay {
+  width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
+}
+
+/* 2. Standard Overlays (Task Overlays) */
 .overlay {
   position: fixed;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   top: 0;
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  /* Semi-transparent background */
-  z-index: 2000;
-  display: flex;
-  /* Use flex to ensure child can be centered easily */
-}
-
-.overlay-content {
-  position: absolute;
-  /* Allow using top, left, transform for centering */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: inline-block;
-  /* Natural width based on child content */
-  padding: 30px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Table styles within overlays */
-.overlay .table {
-  margin: 0 auto;
-  /* Center align the table */
-  width: auto;
-  /* Allow natural width expansion */
-  min-width: 400px;
-  /* Minimum width */
-  color: #333;
-  text-align: center;
-  background-color: #f9f9f9;
-}
-
-.overlay .table thead th {
-  background-color: #343a40;
-  color: #fff;
-}
-
-.overlay .table tbody tr:nth-child(even) {
-  background-color: #e9ecef;
-}
-
-.table-hover tbody tr:hover {
-  background-color: #d1e7fd;
-  /* Light blue highlight */
-}
-
-
-
-
-/* Skills Table Styles */
-.skills-table {
-  width: auto;
-  /* Adjust table width to fit content */
-  table-layout: auto;
-  /* Let the table size be determined by its content */
-  border-collapse: collapse;
-  margin: 15px auto;
-  /* Center align table */
-  font-size: 0.9em;
-  /* Reduced font size */
-}
-
-.skills-table th,
-.skills-table td {
-  padding: 8px 12px;
-  /* Reduced padding */
-  border: 1px solid #dddddd;
-  text-align: left;
-}
-
-.skills-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.skills-table tr:hover {
-  background-color: #d1e7fd;
-  /* Light blue highlight */
-}
-
-/* Header styling */
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-/* Close button styling */
-.close-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  font-size: 24px;
-  cursor: pointer;
-  color: #333;
-}
-
-/* Skill Level Classes */
-.high {
-  color: green;
-  font-weight: bold;
-}
-
-.medium {
-  color: orange;
-  font-weight: bold;
-}
-
-.low {
-  color: red;
-  font-weight: bold;
-}
-
-/* Player Image styling */
-.player-image {
-  width: 100px;
-  height: auto;
-  border-radius: 50%;
-  margin: 20px;
-}
-
-
-/* Fullscreen overlay specific for hire staff */
-#hireStaffOverlay {
   display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1100;
-  overflow-y: hidden;
+  justify-content: center;
+  align-items: center;
+  z-index: 1500;
 }
 
-/* Content area inside the hire staff overlay */
-.hire-staff-content {
-  background-color: #fff;
-  padding: 20px;
-  margin: 60px auto;
-  width: 90%;
-  max-width: 1000px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: relative;
-  max-height: 80vh;
+.overlay-divider {
+  border-top: 2px solid var(--color-accent);
+  margin: 20px 0;
+}
+
+.standard-overlay .overlay-content {
+  max-width: 80vw;
+  max-height: 90vh;
   overflow-y: auto;
 }
 
-.hire-staff-content h3 {
-  margin-top: 20px;
-  margin-bottom: 40px;
+.overlay-section .card-header h3,
+.overlay-section .card-header h2 {
+  color: var(--panel-text);
+  margin: 0;
 }
 
-.hire-staff-container {
+.overlay-section .card-header h2 {
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section-wrapper {
+  padding: 25px;
+  background: var(--color-background);
+  margin-bottom: 20px;
+}
+
+.overlay.active {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
 }
 
-.hire-staff-option {
-  flex: 0 0 48%;
-  margin-bottom: 40px;
-  margin-top: 20px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 15px;
-  background: #f9f9f9;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+.overlay-content {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  width: auto;
+  max-width: 800px;
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-accent);
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 0 auto;
 }
 
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  font-size: 1.5em;
-  cursor: pointer;
+/* 3. Modal Overlays */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  overflow-y: auto;
+  padding: 20px 0;
 }
 
-.table.table-bordered {
-  width: 100%;
+.modal-overlay .overlay-content {
+  position: relative;
+  max-width: 800px;
+  width: 90%;
+  margin: 2rem auto;
+  background: var(--color-background);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+  min-width: min-content;
 }
 
-/* /* Add CSS styles for the planting overlay */
-.planting-overlay-info-box {
-  background-color: #f0f0f0;
-  border-radius: 5px;
-  padding: 10px;
-  margin: 10px 0;
+/* 4. Common Table Styles */
+.overlay-table,
+.overlay-content .table,
+.mainview-overlay-content .table {
+  margin: 0 auto;
+  width: auto;
+  background-color: var(--color-background);
   text-align: center;
-  border: 1px solid #ddd;
-  width: 100px;
+  margin-bottom: 1rem;
 }
 
-/*  - --- --   staff.html - - - - - -*/
-
-.skill-bar-container {
-  display: flex;
-  gap: 5px;
-  /* Space between skill bars */
+.overlay-table th,
+.overlay-content .table th,
+.mainview-overlay-content .table th {
+  background-color: rgba(197, 165, 114, 0.2);
+  color: var(--color-text);
+  padding: 12px;
+  border-bottom: 2px solid var(--color-accent);
 }
 
-.skill-bar {
-  height: 20px;
-  /* Increased height of each skill bar */
-  flex-grow: 1;
-  /* Flex property to allow growth based on width value */
-  border-radius: 3px;
-  margin-top: 3px;
-  /* Space above bars */
-  color: #fff;
-  /* Text color */
-  font-weight: bold;
-  /* Bold text */
-  display: flex;
-  /* Use flexbox to center the text */
-  align-items: center;
-  /* Vertically center text */
-  justify-content: center;
-  /* Horizontally center text */
+.overlay-table td,
+.overlay-content .table td,
+.mainview-overlay-content .table td {
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+  vertical-align: middle;
 }
 
-.skills-column {
-  min-width: 150px;
-  /* Set the minimum width for the skills column */
+.overlay-table tbody tr:hover,
+.overlay-content .table tbody tr:hover,
+.mainview-overlay-content .table tbody tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+}
+
+.table-responsive {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Section Styling */
+.overlay-section {
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.overlay-section .card-header {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  padding: 1rem;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Keep gradient only for multi-section overlays */
+.overlay-section:not(:only-child) .card-header {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+}
+
+/* Overlay Container Styles */
+.overlay-container {
+  background-color: var(--color-background);
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Section-specific Header Styles */
+#vineyard-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Section-specific Header Gradients */
+#grapes-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+#must-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+#wine-section .card-header {
+  background: linear-gradient(135deg, #491809, #23143E);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section .table tbody tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+}
+
+.overlay-section .badge,
+.inventory-section .badge,
+.overlay-section .badge-light {
+  background-color: var(--color-accent);
+  color: var(--panel-text);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+}
+
+#orders-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section .table,
+.overlay-table {
+  margin: 0;
+  background-color: transparent;
+}
+
+.overlay-section .table th,
+.overlay-table th {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-table td,
+.overlay-section .table td {
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+  background: transparent;
+}
+
+/* Skill Bar Implementation - For some reason has to stay in overlay.css*/ 
+.skill-bar-container { display: flex; gap: 5px; }
+.skill-bar { height: 20px; flex-grow: 1; border-radius: 3px; margin-top: 3px; color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+.skill-bar.field-skill-bar { background-color: var(--skill-field); }
+.skill-bar.winery-skill-bar { background-color: var(--skill-winery); }
+.skill-bar.admin-skill-bar { background-color: var(--skill-admin); }
+.skill-bar.sales-skill-bar { background-color: var(--skill-sales); }
+.skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
+.skills-column { min-width: 150px; }
+
+
+/* Progress Bar Base Styles */
+.progress {
+    height: 20px !important;
+    background-color: var(--color-background) !important;
+    border: 1px solid var(--color-accent) !important;
+    border-radius: var(--radius-md) !important;
+    margin: 10px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--color-primary) !important;
+    transition: width 0.3s ease;
+    display: block !important;
+}
+
+/* Progress Bar States */
+.progress-bar[aria-valuenow="0"]:not([data-has-work="true"]) {
+    display: none;
+}
+
+/* Progress Info Components */
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.progress-container {
+    margin: 15px 0;
+}
+
+/* Segmented Progress Bar */
+.progress-segments {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.progress-segment {
+    position: absolute;
+    height: 100%;
+    background-color: transparent;
+    border-right: 1px solid var(--color-background);
+    z-index: 1;
+}
+
+.progress-segments .progress-bar {
+    height: 100%;
+    transition: none;
+}
+
+.progress-segments .progress-bar:hover {
+    filter: brightness(1.2);
+}
+
+/* Glow Effect */
+.progress-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        var(--color-primary) 0%,
+        var(--color-accent) 50%,
+        var(--color-primary) 100%
+    );
+    animation: moveGlow 2s linear infinite;
+    opacity: 0.7;
+}
+
+/* Stats Display */
+.work-stats-wrapper {
+    font-size: 0.85em;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: var(--color-text);
+    opacity: 0.9;
+}
+
+.work-stats-wrapper span {
+    white-space: nowrap;
+}
+
+/* Progress Preview Container */
+.work-preview {
+    background: var(--color-background);
+    padding: 15px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-accent);
+}
+
+.work-preview h5 {
+    color: var(--color-text);
+    margin-bottom: 15px;
+    font-size: 1em;
 }

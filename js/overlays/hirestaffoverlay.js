@@ -1,121 +1,148 @@
-import { createNewStaff, displayStaff } from '../staff.js';
-import { getFlagIconHTML } from '../utils.js';
-import { saveStaff } from '../database/adminFunctions.js'; // Ensure saveStaff is imported
-import { addConsoleMessage } from '../console.js'; // Import addConsoleMessage
-import { addTransaction } from '../finance.js'; // Import addTransaction for recording expenses
-import { handleGenericTask, hiringTaskFunction  } from '../administration.js'; // Import handleHiringTask
+import { createNewStaff, setupStaffWagesRecurringTransaction } from '../staff.js';
+import { getFlagIconHTML, skillLevels, getSkillLevelInfo, formatNumber, getColorClass } from '../utils.js';
+import { saveStaff, loadStaff } from '../database/initiation.js';
+import { addConsoleMessage } from '../console.js';
+import { addTransaction } from '../finance.js';
+import taskManager from '../taskManager.js';  // Changed this line - removed TaskType
+import { showModalOverlay, showStandardOverlay, hideOverlay } from './overlayUtils.js'; // Change this import
+import { specializedRoles } from './hireStaffOptionsOverlay.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    const hireStaffBtn = document.getElementById('hire-staff-btn');
-    const overlay = document.getElementById('hireStaffOverlay');
-    const closeOverlayBtn = document.getElementById('closeHireStaffOverlay');
+export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, specializedRoles = []) {
+    const createdStaffOptions = Array.from(
+        {length: numberOfOptions}, 
+        () => createNewStaff(skillModifier, specializedRoles)
+    );
+    
+    // Add console.log to debug content creation
+    const content = createHireStaffHTML(createdStaffOptions);
+    
+    const overlayContainer = showModalOverlay('hireStaffOverlay', content);
 
-    if (hireStaffBtn) hireStaffBtn.addEventListener('click', displayStaffOptions);
-    if (closeOverlayBtn) closeOverlayBtn.addEventListener('click', closeOverlay);
+    setupHireStaffEventListeners(overlayContainer, createdStaffOptions);
+    return overlayContainer;
+}
 
-    window.addEventListener('click', (event) => {
-        if (event.target === overlay) {
-            closeOverlay();
-        }
+function createHireStaffHTML(createdStaffOptions) {
+    const skillInfo = getSkillLevelInfo(createdStaffOptions[0]?.skillLevel || 0.1);
+    const specializationText = createdStaffOptions[0]?.specializedRoles?.length > 0 
+        ? `We have been specifically looking for ${createdStaffOptions[0].specializedRoles.map(role => 
+            `<span style="color: var(--skill-${role});">${specializedRoles[role].title}</span>`).join(', ')}.<br>`
+        : '';
+
+    return `
+    <div class="overlay-card hire-staff-overlay">
+        <div class="imgbox">
+            <div class="card-header text-white d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">Hire Staff</h3>
+                <button class="btn btn-light btn-sm close-btn">Close</button>
+            </div>
+            <img src="/assets/pic/staff_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Staff">
+            <div class="p-3 text-center">
+                <p>HR Department has completed the search for new Candidate:</p>
+                <p>We have found ${createdStaffOptions.length} candidates</p>
+                <p>We have been searching for ${skillInfo.formattedName}</p>
+                ${specializationText}
+                <p>Here are the possible candidates:</p>
+            </div>
+        </div>
+        <div class="info-grid">
+            ${createdStaffOptions.map((staff, index) => `
+                <div class="info-section">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center">
+                        <h3 class="h5 mb-0">${staff.firstName} ${staff.lastName}</h3>
+                        <button class="btn btn-alternative btn-sm hire-staff-button" data-staff-index="${index}">Hire</button>
+                    </div>
+                    
+                        <div class="info-section">
+                            <h4>Personal Details</h4>
+                            <table class="data-table">
+                                <tbody>
+                                    <tr>
+                                        <td>Nationality</td>
+                                        <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Monthly Wage</td>
+                                        <td>€${staff.wage}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Annual Cost</td>
+                                        <td>€${staff.wage * 12}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Skill Level</td>
+                                        <td>${getSkillLevelInfo(staff.skillLevel).formattedName}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="info-section">
+                            <h4>Skills & Expertise</h4>
+                            <table class="data-table">
+                                <tbody>
+                                    <tr><td>Field Work</td><td class="${getColorClass(staff.skills.field.field)}">${formatNumber(staff.skills.field.field * 100)}%</td></tr>
+                                    <tr><td>Winery Operations</td><td class="${getColorClass(staff.skills.winery.winery)}">${formatNumber(staff.skills.winery.winery * 100)}%</td></tr>
+                                    <tr><td>Administration</td><td class="${getColorClass(staff.skills.administration.administration)}">${formatNumber(staff.skills.administration.administration * 100)}%</td></tr>
+                                    <tr><td>Sales Management</td><td class="${getColorClass(staff.skills.sales.sales)}">${formatNumber(staff.skills.sales.sales * 100)}%</td></tr>
+                                    <tr><td>Maintenance</td><td class="${getColorClass(staff.skills.maintenance.maintenance)}">${formatNumber(staff.skills.maintenance.maintenance * 100)}%</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    
+                </div>
+            `).join('')}
+        </div>
+    </div>`;
+}
+
+function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
+    // Add event listeners for hire buttons
+    overlayContainer.querySelectorAll('.hire-staff-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const staffIndex = parseInt(button.dataset.staffIndex);
+            hireSelectedStaff(createdStaffOptions[staffIndex]);
+        });
     });
 
-    function displayStaffOptions() {
-        const staffContainer = overlay.querySelector('.overlay-content');
+    // Add event listener for close button
+    overlayContainer.querySelector('.close-btn').addEventListener('click', () => {
+        hideOverlay(overlayContainer);
+    });
+}
 
-        // Clear existing content except the close button and header
-        staffContainer.innerHTML = `
-            <span id="closeHireStaffOverlay" class="close-btn">&times;</span>
-            <h3>Hire Staff</h3>
-        `;
+function hireSelectedStaff(staff) {
+    const hiringExpense = staff.wage * 12;
+    const currentMoney = parseFloat(localStorage.getItem('money') || '0');
 
-        const numberOfOptions = 5; // Generate this number of staff options
-        const createdStaffOptions = [];
+    if (currentMoney < hiringExpense) {
+        addConsoleMessage(`Insufficient funds for hiring: <strong>${staff.firstName} ${staff.lastName}</strong>. Required: <strong>${formatNumber(hiringExpense)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>.`);
+        return;
+    }
 
-        for (let i = 0; i < numberOfOptions; i++) {
-            const newStaff = createNewStaff();
-            createdStaffOptions.push(newStaff);
+    taskManager.addCompletionTask(
+        'Hiring Process',
+        'administration', 
+        20,
+        (target, params) => {
+            const { staff, hiringExpense } = params;
+            const staffMembers = loadStaff();
+            staffMembers.push(staff);
+            saveStaff(staffMembers);
+
+            addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+            setupStaffWagesRecurringTransaction(); // Update wages after staff is actually hired
+            const flagIconHTML = getFlagIconHTML(staff.nationality);
+            addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
+        },
+        null,
+        { staff, hiringExpense },
+        (target, params) => {
+            const { staff } = params;
+            addConsoleMessage(`Started hiring process for ${staff.firstName} ${staff.lastName}...`, true);
+            const overlay = document.querySelector('.overlay');
+            if (overlay) {
+                hideOverlay(overlay);
+            }
         }
-
-        let staffHTML = '<div class="staff-options-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; overflow-y: auto; max-height: 80vh;">';
-
-        createdStaffOptions.forEach(staff => {
-            staffHTML += `
-                <div class="staff-option" style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                    <h4>${staff.firstName} ${staff.lastName}</h4>
-                    <table class="table table-bordered" style="width: 100%;">
-                        <tbody>
-                            <tr>
-                                <td>Nationality</td>
-                                <td>${getFlagIconHTML(staff.nationality)} ${staff.nationality}</td>
-                            </tr>
-                            <tr>
-                                <td>Wage</td>
-                                <td>€${staff.wage}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <h4>Skills</h4>
-                    <table class="skills-table" style="width: 100%;">
-                        <thead>
-                            <tr>
-                                <th>Skill</th>
-                                <th>Level</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Field</td><td class="${getSkillLevelClass(staff.skills.field.field)}">${staff.skills.field.field}</td></tr>
-                            <tr><td>Winery</td><td class="${getSkillLevelClass(staff.skills.winery.winery)}">${staff.skills.winery.winery}</td></tr>
-                            <tr><td>Administration</td><td class="${getSkillLevelClass(staff.skills.administration.administration)}">${staff.skills.administration.administration}</td></tr>
-                            <tr><td>Sales</td><td class="${getSkillLevelClass(staff.skills.sales.sales)}">${staff.skills.sales.sales}</td></tr>
-                            <tr><td>Maintenance</td><td class="${getSkillLevelClass(staff.skills.maintenance.maintenance)}">${staff.skills.maintenance.maintenance}</td></tr>
-                        </tbody>
-                    </table>
-                    <button class="btn btn-primary hire-staff-button" style="margin-top: 10px;">Hire</button>
-                </div>
-            `;
-        });
-
-        staffHTML += '</div>';
-
-        staffContainer.innerHTML += staffHTML;
-        overlay.style.display = 'block';
-
-        // Add event listeners for hire buttons
-        overlay.querySelectorAll('.hire-staff-button').forEach((button, index) => {
-            button.addEventListener('click', () => hireSelectedStaff(createdStaffOptions[index]));
-        });
-    }
-
-    function hireSelectedStaff(staff) {
-        // Save pending hire in localStorage without adding to staff list
-        let pendingHires = JSON.parse(localStorage.getItem('pendingHires')) || [];
-        pendingHires.push(staff);
-        localStorage.setItem('pendingHires', JSON.stringify(pendingHires));
-
-        // Immediately deduct the hiring expense as a one-time transaction
-        const hiringExpense = staff.wage * 12;
-        addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
-
-        // Show console message with hiring details
-        const flagIconHTML = getFlagIconHTML(staff.nationality);
-        addConsoleMessage(`Started hiring process for: ${staff.firstName} ${staff.lastName}, ${flagIconHTML} ${staff.nationality}, One-time hiring cost: €${hiringExpense}`, true);
-
-        // Create the hiring task
-        handleGenericTask('Hiring', hiringTaskFunction);
-
-        // Close the overlay
-        closeOverlay();
-    }
-
-    function closeOverlay() {
-        const overlay = document.getElementById('hireStaffOverlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
-    }
-
-    // Helper function to determine skill level class
-    function getSkillLevelClass(skillValue) {
-        return skillValue > 0.75 ? 'high' : skillValue > 0.5 ? 'medium' : 'low';
-    }
-});
+    );
+}

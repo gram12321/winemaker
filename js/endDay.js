@@ -1,161 +1,268 @@
 // endDay.js
 import { addConsoleMessage } from './console.js';
-import { renderCompanyInfo } from './database/loadSidebar.js';
-import { inventoryInstance, displayInventory } from './resource.js'; // Import needed functions
-import { executeAllTasks } from './loadPanel.js'
+import { updateAllDisplays } from './displayManager.js';
 import { processRecurringTransactions } from './finance.js';
-import { handleGenericTask, bookkeepingTaskFunction  } from './administration.js';
-import { Farmland, calculateLandvalue, calculateFarmlandPrestige} from './farmland.js';  // Ensure Farmland is imported if used elsewhere
-import { decayPrestigeHit } from './database/loadSidebar.js';
+import { calculateLandvalue, calculateFarmlandPrestige } from './farmland.js';
+import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
-
-
+import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, updateFarmland, getPrestigeHit, setPrestigeHit, loadTasks, saveTasks } from './database/adminFunctions.js';
+import taskManager from './taskManager.js';
+import { finalizePlanting } from './overlays/plantingOverlay.js';
+import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
+import { calculateRealPrestige } from './company.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
-// Define the new function incrementWeek
-
-
-// Updated incrementWeek function
 export function incrementWeek() {
-    // Retrieve the current week, season, and year from localStorage
-    let currentWeek = parseInt(localStorage.getItem('week'), 10) || 1;
-    let currentSeasonIndex = SEASONS.indexOf(localStorage.getItem('season')) || 0;
-    let currentYear = parseInt(localStorage.getItem('year'), 10) || 2023;
+    const gameState = getGameState();
+    let { week, season, year } = gameState;
+    let currentSeasonIndex = SEASONS.indexOf(season);
 
-    // Increment the week
-    currentWeek += 1;
+    // Increment the week first
+    week += 1;
+
+    
+    // Process all running tasks
+    taskManager.processWeek();
 
     // Check if the week exceeds 12, which indicates a change of season
-    if (currentWeek > 12) {
-        currentWeek = 1; // Reset the week to 1
-        currentSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length; // Move to the next season
+    if (week > 12) {
+        week = 1;
+        currentSeasonIndex = (currentSeasonIndex + 1) % SEASONS.length;
+        season = SEASONS[currentSeasonIndex];
     }
 
     // Only increment the year if we are back to the first week of Spring
-    if (currentSeasonIndex === 0 && currentWeek === 1) {
-        currentYear += 1;
+    if (currentSeasonIndex === 0 && week === 1) {
+        year += 1;
     }
 
-    // Check if it's the start of a new season
-    if (currentWeek === 1) {
-        handleGenericTask('Bookkeeping', bookkeepingTaskFunction);
-    }
-
-    // Update the local storage with the new values for week, season, and year
-    localStorage.setItem('week', currentWeek);
-    localStorage.setItem('season', SEASONS[currentSeasonIndex]);
-    localStorage.setItem('year', currentYear);
-
-    // Log the change to console and update any UI elements
-    addConsoleMessage(`New week: <strong>Week ${currentWeek}, ${SEASONS[currentSeasonIndex]}, ${currentYear}</strong>`);
-    renderCompanyInfo();
-
-    // Execute any pending tasks for the week
-    executeAllTasks();
+    // Update game state
+    updateGameState(week, season, year);
+    
+    // Log the change to console and update UI elements
+    addConsoleMessage(`New week: <strong>Week ${week}, ${season}, ${year}</strong>`);
+    
+    // Execute pending tasks
     updateFieldStatuses();
     updateRipeness();
-    decayPrestigeHit();
+    
+    // Update all displays
+    updateAllDisplays();
+    applyPlantingPenalties(season, week);
+    
+    // Decay prestige hit by 10% - Could eventually be applied per season instead 
+    setPrestigeHit(getPrestigeHit() * 0.99);
+    calculateRealPrestige(); // Update calculated prestige after decay
 
-    // Conditionally generate wine order based on company prestige
     if (shouldGenerateWineOrder()) {
         generateWineOrder();
     }
 
-    // Process recurring transactions based on updated week
-    processRecurringTransactions(currentWeek);
+    processRecurringTransactions(week);
+
+    // Update only when winter starts
+    if (season === 'Winter' && week === 1) {
+        updateWinter();
+    }
+
+    // Runs every 1. week of every season (Trickkers Bookkeeping task needs to run though the taskmanager to check for last weeks work for penalty calculation )
+    if (week === 1) {
+            taskManager.checkDateTriggeredTasks();
+    }
 }
 
-// Define the new function to increment the vine age
+function updateWinter() {
+    const tasks = loadTasks();
+    tasks.forEach((task, taskId) => {
+        if (task.name.toLowerCase().includes('harvest') || task.name.toLowerCase().includes('planting')) {
+            if (task.name.toLowerCase().includes('planting')) {
+                handleIncompletePlantingTask(task);
+            }
+            taskManager.cancelTask(taskId);
+            addConsoleMessage(`${task.name} task for ${task.target.name} has been cancelled due to season change to Winter.`);
+        }
+    });
+    saveTasks(tasks);
+}
+
+function handleIncompletePlantingTask(task) {
+    const { target, progress, params } = task;
+    const farmlands = getFarmlands();
+    const field = farmlands.find(f => f.id === target.id);
+
+    if (field) {
+        const percentComplete = Math.floor(progress * 100);
+        const unplantedPercentage = 1 - progress;
+        const healthPenalty = unplantedPercentage;
+
+        field.farmlandHealth = Math.max(0, field.farmlandHealth - healthPenalty);
+        field.farmlandHealth = parseFloat(field.farmlandHealth.toFixed(6)); // Round to six decimal places
+
+        updateFarmland(field.id, {
+            farmlandHealth: field.farmlandHealth,
+            status: 'Planted'
+        });
+
+        const flagIcon = getFlagIconHTML(field.country);
+        const percentCompleteClass = getColorClass(progress);
+        const healthPenaltyPercentage = healthPenalty * 100;
+        const healthPercentage = field.farmlandHealth * 100;
+        const healthClass = getColorClass(field.farmlandHealth);
+
+        addConsoleMessage(`Planting task for ${flagIcon} ${field.name} was incomplete. <span class="${percentCompleteClass}">${percentComplete}%</span> of the field was planted. Field health reduced by <span class="${healthClass}">${formatNumber(healthPenaltyPercentage, 2)}%</span>. The health of ${field.name} is now <span class="${healthClass}">${formatNumber(healthPercentage, 2)}%</span>.`);
+
+        // Call the common function to finalize planting
+        finalizePlanting(field, params);
+    }
+}
+
+
+function applyPlantingPenalties(season, week) {
+    const farmlands = getFarmlands();
+    const plantingTasks = taskManager.getAllTasks().filter(task => task.name.toLowerCase().includes('planting'));
+
+    plantingTasks.forEach(task => {
+        const field = farmlands.find(f => f.id === task.target.id);
+        if (field) {
+            let penalty = 0;
+            let seasonName = '';
+            switch (season) {
+                case 'Spring':
+                    penalty = 0.002;
+                    seasonName = 'Spring';
+                    break;
+                case 'Summer':
+                    penalty = 0.006;
+                    seasonName = 'Summer';
+                    break;
+                case 'Fall':
+                    penalty = 0.01;
+                    seasonName = 'Fall';
+                    break;
+            }
+            field.farmlandHealth = Math.max(0, field.farmlandHealth - penalty);
+            field.farmlandHealth = parseFloat(field.farmlandHealth.toFixed(6)); // Round to six decimal places
+            updateFarmland(field.id, { farmlandHealth: field.farmlandHealth });
+
+            // Add console message only on week 1 and not in Winter
+            if (week === 1 && season !== 'Winter') {
+                addConsoleMessage(`Planting task is still ongoing on ${field.name}. Planting later in the year will result in higher mortality of the vines, reducing the field's health by ${penalty} every week of ${seasonName}.`);
+            }
+        }
+    });
+}
+
 export function updateNewYear(farmlands) {
     farmlands.forEach(field => {
         if (field.plantedResourceName) {
-            field.vineAge += 1; // Increment the vine age
+            field.vineAge += 1;
+            // Reset remaining yield at start of new year
+            field.remainingYield = null;
+            
+            // Handle organic years progression
+            if (field.conventional === 'Non-Conventional' || field.conventional === 'Ecological') {
+                field.organicYears = (field.organicYears || 0) + 1;
+                
+                // Check if field qualifies for Ecological status
+                if (field.conventional === 'Non-Conventional' && field.organicYears >= 3) {
+                    field.conventional = 'Ecological';
+                    addConsoleMessage(`${getFlagIconHTML(field.country)} ${field.name} is now certified Ecological after ${field.organicYears} years of organic farming!`);
+                }
+
+                // Add bonus to farmland health
+                field.farmlandHealth = Math.min(1.0, field.farmlandHealth + 0.05);
+            }
         }
-        // Recalculate the land value
-        field.landvalue = calculateLandvalue(field.country, field.region, field.altitude, field.aspect);
-        // Recalculate the farmland prestige
-        field.farmlandPrestige = calculateFarmlandPrestige(field);
-        // Reset the annual yield factor for the new year
-        field.annualYieldFactor = (0.5 + Math.random()) * 1.5; // reapply the original formula
-        // Reset the annual yield factor for the new year
-        field.annualQualityFactor = Math.random(); // reapply the original formula
+
+        // Reset organic years if conventional
+        if (field.conventional === 'Conventional') {
+            field.organicYears = 0;
+        }
         
+        // Update other annual properties
+        field.landvalue = calculateLandvalue(field.country, field.region, field.altitude, field.aspect);
+        field.farmlandPrestige = calculateFarmlandPrestige(field);
+        field.annualYieldFactor = (0.5 + Math.random()) * 1.5;
+        field.annualQualityFactor = Math.random();
     });
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands)); // Update the local storage
+    updateAllFarmlands(farmlands);
 }
 
-// Updated updateFieldStatuses function
 export function updateFieldStatuses() {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const currentWeek = parseInt(localStorage.getItem('week'), 10);
-    const currentSeason = localStorage.getItem('season');
+    const farmlands = getFarmlands();
+    const { week, season } = getGameState();
 
-    farmlands.forEach(field => {
-        switch (currentSeason) {
+    // Handle new year updates first if it's Spring week 1
+    if (season === 'Spring' && week === 1) {
+        updateNewYear(farmlands);
+    }
+
+    farmlands.forEach((field, index) => {
+        let updates = null;
+
+        switch (season) {
             case 'Winter':
-                if (currentWeek === 1) {
-                    field.status = 'Dormancy';
+                if (week === 1) {
+                    updates = { 
+                        status: field.vineAge === 0 ? 'No yield in first season' : 'Dormancy',
+                        ripeness: 0,
+                        annualYieldFactor: 0
+                    };
                 }
                 break;
             case 'Spring':
-                if (currentWeek === 1) {
-                    // Set field to Growing if it's the second season for a crop
-                    if (field.status === "No yield in first season") {
-                        field.status = 'Growing';
+                if (week === 1) {
+                    if ((field.status === 'Dormancy' || field.status === 'No yield in first season') && field.plantedResourceName) {
+                        updates = { status: 'Growing' };
                     }
-
-                    // Increment vine age for every field on the first week of spring
-                    updateNewYear(farmlands);
                 }
                 break;
             case 'Summer':
-                if (currentWeek === 1) {
-                    field.status = 'Ripening';
+                if (week === 1 && field.status === 'Growing' && field.vineAge > 0) {
+                    updates = { status: 'Ripening' };
                 }
                 break;
             case 'Fall':
-                if (currentWeek === 1) {
-                    field.status = 'Ready for Harvest';
+                if (week === 1 && field.status === 'Ripening' && field.vineAge > 0) {
+                    updates = { status: 'Ready for Harvest' };
                 }
                 break;
-            default:
-                break;
+        }
+
+        if (updates) {
+            updateFarmland(field.id, updates);
         }
     });
 
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    displayFarmland();
 }
 
 function updateRipeness() {
-    const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-    const currentWeek = parseInt(localStorage.getItem('week'), 10);
-    const currentSeason = localStorage.getItem('season');
+    const farmlands = getFarmlands();
+    const { week, season } = getGameState();
 
-    farmlands.forEach(field => {
-        if (!field.plantedResourceName) return;
+    farmlands.forEach((field, index) => {
+        if (!field.plantedResourceName || field.status === 'Harvested' || field.vineAge === 0) return;
 
-        switch (currentSeason) {
-            case 'Spring':
-                field.ripeness += 0.01; // Add +1 each week of spring
-                break;
-            case 'Summer':
-                field.ripeness += 0.02; // Add +2 each week of summer
-                break;
-            case 'Fall':
-                field.ripeness += 0.05; // Add +3 each week of fall
-                break;
+        let ripenessUpdate = 0;
+        switch (season) {
+            case 'Spring': ripenessUpdate = 0.01; break;
+            case 'Summer': ripenessUpdate = 0.02; break;
+            case 'Fall': ripenessUpdate = 0.05; break;
             case 'Winter':
-                if (currentWeek === 1) {
-                    field.ripeness = 0; // Reset ripeness on first week of winter
+                if (week === 1) {
+                    updateFarmland(field.id, { ripeness: 0 });
+                    return;
                 }
-                break;
-            default:
-                break;
+        }
+
+        if (ripenessUpdate > 0) {
+            updateFarmland(field.id, { ripeness: field.ripeness + ripenessUpdate });
         }
     });
 
-    localStorage.setItem('ownedFarmlands', JSON.stringify(farmlands));
+    displayFarmland();
 }
 
 

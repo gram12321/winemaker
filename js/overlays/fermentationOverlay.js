@@ -1,0 +1,108 @@
+import { fermentation } from '../wineprocessing.js';
+import { addConsoleMessage } from '../console.js';
+import { formatNumber, getColorClass } from '../utils.js';
+import { showWineryOverlay } from './mainpages/wineryoverlay.js';
+import { showStandardOverlay, setupStandardOverlayClose, hideOverlay } from './overlayUtils.js';
+import { loadBuildings } from '../database/adminFunctions.js';
+import { inventoryInstance } from '../resource.js';
+
+export function showFermentationOverlay() {
+    const overlayContent = createFermentationHTML();
+    const overlayContainer = showStandardOverlay(overlayContent);
+    setupFermentationEventListeners(overlayContainer);
+    return overlayContainer;
+}
+
+function createFermentationHTML() {
+    return `
+        <div class="overlay-section-wrapper">
+            <section class="overlay-section card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>Must Fermentation</h3>
+                    <button class="overlay-section-btn close-btn">Close</button>
+                </div>
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Select Must to Ferment</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover overlay-table">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Container</th>
+                                    <th>Capacity</th>
+                                    <th>Resource</th>
+                                    <th>Amount</th>
+                                    <th>Quality</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fermentation-storage-body">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-light btn-sm ferment-btn">Ferment Must</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    `;
+}
+
+function setupFermentationEventListeners(overlayContainer) {
+    setupStandardOverlayClose(overlayContainer);
+    
+    const buildings = loadBuildings();
+    const storageBody = document.getElementById('fermentation-storage-body');
+    
+    buildings.forEach(building => {
+        if (!building.slots) return;
+        
+        building.slots.forEach(slot => {
+            slot.tools.forEach(tool => {
+                if (tool.supportedResources?.includes('Must')) {
+                    const toolId = `${tool.name} #${tool.instanceNumber}`;
+                    const matchingInventoryItems = inventoryInstance.items.filter(item => 
+                        item.storage === toolId && 
+                        item.state === 'Must'
+                    );
+                    
+                    matchingInventoryItems.forEach(item => {
+                        const row = document.createElement('tr');
+                        const qualityDisplay = `<span class="${getColorClass(item.quality)}">(${(item.quality * 100).toFixed(0)}%)</span>`;
+                        
+                        row.innerHTML = `
+                            <td><input type="radio" name="must-select" data-resource="${item.resource.name}" 
+                                data-storage="${toolId}" data-vintage="${item.vintage}"
+                                data-quality="${item.quality}" data-field="${item.fieldName}"
+                                data-prestige="${item.fieldPrestige}"
+                                data-amount="${item.amount}"></td>
+                            <td>${toolId}</td>
+                            <td>${formatNumber(tool.capacity)} l</td>
+                            <td><strong>${item.fieldName}</strong>, ${item.resource.name}, ${item.vintage}</td>
+                            <td>${formatNumber(item.amount)} l</td>
+                            <td>${qualityDisplay}</td>
+                        `;
+                        storageBody.appendChild(row);
+                    });
+                }
+            });
+        });
+    });
+
+    const fermentButton = overlayContainer.querySelector('.ferment-btn');
+    fermentButton.addEventListener('click', () => {
+        const selectedMust = overlayContainer.querySelector('input[name="must-select"]:checked');
+        if (selectedMust) {
+            const storage = selectedMust.dataset.storage;
+            const resourceName = selectedMust.dataset.resource;
+            const amount = parseFloat(selectedMust.dataset.amount);
+            fermentation(resourceName, storage, amount);
+            showWineryOverlay();
+            hideOverlay(overlayContainer);
+        } else {
+            addConsoleMessage('Please select must to ferment.');
+        }
+    });
+}

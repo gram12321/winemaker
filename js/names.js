@@ -115,6 +115,46 @@ const germanMaleNames = [
   "Rainer", "Matthias", "Kurt", "Axel", "Werner"
 ];
 
+const grapeSuitability = {
+  Italy: {
+    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, PinotNoir: 0.6 },
+    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, PinotNoir: 0.5 },
+    Veneto: { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.7 },
+    Sicily: { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.3 },
+    Puglia: { Barbera: 0.9, Chardonnay: 0.65, PinotNoir: 0.4 },
+  },
+  France: {
+    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, PinotNoir: 0.6 },
+    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, PinotNoir: 0.9 },
+    Champagne: { Barbera: 0.2, Chardonnay: 0.9, PinotNoir: 0.8 },
+    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, PinotNoir: 0.7 },
+    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.5 },
+  },
+  Spain: {
+    Rioja: { Barbera: 0.85, Chardonnay: 0.7, PinotNoir: 0.4 },
+    "Ribera del Duero": { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.35 },
+    Jumilla: { Barbera: 0.9, Chardonnay: 0.5, PinotNoir: 0.3 },
+    "La Mancha": { Barbera: 0.85, Chardonnay: 0.55, PinotNoir: 0.25 },
+    "Sherry (Jerez)": { Barbera: 0.8, Chardonnay: 0.5, PinotNoir: 0.2 },
+  },
+  "United States": {
+    "Napa Valley (California)": { Barbera: 0.9, Chardonnay: 1.0, PinotNoir: 0.7 },
+    "Sonoma County (California)": { Barbera: 0.85, Chardonnay: 0.95, PinotNoir: 0.75 },
+    "Willamette Valley (Oregon)": { Barbera: 0.4, Chardonnay: 0.85, PinotNoir: 1.0 },
+    "Finger Lakes (New York)": { Barbera: 0.3, Chardonnay: 0.7, PinotNoir: 0.75 },
+    "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, PinotNoir: 0.6 },
+  },
+  Germany: {
+    Mosel: { Barbera: 0.15, Chardonnay: 0.8, PinotNoir: 1.0 },
+    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, PinotNoir: 0.9 },
+    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, PinotNoir: 0.85 },
+    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, PinotNoir: 0.8 },
+    Ahr: { Barbera: 0.1, Chardonnay: 0.7, PinotNoir: 0.95 },
+  },
+};
+
+
+
 // Aspect ratings for each region
 const regionAspectRatings = {
   "Italy": {
@@ -230,7 +270,6 @@ const regionAspectRatings = {
   },
 };
 
-// names.js
 
 const regionSoilTypes = {
   "Italy": {
@@ -341,39 +380,40 @@ export function calculateAndNormalizePriceFactor(country, region, altitude, aspe
   // Not in use. Use lower price range directly. And max value only for refference 
     //const realPriceFactor = (realPriceRange[0] + realPriceRange[1]) / 2; // Average or other measure
 
-  // Apply the real price factor (Multiply by 1000 to get € and by 0.4)
-  const finalPriceFactor = ( rawPriceFactor +1 ) * realPriceRange[0] ;
+  // Convert hectare price to acre price (1 hectare = 2.47105 acres) and apply the price factor
+  const pricePerAcre = realPriceRange[0] / 2.47105;
+  const finalPriceFactor = (rawPriceFactor + 1) * pricePerAcre;
 
   return finalPriceFactor;
 }
 
-// Real price range for each region
+// Real price range for each region in hectar 
 const regionRealPriceRanges = {
-  "Burgundy (Bourgogne), France": [1000000, 10000000],
-  "Champagne, France": [500000, 2000000],
-  "Napa Valley (California), United States": [300000, 1000000],
-  "Bordeaux, France": [100000, 2000000],
-  "Tuscany, Italy": [80000, 1000000],
-  "Piedmont, Italy": [50000, 700000],
-  "Sonoma County (California), United States": [100000, 500000],
-  "Rheingau, Germany": [50000, 200000],
-  "Mosel, Germany": [30000, 150000],
-  "Rioja, Spain": [30000, 100000],
-  "Willamette Valley (Oregon), United States": [50000, 250000],
-  "Ribera del Duero, Spain": [30000, 80000],
-  "Central Coast (California), United States": [20000, 150000],
-  "Loire Valley, France": [20000, 80000],
-  "Rhone Valley, France": [30000, 120000],
-  "Pfalz, Germany": [15000, 60000],
-  "Veneto, Italy": [20000, 100000],
-  "Sherry (Jerez), Spain": [10000, 40000],
-  "Finger Lakes (New York), United States": [10000, 50000],
-  "Sicily, Italy": [10000, 60000],
-  "La Mancha, Spain": [5000, 30000],
-  "Ahr, Germany": [20000, 50000],
-  "Jumilla, Spain": [5000, 25000],
-  "Rheinhessen, Germany": [10000, 40000],
-  "Puglia, Italy": [5000, 30000],
+  "Burgundy (Bourgogne), France": [1000000, 10000000], // [404858.27, 4048582.7] per acre
+  "Champagne, France": [500000, 2000000], // [202429.135, 809716.54] per acre
+  "Napa Valley (California), United States": [300000, 1000000], // [121457.481, 404858.27] per acre
+  "Bordeaux, France": [100000, 2000000], // [40485.827, 809716.54] per acre
+  "Tuscany, Italy": [80000, 1000000], // [32388.661, 404858.27] per acre
+  "Piedmont, Italy": [50000, 700000], // [20242.914, 283400.196] per acre
+  "Sonoma County (California), United States": [100000, 500000], // [40485.827, 202429.135] per acre
+  "Rheingau, Germany": [50000, 200000], // [20242.914, 80971.654] per acre
+  "Mosel, Germany": [30000, 150000], // [12145.748, 60635.92] per acre
+  "Rioja, Spain": [30000, 100000], // [12145.748, 40485.827] per acre
+  "Willamette Valley (Oregon), United States": [50000, 250000], // [20242.914, 101214.567] per acre
+  "Ribera del Duero, Spain": [30000, 80000], // [12145.748, 32388.661] per acre
+  "Central Coast (California), United States": [20000, 150000], // [8097.1654, 60635.92] per acre
+  "Loire Valley, France": [20000, 80000], // [8097.1654, 32388.661] per acre
+  "Rhone Valley, France": [30000, 120000], // [12145.748, 48582.992] per acre
+  "Pfalz, Germany": [15000, 60000], // [6072.874, 24291.496] per acre
+  "Veneto, Italy": [20000, 100000], // [8097.1654, 40485.827] per acre
+  "Sherry (Jerez), Spain": [10000, 40000], // [4048.5827, 16194.331] per acre
+  "Finger Lakes (New York), United States": [10000, 50000], // [4048.5827, 20242.914] per acre
+  "Sicily, Italy": [10000, 60000], // [4048.5827, 24291.496] per acre
+  "La Mancha, Spain": [5000, 30000], // [2024.2914, 12145.748] per acre
+  "Ahr, Germany": [20000, 50000], // [8097.1654, 20242.914] per acre
+  "Jumilla, Spain": [5000, 25000], // [2024.2914, 10121.456] per acre
+  "Rheinhessen, Germany": [10000, 40000], // [4048.5827, 16194.331] per acre
+  "Puglia, Italy": [5000, 30000], // [2024.2914, 12145.748] per acre
 
 };
 
@@ -444,4 +484,4 @@ const lastNamesByCountry = {
 };
 
 // Export the altitude ranges for use in other parts of the application 
-export { regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};
+export { grapeSuitability, regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};

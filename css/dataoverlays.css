@@ -1,0 +1,199 @@
+/* 5. Data Overlays */
+
+
+/* Shared Modal Overlay Components for dataoverlays */
+.overlay-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin: 0 auto;
+  width: 95%;
+  max-width: 1200px;
+  overflow: hidden; /* Ensure inner elements don't break border radius */
+}
+/* box around image and header */
+.imgbox {
+  background-color: #fff;
+  margin: 60px auto;
+  width: 90%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  width: 100%;
+  padding: 25px;  /* Add padding around the entire grid */
+}
+
+/* Info Section Styles */
+.info-section {
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  background-color: var(--color-background);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+/* Nested info sections should have lighter borders */
+.info-section .info-section {
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px 0;
+}
+
+.data-table {
+  width: fit-content;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 15px auto;
+  font-size: 0.9em;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.data-table th,
+.info-section .data-table th {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--panel-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  background-color: var(--color-primary);
+}
+
+.data-table td,
+.info-section .data-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+/* Make sure all table cells have borders */
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--color-accent);
+  border-right: 1px solid var(--color-accent);
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  border-right: none;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Consistent alternating rows and hover effects */
+.data-table tr:nth-child(even),
+.info-section .data-table tr:nth-child(even) {
+  background-color: rgba(197, 165, 114, 0.05);
+}
+
+.data-table tr:hover,
+.info-section .data-table tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+  cursor: default;
+}
+
+.info-section {
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  background-color: var(--color-background);
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.data-table {
+  width: fit-content;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 15px auto;
+  font-size: 0.9em;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.data-table th {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--panel-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  background-color: var(--color-primary);
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+/* Alternating rows and hover effects */
+.data-table tr:nth-child(even) {
+  background-color: rgba(197, 165, 114, 0.05);
+}
+
+.data-table tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+  cursor: default;
+}
+
+/* specific staffoverlay tweaks */
+.staff-overlay .overlay-card {
+  padding-bottom: 25px;  /* Add padding at bottom of staff overlay */
+}
+
+/* specific hirestaff tweaks */
+.hire-staff-overlay .overlay-card {
+  max-width: 1200px;
+  overflow-y: auto;   /* Remove scroll from card */
+  padding: 0;
+}
+
+.hire-staff-overlay .info-grid {
+  overflow-y: none;     /* Move scroll to grid */
+}
+
+/* Resource overlay specific styles */
+.resource-overlay .country-section {
+  background: var(--color-background);
+  padding: 15px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
+}
+
+.resource-overlay .country-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+

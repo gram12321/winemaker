@@ -1,18 +1,3 @@
-[Done] Udregn værdi for farmland udfra attibutes, Region, Aspect, altitude. Multiply by acres. 
-[Done] Opdater ownedland to display soil and altitude
-
-
-[Done] Names, female for south male for north
-[Done] use country specific names. 
-
-Change the way planting works, to give age to vines -> make new year cycle for vineyard, with harvest, promming, trimming ect.
-
-Settings for acres/hectore/sq.m
-
-
-Ripeness more in south aspect
-
-
 Salleries
 
                                   Hourly Low  Hourly High  Weekly Low   Weekly High  Monthly Low  Monthly High  
@@ -23,31 +8,29 @@ Cellar Master                          22.12        35.38      884.62     1415.3
 Viticulturist (Vineyard Manager)       26.54        44.23     1061.54     1769.23      4600.00       7666.67   
 
 
-
+Knownbugs as of Jan 2025
+- When sidebar is toogle collapsedfrom localstorage mainwindows down get 'collapsed width' but leave empty space between mainwindow overlay and panel
+- Tooltips in sidebar is not shown above mainview
+- Company info in tooltip when collapsed sidebar does not work
+- There is a load/save error on the crushing task. We get a error if we reload the page while there is a active task. Might have something to do with the way we store (or rather fail to) store selectedgrape. 
+ 
 Known Bugs:
 -Save load Owned land and staff (Safe to firestore, but dont restore from localstorage)
 Allow winery-task on same field,grape,vintage if different entry (IE different quality)
-Possible a bug in AmountWork. That calculates workforce of staff without taking care if workers split their workforce to several task
-Bookeeping task dosn't update "Goal", when more task is added to unfinished task (It does, but does not update UI, so need page refresh to show rightly)
 Make sure to clean localstorage on login, in case game was closed without clearing
-Fermenting task has correct value in workprogress, but dont update "Progress" on taskbox info
 Wineorders not saved to firestore, just to localstorage
-last order in wineordertable causes [15:00:29] Invalid wine order index. Can refresh page to make right 
-Possible a crash if 0.000something is left in a task (IE 0.00004 must left will leave fermantation task open, but not possible to finih)
-Close by clicking X on hirering overlay dont work
 There might be an issue where annualYieldFactor  is producing values below 0.5 which is not intentinally. 
 Plant buttom is not disabled when active clearing task, but we dont allow planting task when active clearing task
 Imidiatly on building a building the headline (name of the building) disapears. reshows on pageupdate
 Buildingname only shows in taskbox after pagereload
-in buildings.html build buttom change to "Building..." when a building proces is started. But it resets to "Build" on page reload
 Prevent several building and maintaince task on same building
 There dosnøt seems to be a prestige hit for not completing bookkeeeping task as intented
 
-
-
-
-
 QoL Improvement
+24-01-25
+Better shown error to user  when harvest/crushing/ferminting error. IE Now it only shows in console window. We would maybe like something red flashing
+
+Old Ideas:
  - Hover over info on "Statuspic" on sales.html
  - Default selected staff for new task
   - group orders by field, grape ect. or somekind of filter on orders
@@ -66,3 +49,310 @@ QoL Improvement
   add cost, adminstrationtask and msg for building buildings and tools
    - Ability to choose witch worker uses what tool. Show which staff is using tools in stafdisplay/consolemsg
    Expected yield (in vineyard.html (displayvineywarentried in vineyard.js)) should give a string to the user instead of a value (IE "High/Great/poor" instead of "0.9") 
+   No Upgradecost applied to upgrade building even if there is a function for it (that is not used)
+
+
+
+Usefull wine knowledge:
+
+600 liters of Must per ton of Grapes
+
+In general terms, 1 ton of grapes produces approximately:
+   - 60 cases of wine, which translates to about 720 bottles
+     (assuming 12 bottles per case).
+
+Breakdown:
+   - 1 ton of grapes ≈ 60 cases of wine
+   - 1 case of wine = 12 bottles
+   - 1 ton of grapes ≈ 720 bottles
+
+Yield Categories:
+
+   1. Low Yield (Quality-focused, Old World and Cool Climate):
+      - 2-4 tons per acre.
+      - Regions: Burgundy, certain parts of Napa Valley.
+
+   2. Moderate Yield (Balanced Quality and Quantity):
+      - 4-6 tons per acre.
+      - Regions: Moderate climates, quality-focused New World.
+
+   3. High Yield (High-production or Bulk Wines):
+      - 6-10+ tons per acre.
+      - Regions: Warmer, fertile areas (e.g., La Mancha, Central Valley).
+
+Typical Vineyard Yields:
+
+       - Very Low-Yield: 1-2 tons per hectare (0.4-0.8 tons per acre).
+         - Focus: Intense and sought after flavors.
+
+       - Low-Yield: 2-5 tons per hectare (0.8-2 tons per acre).
+         - Focus: Quality, concentrated wines.
+
+       - Moderate-Yield: 5-10 tons per hectare (2-4 tons per acre).
+         - Focus: Balance of quality and profitability.
+
+       - High-Yield: 10-15 tons per hectare (4-6 tons per acre).
+         - Focus: Quantity with fertile soils, irrigation.
+
+Vineyard Density and Pruning:
+
+   - Low-Density, Less-Pruned:
+     - Yields: 4.05-6.07+ tons per acre.
+     - Characteristics: Higher yields, diluted fruit flavors.
+
+   - Moderate-Density, Balanced Pruning:
+     - Yields: 2.02-4.05 tons per acre.
+     - Characteristics: Balanced quality and quantity.
+
+   - High-Density, Well-Pruned:
+     - Yields: 1.21-2.43 tons per acre.
+     - Characteristics: Lower per-vine yield, better fruit concentration.
+
+
+
+Influencing Factors:
+
+   - Soil:
+     - Fertile soils: Increase yields to 6+ tons per acre.
+     - Poor soils: Limit yields to 1.2-2.8 tons per acre, enhance quality.
+
+   - Climate:
+     - Warmer regions: Yields 4-6 tons per acre.
+     - Cooler regions: Yields 1.2-2.4 tons per acre.
+
+   - Age of Vines:
+     - Young Vines (<10 years): 3.2-4.8 tons per acre, simpler wines.
+     - Mature Vines (10-30 years): 2-4 tons per acre, balanced wines.
+     - Old Vines (>30 years): <2 tons per acre, premium wines.
+
+Vineyard Sizes:
+
+   - Small Vineyards (0.5 to 5 acres):
+     - Typical in regions with high-quality focus, inheritance division.
+
+   - Medium-Sized Vineyards (5 to 50 acres):
+     - Found in Bordeaux, Tuscany, Rioja; balance quality with scale.
+
+   - Large Vineyards (50 to 500+ acres):
+     - Common in estates like Médoc, La Mancha; focus on quantity and quality.
+
+Summary:
+
+Yield and quality depend heavily on vineyard management, soil fertility, climate, vine age, and density/pruning methods. Smaller vineyards often produce higher quality wines, whereas larger vineyards focus on quantity. The balance between quality and quantity is critical in defining the yield categories and types of wine produced across different regions.
+
+
+// Work rates:
+// Manual Planting
+- A skilled worker can plant about 400 to 600 vines per day, depending on conditions.
+- General Planting Time Estimates for a 1-acre vineyard (density of 2,500 to 3,000 vines per acre):
+  - 5 to 8 days of work for 1 acre, assuming 500 vines planted per day by a single worker.
+  - The duration depends on soil conditions and worker efficiency.
+
+// Mechanical Planting
+- In larger or more modern vineyards, machines can dig holes and plant vines.
+- Machines can dramatically increase planting speed to about 1,500 to 3,000 vines per day.
+- General Planting Time Estimates for a 1-acre vineyard:
+  - 1 to 2 days of work for 1 acre, as machines can plant around 1,500 to 3,000 vines per day.
+
+// Considerations
+- For larger vineyards (e.g., 10 acres) or challenging terrains, increase these estimates accordingly.
+
+// This is the corrent (18/01/25) code for planting
+// Calculate total work based on density and acres
+const vinesPerAcre = selectedDensity;
+const totalVines = vinesPerAcre * farmland.acres;
+const workPerVine = 1 / 3500; // Assuming 500 vines planted per day by a single worker (3500 is one week of work for a 100% worker)
+const totalWork = totalVines * workPerVine * 50; // Convert to total work units (50 work units per week)
+
+// Harvest work rate:
+The duration of grape harvest and transportation is influenced by several factors, including vineyard size, harvesting method (manual or mechanical), and terrain features. Here's a detailed overview:
+
+Factors Influencing Harvest Time:
+- Harvest Method:
+    * Manual Harvesting: 
+        - Relies on workers to handpick grapes, placing them gently into baskets or bins to prevent fruit damage. 
+        - Typical Speed: 1 to 2 tons of grapes per worker per day, variables include terrain and grape variety.
+        - Optimal for premium wines or challenging terrains unsuitable for machines.
+    * Mechanical Harvesting:
+        - Utilizes machines which shake or cut through vines, greatly increasing speed but potentially damaging the grapes.
+        - Typical Speed: 3 to 5 acres per day per machine, influenced by vineyard density and terrain.
+        - Suited to flatter terrains where efficiency is key.
+- Terrain:
+    * Flat Terrain:
+        - Facilitates rapid work by both machines and workers.
+    * Steep or Rocky Terrain:
+        - Significantly hampers manual labor and often precludes mechanical harvesters.
+- Vineyard Size and Density:
+    * High-Density Vineyards (3,000+ vines per acre):
+        - Extended harvest time due to numerous grape clusters.
+    * Vineyard Size:
+        - Larger vineyards inherently involve lengthier harvest periods unless multiple crews or machines are employed.
+- Grape Variety:
+    * Delicate Varieties (e.g., Pinot Noir):
+        - Require careful manual handling, making harvesting slower.
+    * Robust Varieties (e.g., Syrah, Chardonnay):
+        - Easier and faster to harvest.
+
+General Harvest Time Estimates:
+- Manual Harvesting:
+    * Small Vineyard (1 acre):
+        - Estimated 6-10 hours of labor with a team of 4-6 workers, assuming ~2 tons of grapes per acre.
+    * Medium Vineyard (10 acres):
+        - 6-10 days of work with a 10-worker team, contingent on conditions.
+    * Large Vineyard (50 acres):
+        - 3-4 weeks of work by a large team, or potentially several crews.
+- Mechanical Harvesting:
+    * Small Vineyard (1 acre):
+        - Approximately 1-2 hours per acre per machine.
+    * Medium Vineyard (10 acres):
+        - 1-2 days with a single machine.
+    * Large Vineyard (50 acres):
+        - 10-15 days with one machine, more swiftly with multiple machines.
+
+Summary:
+- Manual Harvesting: ~6-10 hours per acre with a small team. Slower for challenging terrains or fragile grape varieties.
+- Mechanical Harvesting: ~1-2 hours per acre per machine. Significantly quicker, albeit less precise.
+- Transport: Adds from several minutes to a few hours, contingent on distance.
+
+
+
+
+// Calculation for yield as of 15/01/25
+
+Fixed values:
+- baseYieldPerAcre = 2400 kg
+- naturalYield = 1.0 (Barbera)
+- farmlandHealth = 0.5
+- annualYieldFactor = 1.25 (average of 0.75 + random)
+
+Conversion rates:
+1. Grapes → Must: 60% (0.6)
+2. Must → Wine: 90% (after 10% fermentation loss)
+3. Wine → Bottles: divide by 0.75L (standard bottle size)
+
+// Field Health
+
+Actions That Could Increase Field Health
+To give players a chance to improve Field Health, implement the following vineyard maintenance tasks:
+
+1. Vine Replacement (Replanting):
+   - Description: Replace dead or unproductive vines with new ones.
+   - Game Effect: Provides a significant boost to Field Health, though it’s costly and time-consuming.
+
+2. Pruning:
+   - Description: Cut back vines to promote healthy growth and remove diseased or weak parts.
+   - Game Effect: Leads to a small-to-moderate Field Health improvement, based on the vineyard's condition.
+
+3. Weeding:
+   - Description: Remove weeds to prevent competition for resources, aiding vine growth.
+   - Game Effect: Results in a minor boost to Field Health as well-maintained fields are healthier.
+
+4. Soil Management:
+   - Description: Improve soil quality through composting, fertilizing, or drainage improvements.
+   - Game Effect: Offers a small-to-moderate increase in Field Health, dependent on initial soil condition.
+
+5. Pest and Disease Control:
+   - Description: Treat pests and diseases like mildew, phylloxera, or nematodes.
+   - Game Effect: Stabilizes or enhances Field Health, especially if facing specific threats.
+
+6. Irrigation Management:
+   - Description: Ensure proper water levels to alleviate stress on vines, particularly in drought-prone areas.
+   - Game Effect: Ensures a small but steady health improvement over time.
+
+
+
+---------------------------------------------------------------------
+Ripeness: 0.50  | Quality Mult: (0.5 + 1.0 + 0.5)/3 = 0.67
+---------------------------------------------------------------------
+Density 0.2 (1000 vines):
+  Grapes: 400 kg
+  → Must: 240 L
+  → Wine: 216 L
+  → Bottles: 288
+
+Density 1.0 (5000 vines):
+  Grapes: 2,000 kg
+  → Must: 1,200 L
+  → Wine: 1,080 L
+  → Bottles: 1,440
+
+Density 2.0 (10000 vines):
+  Grapes: 4,000 kg
+  → Must: 2,400 L
+  → Wine: 2,160 L
+  → Bottles: 2,880
+
+---------------------------------------------------------------------
+Ripeness: 0.75  | Quality Mult: (0.75 + 1.0 + 0.5)/3 = 0.75
+---------------------------------------------------------------------
+Density 0.2 (1000 vines):
+  Grapes: 450 kg
+  → Must: 270 L
+  → Wine: 243 L
+  → Bottles: 324
+
+Density 1.0 (5000 vines):
+  Grapes: 2,250 kg
+  → Must: 1,350 L
+  → Wine: 1,215 L
+  → Bottles: 1,620
+
+Density 2.0 (10000 vines):
+  Grapes: 4,500 kg
+  → Must: 2,700 L
+  → Wine: 2,430 L
+  → Bottles: 3,240
+
+---------------------------------------------------------------------
+Ripeness: 1.00  | Quality Mult: (1.0 + 1.0 + 0.5)/3 = 0.83
+---------------------------------------------------------------------
+Density 0.2 (1000 vines):
+  Grapes: 500 kg
+  → Must: 300 L
+  → Wine: 270 L
+  → Bottles: 360
+
+Density 1.0 (5000 vines):
+  Grapes: 2,500 kg
+  → Must: 1,500 L
+  → Wine: 1,350 L
+  → Bottles: 1,800
+
+Density 2.0 (10000 vines):
+  Grapes: 5,000 kg
+  → Must: 3,000 L
+  → Wine: 2,700 L
+  → Bottles: 3,600
+
+
+// Skill calculations
+
+Fresh Off the Vine (0.1):
+- Base: (0-0.6) + (0.1 * 0.4) = 0.04 - 0.64
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.1 * 0.2)
+  Non-specialist: 0.04 - 0.64
+  Specialist: 0.15 - 0.71
+
+Cellar Hand (0.3):
+- Base: (0-0.6) + (0.3 * 0.4) = 0.12 - 0.72
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.3 * 0.2)
+  Non-specialist: 0.12 - 0.72
+  Specialist: 0.27 - 0.78
+
+Grape Sage (0.5):
+- Base: (0-0.6) + (0.5 * 0.4) = 0.20 - 0.80
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.5 * 0.2)
+  Non-specialist: 0.20 - 0.80
+  Specialist: 0.40 - 0.85
+
+Wine Wizard (0.7):
+- Base: (0-0.6) + (0.7 * 0.4) = 0.28 - 0.88
+- Specialist bonus: (1 - baseValue) * (0.2 + 0.7 * 0.2)
+  Non-specialist: 0.28 - 0.88
+  Specialist: 0.52 - 0.92
+
+Living Legend (1.0):
+- Base: (0-0.6) + (1.0 * 0.4) = 0.40 - 1.00
+- Specialist bonus: (1 - baseValue) * (0.2 + 1.0 * 0.2)
+  Non-specialist: 0.40 - 1.00
+  Specialist: 0.70 - 1.00

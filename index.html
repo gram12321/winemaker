@@ -1,35 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winery Game</title>
   <link href="css/style.css" rel="stylesheet" type="text/css" />
+  <link href="css/variables.css" rel="stylesheet" type="text/css" />
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/9.6.11/firebase-firestore.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css">
+  <style>
+    body {
+      background: url('assets/pic/A_picturesque_vineyard_landscape_with_rolling_hill.webp') center/cover no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: var(--color-text);
+      font-family: Arial, sans-serif;
+    }
+
+    .login-box {
+      background-color: var(--color-background);
+      box-shadow: var(--shadow-lg);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      opacity: 0.95;
+    }
+
+    .login-box h2 {
+      color: var(--color-primary);
+      margin-bottom: 1rem;
+    }
+
+    .btn-primary {
+      background-color: var(--color-primary);
+      border: none;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-accent);
+    }
+
+    /* Add fade effect for main content */
+    .fade-out {
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+    
+    /* Ensure overlay is on top */
+    #startingConditionOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2 class="text-center">Login</h2>
-    <form id="login-form" class="text-center">
+  <div class="login-box">
+    <h2>Login</h2>
+    <form id="login-form">
       <div class="form-group">
         <label for="company-name">Company Name</label>
         <input type="text" class="form-control" id="company-name" placeholder="Enter company name" required>
       </div>
-      <button type="submit" class="btn btn-primary">Start</button>
+      <button type="submit" class="btn btn-primary">Continue</button>
     </form>
   </div>
+
+  <!-- Add the starting condition overlay -->
+  <div id="startingConditionOverlay" class="overlay">
+    <div class="overlay-content">
+      <section class="overlay-section">
+        <div class="card-header">
+          <h3 class="h5 mb-0">Select Starting Conditions</h3>
+        </div>
+        <div class="card-body">
+          <div class="starting-condition-grid">
+            <div class="options-container">
+              <!-- Options will be inserted here -->
+            </div>
+            <div class="options-info-box">
+              <!-- Selected option details will be shown here -->
+            </div>
+            <div class="options-picture">
+              <!-- Family picture will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
   <script type="module" src="js/database/adminFunctions.js"></script>
+  <script type="module" src="js/overlays/startingConditionOverlay.js"></script>
   <script type="module">
-    import { storeCompanyName } from './js/database/adminFunctions.js';
+    import { showStartingConditionOverlay } from './js/overlays/startingConditionOverlay.js';
+    
     document.getElementById('login-form').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent the default form submission
-      storeCompanyName(); // Store the company name and handle navigation
+      event.preventDefault();
+      const companyName = document.getElementById('company-name').value;
+      if (companyName) {
+        showStartingConditionOverlay(companyName);
+      }
     });
   </script>
-
-
 </body>
 </html>

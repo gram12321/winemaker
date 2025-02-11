@@ -1,120 +1,389 @@
-import { getBuildingTools } from '../buildings.js'; 
-import { handleGenericTask } from '../administration.js'; 
-import { fieldTaskFunction } from '../farmland.js'; 
-import { populateStorageTable } from '../resource.js'; // Importing populateStorageTable
-import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
-import { addConsoleMessage } from '/js/console.js'; // Adding console message for debugging
+import { addConsoleMessage } from '../console.js';
+import { showVineyardOverlay, canHarvest, validateStorage } from './mainpages/vineyardoverlay.js';
+import { inventoryInstance, allResources } from '../resource.js';
+import { farmlandYield } from '../farmland.js';
+import { formatNumber, getFlagIconHTML } from '../utils.js';
+import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
+import taskManager from '../taskManager.js';
+import { regionAltitudeRanges, grapeSuitability } from '../names.js';
+import { loadFarmlands } from '../database/adminFunctions.js';
+import { showModalOverlay } from './overlayUtils.js';
 
+export function showHarvestOverlay(farmland, farmlandId) {
+    const overlayContainer = showModalOverlay('harvestOverlay', createHarvestHTML(farmland));
+    if (overlayContainer) {
+        setupHarvestEventListeners(overlayContainer, farmland, farmlandId);
+        populateStorageOptions(farmland);
+    }
+    return overlayContainer;
+}
 
-export function showHarvestOverlay(vineyard, index) {
-  const overlayContainer = document.createElement('div');
-  overlayContainer.className = 'overlay';
+function createHarvestHTML(farmland) {
+    return `
+        <div class="overlay-section-wrapper">
+            <section class="overlay-section card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3>Harvest Options for ${farmland.name}</h3>
+                    <button class="overlay-section-btn close-btn">Close</button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered overlay-table">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Container</th>
+                                <th>Capacity</th>
+                                <th>Resource</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="storage-display-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-container">
+                    <div class="selected-wrapper">
+                        <span>Expected Yield: </span>
+                        <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span>
+                    </div>
+                    <div class="w-100">
+                        <span>Selected Capacity: </span>
+                        <span id="selected-capacity">0 kg</span>
+                        <div class="progress">
+                            <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    <button class="overlay-section-btn harvest-btn mt-3">Harvest Selected</button>
+                </div>
+            </section>
+        </div>
+    `;
+}
 
-  overlayContainer.innerHTML = `
-    <div class="overlay-content">
-      <h2>Harvest Options for ${vineyard.name}</h2>
+function setupHarvestEventListeners(overlayContainer, farmland, farmlandId) {
+    const harvestBtn = overlayContainer.querySelector('.harvest-btn');
+    const closeBtn = overlayContainer.querySelector('.close-btn');
 
-      <!-- Storage table starts here -->
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-              <th>Select</th>
-              <th>Container</th>
-              <th>Capacity</th>
-              <th>Resource</th>
-              <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody id="storage-display-body">
-          <!-- Storage resources will be dynamically generated here -->
-        </tbody>
-      </table>
-      <!-- Storage table ends here -->
+    if (harvestBtn) {
+        harvestBtn.addEventListener('click', () => handleHarvestButtonClick(farmland, farmlandId, overlayContainer));
+    }
 
-      <button class="btn btn-success harvest-btn">Start Harvest</button>
-      <button class="btn btn-secondary close-btn">Close</button>
-    </div>
-  `;
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => removeOverlay(overlayContainer));
+    }
 
-  document.body.appendChild(overlayContainer);
+    overlayContainer.addEventListener('click', (event) => {
+        if (event.target === overlayContainer) {
+            removeOverlay(overlayContainer);
+        }
+    });
 
-  // Initialize storage display
-  updateStorageDisplay();
+    // Setup storage checkbox listeners
+    overlayContainer.addEventListener('change', (e) => {
+        if (e.target.classList.contains('storage-checkbox')) {
+            updateSelectedCapacity(farmland);
+        }
+    });
+}
 
-  function updateStorageDisplay() {
-    populateStorageTable('storage-display-body', true); // Populate table while excluding Quality and Status
-  }
+function showWarningModal(farmland, farmlandId, selectedTools, totalAvailableCapacity, expectedYield, overlayContainer) {
+    const warningModal = document.createElement('div');
+    warningModal.className = 'modal fade modal-overlay';
+    warningModal.style.display = 'block';
+    warningModal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    warningModal.innerHTML = `
+    <div class="modal-dialog">
+        <div class="modal-content overlay-section">
+            <div class="modal-header card-header">
+                <h3 class="modal-title">Warning: Limited Container Capacity</h3>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Selected containers have capacity for ${totalAvailableCapacity >= 1000 ? 
+                    formatNumber(totalAvailableCapacity/1000, 2) + ' t' : 
+                    formatNumber(totalAvailableCapacity) + ' kg'} 
+                   of the remaining ${expectedYield >= 1000 ? 
+                    formatNumber(expectedYield/1000, 2) + ' t' : 
+                    formatNumber(expectedYield) + ' kg'} to harvest.</p>
+                <p>Do you want to harvest what fits in the containers?</p>
+            </div>
+                <div class="modal-footer">
+                    <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="overlay-section-btn" id="confirmHarvest">Harvest Available</button>
+                </div>
+            </div>
+        </div>
+    `;
 
-  // Event listener for the harvest button
-  overlayContainer.querySelector('.harvest-btn').addEventListener('click', () => {
-      const selectedRadio = overlayContainer.querySelector('input[name="tool-select"]:checked');
-      if (selectedRadio) {
-          const selectedTool = selectedRadio.value;
-          const resourceBeingHarvested = vineyard.plantedResourceName; // Resource type being harvested
-          const toolName = selectedTool.split(' #')[0]; // Parsing tool name from selected value
+    document.body.appendChild(warningModal);
+    $(warningModal).modal('show');
 
-          // Log selected tool and resource
-          console.log(`Selected Tool: ${selectedTool}, Resource Being Harvested: ${resourceBeingHarvested}`);
+    document.getElementById('confirmHarvest').addEventListener('click', () => {
+        harvest(farmland, farmlandId, selectedTools, totalAvailableCapacity); // This line is now correct
+        $(warningModal).modal('hide');
+        warningModal.remove();
+        removeOverlay(overlayContainer);
+    });
 
-          // Get the matching inventory items
-          const matchingInventoryItems = getMatchingInventoryItems(selectedTool);
+    warningModal.addEventListener('hidden.bs.modal', () => {
+        warningModal.remove();
+    });
+}
 
-          // Check if the selected container is full
-          const isContainerFull = matchingInventoryItems.some(item => {
-              console.log(`Checking inventory item: ${item.storage}, Amount: ${item.amount}`);
-              // Assuming we have access to the building's content, which includes capacity:
-              const tool = getBuildingTools().find(tool => tool.name === toolName); // Retrieve the tool template
-              const capacity = tool ? tool.capacity : 0; // Determine the appropriate capacity
+export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmount) {
+    if (!Array.isArray(selectedTools) || selectedTools.length === 0 || harvestedAmount <= 0) return false;
 
-              console.log(`Container capacity for ${item.storage}: ${capacity}`);
-              return item.amount > capacity; // Check if the amount exceeds the capacity
-          });
+    const toolsArray = selectedTools.map(t => t.toString());
+    const buildings = loadBuildings();
+    let remainingHarvest = harvestedAmount;
+    let totalStoredAmount = 0;
 
-          if (isContainerFull) {
-              addConsoleMessage(`<span style="color:red;">This container is full and cannot be used for harvesting!</span>`);
-              console.log("Container is full. Harvesting action aborted.");
-              return; // Prevent further execution
-          }
+    const gameYear = parseInt(localStorage.getItem('year'), 10);
+    const currentFarmland = loadFarmlands().find(f => f.id === parseInt(farmlandId));
+    if (!currentFarmland) return false;
 
-          if (matchingInventoryItems.length > 0) {
-              const { resource, fieldName, vintage } = matchingInventoryItems[0];
+    const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
+    const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
 
-              // Validate against resource, fieldName, and vintage
-              
-              if (resource.name !== resourceBeingHarvested || fieldName !== vineyard.name || vintage !== vineyard.vintage) {
-                  addConsoleMessage(`<span style="color:red;">This container cannot be used for harvesting the specified resource!</span>`);
-                  console.log("Validation failed. Harvesting action aborted.");
-                  return; // Prevent further execution
-              }
-          }
+    // Process each tool in sequence
+    for (const selectedTool of toolsArray) {
+        if (remainingHarvest <= 0) break;
 
-          // Proceed with task if matching and container is not full
-          handleGenericTask(
-              'Harvesting',
-              (task, mode) => fieldTaskFunction(task, mode, 'Harvesting', { fieldId: index, storage: selectedTool }),
-              { fieldId: index, storage: selectedTool } // Pass the correct stored value from tool selection
-          );
-          removeOverlay();
-      } else {
-          addConsoleMessage(`<span style="color:red;">Please select a tool to proceed with harvesting.</span>`);
-          console.log("No tool selected. Harvesting action aborted.");
-      }
-  });
+        const tool = buildings.flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => t.getStorageId() === selectedTool)
+            )
+        ).find(t => t);
 
-  // Utility function to get matching inventory items for a selected tool
-  function getMatchingInventoryItems(storage) {
-    const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
-    return playerInventory.filter(item => item.storage === storage);
-  }
+        if (!tool) continue;
 
-  // Event listener for the close button and overlay
-  const closeButton = overlayContainer.querySelector('.close-btn');
-  closeButton.addEventListener('click', removeOverlay);
-  overlayContainer.addEventListener('click', (event) => {
-    if (event.target === overlayContainer) removeOverlay();
-  });
+        const currentAmount = inventoryInstance.items
+            .filter(item => item.storage === selectedTool)
+            .reduce((sum, item) => sum + item.amount, 0);
+        const availableCapacity = tool.capacity - currentAmount;
 
-  function removeOverlay() {
-    document.body.removeChild(overlayContainer);
-  }
+        if (availableCapacity <= 0) continue;
+
+        const amountForTool = Math.min(remainingHarvest, availableCapacity);
+        try {
+            const matchingGrapes = inventoryInstance.items.find(item =>
+                item.storage === selectedTool && 
+                item.state === 'Grapes' &&
+                item.resource.name === farmland.plantedResourceName &&
+                item.vintage === gameYear
+            );
+
+            if (matchingGrapes) {
+                const totalAmount = matchingGrapes.amount + amountForTool;
+                const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
+                matchingGrapes.amount = totalAmount;
+                matchingGrapes.quality = newQuality.toFixed(2);
+            } else {
+                inventoryInstance.addResource(
+                    { name: farmland.plantedResourceName, naturalYield: 1 },
+                    amountForTool,
+                    'Grapes',
+                    gameYear,
+                    quality,
+                    farmland.name,
+                    farmland.farmlandPrestige,
+                    selectedTool
+                );
+            }
+
+            totalStoredAmount += amountForTool;
+            remainingHarvest -= amountForTool;
+            addConsoleMessage(`Harvested ${formatNumber(amountForTool)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name} to ${selectedTool}`);
+        } catch (error) {
+            addConsoleMessage(`Error storing harvest: ${error.message}`);
+        }
+    }
+
+    if (totalStoredAmount > 0) {
+        saveInventory();
+        return true;
+    }
+    return false;
+}
+
+// New helper function for grape compatibility check
+function checkGrapeCompatibility(selectedTool, farmland) {
+    const existingGrapes = inventoryInstance.items.find(item => 
+        item.storage === selectedTool && 
+        item.state === 'Grapes' &&
+        (item.resource.name !== farmland.plantedResourceName || 
+         parseInt(item.vintage) !== parseInt(localStorage.getItem('year')))
+    );
+
+    if (existingGrapes) {
+        return {
+            compatible: false,
+            message: `Cannot mix different grapes or vintages in container ${selectedTool}. Contains ${existingGrapes.resource.name} from ${existingGrapes.vintage}`
+        };
+    }
+
+    return { compatible: true };
+}
+
+// Update harvest function to use the helper
+export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
+    if (!Array.isArray(selectedTools) || selectedTools.length === 0) return false;
+
+    const toolsArray = selectedTools.map(t => t.toString());
+    const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
+    
+    // Check compatibility for all selected tools
+    for (const toolId of toolsArray) {
+        const compatibility = checkGrapeCompatibility(toolId, farmland);
+        if (!compatibility.compatible) {
+            addConsoleMessage(compatibility.message);
+            return false;
+        }
+    }
+
+    // Calculate work penalties
+    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+    const medianAltitude = (minAltitude + maxAltitude) / 2;
+    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+
+    const penalties = {
+        density: Math.max(0, (farmland.density - 1000) / 1000) * 0.05,
+        fragile: (1 - resourceObj.fragile) * 0.5,
+        altitude: altitudeDeviation * 0.5
+    };
+    
+    const totalWork = totalHarvest / 1000 * 25 * (1 + Object.values(penalties).reduce((a, b) => a + b, 0));
+
+    taskManager.addProgressiveTask(
+        'Harvesting',
+        'field',
+        totalWork,
+        (target, progress, params) => {
+            // These two checks are necessary because the values might be undefined when the task starts
+            target.remainingYield ??= farmlandYield(target);
+            params.lastProgress ??= 0;
+
+            const progressIncrement = progress - params.lastProgress;
+            const harvestedAmount = Math.min(
+                target.remainingYield,
+                totalHarvest * progressIncrement
+            );
+
+            if (harvestedAmount > 0) {
+                params.lastProgress = progress;
+                target.remainingYield -= harvestedAmount;
+                
+                if (performHarvest(target, farmlandId, toolsArray, harvestedAmount)) {
+                    updateFarmland(farmlandId, {
+                        remainingYield: target.remainingYield,
+                        status: target.remainingYield <= 0 ? 'Harvested' : 'Partially Harvested',
+                        ripeness: target.remainingYield <= 0 ? 0 : target.ripeness
+                    });
+                }
+            }
+        },
+        farmland,
+        {
+            selectedTools: toolsArray,
+            totalHarvest,
+            lastProgress: 0
+        }
+    );
+
+    return true;
+}
+
+function populateStorageOptions(farmland) {
+    const storageBody = document.getElementById('storage-display-body');
+    const buildings = loadBuildings();
+
+    buildings.forEach(building => {
+        if (building.slots) {
+            building.slots.forEach(slot => {
+                slot.tools.forEach(tool => {
+                    if (tool.supportedResources?.includes('Grapes')) {
+                        const toolId = `${tool.name} #${tool.instanceNumber}`;
+                        const playerInventory = inventoryInstance.items;
+                        const matchingInventoryItems = playerInventory.filter(item => 
+                            item.storage === toolId && 
+                            item.state === 'Grapes'
+                        );
+                        const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
+                        const availableCapacity = tool.capacity - currentAmount;
+
+                        // Only show containers with available capacity
+                        if (availableCapacity > 0) {
+                            const row = document.createElement('tr');
+                            const firstItem = matchingInventoryItems[0];
+
+                            row.innerHTML = `
+                                <td><input type="checkbox" class="storage-checkbox" data-capacity="${availableCapacity}" value="${toolId}" style="accent-color: var(--color-primary);"></td>
+                                <td>${toolId}</td>
+                                <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
+                                <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
+                                <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
+                            `;
+                            storageBody.appendChild(row);
+
+                            row.querySelector('.storage-checkbox').addEventListener('change', function() {
+                                updateSelectedCapacity(farmland);
+                            });
+                        }
+                    }
+                });
+            });
+        }
+    });
+}
+
+function updateSelectedCapacity(farmland) {
+    const checkboxes = document.querySelectorAll('.storage-checkbox:checked');
+    let totalCapacity = 0;
+    checkboxes.forEach(checkbox => {
+        totalCapacity += parseFloat(checkbox.dataset.capacity);
+    });
+    const capacityDisplay = document.getElementById('selected-capacity');
+    capacityDisplay.textContent = totalCapacity >= 1000 ? 
+        formatNumber(totalCapacity/1000, 2) + ' t' : 
+        formatNumber(totalCapacity) + ' kg';
+
+    const expectedYield = farmlandYield(farmland);
+    const capacityProgress = document.getElementById('selected-capacity-progress');
+    const progressPercentage = Math.min((totalCapacity / expectedYield) * 100, 100);
+    capacityProgress.style.width = `${progressPercentage}%`;
+    capacityProgress.setAttribute('aria-valuenow', progressPercentage);
+}
+
+function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
+    const selectedCheckboxes = overlayContainer.querySelectorAll('.storage-checkbox:checked');
+    if (selectedCheckboxes.length === 0) {
+        addConsoleMessage('Please select at least one storage container for harvesting');
+        return;
+    }
+
+    // Get all selected tools and their capacities
+    const selectedTools = Array.from(selectedCheckboxes).map(checkbox => checkbox.value);
+    let totalAvailableCapacity = Array.from(selectedCheckboxes).reduce((total, checkbox) => {
+        const storageCheck = validateStorage(farmland, checkbox.value);
+        return total + storageCheck.availableCapacity;
+    }, 0);
+
+    const expectedYield = farmlandYield(farmland);
+    
+    if (totalAvailableCapacity < expectedYield) {
+        showWarningModal(farmland, farmlandId, selectedTools, totalAvailableCapacity, expectedYield, overlayContainer);
+    } else {
+        harvest(farmland, farmlandId, selectedTools, expectedYield);
+        removeOverlay(overlayContainer);
+    }
+}
+
+function removeOverlay(overlayContainer) {
+    if (overlayContainer && overlayContainer.parentNode) {
+        overlayContainer.parentNode.removeChild(overlayContainer);
+    }
+    const vineyardOverlay = document.querySelector('.mainview-overlay');
+    if (vineyardOverlay) {
+        showVineyardOverlay();
+    }
 }
