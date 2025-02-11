@@ -179,8 +179,23 @@
 
 .method-item.selected {
     border-color: var(--color-accent);
-    background: rgba(var(--color-accent-rgb), 0.1);
-    box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.2);
+    background: linear-gradient(
+        rgba(var(--color-accent-rgb), 0.15),
+        rgba(40, 167, 69, 0.2)
+    );
+    box-shadow: 
+        0 0 10px rgba(var(--color-accent-rgb), 0.2),
+        inset 0 0 15px rgba(40, 167, 69, 0.1);
+    transform: translateY(-2px);
+}
+
+.method-item.selected .method-name {
+    color: var(--color-accent);
+    text-shadow: 0 0 5px rgba(40, 167, 69, 0.2);
+}
+
+.method-item.selected .method-stats {
+    color: #28a745;
 }
 
 .method-item:not(.disabled):hover {
