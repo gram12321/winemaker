@@ -273,7 +273,8 @@ const ToolManager = (() => {
         new Tool('Oak Fermentation Barrel', 'Winery', 1.4, 85000, 500, ['Must'], 2, ['fermentation'], 'task'),
 
         // Office Tools
-        new Tool('Computer', 'Office', 1.1, 2000, 0, [], 1, ['administration'], 'individual')
+        new Tool('Desk', 'Office', 1.1, 500, 0, [], 1, ['administration'], 'individual'),
+        new Tool('Computer', 'Office', 1.3, 2000, 0, [], 1, ['administration'], 'individual') // maybe we could make somethingabout a requirement for Desk before computer
       ];
       toolsInitialized = true;
     }
