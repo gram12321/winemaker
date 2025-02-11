@@ -30,9 +30,12 @@ export function showAssignStaffOverlay(task) {
             currentWeight: slot.currentWeight
         }));
 
-        // Only filter by task validity, not availability
         const tools = building.getAllTools();
-        const filteredTools = tools.filter(tool => tool.isValidForTask(task.name));
+        // Add assignable filter to existing validTasks filter
+        const filteredTools = tools.filter(tool => 
+            tool.isValidForTask(task.name) && 
+            tool.assignable
+        );
         return filteredTools;
     });
 

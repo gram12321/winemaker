@@ -154,3 +154,89 @@
     border-bottom: 2px solid var(--color-accent);
 }
 
+/* Update crushing methods styling */
+.crushing-methods {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Update method item styling */
+.method-item {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    min-width: 120px;
+    max-width: 150px;
+    transition: all 0.2s ease;
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.method-item.selected {
+    border-color: var(--color-accent);
+    background: rgba(var(--color-accent-rgb), 0.1);
+    box-shadow: 0 0 10px rgba(var(--color-accent-rgb), 0.2);
+}
+
+.method-item:not(.disabled):hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.method-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(128, 128, 128, 0.1);
+    border-color: #666;
+}
+
+.method-item input[type="radio"] {
+    display: none;
+}
+
+.method-item-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.method-item img {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.25rem;
+    transition: transform 0.2s ease;
+}
+
+.method-item:not(.disabled):hover img {
+    transform: scale(1.1);
+}
+
+.method-item .method-name {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.method-stats {
+    font-size: 0.75em;
+    color: #888;
+    margin-top: 0.25rem;
+}
+
+.method-item.selected .method-stats {
+    color: var(--color-accent);
+}
+
+.no-crushing-option {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.25rem;
+    border-top: 1px solid #ddd;
+    text-align: center;
+}
