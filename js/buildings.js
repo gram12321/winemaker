@@ -247,16 +247,33 @@ const ToolManager = (() => {
       // Reset tool instance counts
       toolInstanceCounts = {};
 
-      tools = [ // name, buildingType, speedBonus, cost, capacity, supportedResources, weight, validTasks, toolType
-        new Tool('Tractor', 'Tool Shed', 1.2, 2500, 0, [], 5, ['planting', 'harvesting', 'clearing', 'uprooting' ], 'task'),      // Takes full slot
-        new Tool('Trimmer', 'Tool Shed', 1.1, 1300, 0, [], 1, ['planting', 'clearing'], 'task'),      // Can fit multiple
-        new Tool('Harvest Bins', 'Tool Shed', 1.1, 700, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
-        new Tool('Lug Box', 'Tool Shed', 1.05, 500, 0, ['Grapes'], 1, ['harvesting'], 'individual'), // Can fit multiple
-        new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation', 'Building & Maintenance'], 'task'),   // Takes full slot
+      tools = [
+        // Tool Shed Tools
+        new Tool('Tractor', 'Tool Shed', 1.2, 2500, 0, [], 5, ['planting', 'harvesting', 'clearing', 'uprooting'], 'task'),
+        new Tool('Trimmer', 'Tool Shed', 1.1, 1300, 0, [], 1, ['planting', 'clearing'], 'task'),
+        new Tool('Harvest Bins', 'Tool Shed', 1.1, 700, 0, ['Grapes'], 1, ['harvesting'], 'individual'),
+        new Tool('Lug Box', 'Tool Shed', 1.05, 500, 0, ['Grapes'], 1, ['harvesting'], 'individual'),
+
+        // Warehouse Tools
+        new Tool('Forklift', 'Warehouse', 1.2, 2000, 0, [], 6, ['crushing', 'fermentation', 'Building & Maintenance'], 'task'),
         new Tool('Pallet Jack', 'Warehouse', 1.1, 1500, 0, [], 3, ['crushing', 'fermentation', 'Building & Maintenance'], 'individual'),
         new Tool('Macro Bin', 'Warehouse', 1.05, 1050, 1000, ['Grapes'], 2, ['crushing'], 'individual'),
         new Tool('Grape Gondola', 'Warehouse', 1.0, 10000, 8000, ['Grapes'], 8, ['crushing'], 'task'),
-        new Tool('Fermentation Tank', 'Warehouse', 1.0, 600000, 20000, ['Must'], 8, ['fermentation'], 'task') // Takes full slot
+
+        // Winery Tools
+        new Tool('Fermentation Tank', 'Winery', 1.0, 600000, 20000, ['Must'], 8, ['fermentation'], 'task'),
+        new Tool('Manual Grape Crusher', 'Winery', 1.0, 5000, 0, ['Grapes'], 2, ['crushing'], 'task'),
+        new Tool('Mechanical Crusher', 'Winery', 1.2, 15000, 0, ['Grapes'], 3, ['crushing'], 'task'),
+        new Tool('Crusher-Destemmer', 'Winery', 1.3, 35000, 0, ['Grapes'], 4, ['crushing'], 'task'),
+        new Tool('Pneumatic Press', 'Winery', 1.4, 75000, 0, ['Grapes'], 5, ['pressing'], 'task'),
+        new Tool('Advanced Press', 'Winery', 1.5, 150000, 0, ['Grapes'], 6, ['pressing'], 'task'),
+        new Tool('Plastic Fermentation Bin', 'Winery', 1.0, 8000, 1000, ['Must'], 3, ['fermentation'], 'task'),
+        new Tool('Stainless Steel Tank', 'Winery', 1.2, 25000, 2000, ['Must'], 5, ['fermentation'], 'task'),
+        new Tool('Concrete Tank', 'Winery', 1.3, 45000, 3000, ['Must'], 8, ['fermentation'], 'task'),
+        new Tool('Oak Fermentation Barrel', 'Winery', 1.4, 85000, 500, ['Must'], 2, ['fermentation'], 'task'),
+
+        // Office Tools
+        new Tool('Computer', 'Office', 1.1, 2000, 0, [], 1, ['administration'], 'individual')
       ];
       toolsInitialized = true;
     }
