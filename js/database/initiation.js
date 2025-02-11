@@ -290,9 +290,14 @@ async function storeCompanyName(companyName, startingCondition = null) {
         setFarmlandsStore([]); // Use the setter instead of direct assignment
       }
 
-      // Initialize with a level 1 warehouse
-      const startingBuilding = new Building('Warehouse', 1);
-      localStorage.setItem('buildings', JSON.stringify([startingBuilding]));
+      // Initialize with starting buildings
+      const startingBuildings = [
+        new Building('Warehouse', 1),
+        new Building('Office', 1),
+        new Building('Wine Cellar', 1),
+        new Building('Winery', 1)
+      ];
+      localStorage.setItem('buildings', JSON.stringify(startingBuildings));
 
       await saveCompanyInfo(); // Save company info to Firestore
       window.location.href = 'html/game.html'; // Redirect to game.html

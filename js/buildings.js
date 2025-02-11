@@ -7,27 +7,44 @@ import { formatNumber } from '/js/utils.js';
 import taskManager from '/js/taskManager.js';
 
 export class Building {
-  static BASE_COSTS = {
-    'Tool Shed': 500000,
-    'Warehouse': 1000000
+  static BUILDINGS = {
+    'Tool Shed': {
+      baseCost: 500000,
+      weightCapacity: 10,
+      slotWeightCapacity: 5
+    },
+    'Warehouse': {
+      baseCost: 1000000,
+      weightCapacity: 15,
+      slotWeightCapacity: 8
+    },
+    'Office': {
+      baseCost: 750000,
+      weightCapacity: 5,
+      slotWeightCapacity: 3
+    },
+    'Wine Cellar': {
+      baseCost: 2000000,
+      weightCapacity: 20,
+      slotWeightCapacity: 10
+    },
+    'Winery': {
+      baseCost: 1500000,
+      weightCapacity: 15,
+      slotWeightCapacity: 8
+    }
   };
 
-  static WEIGHT_CAPACITY = {
-    'Tool Shed': 10,  // Each slot can hold 10 weight units
-    'Warehouse': 15   // Warehouse slots can hold more weight
-  };
-
-  static SLOT_WEIGHT_CAPACITY = {
-    'Tool Shed': 5,  // Each slot can hold 5 weight units
-    'Warehouse': 8   // Warehouse slots can hold more weight
-  };
+  getConfig(name) {
+    return Building.BUILDINGS[name] || Building.BUILDINGS['Tool Shed'];
+  }
 
   constructor(name, level = 1, tools = []) {
     this.name = name;
     this.level = level;
-    this.baseCost = Building.BASE_COSTS[name] || 500000;
+    this.baseCost = this.getConfig(name).baseCost;
     this.capacity = this.calculateCapacity();
-    this.slotWeightCapacity = Building.SLOT_WEIGHT_CAPACITY[name] || 5;
+    this.slotWeightCapacity = this.getConfig(name).slotWeightCapacity;
     this.slots = Array(this.capacity).fill().map(() => ({ tools: [], currentWeight: 0 }));
 
     // Initialize slots with existing tools
@@ -293,7 +310,7 @@ export function buildBuilding(buildingName) {
     return;
   }
 
-  const buildingCost = Building.BASE_COSTS[buildingName] || 500000;
+  const buildingCost = Building.BUILDINGS[buildingName]?.baseCost || 500000;
 
   // Initial state changes
   const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
@@ -348,7 +365,7 @@ export function updateBuildButtonStates() { // Disable build and upgrade buttons
     const buildingName = button.getAttribute('data-building-name');
     const upgradeButton = upgradeButtons[index];
     const existingBuilding = buildings.find(b => b.name === buildingName);
-    const buildCost = Building.BASE_COSTS[buildingName] || 500000;
+    const buildCost = Building.BUILDINGS[buildingName]?.baseCost || 500000;
     const hasBuildingTask = activeTasks.some(task => 
       task.name === 'Building & Maintenance' && 
       task.params.buildingName === buildingName
