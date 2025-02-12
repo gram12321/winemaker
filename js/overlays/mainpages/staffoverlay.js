@@ -13,6 +13,9 @@ export function showStaffOverlay() {
     teams = loadTeams(); // Load teams once
     const overlay = showMainViewOverlay(createStaffOverlayHTML());
     setupStaffOverlayEventListeners(overlay);
+    if (tutorialManager.shouldShowTutorial('STAFF')) {
+        tutorialManager.showTutorial('STAFF');
+    }
 }
 
 export function renderTeamMembersHTML() {

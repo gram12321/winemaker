@@ -149,6 +149,58 @@ const GENERAL_TUTORIALS = {
     ]
   },
 
+  FINANCE: {
+    title: 'Finance Overview',
+    pages: [
+      {
+        title: 'Welcome to Finance Management',
+        content: 'Welcome to your finance management area! Here you can track your income, expenses, and overall financial health. Keeping a close eye on your finances is crucial for the success of your winery. You will see three tabs here "Income/Balance", "Cash Flow", and "Research and Upgrades". I\'ll explain them to you now. ',
+      },
+
+      {
+        title: 'Income/Balance',
+        content: 'The Income Statement section provides a detailed view of your income and expenses over time. You can select to view this by week, season or year. This may be useful to you as the income and expenses may not be distributed evenly across the seasons. You\'ll notice that most of the info here you can click to gain more information. In the balance sheet, you will find information.',
+        highlightElement: 'income-balance-link'  // This will highlight the Income/Balance link // NOT WORKING
+      },
+
+      {
+        title: 'Cash Flow',
+        content: 'The Cash Flow section provides a detailed view of your income and expenses. You will be able to see every transaction in and out of the winery here.',
+        highlightElement: 'cash-flow-link'  // This will highlight the Cash Flow link // NOT WORKING
+      },
+      {
+        title: 'Research and Upgrades',
+        content: 'The Research and Upgrades section allows you to invest in new technologies and upgrades for your winery. This can help you improve efficiency, quality, and overall performance. You will notice that some upgrades are expensive and time consuming. Some upgrades is just for a single field, some is for the whole winery. ',
+        highlightElement: 'income-statement-link'  // This will highlight the Income Statement link // NOT WORKING
+      }
+    ]
+  },
+
+  STAFF: {
+    title: 'Staff Management',
+    pages: [
+      {
+        title: 'Welcome to Staff Management',
+        content: 'Welcome to your staff management area! Here you can hire, train, and manage your winery staff. Your staff has a skill level that represents their overall capabilities. Thier skills is devided into five skilltypes: "Field", "Winery", "Administration", "Sales" and "Building and Maintaince". Like most values in Winemaker, the skills are represented by a value from 0-1. You will find out that the more skilled your worker is with a tasktype the faster and better he/she will perform it. .',
+      },
+
+      {
+        title: 'About your staff',
+        content: 'As you can see the whole family is working here. Some of us you have allready met, and here you can see more information about what we are good at. You can also see how much we are payed each week. The wage of the staff will be tied to, but not an excact match to the skill of the worker. You can always click on a member of the staff to see more information about them. Some of your staff will have specializations that will make them better at certain tasks. ',
+      },
+      
+      {
+        title: 'Hiring Staff',
+        content: 'To hire new staff, click the "Hire Staff" button. This will start a "Search for staff" option window. You can setup what kind of staff you are looking for, what skill level, or if you want a candidate with a specific skill. Be worry though, the more specific you search the longer it will take to find candidates, and it will become more expensive. Once you are ready you can start the search, this will then create a "Search for staff" Task. When its completed your HR, will have information about the available candidates and their qualifications. Choose wisely to build a strong team, and do be mindfull of the weekly wage. ',
+        highlightElement: 'hire-staff-btn'  // This will highlight the Hire Staff button // NOT WORKING
+      },
+      {
+        title: 'Team Management',
+        content: 'In the team Management section you can control, who is working on what task. We have allready created some teams the way we use to do it around here, but you can create your own teams if you want. You can assign a team to be responsible for a specific task, if so that members of that team will automaticly work the task you specify. You\ll notice that some of us is allready on a team, you may change that if you want. ',
+      }
+    ]
+  },
+
   FARMLAND: {
     title: 'Farmland Overview',
     pages: [
