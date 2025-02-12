@@ -119,7 +119,7 @@ const GENERAL_TUTORIALS = {
     pages: [
       {
         title: 'Navigation Menu',
-        content: 'Okay, I will show you around. To the left of the screen, we can acces the most important places. Ill should you a few of them now.',
+        content: 'Okay, I will show you around. To the left of the screen, we can access the most important places. I\'ll show you a few of them now.',
         highlightElement: 'sidebar-wrapper'  // Element ID to highlight
       },
       {
@@ -129,12 +129,12 @@ const GENERAL_TUTORIALS = {
       },
       {
         title: 'Farmland Overview',
-        content: 'This is the Farmland Overview. Here is a list of our current fields. You can buy new fields, plant crops, and manage your land from here, i will tell you more about this the first time you visit this page.',
+        content: 'This is the Farmland Overview. Here is a list of our current fields. You can buy new fields, plant crops, and manage your land from here. I will tell you more about this the first time you visit this page.',
         highlightElement: 'land-link'  // Using the existing ID of the land menu item
       },
       {
         title: 'Vineyard Management',
-        content: 'In the Vineyard section, youll manage your grape vines, from planting to harvesting.',
+        content: 'In the Vineyard section, you\'ll manage your grape vines, from planting to harvesting.',
         highlightElement: 'vineyard-link'
       }
     ]
@@ -170,7 +170,7 @@ const GENERAL_TUTORIALS = {
       },
       {
         title: 'Research and Upgrades',
-        content: 'The Research and Upgrades section allows you to invest in new technologies and upgrades for your winery. This can help you improve efficiency, quality, and overall performance. You will notice that some upgrades are expensive and time consuming. Some upgrades is just for a single field, some is for the whole winery. ',
+        content: 'The Research and Upgrades section allows you to invest in new technologies and upgrades for your winery. This can help you improve efficiency, quality, and overall performance. You will notice that some upgrades are expensive and time consuming. Some upgrades are just for a single field, some are for the whole winery. ',
         highlightElement: 'income-statement-link'  // This will highlight the Income Statement link // NOT WORKING
       }
     ]
@@ -181,17 +181,17 @@ const GENERAL_TUTORIALS = {
     pages: [
       {
         title: 'Welcome to Staff Management',
-        content: 'Welcome to your staff management area! Here you can hire, train, and manage your winery staff. Your staff has a skill level that represents their overall capabilities. Thier skills is devided into five skilltypes: "Field", "Winery", "Administration", "Sales" and "Building and Maintaince". Like most values in Winemaker, the skills are represented by a value from 0-1. You will find out that the more skilled your worker is with a tasktype the faster and better he/she will perform it. .',
+        content: 'Welcome to your staff management area! Here you can hire, train, and manage your winery staff. Your staff has a skill level that represents their overall capabilities. Their skills are divided into five skill types: "Field", "Winery", "Administration", "Sales" and "Building and Maintenance". Like most values in Winemaker, the skills are represented by a value from 0-1. You will find out that the more skilled your worker is with a task type the faster and better he/she will perform it.',
       },
 
       {
         title: 'About your staff',
-        content: 'As you can see the whole family is working here. Some of us you have allready met, and here you can see more information about what we are good at. You can also see how much we are payed each week. The wage of the staff will be tied to, but not an excact match to the skill of the worker. You can always click on a member of the staff to see more information about them. Some of your staff will have specializations that will make them better at certain tasks. ',
+        content: 'As you can see the whole family is working here. Some of us you have already met, and here you can see more information about what we are good at. You can also see how much we are paid each week. The wage of the staff will be tied to, but not an exact match to the skill of the worker. You can always click on a member of the staff to see more information about them. Some of your staff will have specializations that will make them better at certain tasks.',
       },
       
       {
         title: 'Hiring Staff',
-        content: 'To hire new staff, click the "Hire Staff" button. This will start a "Search for staff" option window. You can setup what kind of staff you are looking for, what skill level, or if you want a candidate with a specific skill. Be worry though, the more specific you search the longer it will take to find candidates, and it will become more expensive. Once you are ready you can start the search, this will then create a "Search for staff" Task. When its completed your HR, will have information about the available candidates and their qualifications. Choose wisely to build a strong team, and do be mindfull of the weekly wage. ',
+        content: 'To hire new staff, click the "Hire Staff" button. This will start a "Search for staff" option window. You can set up what kind of staff you are looking for, what skill level, or if you want a candidate with a specific skill. Be wary though, the more specific you search the longer it will take to find candidates, and it will become more expensive.',
         highlightElement: 'hire-staff-btn'  // This will highlight the Hire Staff button // NOT WORKING
       },
       {
@@ -206,13 +206,35 @@ const GENERAL_TUTORIALS = {
     pages: [
       {
         title: 'Welcome to Farmland Management',
-        content: 'Welcome to your farmland management area! Here you can manage your fields, plant various crops, and expand your agricultural operations. Choose your fields wisely to support your winery.',
+        content: 'Welcome to your farmland management area! Here you can manage your fields. This is where you will choose which grapes you want to plant. Choose carefully, vines last many years, once planted you can Uproot and plant new vines, but is cost and labor intensive. You can always click your field to get more information, and you can click the grapes to see detailed information, about the grapes characteristics.',
       },
       {
         title: 'Buying New Land',
         content: 'To expand your operation, you\'ll need to acquire more land. Click the "Buy Land" button to see available properties in different regions.',
         highlightElement: 'buy-land-btn'  // This will highlight the Buy Land button
+      },
+      {
+        title: 'Taking care for your vineyards',
+        content: 'A good vineyard manager connects with his vineyards and can feel the wellbeeing of them, if you need at little help feeling the vines in the beginning, you can monitor at the Field Health value, there are a number of different things you can do to keep your vineyards healthy. Cleanring, Prunning, Vine replanting, or even soil management.',
+        highlightElement: 'action-scetion'  // This will highlight the Buy Land button // NOT WORKING
+      },
+
+      {
+        title: 'Planting Vines',
+        content: 'To plant vines, click on a field and select the "Plant Vines" option. You can then choose the type of grapes to plant. Remember, each grape variety has unique requirements and characteristics, so choose wisely.',
+      },  
+      {
+          title: 'Soil Management',
+          content: 'Proper soil management is crucial for healthy vines. There are reaseach and upgrades you can do you improve soil and health. Be carefull what operations you perform though, if you eventually want to aquire a eco-certificaltions.',
+          highlightElement: 'soil-management-btn'  // This will highlight the Soil Management button
+      },
+
+      {
+          title: 'Planting Vines',
+          content: 'To plant vines, click on a field and select the "Plant Vines" option. You can then choose the type of grapes to plant. Remember, each grape variety has unique requirements and characteristics, so choose wisely.',
+          highlightElement: 'plant-btn'  // This will highlight the Plant Vines button
       }
+      
     ]
   },
   
