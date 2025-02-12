@@ -123,6 +123,11 @@ const GENERAL_TUTORIALS = {
         highlightElement: 'sidebar-wrapper'  // Element ID to highlight
       },
       {
+        title: 'Main Office Overview',
+        content: 'This is the Main Office Overview. Here is where you can manage your administrative tasks and get an overview of the winery operations.',
+        highlightElement: 'main-link'  // Using the existing ID of the land menu item
+      },
+      {
         title: 'Farmland Overview',
         content: 'This is the Farmland Overview. Here is a list of our current fields. You can buy new fields, plant crops, and manage your land from here, i will tell you more about this the first time you visit this page.',
         highlightElement: 'land-link'  // Using the existing ID of the land menu item
@@ -134,6 +139,16 @@ const GENERAL_TUTORIALS = {
       }
     ]
   },
+  MAINOFFICE: {
+    title: 'Main Office Overview',
+    pages: [
+      {
+        title: 'Welcome to your Main Office',
+        content: 'Welcome to your Main office area! Here you will manage the overall operations of your winery. Mostly this is where you can move time forward one week when you are ready.',
+      },
+    ]
+  },
+
   FARMLAND: {
     title: 'Farmland Overview',
     pages: [
@@ -148,6 +163,7 @@ const GENERAL_TUTORIALS = {
       }
     ]
   },
+  
   VINEYARD: {
     title: 'Vineyard Management',
     content: 'Welcome to your vineyard! Here you can manage your fields, plant vines, and harvest grapes. Monitor ripeness levels carefully to achieve the best quality harvest.',
