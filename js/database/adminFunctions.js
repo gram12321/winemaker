@@ -1,6 +1,6 @@
 import { inventoryInstance } from '/js/resource.js';
 import { Building } from '/js/buildings.js';
-import { Tool } from '/js/buildings.js';
+import { Tool, getBuildingTools  } from '/js/buildings.js';
 
 // Function to load inventory from localStorage
 function loadInventory() {
@@ -104,27 +104,29 @@ export function loadBuildings() {
 
   try {
     const buildingsData = JSON.parse(buildingsJSON);
-    // Convert stored objects back to Building instances
     return buildingsData.map(buildingData => {
       const building = new Building(buildingData.name, buildingData.level);
       
-      // Restore slots and tools
       if (buildingData.slots) {
         building.slots = buildingData.slots.map(slotData => ({
           tools: slotData.tools.map(toolData => {
+            const defaultTool = getBuildingTools().find(t => t.name === toolData.name);
+            
             const tool = new Tool(
               toolData.name,
               toolData.buildingType,
               toolData.speedBonus,
               toolData.cost,
               toolData.capacity,
-              toolData.supportedResources || [], // Ensure supportedResources is always an array
+              toolData.supportedResources || [],
               toolData.weight,
               toolData.validTasks || [],
-              toolData.toolType || 'individual'  // Load toolType with fallback
+              toolData.toolType || 'individual',
+              defaultTool ? defaultTool.assignable : true  // Use default tool's assignable property
             );
             tool.instanceNumber = toolData.instanceNumber;
-            tool.assignedTaskId = toolData.assignedTaskId; // Add this line
+            tool.assignedTaskId = toolData.assignedTaskId;
+            tool.assignable = defaultTool ? defaultTool.assignable : true; // Explicitly set assignable
             return tool;
           }),
           currentWeight: slotData.currentWeight

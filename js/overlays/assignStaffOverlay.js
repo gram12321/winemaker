@@ -21,21 +21,24 @@ export function showAssignStaffOverlay(task) {
                     toolData.supportedResources || [],
                     toolData.weight,
                     toolData.validTasks || [],
-                    toolData.toolType // Make sure toolType is passed here
+                    toolData.toolType,
+                    toolData.assignable
                 );
                 tool.instanceNumber = toolData.instanceNumber;
-                tool.assignedTaskId = toolData.assignedTaskId; // Make sure we copy the assignedTaskId
+                tool.assignedTaskId = toolData.assignedTaskId;
+                tool.assignable = toolData.assignable;
                 return tool;
             }),
             currentWeight: slot.currentWeight
         }));
 
         const tools = building.getAllTools();
-        // Add assignable filter to existing validTasks filter
-        const filteredTools = tools.filter(tool => 
-            tool.isValidForTask(task.name) && 
-            tool.assignable
-        );
+        const filteredTools = tools.filter(tool => {
+            const isValid = tool.isValidForTask(task.name);
+            const isAssignable = tool.assignable === true;
+            return isValid && isAssignable;
+        });
+        
         return filteredTools;
     });
 
