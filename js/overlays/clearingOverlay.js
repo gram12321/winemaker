@@ -170,7 +170,7 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
     });
 
     setupClearButton(overlayContainer, farmland, checkboxes, replantingSlider, onClearCallback);
-    setupCloseButton(overlayContainer);
+    setupStandardOverlayClose(overlayContainer);
 
     // Add soil amendment checkbox and slider handlers
     const soilAmendmentCheckbox = overlayContainer.querySelector('#soil-amendment');
@@ -243,8 +243,8 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
         };
 
         if (clearing(farmland, clearingParams)) {
-            onClearCallback();
-            hideOverlay(overlayContainer);
+            hideOverlay(overlayContainer);  // Close overlay first
+            onClearCallback();  // Then run callback
         }
     });
 }
@@ -252,18 +252,11 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
 function clearing(farmland, params) {
     const { selectedTasks, replantingIntensity, soilAmendment } = params;
     
-    // Calculate total work
-    const baseWorkPerAcre = 50;
-    const standardTasks = selectedTasks.filter(task => task !== 'remove-vines').length;
-    let totalWork = farmland.acres * baseWorkPerAcre * standardTasks;
-
-    if (selectedTasks.includes('remove-vines')) {
-        const densityFactor = (farmland.density || 0) / 1000;
-        totalWork += Math.ceil(farmland.acres * baseWorkPerAcre * (densityFactor * replantingIntensity));
-    }
-
+    // Use the same work calculation we use in updateWorkCalculations
+    const workData = calculateClearingWorkData(farmland, selectedTasks.map(taskId => ({ id: taskId })), replantingIntensity);
+    
     // Calculate health improvements
-    const healthImprovementPerTask = 0.5 / 3;
+    const healthImprovementPerTask = DEFAULT_FARMLAND_HEALTH / 3;
     let totalHealthImprovement = selectedTasks.reduce((total, taskId) => {
         if (taskId === 'remove-vines') {
             return total + (healthImprovementPerTask * replantingIntensity);
@@ -273,13 +266,12 @@ function clearing(farmland, params) {
 
     if (soilAmendment) {
         totalHealthImprovement += healthImprovementPerTask;
-        totalWork += Math.ceil(farmland.acres * baseWorkPerAcre * (soilAmendment.isOrganic ? 0.5 : 0.3));
     }
 
     const task = taskManager.addProgressiveTask(
         'Clearing',
         'field',
-        totalWork,
+        workData.totalWork,
         (target, progress) => {
             const percentComplete = Math.floor(progress * 100);
             addConsoleMessage(`Clearing ${getFlagIconHTML(target.country)} ${target.name}: ${percentComplete}% complete...`, true);
@@ -332,8 +324,4 @@ function finalizeClearingTask(farmland, totalHealthImprovement, params) {
     
     addConsoleMessage(message);
     displayFarmland();
-}
-
-function setupCloseButton(overlayContainer) {
-    setupStandardOverlayClose(overlayContainer);
 }
