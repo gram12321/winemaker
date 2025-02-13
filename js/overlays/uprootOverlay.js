@@ -43,7 +43,10 @@ function createUprootOverlayHTML(farmland) {
                 </div>
                 <div class="card-body">
                     <div class="alert alert-warning">
-                        <strong>Warning:</strong> You are about to uproot ${farmland.plantedResourceName}. 
+                        <strong>Warning:</strong> 
+                        <br>
+                        You are about to uproot ${farmland.plantedResourceName}. 
+                        <br>
                         This action cannot be undone and will destroy the current plantation.
                     </div>
                     <hr class="overlay-divider">
