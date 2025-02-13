@@ -1,5 +1,5 @@
 import { formatNumber } from '../utils.js';
-import { BASE_WORK_UNITS } from '../constants/workConstants.js';
+import { BASE_WORK_UNITS } from '../constants/constants.js';
 
 export function createWorkCalculationTable(data) {
     const {

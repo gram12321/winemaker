@@ -1,4 +1,4 @@
-import { BASE_WORK_UNITS, DENSITY_DIVISOR } from '../constants/workConstants.js';
+import { BASE_WORK_UNITS, DENSITY_DIVISOR } from '../constants/constants.js';
 
 export class WorkCalculator {
     constructor() {

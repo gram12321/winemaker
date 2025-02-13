@@ -14,7 +14,7 @@ export function showUprootOverlay(farmland, onUprootCallback) {
     setupUprootEventListeners(overlayContainer, farmland, onUprootCallback);
 }
 
-function calculateUprootWorkData(farmland) {
+function calculateUprootWorkData(farmland) { // uses utility workCalculator to calculate total work
     const totalWork = workCalculator.calculateTotalWork(farmland.acres, {
         density: farmland.density
     });
