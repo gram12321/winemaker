@@ -133,3 +133,17 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Work Calculation Table - Minimal additional styles needed */
+.work-preview .table {
+    margin: 0 auto;
+    width: auto;
+}
+
+.work-preview .table td {
+    padding: 8px 16px;
+}
+
+.work-preview .table tr.table-primary {
+    background-color: rgba(197, 165, 114, 0.1);
+}

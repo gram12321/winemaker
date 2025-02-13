@@ -1,9 +1,10 @@
 import { getFlagIconHTML, formatNumber } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { updateFarmland } from '../database/adminFunctions.js';
-import taskManager from '../taskManager.js';  // Remove TaskType import
+import taskManager from '../taskManager.js';
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
+import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 
 export function showUprootOverlay(farmland, onUprootCallback) {
     const overlayContainer = showStandardOverlay(createUprootOverlayHTML(farmland));
@@ -38,36 +39,14 @@ function createUprootOverlayHTML(farmland) {
                             <span class="health-improvement"></span>
                         </div>
                     </div>
-                    <div class="work-details text-center mt-4">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <td>Field Size:</td>
-                                        <td><span id="field-size">${farmland.acres.toFixed(2)}</span> acres</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Base Work per Acre:</td>
-                                        <td><span id="base-work">50</span> units</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Plant Density:</td>
-                                        <td><span id="density">${formatNumber(farmland.density)}</span> vines/acre</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Density Factor:</td>
-                                        <td><span id="density-factor">${formatNumber(farmland.density/1000)}</span>x</td>
-                                    </tr>
-                                    <tr class="table-primary">
-                                        <td><strong>Total Work:</strong></td>
-                                        <td><strong><span id="total-work">0</span> units</strong></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <small class="text-muted">
-                            Calculation: Acres × (Base Work × Density Factor)
-                        </small>
+                    <div id="work-calculation-container">
+                        ${createWorkCalculationTable({
+                            acres: farmland.acres,
+                            baseWork: 50,
+                            density: farmland.density,
+                            tasks: [],
+                            totalWork: 0
+                        })}
                     </div>
                     <div class="d-flex justify-content-center mt-4">
                         <button class="btn btn-danger uproot-btn">Uproot Field</button>
