@@ -7,7 +7,7 @@ import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './o
 import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { workCalculator } from '../utils/workCalculator.js';
-import { DEFAULT_FARMLAND_HEALTH, VINE_WORK_PER_WEEK } from '../constants/constants.js';
+import { DEFAULT_FARMLAND_HEALTH, WORK_RATES } from '../constants/constants.js';
 
 export function showClearingOverlay(farmland, onClearCallback) {
     const overlayContainer = showStandardOverlay(createClearingOverlayHTML(farmland));
@@ -17,9 +17,10 @@ export function showClearingOverlay(farmland, onClearCallback) {
 function calculateClearingWorkData(farmland, selectedTasks, replantingIntensity = 0) {
     const tasks = selectedTasks.map(task => {
         switch(task.id) {
-            case 'remove-vines': return 'Vine Replanting';
-            case 'clear-vegetation': return 'Vegetation';
-            case 'remove-debris': return 'Debris';
+            case 'remove-vines': return 'UPROOTING';
+            case 'clear-vegetation': return 'VEGETATION';
+            case 'remove-debris': return 'DEBRIS';
+            case 'soil-amendment': return 'AMENDMENT';
             default: return task.id;
         }
     });
@@ -28,16 +29,9 @@ function calculateClearingWorkData(farmland, selectedTasks, replantingIntensity 
         density: farmland.density,
         tasks: tasks,
         taskMultipliers: {
-            'Vine Replanting': replantingIntensity
+            'UPROOTING': replantingIntensity
         }
     });
-
-    // Add replanting work calculation if needed
-    if (tasks.includes('Vine Replanting')) {
-        const vinesAffected = farmland.acres * farmland.density * replantingIntensity;
-        const replantingWork = (vinesAffected / VINE_WORK_PER_WEEK) * workCalculator.baseWorkUnits;
-        totalWork += replantingWork;
-    }
 
     return {
         acres: farmland.acres,

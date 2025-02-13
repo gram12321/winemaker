@@ -127,5 +127,6 @@ export const allResources = [ // Resource(name, naturalYield, fragile)
 ];
 
 export function getResourceByName(name) {
-  return allResources.find(resource => resource.name === name);
+  const resource = allResources.find(r => r.name === name);
+  return resource || null;
 }

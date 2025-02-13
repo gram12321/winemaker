@@ -6,7 +6,14 @@ export function createWorkCalculationTable(data) {
         acres,
         density,
         tasks = [],
-        totalWork
+        totalWork,
+        altitude,
+        altitudeEffect,
+        minAltitude,
+        maxAltitude,
+        medianAltitude,
+        robustness,  // Use robustness instead of fragility
+        fragilityEffect
     } = data;
 
     return `
@@ -33,6 +40,31 @@ export function createWorkCalculationTable(data) {
                             <tr>
                                 <td>Plant Density:</td>
                                 <td><span id="density">${formatNumber(density)}</span> vines/acre</td>
+                            </tr>
+                            ` : ''}
+                            ${altitude ? `
+                            <tr>
+                                <td>Altitude:</td>
+                                <td>${altitude}m (${minAltitude}-${maxAltitude}m region)
+                                    <br>
+                                    <small class="text-muted">
+                                        ${formatNumber(Math.abs(altitudeEffect * 100))}% 
+                                        ${altitudeEffect >= 0 ? 'more' : 'less'} work 
+                                        (${altitude > medianAltitude ? 'above' : 'below'} median)
+                                    </small>
+                                </td>
+                            </tr>
+                            ` : ''}
+                            ${robustness !== undefined ? `
+                            <tr>
+                                <td>Grape Robustness:</td>
+                                <td>${formatNumber(robustness * 100)}% robust
+                                    <br>
+                                    <small class="text-muted">
+                                        ${formatNumber(fragilityEffect * 100)}% work modifier 
+                                        (based on density)
+                                    </small>
+                                </td>
                             </tr>
                             ` : ''}
                             <tr class="table-primary">

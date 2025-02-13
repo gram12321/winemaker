@@ -1,12 +1,14 @@
 import { formatNumber, getFlagIconHTML, getColorClass } from '../utils.js';
 import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
-import { allResources } from '/js/resource.js';
+import { allResources, getResourceByName } from '../resource.js';  // Add getResourceByName to import
 import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
+import { createWorkCalculationTable } from '../components/workCalculationTable.js';
+import { workCalculator } from '../utils/workCalculator.js';
 
 // Show the planting overlay
 export function showPlantingOverlay(farmland, onPlantCallback) {
@@ -24,9 +26,15 @@ function createPlantingOverlayHTML(farmland) {
   const density = farmland.density || 1000;
   const initialCostPerAcre = density * 2;
   const initialTotalCost = initialCostPerAcre * farmland.acres;
+  
+  // Create options with first option selected and trigger initial calculation
+  const firstResource = allResources[0].name;
   const plantingOptions = allResources.map(resource => 
-    `<option value="${resource.name}">${resource.name}</option>`
+    `<option value="${resource.name}" ${resource.name === firstResource ? 'selected' : ''}>${resource.name}</option>`
   ).join('');
+
+  // Pass the first resource for initial work calculation
+  const initialWorkData = calculatePlantingWorkData(farmland, density);
 
   return `
     <div class="overlay-content overlay-container">
@@ -39,7 +47,6 @@ function createPlantingOverlayHTML(farmland) {
           <div class="form-group">
             <label for="resource-select" class="form-label">Select Resource to Plant:</label>
             <select class="form-control form-control-sm" id="resource-select">
-              <option value="">Select Resource</option>
               ${plantingOptions}
             </select>
           </div>
@@ -65,6 +72,9 @@ function createPlantingOverlayHTML(farmland) {
               <span>Total Cost: </span><span id="total-cost">${formatNumber(initialTotalCost)}</span>
             </div>
           </div>
+          <div id="work-calculation-container">
+            ${createWorkCalculationTable(initialWorkData)}
+          </div>
           <div class="d-flex justify-content-center mt-4">
             <button class="btn btn-primary plant-btn">Plant</button>
           </div>
@@ -79,6 +89,15 @@ function setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback
   setupDensitySlider(overlayContainer, farmland);
   setupPlantButton(overlayContainer, farmland, onPlantCallback);
   setupCloseButton(overlayContainer);
+
+  // Add resource selection listener
+  const resourceSelect = overlayContainer.querySelector('#resource-select');
+  resourceSelect.addEventListener('change', () => {
+    const densityValue = parseInt(overlayContainer.querySelector('#density-slider').value, 10);
+    const workData = calculatePlantingWorkData(farmland, densityValue);
+    const container = overlayContainer.querySelector('#work-calculation-container');
+    container.innerHTML = createWorkCalculationTable(workData);
+  });
 }
 
 
@@ -100,39 +119,13 @@ function plant(farmland, selectedResource, selectedDensity) {
     return false;
   }
 
-  // Get the resource object and calculate base modifiers
-  const resourceObj = allResources.find(r => r.name === selectedResource);
-  const densityMultiplier = 1 + Math.max(0, (selectedDensity - 1000) / 1000) * 0.1;   // Calculate density multiplier: 1.0 at 1000 vines/acre, increasing by 0.1 for each 1000 additional vines
-  const fragilePenalty = (1 - resourceObj.fragile) * 0.5 * densityMultiplier;   // More fragile = higher penalty, multiplied by density factor
-
-  // Calculate altitude penalty
-  const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
-  const medianAltitude = (minAltitude + maxAltitude) / 2;
-  const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
-  const altitudePenalty = altitudeDeviation * 0.5;   // 5% extra work for every 10% deviation above median, 5% less work for every 10% deviation below median
-
-  // Calculate total work based on density and acres, including penalties
-  const vinesPerAcre = selectedDensity;
-  const totalVines = vinesPerAcre * farmland.acres;
-
-  const totalStandardWorkWeek = totalVines / 3500;  // How many weeks of work for a single worker capable of planting 500 vines per day (3500 per week)
-  const totalWork = totalStandardWorkWeek * 50 * (1 + altitudePenalty + fragilePenalty);   // Multiply by 50 to convert standardWeekofWork into workunits, then apply penalties
-
-  // Add detailed console message about work calculation
-  addConsoleMessage(`Work calculation for ${getFlagIconHTML(farmland.country)} ${farmland.name}:
-    - Vines per acre: ${formatNumber(vinesPerAcre)}
-    - Total vines: ${formatNumber(totalVines)}
-    - Standard work weeks: ${formatNumber(totalStandardWorkWeek, 2)} (${formatNumber(totalVines)} vines ÷ 3500 vines per week)
-    - Work units before penalties: ${formatNumber(totalStandardWorkWeek * 50, 1)} (${formatNumber(totalStandardWorkWeek, 2)} weeks × 50 units)
-    - Altitude deviation: ${formatNumber(altitudeDeviation * 100, 1)}% (${altitudePenalty >= 0 ? '+' : '-'}${formatNumber(Math.abs(altitudePenalty * 100), 1)}% work)
-    - Fragility penalty: +${formatNumber(fragilePenalty * 100, 1)}% (Base: ${formatNumber((1 - resourceObj.fragile) * 50, 1)}% × Density multiplier: ${formatNumber(densityMultiplier, 2)})
-    - Final work units: ${formatNumber(totalWork, 1)} (${formatNumber(totalStandardWorkWeek * 50, 1)} × ${formatNumber(1 + altitudePenalty + fragilePenalty, 2)})`);
+  const workData = calculatePlantingWorkData(farmland, selectedDensity);
 
   // Create the progressive planting task
   taskManager.addProgressiveTask(
     'Planting',
     'field',  // Changed from TaskType.field
-    totalWork,
+    workData.totalWork,
     (target, progress, params) => {
       // This will be called every week with updated progress
       const percentComplete = Math.floor(progress * 100);
@@ -186,6 +179,11 @@ function setupDensitySlider(overlayContainer, farmland) {
     costPerAcreDisplay.textContent = formatNumber(costPerAcre);
     const totalCost = costPerAcre * farmland.acres;
     totalCostDisplay.textContent = formatNumber(totalCost);
+
+    // Update work calculation display
+    const workData = calculatePlantingWorkData(farmland, densityValue);
+    const container = overlayContainer.querySelector('#work-calculation-container');
+    container.innerHTML = createWorkCalculationTable(workData);
   });
 }
 
@@ -212,4 +210,48 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
 
 function setupCloseButton(overlayContainer) {
   setupStandardOverlayClose(overlayContainer);
+}
+
+function calculatePlantingWorkData(farmland, density) {
+    const selectedResource = document.querySelector('#resource-select')?.value || allResources[0].name;
+    const resource = getResourceByName(selectedResource);
+    
+    if (!resource) {
+        throw new Error(`Resource not found: ${selectedResource}`);
+    }
+
+    // Calculate altitude effect based on region's altitude range
+    // 5% extra work for every 10% deviation above median
+    // 5% less work for every 10% deviation below median
+    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+    const medianAltitude = (minAltitude + maxAltitude) / 2;
+    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+    const altitudeEffect = farmland.altitude > medianAltitude 
+        ? altitudeDeviation * 0.5  // Above median: positive effect (more work)
+        : altitudeDeviation * -0.5; // Below median: negative effect (less work)
+
+    // Calculate fragility effect - scales with density
+    const densityFactor = density / 1000;
+    const robustness = resource.fragile;  // Use direct property access, let it fail if undefined
+    const fragilityEffect = (2 - robustness) * 0.5 * densityFactor;  // Remove conditional, let it fail if values are wrong
+
+    const totalWork = workCalculator.calculateTotalWork(farmland.acres, {
+        density: density,
+        tasks: ['PLANTING'],
+        workModifiers: [altitudeEffect, fragilityEffect]
+    });
+
+    return {
+        acres: farmland.acres,
+        density: density,
+        tasks: ['Planting'],
+        totalWork,
+        altitude: farmland.altitude,
+        altitudeEffect,
+        minAltitude,
+        maxAltitude,
+        medianAltitude,
+        robustness,
+        fragilityEffect
+    };
 }

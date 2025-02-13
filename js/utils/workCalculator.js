@@ -1,33 +1,49 @@
-import { BASE_WORK_UNITS, DENSITY_DIVISOR } from '../constants/constants.js';
+import { BASE_WORK_UNITS, WORK_RATES, DENSITY_DIVISOR } from '../constants/constants.js';
 
 export class WorkCalculator {
     constructor() {
         this.baseWorkUnits = BASE_WORK_UNITS;
     }
 
-    calculateDensityFactor(density) {
-        return density / DENSITY_DIVISOR;
+    calculateRealWorldWorkWeeks(acres, params = {}) {
+        const { 
+            taskType,
+            density = DENSITY_DIVISOR,  // Default to DENSITY_DIVISOR (1000) so density/DENSITY_DIVISOR = 1
+            taskIntensity = 1.0
+        } = params;
+
+        // Normalize density by dividing by DENSITY_DIVISOR
+        // For acre-based tasks this becomes 1000/1000 = 1
+        // For vine tasks this becomes actual_density/1000
+        const normalizedDensity = density / DENSITY_DIVISOR;
+        
+        return (acres * normalizedDensity * taskIntensity) / WORK_RATES[taskType];
     }
 
     calculateTotalWork(acres, factors = {}) {
         const { 
-            density = 5000,  // Changed default to 5000
+            density = DEFAULT_VINE_DENSITY,
             tasks = [],
-            taskMultipliers = {}
+            taskMultipliers = {},
+            workModifiers = []
         } = factors;
 
-        let totalWork = this.baseWorkUnits * acres;
-        
-        // Add density-based work using DENSITY_DIVISOR
-        if (density) {
-            const densityFactor = this.calculateDensityFactor(density);
-            totalWork *= (1 + densityFactor);
-        }
+        let totalWork = 0;
 
-        // Add task-based work
+        // Calculate base work from real-world rates
         tasks.forEach(task => {
-            const multiplier = taskMultipliers[task] || 1;
-            totalWork *= multiplier;
+            const taskIntensity = taskMultipliers[task] || 1.0;
+            const workWeeks = this.calculateRealWorldWorkWeeks(acres, {
+                taskType: task,
+                density,
+                taskIntensity
+            });
+            totalWork += workWeeks * this.baseWorkUnits;
+        });
+
+        // Apply additional modifiers (like altitude, fragility)
+        workModifiers.forEach(modifier => {
+            totalWork *= (1 + modifier);
         });
 
         return Math.ceil(totalWork);
