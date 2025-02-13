@@ -1,16 +1,16 @@
 import { formatNumber } from '../utils.js';
+import { BASE_WORK_UNITS } from '../constants/workConstants.js';
 
 export function createWorkCalculationTable(data) {
     const {
         acres,
-        baseWork,
         density,
         tasks = [],
         taskFactors = {},
         totalWork
     } = data;
 
-        return `
+    return `
         <div class="work-preview">
             <div class="work-stats">
                 <div class="table-responsive">
@@ -22,7 +22,7 @@ export function createWorkCalculationTable(data) {
                             </tr>
                             <tr>
                                 <td>Base Work per Acre:</td>
-                                <td><span id="base-work">${formatNumber(baseWork)}</span> units</td>
+                                <td><span id="base-work">${formatNumber(BASE_WORK_UNITS)}</span> units</td>
                             </tr>
                             ${tasks.length > 0 ? `
                             <tr>

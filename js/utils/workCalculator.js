@@ -1,21 +1,26 @@
+import { BASE_WORK_UNITS, DENSITY_DIVISOR } from '../constants/workConstants.js';
+
 export class WorkCalculator {
-    constructor(baseWorkPerAcre = 50) {
-        this.baseWorkPerAcre = baseWorkPerAcre;
+    constructor() {
+        this.baseWorkUnits = BASE_WORK_UNITS;
+    }
+
+    calculateDensityFactor(density) {
+        return density / DENSITY_DIVISOR;
     }
 
     calculateTotalWork(acres, factors = {}) {
         const { 
-            density = 0,
-            densityMultiplier = 1,
+            density = 5000,  // Changed default to 5000
             tasks = [],
             taskMultipliers = {}
         } = factors;
 
-        let totalWork = this.baseWorkPerAcre * acres;
+        let totalWork = this.baseWorkUnits * acres;
         
-        // Add density-based work
+        // Add density-based work using DENSITY_DIVISOR
         if (density) {
-            const densityFactor = (density / 1000) * densityMultiplier;
+            const densityFactor = this.calculateDensityFactor(density);
             totalWork *= (1 + densityFactor);
         }
 
@@ -28,3 +33,5 @@ export class WorkCalculator {
         return Math.ceil(totalWork);
     }
 }
+
+export const workCalculator = new WorkCalculator();
