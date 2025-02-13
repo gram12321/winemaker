@@ -225,21 +225,13 @@ export function getRandomAspect() {
 }
 
 // Add generateFarmlandPreview function to farmland.js
-export function generateFarmlandPreview(country, region) {
-    // First generate random aspect as it affects the name generation
+export function generateFarmlandPreview(country, region, density) {
     const aspect = getRandomAspect();
-    
-    // Then get a name based on country and aspect
     const name = getRandomName(country, aspect);
-    
-    // Get random soil and altitude based on country and region
     const soil = getRandomSoil(country, region);
     const altitude = getRandomAltitude(country, region);
-    
-    // Generate small random acres (under 1)
     const acres = Number((0.1 + Math.random() * 0.4).toFixed(2));
     
-    // Create farmland with all parameters in correct order
     return new Farmland(
         1,          // id
         name,       // name
@@ -251,7 +243,8 @@ export function generateFarmlandPreview(country, region) {
         '',         // grape
         soil,       // soil
         altitude,   // altitude
-        aspect      // aspect
+        aspect,     // aspect
+        density     // Add density parameter here
     );
 }
 

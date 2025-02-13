@@ -1,16 +1,60 @@
 import { getFlagIconHTML, formatNumber } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { updateFarmland } from '../database/adminFunctions.js';
-import taskManager from '../taskManager.js';  // Remove TaskType from import
+import taskManager from '../taskManager.js';
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
+import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
+import { createWorkCalculationTable } from '../components/workCalculationTable.js';
+import { workCalculator } from '../utils/workCalculator.js';
+import { DEFAULT_FARMLAND_HEALTH, VINE_WORK_PER_WEEK } from '../constants/constants.js';
 
 export function showClearingOverlay(farmland, onClearCallback) {
     const overlayContainer = showStandardOverlay(createClearingOverlayHTML(farmland));
     setupClearingEventListeners(overlayContainer, farmland, onClearCallback);
 }
 
+function calculateClearingWorkData(farmland, selectedTasks, replantingIntensity = 0) {
+    const tasks = selectedTasks.map(task => {
+        switch(task.id) {
+            case 'remove-vines': return 'Vine Replanting';
+            case 'clear-vegetation': return 'Vegetation';
+            case 'remove-debris': return 'Debris';
+            default: return task.id;
+        }
+    });
+
+    let totalWork = workCalculator.calculateTotalWork(farmland.acres, {
+        density: farmland.density,
+        tasks: tasks,
+        taskMultipliers: {
+            'Vine Replanting': replantingIntensity
+        }
+    });
+
+    // Add replanting work calculation if needed
+    if (tasks.includes('Vine Replanting')) {
+        const vinesAffected = farmland.acres * farmland.density * replantingIntensity;
+        const replantingWork = (vinesAffected / VINE_WORK_PER_WEEK) * workCalculator.baseWorkUnits;
+        totalWork += replantingWork;
+    }
+
+    return {
+        acres: farmland.acres,
+        density: farmland.density,
+        tasks: tasks,
+        totalWork: Math.ceil(totalWork)
+    };
+}
+
 function createClearingOverlayHTML(farmland) {
+    const healthData = {
+        currentHealth: farmland.farmlandHealth,
+        newHealth: farmland.farmlandHealth
+    };
+
+    const initialWorkData = calculateClearingWorkData(farmland, []);
+
     return `
         <div class="overlay-content overlay-container">
             <section class="overlay-section card mb-4">
@@ -66,54 +110,9 @@ function createClearingOverlayHTML(farmland) {
                         </div>
                     </div>
                     <hr class="overlay-divider">
-                    <div class="health-bar-container">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label>Farmland Health:</label>
-                            <span class="current-health">${formatNumber(farmland.farmlandHealth * 100)}%</span>
-                        </div>
-                        <div class="health-bar">
-                            <div class="health-bar-base" style="width: ${farmland.farmlandHealth * 100}%"></div>
-                            <div class="health-bar-current" style="width: ${farmland.farmlandHealth * 100}%"></div>
-                            <div class="health-bar-improvement"></div>
-                        </div>
-                        <div class="text-end mt-1">
-                            <span class="health-improvement"></span>
-                        </div>
-                    </div>
-                    <div class="work-details text-center mt-4">
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <td>Field Size:</td>
-                                        <td><span id="field-size">${farmland.acres.toFixed(2)}</span> acres</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Base Work per Acre:</td>
-                                        <td><span id="base-work">50</span> units</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Selected Tasks:</td>
-                                        <td><span id="selected-tasks">None</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Plant Density:</td>
-                                        <td><span id="density">${formatNumber(farmland.density || 0)}</span> vines/acre</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Density Factor:</td>
-                                        <td><span id="density-factor">${formatNumber((farmland.density || 0)/1000)}</span>x</td>
-                                    </tr>
-                                    <tr class="table-primary">
-                                        <td><strong>Total Work:</strong></td>
-                                        <td><strong><span id="total-work">0</span> units</strong></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <small class="text-muted">
-                            Calculation: Acres × (Base Work × (Tasks + Density Factor × Replanting Intensity))
-                        </small>
+                    ${createHealthBar(healthData)}
+                    <div id="work-calculation-container">
+                        ${createWorkCalculationTable(initialWorkData)}
                     </div>
                     <div class="d-flex justify-content-center mt-4">
                         <button class="btn btn-warning clear-btn">Clear Field</button>
@@ -196,108 +195,28 @@ function setupClearingEventListeners(overlayContainer, farmland, onClearCallback
 
 function updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHealth, replantingSlider, farmland) {
     const selectedTasks = Array.from(checkboxes).filter(cb => cb.checked);
-    const baseWorkPerAcre = 50;
-    let totalWork = 0;
-    
-    // Get references to display elements
-    const selectedTasksSpan = document.querySelector('#selected-tasks');
-    
-    if (selectedTasks.length > 0) {
-        const taskNames = selectedTasks.map(task => {
-            switch(task.id) {
-                case 'remove-vines': return 'Vine Replanting';
-                case 'clear-vegetation': return 'Vegetation';
-                case 'remove-debris': return 'Debris';
-                default: return task.id;
-            }
-        });
-        selectedTasksSpan.textContent = taskNames.join(', ');
-        
-        // Calculate standard tasks work (vegetation and debris)
-        const standardTasks = selectedTasks.filter(task => task.id !== 'remove-vines').length;
-        const standardWork = farmland.acres * baseWorkPerAcre * standardTasks;
+    const replantingIntensity = selectedTasks.find(task => task.id === 'remove-vines') 
+        ? parseInt(replantingSlider.value) / 100 
+        : 0;
 
-        // Calculate replanting work if selected
-        const vineReplanting = selectedTasks.find(task => task.id === 'remove-vines');
-        if (vineReplanting) {
-            const densityFactor = (farmland.density || 0) / 1000;
-            const replantingIntensity = parseInt(replantingSlider.value) / 100;
-            
-            // Replanting work calculation:
-            // Base removal work (similar to uprooting but scaled by intensity)
-            const removalWork = farmland.acres * baseWorkPerAcre * densityFactor * replantingIntensity;
-            
-            // Replanting work (similar to planting but scaled by intensity)
-            const vinesAffected = farmland.acres * farmland.density * replantingIntensity;
-            const replantingWork = (vinesAffected / 3500) * 50;  // Using planting formula
-            
-            totalWork = Math.ceil(standardWork + removalWork + replantingWork);
-        } else {
-            totalWork = Math.ceil(standardWork);
-        }
-    } else {
-        selectedTasksSpan.textContent = 'None';
-    }
+    // Calculate work using shared calculator
+    const workData = calculateClearingWorkData(farmland, selectedTasks, replantingIntensity);
+    
+    // Update work calculation display
+    const container = document.getElementById('work-calculation-container');
+    container.innerHTML = createWorkCalculationTable(workData);
 
     // Calculate health improvement
-    const healthImprovementPerTask = 0.17;
-    let totalHealthImprovement = 0;
-
-    selectedTasks.forEach(task => {
+    const healthImprovementPerTask = DEFAULT_FARMLAND_HEALTH / 3;
+    let totalHealthImprovement = selectedTasks.reduce((total, task) => {
         if (task.id === 'remove-vines') {
-            const sliderPercentage = parseInt(replantingSlider.value) / 100;
-            totalHealthImprovement += healthImprovementPerTask * sliderPercentage;
-        } else {
-            totalHealthImprovement += healthImprovementPerTask;
+            return total + (healthImprovementPerTask * replantingIntensity);
         }
-    });
-
-    // Add soil amendment work calculation
-    const organicAmendment = document.querySelector('#organic');
-    const syntheticAmendment = document.querySelector('#synthetic');
-    
-    if (organicAmendment && organicAmendment.checked) {
-        // Organic takes more work
-        totalWork += Math.ceil(farmland.acres * baseWorkPerAcre * 0.5);  // 50% extra work for organic
-        totalHealthImprovement += 0.17;  // Same improvement as other tasks
-    } else if (syntheticAmendment && syntheticAmendment.checked) {
-        totalWork += Math.ceil(farmland.acres * baseWorkPerAcre * 0.3);  // 30% extra work for synthetic
-        totalHealthImprovement += 0.17;  // Same improvement as other tasks
-    }
+        return total + healthImprovementPerTask;
+    }, 0);
 
     const newHealth = Math.min(1.0, currentHealth + totalHealthImprovement);
-
-    // Update displays
-    if (totalWorkSpan) totalWorkSpan.textContent = formatNumber(totalWork);
-    updateHealthBarDisplay(healthBar, currentHealth, newHealth, totalHealthImprovement);
-}
-
-function updateHealthBarDisplay(healthBar, currentHealth, newHealth) {
-    const currentHealthBar = healthBar.querySelector('.health-bar-current');
-    const improvementBar = healthBar.querySelector('.health-bar-improvement');
-    const currentHealthSpan = healthBar.parentElement.querySelector('.current-health');
-    const improvementSpan = healthBar.querySelector('.health-improvement');
-
-    // Update the current health display
-    if (currentHealthSpan) {
-        currentHealthSpan.textContent = `${formatNumber(newHealth * 100)}%`;
-    }
-
-    // Update the health bars
-    if (currentHealthBar) {
-        currentHealthBar.style.width = `${currentHealth * 100}%`;
-    }
-    if (improvementBar) {
-        improvementBar.style.width = `${(newHealth - currentHealth) * 100}%`;
-        improvementBar.style.left = `${currentHealth * 100}%`;
-    }
-
-    // Update the improvement text
-    if (improvementSpan) {
-        improvementSpan.textContent = totalHealthImprovement > 0 
-            ? `+${formatNumber(totalHealthImprovement * 100)}%` 
-            : '';
-    }
+    updateHealthBar(healthBar, currentHealth, newHealth);
 }
 
 function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlider, onClearCallback) {
@@ -309,97 +228,110 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
             return;
         }
 
-        // Calculate total work using the same formula
-        const baseWorkPerAcre = 50;
-        const standardTasks = selectedTasks.filter(task => task.id !== 'remove-vines').length;
-        let totalWork = 0;
-
-        if (selectedTasks.find(task => task.id === 'remove-vines')) {
-            const densityFactor = (farmland.density || 0) / 1000;
-            const replantingIntensity = parseInt(replantingSlider.value) / 100;
-            totalWork = Math.ceil(farmland.acres * baseWorkPerAcre * (standardTasks + (densityFactor * replantingIntensity)));
-        } else {
-            totalWork = Math.ceil(farmland.acres * baseWorkPerAcre * standardTasks);
-        }
-
-        const healthImprovementPerTask = 0.5 / 3;
-        let totalHealthImprovement = 0;
-
-        selectedTasks.forEach(task => {
-            if (task.id === 'remove-vines') {
-                const sliderPercentage = parseInt(replantingSlider.value) / 100;
-                totalHealthImprovement += healthImprovementPerTask * sliderPercentage;
-            } else {
-                totalHealthImprovement += healthImprovementPerTask;
-            }
-        });
-
-        // Add soil amendment health improvement
+        // Get soil amendment settings
         const amendmentMethodSlider = overlayContainer.querySelector('#amendment-method-slider');
         const soilAmendmentCheckbox = overlayContainer.querySelector('#soil-amendment');
-        if (soilAmendmentCheckbox?.checked && amendmentMethodSlider) {
-            const isOrganic = amendmentMethodSlider.value === "1";
-            totalHealthImprovement += healthImprovementPerTask; // Add health improvement for soil amendment
-        }
-
-        // Create initial updates object with base properties
-        let updates = {
-            canBeCleared: 'Not ready'
+        
+        const clearingParams = {
+            selectedTasks: selectedTasks.map(cb => cb.id),
+            replantingIntensity: selectedTasks.find(task => task.id === 'remove-vines') 
+                ? parseInt(replantingSlider.value) / 100 
+                : 0,
+            soilAmendment: soilAmendmentCheckbox?.checked 
+                ? { isOrganic: amendmentMethodSlider?.value === "1" }
+                : null
         };
 
-        // Check soil amendment method and update conventional status only
-        if (soilAmendmentCheckbox?.checked && amendmentMethodSlider) {
-            const isOrganic = amendmentMethodSlider.value === "1";
-            updates.conventional = isOrganic ? 'Non-Conventional' : 'Conventional';
-            // Remove organicYears update - will be handled by yearly update
+        if (clearing(farmland, clearingParams)) {
+            onClearCallback();
+            hideOverlay(overlayContainer);
         }
-
-        taskManager.addProgressiveTask(
-            'Clearing',
-            'field',  // Changed from TaskType.field
-            totalWork,
-            (target, progress, params) => {
-                const percentComplete = Math.floor(progress * 100);
-                addConsoleMessage(`Clearing ${getFlagIconHTML(target.country)} ${target.name}: ${percentComplete}% complete...`, true);
-
-                if (progress >= 1) {
-                    // Calculate new health value, capped at 1.0
-                    const newHealth = Math.min(1.0, target.farmlandHealth + totalHealthImprovement);
-                    const actualImprovement = newHealth - target.farmlandHealth;
-                    
-                    // Add health to updates object
-                    updates.farmlandHealth = newHealth;
-
-                    // Add vineage to updates if vine replanting was selected
-                    const vineReplanting = selectedTasks.find(task => task.id === 'remove-vines');
-                    if (vineReplanting) {
-                        const reductionFactor = parseInt(replantingSlider.value) / 100;
-                        const newVineage = Math.max(0, (target.vineAge * (1 - reductionFactor))).toFixed(2);
-                        updates.vineAge = parseFloat(newVineage);
-                    }
-                    
-                    // Update farmland with all accumulated changes
-                    updateFarmland(target.id, updates);
-
-                    // Final message
-                    let message = `Clearing of ${getFlagIconHTML(target.country)} ${target.name} is done. Farmland health was improved by ${formatNumber(actualImprovement * 100)}%`;
-                    if (vineReplanting) {
-                        message += `. Vineage adjusted to ${updates.vineAge} years`;
-                    }
-                    if (updates.conventional === 'Ecological') {
-                        message += `. Field is now certified Ecological!`;
-                    }
-                    addConsoleMessage(message);
-                    displayFarmland();
-                }
-            },
-            farmland,
-            { selectedTasks: selectedTasks.map(cb => cb.id) }
-        );
-
-        onClearCallback();
-        hideOverlay(overlayContainer);
     });
+}
+
+function clearing(farmland, params) {
+    const { selectedTasks, replantingIntensity, soilAmendment } = params;
+    
+    // Calculate total work
+    const baseWorkPerAcre = 50;
+    const standardTasks = selectedTasks.filter(task => task !== 'remove-vines').length;
+    let totalWork = farmland.acres * baseWorkPerAcre * standardTasks;
+
+    if (selectedTasks.includes('remove-vines')) {
+        const densityFactor = (farmland.density || 0) / 1000;
+        totalWork += Math.ceil(farmland.acres * baseWorkPerAcre * (densityFactor * replantingIntensity));
+    }
+
+    // Calculate health improvements
+    const healthImprovementPerTask = 0.5 / 3;
+    let totalHealthImprovement = selectedTasks.reduce((total, taskId) => {
+        if (taskId === 'remove-vines') {
+            return total + (healthImprovementPerTask * replantingIntensity);
+        }
+        return total + healthImprovementPerTask;
+    }, 0);
+
+    if (soilAmendment) {
+        totalHealthImprovement += healthImprovementPerTask;
+        totalWork += Math.ceil(farmland.acres * baseWorkPerAcre * (soilAmendment.isOrganic ? 0.5 : 0.3));
+    }
+
+    const task = taskManager.addProgressiveTask(
+        'Clearing',
+        'field',
+        totalWork,
+        (target, progress) => {
+            const percentComplete = Math.floor(progress * 100);
+            addConsoleMessage(`Clearing ${getFlagIconHTML(target.country)} ${target.name}: ${percentComplete}% complete...`, true);
+
+            if (progress >= 1) {
+                finalizeClearingTask(target, totalHealthImprovement, params);
+            }
+        },
+        farmland,
+        params
+    );
+
+    return task !== null;
+}
+
+function finalizeClearingTask(farmland, totalHealthImprovement, params) {
+    const { selectedTasks, replantingIntensity, soilAmendment } = params;
+    const updates = {
+        canBeCleared: 'Not ready'
+    };
+
+    // Calculate new health
+    const newHealth = Math.min(1.0, farmland.farmlandHealth + totalHealthImprovement);
+    updates.farmlandHealth = newHealth;
+
+    // Handle vine replanting
+    if (selectedTasks.includes('remove-vines')) {
+        const newVineage = Math.max(0, (farmland.vineAge * (1 - replantingIntensity))).toFixed(2);
+        updates.vineAge = parseFloat(newVineage);
+    }
+
+    // Handle soil amendment
+    if (soilAmendment) {
+        updates.conventional = soilAmendment.isOrganic ? 'Non-Conventional' : 'Conventional';
+    }
+
+    // Update farmland
+    updateFarmland(farmland.id, updates);
+
+    // Create completion message
+    let message = `Clearing of ${getFlagIconHTML(farmland.country)} ${farmland.name} is done. `;
+    message += `Farmland health was improved by ${formatNumber((newHealth - farmland.farmlandHealth) * 100)}%`;
+    
+    if (updates.vineAge !== undefined) {
+        message += `. Vineage adjusted to ${updates.vineAge} years`;
+    }
+    if (updates.conventional === 'Ecological') {
+        message += `. Field is now certified Ecological!`;
+    }
+    
+    addConsoleMessage(message);
+    displayFarmland();
 }
 
 function setupCloseButton(overlayContainer) {

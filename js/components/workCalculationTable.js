@@ -6,7 +6,6 @@ export function createWorkCalculationTable(data) {
         acres,
         density,
         tasks = [],
-        taskFactors = {},
         totalWork
     } = data;
 
@@ -34,10 +33,6 @@ export function createWorkCalculationTable(data) {
                             <tr>
                                 <td>Plant Density:</td>
                                 <td><span id="density">${formatNumber(density)}</span> vines/acre</td>
-                            </tr>
-                            <tr>
-                                <td>Density Factor:</td>
-                                <td><span id="density-factor">${formatNumber(density/1000)}</span>x</td>
                             </tr>
                             ` : ''}
                             <tr class="table-primary">
