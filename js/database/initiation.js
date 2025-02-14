@@ -50,7 +50,7 @@ export function loadStaff() {
     return staffMembers;
 }
 
-// Team management functions (already here)
+// Team management functions 
 export function saveTeams(teams) {
   const defaultTeams = getDefaultTeams();
   const defaultTeamNames = defaultTeams.map(t => t.name);
@@ -268,12 +268,16 @@ async function storeCompanyName(companyName, startingCondition = null) {
       // Find and update teams
       const wineryTeam = initialTeams.find(team => team.name === 'Winery Team');
       const adminTeam = initialTeams.find(team => team.name === 'Administration Team');
+      const maintenanceTeam = initialTeams.find(team => team.name === 'Building & Maintenance Team');
       
       if (wineryTeam && staff[0]) {
         wineryTeam.members = [staff[0]];
       }
       if (adminTeam && staff[1]) {
         adminTeam.members = [staff[1]];
+      }
+      if (maintenanceTeam) {
+        maintenanceTeam.members = [staff[0], staff[1]];
       }
 
       saveTeams(initialTeams);
