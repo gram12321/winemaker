@@ -8,7 +8,7 @@ import taskManager from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
-import { workCalculator } from '../utils/workCalculator.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
 
 // Show the planting overlay
 export function showPlantingOverlay(farmland, onPlantCallback) {
@@ -254,10 +254,10 @@ function calculatePlantingWorkData(farmland, density) {
         fragilityEffect
     });
 
-    const totalWork = workCalculator.calculateTotalWork(farmland.acres, {
+    const totalWork = calculateTotalWork(farmland.acres, {
         density: density,
         tasks: ['PLANTING'],
-        workModifiers: [altitudeEffect, fragilityEffect].map(effect => effect) // Effects are already in correct format
+        workModifiers: [altitudeEffect, fragilityEffect]
     });
 
     console.log('Final Total Work:', totalWork);

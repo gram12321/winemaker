@@ -6,7 +6,7 @@ import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
-import { workCalculator } from '../utils/workCalculator.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
 import { DEFAULT_FARMLAND_HEALTH, WORK_RATES } from '../constants/constants.js';
 
 export function showClearingOverlay(farmland, onClearCallback) {
@@ -25,7 +25,7 @@ function calculateClearingWorkData(farmland, selectedTasks, replantingIntensity 
         }
     });
 
-    let totalWork = workCalculator.calculateTotalWork(farmland.acres, {
+    let totalWork = calculateTotalWork(farmland.acres, {
         density: farmland.density,
         tasks: tasks,
         taskMultipliers: {

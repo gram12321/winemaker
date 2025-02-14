@@ -5,7 +5,7 @@ import taskManager from '../taskManager.js';
 import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
-import { workCalculator } from '../utils/workCalculator.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';  // Update import to get the function instead of the class
 import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
 import { DEFAULT_FARMLAND_HEALTH, WORK_RATES } from '../constants/constants.js';  // Update import, remove VINE_WORK_PER_WEEK
 
@@ -15,7 +15,7 @@ export function showUprootOverlay(farmland, onUprootCallback) {
 }
 
 function calculateUprootWorkData(farmland) { // uses utility workCalculator to calculate total work
-    const totalWork = workCalculator.calculateTotalWork(farmland.acres, {
+    const totalWork = calculateTotalWork(farmland.acres, {
         density: farmland.density,
         tasks: ['UPROOTING']  // Use uppercase to match WORK_RATES keys
     });
@@ -71,7 +71,7 @@ function setupUprootEventListeners(overlayContainer, farmland, onUprootCallback)
     const newHealth = DEFAULT_FARMLAND_HEALTH;  // Target health after uprooting
     
     // Calculate total work using the calculator
-    const totalWork = workCalculator.calculateTotalWork(farmland.acres, {
+    const totalWork = calculateTotalWork(farmland.acres, {
         density: farmland.density,
         tasks: ['UPROOTING']  // Use uppercase to match WORK_RATES keys
     });
