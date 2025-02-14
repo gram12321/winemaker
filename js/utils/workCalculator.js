@@ -1,4 +1,4 @@
-import { BASE_WORK_UNITS, WORK_RATES, DENSITY_DIVISOR } from '../constants/constants.js';
+import { BASE_WORK_UNITS, WORK_RATES, Workrate } from '../constants/constants.js';
 
 export class WorkCalculator {
     constructor() {
@@ -8,25 +8,42 @@ export class WorkCalculator {
     calculateRealWorldWorkWeeks(acres, params = {}) {
         const { 
             taskType,
-            density = DENSITY_DIVISOR,  // Default to DENSITY_DIVISOR (1000) so density/DENSITY_DIVISOR = 1
+            density,
             taskIntensity = 1.0
         } = params;
 
-        // Normalize density by dividing by DENSITY_DIVISOR
-        // For acre-based tasks this becomes 1000/1000 = 1
-        // For vine tasks this becomes actual_density/1000
-        const normalizedDensity = density / DENSITY_DIVISOR;
-        
-        return (acres * normalizedDensity * taskIntensity) / WORK_RATES[taskType];
+        // Debug logging
+        console.log('=== Work Week Calculation Debug ===');
+        console.log('Input:', { acres, taskType, density, taskIntensity, workRate: WORK_RATES[taskType] });
+
+        const effectiveWorkRate = Workrate(taskType, WORK_RATES[taskType], density);
+        const workWeeks = acres / effectiveWorkRate;
+
+        // Debug logging
+        console.log('Calculation Steps:', {
+            effectiveWorkRate,
+            workWeeks,
+            finalWorkUnits: workWeeks * this.baseWorkUnits
+        });
+
+        return workWeeks;
     }
 
     calculateTotalWork(acres, factors = {}) {
         const { 
-            density = DEFAULT_VINE_DENSITY,
+            density,
             tasks = [],
             taskMultipliers = {},
             workModifiers = []
         } = factors;
+
+        console.log('Total Work Calculation:', {
+            acres,
+            density,
+            tasks,
+            taskMultipliers,
+            workModifiers
+        });
 
         let totalWork = 0;
 
@@ -38,12 +55,15 @@ export class WorkCalculator {
                 density,
                 taskIntensity
             });
-            totalWork += workWeeks * this.baseWorkUnits;
+            const taskWork = workWeeks * this.baseWorkUnits;
+            console.log(`Task ${task}:`, { workWeeks, taskWork });
+            totalWork += taskWork;
         });
 
         // Apply additional modifiers (like altitude, fragility)
         workModifiers.forEach(modifier => {
             totalWork *= (1 + modifier);
+            console.log('After modifier:', { modifier, totalWork });
         });
 
         return Math.ceil(totalWork);

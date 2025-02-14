@@ -16,6 +16,12 @@ export function createWorkCalculationTable(data) {
         fragilityEffect
     } = data;
 
+    // Simplify the display logic:
+    // Above median = more work
+    // Below median = less work
+    const isAboveMedian = altitude > medianAltitude;
+    const effectDescription = isAboveMedian ? 'more' : 'less';
+
     return `
         <div class="work-preview">
             <div class="work-stats">
@@ -49,8 +55,8 @@ export function createWorkCalculationTable(data) {
                                     <br>
                                     <small class="text-muted">
                                         ${formatNumber(Math.abs(altitudeEffect * 100))}% 
-                                        ${altitudeEffect >= 0 ? 'more' : 'less'} work 
-                                        (${altitude > medianAltitude ? 'above' : 'below'} median)
+                                        ${effectDescription} work 
+                                        (${isAboveMedian ? 'above' : 'below'} median)
                                     </small>
                                 </td>
                             </tr>

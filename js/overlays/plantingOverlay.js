@@ -220,26 +220,47 @@ function calculatePlantingWorkData(farmland, density) {
         throw new Error(`Resource not found: ${selectedResource}`);
     }
 
+    console.log('=== Planting Work Data ===');
+    console.log('Input:', {
+        acres: farmland.acres,
+        density,
+        resource: resource?.name
+    });
+
     // Calculate altitude effect based on region's altitude range
-    // 5% extra work for every 10% deviation above median
     // 5% less work for every 10% deviation below median
+    // 5% extra work for every 10% deviation above median
     const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
     const medianAltitude = (minAltitude + maxAltitude) / 2;
     const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+    
+    // Convert effect to modifier (1 + effect)
+    // If altitude is 20% below median: -0.1 effect -> 0.9 modifier (10% less work)
+    // If altitude is 20% above median: +0.1 effect -> 1.1 modifier (10% more work)
     const altitudeEffect = farmland.altitude > medianAltitude 
         ? altitudeDeviation * 0.5  // Above median: positive effect (more work)
         : altitudeDeviation * -0.5; // Below median: negative effect (less work)
 
-    // Calculate fragility effect - scales with density
-    const densityFactor = density / 1000;
-    const robustness = resource.fragile;  // Use direct property access, let it fail if undefined
-    const fragilityEffect = (2 - robustness) * 0.5 * densityFactor;  // Remove conditional, let it fail if values are wrong
+    // Calculate fragility effect
+    const robustness = resource.fragile;  // 1.0 = fully robust, 0.4 = 40% robust
+    // Only apply extra work for non-robust grapes, independent of density
+    // If robustness is 1.0 (100%), fragilityEffect will be 0 (no extra work)
+    // If robustness is 0.4 (40%), fragilityEffect will be 0.6 (60% more work)
+    const fragilityEffect = (1 - robustness);
+
+    // Log effects after both are calculated
+    console.log('Effects:', {
+        altitudeEffect,
+        fragilityEffect
+    });
 
     const totalWork = workCalculator.calculateTotalWork(farmland.acres, {
         density: density,
         tasks: ['PLANTING'],
-        workModifiers: [altitudeEffect, fragilityEffect]
+        workModifiers: [altitudeEffect, fragilityEffect].map(effect => effect) // Effects are already in correct format
     });
+
+    console.log('Final Total Work:', totalWork);
 
     return {
         acres: farmland.acres,
