@@ -2,19 +2,7 @@ import { formatNumber } from '../utils.js';
 import { BASE_WORK_UNITS, DENSITY_BASED_TASKS, TASKS } from '../constants/constants.js';
 
 export function createWorkCalculationTable(data) {
-    const {
-        acres,
-        density,
-        tasks = [],
-        totalWork,
-        altitude,
-        altitudeEffect,
-        minAltitude,
-        maxAltitude,
-        medianAltitude,
-        robustness,
-        fragilityEffect
-    } = data;
+    const { acres, density, tasks = [], totalWork, altitude, altitudeEffect, minAltitude, maxAltitude, medianAltitude, robustness, fragilityEffect } = data;
 
     const showDensity = tasks.some(task => DENSITY_BASED_TASKS.includes(task));
     const taskDisplayNames = tasks.map(taskCode => TASKS[taskCode]?.name || taskCode).join(', ');
