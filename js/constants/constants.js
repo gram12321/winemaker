@@ -2,25 +2,19 @@
 export const BASE_WORK_UNITS = 50; // work units per standard week
 export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
 
-// Real-world work rates (all in acres per week)
-export const WORK_RATES = {
-    // A worker can plant 3500 vines per week
-    // At DEFAULT_VINE_DENSITY (5000 vines/acre), this means:
-    // 3500 vines/week ÷ 5000 vines/acre = 0.7 acres/week
-    PLANTING: 0.7,      // acres planted per week at default density
-    
-    // 20% slower than planting: 2800 vines/week
-    // 2800 vines/week ÷ 5000 vines/acre = 0.56 acres/week
-    UPROOTING: 0.56,    // acres removed per week at default density
-    
-    // 4000 vines/week ÷ 5000 vines/acre = 0.8 acres/week
-    HARVESTING: 0.8,    // acres harvested per week at default density
-    
-    // Non-vine tasks (straight acres per week)
-    VEGETATION: 0.5,    // acres cleared per week
-    DEBRIS: 0.4,        // acres cleared per week
-    AMENDMENT: 0.8      // acres amended per week
+export const TASKS = {
+    PLANTING: { name: 'Planting', rate: 0.7 },
+    UPROOTING: { name: 'Uprooting', rate: 0.56 },
+    HARVESTING: { name: 'Harvesting', rate: 0.8 },
+    VEGETATION: { name: 'Vegetation', rate: 0.5 },
+    DEBRIS: { name: 'Debris', rate: 0.4 },
+    AMENDMENT: { name: 'Amendment', rate: 0.8 }
 };
+
+// Then update WORK_RATES to use these:
+export const WORK_RATES = Object.fromEntries(
+    Object.entries(TASKS).map(([key, task]) => [key, task.rate])
+);
 
 // Define density-based tasks
 export const DENSITY_BASED_TASKS = ['PLANTING', 'UPROOTING', 'HARVESTING'];

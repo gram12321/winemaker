@@ -7,7 +7,7 @@ import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './o
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';  // Update import to get the function instead of the class
 import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
-import { DEFAULT_FARMLAND_HEALTH, WORK_RATES } from '../constants/constants.js';  // Update import, remove VINE_WORK_PER_WEEK
+import { DEFAULT_FARMLAND_HEALTH } from '../constants/constants.js';  // Update import, remove VINE_WORK_PER_WEEK
 
 export function showUprootOverlay(farmland, onUprootCallback) {
     const overlayContainer = showStandardOverlay(createUprootOverlayHTML(farmland));

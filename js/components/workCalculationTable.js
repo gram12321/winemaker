@@ -1,5 +1,5 @@
 import { formatNumber } from '../utils.js';
-import { BASE_WORK_UNITS } from '../constants/constants.js';
+import { BASE_WORK_UNITS, DENSITY_BASED_TASKS, TASKS } from '../constants/constants.js';
 
 export function createWorkCalculationTable(data) {
     const {
@@ -12,13 +12,12 @@ export function createWorkCalculationTable(data) {
         minAltitude,
         maxAltitude,
         medianAltitude,
-        robustness,  // Use robustness instead of fragility
+        robustness,
         fragilityEffect
     } = data;
 
-    // Simplify the display logic:
-    // Above median = more work
-    // Below median = less work
+    const showDensity = tasks.some(task => DENSITY_BASED_TASKS.includes(task));
+    const taskDisplayNames = tasks.map(taskCode => TASKS[taskCode]?.name || taskCode).join(', ');
     const isAboveMedian = altitude > medianAltitude;
     const effectDescription = isAboveMedian ? 'more' : 'less';
 
@@ -39,10 +38,10 @@ export function createWorkCalculationTable(data) {
                             ${tasks.length > 0 ? `
                             <tr>
                                 <td>Selected Tasks:</td>
-                                <td><span id="selected-tasks">${tasks.join(', ')}</span></td>
+                                <td><span id="selected-tasks">${taskDisplayNames}</span></td>
                             </tr>
                             ` : ''}
-                            ${density ? `
+                            ${showDensity && density ? `
                             <tr>
                                 <td>Plant Density:</td>
                                 <td><span id="density">${formatNumber(density)}</span> vines/acre</td>
@@ -51,7 +50,7 @@ export function createWorkCalculationTable(data) {
                             ${altitude ? `
                             <tr>
                                 <td>Altitude:</td>
-                                <td>${altitude}m (${minAltitude}-${maxAltitude}m region)
+                                <td>${altitude}m (${minAltitude}-${maxAltitude}m region})
                                     <br>
                                     <small class="text-muted">
                                         ${formatNumber(Math.abs(altitudeEffect * 100))}% 
