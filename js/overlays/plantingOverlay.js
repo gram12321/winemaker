@@ -3,12 +3,13 @@ import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
 import { allResources, getResourceByName } from '../resource.js';  // Add getResourceByName to import
 import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
-import { updateFarmland } from '../database/adminFunctions.js';
+import { updateFarmland, getFarmlands } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
+import { updateAllDisplays } from '../displayManager.js';
 
 // Show the planting overlay
 export function showPlantingOverlay(farmland, onPlantCallback) {
@@ -194,16 +195,16 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
     const selectedResource = overlayContainer.querySelector('#resource-select').value;
 
     if (plant(farmland, selectedResource, selectedDensity)) {
-      // Force a UI refresh by reloading the farmlands
-      const farmlands = JSON.parse(localStorage.getItem('ownedFarmlands')) || [];
-      const updatedFarmlandIndex = farmlands.findIndex(f => f.id === farmland.id);
-      if (updatedFarmlandIndex !== -1) {
-        farmland = farmlands[updatedFarmlandIndex];
+      // Get updated farmland data from storage
+      const farmlands = getFarmlands();
+      const updatedFarmland = farmlands.find(f => f.id === farmland.id);
+      if (updatedFarmland) {
+        farmland = updatedFarmland;
       }
       onPlantCallback(selectedDensity);
       hideOverlay(overlayContainer);
-      // Refresh the display
-      displayFarmland();
+      // Use displayManager to update all displays
+      updateAllDisplays();
     }
   });
 }
