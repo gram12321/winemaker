@@ -46,7 +46,7 @@ function createUprootOverlayHTML(farmland) {
         farmland,
         content,
         buttonText: 'Uproot Field',
-        buttonClass: 'btn-danger',
+        buttonClass: 'btn-warning',
         buttonIdentifier: 'uproot-btn',
         warningMessage: `You are about to uproot ${farmland.plantedResourceName}. 
                         <br>
