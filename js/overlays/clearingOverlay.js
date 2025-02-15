@@ -200,6 +200,11 @@ function updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHea
     const container = document.getElementById('work-calculation-container');
     container.innerHTML = createWorkCalculationTable(workData);
 
+    // Update health bar separately
+    updateHealthCalculations(selectedTasks, currentHealth, healthBar, replantingIntensity);
+}
+
+function updateHealthCalculations(selectedTasks, currentHealth, healthBar, replantingIntensity) {
     // Calculate health improvement
     const healthImprovementPerTask = DEFAULT_FARMLAND_HEALTH / 3;
     let totalHealthImprovement = selectedTasks.reduce((total, task) => {

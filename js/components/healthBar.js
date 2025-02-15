@@ -10,7 +10,7 @@ export function createHealthBar(data) {
                 <span class="current-health">${formatNumber(currentHealth * 100)}%</span>
             </div>
             <div class="health-bar">
-                <div class="health-bar-base" style="width: ${currentHealth * 100}%"></div>
+                <div class="health-bar-base"></div>
                 <div class="health-bar-current" style="width: ${currentHealth * 100}%"></div>
                 <div class="health-bar-improvement"></div>
             </div>
@@ -43,14 +43,15 @@ export function updateHealthBar(healthBar, currentHealth, newHealth) {
         improvementBar.style.left = difference < 0 ? 
             `${newHealth * 100}%` : 
             `${currentHealth * 100}%`;
-        improvementBar.style.backgroundColor = difference >= 0 ? 
-            '#28a745' : '#dc3545';
+        improvementBar.classList.toggle('improvement-positive', difference >= 0);
+        improvementBar.classList.toggle('improvement-negative', difference < 0);
     }
 
     if (improvementSpan) {
         improvementSpan.textContent = difference !== 0 
             ? `${difference > 0 ? '+' : ''}${formatNumber(difference * 100)}%` 
             : '';
-        improvementSpan.style.color = difference >= 0 ? '#28a745' : '#dc3545';
+        improvementSpan.classList.toggle('improvement-positive', difference >= 0);
+        improvementSpan.classList.toggle('improvement-negative', difference < 0);
     }
 }
