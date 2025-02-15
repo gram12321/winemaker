@@ -76,7 +76,7 @@ function setupUprootEventListeners(overlayContainer, farmland, onUprootCallback)
         }
     });
 
-    setupCloseButton(overlayContainer);
+    setupStandardOverlayClose(overlayContainer);  // Use directly instead of through wrapper
 }
 
 function uproot(farmland, totalWork) {
@@ -107,8 +107,4 @@ function uproot(farmland, totalWork) {
     );
 
     return task !== null;
-}
-
-function setupCloseButton(overlayContainer) {
-    setupStandardOverlayClose(overlayContainer);
 }

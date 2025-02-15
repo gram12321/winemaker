@@ -92,7 +92,7 @@ function createPlantingOverlayHTML(farmland) {
 function setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback) {
   setupDensitySlider(overlayContainer, farmland);
   setupPlantButton(overlayContainer, farmland, onPlantCallback);
-  setupCloseButton(overlayContainer);
+  setupStandardOverlayClose(overlayContainer);  // Use directly instead of through wrapper
 
   // Add resource selection listener
   const resourceSelect = overlayContainer.querySelector('#resource-select');
@@ -212,9 +212,7 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
   });
 }
 
-function setupCloseButton(overlayContainer) {
-  setupStandardOverlayClose(overlayContainer);
-}
+
 
 function calculatePlantingWorkData(farmland, density) {
     const selectedResource = document.querySelector('#resource-select')?.value || allResources[0].name;
