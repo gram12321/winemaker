@@ -120,7 +120,7 @@ function createClearingOverlayHTML(farmland) {
 function setupClearingEventListeners(overlayContainer, farmland, onClearCallback) {
     const checkboxes = overlayContainer.querySelectorAll('input[type="checkbox"]');
     const totalWorkSpan = overlayContainer.querySelector('#total-work');
-    const healthBar = overlayContainer.querySelector('.health-bar');
+    const healthBar = overlayContainer.querySelector('.health-bar-container');  // Updated selector to match component
     const currentHealth = farmland.farmlandHealth;
     const replantingSlider = overlayContainer.querySelector('#replanting-slider');
     const replantingValue = overlayContainer.querySelector('#replanting-value');
@@ -210,6 +210,25 @@ function updateWorkCalculations(checkboxes, totalWorkSpan, healthBar, currentHea
     }, 0);
 
     const newHealth = Math.min(1.0, currentHealth + totalHealthImprovement);
+
+    // Update the health display
+    const healthImprovement = healthBar.querySelector('.health-improvement');
+    if (healthImprovement) {
+        const improvement = newHealth - currentHealth;
+        if (improvement > 0) {
+            healthImprovement.textContent = `+${formatNumber(improvement * 100)}%`;
+            healthImprovement.style.color = '#28a745'; // green
+        } else {
+            healthImprovement.textContent = ''; // Clear if no improvement
+        }
+    }
+
+    // Update current health display with both values
+    const currentHealthSpan = healthBar.querySelector('.current-health');
+    if (currentHealthSpan) {
+        currentHealthSpan.textContent = `${formatNumber(currentHealth * 100)}% → ${formatNumber(newHealth * 100)}%`;
+    }
+
     updateHealthBar(healthBar, currentHealth, newHealth);
 }
 

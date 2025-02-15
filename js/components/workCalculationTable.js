@@ -1,5 +1,5 @@
 import { formatNumber } from '../utils.js';
-import { BASE_WORK_UNITS, DENSITY_BASED_TASKS, TASKS } from '../constants/constants.js';
+import { DENSITY_BASED_TASKS, TASKS } from '../constants/constants.js';
 
 export function createWorkCalculationTable(data) {
     const { acres, density, tasks = [], totalWork, altitude, altitudeEffect, minAltitude, maxAltitude, medianAltitude, robustness, fragilityEffect } = data;
@@ -17,11 +17,7 @@ export function createWorkCalculationTable(data) {
                         <tbody>
                             <tr>
                                 <td>Field Size:</td>
-                                <td><span id="field-size">${formatNumber(acres)}</span> acres</td>
-                            </tr>
-                            <tr>
-                                <td>Base Work per Acre:</td>
-                                <td><span id="base-work">${formatNumber(BASE_WORK_UNITS)}</span> units</td>
+                                <td><span id="field-size">${formatNumber(acres, acres < 10 ? 2 : 0)}</span> acres</td>
                             </tr>
                             ${tasks.length > 0 ? `
                             <tr>
