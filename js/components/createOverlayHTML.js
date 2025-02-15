@@ -130,10 +130,30 @@ function createTextCenter({
     `;
 }
 
+function createTable({
+    headers = [],
+    id = '',
+    className = '',
+    tableClassName = 'table table-bordered'
+}) {
+    return `
+        <table class="${tableClassName} ${className}">
+            <thead>
+                <tr>
+                    ${headers.map(header => `<th>${header}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody ${id ? `id="${id}"` : ''}>
+            </tbody>
+        </table>
+    `;
+}
+
 export {
     createSlider,
     createCheckbox,
     createSelect,
     createInfoBox,
-    createTextCenter
+    createTextCenter,
+    createTable
 };

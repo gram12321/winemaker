@@ -8,7 +8,7 @@ import taskManager from '../taskManager.js';
 import { regionAltitudeRanges, grapeSuitability } from '../names.js';
 import { loadFarmlands } from '../database/adminFunctions.js';
 import { showModalOverlay } from './overlayUtils.js';
-import { createOverlayHTML, createTextCenter } from '../components/createOverlayHTML.js';
+import { createOverlayHTML, createTextCenter, createTable } from '../components/createOverlayHTML.js';
 
 
 export function showHarvestOverlay(farmland, farmlandId) {
@@ -22,27 +22,18 @@ export function showHarvestOverlay(farmland, farmlandId) {
 
 function createHarvestOverlayHTML(farmland) {
     const content = `
-        <table class="table table-bordered overlay-table">
-            <thead>
-                <tr>
-                    <th>Select</th>
-                    <th>Container</th>
-                    <th>Capacity</th>
-                    <th>Resource</th>
-                    <th>Amount</th>
-                </tr>
-            </thead>
-            <tbody id="storage-display-body">
-            </tbody>
-        </table>
-        <div class="button-container">
+        ${createTable({
+            headers: ['Select', 'Container', 'Capacity', 'Resource', 'Amount'],
+            id: 'storage-display-body',
+            className: 'overlay-table'
+        })}
+        <div class="default-overlay-content"> 
             ${createTextCenter({
                 text: `Expected Yield: ${farmlandYield(farmland) >= 1000 ? 
-                    formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : 
-                    formatNumber(farmlandYield(farmland)) + ' kg'}`,
+                formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : 
+                formatNumber(farmlandYield(farmland)) + ' kg'}`,
                 className: 'expected-yield'
             })}
-            <div class="w-100">
                 ${createTextCenter({
                     text: `Selected Capacity: <span id="selected-capacity">0 kg</span>`,
                     className: 'mb-2'
@@ -50,7 +41,6 @@ function createHarvestOverlayHTML(farmland) {
                 <div class="progress">
                     <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-            </div>
         </div>`;
 
     return createOverlayHTML({
