@@ -2,12 +2,12 @@ import { getFlagIconHTML, formatNumber } from '../utils.js';
 import { addConsoleMessage } from '../console.js';
 import { updateFarmland } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
-import { displayFarmland } from '../overlays/mainpages/landoverlay.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
-import { DEFAULT_FARMLAND_HEALTH, WORK_RATES } from '../constants/constants.js';
+import { DEFAULT_FARMLAND_HEALTH, } from '../constants/constants.js';
+import { updateAllDisplays } from '../displayManager.js';
 
 export function showClearingOverlay(farmland, onClearCallback) {
     const overlayContainer = showStandardOverlay(createClearingOverlayHTML(farmland));
@@ -244,11 +244,37 @@ function setupClearButton(overlayContainer, farmland, checkboxes, replantingSlid
 }
 
 function clearing(farmland, params) {
+    const { selectedTasks, replantingIntensity } = params;
+    
+    const workData = calculateClearingWorkData(
+        farmland, 
+        selectedTasks.map(taskId => ({ id: taskId })), 
+        replantingIntensity
+    );
+
+    const task = taskManager.addProgressiveTask(
+        'Clearing',
+        'field',
+        workData.totalWork,
+        (target, progress) => {
+            const percentComplete = Math.floor(progress * 100);
+            addConsoleMessage(`Clearing ${getFlagIconHTML(target.country)} ${target.name}: ${percentComplete}% complete...`, true);
+
+            if (progress >= 1) {
+                performClearing(target, params);
+            }
+        },
+        farmland,
+        params
+    );
+
+    return task !== null;
+}
+
+export function performClearing(farmland, params) {
     const { selectedTasks, replantingIntensity, soilAmendment } = params;
-    
-    // Use the same work calculation we use in updateWorkCalculations
-    const workData = calculateClearingWorkData(farmland, selectedTasks.map(taskId => ({ id: taskId })), replantingIntensity);
-    
+    const updates = { canBeCleared: 'Not ready' };
+
     // Calculate health improvements
     const healthImprovementPerTask = DEFAULT_FARMLAND_HEALTH / 3;
     let totalHealthImprovement = selectedTasks.reduce((total, taskId) => {
@@ -261,31 +287,6 @@ function clearing(farmland, params) {
     if (soilAmendment) {
         totalHealthImprovement += healthImprovementPerTask;
     }
-
-    const task = taskManager.addProgressiveTask(
-        'Clearing',
-        'field',
-        workData.totalWork,
-        (target, progress) => {
-            const percentComplete = Math.floor(progress * 100);
-            addConsoleMessage(`Clearing ${getFlagIconHTML(target.country)} ${target.name}: ${percentComplete}% complete...`, true);
-
-            if (progress >= 1) {
-                finalizeClearingTask(target, totalHealthImprovement, params);
-            }
-        },
-        farmland,
-        params
-    );
-
-    return task !== null;
-}
-
-function finalizeClearingTask(farmland, totalHealthImprovement, params) {
-    const { selectedTasks, replantingIntensity, soilAmendment } = params;
-    const updates = {
-        canBeCleared: 'Not ready'
-    };
 
     // Calculate new health
     const newHealth = Math.min(1.0, farmland.farmlandHealth + totalHealthImprovement);
@@ -302,20 +303,20 @@ function finalizeClearingTask(farmland, totalHealthImprovement, params) {
         updates.conventional = soilAmendment.isOrganic ? 'Non-Conventional' : 'Conventional';
     }
 
-    // Update farmland
-    updateFarmland(farmland.id, updates);
-
     // Create completion message
     let message = `Clearing of ${getFlagIconHTML(farmland.country)} ${farmland.name} is done. `;
     message += `Farmland health was improved by ${formatNumber((newHealth - farmland.farmlandHealth) * 100)}%`;
     
-    if (updates.vineAge !== undefined) {
+    if (selectedTasks.includes('remove-vines')) {
         message += `. Vineage adjusted to ${updates.vineAge} years`;
     }
-    if (updates.conventional === 'Ecological') {
-        message += `. Field is now certified Ecological!`;
+    if (soilAmendment) {
+        message += `. Field is now ${updates.conventional}`;
     }
-    
+
+    // Update data and UI together
+    updateFarmland(farmland.id, updates);
     addConsoleMessage(message);
-    displayFarmland();
+    updateAllDisplays();
 }
+

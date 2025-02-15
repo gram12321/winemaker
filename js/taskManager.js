@@ -15,6 +15,7 @@ import { addTransaction } from './finance.js';
 import { setupStaffWagesRecurringTransaction } from './staff.js';
 import { addConsoleMessage } from './console.js';
 import { loadStaff, saveStaff, loadTeams } from './database/initiation.js';
+import { performClearing } from './overlays/clearingOverlay.js';  // Add this import
 
 
 // Internal mapping for display names
@@ -468,55 +469,10 @@ class TaskManager {
             case 'clearing':
                 return (target, progress, params) => {
                     if (progress >= 1) {
-                        const { selectedTasks, replantingIntensity, soilAmendment } = params;
-                        const updates = { canBeCleared: 'Not ready' };
-
-                        // Calculate health improvements
-                        const healthImprovementPerTask = DEFAULT_FARMLAND_HEALTH / 3;
-                        let totalHealthImprovement = selectedTasks.reduce((total, taskId) => {
-                            if (taskId === 'remove-vines') {
-                                return total + (healthImprovementPerTask * replantingIntensity);
-                            }
-                            return total + healthImprovementPerTask;
-                        }, 0);
-
-                        if (soilAmendment) {
-                            totalHealthImprovement += healthImprovementPerTask;
-                        }
-
-                        // Calculate new health
-                        const newHealth = Math.min(1.0, target.farmlandHealth + totalHealthImprovement);
-                        updates.farmlandHealth = newHealth;
-
-                        // Handle vine replanting
-                        if (selectedTasks.includes('remove-vines')) {
-                            const newVineage = Math.max(0, (target.vineAge * (1 - replantingIntensity))).toFixed(2);
-                            updates.vineAge = parseFloat(newVineage);
-                        }
-
-                        // Handle soil amendment
-                        if (soilAmendment) {
-                            updates.conventional = soilAmendment.isOrganic ? 'Non-Conventional' : 'Conventional';
-                        }
-
-                        // Update farmland
-                        updateFarmland(target.id, updates);
-
-                        // Create completion message
-                        let message = `Clearing of ${getFlagIconHTML(target.country)} ${target.name} is done. `;
-                        message += `Farmland health was improved by ${formatNumber((newHealth - target.farmlandHealth) * 100)}%`;
-                        
-                        if (updates.vineAge !== undefined) {
-                            message += `. Vineage adjusted to ${updates.vineAge} years`;
-                        }
-                        if (updates.conventional === 'Ecological') {
-                            message += `. Field is now certified Ecological!`;
-                        }
-                        
-                        addConsoleMessage(message);
-                        displayFarmland();
+                        performClearing(target, params);
                     }
                 };
+
             default:
                 return () => console.warn(`No callback found for task: ${taskName}`);
         }
