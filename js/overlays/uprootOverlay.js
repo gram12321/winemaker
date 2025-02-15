@@ -8,6 +8,7 @@ import { createWorkCalculationTable } from '../components/workCalculationTable.j
 import { calculateTotalWork } from '../utils/workCalculator.js';  // Update import to get the function instead of the class
 import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
 import { DEFAULT_FARMLAND_HEALTH } from '../constants/constants.js';  // Update import, remove VINE_WORK_PER_WEEK
+import { createOverlayHTML } from '../components/createOverlayHTML.js';
 
 export function showUprootOverlay(farmland, onUprootCallback) {
     const overlayContainer = showStandardOverlay(createUprootOverlayHTML(farmland));
@@ -34,34 +35,23 @@ function createUprootOverlayHTML(farmland) {
         currentHealth: farmland.farmlandHealth,
         newHealth: farmland.farmlandHealth
     };
-    
-    return `
-        <div class="overlay-content overlay-container">
-            <section class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Uproot Field: ${getFlagIconHTML(farmland.country)} ${farmland.name}</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-warning">
-                        <strong>Warning:</strong> 
-                        <br>
-                        You are about to uproot ${farmland.plantedResourceName}. 
-                        <br>
-                        This action cannot be undone and will destroy the current plantation.
-                    </div>
-                    <hr class="overlay-divider">
-                    ${createHealthBar(healthData)}
-                    <div id="work-calculation-container">
-                        ${createWorkCalculationTable(workData)}
-                    </div>
-                    <div class="d-flex justify-content-center mt-4">
-                        <button class="btn btn-danger uproot-btn">Uproot Field</button>
-                    </div>
-                </div>
-            </section>
-        </div>
+
+    const content = `
+        ${createHealthBar(healthData)}
+        ${createWorkCalculationTable(workData)}
     `;
+
+    return createOverlayHTML({
+        title: 'Uproot Field:',
+        farmland,
+        content,
+        buttonText: 'Uproot Field',
+        buttonClass: 'btn-danger',
+        buttonIdentifier: 'uproot-btn',
+        warningMessage: `You are about to uproot ${farmland.plantedResourceName}. 
+                        <br>
+                        This action cannot be undone and will destroy the current plantation.`
+    });
 }
 
 function setupUprootEventListeners(overlayContainer, farmland, onUprootCallback) {

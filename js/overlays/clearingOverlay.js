@@ -8,6 +8,7 @@ import { createWorkCalculationTable } from '../components/workCalculationTable.j
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { DEFAULT_FARMLAND_HEALTH, } from '../constants/constants.js';
 import { updateAllDisplays } from '../displayManager.js';
+import { createOverlayHTML, createSlider, createCheckbox, createTextCenter } from '../components/createOverlayHTML.js';
 
 export function showClearingOverlay(farmland, onClearCallback) {
     const overlayContainer = showStandardOverlay(createClearingOverlayHTML(farmland));
@@ -49,72 +50,76 @@ function createClearingOverlayHTML(farmland) {
 
     const initialWorkData = calculateClearingWorkData(farmland, []);
 
-    return `
-        <div class="overlay-content overlay-container">
-            <section class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Clearing Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
-                </div>
-                <div class="card-body">
-                    <div class="clearing-options">
-                        <div class="form-check mb-3">
-                            <input type="checkbox" class="form-check-input" id="remove-vines" 
-                                ${!farmland.plantedResourceName ? 'disabled' : ''}>
-                            <label class="form-check-label ${!farmland.plantedResourceName ? 'text-muted' : ''}" for="remove-vines">
-                                Vine Replanting ${!farmland.plantedResourceName ? '(No vines planted)' : ''}
-                            </label>
-                            <div class="slider-container mt-2 ${!farmland.plantedResourceName ? 'd-none' : ''}" id="replanting-slider-container">
-                                <div class="d-flex align-items-center">
-                                    <span class="mr-2">Low</span>
-                                    <input type="range" class="custom-range" id="replanting-slider" 
-                                        min="0" max="100" step="1" value="100" 
-                                        ${!farmland.plantedResourceName ? 'disabled' : ''}>
-                                    <span class="ml-2">High</span>
-                                </div>
-                                <div class="text-center">
-                                    <div>Replanting intensity: <span id="replanting-value">100</span>%</div>
-                                    <div class="text-muted">Vineage reduction: <span id="vineage-reduction">${farmland.vineAge} → ${farmland.vineAge}</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input type="checkbox" class="form-check-input" id="clear-vegetation">
-                            <label class="form-check-label" for="clear-vegetation">Clear Vegetation</label>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input type="checkbox" class="form-check-input" id="remove-debris">
-                            <label class="form-check-label" for="remove-debris">Debris Removal</label>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input type="checkbox" class="form-check-input" id="soil-amendment">
-                            <label class="form-check-label" for="soil-amendment">Soil Amendment</label>
-                            <div class="slider-container mt-2 d-none" id="amendment-method-container">
-                                <div class="d-flex align-items-center">
-                                    <span class="mr-2">Synthetic</span>
-                                    <input type="range" class="custom-range" id="amendment-method-slider" 
-                                        min="0" max="1" step="1" value="1">
-                                    <span class="ml-2">Organic</span>
-                                </div>
-                                <div class="text-center">
-                                    <div>Method: <span id="amendment-method-value">Organic</span></div>
-                                    <div class="text-muted">Current Status: ${farmland.conventional} (${farmland.organicYears}/3 years organic)</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr class="overlay-divider">
-                    ${createHealthBar(healthData)}
-                    <div id="work-calculation-container">
-                        ${createWorkCalculationTable(initialWorkData)}
-                    </div>
-                    <div class="d-flex justify-content-center mt-4">
-                        <button class="btn btn-warning clear-btn">Clear Field</button>
-                    </div>
-                </div>
-            </section>
+    const content = `
+        <div class="clearing-options">
+            ${createCheckbox({
+                id: 'remove-vines',
+                label: `Vine Replanting ${!farmland.plantedResourceName ? '(No vines planted)' : ''}`,
+                disabled: !farmland.plantedResourceName,
+                labelClass: !farmland.plantedResourceName ? 'text-muted' : ''
+            })}
+            <div class="slider-container mt-2 ${!farmland.plantedResourceName ? 'd-none' : ''}" id="replanting-slider-container">
+                ${createSlider({
+                    id: 'replanting-slider',
+                    min: 0,
+                    max: 100,
+                    step: 1,
+                    value: 100,
+                    disabled: !farmland.plantedResourceName,
+                    showValue: false
+                })}
+                ${createTextCenter({
+                    text: `Replanting intensity: <span id="replanting-value">100</span>%`,
+                    mutedText: `Vineage reduction: <span id="vineage-reduction">${farmland.vineAge} → ${farmland.vineAge}</span>`
+                })}
+            </div>
+
+            ${createCheckbox({
+                id: 'clear-vegetation',
+                label: 'Clear Vegetation'
+            })}
+
+            ${createCheckbox({
+                id: 'remove-debris',
+                label: 'Debris Removal'
+            })}
+
+            ${createCheckbox({
+                id: 'soil-amendment',
+                label: 'Soil Amendment'
+            })}
+            <div class="slider-container mt-2 d-none" id="amendment-method-container">
+                ${createSlider({
+                    id: 'amendment-method-slider',
+                    min: 0,
+                    max: 1,
+                    step: 1,
+                    value: 1,
+                    lowLabel: 'Synthetic',
+                    highLabel: 'Organic',
+                    showValue: false
+                })}
+                ${createTextCenter({
+                    text: `Method: <span id="amendment-method-value">Organic</span>`,
+                    mutedText: `Current Status: ${farmland.conventional} (${farmland.organicYears}/3 years organic)`
+                })}
+            </div>
+        </div>
+        <hr class="overlay-divider">
+        ${createHealthBar(healthData)}
+        <div id="work-calculation-container">
+            ${createWorkCalculationTable(initialWorkData)}
         </div>
     `;
+
+    return createOverlayHTML({
+        title: 'Clearing Options for',
+        farmland,
+        content,
+        buttonText: 'Clear Field',
+        buttonClass: 'btn-warning',
+        buttonIdentifier: 'clear-btn'
+    });
 }
 
 function setupClearingEventListeners(overlayContainer, farmland, onClearCallback) {

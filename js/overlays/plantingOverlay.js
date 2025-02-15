@@ -10,6 +10,8 @@ import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './o
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { updateAllDisplays } from '../displayManager.js';
+import { createOverlayHTML } from '../components/createOverlayHTML.js';
+import { createSlider, createSelect, createInfoBox } from '../components/createOverlayHTML.js';
 
 // Show the planting overlay
 export function showPlantingOverlay(farmland, onPlantCallback) {
@@ -24,65 +26,66 @@ export function showPlantingOverlay(farmland, onPlantCallback) {
 
 // Create the HTML for the overlay
 function createPlantingOverlayHTML(farmland) {
-  const density = farmland.density || 1000;
-  const initialCostPerAcre = density * 2;
-  const initialTotalCost = initialCostPerAcre * farmland.acres;
-  
-  // Create options with first option selected and trigger initial calculation
-  const firstResource = allResources[0].name;
-  const plantingOptions = allResources.map(resource => 
-    `<option value="${resource.name}" ${resource.name === firstResource ? 'selected' : ''}>${resource.name}</option>`
-  ).join('');
+    const density = farmland.density || 1000;
+    const initialCostPerAcre = density * 2;
+    const initialTotalCost = initialCostPerAcre * farmland.acres;
+    
+    const selectOptions = allResources.map(resource => ({
+        value: resource.name,
+        label: resource.name
+    }));
 
-  // Pass the first resource for initial work calculation
-  const initialWorkData = calculatePlantingWorkData(farmland, density);
+    // Calculate initial work data before using it
+    const initialWorkData = calculatePlantingWorkData(farmland, density);
 
-  return `
-    <div class="overlay-content overlay-container">
-      <section class="overlay-section card mb-4">
-        <div class="card-header text-white d-flex justify-content-between align-items-center">
-          <h3 class="h5 mb-0">Planting Options for ${getFlagIconHTML(farmland.country)} ${farmland.name}</h3>
-          <button class="btn btn-light btn-sm close-btn">Close</button>
+    const content = `
+        ${createSelect({
+            id: 'resource-select',
+            label: 'Select Resource to Plant:',
+            options: selectOptions,
+            selectedValue: allResources[0].name
+        })}
+        
+        ${createSlider({
+            id: 'density-slider',
+            label: 'Select Planting Density (Plants/Acre):',
+            min: 1000,
+            max: 10000,
+            step: 1000,
+            value: density
+        })}
+        
+        <div class="density-details d-flex justify-content-between">
+            ${createInfoBox({
+                label: 'Plants/acre',
+                value: formatNumber(density),
+                id: 'plants-per-acre'
+            })}
+            ${createInfoBox({
+                label: 'Cost/acre',
+                value: formatNumber(initialCostPerAcre),
+                id: 'cost-per-acre'
+            })}
+            ${createInfoBox({
+                label: 'Total Cost',
+                value: formatNumber(initialTotalCost),
+                id: 'total-cost'
+            })}
         </div>
-        <div class="card-body">
-          <div class="form-group">
-            <label for="resource-select" class="form-label">Select Resource to Plant:</label>
-            <select class="form-control form-control-sm" id="resource-select">
-              ${plantingOptions}
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="density-slider" class="form-label">Select Planting Density (Plants/Acre):</label>
-            <div class="d-flex align-items-center">
-              <span class="mr-2">Low</span>
-              <input type="range" class="custom-range" id="density-slider" min="1000" max="10000" step="1000" value="${density}">
-              <span class="ml-2">High</span>
-            </div>
-            <div>
-              Selected density: <span id="density-value">${density}</span> plants/acre
-            </div>
-          </div>
-          <div class="density-details d-flex justify-content-between">
-            <div class="planting-overlay-info-box">
-              <span>Plants/acre: </span><span id="plants-per-acre">${formatNumber(density)}</span>
-            </div>
-            <div class="planting-overlay-info-box">
-              <span>Cost/acre: </span><span id="cost-per-acre">${formatNumber(initialCostPerAcre)}</span>
-            </div>
-            <div class="planting-overlay-info-box">
-              <span>Total Cost: </span><span id="total-cost">${formatNumber(initialTotalCost)}</span>
-            </div>
-          </div>
-          <div id="work-calculation-container">
+        
+        <div id="work-calculation-container">
             ${createWorkCalculationTable(initialWorkData)}
-          </div>
-          <div class="d-flex justify-content-center mt-4">
-            <button class="btn btn-primary plant-btn">Plant</button>
-          </div>
         </div>
-      </section>
-    </div>
-  `;
+    `;
+
+    return createOverlayHTML({
+        title: 'Planting Options for',
+        farmland,
+        content,
+        buttonText: 'Plant',
+        buttonClass: 'btn-primary',
+        buttonIdentifier: 'plant-btn'
+    });
 }
 
 // Set up all event listeners
