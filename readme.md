@@ -1,5 +1,7 @@
 # Winery Management Game
 
+Test change for git-replitdev
+
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 
 ## Project Statistics
