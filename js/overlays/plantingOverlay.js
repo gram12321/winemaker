@@ -111,26 +111,34 @@ function setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback
 
 
 // Function to handle planting logic
-function plant(farmland, selectedResource, selectedDensity) {
-    // Validation checks
+function validatePlantingRequirements(selectedResource, totalCost) {
     if (!selectedResource) {
         addConsoleMessage('Please select a resource to plant', false, true);
         return false;
     }
 
-    // Calculate planting cost
-    const totalCost = selectedDensity * 2 * farmland.acres;
     const currentMoney = parseFloat(localStorage.getItem('money') || '0');
-
-    // Check if enough money is available
     if (currentMoney < totalCost) {
         addConsoleMessage(`Insufficient funds for planting. Required: <strong>${formatNumber(totalCost)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>`, false, true);
         return false;
     }
 
+    return true;
+}
+
+function calculatePlantingCost(density, acres) {
+    return density * 2 * acres;
+}
+
+function plant(farmland, selectedResource, selectedDensity) {
+    const totalCost = calculatePlantingCost(selectedDensity, farmland.acres);
+    
+    if (!validatePlantingRequirements(selectedResource, totalCost)) {
+        return false;
+    }
+
     const workData = calculatePlantingWorkData(farmland, selectedDensity);
 
-    // Create the progressive planting task
     taskManager.addProgressiveTask(
         'Planting',
         'field',
@@ -174,20 +182,11 @@ function setupDensitySlider(overlayContainer, farmland) {
     const plantsPerAcreDisplay = overlayContainer.querySelector('#plants-per-acre');
     const costPerAcreDisplay = overlayContainer.querySelector('#cost-per-acre');
     const totalCostDisplay = overlayContainer.querySelector('#total-cost');
-    const densityValueDisplay = overlayContainer.querySelector('#density-slider-value');
-
-    if (!densitySlider) return;
 
     densitySlider.addEventListener('input', () => {
         const densityValue = parseInt(densitySlider.value, 10);
         
-        // Update the slider value display
-        const valueDisplay = overlayContainer.querySelector('#density-slider-value');
-        if (valueDisplay) {
-            valueDisplay.textContent = formatNumber(densityValue);
-        }
-
-        // Update other displays
+        // Update info boxes
         if (plantsPerAcreDisplay) {
             plantsPerAcreDisplay.textContent = formatNumber(densityValue);
         }
