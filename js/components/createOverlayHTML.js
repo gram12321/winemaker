@@ -44,22 +44,24 @@ function createSlider({
     value = 50,
     disabled = false,
     showValue = true,
-    lowLabel = 'Low',
-    highLabel = 'High'
+    lowLabel = '',
+    highLabel = '',
+    valuePrefix = '',
+    valueSuffix = ''
 }) {
     return `
         <div class="form-group">
             ${label ? `<label for="${id}" class="form-label">${label}</label>` : ''}
             <div class="d-flex align-items-center">
-                <span class="mr-2">${lowLabel}</span>
+                ${lowLabel ? `<span class="mr-2">${lowLabel}</span>` : ''}
                 <input type="range" class="custom-range" id="${id}"
                     min="${min}" max="${max}" step="${step}" value="${value}"
                     ${disabled ? 'disabled' : ''}>
-                <span class="ml-2">${highLabel}</span>
+                ${highLabel ? `<span class="ml-2">${highLabel}</span>` : ''}
             </div>
             ${showValue ? `
-            <div>
-                Selected value: <span id="${id}-value">${value}</span>
+            <div class="text-center">
+                ${valuePrefix}<span id="${id}-value">${value}</span>${valueSuffix}
             </div>` : ''}
         </div>
     `;

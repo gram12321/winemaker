@@ -52,7 +52,12 @@ function createPlantingOverlayHTML(farmland) {
             min: 1000,
             max: 10000,
             step: 1000,
-            value: density
+            value: density,
+            showValue: true,
+            valuePrefix: 'Selected density: ',
+            valueSuffix: ' plants/acre',
+            lowLabel: 'Low Density',
+            highLabel: 'High Density'
         })}
         
         <div class="density-details d-flex justify-content-between">
@@ -165,26 +170,45 @@ export function performPlanting(target, params) {
 }
 
 function setupDensitySlider(overlayContainer, farmland) {
-  const densitySlider = overlayContainer.querySelector('#density-slider');
-  const densityValueDisplay = overlayContainer.querySelector('#density-value');
-  const plantsPerAcreDisplay = overlayContainer.querySelector('#plants-per-acre');
-  const costPerAcreDisplay = overlayContainer.querySelector('#cost-per-acre');
-  const totalCostDisplay = overlayContainer.querySelector('#total-cost');
+    const densitySlider = overlayContainer.querySelector('#density-slider');
+    const plantsPerAcreDisplay = overlayContainer.querySelector('#plants-per-acre');
+    const costPerAcreDisplay = overlayContainer.querySelector('#cost-per-acre');
+    const totalCostDisplay = overlayContainer.querySelector('#total-cost');
+    const densityValueDisplay = overlayContainer.querySelector('#density-slider-value');
 
-  densitySlider.addEventListener('input', () => {
-    const densityValue = parseInt(densitySlider.value, 10);
-    densityValueDisplay.textContent = densityValue;
-    plantsPerAcreDisplay.textContent = formatNumber(densityValue);
-    const costPerAcre = densityValue * 2;
-    costPerAcreDisplay.textContent = formatNumber(costPerAcre);
-    const totalCost = costPerAcre * farmland.acres;
-    totalCostDisplay.textContent = formatNumber(totalCost);
+    if (!densitySlider) return;
 
-    // Update work calculation display
-    const workData = calculatePlantingWorkData(farmland, densityValue);
-    const container = overlayContainer.querySelector('#work-calculation-container');
-    container.innerHTML = createWorkCalculationTable(workData);
-  });
+    densitySlider.addEventListener('input', () => {
+        const densityValue = parseInt(densitySlider.value, 10);
+        
+        // Update the slider value display
+        const valueDisplay = overlayContainer.querySelector('#density-slider-value');
+        if (valueDisplay) {
+            valueDisplay.textContent = formatNumber(densityValue);
+        }
+
+        // Update other displays
+        if (plantsPerAcreDisplay) {
+            plantsPerAcreDisplay.textContent = formatNumber(densityValue);
+        }
+        
+        const costPerAcre = densityValue * 2;
+        if (costPerAcreDisplay) {
+            costPerAcreDisplay.textContent = formatNumber(costPerAcre);
+        }
+        
+        const totalCost = costPerAcre * farmland.acres;
+        if (totalCostDisplay) {
+            totalCostDisplay.textContent = formatNumber(totalCost);
+        }
+
+        // Update work calculation display
+        const workData = calculatePlantingWorkData(farmland, densityValue);
+        const container = overlayContainer.querySelector('#work-calculation-container');
+        if (container) {
+            container.innerHTML = createWorkCalculationTable(workData);
+        }
+    });
 }
 
 function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
