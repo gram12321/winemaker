@@ -8,56 +8,50 @@ import taskManager from '../taskManager.js';
 import { regionAltitudeRanges, grapeSuitability } from '../names.js';
 import { loadFarmlands } from '../database/adminFunctions.js';
 import { showModalOverlay } from './overlayUtils.js';
+import { createOverlayHTML } from '../components/createOverlayHTML.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
-    const overlayContainer = showModalOverlay('harvestOverlay', createHarvestHTML(farmland));
+    const overlayContent = `
+        <table class="table table-bordered overlay-table">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Container</th>
+                    <th>Capacity</th>
+                    <th>Resource</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            <tbody id="storage-display-body">
+            </tbody>
+        </table>
+        <div class="selected-wrapper">
+            <span>Expected Yield: </span>
+            <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span>
+        </div>
+        <div class="w-100">
+            <span>Selected Capacity: </span>
+            <span id="selected-capacity">0 kg</span>
+            <div class="progress">
+                <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    `;
+
+    const overlayContainer = showModalOverlay('harvestOverlay', createOverlayHTML({
+        title: 'Harvest Options for',
+        farmland: farmland,
+        content: overlayContent,
+        buttonText: 'Harvest Selected',
+        buttonClass: 'overlay-section-btn',
+        buttonIdentifier: 'harvest-btn'
+    }));
+
     if (overlayContainer) {
         setupHarvestEventListeners(overlayContainer, farmland, farmlandId);
         populateStorageOptions(farmland);
     }
     return overlayContainer;
-}
-
-function createHarvestHTML(farmland) {
-    return `
-        <div class="overlay-section-wrapper">
-            <section class="overlay-section card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3>Harvest Options for ${farmland.name}</h3>
-                    <button class="overlay-section-btn close-btn">Close</button>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered overlay-table">
-                        <thead>
-                            <tr>
-                                <th>Select</th>
-                                <th>Container</th>
-                                <th>Capacity</th>
-                                <th>Resource</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody id="storage-display-body">
-                        </tbody>
-                    </table>
-                </div>
-                <div class="button-container">
-                    <div class="selected-wrapper">
-                        <span>Expected Yield: </span>
-                        <span id="expected-yield">${farmlandYield(farmland) >= 1000 ? formatNumber(farmlandYield(farmland)/1000, 2) + ' t' : formatNumber(farmlandYield(farmland)) + ' kg'}</span>
-                    </div>
-                    <div class="w-100">
-                        <span>Selected Capacity: </span>
-                        <span id="selected-capacity">0 kg</span>
-                        <div class="progress">
-                            <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                    <button class="overlay-section-btn harvest-btn mt-3">Harvest Selected</button>
-                </div>
-            </section>
-        </div>
-    `;
 }
 
 function setupHarvestEventListeners(overlayContainer, farmland, farmlandId) {
@@ -107,19 +101,19 @@ function showWarningModal(farmland, farmlandId, selectedTools, totalAvailableCap
                     formatNumber(expectedYield) + ' kg'} to harvest.</p>
                 <p>Do you want to harvest what fits in the containers?</p>
             </div>
-                <div class="modal-footer">
-                    <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="overlay-section-btn" id="confirmHarvest">Harvest Available</button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+                <button type="button" class="overlay-section-btn" id="confirmHarvest">Harvest Available</button>
             </div>
         </div>
+    </div>
     `;
 
     document.body.appendChild(warningModal);
     $(warningModal).modal('show');
 
     document.getElementById('confirmHarvest').addEventListener('click', () => {
-        harvest(farmland, farmlandId, selectedTools, totalAvailableCapacity); // This line is now correct
+        harvest(farmland, farmlandId, selectedTools, totalAvailableCapacity);
         $(warningModal).modal('hide');
         warningModal.remove();
         removeOverlay(overlayContainer);

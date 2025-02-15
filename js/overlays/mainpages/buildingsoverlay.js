@@ -1,4 +1,3 @@
-
 // Import required functions from other modules
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { buildBuilding, upgradeBuilding } from '/js/buildings.js';
@@ -33,6 +32,33 @@ function createBuildingsOverlayHTML() {
                 </div>
                 <button class="btn btn-light btn-sm build-button overlay-section-btn" data-building-name="Warehouse">Build</button>
                 <button class="btn btn-light btn-sm upgrade-button overlay-section-btn" data-building-name="Warehouse" disabled>Upgrade</button>
+              </div>
+
+              <div class="col-md-6">
+                <div class="building-card">
+                  <div class="icon" style="background-image: url('/assets/icon/menu/office.webp');"></div>
+                  <div class="details building-details" data-building-name="Office"></div>
+                </div>
+                <button class="btn btn-light btn-sm build-button overlay-section-btn" data-building-name="Office">Build</button>
+                <button class="btn btn-light btn-sm upgrade-button overlay-section-btn" data-building-name="Office" disabled>Upgrade</button>
+              </div>
+
+              <div class="col-md-6">
+                <div class="building-card">
+                  <div class="icon" style="background-image: url('/assets/icon/menu/winecellar.webp');"></div>
+                  <div class="details building-details" data-building-name="Wine Cellar"></div>
+                </div>
+                <button class="btn btn-light btn-sm build-button overlay-section-btn" data-building-name="Wine Cellar">Build</button>
+                <button class="btn btn-light btn-sm upgrade-button overlay-section-btn" data-building-name="Wine Cellar" disabled>Upgrade</button>
+              </div>
+
+              <div class="col-md-6">
+                <div class="building-card">
+                  <div class="icon" style="background-image: url('/assets/icon/menu/winery.webp');"></div>
+                  <div class="details building-details" data-building-name="Winery"></div>
+                </div>
+                <button class="btn btn-light btn-sm build-button overlay-section-btn" data-building-name="Winery">Build</button>
+                <button class="btn btn-light btn-sm upgrade-button overlay-section-btn" data-building-name="Winery" disabled>Upgrade</button>
               </div>
             </div>
         </div>

@@ -15,6 +15,7 @@ import { addTransaction } from './finance.js';
 import { setupStaffWagesRecurringTransaction } from './staff.js';
 import { addConsoleMessage } from './console.js';
 import { loadStaff, saveStaff, loadTeams } from './database/initiation.js';
+import { performClearing } from './overlays/clearingOverlay.js';  // Add this import
 
 
 // Internal mapping for display names
@@ -465,6 +466,13 @@ class TaskManager {
                     const { prevSeason, prevYear } = params;
                     addConsoleMessage(`Bookkeeping for ${prevSeason} ${prevYear} completed successfully.`);
                 };
+            case 'clearing':
+                return (target, progress, params) => {
+                    if (progress >= 1) {
+                        performClearing(target, params);
+                    }
+                };
+
             default:
                 return () => console.warn(`No callback found for task: ${taskName}`);
         }

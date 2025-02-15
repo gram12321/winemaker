@@ -9,78 +9,45 @@ import { showStandardOverlay, hideOverlay, setupStandardOverlayClose } from './o
 function createBuildingDetails(building) {
   const tools = getBuildingTools()
     .filter(tool => tool.buildingType === building.name)
-    .sort((a, b) => a.cost - b.cost); // Sort all tools by cost first
-  
-  // Group pre-sorted tools by their supported resources
-  const generalTools = tools.filter(tool => !tool.supportedResources || tool.supportedResources.length === 0);
-  const grapeTools = tools.filter(tool => tool.supportedResources?.includes('Grapes'));
-  const mustTools = tools.filter(tool => tool.supportedResources?.includes('Must'));
+    .sort((a, b) => a.cost - b.cost);
 
-  const createToolSection = (tools, title) => `
-    <div class="tool-column collapsed">
-      <h4 class="tool-column-header h5 mb-0" onclick="this.closest('.tool-column').classList.toggle('collapsed')">
-        ${title}
-        <span class="expand-icon">▼</span>
-      </h4>
-      <div class="tool-column-content">
-        ${tools.map(tool => `
-          <div class="tool-container">
-            <div class="tool-header">
-              <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">
-                Add ${tool.name}
-              </button>
-            </div>
-            <div class="collapsible-content">
-              <div class="tool-stats">
-                <div>
-                  <img src="/assets/icon/small/gold_black.png" alt="Cost" class="stat-icon" title="Cost">
-                  €${formatNumber(tool.cost)}
-                </div>
-                ${tool.speedBonus !== 1.0 ? `
-                <div>
-                  <img src="/assets/icon/small/speed.png" alt="Speed Bonus" class="stat-icon" title="Speed Bonus">
-                  ${(tool.speedBonus * 100 - 100).toFixed(0)}%
-                </div>` : ''}
-                ${tool.capacity > 0 ? `
-                <div>
-                  <img src="/assets/icon/small/storage.png" alt="Storage" class="stat-icon" title="Storage">
-                  ${formatNumber(tool.capacity)} kg
-                </div>` : ''}
-                ${tool.supportedResources?.length ? `
-                <div>
-                  <img src="/assets/icon/small/store.png" alt="Stores" class="stat-icon" title="Stores">
-                  ${tool.supportedResources.join(', ')}
-                </div>` : ''}
-                <div>
-                  <img src="/assets/icon/small/weight.png" alt="Weight" class="stat-icon" title="Weight">
-                  ${tool.weight} units
-                </div>
-                ${tool.validTasks?.length ? `
-                <div>
-                  ${tool.validTasks.map(task => {
-                    // Get only the first word and convert to lowercase
-                    const iconName = task.split(' ')[0].toLowerCase();
-                    return `<img src="/assets/icon/icon_${iconName}.webp" 
-                              alt="${task}" 
-                              class="tool-tasktype-icon" 
-                              title="${task}">`;
-                  }).join('')}
-                </div>` : ''}
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
+  // Define all possible categories and their display names
+  const processCategories = {
+    'planting': 'Planting Tools',
+    'harvesting': 'Harvesting Tools',
+    'crushing': 'Crushing Tools',
+    'pressing': 'Pressing Tools',
+    'fermentation': 'Fermentation Tools',
+    'administration': 'Administration Tools'
+  };
 
-  const toolButtons = `
-    <div class="tool-grid">
-      ${createToolSection(generalTools, 'General Tools')}
-      ${createToolSection(grapeTools, 'Grape Storage')}
-      ${createToolSection(mustTools, 'Must Storage')}
-    </div>
-  `;
+  // Helper function to check if a tool is "general" (has multiple tasks)
+  const isGeneralTool = (tool) => tool.validTasks.length > 1;
+
+  // Sort tools into categories
+  const categorizedTools = {
+    'general': tools.filter(isGeneralTool)
+  };
+
+  // Initialize other categories based on validTasks
+  Object.keys(processCategories).forEach(category => {
+    categorizedTools[category] = tools.filter(tool => 
+      !isGeneralTool(tool) && // Skip general tools
+      tool.validTasks.some(task => task.toLowerCase() === category)
+    );
+  });
+
+  // Create HTML for non-empty categories only
+  const toolSections = Object.entries(categorizedTools)
+    .filter(([_, toolList]) => toolList.length > 0) // Only include categories with tools
+    .map(([category, toolList]) => {
+      const categoryTitle = category === 'general' ? 
+        'General Tools' : 
+        processCategories[category] || category;
+
+      return createToolSection(toolList, categoryTitle);
+    })
+    .join('');
 
   return `
     <div class="card">
@@ -90,12 +57,78 @@ function createBuildingDetails(building) {
       </div>
       <div class="card-body">
         <div class="building-layout-grid">
-          <div class="button-container">
-            ${toolButtons}
+          <div class="tool-grid">
+            ${toolSections}
           </div>
           <div class="building-simulator">
             <div id="capacity-grid" class="capacity-grid"></div>
           </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function createToolSection(tools, title) {
+  if (tools.length === 0) return ''; // Don't create empty sections
+
+  return `
+    <div class="tool-column collapsed">
+      <h4 class="tool-column-header h5 mb-0" onclick="this.closest('.tool-column').classList.toggle('collapsed')">
+        ${title}
+        <span class="expand-icon">▼</span>
+      </h4>
+      <div class="tool-column-content">
+        ${tools.map(tool => createToolEntry(tool)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function createToolEntry(tool) {
+  return `
+    <div class="tool-container">
+      <div class="tool-header">
+        <button class="add-tool-button btn btn-light btn-sm overlay-section-btn" data-tool-name="${tool.name}">
+          Add ${tool.name}
+        </button>
+      </div>
+      <div class="collapsible-content">
+        <div class="tool-stats">
+          <div>
+            <img src="/assets/icon/small/gold_black.png" alt="Cost" class="stat-icon" title="Cost">
+            €${formatNumber(tool.cost)}
+          </div>
+          ${tool.speedBonus !== 1.0 ? `
+          <div>
+            <img src="/assets/icon/small/speed.png" alt="Speed Bonus" class="stat-icon" title="Speed Bonus">
+            ${(tool.speedBonus * 100 - 100).toFixed(0)}%
+          </div>` : ''}
+          ${tool.capacity > 0 ? `
+          <div>
+            <img src="/assets/icon/small/storage.png" alt="Storage" class="stat-icon" title="Storage">
+            ${formatNumber(tool.capacity)} kg
+          </div>` : ''}
+          ${tool.supportedResources?.length ? `
+          <div>
+            <img src="/assets/icon/small/store.png" alt="Stores" class="stat-icon" title="Stores">
+            ${tool.supportedResources.join(', ')}
+          </div>` : ''}
+          <div>
+            <img src="/assets/icon/small/weight.png" alt="Weight" class="stat-icon" title="Weight">
+            ${tool.weight} units
+          </div>
+          ${tool.validTasks?.length ? `
+          <div>
+            ${tool.validTasks.map(task => {
+              // Get only the first word and convert to lowercase
+              const iconName = task.split(' ')[0].toLowerCase();
+              return `<img src="/assets/icon/icon_${iconName}.webp" 
+                        alt="${task}" 
+                        class="tool-tasktype-icon" 
+                        title="${task}">`;
+            }).join('')}
+          </div>` : ''}
         </div>
       </div>
     </div>

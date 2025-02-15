@@ -11,6 +11,11 @@ export function showMainOfficeOverlay() {
     if (tutorialManager.shouldShowTutorial('WELCOME')) {
         tutorialManager.showTutorial('WELCOME');
     }
+
+        // Add tutorial check
+        if (tutorialManager.shouldShowTutorial('MAINOFFICE')) {
+            tutorialManager.showTutorial('MAINOFFICE');
+        }
 }
 
 function createMainOfficeOverlayHTML() {
