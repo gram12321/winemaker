@@ -7,7 +7,7 @@ import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
 import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, updateFarmland, getPrestigeHit, setPrestigeHit, loadTasks, saveTasks } from './database/adminFunctions.js';
 import taskManager from './taskManager.js';
-import { finalizePlanting } from './overlays/plantingOverlay.js';
+import { performPlanting } from './overlays/plantingOverlay.js';
 import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
 import { calculateRealPrestige } from './company.js';
 
@@ -113,7 +113,7 @@ function handleIncompletePlantingTask(task) {
         addConsoleMessage(`Planting task for ${flagIcon} ${field.name} was incomplete. <span class="${percentCompleteClass}">${percentComplete}%</span> of the field was planted. Field health reduced by <span class="${healthClass}">${formatNumber(healthPenaltyPercentage, 2)}%</span>. The health of ${field.name} is now <span class="${healthClass}">${formatNumber(healthPercentage, 2)}%</span>.`);
 
         // Call the common function to finalize planting
-        finalizePlanting(field, params);
+        performPlanting(field, params);
     }
 }
 

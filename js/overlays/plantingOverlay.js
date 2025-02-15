@@ -107,55 +107,51 @@ function setupPlantingEventListeners(overlayContainer, farmland, onPlantCallback
 
 // Function to handle planting logic
 function plant(farmland, selectedResource, selectedDensity) {
-  // Validation checks
-  if (!selectedResource) {
-    addConsoleMessage('Please select a resource to plant', false, true);
-    return false;
-  }
-
-  // Calculate planting cost
-  const totalCost = selectedDensity * 2 * farmland.acres;
-  const currentMoney = parseFloat(localStorage.getItem('money') || '0');
-
-  // Check if enough money is available
-  if (currentMoney < totalCost) {
-    addConsoleMessage(`Insufficient funds for planting. Required: <strong>${formatNumber(totalCost)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>`, false, true);
-    return false;
-  }
-
-  const workData = calculatePlantingWorkData(farmland, selectedDensity);
-
-  // Create the progressive planting task
-  taskManager.addProgressiveTask(
-    'Planting',
-    'field',  // Changed from TaskType.field
-    workData.totalWork,
-    (target, progress, params) => {
-      // This will be called every week with updated progress
-      const percentComplete = Math.floor(progress * 100);
-      const percentCompleteClass = getColorClass(progress);
-      addConsoleMessage(`Planting ${getFlagIconHTML(target.country)} ${target.name}: <span class="${percentCompleteClass}">${percentComplete}%</span> complete...`, true);
-      
-      if (progress >= 1) {
-        // Final update when task completes
-        finalizePlanting(target, params);
-      }
-    },
-    farmland,
-    { selectedResource, selectedDensity, totalCost },
-    // Initial callback
-    (target, params) => {
-      updateFarmland(target.id, {
-        status: 'Planting...'
-      });
-      displayFarmland();
+    // Validation checks
+    if (!selectedResource) {
+        addConsoleMessage('Please select a resource to plant', false, true);
+        return false;
     }
-  );
 
-  return true;
+    // Calculate planting cost
+    const totalCost = selectedDensity * 2 * farmland.acres;
+    const currentMoney = parseFloat(localStorage.getItem('money') || '0');
+
+    // Check if enough money is available
+    if (currentMoney < totalCost) {
+        addConsoleMessage(`Insufficient funds for planting. Required: <strong>${formatNumber(totalCost)}€</strong>, Available: <strong>${formatNumber(currentMoney)}€</strong>`, false, true);
+        return false;
+    }
+
+    const workData = calculatePlantingWorkData(farmland, selectedDensity);
+
+    // Create the progressive planting task
+    taskManager.addProgressiveTask(
+        'Planting',
+        'field',
+        workData.totalWork,
+        (target, progress, params) => {
+            const percentComplete = Math.floor(progress * 100);
+            const percentCompleteClass = getColorClass(progress);
+            addConsoleMessage(`Planting ${getFlagIconHTML(target.country)} ${target.name}: <span class="${percentCompleteClass}">${percentComplete}%</span> complete...`, true);
+            
+            if (progress >= 1) {
+                performPlanting(target, params);
+            }
+        },
+        farmland,
+        { selectedResource, selectedDensity, totalCost },
+        // Initial callback sets the "Planting..." status
+        (target) => {
+            updateFarmland(target.id, { status: 'Planting...' });
+            updateAllDisplays();
+        }
+    );
+
+    return true;
 }
 
-export function finalizePlanting(target, params) {
+export function performPlanting(target, params) {
     const { selectedResource, selectedDensity, totalCost } = params;
     updateFarmland(target.id, {
         density: selectedDensity,
@@ -165,7 +161,7 @@ export function finalizePlanting(target, params) {
         canBeCleared: 'Ready to be cleared'  // Add this line to set clearing status
     });
     addTransaction('Expense', `Planting on ${getFlagIconHTML(target.country)} ${target.name}`, -totalCost);
-    displayFarmland();
+    updateAllDisplays();
 }
 
 function setupDensitySlider(overlayContainer, farmland) {
@@ -211,8 +207,6 @@ function setupPlantButton(overlayContainer, farmland, onPlantCallback) {
     }
   });
 }
-
-
 
 function calculatePlantingWorkData(farmland, density) {
     const selectedResource = document.querySelector('#resource-select')?.value || allResources[0].name;

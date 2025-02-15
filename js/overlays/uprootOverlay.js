@@ -79,6 +79,18 @@ function setupUprootEventListeners(overlayContainer, farmland, onUprootCallback)
     setupStandardOverlayClose(overlayContainer);  // Use directly instead of through wrapper
 }
 
+export function performUproot(farmland) {
+    updateFarmland(farmland.id, {
+        plantedResourceName: null,
+        status: 'Ready for planting',
+        canBeCleared: 'Ready to be cleared',
+        density: null,
+        farmlandHealth: DEFAULT_FARMLAND_HEALTH  // Reset health to default
+    });
+    addConsoleMessage(`Uprooting of ${getFlagIconHTML(farmland.country)} ${farmland.name} is complete. Farmland health reset to ${DEFAULT_FARMLAND_HEALTH * 100}%`);
+    updateAllDisplays();
+}
+
 function uproot(farmland, totalWork) {
     const task = taskManager.addProgressiveTask(
         'Uprooting',
@@ -92,15 +104,7 @@ function uproot(farmland, totalWork) {
             );
 
             if (progress >= 1) {
-                updateFarmland(target.id, {
-                    plantedResourceName: null,
-                    status: 'Ready for planting',
-                    canBeCleared: 'Ready to be cleared',
-                    density: null,
-                    farmlandHealth: DEFAULT_FARMLAND_HEALTH  // Reset health to default
-                });
-                addConsoleMessage(`Uprooting of ${getFlagIconHTML(target.country)} ${target.name} is complete. Farmland health reset to ${DEFAULT_FARMLAND_HEALTH * 100}%`);
-                displayFarmland();
+                performUproot(target);
             }
         },
         farmland

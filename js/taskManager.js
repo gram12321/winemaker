@@ -16,6 +16,8 @@ import { setupStaffWagesRecurringTransaction } from './staff.js';
 import { addConsoleMessage } from './console.js';
 import { loadStaff, saveStaff, loadTeams } from './database/initiation.js';
 import { performClearing } from './overlays/clearingOverlay.js';  // Add this import
+import { performPlanting } from './overlays/plantingOverlay.js';  // Add this import
+import { performUproot } from './overlays/uprootOverlay.js';  // Add this import
 
 
 // Internal mapping for display names
@@ -395,15 +397,7 @@ class TaskManager {
             case 'planting':
                 return (target, progress, params) => {
                     if (progress >= 1) {
-                        const { selectedResource, selectedDensity, totalCost } = params;
-                        updateFarmland(target.id, {
-                            density: selectedDensity,
-                            plantedResourceName: selectedResource,
-                            vineAge: 0,
-                            status: 'No yield in first season'
-                        });
-                        addTransaction('Expense', `Planting on ${target.name}`, -totalCost);
-                        displayFarmland();
+                        performPlanting(target, params);
                     }
                 };
             case 'staff search':
@@ -448,13 +442,7 @@ class TaskManager {
             case 'uprooting':
                 return (target, progress) => {
                     if (progress >= 1) {
-                        updateFarmland(target.id, {
-                            plantedResourceName: null,
-                            status: 'Ready for planting',
-                            canBeCleared: 'Not ready',
-                            density: null
-                        });
-                        displayFarmland();
+                        performUproot(target);
                     }
                 };
             case 'maintain':
