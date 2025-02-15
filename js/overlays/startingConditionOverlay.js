@@ -1,6 +1,7 @@
 import { storeCompanyName, checkCompanyExists, loadExistingCompanyData } from '../database/initiation.js';
 import { getFlagIconHTML } from '../utils.js';
 import { generateFarmlandPreview } from '../farmland.js';
+import { DEFAULT_VINE_DENSITY } from '../constants/constants.js';
 
 // Generate farmland previews when defining starting conditions
 const startingConditions = {
@@ -12,7 +13,8 @@ const startingConditions = {
         familyPicture: 'pierrecamille.webp',
         startingFarmland: {
             ...generateFarmlandPreview('France', 'Burgundy (Bourgogne)'),
-            region: 'Burgundy (Bourgogne)'  // Ensure correct region
+            region: 'Burgundy (Bourgogne)',  // Ensure correct region
+            density: DEFAULT_VINE_DENSITY  // Add default density
         }
     },
     'Italy': {

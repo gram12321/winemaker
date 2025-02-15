@@ -119,35 +119,125 @@ const GENERAL_TUTORIALS = {
     pages: [
       {
         title: 'Navigation Menu',
-        content: 'Okay, I will show you around. To the left of the screen, we can acces the most important places. Ill should you a few of them now.',
+        content: 'Okay, I will show you around. To the left of the screen, we can access the most important places. I\'ll show you a few of them now.',
         highlightElement: 'sidebar-wrapper'  // Element ID to highlight
       },
       {
+        title: 'Main Office Overview',
+        content: 'This is the Main Office Overview. Here is where you can manage your administrative tasks and get an overview of the winery operations.',
+        highlightElement: 'main-link'  // Using the existing ID of the land menu item
+      },
+      {
         title: 'Farmland Overview',
-        content: 'This is the Farmland Overview. Here is a list of our current fields. You can buy new fields, plant crops, and manage your land from here, i will tell you more about this the first time you visit this page.',
+        content: 'This is the Farmland Overview. Here is a list of our current fields. You can buy new fields, plant crops, and manage your land from here. I will tell you more about this the first time you visit this page.',
         highlightElement: 'land-link'  // Using the existing ID of the land menu item
       },
       {
         title: 'Vineyard Management',
-        content: 'In the Vineyard section, youll manage your grape vines, from planting to harvesting.',
+        content: 'In the Vineyard section, you\'ll manage your grape vines, from planting to harvesting.',
         highlightElement: 'vineyard-link'
       }
     ]
   },
+  MAINOFFICE: {
+    title: 'Main Office Overview',
+    pages: [
+      {
+        title: 'Welcome to your Main Office',
+        content: 'Welcome to your Main office area! Here you will manage the overall operations of your winery. Mostly this is where you can move time forward one week when you are ready.',
+      },
+    ]
+  },
+
+  FINANCE: {
+    title: 'Finance Overview',
+    pages: [
+      {
+        title: 'Welcome to Finance Management',
+        content: 'Welcome to your finance management area! Here you can track your income, expenses, and overall financial health. Keeping a close eye on your finances is crucial for the success of your winery. You will see three tabs here "Income/Balance", "Cash Flow", and "Research and Upgrades". I\'ll explain them to you now. ',
+      },
+
+      {
+        title: 'Income/Balance',
+        content: 'The Income Statement section provides a detailed view of your income and expenses over time. You can select to view this by week, season or year. This may be useful to you as the income and expenses may not be distributed evenly across the seasons. You\'ll notice that most of the info here you can click to gain more information. In the balance sheet, you will find information.',
+        highlightElement: 'income-balance-link'  // This will highlight the Income/Balance link // NOT WORKING
+      },
+
+      {
+        title: 'Cash Flow',
+        content: 'The Cash Flow section provides a detailed view of your income and expenses. You will be able to see every transaction in and out of the winery here.',
+        highlightElement: 'cash-flow-link'  // This will highlight the Cash Flow link // NOT WORKING
+      },
+      {
+        title: 'Research and Upgrades',
+        content: 'The Research and Upgrades section allows you to invest in new technologies and upgrades for your winery. This can help you improve efficiency, quality, and overall performance. You will notice that some upgrades are expensive and time consuming. Some upgrades are just for a single field, some are for the whole winery. ',
+        highlightElement: 'income-statement-link'  // This will highlight the Income Statement link // NOT WORKING
+      }
+    ]
+  },
+
+  STAFF: {
+    title: 'Staff Management',
+    pages: [
+      {
+        title: 'Welcome to Staff Management',
+        content: 'Welcome to your staff management area! Here you can hire, train, and manage your winery staff. Your staff has a skill level that represents their overall capabilities. Their skills are divided into five skill types: "Field", "Winery", "Administration", "Sales" and "Building and Maintenance". Like most values in Winemaker, the skills are represented by a value from 0-1. You will find out that the more skilled your worker is with a task type the faster and better he/she will perform it.',
+      },
+
+      {
+        title: 'About your staff',
+        content: 'As you can see the whole family is working here. Some of us you have already met, and here you can see more information about what we are good at. You can also see how much we are paid each week. The wage of the staff will be tied to, but not an exact match to the skill of the worker. You can always click on a member of the staff to see more information about them. Some of your staff will have specializations that will make them better at certain tasks.',
+      },
+      
+      {
+        title: 'Hiring Staff',
+        content: 'To hire new staff, click the "Hire Staff" button. This will start a "Search for staff" option window. You can set up what kind of staff you are looking for, what skill level, or if you want a candidate with a specific skill. Be wary though, the more specific you search the longer it will take to find candidates, and it will become more expensive.',
+        highlightElement: 'hire-staff-btn'  // This will highlight the Hire Staff button // NOT WORKING
+      },
+      {
+        title: 'Team Management',
+        content: 'In the team Management section you can control, who is working on what task. We have allready created some teams the way we use to do it around here, but you can create your own teams if you want. You can assign a team to be responsible for a specific task, if so that members of that team will automaticly work the task you specify. You\ll notice that some of us is allready on a team, you may change that if you want. ',
+      }
+    ]
+  },
+
   FARMLAND: {
     title: 'Farmland Overview',
     pages: [
       {
         title: 'Welcome to Farmland Management',
-        content: 'Welcome to your farmland management area! Here you can manage your fields, plant various crops, and expand your agricultural operations. Choose your fields wisely to support your winery.',
+        content: 'Welcome to your farmland management area! Here you can manage your fields. This is where you will choose which grapes you want to plant. Choose carefully, vines last many years, once planted you can Uproot and plant new vines, but is cost and labor intensive. You can always click your field to get more information, and you can click the grapes to see detailed information, about the grapes characteristics.',
       },
       {
         title: 'Buying New Land',
         content: 'To expand your operation, you\'ll need to acquire more land. Click the "Buy Land" button to see available properties in different regions.',
         highlightElement: 'buy-land-btn'  // This will highlight the Buy Land button
+      },
+      {
+        title: 'Taking care for your vineyards',
+        content: 'A good vineyard manager connects with his vineyards and can feel the wellbeeing of them, if you need at little help feeling the vines in the beginning, you can monitor at the Field Health value, there are a number of different things you can do to keep your vineyards healthy. Cleanring, Prunning, Vine replanting, or even soil management.',
+        highlightElement: 'action-scetion'  // This will highlight the Buy Land button // NOT WORKING
+      },
+
+      {
+        title: 'Planting Vines',
+        content: 'To plant vines, click on a field and select the "Plant Vines" option. You can then choose the type of grapes to plant. Remember, each grape variety has unique requirements and characteristics, so choose wisely.',
+      },  
+      {
+          title: 'Soil Management',
+          content: 'Proper soil management is crucial for healthy vines. There are reaseach and upgrades you can do you improve soil and health. Be carefull what operations you perform though, if you eventually want to aquire a eco-certificaltions.',
+          highlightElement: 'soil-management-btn'  // This will highlight the Soil Management button
+      },
+
+      {
+          title: 'Planting Vines',
+          content: 'To plant vines, click on a field and select the "Plant Vines" option. You can then choose the type of grapes to plant. Remember, each grape variety has unique requirements and characteristics, so choose wisely.',
+          highlightElement: 'plant-btn'  // This will highlight the Plant Vines button
       }
+      
     ]
   },
+  
   VINEYARD: {
     title: 'Vineyard Management',
     content: 'Welcome to your vineyard! Here you can manage your fields, plant vines, and harvest grapes. Monitor ripeness levels carefully to achieve the best quality harvest.',

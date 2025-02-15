@@ -82,7 +82,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
     transition: all 0.3s ease;
     opacity: 0.6;
   }
-  
+
   .health-values {
     display: flex;
     justify-content: space-between;
@@ -93,4 +93,22 @@ input[type="range"]::-webkit-slider-thumb:hover {
   .health-improvement {
     color: var(--color-accent);
     margin-left: 10px;
+  }
+
+  /* Health bar visualization colors */
+  .health-bar-improvement.improvement-positive {
+    background: var(--color-positive);
+  }
+  
+  .health-bar-improvement.improvement-negative {
+    background: var(--color-negative);
+  }
+  
+  /* Health percentage text colors */
+  .health-improvement.improvement-positive {
+    color: var(--color-positive);
+  }
+  
+  .health-improvement.improvement-negative {
+    color: var(--color-negative);
   }

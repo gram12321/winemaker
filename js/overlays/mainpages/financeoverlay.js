@@ -11,6 +11,12 @@ export function showFinanceOverlay() {
     const overlay = showMainViewOverlay(createFinanceOverlayHTML());
     setupFinanceEventListeners(overlay);
     updateUpgradesList();
+
+    // Add tutorial check
+    if (tutorialManager.shouldShowTutorial('FINANCE')) {
+        tutorialManager.showTutorial('FINANCE');
+    }
+
 }
 
 function createFinanceOverlayHTML() {

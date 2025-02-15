@@ -16,6 +16,8 @@
   --color-success: #4A5D3F;      /* Earthy green */
   --color-warning: #CF9F5D;      /* Warm amber */
   --color-error: #8B2E2E;        /* Dark red */
+  --color-positive: #28a745;     /* Success/positive changes */
+  --color-negative: #dc3545;     /* Error/negative changes */
 
   /* UI Element Colors */
   --panel-bg: #343A40;           /* Dark background for panels */
@@ -34,7 +36,7 @@
   --console-width-both-collapsed: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
   --transition-speed: 0.3s;
 
-/* Spacing */
+  /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;

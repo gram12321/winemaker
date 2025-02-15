@@ -4,6 +4,8 @@ import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { inventoryInstance } from '../resource.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
+import { getBuildingTools } from '../buildings.js';
+import { loadBuildings } from '../database/adminFunctions.js'; // Add this import
 
 export function showCrushingOverlay() {
     const overlayContent = createCrushingHTML();
@@ -57,6 +59,8 @@ function createCrushingHTML() {
                 <!-- Progress section (unchanged) -->
                 ${createProgressSection()}
             </section>
+
+            ${createCrushingMethodSection()}
 
             <section id="select-grape-section" class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
@@ -156,11 +160,45 @@ function createProgressSection() {
     `;
 }
 
+// Update the setupCrushingEventListeners to only allow clicking on available methods
 function setupCrushingEventListeners(overlay) {
     const crushBtn = overlay.querySelector('.crush-btn');
     const closeBtn = overlay.querySelector('.close-btn');
+    const noCrushingCheckbox = overlay.querySelector('#no-crushing');
+    const methodRadios = overlay.querySelectorAll('input[name="crushing-method"]');
+
+    // Handle crushing method selection
+    methodRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (radio.checked) {
+                noCrushingCheckbox.checked = false;
+                validateCrushingSelection();
+            }
+        });
+    });
+
+    noCrushingCheckbox.addEventListener('change', () => {
+        if (noCrushingCheckbox.checked) {
+            methodRadios.forEach(radio => radio.checked = false);
+            // Deselect all method items and their radio buttons
+            const methodItems = overlay.querySelectorAll('.method-item');
+            methodItems.forEach(item => {
+                item.classList.remove('selected');
+                const radio = item.querySelector('input[type="radio"]');
+                if (radio) radio.checked = false;
+            });
+        }
+        validateCrushingSelection();
+    });
+
+    function validateCrushingSelection() {
+        const hasMethodSelected = Array.from(methodRadios).some(radio => radio.checked);
+        const isNoCrushing = noCrushingCheckbox.checked;
+        crushBtn.disabled = !hasMethodSelected && !isNoCrushing;
+    }
 
     if (crushBtn) {
+        crushBtn.disabled = true; // Initially disabled
         crushBtn.addEventListener('click', () => {
             if (crushing(overlay)) {
                 showWineryOverlay();
@@ -179,6 +217,23 @@ function setupCrushingEventListeners(overlay) {
         if (event.target === overlay) {
             hideOverlay(overlay);
         }
+    });
+
+    // Add method selection handlers
+    const methodItems = overlay.querySelectorAll('.method-item:not(.disabled)');
+    methodItems.forEach(item => {
+        item.addEventListener('click', () => {
+            // Remove selection from all items
+            methodItems.forEach(i => i.classList.remove('selected'));
+            // Select clicked item
+            item.classList.add('selected');
+            // Check the hidden radio
+            const radio = item.querySelector('input[type="radio"]');
+            radio.checked = true;
+            // Uncheck the no-crushing checkbox
+            overlay.querySelector('#no-crushing').checked = false;
+            validateCrushingSelection();
+        });
     });
 }
 
@@ -405,6 +460,14 @@ function updateCrushingData(selectedGrape, selectedStorage) {
 }
 
 function crushing(overlayContainer) {
+    const selectedMethod = overlayContainer.querySelector('input[name="crushing-method"]:checked')?.value;
+    const skipCrushing = overlayContainer.querySelector('#no-crushing').checked;
+
+    if (!skipCrushing && !selectedMethod) {
+        addConsoleMessage("Please select a crushing method or check 'Skip crushing'");
+        return false;
+    }
+
     const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
     if (!selectedGrape) {
         addConsoleMessage("Please select grapes to crush");
@@ -657,4 +720,58 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
         inventoryInstance.save();
     }
     return success;
+}
+
+function createCrushingMethodSection() {
+    const availableTools = getBuildingTools().filter(tool => 
+        tool.validTasks.includes('crushing') && 
+        !tool.assignable
+    );
+
+    const buildings = loadBuildings();
+    const existingTools = buildings.flatMap(building => 
+        building.slots.flatMap(slot => slot.tools)
+    );
+
+    return `
+        <section id="crushing-method-section" class="overlay-section card mb-4">
+            <div class="card-header text-white">
+                <h3 class="h5 mb-0">Select Crushing Method</h3>
+            </div>
+            <div class="card-body">
+                <div class="crushing-methods">
+                    <div class="method-item selected" data-method="Hand Crushing">
+                        <div class="method-item-content">
+                            <img src="/assets/icon/buildings/hand crushing.png" alt="Hand Crushing">
+                            <span class="method-name">Hand Crushing</span>
+                            <span class="method-stats">+100% work</span>
+                        </div>
+                        <input type="radio" name="crushing-method" value="Hand Crushing" checked>
+                    </div>
+                    
+                    ${availableTools.map(tool => {
+                        const extraWork = ((1 / tool.speedBonus - 1) * 100).toFixed(0);
+                        const isAvailable = existingTools.some(t => t.name === tool.name);
+                        return `
+                        <div class="method-item ${!isAvailable ? 'disabled' : ''}" 
+                             data-method="${tool.name}"
+                             title="${!isAvailable ? 'You need to purchase this tool first' : ''}">
+                            <div class="method-item-content">
+                                <img src="/assets/icon/buildings/${tool.name.toLowerCase()}.png" alt="${tool.name}">
+                                <span class="method-name">${tool.name}</span>
+                                <span class="method-stats">${extraWork > 0 ? '+' : '-'}${Math.abs(extraWork)}% work</span>
+                            </div>
+                            <input type="radio" name="crushing-method" value="${tool.name}" ${!isAvailable ? 'disabled' : ''}>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="no-crushing-option">
+                    <input type="checkbox" id="no-crushing" name="no-crushing">
+                    <label for="no-crushing">Skip crushing (not recommended)</label>
+                </div>
+            </div>
+        </section>
+    `;
 }
