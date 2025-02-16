@@ -6,6 +6,7 @@ import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools } from '../buildings.js';
 import { loadBuildings } from '../database/adminFunctions.js'; // Add this import
+import { createOverlayHTML, createTable } from '../components/createOverlayHTML.js';
 
 export function showCrushingOverlay() {
     const overlayContent = createCrushingHTML();
@@ -42,47 +43,48 @@ function updateGrapeImage(resourceName) {
 }
 
 function createCrushingHTML() {
-    return `
+    const content = `
         <div class="overlay-section-wrapper">
             <section id="grape-crushing-section" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Grape Crushing</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
-                </div>
                 <div class="card-body">
                     <div class="crushing-process">
-                        <!-- Crushing process visualization (unchanged) -->
                         ${createCrushingProcess()}
                     </div>
                 </div>
-                <!-- Progress section not in div to make spacing as small as possible -->
-                <!-- Progress section (unchanged) -->
                 ${createProgressSection()}
             </section>
 
             ${createCrushingMethodSection()}
 
             <section id="select-grape-section" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Select Grapes to Crush</h3>
-                </div>
                 <div class="card-body">
-                    ${createGrapesTable()}
+                    ${createTable({
+                        headers: ['Select', 'Container', 'Grapes in Storage', 'Amount', 'Quality'],
+                        id: 'crushing-storage-table',
+                        className: 'table-hover overlay-table'
+                    })}
                 </div>
             </section>
 
             <section id="must-section" class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Select Must Storage Container</h3>
-                </div>
                 <div class="card-body">
-                    ${createMustStorageTable()}
+                    ${createTable({
+                        headers: ['Select', 'Container', 'Must in Storage', 'Capacity', 'Available Space'],
+                        id: 'crushing-must-storage-table',
+                        className: 'table-hover overlay-table'
+                    })}
                 </div>
             </section>
-
-
         </div>
     `;
+
+    return createOverlayHTML({
+        title: 'Grape Crushing',
+        content,
+        buttonText: 'Crush Selected Grapes',
+        buttonClass: 'btn-primary crush-btn',
+        buttonIdentifier: 'crush-btn'
+    });
 }
 
 // New helper function to keep the code organized

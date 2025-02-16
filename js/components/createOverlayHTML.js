@@ -2,18 +2,22 @@ import { getFlagIconHTML } from '../utils.js';
 
 export function createOverlayHTML({ 
     title,
-    farmland,
+    farmland = null,  // Make farmland optional
     content,
     buttonText = 'Submit',
     buttonClass = 'btn-primary',
     buttonIdentifier = 'action-btn',
     warningMessage = null
 }) {
+    const headerTitle = farmland ? 
+        `${title} ${getFlagIconHTML(farmland.country)} ${farmland.name}` : 
+        title;
+
     return `
         <div class="overlay-content overlay-container">
             <section class="overlay-section card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">${title} ${getFlagIconHTML(farmland.country)} ${farmland.name}</h3>
+                    <h3 class="h5 mb-0">${headerTitle}</h3>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
                 <div class="card-body">
@@ -25,9 +29,11 @@ export function createOverlayHTML({
                         </div>
                     ` : ''}
                     ${content}
-                    <div class="d-flex justify-content-center mt-4">
-                        <button class="btn ${buttonClass} ${buttonIdentifier}">${buttonText}</button>
-                    </div>
+                    ${buttonText ? `
+                        <div class="d-flex justify-content-center mt-4">
+                            <button class="btn ${buttonClass} ${buttonIdentifier}">${buttonText}</button>
+                        </div>
+                    ` : ''}
                 </div>
             </section>
         </div>
