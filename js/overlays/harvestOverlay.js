@@ -1,8 +1,8 @@
 import { addConsoleMessage } from '../console.js';
-import { showVineyardOverlay, canHarvest, validateStorage } from './mainpages/vineyardoverlay.js';
-import { inventoryInstance, allResources } from '../resource.js';
+import { showVineyardOverlay, validateStorage } from './mainpages/vineyardoverlay.js';
+import { inventoryInstance, getResourceByName } from '../resource.js';
 import { farmlandYield } from '../farmland.js';
-import { formatNumber, getFlagIconHTML } from '../utils.js';
+import { formatNumber } from '../utils.js';
 import { saveInventory, updateFarmland, loadBuildings } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
 import { regionAltitudeRanges, grapeSuitability } from '../names.js';
@@ -10,6 +10,7 @@ import { loadFarmlands } from '../database/adminFunctions.js';
 import { showModalOverlay } from './overlayUtils.js';
 import { createOverlayHTML, createTextCenter, createTable } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
+import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
     const overlayContainer = showModalOverlay('harvestOverlay', createHarvestOverlayHTML(farmland));
@@ -20,13 +21,51 @@ export function showHarvestOverlay(farmland, farmlandId) {
     return overlayContainer;
 }
 
+// Modify calculateHarvestWorkData to return workData object instead of just totalWork
+function calculateHarvestWorkData(farmland, totalHarvest, resourceObj) {
+    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+    const medianAltitude = (minAltitude + maxAltitude) / 2;
+    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+
+    const workModifiers = [
+        (1 - resourceObj.fragile) * 0.5,    // fragility penalty
+        altitudeDeviation * 0.5             // altitude penalty
+    ];
+
+    const totalWork = calculateTotalWork(farmland.acres, {
+        density: farmland.density,
+        tasks: ['HARVESTING'],
+        workModifiers
+    });
+
+    return {
+        acres: farmland.acres,
+        density: farmland.density,
+        tasks: ['HARVESTING'],
+        totalWork: totalHarvest ? Math.ceil(totalWork * (totalHarvest / farmlandYield(farmland))) : totalWork,
+        altitude: farmland.altitude,
+        altitudeEffect: altitudeDeviation * 0.5,
+        minAltitude,
+        maxAltitude,
+        medianAltitude,
+        robustness: resourceObj.fragile,     // Pass fragile directly instead of inverting
+        fragilityEffect: (1 - resourceObj.fragile) * 0.5  // Keep calculation logic unchanged
+    };
+}
+
 function createHarvestOverlayHTML(farmland) {
+    const resourceObj = getResourceByName(farmland.plantedResourceName); // Changed this line
+    const workData = calculateHarvestWorkData(farmland, null, resourceObj);
+
     const content = `
+        
         ${createTable({
             headers: ['Select', 'Container', 'Capacity', 'Resource', 'Amount'],
             id: 'storage-display-body',
             className: 'overlay-table'
         })}
+
+        <hr class="overlay-divider">
         <div class="default-overlay-content"> 
             ${createTextCenter({
                 text: `Expected Yield: ${farmlandYield(farmland) >= 1000 ? 
@@ -41,7 +80,13 @@ function createHarvestOverlayHTML(farmland) {
                 <div class="progress">
                     <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
+                <hr class="overlay-divider">
+                <div>
+                
+                ${createWorkCalculationTable(workData)}
+                </div>
         </div>`;
+        
 
     return createOverlayHTML({
         title: 'Harvest Options for',
@@ -219,35 +264,11 @@ function checkGrapeCompatibility(selectedTool, farmland) {
 }
 
 // Update harvest function to use the helper
-function calculateHarvestWorkData(farmland, totalHarvest, resourceObj) {
-    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
-    const medianAltitude = (minAltitude + maxAltitude) / 2;
-    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
-
-    // Convert penalties to workModifiers for the calculator
-    const workModifiers = [
-        // Removed density penalty since it's handled by workCalculator's densityRatio
-        (1 - resourceObj.fragile) * 0.5,    // fragility penalty
-        altitudeDeviation * 0.5             // altitude penalty
-    ];
-
-    // Calculate total work using the shared calculator
-    const totalWork = calculateTotalWork(farmland.acres, {
-        density: farmland.density,
-        tasks: ['HARVESTING'],
-        workModifiers
-    });
-
-    // Scale the work based on harvest amount vs total yield
-    const harvestRatio = totalHarvest / farmlandYield(farmland);
-    return Math.ceil(totalWork * harvestRatio);
-}
-
 export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
     if (!Array.isArray(selectedTools) || selectedTools.length === 0) return false;
 
     const toolsArray = selectedTools.map(t => t.toString());
-    const resourceObj = allResources.find(r => r.name === farmland.plantedResourceName);
+    const resourceObj = getResourceByName(farmland.plantedResourceName); // Changed this line
     
     // Check compatibility for all selected tools
     for (const toolId of toolsArray) {
@@ -258,7 +279,7 @@ export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
         }
     }
 
-    const totalWork = calculateHarvestWorkData(farmland, totalHarvest, resourceObj);
+    const { totalWork } = calculateHarvestWorkData(farmland, totalHarvest, resourceObj);
 
     taskManager.addProgressiveTask(
         'Harvesting',
