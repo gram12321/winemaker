@@ -187,22 +187,20 @@ function createMethodSelector({
     `).join('');
 
     return `
-        <section class="method-selector-section overlay-section card mb-4 ${containerClass}">
-            <div class="card-header text-white">
-                <h3 class="h5 mb-0">${title}</h3>
+        <div class="text-center">
+            <h3 class="h5 mb-0">${title}</h3>
+        </div>
+        <div class="card-body text-center">
+            <div class="method-selector">
+                ${methodItems}
             </div>
-            <div class="card-body">
-                <div class="method-selector">
-                    ${methodItems}
+            ${showSkipOption ? `
+                <div class="skip-option">
+                    <input type="checkbox" id="${skipOptionId}" name="${skipOptionId}">
+                    <label for="${skipOptionId}">${skipOptionText}</label>
                 </div>
-                ${showSkipOption ? `
-                    <div class="skip-option">
-                        <input type="checkbox" id="${skipOptionId}" name="${skipOptionId}">
-                        <label for="${skipOptionId}">${skipOptionText}</label>
-                    </div>
-                ` : ''}
-            </div>
-        </section>
+            ` : ''}
+        </div>
     `;
 }
 

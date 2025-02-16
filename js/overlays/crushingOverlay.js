@@ -43,18 +43,27 @@ function updateGrapeImage(resourceName) {
 }
 
 function createCrushingHTML() {
-    const content = `
-        
-            <section id="grape-crushing-section" class="overlay-section card mb-4">
+    const content = `     
+                
+        <div class="text-center">
+            <h3 class="h5 mb-0">Grape Crushing</h3>
+        </div>
+
                 <div class="card-body">
                     <div class="crushing-process">
                         ${createCrushingProcess()}
                     </div>
                 </div>
-                ${createProgressSection()}
-            </section>
+                
+                <hr class="overlay-divider">
 
-            ${createCrushingMethodSection()}
+                ${createCrushingMethodSection()}
+                <hr class="overlay-divider">    
+                    ${createProgressSection()}
+            
+<div class="text-center">
+            <h3 class="h5 mb-0">Select Grapes</h3>
+        </div>
 
             <section id="select-grape-section">
                 <div class="card-body">
@@ -65,7 +74,9 @@ function createCrushingHTML() {
                     })}
                 </div>
             </section>
-
+<div class="text-center">
+            <h3 class="h5 mb-0">Select Storage</h3>
+        </div>
             <section id="must-section" >
                 <div class="card-body">
                     ${createTable({
