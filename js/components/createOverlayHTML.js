@@ -157,11 +157,61 @@ function createTable({
     `;
 }
 
+function createMethodSelector({
+    title = 'Select Method',
+    methods = [],
+    defaultMethod = null,
+    showSkipOption = false,
+    skipOptionText = 'Skip (not recommended)',
+    containerClass = '',
+    skipOptionId = 'skip-method',  // Add this parameter
+    methodRadioName = 'method-select',  // Add this parameter
+    customMethodContent = item => '' // Allow custom content injection
+}) {
+    const methodItems = methods.map(item => `
+        <div class="method-item ${item.disabled ? 'disabled' : ''} ${item.name === defaultMethod ? 'selected' : ''}" 
+             data-method="${item.name}"
+             title="${item.disabled ? item.disabledReason || 'Not available' : ''}">
+            <div class="method-item-content">
+                ${item.iconPath ? `<img src="${item.iconPath}" alt="${item.name}">` : ''}
+                <span class="method-name">${item.name}</span>
+                ${item.stats ? `<span class="method-stats">${item.stats}</span>` : ''}
+                ${customMethodContent(item)}
+            </div>
+            <input type="radio" 
+                   name="${methodRadioName}" 
+                   value="${item.name}" 
+                   ${item.disabled ? 'disabled' : ''}
+                   ${item.name === defaultMethod ? 'checked' : ''}>
+        </div>
+    `).join('');
+
+    return `
+        <section class="method-selector-section overlay-section card mb-4 ${containerClass}">
+            <div class="card-header text-white">
+                <h3 class="h5 mb-0">${title}</h3>
+            </div>
+            <div class="card-body">
+                <div class="method-selector">
+                    ${methodItems}
+                </div>
+                ${showSkipOption ? `
+                    <div class="skip-option">
+                        <input type="checkbox" id="${skipOptionId}" name="${skipOptionId}">
+                        <label for="${skipOptionId}">${skipOptionText}</label>
+                    </div>
+                ` : ''}
+            </div>
+        </section>
+    `;
+}
+
 export {
     createSlider,
     createCheckbox,
     createSelect,
     createInfoBox,
     createTextCenter,
-    createTable
+    createTable,
+    createMethodSelector
 };

@@ -155,22 +155,27 @@
 }
 
 /* Update crushing methods styling */
-.crushing-methods {
-    display: flex;
-    justify-content: space-between;
-    gap: 0.5rem;
+.crushing-methods,
+.method-selector {
+    display: flex;  /* Change from grid to flex */
+    justify-content: center;
+    gap: 0.5rem;    /* Reduce gap */
     margin-bottom: 1rem;
+    flex-wrap: nowrap;  /* Prevent wrapping */
+    padding: 0.25rem;   /* Reduce padding */
 }
 
-/* Update method item styling */
+/* Ensure consistent width and height for method items */
 .method-item {
+    flex: 0 0 auto;     /* Prevent items from growing/shrinking */
+    min-width: 100px;   /* Reduce minimum width */
+    max-width: 120px;   /* Reduce maximum width */
+    padding: 0.5rem;    /* Reduce padding */
     flex: 1;
-    padding: 0.75rem;
     border: 2px solid #ddd;
     border-radius: 4px;
     cursor: pointer;
     text-align: center;
-    min-width: 120px;
     max-width: 150px;
     transition: all 0.2s ease;
     position: relative;
@@ -219,12 +224,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;      /* Reduce gap between elements */
 }
 
 .method-item img {
-    width: 32px;
-    height: 32px;
+    width: 28px;       /* Slightly smaller icons */
+    height: 28px;
     margin-bottom: 0.25rem;
     transition: transform 0.2s ease;
 }

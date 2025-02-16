@@ -5,8 +5,8 @@ import { inventoryInstance } from '../resource.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools } from '../buildings.js';
-import { loadBuildings } from '../database/adminFunctions.js'; // Add this import
-import { createOverlayHTML, createTable } from '../components/createOverlayHTML.js';
+import { loadBuildings } from '../database/adminFunctions.js';
+import { createOverlayHTML, createTable, createMethodSelector } from '../components/createOverlayHTML.js';
 
 export function showCrushingOverlay() {
     const overlayContent = createCrushingHTML();
@@ -44,7 +44,7 @@ function updateGrapeImage(resourceName) {
 
 function createCrushingHTML() {
     const content = `
-        <div class="overlay-section-wrapper">
+        
             <section id="grape-crushing-section" class="overlay-section card mb-4">
                 <div class="card-body">
                     <div class="crushing-process">
@@ -56,7 +56,7 @@ function createCrushingHTML() {
 
             ${createCrushingMethodSection()}
 
-            <section id="select-grape-section" class="overlay-section card mb-4">
+            <section id="select-grape-section">
                 <div class="card-body">
                     ${createTable({
                         headers: ['Select', 'Container', 'Grapes in Storage', 'Amount', 'Quality'],
@@ -66,7 +66,7 @@ function createCrushingHTML() {
                 </div>
             </section>
 
-            <section id="must-section" class="overlay-section card mb-4">
+            <section id="must-section" >
                 <div class="card-body">
                     ${createTable({
                         headers: ['Select', 'Container', 'Must in Storage', 'Capacity', 'Available Space'],
@@ -75,7 +75,7 @@ function createCrushingHTML() {
                     })}
                 </div>
             </section>
-        </div>
+        
     `;
 
     return createOverlayHTML({
@@ -695,45 +695,34 @@ function createCrushingMethodSection() {
         building.slots.flatMap(slot => slot.tools)
     );
 
-    return `
-        <section id="crushing-method-section" class="overlay-section card mb-4">
-            <div class="card-header text-white">
-                <h3 class="h5 mb-0">Select Crushing Method</h3>
-            </div>
-            <div class="card-body">
-                <div class="crushing-methods">
-                    <div class="method-item selected" data-method="Hand Crushing">
-                        <div class="method-item-content">
-                            <img src="/assets/icon/buildings/hand crushing.png" alt="Hand Crushing">
-                            <span class="method-name">Hand Crushing</span>
-                            <span class="method-stats">+100% work</span>
-                        </div>
-                        <input type="radio" name="crushing-method" value="Hand Crushing" checked>
-                    </div>
-                    
-                    ${availableTools.map(tool => {
-                        const extraWork = ((1 / tool.speedBonus - 1) * 100).toFixed(0);
-                        const isAvailable = existingTools.some(t => t.name === tool.name);
-                        return `
-                        <div class="method-item ${!isAvailable ? 'disabled' : ''}" 
-                             data-method="${tool.name}"
-                             title="${!isAvailable ? 'You need to purchase this tool first' : ''}">
-                            <div class="method-item-content">
-                                <img src="/assets/icon/buildings/${tool.name.toLowerCase()}.png" alt="${tool.name}">
-                                <span class="method-name">${tool.name}</span>
-                                <span class="method-stats">${extraWork > 0 ? '+' : '-'}${Math.abs(extraWork)}% work</span>
-                            </div>
-                            <input type="radio" name="crushing-method" value="${tool.name}" ${!isAvailable ? 'disabled' : ''}>
-                        </div>
-                        `;
-                    }).join('')}
-                </div>
-                
-                <div class="no-crushing-option">
-                    <input type="checkbox" id="no-crushing" name="no-crushing">
-                    <label for="no-crushing">Skip crushing (not recommended)</label>
-                </div>
-            </div>
-        </section>
-    `;
+    const methods = [
+        {
+            name: 'Hand Crushing',
+            iconPath: '/assets/icon/buildings/hand crushing.png',
+            stats: '+100% work',
+            disabled: false
+        },
+        ...availableTools.map(tool => {
+            const isAvailable = existingTools.some(t => t.name === tool.name);
+            const extraWork = ((1 / tool.speedBonus - 1) * 100).toFixed(0);
+            return {
+                name: tool.name,
+                iconPath: `/assets/icon/buildings/${tool.name.toLowerCase()}.png`,
+                stats: `${extraWork > 0 ? '+' : '-'}${Math.abs(extraWork)}% work`,
+                disabled: !isAvailable,
+                disabledReason: 'You need to purchase this tool first'
+            };
+        })
+    ];
+
+    return createMethodSelector({
+        title: 'Select Crushing Method',
+        methods,
+        defaultMethod: 'Hand Crushing',
+        showSkipOption: true,
+        skipOptionText: 'Skip crushing (not recommended)',
+        containerClass: 'crushing-methods-section',
+        skipOptionId: 'no-crushing',           // Match the ID we're looking for
+        methodRadioName: 'crushing-method'     // Match the radio name we're looking for
+    });
 }
