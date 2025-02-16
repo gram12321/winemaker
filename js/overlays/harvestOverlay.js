@@ -22,13 +22,14 @@ export function showHarvestOverlay(farmland, farmlandId) {
 }
 
 // Modify calculateHarvestWorkData to return workData object instead of just totalWork
-function calculateHarvestWorkData(farmland, totalHarvest, resourceObj) {
+function calculateHarvestWorkData(farmland, totalHarvest) {
     const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
     const medianAltitude = (minAltitude + maxAltitude) / 2;
     const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+    const resource = getResourceByName(farmland.plantedResourceName);
 
     const workModifiers = [
-        (1 - resourceObj.fragile) * 0.5,    // fragility penalty
+        (1 - resource.fragile) * 0.5,    // fragility penalty
         altitudeDeviation * 0.5             // altitude penalty
     ];
 
@@ -48,14 +49,13 @@ function calculateHarvestWorkData(farmland, totalHarvest, resourceObj) {
         minAltitude,
         maxAltitude,
         medianAltitude,
-        robustness: resourceObj.fragile,     // Pass fragile directly instead of inverting
-        fragilityEffect: (1 - resourceObj.fragile) * 0.5  // Keep calculation logic unchanged
+        robustness: resource.fragile,     // Pass fragile directly instead of inverting
+        fragilityEffect: (1 - resource.fragile) * 0.5  // Keep calculation logic unchanged
     };
 }
 
 function createHarvestOverlayHTML(farmland) {
-    const resourceObj = getResourceByName(farmland.plantedResourceName); // Changed this line
-    const workData = calculateHarvestWorkData(farmland, null, resourceObj);
+    const workData = calculateHarvestWorkData(farmland, null);
 
     const content = `
         
@@ -268,7 +268,6 @@ export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
     if (!Array.isArray(selectedTools) || selectedTools.length === 0) return false;
 
     const toolsArray = selectedTools.map(t => t.toString());
-    const resourceObj = getResourceByName(farmland.plantedResourceName); // Changed this line
     
     // Check compatibility for all selected tools
     for (const toolId of toolsArray) {
@@ -279,7 +278,7 @@ export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
         }
     }
 
-    const { totalWork } = calculateHarvestWorkData(farmland, totalHarvest, resourceObj);
+    const { totalWork } = calculateHarvestWorkData(farmland, totalHarvest);
 
     taskManager.addProgressiveTask(
         'Harvesting',
