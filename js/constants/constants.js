@@ -5,7 +5,12 @@ export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
 export const TASKS = {
     PLANTING: { name: 'Planting', rate: 0.7 },
     UPROOTING: { name: 'Uprooting', rate: 0.56 },
-    HARVESTING: { name: 'Harvesting', rate: 0.8 },
+    HARVESTING: { 
+        name: 'Harvesting',  
+        rate: 4.4  // Changed from 0.8 to 4.4 based on real-world calculations:
+                   // 1 worker (50 units/week) can harvest ~10500kg/week
+                   // With baseYieldPerAcre of 2400kg, this means 4.4 acres/week
+    },
     VEGETATION: { name: 'Vegetation', rate: 0.5 },
     DEBRIS: { name: 'Debris', rate: 0.4 },
     AMENDMENT: { name: 'Amendment', rate: 0.8 }

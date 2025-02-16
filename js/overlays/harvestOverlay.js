@@ -9,7 +9,7 @@ import { regionAltitudeRanges, grapeSuitability } from '../names.js';
 import { loadFarmlands } from '../database/adminFunctions.js';
 import { showModalOverlay } from './overlayUtils.js';
 import { createOverlayHTML, createTextCenter, createTable } from '../components/createOverlayHTML.js';
-
+import { calculateTotalWork } from '../utils/workCalculator.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
     const overlayContainer = showModalOverlay('harvestOverlay', createHarvestOverlayHTML(farmland));
@@ -219,6 +219,30 @@ function checkGrapeCompatibility(selectedTool, farmland) {
 }
 
 // Update harvest function to use the helper
+function calculateHarvestWorkData(farmland, totalHarvest, resourceObj) {
+    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+    const medianAltitude = (minAltitude + maxAltitude) / 2;
+    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+
+    // Convert penalties to workModifiers for the calculator
+    const workModifiers = [
+        // Removed density penalty since it's handled by workCalculator's densityRatio
+        (1 - resourceObj.fragile) * 0.5,    // fragility penalty
+        altitudeDeviation * 0.5             // altitude penalty
+    ];
+
+    // Calculate total work using the shared calculator
+    const totalWork = calculateTotalWork(farmland.acres, {
+        density: farmland.density,
+        tasks: ['HARVESTING'],
+        workModifiers
+    });
+
+    // Scale the work based on harvest amount vs total yield
+    const harvestRatio = totalHarvest / farmlandYield(farmland);
+    return Math.ceil(totalWork * harvestRatio);
+}
+
 export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
     if (!Array.isArray(selectedTools) || selectedTools.length === 0) return false;
 
@@ -234,18 +258,7 @@ export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
         }
     }
 
-    // Calculate work penalties
-    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
-    const medianAltitude = (minAltitude + maxAltitude) / 2;
-    const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
-
-    const penalties = {
-        density: Math.max(0, (farmland.density - 1000) / 1000) * 0.05,
-        fragile: (1 - resourceObj.fragile) * 0.5,
-        altitude: altitudeDeviation * 0.5
-    };
-    
-    const totalWork = totalHarvest / 1000 * 25 * (1 + Object.values(penalties).reduce((a, b) => a + b, 0));
+    const totalWork = calculateHarvestWorkData(farmland, totalHarvest, resourceObj);
 
     taskManager.addProgressiveTask(
         'Harvesting',
