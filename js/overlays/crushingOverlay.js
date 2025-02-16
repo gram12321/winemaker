@@ -162,6 +162,29 @@ function createProgressSection() {
     `;
 }
 
+function updateStorageProgress() {
+    const checkboxes = document.querySelectorAll('input[name="must-storage"]:checked');
+    let totalStorage = 0;
+    checkboxes.forEach(checkbox => {
+        totalStorage += parseFloat(checkbox.dataset.available);
+    });
+
+    const selectedGrapes = parseFloat(document.querySelector('.grape-select:checked')?.dataset.amount || 0);
+    const estimatedMust = calculateMustAmount(selectedGrapes, true);
+
+    const storageDisplay = document.getElementById('selected-storage');
+    const grapesDisplay = document.getElementById('selected-grapes');
+    
+    storageDisplay.textContent = `${formatNumber(totalStorage)} L`;
+    grapesDisplay.textContent = `≈ ${formatNumber(estimatedMust)} L`;  // Added ≈ symbol
+
+    const progressPercentage = Math.min((totalStorage / estimatedMust) * 100, 100);
+    const storageProgress = document.getElementById('selected-storage-progress');
+    storageProgress.style.width = `${progressPercentage}%`;
+    storageProgress.setAttribute('aria-valuenow', progressPercentage);
+}
+
+
 // Update the setupCrushingEventListeners to only allow clicking on available methods
 function setupCrushingEventListeners(overlay) {
     const crushBtn = overlay.querySelector('.crush-btn');
@@ -294,27 +317,6 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory, 
   });
 }
 
-function updateStorageProgress() {
-    const checkboxes = document.querySelectorAll('input[name="must-storage"]:checked');
-    let totalStorage = 0;
-    checkboxes.forEach(checkbox => {
-        totalStorage += parseFloat(checkbox.dataset.available);
-    });
-
-    const selectedGrapes = parseFloat(document.querySelector('.grape-select:checked')?.dataset.amount || 0);
-    const estimatedMust = calculateMustAmount(selectedGrapes, true);
-
-    const storageDisplay = document.getElementById('selected-storage');
-    const grapesDisplay = document.getElementById('selected-grapes');
-    
-    storageDisplay.textContent = `${formatNumber(totalStorage)} L`;
-    grapesDisplay.textContent = `≈ ${formatNumber(estimatedMust)} L`;  // Added ≈ symbol
-
-    const progressPercentage = Math.min((totalStorage / estimatedMust) * 100, 100);
-    const storageProgress = document.getElementById('selected-storage-progress');
-    storageProgress.style.width = `${progressPercentage}%`;
-    storageProgress.setAttribute('aria-valuenow', progressPercentage);
-}
 
 function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');

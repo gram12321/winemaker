@@ -54,11 +54,55 @@ function calculateHarvestWorkData(farmland, totalHarvest) {
     };
 }
 
+function createProgressSection(farmland) {
+    const expectedYield = farmlandYield(farmland);
+    return `
+        <div class="card-body">
+            ${createTextCenter({
+                text: `
+                    <div class="selected-wrapper">
+                        <span>Selected Storage: </span>
+                        <span id="selected-capacity">0 kg</span>
+                        <span> / </span>
+                        <span id="total-capacity">${expectedYield >= 1000 ? 
+                            formatNumber(expectedYield/1000, 2) + ' t' : 
+                            formatNumber(expectedYield) + ' kg'}</span>
+                    </div>`,
+                className: 'mb-2'
+            })}
+            <div class="w-100">
+                <div class="progress">
+                    <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function updateStorageProgress(farmland) {
+    const checkboxes = document.querySelectorAll('.storage-checkbox:checked');
+    let totalCapacity = 0;
+    checkboxes.forEach(checkbox => {
+        totalCapacity += parseFloat(checkbox.dataset.capacity);
+    });
+
+    const expectedYield = farmlandYield(farmland);
+    const capacityDisplay = document.getElementById('selected-capacity');
+    
+    capacityDisplay.textContent = totalCapacity >= 1000 ? 
+        formatNumber(totalCapacity/1000, 2) + ' t' : 
+        formatNumber(totalCapacity) + ' kg';
+
+    const progressPercentage = Math.min((totalCapacity / expectedYield) * 100, 100);
+    const capacityProgress = document.getElementById('selected-capacity-progress');
+    capacityProgress.style.width = `${progressPercentage}%`;
+    capacityProgress.setAttribute('aria-valuenow', progressPercentage);
+}
+
 function createHarvestOverlayHTML(farmland) {
     const workData = calculateHarvestWorkData(farmland, null);
 
     const content = `
-        
         ${createTable({
             headers: ['Select', 'Container', 'Capacity', 'Resource', 'Amount'],
             id: 'storage-display-body',
@@ -73,20 +117,12 @@ function createHarvestOverlayHTML(farmland) {
                 formatNumber(farmlandYield(farmland)) + ' kg'}`,
                 className: 'expected-yield'
             })}
-                ${createTextCenter({
-                    text: `Selected Capacity: <span id="selected-capacity">0 kg</span>`,
-                    className: 'mb-2'
-                })}
-                <div class="progress">
-                    <div id="selected-capacity-progress" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <hr class="overlay-divider">
-                <div>
-                
+            ${createProgressSection(farmland)}
+            <hr class="overlay-divider">
+            <div>
                 ${createWorkCalculationTable(workData)}
-                </div>
+            </div>
         </div>`;
-        
 
     return createOverlayHTML({
         title: 'Harvest Options for',
@@ -119,7 +155,7 @@ function setupHarvestEventListeners(overlayContainer, farmland, farmlandId) {
     // Setup storage checkbox listeners
     overlayContainer.addEventListener('change', (e) => {
         if (e.target.classList.contains('storage-checkbox')) {
-            updateSelectedCapacity(farmland);
+            updateStorageProgress(farmland);
         }
     });
 }
@@ -352,7 +388,7 @@ function populateStorageOptions(farmland) {
                             storageBody.appendChild(row);
 
                             row.querySelector('.storage-checkbox').addEventListener('change', function() {
-                                updateSelectedCapacity(farmland);
+                                updateStorageProgress(farmland);  // Changed from updateSelectedCapacity
                             });
                         }
                     }
@@ -360,24 +396,6 @@ function populateStorageOptions(farmland) {
             });
         }
     });
-}
-
-function updateSelectedCapacity(farmland) {
-    const checkboxes = document.querySelectorAll('.storage-checkbox:checked');
-    let totalCapacity = 0;
-    checkboxes.forEach(checkbox => {
-        totalCapacity += parseFloat(checkbox.dataset.capacity);
-    });
-    const capacityDisplay = document.getElementById('selected-capacity');
-    capacityDisplay.textContent = totalCapacity >= 1000 ? 
-        formatNumber(totalCapacity/1000, 2) + ' t' : 
-        formatNumber(totalCapacity) + ' kg';
-
-    const expectedYield = farmlandYield(farmland);
-    const capacityProgress = document.getElementById('selected-capacity-progress');
-    const progressPercentage = Math.min((totalCapacity / expectedYield) * 100, 100);
-    capacityProgress.style.width = `${progressPercentage}%`;
-    capacityProgress.setAttribute('aria-valuenow', progressPercentage);
 }
 
 function handleHarvestButtonClick(farmland, farmlandId, overlayContainer) {
