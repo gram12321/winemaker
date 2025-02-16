@@ -45,11 +45,8 @@ export function showModalOverlay(overlayId, content) {
     overlay.classList.add('overlay', 'modal-overlay');
     overlay.id = overlayId;
     
-    overlay.innerHTML = `
-        <div class="overlay-content">
-            ${content}
-        </div>
-    `;
+    // Remove the extra wrapper, just use content directly
+    overlay.innerHTML = content;
     
     document.body.appendChild(overlay);
     requestAnimationFrame(() => {

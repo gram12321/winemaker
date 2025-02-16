@@ -130,7 +130,8 @@ function createHarvestOverlayHTML(farmland) {
         content,
         buttonText: 'Harvest Selected',
         buttonClass: 'btn-primary',
-        buttonIdentifier: 'harvest-btn'
+        buttonIdentifier: 'harvest-btn',
+        isModal: true  // Add this line
     });
 }
 

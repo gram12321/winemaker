@@ -2,40 +2,46 @@ import { getFlagIconHTML } from '../utils.js';
 
 export function createOverlayHTML({ 
     title,
-    farmland = null,  // Make farmland optional
+    farmland = null,
     content,
     buttonText = 'Submit',
     buttonClass = 'btn-primary',
     buttonIdentifier = 'action-btn',
-    warningMessage = null
+    warningMessage = null,
+    isModal = false  // Add new parameter to determine if this is for a modal
 }) {
     const headerTitle = farmland ? 
         `${title} ${getFlagIconHTML(farmland.country)} ${farmland.name}` : 
         title;
 
-    return `
+    // For modal overlays, don't wrap in overlay-content/container
+    const innerContent = `
+        <section class="overlay-section card mb-4">
+            <div class="card-header text-white d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">${headerTitle}</h3>
+                <button class="btn btn-light btn-sm close-btn">Close</button>
+            </div>
+            <div class="card-body">
+                ${warningMessage ? `
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> 
+                        <br>
+                        ${warningMessage}
+                    </div>
+                ` : ''}
+                ${content}
+                ${buttonText ? `
+                    <div class="d-flex justify-content-center mt-4">
+                        <button class="btn ${buttonClass} ${buttonIdentifier}">${buttonText}</button>
+                    </div>
+                ` : ''}
+            </div>
+        </section>
+    `;
+
+    return isModal ? innerContent : `
         <div class="overlay-content overlay-container">
-            <section class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">${headerTitle}</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
-                </div>
-                <div class="card-body">
-                    ${warningMessage ? `
-                        <div class="alert alert-warning">
-                            <strong>Warning:</strong> 
-                            <br>
-                            ${warningMessage}
-                        </div>
-                    ` : ''}
-                    ${content}
-                    ${buttonText ? `
-                        <div class="d-flex justify-content-center mt-4">
-                            <button class="btn ${buttonClass} ${buttonIdentifier}">${buttonText}</button>
-                        </div>
-                    ` : ''}
-                </div>
-            </section>
+            ${innerContent}
         </div>
     `;
 }

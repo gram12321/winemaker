@@ -94,7 +94,8 @@ function createCrushingHTML() {
         content,
         buttonText: 'Crush Selected Grapes',
         buttonClass: 'btn-primary crush-btn',
-        buttonIdentifier: 'crush-btn'
+        buttonIdentifier: 'crush-btn',
+        isModal: true  // Add this line
     });
 }
 
