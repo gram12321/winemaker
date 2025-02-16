@@ -7,6 +7,8 @@ import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools } from '../buildings.js';
 import { loadBuildings } from '../database/adminFunctions.js';
 import { createOverlayHTML, createTable, createMethodSelector } from '../components/createOverlayHTML.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
+import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 
 export function showCrushingOverlay() {
     const overlayContent = createCrushingHTML();
@@ -89,6 +91,12 @@ function createCrushingHTML() {
                     })}
                 </div>
             </section>
+
+            
+        <!-- Add work calculation section -->
+        <div class="crushing-work-section">
+            ${createWorkCalculationTable(calculateCrushingWorkData(0))}
+        </div>
     `;
 
     return createOverlayHTML({
@@ -153,6 +161,7 @@ function createCrushingProcess() {
             </div>
             <div class="crushing-arrow right-arrow"></div>
         </div>
+
     `;
 }
 
@@ -206,12 +215,24 @@ function setupCrushingEventListeners(overlay) {
     const noCrushingCheckbox = overlay.querySelector('#no-crushing');
     const methodRadios = overlay.querySelectorAll('input[name="crushing-method"]');
 
+    // Move validateCrushingSelection outside the function scope
+    function validateCrushingSelection() {
+        const hasMethodSelected = Array.from(methodRadios).some(radio => radio.checked);
+        const isNoCrushing = noCrushingCheckbox.checked;
+        crushBtn.disabled = !hasMethodSelected && !isNoCrushing;
+    }
+
     // Handle crushing method selection
     methodRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             if (radio.checked) {
                 noCrushingCheckbox.checked = false;
                 validateCrushingSelection();
+                // Update work calculation when method changes
+                const selectedGrape = overlay.querySelector('.grape-select:checked');
+                if (selectedGrape) {
+                    updateCrushingData(selectedGrape, null);
+                }
             }
         });
     });
@@ -229,12 +250,6 @@ function setupCrushingEventListeners(overlay) {
         }
         validateCrushingSelection();
     });
-
-    function validateCrushingSelection() {
-        const hasMethodSelected = Array.from(methodRadios).some(radio => radio.checked);
-        const isNoCrushing = noCrushingCheckbox.checked;
-        crushBtn.disabled = !hasMethodSelected && !isNoCrushing;
-    }
 
     if (crushBtn) {
         crushBtn.disabled = true; // Initially disabled
@@ -433,6 +448,13 @@ function updateCrushingData(selectedGrape, selectedStorage) {
         document.getElementById('must-storage').textContent = storageName;
         document.getElementById('must-available').textContent = 
             `${formatNumber(availableSpace)} L`;
+
+        // Update work calculation
+        const workSection = document.querySelector('.crushing-work-section');
+        if (workSection) {
+            const selectedMethod = document.querySelector('input[name="crushing-method"]:checked')?.value;
+            workSection.innerHTML = createWorkCalculationTable(calculateCrushingWorkData(amount, selectedMethod));
+        }
     }
 }
 
@@ -566,13 +588,12 @@ function showWarningModal(totalAvailableSpace, mustAmount, onConfirm) {
 }
 
 function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes) {
-    const taskName = 'Crushing';
-    const totalWork = totalAvailableSpace/100; // Work based on must amount
-
+    const workData = calculateCrushingWorkData(totalGrapes);
+    
     taskManager.addProgressiveTask(
-        taskName,
+        'Crushing',
         'winery',
-        totalWork,
+        workData.totalWork,  // Use calculated work units
         (target, progress, params) => {
             if (!params.lastProgress) params.lastProgress = 0;
             const processedAmount = totalAvailableSpace * (progress - params.lastProgress);
@@ -739,4 +760,48 @@ function createCrushingMethodSection() {
         skipOptionId: 'no-crushing',           // Match the ID we're looking for
         methodRadioName: 'crushing-method'     // Match the radio name we're looking for
     });
+}
+
+function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
+    // Convert kg to tons for work calculation
+    const tons = grapeAmount / 1000;
+    
+    // Calculate method modifier
+    let methodModifier = 0;
+    let methodName = null;
+    
+    if (selectedMethod) {
+        // Hand crushing is baseline (100% more work)
+        if (selectedMethod === 'Hand Crushing') {
+            methodModifier = 1.0;
+            methodName = 'Hand Crushing';
+        } else {
+            // Find the tool and its speed bonus
+            const tool = getBuildingTools().find(t => t.name === selectedMethod);
+            if (tool) {
+                methodModifier = (1 / tool.speedBonus - 1);
+                methodName = tool.name;
+            }
+        }
+    }
+
+    // Calculate base work units
+    let totalWork = calculateTotalWork(tons, {
+        tasks: ['CRUSHING']
+    });
+
+    // Apply method modifier
+    if (methodModifier !== 0) {
+        totalWork *= (1 + methodModifier);
+    }
+
+    return {
+        amount: grapeAmount,
+        unit: grapeAmount >= 1000 ? 't' : 'kg',
+        tasks: ['CRUSHING'],
+        totalWork,
+        location: 'winery',
+        methodModifier,
+        methodName
+    };
 }

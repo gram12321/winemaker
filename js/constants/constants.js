@@ -11,6 +11,10 @@ export const TASKS = {
                    // 1 worker (50 units/week) can harvest ~10500kg/week
                    // With baseYieldPerAcre of 2400kg, this means 4.4 acres/week
     },
+    CRUSHING: {  // Add crushing task
+        name: 'Crushing',
+        rate: 5.0  // One worker can process about 5 tons of grapes per week
+    },
     VEGETATION: { name: 'Vegetation', rate: 0.5 },
     DEBRIS: { name: 'Debris', rate: 0.4 },
     AMENDMENT: { name: 'Amendment', rate: 0.8 }
