@@ -262,7 +262,6 @@ function setupCrushingEventListeners(overlay) {
     });
 }
 
-
 function populateTables(overlayContainer) {
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
   const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
@@ -316,7 +315,6 @@ function populateMustStorageTable(overlayContainer, buildings, playerInventory, 
     });
   });
 }
-
 
 function populateGrapesTable(overlayContainer, buildings, playerInventory) {
   const storageTableBody = overlayContainer.querySelector('#crushing-storage-table');
@@ -517,7 +515,7 @@ function validateCrushingInputs(overlayContainer) {
     };
 }
 
-function showLimitedCapacityWarning(totalAvailableSpace, mustAmount, onConfirm) {
+function showWarningModal(totalAvailableSpace, mustAmount, onConfirm) {
     const warningModal = document.createElement('div');
     warningModal.className = 'modal fade';
     warningModal.innerHTML = `
@@ -582,7 +580,7 @@ function handleCrushingStart(overlayContainer) {
     const mustAmount = calculateMustAmount(totalGrapes);
 
     if (mustAmount > totalAvailableSpace) {
-        showLimitedCapacityWarning(totalAvailableSpace, mustAmount, () => {
+        showWarningModal(totalAvailableSpace, mustAmount, () => {
             crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
             showWineryOverlay();
             hideOverlay(overlayContainer);
