@@ -44,26 +44,27 @@ function updateGrapeImage(resourceName) {
 
 function createCrushingHTML() {
     const content = `     
-                
-        <div class="text-center">
-            <h3 class="h5 mb-0">Grape Crushing</h3>
-        </div>
+            <div class="text-center">
+                <h3 class="h5 mb-0">Grape Crushing</h3>
+            </div>
 
-                <div class="card-body">
-                    <div class="crushing-process">
-                        ${createCrushingProcess()}
-                    </div>
+            <div class="card-body">
+                <div class="crushing-process">
+                    ${createCrushingProcess()}
                 </div>
-                
-                <hr class="overlay-divider">
+            </div>
+        
+        <hr class="overlay-divider">
 
-                ${createCrushingMethodSection()}
-                <hr class="overlay-divider">    
-                    ${createProgressSection()}
+            ${createCrushingMethodSection()}
             
-<div class="text-center">
-            <h3 class="h5 mb-0">Select Grapes</h3>
-        </div>
+        <hr class="overlay-divider">    
+        
+            ${createProgressSection()}
+        
+            <div class="text-center">
+                <h3 class="h5 mb-0">Select Grapes</h3>
+            </div>
 
             <section id="select-grape-section">
                 <div class="card-body">
@@ -74,10 +75,12 @@ function createCrushingHTML() {
                     })}
                 </div>
             </section>
-<div class="text-center">
-            <h3 class="h5 mb-0">Select Storage</h3>
-        </div>
-            <section id="must-section" >
+        
+            <div class="text-center">
+                <h3 class="h5 mb-0">Select Storage</h3>
+            </div>
+            
+            <section id="must-section">
                 <div class="card-body">
                     ${createTable({
                         headers: ['Select', 'Container', 'Must in Storage', 'Capacity', 'Available Space'],
@@ -86,7 +89,6 @@ function createCrushingHTML() {
                     })}
                 </div>
             </section>
-        
     `;
 
     return createOverlayHTML({
@@ -95,7 +97,7 @@ function createCrushingHTML() {
         buttonText: 'Crush Selected Grapes',
         buttonClass: 'btn-primary crush-btn',
         buttonIdentifier: 'crush-btn',
-        isModal: true  // Add this line
+        isModal: true
     });
 }
 
