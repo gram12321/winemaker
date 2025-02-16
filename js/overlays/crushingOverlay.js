@@ -200,7 +200,7 @@ function setupCrushingEventListeners(overlay) {
     if (crushBtn) {
         crushBtn.disabled = true; // Initially disabled
         crushBtn.addEventListener('click', () => {
-            if (crushing(overlay)) {
+            if (handleCrushingStart(overlay)) {
                 showWineryOverlay();
                 hideOverlay(overlay);
             }
@@ -459,52 +459,41 @@ function updateCrushingData(selectedGrape, selectedStorage) {
     }
 }
 
-function crushing(overlayContainer) {
+function validateCrushingInputs(overlayContainer) {
+    // 1. Check crushing method selection
     const selectedMethod = overlayContainer.querySelector('input[name="crushing-method"]:checked')?.value;
     const skipCrushing = overlayContainer.querySelector('#no-crushing').checked;
 
     if (!skipCrushing && !selectedMethod) {
         addConsoleMessage("Please select a crushing method or check 'Skip crushing'");
-        return false;
+        return { valid: false };
     }
 
+    // 2. Check grape selection
     const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
     if (!selectedGrape) {
         addConsoleMessage("Please select grapes to crush");
-        return false;
+        return { valid: false };
     }
 
-    const storage = selectedGrape.dataset.storage;
-    const resourceName = selectedGrape.dataset.resource;
-    const vintage = parseInt(selectedGrape.dataset.vintage);
-
-    const grapeResource = inventoryInstance.items.find(item => 
-        item.resource.name === resourceName && 
-        item.state === 'Grapes' &&
-        item.storage === storage &&
-        item.vintage === vintage
-    );
-
-    if (!grapeResource) {
-        addConsoleMessage("Selected grapes not found in inventory");
-        return false;
-    }
-
-    const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
-    const totalGrapes = grapeResource.amount;
-
-    // Check for existing crushing tasks with the same grape storage
+    // 3. Check for existing tasks
     const existingTasks = taskManager.getAllTasks().filter(task => 
         task.name === 'Crushing' && 
-        task.target === storage
+        task.target === selectedGrape.dataset.storage
     );
 
     if (existingTasks.length > 0) {
         addConsoleMessage("A crushing task is already in progress for these grapes");
-        return false;
+        return { valid: false };
     }
 
-    // Check if any selected must storage is already being used in another crushing task
+    // 4. Check storage selection and compatibility
+    const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
+    if (selectedStorages.length === 0) {
+        addConsoleMessage("Please select at least one storage container for the must");
+        return { valid: false };
+    }
+
     const selectedStorageIds = Array.from(selectedStorages).map(storage => storage.value);
     const existingStorageTasks = taskManager.getAllTasks().filter(task => {
         if (task.name !== 'Crushing' || !task.params?.selectedStorages) return false;
@@ -516,23 +505,12 @@ function crushing(overlayContainer) {
 
     if (existingStorageTasks.length > 0) {
         addConsoleMessage("Selected must storage is already being used in another crushing task");
-        return false;
+        return { valid: false };
     }
 
-    // Check if there's any work progress
-    const workProgress = taskManager.getTaskProgress('Crushing');
-    if (workProgress <= 0) {
-        addConsoleMessage("No work has been done on crushing yet");
-        return false;
-    }
-
-    if (selectedStorages.length === 0) {
-        addConsoleMessage("Please select at least one storage container for the must");
-        return false;
-    }
-
+    // 5. Check storage compatibility
     let totalAvailableSpace = 0;
-    let invalidStorages = []; // Change to array to collect all invalid storages
+    let invalidStorages = [];
 
     selectedStorages.forEach(storage => {
         const availableSpace = parseFloat(storage.dataset.available);
@@ -547,7 +525,7 @@ function crushing(overlayContainer) {
             if (firstItem.resource.name !== selectedGrape.dataset.resource || 
                 firstItem.vintage !== parseInt(selectedGrape.dataset.vintage) ||
                 firstItem.fieldName !== selectedGrape.dataset.field) {
-                invalidStorages.push(storageId); // Collect invalid storages
+                invalidStorages.push(storageId);
             } else {
                 totalAvailableSpace += availableSpace;
             }
@@ -556,69 +534,71 @@ function crushing(overlayContainer) {
         }
     });
 
-    // Show messages for all invalid storages
     if (invalidStorages.length > 0) {
         invalidStorages.forEach(storageId => {
             addConsoleMessage(`Cannot use ${storageId} as it contains must from a different field, resource or vintage.`);
         });
-        return false;
+        return { valid: false };
     }
 
-    const mustAmount = calculateMustAmount(totalGrapes);
+    return {
+        valid: true,
+        data: {
+            selectedGrape,
+            selectedStorages,
+            totalAvailableSpace,
+            totalGrapes: parseFloat(selectedGrape.dataset.amount)
+        }
+    };
+}
 
-    if (mustAmount > totalAvailableSpace) {
-        const warningModal = document.createElement('div');
-        warningModal.className = 'modal fade';
-        warningModal.innerHTML = `
-            <div class="modal-dialog">
-                <div class="modal-content overlay-section">
-                    <div class="modal-header card-header">
-                        <h3 class="modal-title">Warning: Limited Container Capacity</h3>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l. out of needed ${formatNumber(mustAmount)} l.</p>
-                        <p>Do you want to crush what fits in the containers?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="overlay-section-btn" id="confirmCrush">Crush Available</button>
-                    </div>
+function showLimitedCapacityWarning(totalAvailableSpace, mustAmount, onConfirm) {
+    const warningModal = document.createElement('div');
+    warningModal.className = 'modal fade';
+    warningModal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content overlay-section">
+                <div class="modal-header card-header">
+                    <h3 class="modal-title">Warning: Limited Container Capacity</h3>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Selected containers only have total capacity for ${formatNumber(totalAvailableSpace)} l. out of needed ${formatNumber(mustAmount)} l.</p>
+                    <p>Do you want to crush what fits in the containers?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="overlay-section-btn" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="overlay-section-btn" id="confirmCrush">Crush Available</button>
                 </div>
             </div>
-        `;
+        </div>
+    `;
 
-        document.body.appendChild(warningModal);
-        $(warningModal).modal('show');
+    document.body.appendChild(warningModal);
+    $(warningModal).modal('show');
 
-        document.getElementById('confirmCrush').addEventListener('click', () => {
-            const success = addCrushingTask(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
-            if (success) {
-                $(warningModal).modal('hide');
-                warningModal.remove();
-                showWineryOverlay();
-                hideOverlay(overlayContainer);
-            }
-        });
+    document.getElementById('confirmCrush').addEventListener('click', () => {
+        onConfirm();
+        $(warningModal).modal('hide');
+        warningModal.remove();
+    });
 
-        warningModal.addEventListener('hidden.bs.modal', () => {
-            warningModal.remove();
-        });
+    warningModal.addEventListener('hidden.bs.modal', () => {
+        warningModal.remove();
+    });
+}
 
-        return false;
-    }
-
-    // Initiate the crushing task using the taskManager system
-    const taskName = `Crushing`;
-    const totalWork = mustAmount/100;
+function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes) {
+    const taskName = 'Crushing';
+    const totalWork = totalAvailableSpace/100; // Work based on must amount
 
     taskManager.addProgressiveTask(
         taskName,
-        'winery',  // Changed from TaskType.winery
+        'winery',
         totalWork,
         (target, progress, params) => {
             if (!params.lastProgress) params.lastProgress = 0;
-            const processedAmount = mustAmount * (progress - params.lastProgress);
+            const processedAmount = totalAvailableSpace * (progress - params.lastProgress);
             params.lastProgress = progress;
             performCrushing(params.selectedStorages, processedAmount, params.totalGrapes);
         },
@@ -627,6 +607,25 @@ function crushing(overlayContainer) {
     );
 
     return true;
+}
+
+function handleCrushingStart(overlayContainer) {
+    const validation = validateCrushingInputs(overlayContainer);
+    if (!validation.valid) return false;
+
+    const { selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes } = validation.data;
+    const mustAmount = calculateMustAmount(totalGrapes);
+
+    if (mustAmount > totalAvailableSpace) {
+        showLimitedCapacityWarning(totalAvailableSpace, mustAmount, () => {
+            crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
+            showWineryOverlay();
+            hideOverlay(overlayContainer);
+        });
+        return false;
+    }
+
+    return crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
 }
 
 export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
