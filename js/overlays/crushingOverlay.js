@@ -239,45 +239,6 @@ function setupCrushingEventListeners(overlay) {
     });
 }
 
-function createGrapesTable() {
-    return `
-        <div class="table-responsive">
-            <table class="table table-hover overlay-table">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Container</th>
-                        <th>Grapes in Storage</th>
-                        <th>Amount</th>
-                        <th>Quality</th>
-                    </tr>
-                </thead>
-                <tbody id="crushing-storage-table">
-                </tbody>
-            </table>
-        </div>
-    `;
-}
-
-function createMustStorageTable() {
-    return `
-        <div class="table-responsive">
-            <table class="table table-hover overlay-table">
-                <thead>
-                    <tr>
-                        <th>Select</th>
-                        <th>Container</th>
-                        <th>Must in Storage</th>
-                        <th>Capacity</th>
-                        <th>Available Space</th>
-                    </tr>
-                </thead>
-                <tbody id="crushing-must-storage-table">
-                </tbody>
-            </table>
-        </div>
-    `;
-}
 
 function populateTables(overlayContainer) {
   const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
