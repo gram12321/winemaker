@@ -107,8 +107,11 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 2000;
-  overflow-y: auto;
-  padding: 20px 0;
+  overflow-y: auto;  /* This ensures the container itself is scrollable */
+  padding: 2rem 0;   /* Add some padding top and bottom */
+  display: flex;     /* Add flex display */
+  align-items: flex-start;  /* Change from center to flex-start */
+  justify-content: center;
 }
 
 .modal-overlay .overlay-content {
@@ -123,6 +126,12 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   max-height: 90vh;
   overflow-y: auto;
   min-width: min-content;
+}
+
+.modal-overlay .overlay-section {
+  max-height: calc(100vh - 4rem);  /* Account for padding */
+  overflow-y: auto;  /* Make the section content scrollable */
+  margin: 0;        /* Remove margin since we have padding on container */
 }
 
 /* 4. Common Table Styles */
