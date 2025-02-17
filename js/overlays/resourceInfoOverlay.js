@@ -21,6 +21,20 @@ function createResourceInfoOverlayHTML(resource) {
   const fragilePercentage = resource.fragile * 100;
   const fragileColorClass = getColorClass(resource.naturalYield);
 
+  // Create characteristics section - simplified without tooltips
+  let characteristicsTable = '<table class="data-table"><tbody>';
+  const characteristics = resource.wineCharacteristics;
+  for (const [trait, value] of Object.entries(characteristics)) {
+    const displayValue = 0.5 + value;
+    const colorClass = getColorClass(displayValue);
+    characteristicsTable += `
+      <tr>
+        <td>${trait.charAt(0).toUpperCase() + trait.slice(1)}</td>
+        <td class="${colorClass}">${(displayValue * 100).toFixed(0)}%</td>
+      </tr>`;
+  }
+  characteristicsTable += '</tbody></table>';
+
   // Generate regions suitability data
   let countryButtons = '';
   let regionsTable = '';
@@ -59,7 +73,7 @@ function createResourceInfoOverlayHTML(resource) {
       </div>  
       <div class="info-grid">
         <div class="info-section">
-          <h4>Resource Information</h4>
+          <h4>Base Information</h4>
           <table class="data-table">
             <tbody>
               <tr><td>Name</td><td>${resource.name}</td></tr>
@@ -68,8 +82,14 @@ function createResourceInfoOverlayHTML(resource) {
             </tbody>
           </table>
         </div>
+
         <div class="info-section">
-          <h4>Regions</h4>
+          <h4>Wine Characteristics</h4>
+          ${characteristicsTable}
+        </div>
+
+        <div class="info-section">
+          <h4>Regional Suitability</h4>
           <div class="country-buttons">
             ${countryButtons}
           </div>
@@ -116,4 +136,6 @@ function setupResourceInfoEventListeners(details, overlay) {
       }
     });
   });
+
+  // Remove tooltip initialization section completely
 }

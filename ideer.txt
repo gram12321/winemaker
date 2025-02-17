@@ -376,3 +376,12 @@ Tannins (astringent, firm)	Soft / Supple / Low Tannin (“smooth” mouthfeel)
 Aroma Intensity (aromatic, expressive)	Neutral / Subtle Nose (light aroma)
 Body / Fullness (rich, heavy, high alcohol)	Light / Thin Body (low alcohol, watery)
 Oakiness / Wood Spice (vanilla, toast)	Unoaked / Neutral (no wood influence, “pure” grape expression)
+
+  const characteristicTooltips = {
+    sweetness: '0% (Dry) to 100% (Sweet)',
+    acidity: '0% (Soft) to 100% (High acid)',
+    tannins: '0% (Smooth) to 100% (Firm)',
+    aroma: '0% (Neutral) to 100% (Intense)',
+    body: '0% (Light) to 100% (Full)',
+    spice: '0% (Pure) to 100% (Full)'
+  };
