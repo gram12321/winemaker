@@ -263,9 +263,9 @@ const ToolManager = (() => {
 
         // Winery Tools - some not assignable
         new Tool('Fermentation Tank', 'Winery', 1.0, 600000, 20000, ['Must'], 8, ['fermentation'], 'task', false),
-        new Tool('Manual Crusher', 'Winery', 1.0, 5000, 0, ['Grapes'], 2, ['crushing'], 'task', false),
-        new Tool('Mechanical Crusher', 'Winery', 1.2, 15000, 0, ['Grapes'], 3, ['crushing'], 'task', false),
-        new Tool('Crusher-Destemmer', 'Winery', 1.3, 35000, 0, ['Grapes'], 4, ['crushing'], 'task', false),
+        new Tool('Manual Crusher', 'Winery', 1.5, 5000, 0, ['Grapes'], 2, ['crushing'], 'task', false),      // 1.5x faster than hand
+        new Tool('Mechanical Crusher', 'Winery', 3.0, 15000, 0, ['Grapes'], 3, ['crushing'], 'task', false), // 3x faster than hand
+        new Tool('Crusher-Destemmer', 'Winery', 3.0, 35000, 0, ['Grapes'], 4, ['crushing'], 'task', false), // Same speed as mechanical for now
         new Tool('Pneumatic Press', 'Winery', 1.4, 75000, 0, ['Grapes'], 5, ['pressing'], 'task', false),
         new Tool('Advanced Press', 'Winery', 1.5, 150000, 0, ['Grapes'], 6, ['pressing'], 'task', false),
         new Tool('Plastic Fermentation Bin', 'Winery', 1.0, 8000, 1000, ['Must'], 3, ['fermentation'], 'task', false),

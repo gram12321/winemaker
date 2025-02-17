@@ -45,7 +45,7 @@ export function showAssignStaffOverlay(task) {
     const overlayContent = generateAssignStaffHTML(task, validTools);
     const overlay = showModalOverlay('assignStaffOverlay', overlayContent);
     if (overlay) {
-        setupAssignStaffEventListeners(overlay.querySelector('.overlay-content'), task, validTools);
+        setupAssignStaffEventListeners(overlay, task, validTools); // Pass overlay directly
     }
     return overlay;
 }
@@ -285,13 +285,13 @@ function calculateWorkPerWeek(staffCheckboxes, toolCheckboxes, validTools, task)
     return totalWorkforce * toolSpeedBonus;
 }
 
-function setupAssignStaffEventListeners(overlayContent, task, validTools) {
-    if (!overlayContent) return;
+function setupAssignStaffEventListeners(overlay, task, validTools) {
+    if (!overlay) return;
     
-    const saveBtn = overlayContent.querySelector('.save-staff-btn');
-    const closeBtn = overlayContent.querySelector('.close-btn');
-    const selectAllCheckbox = overlayContent.querySelector('#select-all-staff');
-    const overlay = document.getElementById('assignStaffOverlay');
+    // Use the overlay itself to find buttons
+    const saveBtn = overlay.querySelector('.btn.save-staff-btn');
+    const closeBtn = overlay.querySelector('.btn.btn-light.close-btn');
+    const selectAllCheckbox = overlay.querySelector('#select-all-staff');
 
     // Add select all functionality
     if (selectAllCheckbox) {

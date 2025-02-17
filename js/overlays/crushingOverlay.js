@@ -734,16 +734,17 @@ function createCrushingMethodSection() {
         {
             name: 'Hand Crushing',
             iconPath: '/assets/icon/buildings/hand crushing.png',
-            stats: '+100% work',
+            stats: '2.5 tons/week',  // Updated to show actual rate
             disabled: false
         },
         ...availableTools.map(tool => {
             const isAvailable = existingTools.some(t => t.name === tool.name);
-            const extraWork = ((1 / tool.speedBonus - 1) * 100).toFixed(0);
+            const speedMultiplier = tool.speedBonus;
+            const throughput = (2.5 * speedMultiplier).toFixed(1);  // Calculate based on hand crushing rate
             return {
                 name: tool.name,
                 iconPath: `/assets/icon/buildings/${tool.name.toLowerCase()}.png`,
-                stats: `${extraWork > 0 ? '+' : '-'}${Math.abs(extraWork)}% work`,
+                stats: `${throughput} tons/week`,  // Show actual throughput
                 disabled: !isAvailable,
                 disabledReason: 'You need to purchase this tool first'
             };
@@ -763,36 +764,32 @@ function createCrushingMethodSection() {
 }
 
 function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
-    // Convert kg to tons for work calculation
     const tons = grapeAmount / 1000;
-    
-    // Calculate method modifier
     let methodModifier = 0;
     let methodName = null;
     
     if (selectedMethod) {
-        // Hand crushing is baseline (100% more work)
+        // Hand crushing is baseline (no modifier)
         if (selectedMethod === 'Hand Crushing') {
-            methodModifier = 1.0;
+            methodModifier = 0;  // Changed from 1.0 to 0
             methodName = 'Hand Crushing';
         } else {
-            // Find the tool and its speed bonus
             const tool = getBuildingTools().find(t => t.name === selectedMethod);
             if (tool) {
-                methodModifier = (1 / tool.speedBonus - 1);
+                // Change from reducing work to directly using speedBonus
+                methodModifier = -(1 - (1 / tool.speedBonus));  // This gives us the work reduction percentage
                 methodName = tool.name;
             }
         }
     }
 
-    // Calculate base work units
     let totalWork = calculateTotalWork(tons, {
         tasks: ['CRUSHING']
     });
 
     // Apply method modifier
     if (methodModifier !== 0) {
-        totalWork *= (1 + methodModifier);
+        totalWork *= (1 + methodModifier);  // This will reduce work for better tools
     }
 
     return {

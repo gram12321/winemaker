@@ -13,7 +13,9 @@ export const TASKS = {
     },
     CRUSHING: {  // Add crushing task
         name: 'Crushing',
-        rate: 5.0  // One worker can process about 5 tons of grapes per week
+        rate: 2.5  // Change from 1.5 to 2.5
+                   // This means one worker (50 units/week) can crush 2.5 tons/week by hand
+                   // Which is roughly 250-300kg per day (realistic for hand crushing)
     },
     VEGETATION: { name: 'Vegetation', rate: 0.5 },
     DEBRIS: { name: 'Debris', rate: 0.4 },

@@ -14,6 +14,9 @@ export function createOverlayHTML({
         `${title} ${getFlagIconHTML(farmland.country)} ${farmland.name}` : 
         title;
 
+    // Ensure btn class is always included
+    const btnClasses = `btn ${buttonClass} ${buttonIdentifier}`.trim();
+
     // For modal overlays, don't wrap in overlay-content/container
     const innerContent = `
         <section class="overlay-section card mb-4">
@@ -32,7 +35,7 @@ export function createOverlayHTML({
                 ${content}
                 ${buttonText ? `
                     <div class="d-flex justify-content-center mt-4">
-                        <button class="btn ${buttonClass} ${buttonIdentifier}">${buttonText}</button>
+                        <button class="${btnClasses}">${buttonText}</button>
                     </div>
                 ` : ''}
             </div>
