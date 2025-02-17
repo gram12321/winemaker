@@ -19,11 +19,11 @@ const grapeCharacteristics = {
     },
     'Chardonnay': {
         sweetness: 0,      // neutral
-        acidity: 0.1,      // moderate acidity
+        acidity: -0.1,      // moderate acidity
         tannins: -0.15,    // very low tannins
         aroma: 0.15,       // aromatic
-        body: 0.05,        // medium body
-        spice: 0           // neutral
+        body: 0.25,        // medium body
+        spice: 0.0         // neutral
     },
     'Primitivo': {
         sweetness: 0.2,     // naturally sweet
