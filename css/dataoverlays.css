@@ -8,25 +8,21 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   margin: 0 auto;
-  width: 95%;
   max-width: 1200px;
   overflow: hidden; /* Ensure inner elements don't break border radius */
 }
 /* box around image and header */
 .imgbox {
   background-color: #fff;
-  margin: 60px auto;
-  width: 90%;
+  width: 100%;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 20px;
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 25px;
-  width: 100%;
   padding: 25px;  /* Add padding around the entire grid */
 }
 
@@ -37,6 +33,7 @@
   background-color: var(--color-background);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   text-align: center;
+
 }
 
 /* Nested info sections should have lighter borders */
@@ -190,10 +187,11 @@
 }
 
 .resource-overlay .country-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Display 3 buttons per row */
+  gap: 3px;
   justify-content: center;
-  margin-bottom: 15px;
+
+
 }
 

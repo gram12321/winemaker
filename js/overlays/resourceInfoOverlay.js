@@ -2,6 +2,7 @@ import { getResourceByName } from '../resource.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { grapeSuitability } from '../names.js';
 import { hideOverlay, showModalOverlay } from './overlayUtils.js';
+import { createTable, createTextCenter } from '../components/createOverlayHTML.js';
 
 export function showResourceInfoOverlay(resourceName) {
   const resource = getResourceByName(resourceName);
@@ -21,43 +22,65 @@ function createResourceInfoOverlayHTML(resource) {
   const fragilePercentage = resource.fragile * 100;
   const fragileColorClass = getColorClass(resource.naturalYield);
 
-  // Create characteristics section - simplified without tooltips
-  let characteristicsTable = '<table class="data-table"><tbody>';
-  const characteristics = resource.wineCharacteristics;
-  for (const [trait, value] of Object.entries(characteristics)) {
-    const displayValue = 0.5 + value;
-    const colorClass = getColorClass(displayValue);
-    characteristicsTable += `
-      <tr>
-        <td>${trait.charAt(0).toUpperCase() + trait.slice(1)}</td>
-        <td class="${colorClass}">${(displayValue * 100).toFixed(0)}%</td>
-      </tr>`;
-  }
-  characteristicsTable += '</tbody></table>';
+  // Create base information section
+  const baseInfoSection = `
+    <div class="info-section">
+      ${createTextCenter({ text: '<h4>Base Information</h4>' })}
+      <table class="data-table">
+        <tbody>
+          <tr><td>Name</td><td>${resource.name}</td></tr>
+          <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
+          <tr><td>Grape Fragile</td><td class="${fragileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
+        </tbody>
+      </table>
+    </div>`;
 
-  // Generate regions suitability data
+  // Create characteristics section
+  const characteristicsSection = `
+    <div class="info-section">
+      ${createTextCenter({ text: '<h4>Wine Characteristics</h4>' })}
+      <table class="data-table">
+        <tbody>
+          ${Object.entries(resource.wineCharacteristics)
+            .map(([trait, value]) => {
+              const displayValue = 0.5 + value;
+              const colorClass = getColorClass(displayValue);
+              return `
+                <tr>
+                  <td>${trait.charAt(0).toUpperCase() + trait.slice(1)}</td>
+                  <td class="${colorClass}">${(displayValue * 100).toFixed(0)}%</td>
+                </tr>`;
+            }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+
+  // Generate regions section
   let countryButtons = '';
   let regionsTable = '';
   const sortedCountries = Object.keys(grapeSuitability).sort();
   sortedCountries.forEach((country, index) => {
-    let countryTable = '<table class="data-table"><tbody>';
-    for (const [region, suitability] of Object.entries(grapeSuitability[country])) {
-      if (suitability[resource.name]) {
+    const countryContent = Object.entries(grapeSuitability[country])
+      .filter(([_, suitability]) => suitability[resource.name])
+      .map(([region, suitability]) => {
         const suitabilityValue = suitability[resource.name];
         const colorClass = getColorClass(suitabilityValue);
-        countryTable += `<tr>
+        return `<tr>
           <td>${region}</td>
           <td class="${colorClass}">${(suitabilityValue * 100).toFixed(0)}%</td>
         </tr>`;
-      }
-    }
-    countryTable += '</tbody></table>';
+      }).join('');
+
     countryButtons += `
       <button class="btn btn-secondary btn-sm toggle-country" data-country="${country}">${country}</button>
     `;
     regionsTable += `
       <div class="country-section" id="regions-${country.replace(/\s+/g, '-')}" style="display: ${index === 0 ? 'block' : 'none'};">
-        ${countryTable}
+        <table class="data-table">
+          <tbody>
+            ${countryContent}
+          </tbody>
+        </table>
       </div>
     `;
   });
@@ -72,24 +95,10 @@ function createResourceInfoOverlayHTML(resource) {
         <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
       </div>  
       <div class="info-grid">
+        ${baseInfoSection}
+        ${characteristicsSection}
         <div class="info-section">
-          <h4>Base Information</h4>
-          <table class="data-table">
-            <tbody>
-              <tr><td>Name</td><td>${resource.name}</td></tr>
-              <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
-              <tr><td>Grape Fragile</td><td class="${fragileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="info-section">
-          <h4>Wine Characteristics</h4>
-          ${characteristicsTable}
-        </div>
-
-        <div class="info-section">
-          <h4>Regional Suitability</h4>
+          ${createTextCenter({ text: '<h4>Regional Suitability</h4>' })}
           <div class="country-buttons">
             ${countryButtons}
           </div>
