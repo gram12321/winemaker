@@ -4,8 +4,8 @@ import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { inventoryInstance } from '../resource.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
-import { getBuildingTools } from '../buildings.js';
-import { loadBuildings } from '../database/adminFunctions.js';
+import { getBuildingTools  } from '../buildings.js';
+import { loadBuildings, storeBuildings } from '../database/adminFunctions.js';
 import { createOverlayHTML, createTable, createMethodSelector } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
@@ -589,11 +589,33 @@ function showWarningModal(totalAvailableSpace, mustAmount, onConfirm) {
 
 function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes) {
     const workData = calculateCrushingWorkData(totalGrapes);
+    const selectedMethod = document.querySelector('input[name="crushing-method"]:checked')?.value;
+    
+    // Get the task ID before creating the task
+    const taskId = taskManager.taskIdCounter + 1;
+    
+    // Find and assign the selected crushing tool
+    if (selectedMethod && selectedMethod !== 'Hand Crushing') {
+        const buildings = loadBuildings();
+        const tool = buildings.flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => 
+                    t.name === selectedMethod && 
+                    t.isAvailable()
+                )
+            )
+        ).find(t => t);
+
+        if (tool) {
+            tool.assignToTask(taskId);
+            storeBuildings(buildings);
+        }
+    }
     
     taskManager.addProgressiveTask(
         'Crushing',
         'winery',
-        workData.totalWork,  // Use calculated work units
+        workData.totalWork,
         (target, progress, params) => {
             if (!params.lastProgress) params.lastProgress = 0;
             const processedAmount = totalAvailableSpace * (progress - params.lastProgress);
@@ -601,7 +623,12 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             performCrushing(params.selectedStorages, processedAmount, params.totalGrapes);
         },
         null,
-        { selectedGrape, selectedStorages: Array.from(selectedStorages), totalGrapes }
+        { 
+            selectedGrape, 
+            selectedStorages: Array.from(selectedStorages), 
+            totalGrapes,
+            selectedMethod  // Store the selected method with the task
+        }
     );
 
     return true;
@@ -730,23 +757,41 @@ function createCrushingMethodSection() {
         building.slots.flatMap(slot => slot.tools)
     );
 
+    const tasks = taskManager.getAllTasks();
+
     const methods = [
         {
             name: 'Hand Crushing',
             iconPath: '/assets/icon/buildings/hand crushing.png',
-            stats: '2.5 tons/week',  // Updated to show actual rate
+            stats: '2.5 tons/week',
             disabled: false
         },
         ...availableTools.map(tool => {
-            const isAvailable = existingTools.some(t => t.name === tool.name);
+            // Check if we own the tool
+            const ownedTools = existingTools.filter(t => t.name === tool.name);
+            const hasTools = ownedTools.length > 0;
+
+            // Check if all instances are in use
+            const allToolsInUse = hasTools && ownedTools.every(t => t.assignedTaskId !== null);
+            const inUseTaskNames = hasTools ? 
+                ownedTools
+                    .filter(t => t.assignedTaskId)
+                    .map(t => tasks.find(task => task.id === t.assignedTaskId)?.name)
+                    .filter(name => name)
+                    .join(', ') 
+                : '';
+
             const speedMultiplier = tool.speedBonus;
-            const throughput = (2.5 * speedMultiplier).toFixed(1);  // Calculate based on hand crushing rate
+            const throughput = (2.5 * speedMultiplier).toFixed(1);
+
             return {
                 name: tool.name,
                 iconPath: `/assets/icon/buildings/${tool.name.toLowerCase()}.png`,
-                stats: `${throughput} tons/week`,  // Show actual throughput
-                disabled: !isAvailable,
-                disabledReason: 'You need to purchase this tool first'
+                stats: `${throughput} tons/week`,
+                disabled: !hasTools || allToolsInUse,
+                disabledReason: !hasTools 
+                    ? 'You need to purchase this tool first'
+                    : `Tool in use by: ${inUseTaskNames}`
             };
         })
     ];

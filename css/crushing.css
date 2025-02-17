@@ -209,7 +209,8 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
-.method-item.disabled {
+.method-item.disabled,
+.harvest-tool.disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background: rgba(128, 128, 128, 0.1);

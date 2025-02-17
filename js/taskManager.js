@@ -192,8 +192,9 @@ class TaskManager {
     removeTask(taskId) {
         const task = this.tasks.get(taskId);
         if (task) {
-            // Release assigned tools
             const buildings = loadBuildings();
+            
+            // Release tools assigned through assignStaff
             if (Array.isArray(task.params.selectedTools)) {
                 task.params.selectedTools.forEach(toolId => {
                     const tool = this.findToolById(buildings, toolId);
@@ -201,13 +202,27 @@ class TaskManager {
                         tool.releaseFromTask();
                     }
                 });
-                storeBuildings(buildings);
             }
+            
+            // Release crushing tools assigned directly
+            if (task.name === 'Crushing' && task.params.selectedMethod) {
+                buildings.forEach(building => {
+                    building.slots.forEach(slot => {
+                        slot.tools.forEach(tool => {
+                            if (tool.name === task.params.selectedMethod && tool.assignedTaskId === taskId) {
+                                tool.releaseFromTask();
+                            }
+                        });
+                    });
+                });
+            }
+            
+            storeBuildings(buildings);
         }
         this.tasks.delete(taskId);
         saveTasks(this.tasks);
         this.updateTaskDisplay();
-        updateAllDisplays(); // Add this line to update all displays when a task is removed
+        updateAllDisplays();
     }
 
     getTaskProgress(taskId) {

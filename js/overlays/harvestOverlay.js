@@ -359,6 +359,12 @@ export function harvest(farmland, farmlandId, selectedTools, totalHarvest) {
 function populateStorageOptions(farmland) {
     const storageBody = document.getElementById('storage-display-body');
     const buildings = loadBuildings();
+    const activeTasks = taskManager.getAllTasks();
+
+    // Get all storage IDs that are currently being used in active harvest tasks
+    const storagesInUse = activeTasks
+        .filter(task => task.name === 'Harvesting')
+        .flatMap(task => task.params.selectedTools || []);
 
     buildings.forEach(building => {
         if (building.slots) {
@@ -373,24 +379,52 @@ function populateStorageOptions(farmland) {
                         );
                         const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
                         const availableCapacity = tool.capacity - currentAmount;
+                        
+                        // Check if this storage is being used in any active harvest task
+                        const isInUse = storagesInUse.includes(toolId);
+                        const taskUsingStorage = isInUse ? 
+                            activeTasks.find(task => 
+                                task.name === 'Harvesting' && 
+                                task.params.selectedTools?.includes(toolId)
+                            ) : null;
 
-                        // Only show containers with available capacity
+                        // Only show containers with available capacity and not in use
                         if (availableCapacity > 0) {
                             const row = document.createElement('tr');
                             const firstItem = matchingInventoryItems[0];
 
+                            // Add both method-item.disabled and harvest-tool classes
+                            if (isInUse) {
+                                row.classList.add('harvest-tool', 'disabled');  // Simplified class names
+                            }
+
                             row.innerHTML = `
-                                <td><input type="checkbox" class="storage-checkbox" data-capacity="${availableCapacity}" value="${toolId}" style="accent-color: var(--color-primary);"></td>
-                                <td>${toolId}</td>
+                                <td>
+                                    <input type="checkbox" 
+                                           class="storage-checkbox" 
+                                           data-capacity="${availableCapacity}" 
+                                           value="${toolId}"
+                                           style="accent-color: var(--color-primary);"
+                                           ${isInUse ? 'disabled' : ''}>
+                                </td>
+                                <td>${toolId}
+                                    ${isInUse ? `
+                                        <br><small class="text-warning">
+                                            In use by harvest task for ${taskUsingStorage.target.name}
+                                        </small>
+                                    ` : ''}
+                                </td>
                                 <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
                                 <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
                                 <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
                             `;
                             storageBody.appendChild(row);
 
-                            row.querySelector('.storage-checkbox').addEventListener('change', function() {
-                                updateStorageProgress(farmland);  // Changed from updateSelectedCapacity
-                            });
+                            if (!isInUse) {
+                                row.querySelector('.storage-checkbox').addEventListener('change', function() {
+                                    updateStorageProgress(farmland);
+                                });
+                            }
                         }
                     }
                 });
