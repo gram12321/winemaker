@@ -356,3 +356,23 @@ Living Legend (1.0):
 - Specialist bonus: (1 - baseValue) * (0.2 + 1.0 * 0.2)
   Non-specialist: 0.40 - 1.00
   Specialist: 0.70 - 1.00
+
+
+  Grapes/wine Characteristics
+
+  2.1. Key Spokes (Primary Attributes)
+Sweetness (Sugar)
+Acidity
+Tannin (for reds, or at least for some whites that have phenolic structure)
+Aroma / Intensity (could be expanded into multiple aroma categories like fruit, floral, herbal, etc.)
+Body / Alcohol
+Oakiness (if barrel aging is a factor)
+
+
+Characteristic (High Intensity)	Conceptual Opposite (Low or Contrasting Intensity)
+Sweetness (e.g., sugary, dessert-level)	Dryness (bone-dry, no residual sugar)
+Acidity (fresh, tart, zesty)	Flabbiness / Softness (very low acid, “dull” mouthfeel)
+Tannins (astringent, firm)	Soft / Supple / Low Tannin (“smooth” mouthfeel)
+Aroma Intensity (aromatic, expressive)	Neutral / Subtle Nose (light aroma)
+Body / Fullness (rich, heavy, high alcohol)	Light / Thin Body (low alcohol, watery)
+Oakiness / Wood Spice (vanilla, toast)	Unoaked / Neutral (no wood influence, “pure” grape expression)

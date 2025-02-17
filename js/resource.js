@@ -1,11 +1,56 @@
 import { getColorClass } from './utils.js';
 
+const grapeCharacteristics = {
+    'Barbera': {
+        sweetness: 0,      // neutral
+        acidity: 0.2,      // high acidity
+        tannins: 0.1,      // moderate tannins
+        aroma: 0,          // neutral
+        body: 0.1,         // moderately full body
+        spice: 0           // neutral
+    },
+    'Pinot Noir': {
+        sweetness: 0,      // neutral
+        acidity: 0.15,     // moderately high acidity
+        tannins: -0.1,     // low tannins
+        aroma: 0.1,        // aromatic
+        body: -0.15,       // light body
+        spice: 0           // neutral
+    },
+    'Chardonnay': {
+        sweetness: 0,      // neutral
+        acidity: 0.1,      // moderate acidity
+        tannins: -0.15,    // very low tannins
+        aroma: 0.15,       // aromatic
+        body: 0.05,        // medium body
+        spice: 0           // neutral
+    },
+    'Primitivo': {
+        sweetness: 0.2,     // naturally sweet
+        acidity: 0,        // neutral
+        tannins: 0.2,      // high tannins
+        aroma: 0.2,        // very aromatic
+        body: 0.2,         // full bodied
+        spice: 0           // neutral
+    }
+};
+
 export class Resource {
-  constructor(name, naturalYield, fragile) {
-    this.name = name;
-    this.naturalYield = naturalYield;
-    this.fragile = fragile;
-  }
+    constructor(name, naturalYield, fragile) {
+        this.name = name;
+        this.naturalYield = naturalYield;
+        this.fragile = fragile;
+
+        // Set characteristics from the data structure
+        this.wineCharacteristics = grapeCharacteristics[name] || {
+            sweetness: 0,
+            acidity: 0,
+            tannins: 0,
+            aroma: 0,
+            body: 0,
+            spice: 0
+        };
+    }
 }
 
 export class InventoryItem {
@@ -18,6 +63,24 @@ export class InventoryItem {
     this.fieldName = fieldName;
     this.fieldPrestige = fieldPrestige;
     this.storage = storage;
+
+    // Initialize base characteristics
+    this.sweetness = 0.5;
+    this.acidity = 0.5;
+    this.tannins = 0.5;
+    this.aroma = 0.5;
+    this.body = 0.5;
+    this.spice = 0.5;
+
+    // Apply grape variety characteristics if they exist
+    if (resource.wineCharacteristics) {
+      this.sweetness += resource.wineCharacteristics.sweetness || 0;
+      this.acidity += resource.wineCharacteristics.acidity || 0;
+      this.tannins += resource.wineCharacteristics.tannins || 0;
+      this.aroma += resource.wineCharacteristics.aroma || 0;
+      this.body += resource.wineCharacteristics.body || 0;
+      this.spice += resource.wineCharacteristics.spice || 0;
+    }
   }
 
   getDisplayInfo() {
@@ -61,7 +124,7 @@ export class Inventory {
     if (existingItem) {
       existingItem.amount += amount;
     } else {
-      this.items.push(new InventoryItem(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage));
+            this.items.push(new InventoryItem(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage));
     }
   }
 
@@ -123,7 +186,8 @@ export const inventoryInstance = new Inventory();
 export const allResources = [ // Resource(name, naturalYield, fragile)
   new Resource('Barbera', 1, 1),
   new Resource('Chardonnay', 0.9, 1),
-  new Resource('Pinot Noir', 0.7, 0.4)
+  new Resource('Pinot Noir', 0.7, 0.4),
+  new Resource('Primitivo', 0.85, 0.8)  // Moderate-high yield, fairly fragile
 ];
 
 export function getResourceByName(name) {

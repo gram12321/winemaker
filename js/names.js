@@ -2,25 +2,25 @@
 
 // Country to Region mapping
 const countryRegionMap = {
-  "Italy": ["Piedmont", "Tuscany", "Veneto", "Sicily", "Puglia"],
   "France": ["Bordeaux", "Burgundy (Bourgogne)", "Champagne", "Loire Valley", "Rhone Valley"],
-  "Spain": ["Rioja", "Ribera del Duero", "Jumilla", "La Mancha", "Sherry (Jerez)"],
-  "United States": ["Napa Valley (California)", "Sonoma County (California)", "Willamette Valley (Oregon)", "Finger Lakes (New York)", "Central Coast (California)"],
-  "Germany": ["Mosel", "Rheingau", "Rheinhessen", "Pfalz", "Ahr"],
+  "Germany": ["Ahr", "Mosel", "Pfalz", "Rheingau", "Rheinhessen"],
+  "Italy": ["Piedmont", "Puglia", "Sicily", "Tuscany", "Veneto"],
+  "Spain": ["Jumilla", "La Mancha", "Ribera del Duero", "Rioja", "Sherry (Jerez)"],
+  "United States": ["Central Coast (California)", "Finger Lakes (New York)", "Napa Valley (California)", "Sonoma County (California)", "Willamette Valley (Oregon)"],
 };
 
 // Array of Italian male names
 const italianMaleNames = [
-  "Alessandro", "Andrea", "Antonio", "Carlo", "Claudio",
-  "Davide", "Diego", "Edoardo", "Enrico", "Fabrizio",
+  "Alessandro", "Alessio", "Alessio", "Andrea", "Angelo",
+  "Angelo", "Antonio", "Carlo", "Claudio", "Cristian",
+  "Cristian", "Davide", "Diego", "Edoardo", "Elia",
+  "Elia", "Emanuele", "Emanuele", "Enrico", "Fabrizio",
   "Federico", "Filippo", "Francesco", "Gabriele", "Giacomo",
   "Gianluca", "Giovanni", "Giuseppe", "Jacopo", "Leonardo",
-  "Lorenzo", "Luca", "Luigi", "Marco", "Matteo",
-  "Mattia", "Michele", "Nicolò", "Paolo", "Pietro",
-  "Riccardo", "Rocco", "Salvatore", "Samuele", "Sandro",
-  "Sergio", "Simone", "Stefano", "Tommaso", "Umberto",
-  "Valentino", "Valerio", "Vittorio", "Vincenzo", "Alessio",
-  "Angelo", "Cristian", "Elia", "Emanuele", "Massimo"
+  "Lorenzo", "Luca", "Luigi", "Marco", "Massimo",
+  "Massimo", "Matteo", "Mattia", "Michele", "Nicolò",
+  "Paolo", "Sergio", "Simone", "Stefano", "Tommaso",
+  "Umberto", "Valentino", "Valerio", "Vincenzo", "Vittorio"
 ];
 
 // Array of Italian female names
@@ -117,43 +117,41 @@ const germanMaleNames = [
 
 const grapeSuitability = {
   Italy: {
-    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, PinotNoir: 0.6 },
-    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, PinotNoir: 0.5 },
-    Veneto: { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.7 },
-    Sicily: { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.3 },
-    Puglia: { Barbera: 0.9, Chardonnay: 0.65, PinotNoir: 0.4 },
+    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.5 },
+    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, PinotNoir: 0.5, Primitivo: 0.7 },
+    Veneto: { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.7, Primitivo: 0.6 },
+    Sicily: { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.3, Primitivo: 0.8 },
+    Puglia: { Barbera: 0.9, Chardonnay: 0.65, PinotNoir: 0.4, Primitivo: 1.0 },  // Primitivo's homeland
   },
   France: {
-    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, PinotNoir: 0.6 },
-    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, PinotNoir: 0.9 },
-    Champagne: { Barbera: 0.2, Chardonnay: 0.9, PinotNoir: 0.8 },
-    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, PinotNoir: 0.7 },
-    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.5 },
+    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.6 },
+    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, PinotNoir: 0.9, Primitivo: 0.3 },
+    Champagne: { Barbera: 0.2, Chardonnay: 0.9, PinotNoir: 0.8, Primitivo: 0.2 },
+    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, PinotNoir: 0.7, Primitivo: 0.3 },
+    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.5, Primitivo: 0.7 },
   },
   Spain: {
-    Rioja: { Barbera: 0.85, Chardonnay: 0.7, PinotNoir: 0.4 },
-    "Ribera del Duero": { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.35 },
-    Jumilla: { Barbera: 0.9, Chardonnay: 0.5, PinotNoir: 0.3 },
-    "La Mancha": { Barbera: 0.85, Chardonnay: 0.55, PinotNoir: 0.25 },
-    "Sherry (Jerez)": { Barbera: 0.8, Chardonnay: 0.5, PinotNoir: 0.2 },
+    Rioja: { Barbera: 0.85, Chardonnay: 0.7, PinotNoir: 0.4, Primitivo: 0.5 },
+    "Ribera del Duero": { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.35, Primitivo: 0.4 },
+    Jumilla: { Barbera: 0.9, Chardonnay: 0.5, PinotNoir: 0.3, Primitivo: 0.85 },  // Hot climate suits Primitivo
+    "La Mancha": { Barbera: 0.85, Chardonnay: 0.55, PinotNoir: 0.25, Primitivo: 0.8 },  // Hot, dry climate good for Primitivo
+    "Sherry (Jerez)": { Barbera: 0.8, Chardonnay: 0.5, PinotNoir: 0.2, Primitivo: 0.7 },
   },
   "United States": {
-    "Napa Valley (California)": { Barbera: 0.9, Chardonnay: 1.0, PinotNoir: 0.7 },
-    "Sonoma County (California)": { Barbera: 0.85, Chardonnay: 0.95, PinotNoir: 0.75 },
-    "Willamette Valley (Oregon)": { Barbera: 0.4, Chardonnay: 0.85, PinotNoir: 1.0 },
-    "Finger Lakes (New York)": { Barbera: 0.3, Chardonnay: 0.7, PinotNoir: 0.75 },
-    "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, PinotNoir: 0.6 },
+    "Napa Valley (California)": { Barbera: 0.9, Chardonnay: 1.0, PinotNoir: 0.7, Primitivo: 0.85 },  // Warm climate suits Primitivo
+    "Sonoma County (California)": { Barbera: 0.85, Chardonnay: 0.95, PinotNoir: 0.75, Primitivo: 0.8 },
+    "Willamette Valley (Oregon)": { Barbera: 0.4, Chardonnay: 0.85, PinotNoir: 1.0, Primitivo: 0.3 },  // Too cool for Primitivo
+    "Finger Lakes (New York)": { Barbera: 0.3, Chardonnay: 0.7, PinotNoir: 0.75, Primitivo: 0.2 },  // Too cool for Primitivo
+    "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.75 },
   },
   Germany: {
-    Mosel: { Barbera: 0.15, Chardonnay: 0.8, PinotNoir: 1.0 },
-    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, PinotNoir: 0.9 },
-    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, PinotNoir: 0.85 },
-    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, PinotNoir: 0.8 },
-    Ahr: { Barbera: 0.1, Chardonnay: 0.7, PinotNoir: 0.95 },
+    Mosel: { Barbera: 0.15, Chardonnay: 0.8, PinotNoir: 1.0, Primitivo: 0.1 },  // Too cool for Primitivo
+    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, PinotNoir: 0.9, Primitivo: 0.15 },
+    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, PinotNoir: 0.85, Primitivo: 0.2 },
+    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, PinotNoir: 0.8, Primitivo: 0.25 },
+    Ahr: { Barbera: 0.1, Chardonnay: 0.7, PinotNoir: 0.95, Primitivo: 0.1 },
   },
 };
-
-
 
 // Aspect ratings for each region
 const regionAspectRatings = {
@@ -269,7 +267,6 @@ const regionAspectRatings = {
     },
   },
 };
-
 
 const regionSoilTypes = {
   "Italy": {
@@ -484,4 +481,4 @@ const lastNamesByCountry = {
 };
 
 // Export the altitude ranges for use in other parts of the application 
-export { grapeSuitability, regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry};
+export { grapeSuitability, regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry };
