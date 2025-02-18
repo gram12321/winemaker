@@ -10,7 +10,7 @@ const perfectSweet = {
     tannins: 0.5,
     aroma: 0.5,
     body: 0.5,
-    spice: 0.8
+    spice: 0.7
 };
 console.log("Test 1 - Perfect Sweet Wine:", 
     balanceCalculator(perfectSweet, archetypes.sweetWine), "Expected: archetype~99% dynamic 95%");

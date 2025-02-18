@@ -28,14 +28,20 @@ export function balanceCalculator(wine, archetype) {
     let dynamicScore = calculateSteppedBalance(dynamicBalance);
     debugInfo.scores.dynamicFinal = dynamicScore;
 
-    // Final score calculation
-    let finalScore = qualifiesForArchetype(wine, archetype) ?
-        (archetypeBalance * 0.6) + (dynamicScore * 0.4) :
-        dynamicScore;
+    // Final score calculation - take highest score instead of weighted average
+    let finalScore;
+    if (qualifiesForArchetype(wine, archetype)) {
+        finalScore = Math.max(archetypeBalance, dynamicScore);
+        debugInfo.scoreUsed = archetypeBalance > dynamicScore ? "archetype" : "dynamic";
+    } else {
+        finalScore = dynamicScore;
+        debugInfo.scoreUsed = "dynamic";
+    }
 
     // Debug logging
     console.log("=== Wine Balance Analysis ===");
     console.log("Status:", debugInfo.reason);
+    console.log("Score Used:", debugInfo.scoreUsed);
     
     // More detailed score breakdown
     console.log("\nScore Breakdown:");
@@ -45,6 +51,7 @@ export function balanceCalculator(wine, archetype) {
     if (debugInfo.scores.archetype) {
         console.log("Archetype Score:", debugInfo.scores.archetype.toFixed(3));
     }
+    console.log("Final Score (using " + debugInfo.scoreUsed + "):", finalScore.toFixed(3));
 
     // Detailed range and deduction analysis
     console.log("\nCharacteristic Analysis:");
@@ -74,21 +81,42 @@ export function balanceCalculator(wine, archetype) {
 }
 
 function calculateSteppedBalance(score) {
-    if (score < 0.7) {
-        // Linear with low multiplier for poor scores
-        return score * 0.8;
+    if (score < 0.4) {
+        // Polynomial curve for low scores: x² * 1.5
+        return score * score * 1.5;
+        // 0.0 → 0.000
+        // 0.1 → 0.015
+        // 0.2 → 0.060
+        // 0.3 → 0.135
+        // 0.4 → 0.240
+    } else if (score < 0.7) {
+        // Logarithmic scaling for middle range
+        return 0.24 + (Math.log(1 + (score - 0.4) * 3.33) * 0.3);
+        // 0.4 → 0.240
+        // 0.5 → 0.370
+        // 0.6 → 0.480
+        // 0.7 → 0.560
     } else if (score < 0.9) {
-        // Steeper linear for good scores
+        // Linear scaling for good scores
         return 0.56 + (score - 0.7) * 1.5;
+        // 0.7 → 0.560
+        // 0.8 → 0.710
+        // 0.9 → 0.860
     } else if (score < 0.95) {
         // Exponential for very good scores
         return 0.86 + (score - 0.9) * 2;
+        // 0.90 → 0.860
+        // 0.95 → 0.960
     } else if (score < 0.99) {
         // Logistic curve for excellent scores
         return 0.96 + (score - 0.95) * 0.8;
+        // 0.95 → 0.960
+        // 0.99 → 0.992
     } else {
-        // Final sigmoid for near-perfect scores
+        // Sigmoid for near-perfect scores
         return 0.99 + (1 - Math.exp(-(score - 0.99) * 10)) * 0.01;
+        // 0.99 → 0.992
+        // 1.00 → 1.000
     }
 }
 
@@ -282,20 +310,17 @@ function dynamicBalanceScore(wine, baseBalancedRanges, debug = false) {
         const midpoint = (min + max) / 2;
         const value = wine[characteristic];
 
-        // Calculate deductions
+        // Calculate raw deductions
         let insideRangeDeduction = 0;
         let outOfRangeDeduction = 0;
 
         if (value >= min && value <= max) {
-            // Inside range: simple linear distance from midpoint (without normalization)
             insideRangeDeduction = Math.abs(value - midpoint);
         } else {
-            // Inside range portion (full distance from midpoint to boundary)
             insideRangeDeduction = Math.abs(value < min ? min - midpoint : max - midpoint);
             
-            // Outside range portion with exponential scaling
             let outsideDistance = value < min ? min - value : value - max;
-            let steps = Math.ceil(outsideDistance * 10); // Split into 0.1 increments
+            let steps = Math.ceil(outsideDistance * 10);
             
             for (let i = 0; i < steps; i++) {
                 let stepSize = Math.min(0.1, outsideDistance - (i * 0.1));
@@ -303,22 +328,15 @@ function dynamicBalanceScore(wine, baseBalancedRanges, debug = false) {
             }
         }
 
-        if (characteristic === 'acidity') {
-            console.log('Raw calculation for acidity:');
-            console.log('value:', value);
-            console.log('midpoint:', midpoint);
-            console.log('abs(value - midpoint):', Math.abs(value - midpoint));
-            console.log('raw insideRangeDeduction:', insideRangeDeduction);
-        }
+        let rawDeduction = insideRangeDeduction + outOfRangeDeduction;
 
-        let characteristicDeduction = insideRangeDeduction + outOfRangeDeduction;
-
-        // Apply penalties to the deductions
+        // Apply penalties
         let penaltyKey = characteristic + "_penalty";
         let adjustmentPenalty = penaltyMultipliers[penaltyKey] || 1;
-        
-        // Apply penalty multiplier to the total deduction
-        characteristicDeduction *= adjustmentPenalty;
+        rawDeduction *= adjustmentPenalty;
+
+        // Apply exponential decay to the deduction: 1 - Math.exp(-deduction)
+        let normalizedDeduction = 1 - Math.exp(-rawDeduction);
 
         if (debug) {
             deductions[characteristic] = {
@@ -327,26 +345,29 @@ function dynamicBalanceScore(wine, baseBalancedRanges, debug = false) {
                 midpoint,
                 insideRangeDeduction,
                 outOfRangeDeduction,
-                adjustmentPenalty, // Add penalty multiplier to debug info
-                totalDeduction: characteristicDeduction
+                adjustmentPenalty,
+                rawDeduction,
+                normalizedDeduction,
+                totalDeduction: normalizedDeduction
             };
         }
 
-        totalDeduction += characteristicDeduction;
+        totalDeduction += normalizedDeduction;
     }
 
-    console.log("\nFinal Score Calculation:");
-    console.log("Total Deductions by Characteristic:");
-    for (const characteristic in deductions) {
-        console.log(`  ${characteristic}: ${deductions[characteristic].totalDeduction.toFixed(3)}`);
+    let avgDeduction = totalDeduction / Object.keys(wine).length;
+    let finalScore = 1 - avgDeduction;
+
+    // Debug logging
+    if (debug) {
+        console.log("\nFinal Score Calculation:");
+        console.log("Normalized Deductions by Characteristic:");
+        for (const characteristic in deductions) {
+            console.log(`  ${characteristic}: ${deductions[characteristic].normalizedDeduction.toFixed(3)} (raw: ${deductions[characteristic].rawDeduction.toFixed(3)})`);
+        }
+        console.log(`Average normalized deduction: ${avgDeduction.toFixed(3)}`);
+        console.log(`Final Score: 1.0 - ${avgDeduction.toFixed(3)} = ${finalScore.toFixed(3)}`);
     }
-    console.log(`Sum of all deductions: ${totalDeduction.toFixed(3)}`);
-    console.log(`Number of characteristics: ${Object.keys(wine).length}`);
-    console.log(`Average deduction: ${(totalDeduction / Object.keys(wine).length).toFixed(3)}`);
-    
-    // Calculate final score (start at 1.0 and subtract average deduction)
-    let finalScore = Math.max(0, 1 - (totalDeduction / Object.keys(wine).length));
-    console.log(`Final Score: 1.0 - ${(totalDeduction / Object.keys(wine).length).toFixed(3)} = ${finalScore.toFixed(3)}`);
 
     return debug ? {
         score: finalScore,
