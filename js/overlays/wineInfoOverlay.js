@@ -41,6 +41,19 @@ function calculateWineBalance(wine) {
 }
 
 function createWineInfoOverlayHTML(wine) {
+    console.log('Wine data in overlay:', {
+        name: wine.resource.name,
+        characteristics: {
+            sweetness: wine.sweetness,
+            acidity: wine.acidity,
+            tannins: wine.tannins,
+            aroma: wine.aroma,
+            body: wine.body,
+            spice: wine.spice
+        },
+        resourceCharacteristics: wine.resource.wineCharacteristics
+    });
+
     const balanceInfo = calculateWineBalance(wine);
     const balanceColorClass = getColorClass(balanceInfo.score);
 

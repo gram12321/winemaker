@@ -42,14 +42,8 @@ export class Resource {
         this.fragile = fragile;
 
         // Set characteristics from the data structure
-        this.wineCharacteristics = grapeCharacteristics[name] || {
-            sweetness: 0,
-            acidity: 0,
-            tannins: 0,
-            aroma: 0,
-            body: 0,
-            spice: 0
-        };
+        this.wineCharacteristics = grapeCharacteristics[name];
+        console.log(`Creating Resource ${name}:`, this.wineCharacteristics);
     }
 }
 
@@ -64,6 +58,11 @@ export class InventoryItem {
     this.fieldPrestige = fieldPrestige;
     this.storage = storage;
 
+    console.log('Creating InventoryItem:', {
+      resourceName: resource.name,
+      wineCharacteristics: resource.wineCharacteristics
+    });
+
     // Initialize base characteristics with resource-specific values
     const baseCharacteristics = resource.wineCharacteristics || {
       sweetness: 0,
@@ -74,6 +73,8 @@ export class InventoryItem {
       spice: 0
     };
 
+    console.log('Base characteristics:', baseCharacteristics);
+
     // Apply base values plus grape characteristics
     this.sweetness = 0.5 + (baseCharacteristics.sweetness || 0);
     this.acidity = 0.5 + (baseCharacteristics.acidity || 0);
@@ -81,6 +82,15 @@ export class InventoryItem {
     this.aroma = 0.5 + (baseCharacteristics.aroma || 0);
     this.body = 0.5 + (baseCharacteristics.body || 0);
     this.spice = 0.5 + (baseCharacteristics.spice || 0);
+
+    console.log('Final characteristics after adding base 0.5:', {
+      sweetness: this.sweetness,
+      acidity: this.acidity,
+      tannins: this.tannins,
+      aroma: this.aroma,
+      body: this.body,
+      spice: this.spice
+    });
 
     // Ensure values stay within 0-1 range
     Object.entries({
@@ -92,6 +102,15 @@ export class InventoryItem {
       spice: this.spice
     }).forEach(([key, value]) => {
       this[key] = Math.max(0, Math.min(1, value));
+    });
+
+    console.log('Final characteristics after clamping to 0-1:', {
+      sweetness: this.sweetness,
+      acidity: this.acidity,
+      tannins: this.tannins,
+      aroma: this.aroma,
+      body: this.body,
+      spice: this.spice
     });
   }
 
@@ -131,12 +150,25 @@ export class Inventory {
   }
 
   addResource(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
-    const existingItem = this.findMatchingItem(resource, state, vintage, quality, fieldName, storage);
+    // Ensure we're passing a proper Resource object
+    let resourceObj;
+    if (typeof resource === 'string') {
+      resourceObj = getResourceByName(resource);
+    } else if (resource.name) {
+      resourceObj = getResourceByName(resource.name);
+    }
+
+    if (!resourceObj) {
+      console.error('Invalid resource:', resource);
+      return;
+    }
+
+    const existingItem = this.findMatchingItem(resourceObj, state, vintage, quality, fieldName, storage);
     
     if (existingItem) {
       existingItem.amount += amount;
     } else {
-            this.items.push(new InventoryItem(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage));
+      this.items.push(new InventoryItem(resourceObj, amount, state, vintage, quality, fieldName, fieldPrestige, storage));
     }
   }
 
