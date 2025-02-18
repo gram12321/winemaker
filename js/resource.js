@@ -43,7 +43,6 @@ export class Resource {
 
         // Set characteristics from the data structure
         this.wineCharacteristics = grapeCharacteristics[name];
-        console.log(`Creating Resource ${name}:`, this.wineCharacteristics);
     }
 }
 
@@ -57,11 +56,6 @@ export class InventoryItem {
     this.fieldName = fieldName;
     this.fieldPrestige = fieldPrestige;
     this.storage = storage;
-
-    console.log('Creating InventoryItem:', {
-      resourceName: resource.name,
-      wineCharacteristics: resource.wineCharacteristics
-    });
 
     // Initialize base characteristics with resource-specific values
     const baseCharacteristics = resource.wineCharacteristics || {

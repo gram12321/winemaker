@@ -53,7 +53,14 @@ function createWineInfoOverlayHTML(wine) {
                             ` (${(balanceInfo.distance * 100).toFixed(1)}% away)` : 
                             ''}</td></tr>
                     <tr><td>Amount</td><td>${formatAmount(wine)}</td></tr>
-                    <tr><td>State</td><td>${wine.state}</td></tr>
+                    <tr>
+                        <td>State</td>
+                        <td>
+                            <img src="/assets/icon/small/${wine.state.toLowerCase()}.png" 
+                                 alt="${wine.state}" 
+                                 class="characteristic-icon">
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>`;
@@ -75,7 +82,12 @@ function createWineInfoOverlayHTML(wine) {
                         const colorClass = getColorClass(value);
                         return `
                             <tr>
-                                <td>${trait.charAt(0).toUpperCase() + trait.slice(1)}</td>
+                                <td>
+                                    <img src="/assets/icon/small/${trait}.png" 
+                                         alt="${trait}" 
+                                         class="characteristic-icon">
+                                    ${trait.charAt(0).toUpperCase() + trait.slice(1)}
+                                </td>
                                 <td class="${colorClass}">${(value * 100).toFixed(0)}%</td>
                             </tr>`;
                     }).join('')}

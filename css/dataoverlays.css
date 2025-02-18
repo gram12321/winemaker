@@ -191,7 +191,13 @@
   grid-template-columns: repeat(3, 1fr); /* Display 3 buttons per row */
   gap: 3px;
   justify-content: center;
+}
 
-
+/* Specific for wineinfooverlay */
+.characteristic-icon {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+  margin-right: 8px;
 }
 
