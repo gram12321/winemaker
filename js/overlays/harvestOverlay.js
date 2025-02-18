@@ -22,16 +22,28 @@ export function showHarvestOverlay(farmland, farmlandId) {
     return overlayContainer;
 }
 
-// Modify calculateHarvestWorkData to return workData object instead of just totalWork
-function calculateHarvestWorkData(farmland, totalHarvest) {
+// New helper function for altitude calculations
+function getAltitudeParams(farmland) {
     const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
     const medianAltitude = (minAltitude + maxAltitude) / 2;
     const altitudeDeviation = (farmland.altitude - medianAltitude) / (maxAltitude - minAltitude);
+
+    return {
+        minAltitude,
+        maxAltitude,
+        medianAltitude,
+        altitudeEffect: altitudeDeviation * 0.5
+    };
+}
+
+// Modify calculateHarvestWorkData to return workData object instead of just totalWork
+function calculateHarvestWorkData(farmland, totalHarvest) {
+    const altitudeParams = getAltitudeParams(farmland);
     const resource = getResourceByName(farmland.plantedResourceName);
 
     const workModifiers = [
         (1 - resource.fragile) * 0.5,    // fragility penalty
-        altitudeDeviation * 0.5             // altitude penalty
+        altitudeParams.altitudeEffect     // altitude penalty
     ];
 
     const totalWork = calculateTotalWork(farmland.acres, {
@@ -46,10 +58,7 @@ function calculateHarvestWorkData(farmland, totalHarvest) {
         tasks: ['HARVESTING'],
         totalWork: totalHarvest ? Math.ceil(totalWork * (totalHarvest / farmlandYield(farmland))) : totalWork,
         altitude: farmland.altitude,
-        altitudeEffect: altitudeDeviation * 0.5,
-        minAltitude,
-        maxAltitude,
-        medianAltitude,
+        ...altitudeParams,
         robustness: resource.fragile,     // Pass fragile directly instead of inverting
         fragilityEffect: (1 - resource.fragile) * 0.5  // Keep calculation logic unchanged
     };
@@ -218,12 +227,11 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
     const currentFarmland = loadFarmlands().find(f => f.id === parseInt(farmlandId));
     if (!currentFarmland) return false;
 
-    const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
+    const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName];
     const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
 
-    // Calculate harvest characteristics
-    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
-    const medianAltitude = (minAltitude + maxAltitude) / 2;
+    // Use the shared altitude parameters function
+    const { medianAltitude, maxAltitude } = getAltitudeParams(farmland);
 
     const harvestParams = {
         ripeness: currentFarmland.ripeness,
@@ -261,46 +269,43 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
         if (availableCapacity <= 0) continue;
 
         const amountForTool = Math.min(remainingHarvest, availableCapacity);
-        try {
-            const matchingGrapes = inventoryInstance.items.find(item =>
-                item.storage === selectedTool && 
-                item.state === 'Grapes' &&
-                item.resource.name === farmland.plantedResourceName &&
-                item.vintage === gameYear
-            );
+        const matchingGrapes = inventoryInstance.items.find(item =>
+            item.storage === selectedTool && 
+            item.state === 'Grapes' &&
+            item.resource.name === farmland.plantedResourceName &&
+            item.vintage === gameYear
+        );
 
-            if (matchingGrapes) {
-                // Blend characteristics based on amounts
-                const totalAmount = matchingGrapes.amount + amountForTool;
-                Object.keys(harvestedCharacteristics).forEach(characteristic => {
-                    matchingGrapes[characteristic] = (
-                        (matchingGrapes[characteristic] * matchingGrapes.amount) +
-                        (harvestedCharacteristics[characteristic] * amountForTool)
-                    ) / totalAmount;
-                });
-                matchingGrapes.amount = totalAmount;
-                matchingGrapes.quality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
-            } else {
-                const newGrapes = inventoryInstance.addResource(
-                    resourceObj,
-                    amountForTool,
-                    'Grapes',
-                    gameYear,
-                    quality,
-                    farmland.name,
-                    farmland.farmlandPrestige,
-                    selectedTool
-                );
-                // Apply calculated characteristics to new grapes
+        if (matchingGrapes) {
+            // Blend characteristics based on amounts
+            const totalAmount = matchingGrapes.amount + amountForTool;
+            Object.keys(harvestedCharacteristics).forEach(characteristic => {
+                matchingGrapes[characteristic] = (
+                    (matchingGrapes[characteristic] * matchingGrapes.amount) +
+                    (harvestedCharacteristics[characteristic] * amountForTool)
+                ) / totalAmount;
+            });
+            matchingGrapes.amount = totalAmount;
+            matchingGrapes.quality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
+        } else {
+            const newGrapes = inventoryInstance.addResource(
+                resourceObj,
+                amountForTool,
+                'Grapes',
+                gameYear,
+                quality,
+                farmland.name,
+                farmland.farmlandPrestige,
+                selectedTool
+            );
+            if (newGrapes) {
                 Object.assign(newGrapes, harvestedCharacteristics);
             }
-
-            totalStoredAmount += amountForTool;
-            remainingHarvest -= amountForTool;
-            addConsoleMessage(`Harvested ${formatNumber(amountForTool)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name} to ${selectedTool}`);
-        } catch (error) {
-            addConsoleMessage(`Error storing harvest: ${error.message}`);
         }
+
+        totalStoredAmount += amountForTool;
+        remainingHarvest -= amountForTool;
+        addConsoleMessage(`Harvested ${formatNumber(amountForTool)} kg of ${farmland.plantedResourceName} with quality ${quality} from ${farmland.name} to ${selectedTool}`);
     }
 
     if (totalStoredAmount > 0) {
