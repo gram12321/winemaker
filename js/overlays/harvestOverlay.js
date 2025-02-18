@@ -12,6 +12,7 @@ import { createOverlayHTML, createTextCenter, createTable } from '../components/
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateHarvestCharacteristics } from '../utils/harvestCharacteristics.js';
+import { applyHarvestOxidation } from '../utils/oxidationIndex.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
     const overlayContainer = showModalOverlay('harvestOverlay', createHarvestOverlayHTML(farmland));
@@ -287,6 +288,7 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             });
             matchingGrapes.amount = totalAmount;
             matchingGrapes.quality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
+            applyHarvestOxidation(matchingGrapes);
         } else {
             const newGrapes = inventoryInstance.addResource(
                 resourceObj,
@@ -300,6 +302,7 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             );
             if (newGrapes) {
                 Object.assign(newGrapes, harvestedCharacteristics);
+                applyHarvestOxidation(newGrapes);
             }
         }
 

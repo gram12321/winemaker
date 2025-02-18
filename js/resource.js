@@ -85,7 +85,7 @@ export class InventoryItem {
     this.sweetness = 0.5 + (baseCharacteristics.sweetness || 0);
     this.tannins = 0.5 + (baseCharacteristics.tannins || 0);
 
-  }
+      }
 
   getDisplayInfo() {
     return {
