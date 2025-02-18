@@ -679,6 +679,17 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
     const fieldName = grapeResource.fieldName;
     const fieldPrestige = grapeResource.fieldPrestige;
 
+    // Copy all grape characteristics
+    const characteristics = {
+        acidity: grapeResource.acidity,
+        aroma: grapeResource.aroma,
+        body: grapeResource.body,
+        spice: grapeResource.spice,
+        sweetness: grapeResource.sweetness,
+        tannins: grapeResource.tannins,
+        oxidation: grapeResource.oxidation || 0
+    };
+
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
         grapeAmountToRemove,
@@ -723,7 +734,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
         const amountToStore = Math.min(mustPerStorage, remainingMust);
 
         if (amountToStore > 0) {
-            inventoryInstance.addResource(
+            const newMust = inventoryInstance.addResource(
                 { name: resourceName, naturalYield: 1 },
                 amountToStore,
                 'Must',
@@ -733,6 +744,11 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
                 fieldPrestige,
                 mustStorage
             );
+
+            // Apply all characteristics to the new must
+            if (newMust) {
+                Object.assign(newMust, characteristics);
+            }
 
             remainingMust -= amountToStore;
         }
