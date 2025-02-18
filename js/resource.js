@@ -123,15 +123,18 @@ export class Inventory {
 
     if (!resourceObj) {
       console.error('Invalid resource:', resource);
-      return;
+      return null;
     }
 
     const existingItem = this.findMatchingItem(resourceObj, state, vintage, quality, fieldName, storage);
     
     if (existingItem) {
       existingItem.amount += amount;
+      return existingItem;
     } else {
-      this.items.push(new InventoryItem(resourceObj, amount, state, vintage, quality, fieldName, fieldPrestige, storage));
+      const newItem = new InventoryItem(resourceObj, amount, state, vintage, quality, fieldName, fieldPrestige, storage);
+      this.items.push(newItem);
+      return newItem;
     }
   }
 

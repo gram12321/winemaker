@@ -6,10 +6,8 @@ import { Tool, getBuildingTools  } from '/js/buildings.js';
 function loadInventory() {
   let savedInventory = localStorage.getItem('playerInventory');
 
-  // Safely parse JSON data
   try {
     savedInventory = JSON.parse(savedInventory);
-    // Ensure savedInventory is an array
     if (!Array.isArray(savedInventory)) {
       savedInventory = [];
     }
@@ -17,9 +15,13 @@ function loadInventory() {
     console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
     savedInventory = [];
   }
-  // Populate the inventory instance
+
+  // Clear existing inventory
+  inventoryInstance.items = [];
+
+  // Populate the inventory instance with saved data
   savedInventory.forEach(item => {
-    inventoryInstance.addResource(
+    const newItem = inventoryInstance.addResource(
       { name: item.resource.name, naturalYield: item.resource.naturalYield || 1 },
       item.amount,
       item.state,
@@ -29,6 +31,24 @@ function loadInventory() {
       item.fieldPrestige,
       item.storage
     );
+
+    // Restore grape characteristics if they exist
+    if (newItem && item.state === 'Grapes') {
+      const characteristics = [
+        'sweetness',
+        'acidity',
+        'tannins',
+        'body',
+        'spice',
+        'aroma'
+      ];
+
+      characteristics.forEach(char => {
+        if (typeof item[char] === 'number') {
+          newItem[char] = item[char];
+        }
+      });
+    }
   });
 }
 
@@ -37,7 +57,44 @@ loadInventory();
 
 // Function to save inventory to localStorage
 function saveInventory() {
-  localStorage.setItem('playerInventory', JSON.stringify(inventoryInstance.items));
+  // Save all item properties including grape characteristics
+  const itemsToSave = inventoryInstance.items.map(item => {
+    const savedItem = {
+      resource: {
+        name: item.resource.name,
+        naturalYield: item.resource.naturalYield
+      },
+      amount: item.amount,
+      state: item.state,
+      vintage: item.vintage,
+      quality: item.quality,
+      fieldName: item.fieldName,
+      fieldPrestige: item.fieldPrestige,
+      storage: item.storage
+    };
+
+    // Add grape characteristics if they exist
+    if (item.state === 'Grapes') {
+      const characteristics = [
+        'sweetness',
+        'acidity',
+        'tannins',
+        'body',
+        'spice',
+        'aroma'
+      ];
+
+      characteristics.forEach(char => {
+        if (typeof item[char] === 'number') {
+          savedItem[char] = item[char];
+        }
+      });
+    }
+
+    return savedItem;
+  });
+
+  localStorage.setItem('playerInventory', JSON.stringify(itemsToSave));
 }
 
 

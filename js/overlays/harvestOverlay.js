@@ -11,6 +11,7 @@ import { showModalOverlay } from './overlayUtils.js';
 import { createOverlayHTML, createTextCenter, createTable } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
+import { calculateHarvestCharacteristics } from '../utils/harvestCharacteristics.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
     const overlayContainer = showModalOverlay('harvestOverlay', createHarvestOverlayHTML(farmland));
@@ -220,6 +221,26 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
     const suitability = grapeSuitability[farmland.country]?.[farmland.region]?.[farmland.plantedResourceName] || 0.5;
     const quality = ((farmland.annualQualityFactor + currentFarmland.ripeness + suitability) / 3).toFixed(2);
 
+    // Calculate harvest characteristics
+    const [minAltitude, maxAltitude] = regionAltitudeRanges[farmland.country][farmland.region];
+    const medianAltitude = (minAltitude + maxAltitude) / 2;
+
+    const harvestParams = {
+        ripeness: currentFarmland.ripeness,
+        qualityFactor: farmland.annualQualityFactor,
+        suitability,
+        altitude: farmland.altitude,
+        medianAltitude,
+        maxAltitude
+    };
+
+    // Get base characteristics from resource
+    const resourceObj = getResourceByName(farmland.plantedResourceName);
+    const harvestedCharacteristics = calculateHarvestCharacteristics(
+        resourceObj.wineCharacteristics,
+        harvestParams
+    );
+
     // Process each tool in sequence
     for (const selectedTool of toolsArray) {
         if (remainingHarvest <= 0) break;
@@ -249,13 +270,19 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             );
 
             if (matchingGrapes) {
+                // Blend characteristics based on amounts
                 const totalAmount = matchingGrapes.amount + amountForTool;
-                const newQuality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
+                Object.keys(harvestedCharacteristics).forEach(characteristic => {
+                    matchingGrapes[characteristic] = (
+                        (matchingGrapes[characteristic] * matchingGrapes.amount) +
+                        (harvestedCharacteristics[characteristic] * amountForTool)
+                    ) / totalAmount;
+                });
                 matchingGrapes.amount = totalAmount;
-                matchingGrapes.quality = newQuality.toFixed(2);
+                matchingGrapes.quality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
             } else {
-                inventoryInstance.addResource(
-                    { name: farmland.plantedResourceName, naturalYield: 1 },
+                const newGrapes = inventoryInstance.addResource(
+                    resourceObj,
                     amountForTool,
                     'Grapes',
                     gameYear,
@@ -264,6 +291,8 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                     farmland.farmlandPrestige,
                     selectedTool
                 );
+                // Apply calculated characteristics to new grapes
+                Object.assign(newGrapes, harvestedCharacteristics);
             }
 
             totalStoredAmount += amountForTool;

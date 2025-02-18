@@ -1,16 +1,6 @@
 export function balanceCalculator(wine, archetype) {
-    let debugInfo = {
-        scores: {},
-        adjustedRanges: {},
-        deductions: {},  // Changed from penalties to deductions
-        reason: ""
-    };
-
     // Calculate dynamic balance first (always applies)
-    let { score: dynamicBalance, adjustedRanges, deductions } = dynamicBalanceScore(wine, baseBalancedRanges, true);  // Changed from penalties to deductions
-    debugInfo.scores.dynamic = dynamicBalance;
-    debugInfo.adjustedRanges = adjustedRanges;
-    debugInfo.deductions = deductions;  // Changed from penalties to deductions
+    let dynamicBalance = dynamicBalanceScore(wine, baseBalancedRanges);
 
     // Calculate archetype scores if wine qualifies
     let archetypeBalance = 0;
@@ -18,66 +8,15 @@ export function balanceCalculator(wine, archetype) {
         let midpointScore = distanceScore(wine, archetype);
         let groupBalance = balanceScore(wine, archetype);
         archetypeBalance = calculateSteppedBalance((midpointScore + groupBalance) / 2);
-        debugInfo.scores.archetype = archetypeBalance;
-        debugInfo.reason = "Wine qualifies for archetype";
-    } else {
-        debugInfo.reason = "Wine does not qualify for archetype";
     }
 
     // Apply stepped balance calculation
     let dynamicScore = calculateSteppedBalance(dynamicBalance);
-    debugInfo.scores.dynamicFinal = dynamicScore;
 
     // Final score calculation - take highest score instead of weighted average
-    let finalScore;
-    if (qualifiesForArchetype(wine, archetype)) {
-        finalScore = Math.max(archetypeBalance, dynamicScore);
-        debugInfo.scoreUsed = archetypeBalance > dynamicScore ? "archetype" : "dynamic";
-    } else {
-        finalScore = dynamicScore;
-        debugInfo.scoreUsed = "dynamic";
-    }
-
-    // Debug logging
-    console.log("=== Wine Balance Analysis ===");
-    console.log("Status:", debugInfo.reason);
-    console.log("Score Used:", debugInfo.scoreUsed);
-    
-    // More detailed score breakdown
-    console.log("\nScore Breakdown:");
-    console.log("Dynamic Balance:");
-    console.log("  Raw Score:", debugInfo.scores.dynamic.toFixed(3));
-    console.log("  After Stepped Calculation:", debugInfo.scores.dynamicFinal.toFixed(3));
-    if (debugInfo.scores.archetype) {
-        console.log("Archetype Score:", debugInfo.scores.archetype.toFixed(3));
-    }
-    console.log("Final Score (using " + debugInfo.scoreUsed + "):", finalScore.toFixed(3));
-
-    // Detailed range and deduction analysis
-    console.log("\nCharacteristic Analysis:");
-    for (const [characteristic, deduction] of Object.entries(debugInfo.deductions)) {  // Changed from penalties to deductions
-        console.log(`\n${characteristic.toUpperCase()}:`);
-        console.log(`  Value: ${deduction.value.toFixed(3)}`);
-        console.log(`  Acceptable Range: [${deduction.range[0].toFixed(2)} - ${deduction.range[1].toFixed(2)}]`);
-        console.log(`  Midpoint: ${deduction.midpoint.toFixed(6)}`);  // Show more decimals
-        console.log("  Deductions:");
-        console.log(`    Within Range: ${deduction.insideRangeDeduction.toFixed(6)}`);
-        if (deduction.outOfRangeDeduction > 0) {
-            console.log(`    Outside Range: ${deduction.outOfRangeDeduction.toFixed(3)}`);
-        }
-        if (deduction.adjustmentPenalty && deduction.adjustmentPenalty !== 1) {
-            console.log(`    Additional Penalties:`);
-            console.log(`      Base Deduction: ${(deduction.insideRangeDeduction + deduction.outOfRangeDeduction).toFixed(3)}`);
-            console.log(`      Penalty Multiplier: ${deduction.adjustmentPenalty.toFixed(3)}x`);
-            console.log(`      After Penalties: ${((deduction.insideRangeDeduction + deduction.outOfRangeDeduction) * deduction.adjustmentPenalty).toFixed(3)}`);
-        }
-        console.log(`  Total Deduction: ${deduction.totalDeduction.toFixed(3)}`);
-    }
-
-    console.log(`\nFinal Score: ${finalScore.toFixed(3)}`);
-    console.log("========================");
-
-    return finalScore;
+    return qualifiesForArchetype(wine, archetype) ? 
+        Math.max(archetypeBalance, dynamicScore) : 
+        dynamicScore;
 }
 
 function calculateSteppedBalance(score) {
@@ -240,7 +179,6 @@ export const archetypes = {
     aroma: [0.3, 0.7]
 };
 
-
 function applyRangeAdjustments(wine, baseBalancedRanges) {
     let adjustedRanges = structuredClone(baseBalancedRanges);
 
@@ -297,10 +235,9 @@ function applyPenaltyAdjustments(wine) {
     return penaltyMultipliers;
 }
 
-function dynamicBalanceScore(wine, baseBalancedRanges, debug = false) {
+function dynamicBalanceScore(wine, baseBalancedRanges) {
     let adjustedRanges = applyRangeAdjustments(wine, baseBalancedRanges);
     let penaltyMultipliers = applyPenaltyAdjustments(wine);
-    let deductions = {};
     let totalDeduction = 0;
 
     for (const characteristic in wine) {
@@ -335,45 +272,13 @@ function dynamicBalanceScore(wine, baseBalancedRanges, debug = false) {
         let adjustmentPenalty = penaltyMultipliers[penaltyKey] || 1;
         rawDeduction *= adjustmentPenalty;
 
-        // Apply exponential decay to the deduction: 1 - Math.exp(-deduction)
+        // Apply exponential decay to the deduction
         let normalizedDeduction = 1 - Math.exp(-rawDeduction);
-
-        if (debug) {
-            deductions[characteristic] = {
-                value,
-                range: [min, max],
-                midpoint,
-                insideRangeDeduction,
-                outOfRangeDeduction,
-                adjustmentPenalty,
-                rawDeduction,
-                normalizedDeduction,
-                totalDeduction: normalizedDeduction
-            };
-        }
-
         totalDeduction += normalizedDeduction;
     }
 
     let avgDeduction = totalDeduction / Object.keys(wine).length;
-    let finalScore = 1 - avgDeduction;
-
-    // Debug logging
-    if (debug) {
-        console.log("\nFinal Score Calculation:");
-        console.log("Normalized Deductions by Characteristic:");
-        for (const characteristic in deductions) {
-            console.log(`  ${characteristic}: ${deductions[characteristic].normalizedDeduction.toFixed(3)} (raw: ${deductions[characteristic].rawDeduction.toFixed(3)})`);
-        }
-        console.log(`Average normalized deduction: ${avgDeduction.toFixed(3)}`);
-        console.log(`Final Score: 1.0 - ${avgDeduction.toFixed(3)} = ${finalScore.toFixed(3)}`);
-    }
-
-    return debug ? {
-        score: finalScore,
-        adjustedRanges,
-        deductions
-    } : finalScore;
+    return 1 - avgDeduction;
 }
 
 // Update balance adjustments with stronger range modifications
