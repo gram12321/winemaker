@@ -4,6 +4,7 @@ import { showFermentationOverlay } from '/js/overlays/fermentationOverlay.js';
 import { loadBuildings } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 import { inventoryInstance } from '/js/resource.js';
+import { showWineInfoOverlay } from '../wineInfoOverlay.js';
 
 export function showWineryOverlay() {
     const overlayContent = createWineryOverlayHTML();
@@ -126,6 +127,17 @@ function populateStorageRow(tableBody, tool, inventoryItems) {
 
     if (firstItem || tool) {
         const row = document.createElement('tr');
+        
+        // Make entire row clickable for item info if there's content
+        if (firstItem) {
+            row.addEventListener('click', (e) => {
+                // Don't trigger if clicking a button or other interactive element
+                if (!e.target.closest('button')) {
+                    showWineInfoOverlay(firstItem);
+                }
+            });
+        }
+
         let qualityDisplay = 'N/A';
         if (firstItem?.quality) {
             qualityDisplay = formatQualityDisplay(firstItem.quality);

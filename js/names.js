@@ -306,8 +306,6 @@ const regionSoilTypes = {
   },
 };
 
-// names.js
-
 const regionAltitudeRanges = {
   "Italy": {
     "Piedmont": [150, 600],
