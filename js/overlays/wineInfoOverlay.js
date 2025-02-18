@@ -12,12 +12,12 @@ export function showWineInfoOverlay(wineItem) {
 function calculateWineBalance(wine) {
     // Create wine data object for balance calculation
     const wineData = {
-        sweetness: wine.sweetness,
         acidity: wine.acidity,
-        tannins: wine.tannins,
+        aroma: wine.aroma,
         body: wine.body,
         spice: wine.spice,
-        aroma: wine.aroma
+        sweetness: wine.sweetness,
+        tannins: wine.tannins
     };
 
     let bestScore = 0;
@@ -41,19 +41,7 @@ function calculateWineBalance(wine) {
 }
 
 function createWineInfoOverlayHTML(wine) {
-    console.log('Wine data in overlay:', {
-        name: wine.resource.name,
-        characteristics: {
-            sweetness: wine.sweetness,
-            acidity: wine.acidity,
-            tannins: wine.tannins,
-            aroma: wine.aroma,
-            body: wine.body,
-            spice: wine.spice
-        },
-        resourceCharacteristics: wine.resource.wineCharacteristics
-    });
-
+    
     const balanceInfo = calculateWineBalance(wine);
     const balanceColorClass = getColorClass(balanceInfo.score);
 
@@ -66,10 +54,10 @@ function createWineInfoOverlayHTML(wine) {
                     <tr><td>Name</td><td>${wine.resource.name}</td></tr>
                     <tr><td>Vintage</td><td>${wine.vintage}</td></tr>
                     <tr><td>Field</td><td>${wine.fieldName}</td></tr>
-                    <tr><td>Quality</td><td class="${getColorClass(wine.quality)}">${(wine.quality * 100).toFixed(0)}%</td></tr>
-                    <tr><td>Balance</td><td class="${balanceColorClass}">${(balanceInfo.score * 100).toFixed(1)}%</td></tr>
-                    ${balanceInfo.archetype ? `<tr><td>Best Archetype</td><td>${balanceInfo.archetype}</td></tr>` : ''}
                     <tr><td>Amount</td><td>${formatAmount(wine)}</td></tr>
+                    ${balanceInfo.archetype ? `<tr><td>Best Archetype</td><td>${balanceInfo.archetype}</td></tr>` : ''}
+                    <tr><td>Balance</td><td class="${balanceColorClass}">${(balanceInfo.score * 100).toFixed(1)}%</td></tr>
+                    <tr><td>Quality</td><td class="${getColorClass(wine.quality)}">${(wine.quality * 100).toFixed(0)}%</td></tr>
                     <tr><td>State</td><td>${wine.state}</td></tr>
                 </tbody>
             </table>
@@ -82,13 +70,13 @@ function createWineInfoOverlayHTML(wine) {
             <table class="data-table">
                 <tbody>
                     ${Object.entries({
-                        sweetness: wine.sweetness,
                         acidity: wine.acidity,
-                        tannins: wine.tannins,
+                        aroma: wine.aroma,
                         body: wine.body,
                         spice: wine.spice,
-                        aroma: wine.aroma
-                    }).map(([trait, value]) => {
+                        sweetness: wine.sweetness,
+                        tannins: wine.tannins
+                    }).sort(([a], [b]) => a.localeCompare(b)).map(([trait, value]) => {
                         const colorClass = getColorClass(value);
                         return `
                             <tr>

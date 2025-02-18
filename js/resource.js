@@ -1,38 +1,38 @@
 import { getColorClass } from './utils.js';
 
 const grapeCharacteristics = {
-    'Barbera': {
-        sweetness: 0,      // neutral
-        acidity: 0.2,      // high acidity
-        tannins: 0.1,      // moderate tannins
-        aroma: 0,          // neutral
-        body: 0.1,         // moderately full body
-        spice: 0           // neutral
-    },
-    'Pinot Noir': {
-        sweetness: 0,      // neutral
-        acidity: 0.15,     // moderately high acidity
-        tannins: -0.1,     // low tannins
-        aroma: 0.1,        // aromatic
-        body: -0.15,       // light body
-        spice: 0           // neutral
-    },
-    'Chardonnay': {
-        sweetness: 0,      // neutral
-        acidity: -0.1,      // moderate acidity
-        tannins: -0.15,    // very low tannins
-        aroma: 0.15,       // aromatic
-        body: 0.25,        // medium body
-        spice: 0.0         // neutral
-    },
-    'Primitivo': {
-        sweetness: 0.2,     // naturally sweet
-        acidity: 0,        // neutral
-        tannins: 0.2,      // high tannins
-        aroma: 0.2,        // very aromatic
-        body: 0.2,         // full bodied
-        spice: 0           // neutral
-    }
+  'Barbera': {
+    acidity: 0.2,      // high acidity
+    aroma: 0,          // neutral
+    body: 0.1,         // moderately full body
+    spice: 0,          // neutral
+    sweetness: 0,      // neutral
+    tannins: 0.1       // moderate tannins
+  },
+  'Chardonnay': {
+    acidity: -0.1,     // moderate acidity
+    aroma: 0.15,       // aromatic
+    body: 0.25,        // medium body
+    spice: 0.0,        // neutral
+    sweetness: 0,      // neutral
+    tannins: -0.15     // very low tannins
+  },
+  'Pinot Noir': {
+    acidity: 0.15,     // moderately high acidity
+    aroma: 0.1,        // aromatic
+    body: -0.15,       // light body
+    spice: 0,          // neutral
+    sweetness: 0,      // neutral
+    tannins: -0.1      // low tannins
+  },
+  'Primitivo': {
+    acidity: 0,        // neutral
+    aroma: 0.2,        // very aromatic
+    body: 0.2,         // full bodied
+    spice: 0,          // neutral
+    sweetness: 0.2,    // naturally sweet
+    tannins: 0.2       // high tannins
+  }
 };
 
 export class Resource {
@@ -65,53 +65,22 @@ export class InventoryItem {
 
     // Initialize base characteristics with resource-specific values
     const baseCharacteristics = resource.wineCharacteristics || {
-      sweetness: 0,
       acidity: 0,
-      tannins: 0,
       aroma: 0,
       body: 0,
-      spice: 0
+      spice: 0,
+      sweetness: 0,
+      tannins: 0
     };
 
-    console.log('Base characteristics:', baseCharacteristics);
-
     // Apply base values plus grape characteristics
-    this.sweetness = 0.5 + (baseCharacteristics.sweetness || 0);
     this.acidity = 0.5 + (baseCharacteristics.acidity || 0);
-    this.tannins = 0.5 + (baseCharacteristics.tannins || 0);
     this.aroma = 0.5 + (baseCharacteristics.aroma || 0);
     this.body = 0.5 + (baseCharacteristics.body || 0);
     this.spice = 0.5 + (baseCharacteristics.spice || 0);
+    this.sweetness = 0.5 + (baseCharacteristics.sweetness || 0);
+    this.tannins = 0.5 + (baseCharacteristics.tannins || 0);
 
-    console.log('Final characteristics after adding base 0.5:', {
-      sweetness: this.sweetness,
-      acidity: this.acidity,
-      tannins: this.tannins,
-      aroma: this.aroma,
-      body: this.body,
-      spice: this.spice
-    });
-
-    // Ensure values stay within 0-1 range
-    Object.entries({
-      sweetness: this.sweetness,
-      acidity: this.acidity,
-      tannins: this.tannins,
-      aroma: this.aroma,
-      body: this.body,
-      spice: this.spice
-    }).forEach(([key, value]) => {
-      this[key] = Math.max(0, Math.min(1, value));
-    });
-
-    console.log('Final characteristics after clamping to 0-1:', {
-      sweetness: this.sweetness,
-      acidity: this.acidity,
-      tannins: this.tannins,
-      aroma: this.aroma,
-      body: this.body,
-      spice: this.spice
-    });
   }
 
   getDisplayInfo() {
