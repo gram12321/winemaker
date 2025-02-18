@@ -1,3 +1,165 @@
+//Constants
+
+const baseBalancedRanges = {
+    acidity: [0.3, 0.7],
+    aroma: [0.3, 0.7],
+    body: [0.4, 0.8],
+    spice: [0.35, 0.65],
+    sweetness: [0.4, 0.6],
+    tannins: [0.3, 0.7]
+};
+
+const balanceAdjustments = {
+    // Primary Taste Balance
+    sweetness_up: [
+        { 
+            target: "acidity_range",
+            multiplier: 0.5,  // Shift acidity range up by half of sweetness's distance from midpoint
+            formula: (diff) => diff * 0.5  // Simple linear adjustment
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 1,  // Base multiplier
+            formula: (diff) => {
+                // For every 0.1 above midpoint, increase penalty exponentially
+                let steps = Math.floor(diff * 10);  // Convert to steps of 0.1
+                let penalty = 1;  // Start with no penalty
+                
+                for (let i = 0; i < steps; i++) {
+                    penalty *= 1.2;  // Increase by 20% each 0.1 step
+                }
+                
+                return penalty;
+            }
+        }
+    ],
+    acidity_down: [
+        { 
+            target: "sweetness_range",
+            multiplier: 0.5,
+            formula: (diff) => diff * 0.5
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 1.5,
+            formula: (diff) => 1 + Math.pow(diff, 2)
+        }
+    ],
+
+    // Structure Balance
+    body_up: [
+        { 
+            target: "spice_range",
+            multiplier: 0.5,
+            formula: (diff) => diff * 0.5
+        },
+        { 
+            target: "tannins_range",
+            multiplier: 0.6,  // Slightly stronger effect on tannins
+            formula: (diff) => diff * 0.6
+        },
+        {
+            target: "aroma_penalty",
+            penaltyMod: 1.5,
+            formula: (diff) => 1 + Math.pow(diff, 1.5)
+        }
+    ],
+    tannins_up: [
+        { 
+            target: "body_range",
+            multiplier: 0.5,
+            formula: (diff) => diff * 0.5
+        },
+        { 
+            target: "aroma_range",
+            multiplier: 0.4,  // Slightly weaker effect on aroma
+            formula: (diff) => diff * 0.4
+        },
+        {
+            target: "sweetness_penalty",
+            penaltyMod: 2,
+            formula: (diff) => 1 + Math.pow(diff, 2)
+        }
+    ],
+
+    // Aromatics Balance
+    spice_down: [
+        {
+            target: "body_penalty",
+            penaltyMod: 2,
+            formula: (diff) => 1 + Math.pow(diff, 1.5)
+        },
+        {
+            target: "aroma_penalty",
+            penaltyMod: 1.5,
+            formula: (diff) => 1 + Math.pow(diff, 1.3)
+        }
+    ],
+    aroma_up: [
+        {
+            target: "body_range",
+            multiplier: 0.3,
+            formula: (diff) => diff * 0.3
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 1.3,
+            formula: (diff) => 1 + Math.pow(diff, 1.2)
+        }
+    ]
+};
+
+// archetype constants
+export const archetypes = {
+    sweetWine: {
+      name: "Sweet Wine",
+      idealRanges: {
+        sweetness: [0.8, 1.0],  
+        acidity: [0.8, 1.0],    
+        tannins: [0.3, 0.7],  
+        aroma: [0.3, 0.7],     
+        body: [0.3, 0.7],       
+        spice: [0.3, 0.7]       
+      },
+      importance: { 
+        sweetness: 1.0, 
+        acidity: 1.0,
+        tannins: 0.5,
+        aroma: 0.5,
+        body: 0.5,
+        spice: 0.5
+      },
+      balanceGroups: [
+        ["sweetness", "acidity"],  // These must be in balance
+        ["tannins", "aroma", "body", "spice"]  // These should be similar
+      ]
+    },
+  
+    boldRed: {
+      name: "Bold Red",
+      idealRanges: {
+        sweetness: [0.0, 0.4],  
+        acidity: [0.3, 0.7],    
+        tannins: [0.7, 1.0],  
+        aroma: [0.3, 0.7],     // Need to match with acidity
+        body: [0.7, 1.0],       
+        spice: [0.7, 1.0]       
+      },
+      importance: { 
+        sweetness: 0.5, 
+        acidity: 0.8,
+        tannins: 1.0,
+        aroma: 0.7,
+        body: 1.0,
+        spice: 0.7
+      },
+      balanceGroups: [
+        ["tannins", "body", "spice"],  // These must be similar
+        ["acidity", "aroma"]  // These should not be too far apart
+      ]
+    }
+  };
+
 export function balanceCalculator(wine, archetype) {
     // Calculate dynamic balance first (always applies)
     let dynamicBalance = dynamicBalanceScore(wine, baseBalancedRanges);
@@ -59,125 +221,6 @@ function calculateSteppedBalance(score) {
     }
 }
 
-function distanceScore(wine, archetype) {
-    let totalScore = 0;
-    let totalWeight = 0;
-
-    for (const characteristic in archetype.idealRanges) {
-        const [min, max] = archetype.idealRanges[characteristic];
-        const midpoint = (min + max) / 2;  // Fixed: removed 'and', replaced with '+'
-        const value = wine[characteristic];
-        const importance = archetype.importance[characteristic] || 1;
-
-        let distance = Math.abs(value - midpoint) / (max - min); // Normalize distance
-        let score = Math.pow(1 - Math.pow(distance, 2), importance); // Exponential decay
-
-        totalScore += score * importance;
-        totalWeight += importance;
-    }
-
-    return totalWeight > 0 ? totalScore / totalWeight : 0; // Normalize to 0-1
-}
-
-function balanceScore(wine, archetype) {
-    let totalScore = 0;
-    let totalWeight = 0;
-    
-    for (const group of archetype.balanceGroups) {
-        let values = group.map(char => wine[char]).filter(v => v !== undefined);
-        if (values.length < 2) continue; // Skip groups with only 1 characteristic
-
-        let weight = group.reduce((sum, char) => sum + (archetype.importance[char] || 1), 0) / group.length;  // Fixed: added dot before reduce
-
-        let pairwiseDistances = [];
-
-        // Compute all pairwise distances
-        for (let i = 0; i < values.length; i++) {
-            for (let j = i + 1; j < values.length; j++) {
-                let difference = Math.abs(values[i] - values[j]); // Absolute difference
-                pairwiseDistances.push(difference);
-            }
-        }
-
-        let avgDistance = pairwiseDistances.reduce((a, b) => a + b, 0) / pairwiseDistances.length;
-        let score = Math.pow(1 - Math.pow(avgDistance, 2), weight); // Exponential decay
-
-        totalScore += score * weight;
-        totalWeight += weight;
-    }
-
-    return totalWeight > 0 ? totalScore / totalWeight : 0; // Normalize
-}
-
-function qualifiesForArchetype(wine, archetype) {
-    for (const characteristic in archetype.idealRanges) {
-        const [min, max] = archetype.idealRanges[characteristic];
-        if (wine[characteristic] < min || wine[characteristic] > max) {
-            return false; // Reject immediately
-        }
-    }
-    return true;
-}
-
-export const archetypes = {
-    sweetWine: {
-      name: "Sweet Wine",
-      idealRanges: {
-        sweetness: [0.8, 1.0],  
-        acidity: [0.8, 1.0],    
-        tannins: [0.3, 0.7],  
-        aroma: [0.3, 0.7],     
-        body: [0.3, 0.7],       
-        spice: [0.3, 0.7]       
-      },
-      importance: { 
-        sweetness: 1.0, 
-        acidity: 1.0,
-        tannins: 0.5,
-        aroma: 0.5,
-        body: 0.5,
-        spice: 0.5
-      },
-      balanceGroups: [
-        ["sweetness", "acidity"],  // These must be in balance
-        ["tannins", "aroma", "body", "spice"]  // These should be similar
-      ]
-    },
-  
-    boldRed: {
-      name: "Bold Red",
-      idealRanges: {
-        sweetness: [0.0, 0.4],  
-        acidity: [0.3, 0.7],    
-        tannins: [0.7, 1.0],  
-        aroma: [0.3, 0.7],     // Need to match with acidity
-        body: [0.7, 1.0],       
-        spice: [0.7, 1.0]       
-      },
-      importance: { 
-        sweetness: 0.5, 
-        acidity: 0.8,
-        tannins: 1.0,
-        aroma: 0.7,
-        body: 1.0,
-        spice: 0.7
-      },
-      balanceGroups: [
-        ["tannins", "body", "spice"],  // These must be similar
-        ["acidity", "aroma"]  // These should not be too far apart
-      ]
-    }
-  };
-
-
-  const baseBalancedRanges = {
-    sweetness: [0.4, 0.6], 
-    acidity: [0.3, 0.7], 
-    tannins: [0.3, 0.7], 
-    body: [0.4, 0.8], 
-    spice: [0.2, 0.6], 
-    aroma: [0.3, 0.7]
-};
 
 function applyRangeAdjustments(wine, baseBalancedRanges) {
     let adjustedRanges = structuredClone(baseBalancedRanges);
@@ -281,108 +324,70 @@ function dynamicBalanceScore(wine, baseBalancedRanges) {
     return 1 - avgDeduction;
 }
 
-// Update balance adjustments with stronger range modifications
-const balanceAdjustments = {
-    // Primary Taste Balance
-    sweetness_up: [
-        { 
-            target: "acidity_range",
-            multiplier: 0.5,  // Shift acidity range up by half of sweetness's distance from midpoint
-            formula: (diff) => diff * 0.5  // Simple linear adjustment
-        },
-        {
-            target: "spice_penalty",
-            penaltyMod: 1,  // Base multiplier
-            formula: (diff) => {
-                // For every 0.1 above midpoint, increase penalty exponentially
-                let steps = Math.floor(diff * 10);  // Convert to steps of 0.1
-                let penalty = 1;  // Start with no penalty
-                
-                for (let i = 0; i < steps; i++) {
-                    penalty *= 1.2;  // Increase by 20% each 0.1 step
-                }
-                
-                return penalty;
+
+
+// Archtype calculations
+function distanceScore(wine, archetype) {
+    let totalScore = 0;
+    let totalWeight = 0;
+
+    for (const characteristic in archetype.idealRanges) {
+        const [min, max] = archetype.idealRanges[characteristic];
+        const midpoint = (min + max) / 2;  // Fixed: removed 'and', replaced with '+'
+        const value = wine[characteristic];
+        const importance = archetype.importance[characteristic] || 1;
+
+        let distance = Math.abs(value - midpoint) / (max - min); // Normalize distance
+        let score = Math.pow(1 - Math.pow(distance, 2), importance); // Exponential decay
+
+        totalScore += score * importance;
+        totalWeight += importance;
+    }
+
+    return totalWeight > 0 ? totalScore / totalWeight : 0; // Normalize to 0-1
+}
+
+function balanceScore(wine, archetype) {
+    let totalScore = 0;
+    let totalWeight = 0;
+    
+    for (const group of archetype.balanceGroups) {
+        let values = group.map(char => wine[char]).filter(v => v !== undefined);
+        if (values.length < 2) continue; // Skip groups with only 1 characteristic
+
+        let weight = group.reduce((sum, char) => sum + (archetype.importance[char] || 1), 0) / group.length;  // Fixed: added dot before reduce
+
+        let pairwiseDistances = [];
+
+        // Compute all pairwise distances
+        for (let i = 0; i < values.length; i++) {
+            for (let j = i + 1; j < values.length; j++) {
+                let difference = Math.abs(values[i] - values[j]); // Absolute difference
+                pairwiseDistances.push(difference);
             }
         }
-    ],
-    acidity_down: [
-        { 
-            target: "sweetness_range",
-            multiplier: 0.5,
-            formula: (diff) => diff * 0.5
-        },
-        {
-            target: "spice_penalty",
-            penaltyMod: 1.5,
-            formula: (diff) => 1 + Math.pow(diff, 2)
-        }
-    ],
 
-    // Structure Balance
-    body_up: [
-        { 
-            target: "spice_range",
-            multiplier: 0.5,
-            formula: (diff) => diff * 0.5
-        },
-        { 
-            target: "tannins_range",
-            multiplier: 0.6,  // Slightly stronger effect on tannins
-            formula: (diff) => diff * 0.6
-        },
-        {
-            target: "aroma_penalty",
-            penaltyMod: 1.5,
-            formula: (diff) => 1 + Math.pow(diff, 1.5)
-        }
-    ],
-    tannins_up: [
-        { 
-            target: "body_range",
-            multiplier: 0.5,
-            formula: (diff) => diff * 0.5
-        },
-        { 
-            target: "aroma_range",
-            multiplier: 0.4,  // Slightly weaker effect on aroma
-            formula: (diff) => diff * 0.4
-        },
-        {
-            target: "sweetness_penalty",
-            penaltyMod: 2,
-            formula: (diff) => 1 + Math.pow(diff, 2)
-        }
-    ],
+        let avgDistance = pairwiseDistances.reduce((a, b) => a + b, 0) / pairwiseDistances.length;
+        let score = Math.pow(1 - Math.pow(avgDistance, 2), weight); // Exponential decay
 
-    // Aromatics Balance
-    spice_down: [
-        {
-            target: "body_penalty",
-            penaltyMod: 2,
-            formula: (diff) => 1 + Math.pow(diff, 1.5)
-        },
-        {
-            target: "aroma_penalty",
-            penaltyMod: 1.5,
-            formula: (diff) => 1 + Math.pow(diff, 1.3)
-        }
-    ],
-    aroma_up: [
-        {
-            target: "body_range",
-            multiplier: 0.3,
-            formula: (diff) => diff * 0.3
-        },
-        {
-            target: "spice_penalty",
-            penaltyMod: 1.3,
-            formula: (diff) => 1 + Math.pow(diff, 1.2)
-        }
-    ]
-};
+        totalScore += score * weight;
+        totalWeight += weight;
+    }
 
-function calculateNearestArchetype(wine) {
+    return totalWeight > 0 ? totalScore / totalWeight : 0; // Normalize
+}
+
+function qualifiesForArchetype(wine, archetype) {
+    for (const characteristic in archetype.idealRanges) {
+        const [min, max] = archetype.idealRanges[characteristic];
+        if (wine[characteristic] < min || wine[characteristic] > max) {
+            return false; // Reject immediately
+        }
+    }
+    return true;
+}
+
+  function calculateNearestArchetype(wine) {
     let bestDistance = Infinity;
     let nearestArchetype = null;
 

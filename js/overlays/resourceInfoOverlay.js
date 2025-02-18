@@ -125,7 +125,7 @@ function setupResourceInfoEventListeners(details, overlay) {
     if (event.target === overlay) {
       overlay.remove();
     }
-  });  // Removed extra semicolon and fixed bracket
+  });  
 
   // Setup toggle button event listeners for countries
   const toggleButtons = details.querySelectorAll('.toggle-country');
@@ -146,5 +146,4 @@ function setupResourceInfoEventListeners(details, overlay) {
     });
   });
 
-  // Remove tooltip initialization section completely
 }

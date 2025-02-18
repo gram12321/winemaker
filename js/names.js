@@ -117,18 +117,18 @@ const germanMaleNames = [
 
 const grapeSuitability = {
   Italy: {
-    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.5 },
-    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, PinotNoir: 0.5, Primitivo: 0.7 },
-    Veneto: { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.7, Primitivo: 0.6 },
-    Sicily: { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.3, Primitivo: 0.8 },
-    Puglia: { Barbera: 0.9, Chardonnay: 0.65, PinotNoir: 0.4, Primitivo: 1.0 },  // Primitivo's homeland
+    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.5, SauvignonBlanc: 0.6 },
+    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, PinotNoir: 0.5, Primitivo: 0.7, SauvignonBlanc: 0.7 },
+    Veneto: { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.7, Primitivo: 0.6, SauvignonBlanc: 0.8 },
+    Sicily: { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.3, Primitivo: 0.8, SauvignonBlanc: 0.5 },
+    Puglia: { Barbera: 0.9, Chardonnay: 0.65, PinotNoir: 0.4, Primitivo: 1.0, SauvignonBlanc: 0.4 },  // Primitivo's homeland
   },
   France: {
-    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.6 },
-    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, PinotNoir: 0.9, Primitivo: 0.3 },
-    Champagne: { Barbera: 0.2, Chardonnay: 0.9, PinotNoir: 0.8, Primitivo: 0.2 },
-    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, PinotNoir: 0.7, Primitivo: 0.3 },
-    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.5, Primitivo: 0.7 },
+    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.6, SauvignonBlanc: 0.9 },
+    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, PinotNoir: 0.9, Primitivo: 0.3, SauvignonBlanc: 0.7 },
+    Champagne: { Barbera: 0.2, Chardonnay: 0.9, PinotNoir: 0.8, Primitivo: 0.2, SauvignonBlanc: 0.6 },
+    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, PinotNoir: 0.7, Primitivo: 0.3, SauvignonBlanc: 1.0 }, // Loire Valley is perfect for Sauvignon Blanc
+    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.5, Primitivo: 0.7, SauvignonBlanc: 0.7 },
   },
   Spain: {
     Rioja: { Barbera: 0.85, Chardonnay: 0.7, PinotNoir: 0.4, Primitivo: 0.5 },
@@ -145,11 +145,11 @@ const grapeSuitability = {
     "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.75 },
   },
   Germany: {
-    Mosel: { Barbera: 0.15, Chardonnay: 0.8, PinotNoir: 1.0, Primitivo: 0.1 },  // Too cool for Primitivo
-    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, PinotNoir: 0.9, Primitivo: 0.15 },
-    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, PinotNoir: 0.85, Primitivo: 0.2 },
-    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, PinotNoir: 0.8, Primitivo: 0.25 },
-    Ahr: { Barbera: 0.1, Chardonnay: 0.7, PinotNoir: 0.95, Primitivo: 0.1 },
+    Mosel: { Barbera: 0.15, Chardonnay: 0.8, PinotNoir: 1.0, Primitivo: 0.1, SauvignonBlanc: 0.8 },
+    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, PinotNoir: 0.9, Primitivo: 0.15, SauvignonBlanc: 0.85 },
+    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, PinotNoir: 0.85, Primitivo: 0.2, SauvignonBlanc: 0.8 },
+    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, PinotNoir: 0.8, Primitivo: 0.25, SauvignonBlanc: 0.75 },
+    Ahr: { Barbera: 0.1, Chardonnay: 0.7, PinotNoir: 0.95, Primitivo: 0.1, SauvignonBlanc: 0.6 },
   },
 };
 

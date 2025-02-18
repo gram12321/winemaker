@@ -32,6 +32,11 @@ function loadInventory() {
       item.storage
     );
 
+    // Restore oxidation value if it exists
+    if (newItem && typeof item.oxidation === 'number') {
+      newItem.oxidation = item.oxidation;
+    }
+
     // Restore grape characteristics if they exist
     if (newItem && item.state === 'Grapes') {
       const characteristics = [
@@ -70,7 +75,8 @@ function saveInventory() {
       quality: item.quality,
       fieldName: item.fieldName,
       fieldPrestige: item.fieldPrestige,
-      storage: item.storage
+      storage: item.storage,
+      oxidation: item.oxidation // Save oxidation value
     };
 
     // Add grape characteristics if they exist
