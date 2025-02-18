@@ -240,7 +240,7 @@ function applyRangeAdjustments(wine, baseBalancedRanges) {
     return adjustedRanges;
 }
 
-function applyPenaltyAdjustments(wine) {
+function applyPenaltyAdjustments(wine) { // this has the problem that the penalty are non exponential while the basic reduction are exponential, resulting in that the penalty adjustments are not as severe as the normal reduction. Expecially for extream unbalanced wines. It still gives ekstra penalty so we leave it for now
     let penaltyMultipliers = {};
 
     for (const characteristic in wine) {
