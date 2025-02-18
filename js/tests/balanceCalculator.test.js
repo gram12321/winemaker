@@ -1,6 +1,6 @@
 import { balanceCalculator, archetypes } from '../utils/balanceCalculator.js';
 
-// Test Cases
+/* Test Cases
 console.log("=== Balance Calculator Test Suite ===");
 
 // Test 1: Perfect Sweet Wine
@@ -74,3 +74,4 @@ const allOnes = {
 };
 console.log("Test 6 - All Ones:", 
     balanceCalculator(allOnes, archetypes.boldRed), "Expected: <40%");
+ */

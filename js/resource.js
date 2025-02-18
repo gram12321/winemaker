@@ -64,23 +64,35 @@ export class InventoryItem {
     this.fieldPrestige = fieldPrestige;
     this.storage = storage;
 
-    // Initialize base characteristics
-    this.sweetness = 0.5;
-    this.acidity = 0.5;
-    this.tannins = 0.5;
-    this.aroma = 0.5;
-    this.body = 0.5;
-    this.spice = 0.5;
+    // Initialize base characteristics with resource-specific values
+    const baseCharacteristics = resource.wineCharacteristics || {
+      sweetness: 0,
+      acidity: 0,
+      tannins: 0,
+      aroma: 0,
+      body: 0,
+      spice: 0
+    };
 
-    // Apply grape variety characteristics if they exist
-    if (resource.wineCharacteristics) {
-      this.sweetness += resource.wineCharacteristics.sweetness || 0;
-      this.acidity += resource.wineCharacteristics.acidity || 0;
-      this.tannins += resource.wineCharacteristics.tannins || 0;
-      this.aroma += resource.wineCharacteristics.aroma || 0;
-      this.body += resource.wineCharacteristics.body || 0;
-      this.spice += resource.wineCharacteristics.spice || 0;
-    }
+    // Apply base values plus grape characteristics
+    this.sweetness = 0.5 + (baseCharacteristics.sweetness || 0);
+    this.acidity = 0.5 + (baseCharacteristics.acidity || 0);
+    this.tannins = 0.5 + (baseCharacteristics.tannins || 0);
+    this.aroma = 0.5 + (baseCharacteristics.aroma || 0);
+    this.body = 0.5 + (baseCharacteristics.body || 0);
+    this.spice = 0.5 + (baseCharacteristics.spice || 0);
+
+    // Ensure values stay within 0-1 range
+    Object.entries({
+      sweetness: this.sweetness,
+      acidity: this.acidity,
+      tannins: this.tannins,
+      aroma: this.aroma,
+      body: this.body,
+      spice: this.spice
+    }).forEach(([key, value]) => {
+      this[key] = Math.max(0, Math.min(1, value));
+    });
   }
 
   getDisplayInfo() {

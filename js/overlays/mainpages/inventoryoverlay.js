@@ -4,6 +4,7 @@ import { formatNumber, formatQualityDisplay } from '/js/utils.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import { addConsoleMessage } from '/js/console.js';
 import { addTransaction } from '/js/finance.js';
+import { showWineInfoOverlay } from '../wineInfoOverlay.js';
 
 export function showInventoryOverlay() {
     const overlay = showMainViewOverlay(createInventoryOverlayHTML());
@@ -160,6 +161,17 @@ function updateStorageTable(type, buildings, resourceType) {
 function createStorageRow(tool, items) {
     const row = document.createElement('tr');
     const firstItem = items[0];
+    
+    // Make entire row clickable for item info, similar to vineyard overlay pattern
+    if (firstItem) {
+        row.addEventListener('click', (e) => {
+            // Don't trigger if clicking the sell button
+            if (!e.target.closest('.sell-grapes-btn')) {
+                showWineInfoOverlay(firstItem);
+            }
+        });
+    }
+
     const totalAmount = items.reduce((sum, item) => sum + item.amount, 0);
     const qualityDisplay = firstItem?.getQualityDisplay() || 'N/A';
 
@@ -248,6 +260,8 @@ function updateWineTable() {
     bottledWines.forEach(item => {
         const statusImage = `<img src="/assets/pic/bottles.webp" alt="Bottles" title="Bottles" class="status-icon">`;
         const row = document.createElement('tr');
+        // Make row clickable using existing table hover styles
+        row.addEventListener('click', () => showWineInfoOverlay(item));
         row.innerHTML = `
             <td>${item.getDisplayInfo().name}</td>
             <td>${formatNumber(item.amount)} bottles</td>
