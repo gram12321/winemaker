@@ -1,20 +1,55 @@
 //Constants
 
 const baseBalancedRanges = {
-    acidity: [0.3, 0.7],
+    acidity: [0.4, 0.6],
     aroma: [0.3, 0.7],
     body: [0.4, 0.8],
     spice: [0.35, 0.65],
     sweetness: [0.4, 0.6],
-    tannins: [0.3, 0.7]
+    tannins: [0.35, 0.65]
 };
 
 const balanceAdjustments = {
-    // Primary Taste Balance
+    acidity_down: [
+        { 
+            target: "sweetness_range",
+            formula: (diff) => diff * 0.5
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 1.5,
+            formula: (diff) => 1 + Math.pow(diff, 2)
+        }
+    ],
+    aroma_up: [
+        {
+            target: "body_range",
+            formula: (diff) => diff * 0.3
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 1.3,
+            formula: (diff) => 1 + Math.pow(diff, 1.2)
+        }
+    ],
+    body_up: [
+        { 
+            target: "spice_range",
+            formula: (diff) => diff * 0.5
+        },
+        { 
+            target: "tannins_range",
+            formula: (diff) => diff * 0.6
+        },
+        {
+            target: "aroma_penalty",
+            penaltyMod: 1.5,
+            formula: (diff) => 1 + Math.pow(diff, 1.5)
+        }
+    ],
     sweetness_up: [
         { 
             target: "acidity_range",
-            multiplier: 0.5,  // Shift acidity range up by half of sweetness's distance from midpoint
             formula: (diff) => diff * 0.5  // Simple linear adjustment
         },
         {
@@ -33,46 +68,13 @@ const balanceAdjustments = {
             }
         }
     ],
-    acidity_down: [
-        { 
-            target: "sweetness_range",
-            multiplier: 0.5,
-            formula: (diff) => diff * 0.5
-        },
-        {
-            target: "spice_penalty",
-            penaltyMod: 1.5,
-            formula: (diff) => 1 + Math.pow(diff, 2)
-        }
-    ],
-
-    // Structure Balance
-    body_up: [
-        { 
-            target: "spice_range",
-            multiplier: 0.5,
-            formula: (diff) => diff * 0.5
-        },
-        { 
-            target: "tannins_range",
-            multiplier: 0.6,  // Slightly stronger effect on tannins
-            formula: (diff) => diff * 0.6
-        },
-        {
-            target: "aroma_penalty",
-            penaltyMod: 1.5,
-            formula: (diff) => 1 + Math.pow(diff, 1.5)
-        }
-    ],
     tannins_up: [
         { 
             target: "body_range",
-            multiplier: 0.5,
             formula: (diff) => diff * 0.5
         },
         { 
             target: "aroma_range",
-            multiplier: 0.4,  // Slightly weaker effect on aroma
             formula: (diff) => diff * 0.4
         },
         {
@@ -81,8 +83,6 @@ const balanceAdjustments = {
             formula: (diff) => 1 + Math.pow(diff, 2)
         }
     ],
-
-    // Aromatics Balance
     spice_down: [
         {
             target: "body_penalty",
@@ -93,18 +93,6 @@ const balanceAdjustments = {
             target: "aroma_penalty",
             penaltyMod: 1.5,
             formula: (diff) => 1 + Math.pow(diff, 1.3)
-        }
-    ],
-    aroma_up: [
-        {
-            target: "body_range",
-            multiplier: 0.3,
-            formula: (diff) => diff * 0.3
-        },
-        {
-            target: "spice_penalty",
-            penaltyMod: 1.3,
-            formula: (diff) => 1 + Math.pow(diff, 1.2)
         }
     ]
 };

@@ -1,6 +1,6 @@
 import { balanceCalculator, archetypes } from '../utils/balanceCalculator.js';
 
-/* Test Cases
+// Test Cases
 console.log("=== Balance Calculator Test Suite ===");
 
 // Test 1: Perfect Sweet Wine
@@ -74,4 +74,80 @@ const allOnes = {
 };
 console.log("Test 6 - All Ones:", 
     balanceCalculator(allOnes, archetypes.boldRed), "Expected: <40%");
- */
+
+console.log("\n=== Acidity Down Penalty Test Cases ===");
+
+// Test 7-8: Slightly Off Acidity (0.45) Comparison
+const slightAciditySpiceCase = {
+    sweetness: 0.5,
+    acidity: 0.45,   // Slightly below midpoint
+    tannins: 0.5,
+    aroma: 0.5,
+    body: 0.5,
+    spice: 0.25     // Out of range, will get penalty
+};
+
+const slightAcidityTanninCase = {
+    sweetness: 0.5,
+    acidity: 0.45,   // Slightly below midpoint
+    tannins: 0.25,   // Out of range, but no special penalty
+    aroma: 0.5,
+    body: 0.5,
+    spice: 0.5
+};
+
+console.log("Test 7 - Slight Acidity Down + Spice Down:", 
+    balanceCalculator(slightAciditySpiceCase, archetypes.boldRed));
+console.log("Test 8 - Slight Acidity Down + Tannin Down:", 
+    balanceCalculator(slightAcidityTanninCase, archetypes.boldRed),
+    "Expected: Test 7 should be lower than Test 8");
+
+// Test 9-10: Out of Range Acidity (0.30) Comparison
+const outRangeAciditySpiceCase = {
+    sweetness: 0.5,
+    acidity: 0.30,   // Out of acceptable range
+    tannins: 0.5,
+    aroma: 0.5,
+    body: 0.5,
+    spice: 0.25     // Out of range, will get penalty
+};
+
+const outRangeAcidityTanninCase = {
+    sweetness: 0.5,
+    acidity: 0.30,   // Out of acceptable range
+    tannins: 0.25,   // Out of range, but no special penalty
+    aroma: 0.5,
+    body: 0.5,
+    spice: 0.5
+};
+
+console.log("Test 9 - Out Range Acidity + Spice Down:", 
+    balanceCalculator(outRangeAciditySpiceCase, archetypes.boldRed));
+console.log("Test 10 - Out Range Acidity + Tannin Down:", 
+    balanceCalculator(outRangeAcidityTanninCase, archetypes.boldRed),
+    "Expected: Test 9 should be significantly lower than Test 10");
+
+// Test 11-12: Extreme Acidity (0.10) Comparison
+const extremeAciditySpiceCase = {
+    sweetness: 0.5,
+    acidity: 0.10,   // Extremely low acidity
+    tannins: 0.5,
+    aroma: 0.5,
+    body: 0.5,
+    spice: 0.05     // Out of range, will get penalty
+};
+
+const extremeAcidityTanninCase = {
+    sweetness: 0.5,
+    acidity: 0.10,   // Extremely low acidity
+    tannins: 0.05,   // Out of range, but no special penalty
+    aroma: 0.5,
+    body: 0.5,
+    spice: 0.5
+};
+
+console.log("Test 11 - Extreme Acidity Down + Spice Down:", 
+    balanceCalculator(extremeAciditySpiceCase, archetypes.boldRed));
+console.log("Test 12 - Extreme Acidity Down + Tannin Down:", 
+    balanceCalculator(extremeAcidityTanninCase, archetypes.boldRed),
+    "Expected: Test 11 should be drastically lower than Test 12");
