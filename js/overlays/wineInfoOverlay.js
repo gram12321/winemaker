@@ -1,7 +1,7 @@
 import { showModalOverlay } from './overlayUtils.js';
 import { createTextCenter } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
-import { archetypes, balanceCalculator } from '../utils/balanceCalculator.js';
+import { archetypes, balanceCalculator, calculateNearestArchetype } from '../utils/balanceCalculator.js';
 
 export function showWineInfoOverlay(wineItem) {
     const overlayContainer = showModalOverlay('wineInfoOverlay', createWineInfoOverlayHTML(wineItem));
@@ -10,7 +10,6 @@ export function showWineInfoOverlay(wineItem) {
 }
 
 function calculateWineBalance(wine) {
-    // Create wine data object for balance calculation
     const wineData = {
         acidity: wine.acidity,
         aroma: wine.aroma,
@@ -20,28 +19,21 @@ function calculateWineBalance(wine) {
         tannins: wine.tannins
     };
 
-    let bestScore = 0;
-    let bestArchetype = null;
-    let bestDebugInfo = null;
-
-    for (const [key, archetype] of Object.entries(archetypes)) {
-        const score = balanceCalculator(wineData, archetype);
-        if (score > bestScore) {
-            bestScore = score;
-            bestArchetype = archetype.name;
-            bestDebugInfo = score;
-        }
-    }
+    // Get nearest archetype and check if wine qualifies
+    const { archetype, distance, qualifies } = calculateNearestArchetype(wineData);
+    
+    // Calculate balance score for the nearest archetype
+    const score = balanceCalculator(wineData, archetype);
 
     return {
-        score: bestScore,
-        archetype: bestArchetype,
-        debugInfo: bestDebugInfo
+        score: score,
+        archetype: archetype.name,
+        qualifies: qualifies,
+        distance: distance
     };
 }
 
 function createWineInfoOverlayHTML(wine) {
-    
     const balanceInfo = calculateWineBalance(wine);
     const balanceColorClass = getColorClass(balanceInfo.score);
 
@@ -54,10 +46,13 @@ function createWineInfoOverlayHTML(wine) {
                     <tr><td>Name</td><td>${wine.resource.name}</td></tr>
                     <tr><td>Vintage</td><td>${wine.vintage}</td></tr>
                     <tr><td>Field</td><td>${wine.fieldName}</td></tr>
-                    <tr><td>Amount</td><td>${formatAmount(wine)}</td></tr>
-                    ${balanceInfo.archetype ? `<tr><td>Best Archetype</td><td>${balanceInfo.archetype}</td></tr>` : ''}
-                    <tr><td>Balance</td><td class="${balanceColorClass}">${(balanceInfo.score * 100).toFixed(1)}%</td></tr>
                     <tr><td>Quality</td><td class="${getColorClass(wine.quality)}">${(wine.quality * 100).toFixed(0)}%</td></tr>
+                    <tr><td>Balance</td><td class="${balanceColorClass}">${(balanceInfo.score * 100).toFixed(1)}%</td></tr>
+                    <tr><td>${balanceInfo.qualifies ? 'Archetype' : 'Nearest Archetype'}</td>
+                        <td>${balanceInfo.archetype}${!balanceInfo.qualifies ? 
+                            ` (${(balanceInfo.distance * 100).toFixed(1)}% away)` : 
+                            ''}</td></tr>
+                    <tr><td>Amount</td><td>${formatAmount(wine)}</td></tr>
                     <tr><td>State</td><td>${wine.state}</td></tr>
                 </tbody>
             </table>

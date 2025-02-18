@@ -476,3 +476,37 @@ const balanceAdjustments = {
         }
     ]
 };
+
+function calculateNearestArchetype(wine) {
+    let bestDistance = Infinity;
+    let nearestArchetype = null;
+
+    for (const [key, archetype] of Object.entries(archetypes)) {
+        let totalDistance = 0;
+        
+        // Calculate total distance from ideal ranges for each characteristic
+        for (const [characteristic, range] of Object.entries(archetype.idealRanges)) {
+            const value = wine[characteristic];
+            const [min, max] = range;
+            
+            if (value < min) {
+                totalDistance += min - value;
+            } else if (value > max) {
+                totalDistance += value - max;
+            }
+        }
+
+        if (totalDistance < bestDistance) {
+            bestDistance = totalDistance;
+            nearestArchetype = archetype;
+        }
+    }
+
+    return {
+        archetype: nearestArchetype,
+        distance: bestDistance,
+        qualifies: bestDistance === 0
+    };
+}
+
+export { calculateNearestArchetype };
