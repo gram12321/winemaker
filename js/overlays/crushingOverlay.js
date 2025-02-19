@@ -6,7 +6,7 @@ import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools  } from '../buildings.js';
 import { loadBuildings, storeBuildings } from '../database/adminFunctions.js';
-import { createOverlayHTML, createTable, createMethodSelector } from '../components/createOverlayHTML.js';
+import { createOverlayHTML, createTable, createMethodSelector, createCheckbox } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateCrushingCharacteristics } from '../utils/crushingCharacteristics.js';
@@ -604,6 +604,27 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
         return false;
     }
 
+    // Get the task ID before creating the task
+    const taskId = taskManager.taskIdCounter + 1;
+    
+    // Find and assign the selected crushing tool
+    if (selectedMethod && selectedMethod !== 'Hand Crushing') {
+        const buildings = loadBuildings();
+        const tool = buildings.flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => 
+                    t.name === selectedMethod && 
+                    t.isAvailable()
+                )
+            )
+        ).find(t => t);
+
+        if (tool) {
+            tool.assignToTask(taskId);
+            storeBuildings(buildings);
+        }
+    }
+
     taskManager.addProgressiveTask(
         'Crushing',
         'winery',
@@ -613,25 +634,11 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
                 params.lastProgress = 0;
                 
                 // Calculate green flavors chance only once at the start
-                if (!destemming) {
-                    const ripeness = params.grapeRipeness;
-                    if (ripeness !== undefined) {  // Only proceed if we have ripeness
-                        const greenFlavorChance = (1 - ripeness) * 0.05;
-                        
-                        console.log('\n=== Green Flavors Check ===');
-                        console.log('Ripeness:', ripeness);
-                        console.log('Green Flavor Chance:', (greenFlavorChance * 100).toFixed(1) + '%');
-                        
-                        const roll = Math.random();
-                        console.log('Random Roll:', roll.toFixed(3));
-                        
-                        if (roll < greenFlavorChance) {
-                            console.log('Result: Green Flavors developed!');
-                            addConsoleMessage(`The must will develop green flavors due to stems being present during crushing.`);
-                            params.developGreenFlavors = true;
-                        } else {
-                            console.log('Result: No green flavors developed');
-                        }
+                if (!destemming && params.grapeRipeness !== undefined) {
+                    const greenFlavorChance = (1 - params.grapeRipeness) * 0.05;
+                    if (Math.random() < greenFlavorChance) {
+                        addConsoleMessage(`The must will develop green flavors due to stems being present during crushing.`);
+                        params.developGreenFlavors = true;
                     }
                 }
             }
@@ -639,7 +646,6 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             const processedAmount = totalAvailableSpace * (progress - params.lastProgress);
             params.lastProgress = progress;
 
-            // Pass the green flavors decision to performCrushing
             if (params.developGreenFlavors) {
                 params.specialFeatures = ['Green Flavors'];
             }
@@ -653,7 +659,7 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             totalGrapes,
             selectedMethod,
             destemming,
-            grapeRipeness: grapeResource.ripeness  // Pass the ripeness from the actual grape resource
+            grapeRipeness: grapeResource.ripeness
         }
     );
 
@@ -685,8 +691,11 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes, deste
         return false; // Skip if no grapes to crush
     }
 
+    // Get the grape resource with more specific criteria
+    const selectedGrapes = Array.from(selectedStorages)[0];  // Get first storage to find original source
     const grapeResource = inventoryInstance.items.find(item => 
         item.state === 'Grapes' &&
+        item.storage === selectedGrapes?.value && // Match the specific storage
         item.amount > 0
     );
 
@@ -758,22 +767,12 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes, deste
     // Add special features based on destemming choice
     if (!destemming) {
         // Calculate chance of getting green flavors based on ripeness
-        const ripeness = grapeResource.ripeness || 0.5; // Default to 0.5 if not set
+        const ripeness = grapeResource.ripeness;
         const greenFlavorChance = (1 - ripeness) * 0.05;
         
-        console.log('\n=== Green Flavors Check ===');
-        console.log('Ripeness:', ripeness);
-        console.log('Green Flavor Chance:', (greenFlavorChance * 100).toFixed(1) + '%');
-        
-        const roll = Math.random();
-        console.log('Random Roll:', roll.toFixed(3));
-        
-        if (roll < greenFlavorChance) {
-            console.log('Result: Green Flavors developed!');
+        if (Math.random() < greenFlavorChance) {
             addConsoleMessage(`The must has developed green flavors due to stems being present during crushing.`);
             characteristics.specialFeatures = ['Green Flavors'];
-        } else {
-            console.log('Result: No green flavors developed');
         }
     }
 
@@ -882,12 +881,12 @@ function createCrushingMethodSection() {
             methodRadioName: 'crushing-method'
         })}
         <div class="crushing-options mt-3">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="destemming-checkbox">
-                <label class="form-check-label" for="destemming-checkbox">
-                    De-stemming (Removes stems before crushing, improves body and tannins but requires more work)
-                </label>
-            </div>
+            ${createCheckbox({
+                id: 'destemming-checkbox',
+                label: 'De-stemming (Removes stems before crushing, improves body and tannins but requires more work)',
+                disabled: false,
+                checked: false
+            })}
         </div>
     `;
 }
