@@ -117,39 +117,39 @@ const germanMaleNames = [
 
 const grapeSuitability = {
   Italy: {
-    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.5, SauvignonBlanc: 0.6 },
-    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, PinotNoir: 0.5, Primitivo: 0.7, SauvignonBlanc: 0.7 },
-    Veneto: { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.7, Primitivo: 0.6, SauvignonBlanc: 0.8 },
-    Sicily: { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.3, Primitivo: 0.8, SauvignonBlanc: 0.5 },
-    Puglia: { Barbera: 0.9, Chardonnay: 0.65, PinotNoir: 0.4, Primitivo: 1.0, SauvignonBlanc: 0.4 },  // Primitivo's homeland
+    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, 'Pinot Noir': 0.6, Primitivo: 0.5, 'Sauvignon Blanc': 0.6 },
+    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, 'Pinot Noir': 0.5, Primitivo: 0.7, 'Sauvignon Blanc': 0.7 },
+    Veneto: { Barbera: 0.85, Chardonnay: 0.75, 'Pinot Noir': 0.7, Primitivo: 0.6, 'Sauvignon Blanc': 0.8 },
+    Sicily: { Barbera: 0.8, Chardonnay: 0.6, 'Pinot Noir': 0.3, Primitivo: 0.8, 'Sauvignon Blanc': 0.5 },
+    Puglia: { Barbera: 0.9, Chardonnay: 0.65, 'Pinot Noir': 0.4, Primitivo: 1.0, 'Sauvignon Blanc': 0.4 }
   },
   France: {
-    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.6, SauvignonBlanc: 0.9 },
-    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, PinotNoir: 0.9, Primitivo: 0.3, SauvignonBlanc: 0.7 },
-    Champagne: { Barbera: 0.2, Chardonnay: 0.9, PinotNoir: 0.8, Primitivo: 0.2, SauvignonBlanc: 0.6 },
-    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, PinotNoir: 0.7, Primitivo: 0.3, SauvignonBlanc: 1.0 }, // Loire Valley is perfect for Sauvignon Blanc
-    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, PinotNoir: 0.5, Primitivo: 0.7, SauvignonBlanc: 0.7 },
+    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, 'Pinot Noir': 0.6, Primitivo: 0.6, 'Sauvignon Blanc': 0.9 },
+    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, 'Pinot Noir': 0.9, Primitivo: 0.3, 'Sauvignon Blanc': 0.7 },
+    Champagne: { Barbera: 0.2, Chardonnay: 0.9, 'Pinot Noir': 0.8, Primitivo: 0.2, 'Sauvignon Blanc': 0.6 },
+    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, 'Pinot Noir': 0.7, Primitivo: 0.3, 'Sauvignon Blanc': 1.0 },
+    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, 'Pinot Noir': 0.5, Primitivo: 0.7, 'Sauvignon Blanc': 0.7 }
   },
   Spain: {
-    Rioja: { Barbera: 0.85, Chardonnay: 0.7, PinotNoir: 0.4, Primitivo: 0.5 },
-    "Ribera del Duero": { Barbera: 0.8, Chardonnay: 0.6, PinotNoir: 0.35, Primitivo: 0.4 },
-    Jumilla: { Barbera: 0.9, Chardonnay: 0.5, PinotNoir: 0.3, Primitivo: 0.85 },  // Hot climate suits Primitivo
-    "La Mancha": { Barbera: 0.85, Chardonnay: 0.55, PinotNoir: 0.25, Primitivo: 0.8 },  // Hot, dry climate good for Primitivo
-    "Sherry (Jerez)": { Barbera: 0.8, Chardonnay: 0.5, PinotNoir: 0.2, Primitivo: 0.7 },
+    Rioja: { Barbera: 0.85, Chardonnay: 0.7, 'Pinot Noir': 0.4, Primitivo: 0.5, 'Sauvignon Blanc': 0.6 },
+    "Ribera del Duero": { Barbera: 0.8, Chardonnay: 0.6, 'Pinot Noir': 0.35, Primitivo: 0.4, 'Sauvignon Blanc': 0.5 },
+    Jumilla: { Barbera: 0.9, Chardonnay: 0.5, 'Pinot Noir': 0.3, Primitivo: 0.85, 'Sauvignon Blanc': 0.4 },  // Hot climate suits Primitivo
+    "La Mancha": { Barbera: 0.85, Chardonnay: 0.55, 'Pinot Noir': 0.25, Primitivo: 0.8, 'Sauvignon Blanc': 0.5 },  // Hot, dry climate good for Primitivo
+    "Sherry (Jerez)": { Barbera: 0.8, Chardonnay: 0.5, 'Pinot Noir': 0.2, Primitivo: 0.7, 'Sauvignon Blanc': 0.4 },
   },
   "United States": {
-    "Napa Valley (California)": { Barbera: 0.9, Chardonnay: 1.0, PinotNoir: 0.7, Primitivo: 0.85 },  // Warm climate suits Primitivo
-    "Sonoma County (California)": { Barbera: 0.85, Chardonnay: 0.95, PinotNoir: 0.75, Primitivo: 0.8 },
-    "Willamette Valley (Oregon)": { Barbera: 0.4, Chardonnay: 0.85, PinotNoir: 1.0, Primitivo: 0.3 },  // Too cool for Primitivo
-    "Finger Lakes (New York)": { Barbera: 0.3, Chardonnay: 0.7, PinotNoir: 0.75, Primitivo: 0.2 },  // Too cool for Primitivo
-    "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, PinotNoir: 0.6, Primitivo: 0.75 },
+    "Napa Valley (California)": { Barbera: 0.9, Chardonnay: 1.0, 'Pinot Noir': 0.7, Primitivo: 0.85, 'Sauvignon Blanc': 0.8 },  // Warm climate suits Primitivo
+    "Sonoma County (California)": { Barbera: 0.85, Chardonnay: 0.95, 'Pinot Noir': 0.75, Primitivo: 0.8, 'Sauvignon Blanc': 0.7 },
+    "Willamette Valley (Oregon)": { Barbera: 0.4, Chardonnay: 0.85, 'Pinot Noir': 1.0, Primitivo: 0.3, 'Sauvignon Blanc': 0.6 },  // Too cool for Primitivo
+    "Finger Lakes (New York)": { Barbera: 0.3, Chardonnay: 0.7, 'Pinot Noir': 0.75, Primitivo: 0.2, 'Sauvignon Blanc': 0.5 },  // Too cool for Primitivo
+    "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, 'Pinot Noir': 0.6, Primitivo: 0.75, 'Sauvignon Blanc': 0.7 },
   },
   Germany: {
-    Mosel: { Barbera: 0.15, Chardonnay: 0.8, PinotNoir: 1.0, Primitivo: 0.1, SauvignonBlanc: 0.8 },
-    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, PinotNoir: 0.9, Primitivo: 0.15, SauvignonBlanc: 0.85 },
-    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, PinotNoir: 0.85, Primitivo: 0.2, SauvignonBlanc: 0.8 },
-    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, PinotNoir: 0.8, Primitivo: 0.25, SauvignonBlanc: 0.75 },
-    Ahr: { Barbera: 0.1, Chardonnay: 0.7, PinotNoir: 0.95, Primitivo: 0.1, SauvignonBlanc: 0.6 },
+    Mosel: { Barbera: 0.15, Chardonnay: 0.8, 'Pinot Noir': 1.0, Primitivo: 0.1, 'Sauvignon Blanc': 0.8 },
+    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, 'Pinot Noir': 0.9, Primitivo: 0.15, 'Sauvignon Blanc': 0.85 },
+    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, 'Pinot Noir': 0.85, Primitivo: 0.2, 'Sauvignon Blanc': 0.8 },
+    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, 'Pinot Noir': 0.8, Primitivo: 0.25, 'Sauvignon Blanc': 0.75 },
+    Ahr: { Barbera: 0.1, Chardonnay: 0.7, 'Pinot Noir': 0.95, Primitivo: 0.1, 'Sauvignon Blanc': 0.6 },
   },
 };
 

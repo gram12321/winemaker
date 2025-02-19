@@ -33,13 +33,13 @@ const grapeCharacteristics = {
     sweetness: 0.2,    // naturally sweet
     tannins: 0.2       // high tannins
   },
-  'Sauvignon Blanc': {
-    acidity: 0.3,      // very high acidity
-    aroma: 0.25,       // highly aromatic
-    body: -0.2,        // light body
-    spice: 0.1,        // slight spiciness
-    sweetness: -0.1,   // typically dry
-    tannins: -0.2      // very low tannins
+  'Sauvignon Blanc': {    // The issue is here - there's a space in the name
+    acidity: 0.3,      
+    aroma: 0.25,       
+    body: -0.2,        
+    spice: 0.1,        
+    sweetness: -0.1,   
+    tannins: -0.2      
   }
 };
 

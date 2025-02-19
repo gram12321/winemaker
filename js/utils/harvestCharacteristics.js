@@ -1,13 +1,6 @@
 export function calculateHarvestCharacteristics(baseCharacteristics, params) {
     const { ripeness, qualityFactor, suitability, altitude, medianAltitude, maxAltitude } = params;
     
-    console.log("\n=== Harvest Characteristics Calculation ===");
-    console.log("Initial Parameters:");
-    console.log("Ripeness:", ripeness.toFixed(3));
-    console.log("Quality Factor:", qualityFactor.toFixed(3));
-    console.log("Regional Suitability:", suitability.toFixed(3));
-    console.log("Altitude:", altitude, "m");
-    
     // Calculate altitude effect (-1 to 1 range)
     const altitudeEffect = (altitude - medianAltitude) / (maxAltitude - medianAltitude);
     console.log("Altitude Effect:", altitudeEffect.toFixed(3));

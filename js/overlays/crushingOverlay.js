@@ -9,6 +9,7 @@ import { loadBuildings, storeBuildings } from '../database/adminFunctions.js';
 import { createOverlayHTML, createTable, createMethodSelector } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
+import { calculateCrushingCharacteristics } from '../utils/crushingCharacteristics.js';
 
 export function showCrushingOverlay() {
     const overlayContent = createCrushingHTML();
@@ -590,6 +591,7 @@ function showWarningModal(totalAvailableSpace, mustAmount, onConfirm) {
 function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes) {
     const workData = calculateCrushingWorkData(totalGrapes);
     const selectedMethod = document.querySelector('input[name="crushing-method"]:checked')?.value;
+    const destemming = document.getElementById('destemming-checkbox')?.checked || false;  // Add this line
     
     // Get the task ID before creating the task
     const taskId = taskManager.taskIdCounter + 1;
@@ -620,14 +622,15 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             if (!params.lastProgress) params.lastProgress = 0;
             const processedAmount = totalAvailableSpace * (progress - params.lastProgress);
             params.lastProgress = progress;
-            performCrushing(params.selectedStorages, processedAmount, params.totalGrapes);
+            performCrushing(params.selectedStorages, processedAmount, params.totalGrapes, params.destemming);  // Add destemming parameter
         },
         null,
         { 
             selectedGrape, 
             selectedStorages: Array.from(selectedStorages), 
             totalGrapes,
-            selectedMethod  // Store the selected method with the task
+            selectedMethod,
+            destemming  // Add this line
         }
     );
 
@@ -653,7 +656,7 @@ function handleCrushingStart(overlayContainer) {
     return crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
 }
 
-export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
+export function performCrushing(selectedStorages, mustAmount, totalGrapes, destemming) {  // destemming is now passed as parameter
     const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
@@ -680,7 +683,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
     const fieldPrestige = grapeResource.fieldPrestige;
 
     // Copy all grape characteristics
-    const characteristics = {
+    const baseCharacteristics = {
         acidity: grapeResource.acidity,
         aroma: grapeResource.aroma,
         body: grapeResource.body,
@@ -689,6 +692,11 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
         tannins: grapeResource.tannins,
         oxidation: grapeResource.oxidation || 0
     };
+
+    // Calculate modified characteristics based on crushing process
+    const characteristics = calculateCrushingCharacteristics(baseCharacteristics, {
+        destemming  // Use the parameter value
+    });
 
     let removed = inventoryInstance.removeResource(
         { name: resourceName },
@@ -745,7 +753,7 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes) {
                 mustStorage
             );
 
-            // Apply all characteristics to the new must
+            // Apply modified characteristics to the new must
             if (newMust) {
                 Object.assign(newMust, characteristics);
             }
@@ -812,16 +820,26 @@ function createCrushingMethodSection() {
         })
     ];
 
-    return createMethodSelector({
-        title: 'Select Crushing Method',
-        methods,
-        defaultMethod: 'Hand Crushing',
-        showSkipOption: true,
-        skipOptionText: 'Skip crushing (not recommended)',
-        containerClass: 'crushing-methods-section',
-        skipOptionId: 'no-crushing',           // Match the ID we're looking for
-        methodRadioName: 'crushing-method'     // Match the radio name we're looking for
-    });
+    return `
+        ${createMethodSelector({
+            title: 'Select Crushing Method',
+            methods,
+            defaultMethod: 'Hand Crushing',
+            showSkipOption: true,
+            skipOptionText: 'Skip crushing (not recommended)',
+            containerClass: 'crushing-methods-section',
+            skipOptionId: 'no-crushing',
+            methodRadioName: 'crushing-method'
+        })}
+        <div class="crushing-options mt-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="destemming-checkbox">
+                <label class="form-check-label" for="destemming-checkbox">
+                    De-stemming (Removes stems before crushing, improves body and tannins but requires more work)
+                </label>
+            </div>
+        </div>
+    `;
 }
 
 function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
@@ -853,6 +871,12 @@ function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
         totalWork *= (1 + methodModifier);  // This will reduce work for better tools
     }
 
+    // Add work if destemming is checked
+    const destemming = document.getElementById('destemming-checkbox')?.checked || false;
+    if (destemming) {
+        totalWork *= 1.2; // 20% more work for destemming
+    }
+
     return {
         amount: grapeAmount,
         unit: grapeAmount >= 1000 ? 't' : 'kg',
@@ -860,6 +884,7 @@ function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
         totalWork,
         location: 'winery',
         methodModifier,
-        methodName
+        methodName,
+        destemming
     };
 }
