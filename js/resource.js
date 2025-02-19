@@ -67,6 +67,9 @@ export class InventoryItem {
     this.storage = storage;
     this.oxidation = 0; // Initialize oxidation at 0
 
+    // Add new array for special features
+    this.specialFeatures = [];
+
     // Initialize base characteristics with resource-specific values
     const baseCharacteristics = resource.wineCharacteristics || {
       acidity: 0,
@@ -85,7 +88,18 @@ export class InventoryItem {
     this.sweetness = 0.5 + (baseCharacteristics.sweetness || 0);
     this.tannins = 0.5 + (baseCharacteristics.tannins || 0);
 
-      }
+  }
+
+  // Add helper methods for special features
+  addSpecialFeature(feature) {
+    if (!this.specialFeatures.includes(feature)) {
+      this.specialFeatures.push(feature);
+    }
+  }
+
+  hasSpecialFeature(feature) {
+    return this.specialFeatures.includes(feature);
+  }
 
   getDisplayInfo() {
     return {

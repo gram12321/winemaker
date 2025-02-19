@@ -54,6 +54,16 @@ function loadInventory() {
         }
       });
     }
+
+    // Restore special features if they exist
+    if (newItem && Array.isArray(item.specialFeatures)) {
+      newItem.specialFeatures = item.specialFeatures;
+    }
+
+    // Restore ripeness if it exists
+    if (typeof item.ripeness === 'number') {
+      newItem.ripeness = item.ripeness;
+    }
   });
 }
 
@@ -76,7 +86,9 @@ function saveInventory() {
       fieldName: item.fieldName,
       fieldPrestige: item.fieldPrestige,
       storage: item.storage,
-      oxidation: item.oxidation // Save oxidation value
+      oxidation: item.oxidation, // Save oxidation value
+      specialFeatures: item.specialFeatures || [], // Add this line
+      ripeness: item.ripeness // Add ripeness to saved properties
     };
 
     // Add grape characteristics if they exist

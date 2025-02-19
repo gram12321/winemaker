@@ -591,38 +591,60 @@ function showWarningModal(totalAvailableSpace, mustAmount, onConfirm) {
 function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes) {
     const workData = calculateCrushingWorkData(totalGrapes);
     const selectedMethod = document.querySelector('input[name="crushing-method"]:checked')?.value;
-    const destemming = document.getElementById('destemming-checkbox')?.checked || false;  // Add this line
+    const destemming = document.getElementById('destemming-checkbox')?.checked || false;
     
-    // Get the task ID before creating the task
-    const taskId = taskManager.taskIdCounter + 1;
-    
-    // Find and assign the selected crushing tool
-    if (selectedMethod && selectedMethod !== 'Hand Crushing') {
-        const buildings = loadBuildings();
-        const tool = buildings.flatMap(b => 
-            b.slots.flatMap(slot => 
-                slot.tools.find(t => 
-                    t.name === selectedMethod && 
-                    t.isAvailable()
-                )
-            )
-        ).find(t => t);
+    const grapeResource = inventoryInstance.items.find(item => 
+        item.storage === selectedGrape.dataset.storage &&
+        item.state === 'Grapes' &&
+        item.resource.name === selectedGrape.dataset.resource
+    );
 
-        if (tool) {
-            tool.assignToTask(taskId);
-            storeBuildings(buildings);
-        }
+    if (!grapeResource) {
+        addConsoleMessage("Could not find grape resource");
+        return false;
     }
-    
+
     taskManager.addProgressiveTask(
         'Crushing',
         'winery',
         workData.totalWork,
         (target, progress, params) => {
-            if (!params.lastProgress) params.lastProgress = 0;
+            if (!params.lastProgress) {
+                params.lastProgress = 0;
+                
+                // Calculate green flavors chance only once at the start
+                if (!destemming) {
+                    const ripeness = params.grapeRipeness;
+                    if (ripeness !== undefined) {  // Only proceed if we have ripeness
+                        const greenFlavorChance = (1 - ripeness) * 0.05;
+                        
+                        console.log('\n=== Green Flavors Check ===');
+                        console.log('Ripeness:', ripeness);
+                        console.log('Green Flavor Chance:', (greenFlavorChance * 100).toFixed(1) + '%');
+                        
+                        const roll = Math.random();
+                        console.log('Random Roll:', roll.toFixed(3));
+                        
+                        if (roll < greenFlavorChance) {
+                            console.log('Result: Green Flavors developed!');
+                            addConsoleMessage(`The must will develop green flavors due to stems being present during crushing.`);
+                            params.developGreenFlavors = true;
+                        } else {
+                            console.log('Result: No green flavors developed');
+                        }
+                    }
+                }
+            }
+
             const processedAmount = totalAvailableSpace * (progress - params.lastProgress);
             params.lastProgress = progress;
-            performCrushing(params.selectedStorages, processedAmount, params.totalGrapes, params.destemming);  // Add destemming parameter
+
+            // Pass the green flavors decision to performCrushing
+            if (params.developGreenFlavors) {
+                params.specialFeatures = ['Green Flavors'];
+            }
+            
+            performCrushing(params.selectedStorages, processedAmount, params.totalGrapes, params.destemming);
         },
         null,
         { 
@@ -630,7 +652,8 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             selectedStorages: Array.from(selectedStorages), 
             totalGrapes,
             selectedMethod,
-            destemming  // Add this line
+            destemming,
+            grapeRipeness: grapeResource.ripeness  // Pass the ripeness from the actual grape resource
         }
     );
 
@@ -732,6 +755,28 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes, deste
         addConsoleMessage(`Crushed ${formatNumber(grapeAmountToRemove)} kg of ${resourceName} grapes from ${fieldName} into ${formatNumber(grapeAmountToRemove * 0.6)} l of must`);
     }
 
+    // Add special features based on destemming choice
+    if (!destemming) {
+        // Calculate chance of getting green flavors based on ripeness
+        const ripeness = grapeResource.ripeness || 0.5; // Default to 0.5 if not set
+        const greenFlavorChance = (1 - ripeness) * 0.05;
+        
+        console.log('\n=== Green Flavors Check ===');
+        console.log('Ripeness:', ripeness);
+        console.log('Green Flavor Chance:', (greenFlavorChance * 100).toFixed(1) + '%');
+        
+        const roll = Math.random();
+        console.log('Random Roll:', roll.toFixed(3));
+        
+        if (roll < greenFlavorChance) {
+            console.log('Result: Green Flavors developed!');
+            addConsoleMessage(`The must has developed green flavors due to stems being present during crushing.`);
+            characteristics.specialFeatures = ['Green Flavors'];
+        } else {
+            console.log('Result: No green flavors developed');
+        }
+    }
+
     // Add even distribution of must among containers
     const storageArray = Array.from(selectedStorages);
     const mustPerStorage = remainingMust / storageArray.length;
@@ -753,9 +798,14 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes, deste
                 mustStorage
             );
 
-            // Apply modified characteristics to the new must
+            // Apply modified characteristics and special features to the new must
             if (newMust) {
                 Object.assign(newMust, characteristics);
+                if (characteristics.specialFeatures) {
+                    characteristics.specialFeatures.forEach(feature => {
+                        newMust.addSpecialFeature(feature);
+                    });
+                }
             }
 
             remainingMust -= amountToStore;

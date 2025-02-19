@@ -288,6 +288,8 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             });
             matchingGrapes.amount = totalAmount;
             matchingGrapes.quality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
+            // Add ripeness value from farmland
+            matchingGrapes.ripeness = currentFarmland.ripeness;
             applyHarvestOxidation(matchingGrapes);
         } else {
             const newGrapes = inventoryInstance.addResource(
@@ -302,6 +304,8 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             );
             if (newGrapes) {
                 Object.assign(newGrapes, harvestedCharacteristics);
+                // Add ripeness value from farmland
+                newGrapes.ripeness = currentFarmland.ripeness;
                 applyHarvestOxidation(newGrapes);
             }
         }
