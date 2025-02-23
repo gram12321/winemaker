@@ -402,82 +402,87 @@ function populateStorageOptions(farmland) {
     const buildings = loadBuildings();
     const activeTasks = taskManager.getAllTasks();
 
-    const storagesInUse = activeTasks
-        .filter(task => task.name === 'Harvesting')
-        .flatMap(task => task.params.selectedTools || []);
-
     buildings.forEach(building => {
-        if (building.slots) {
-            building.slots.forEach(slot => {
-                slot.tools.forEach(tool => {
-                    if (tool.supportedResources?.includes('Grapes')) {
-                        const toolId = `${tool.name} #${tool.instanceNumber}`;
-                        const playerInventory = inventoryInstance.items;
-                        const matchingInventoryItems = playerInventory.filter(item => 
-                            item.storage === toolId && 
-                            item.state === 'Grapes'
-                        );
-                        const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
-                        const availableCapacity = tool.capacity - currentAmount;
-                        
-                        // Check if storage is in use or contains incompatible contents
-                        const isInUse = storagesInUse.includes(toolId);
-                        const hasIncompatibleContents = matchingInventoryItems.some(item => 
-                            item.resource.name !== farmland.plantedResourceName ||
-                            item.vintage !== parseInt(localStorage.getItem('year'))
-                        );
-                        
-                        const taskUsingStorage = isInUse ? 
-                            activeTasks.find(task => 
-                                task.name === 'Harvesting' && 
-                                task.params.selectedTools?.includes(toolId)
-                            ) : null;
+        if (!building.slots) return;
 
-                        // Show all containers, but disable if unavailable
-                        const row = document.createElement('tr');
-                        const firstItem = matchingInventoryItems[0];
-                        const isDisabled = isInUse || hasIncompatibleContents;
+        building.slots.forEach(slot => {
+            slot.tools.forEach(tool => {
+                // Fix: Only show tools that:
+                // 1. Support grapes storage
+                // 2. Have capacity > 0
+                // 3. Are marked as storage tools (assignable === false)
+                if (tool.supportedResources?.includes('Grapes') && 
+                    tool.capacity > 0 && 
+                    tool.assignable === false) {
+                    const toolId = `${tool.name} #${tool.instanceNumber}`;
+                    const playerInventory = inventoryInstance.items;
+                    const matchingInventoryItems = playerInventory.filter(item => 
+                        item.storage === toolId && 
+                        item.state === 'Grapes'
+                    );
+                    const currentAmount = matchingInventoryItems.reduce((sum, item) => sum + item.amount, 0);
+                    const availableCapacity = tool.capacity - currentAmount;
+                    
+                    // Check if storage is in use or contains incompatible contents
+                    const isInUse = activeTasks.some(task => 
+                        task.name === 'Harvesting' && 
+                        task.params.selectedTools?.includes(toolId)
+                    );
+                    const hasIncompatibleContents = matchingInventoryItems.some(item => 
+                        item.resource.name !== farmland.plantedResourceName ||
+                        item.vintage !== parseInt(localStorage.getItem('year'))
+                    );
+                    
+                    const taskUsingStorage = isInUse ? 
+                        activeTasks.find(task => 
+                            task.name === 'Harvesting' && 
+                            task.params.selectedTools?.includes(toolId)
+                        ) : null;
 
-                        if (isDisabled) {
-                            row.classList.add('harvest-tool', 'disabled');
-                        }
+                    // Show all containers, but disable if unavailable
+                    const row = document.createElement('tr');
+                    const firstItem = matchingInventoryItems[0];
+                    const isDisabled = isInUse || hasIncompatibleContents;
 
-                        row.innerHTML = `
-                            <td>
-                                <input type="checkbox" 
-                                       class="storage-checkbox" 
-                                       data-capacity="${availableCapacity}" 
-                                       value="${toolId}"
-                                       style="accent-color: var(--color-primary);"
-                                       ${isDisabled ? 'disabled' : ''}>
-                            </td>
-                            <td>${toolId}
-                                ${isInUse ? `
-                                    <br><small class="text-warning">
-                                        In use by harvest task for ${taskUsingStorage.target.name}
-                                    </small>
-                                ` : ''}
-                                ${hasIncompatibleContents ? `
-                                    <br><small class="text-warning">
-                                        Contains different grapes or vintage
-                                    </small>
-                                ` : ''}
-                            </td>
-                            <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
-                            <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
-                            <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
-                        `;
-                        storageBody.appendChild(row);
-
-                        if (!isDisabled && availableCapacity > 0) {
-                            row.querySelector('.storage-checkbox').addEventListener('change', function() {
-                                updateStorageProgress(farmland);
-                            });
-                        }
+                    if (isDisabled) {
+                        row.classList.add('harvest-tool', 'disabled');
                     }
-                });
+
+                    row.innerHTML = `
+                        <td>
+                            <input type="checkbox" 
+                                   class="storage-checkbox" 
+                                   data-capacity="${availableCapacity}" 
+                                   value="${toolId}"
+                                   style="accent-color: var(--color-primary);"
+                                   ${isDisabled ? 'disabled' : ''}>
+                        </td>
+                        <td>${toolId}
+                            ${isInUse ? `
+                                <br><small class="text-warning">
+                                    In use by harvest task for ${taskUsingStorage.target.name}
+                                </small>
+                            ` : ''}
+                            ${hasIncompatibleContents ? `
+                                <br><small class="text-warning">
+                                    Contains different grapes or vintage
+                                </small>
+                            ` : ''}
+                        </td>
+                        <td>${tool.capacity >= 1000 ? formatNumber(tool.capacity/1000, 2) + ' t' : formatNumber(tool.capacity) + ' kg'}</td>
+                        <td>${firstItem ? `${firstItem.fieldName}, ${firstItem.resource.name}, ${firstItem.vintage}` : 'Empty'}</td>
+                        <td>${currentAmount >= 1000 ? formatNumber(currentAmount/1000, 2) + ' t' : formatNumber(currentAmount) + ' kg'}</td>
+                    `;
+                    storageBody.appendChild(row);
+
+                    if (!isDisabled && availableCapacity > 0) {
+                        row.querySelector('.storage-checkbox').addEventListener('change', function() {
+                            updateStorageProgress(farmland);
+                        });
+                    }
+                }
             });
-        }
+        });
     });
 }
 

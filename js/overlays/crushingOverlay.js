@@ -603,48 +603,39 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
         addConsoleMessage("Could not find grape resource");
         return false;
     }
+    
+    // Get the task ID before creating the task
+    const taskId = taskManager.taskIdCounter + 1;
+    
+    // Find and assign the selected crushing tool
+    if (selectedMethod && selectedMethod !== 'Hand Crushing') {
+        const buildings = loadBuildings();
+        const tool = buildings.flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => 
+                    t.name === selectedMethod && 
+                    t.isAvailable()
+                )
+            )
+        ).find(t => t);
+
+        if (tool) {
+            tool.assignToTask(taskId);
+            storeBuildings(buildings);
+        }
+    }
 
     taskManager.addProgressiveTask(
         'Crushing',
         'winery',
         workData.totalWork,
         (target, progress, params) => {
-            if (!params.lastProgress) {
-                params.lastProgress = 0;
-                
-                // Calculate green flavors chance only once at the start
-                if (!destemming) {
-                    const ripeness = params.grapeRipeness;
-                    if (ripeness !== undefined) {  // Only proceed if we have ripeness
-                        const greenFlavorChance = (1 - ripeness) * 0.05;
-                        
-                        console.log('\n=== Green Flavors Check ===');
-                        console.log('Ripeness:', ripeness);
-                        console.log('Green Flavor Chance:', (greenFlavorChance * 100).toFixed(1) + '%');
-                        
-                        const roll = Math.random();
-                        console.log('Random Roll:', roll.toFixed(3));
-                        
-                        if (roll < greenFlavorChance) {
-                            console.log('Result: Green Flavors developed!');
-                            addConsoleMessage(`The must will develop green flavors due to stems being present during crushing.`);
-                            params.developGreenFlavors = true;
-                        } else {
-                            console.log('Result: No green flavors developed');
-                        }
-                    }
-                }
-            }
-
-            const processedAmount = totalAvailableSpace * (progress - params.lastProgress);
+            if (!params.lastProgress) params.lastProgress = 0;
+            const progressIncrement = progress - params.lastProgress;
+            const grapesToProcess = Math.min(params.totalGrapes * progressIncrement, params.totalGrapes);
+            const mustAmount = calculateMustAmount(grapesToProcess);
             params.lastProgress = progress;
-
-            // Pass the green flavors decision to performCrushing
-            if (params.developGreenFlavors) {
-                params.specialFeatures = ['Green Flavors'];
-            }
-            
-            performCrushing(params.selectedStorages, processedAmount, params.totalGrapes, params.destemming);
+            performCrushing(params.selectedStorages, mustAmount, grapesToProcess, params.destemming);
         },
         null,
         { 
@@ -653,7 +644,7 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             totalGrapes,
             selectedMethod,
             destemming,
-            grapeRipeness: grapeResource.ripeness  // Pass the ripeness from the actual grape resource
+            grapeRipeness: grapeResource.ripeness
         }
     );
 
@@ -679,8 +670,11 @@ function handleCrushingStart(overlayContainer) {
     return crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
 }
 
-export function performCrushing(selectedStorages, mustAmount, totalGrapes, destemming) {  // destemming is now passed as parameter
-    const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
+// Update performCrushing to be more explicit about the amounts
+export function performCrushing(selectedStorages, mustAmount, grapeAmount, destemming) {
+
+    // Now grapeAmount is explicitly passed and matches what we want to remove
+    const grapeAmountToRemove = grapeAmount;
     if (grapeAmountToRemove <= 0) {
         return false; // Skip if no grapes to crush
     }
@@ -761,19 +755,11 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes, deste
         const ripeness = grapeResource.ripeness || 0.5; // Default to 0.5 if not set
         const greenFlavorChance = (1 - ripeness) * 0.05;
         
-        console.log('\n=== Green Flavors Check ===');
-        console.log('Ripeness:', ripeness);
-        console.log('Green Flavor Chance:', (greenFlavorChance * 100).toFixed(1) + '%');
-        
         const roll = Math.random();
-        console.log('Random Roll:', roll.toFixed(3));
         
         if (roll < greenFlavorChance) {
-            console.log('Result: Green Flavors developed!');
             addConsoleMessage(`The must has developed green flavors due to stems being present during crushing.`);
             characteristics.specialFeatures = ['Green Flavors'];
-        } else {
-            console.log('Result: No green flavors developed');
         }
     }
 

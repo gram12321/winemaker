@@ -49,8 +49,6 @@ export class Resource {
         this.naturalYield = naturalYield;
         this.fragile = fragile;
         this.proneToOxidation = proneToOxidation;
-
-        // Set characteristics from the data structure
         this.wineCharacteristics = grapeCharacteristics[name];
     }
 }

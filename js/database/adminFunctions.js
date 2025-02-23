@@ -4,67 +4,47 @@ import { Tool, getBuildingTools  } from '/js/buildings.js';
 
 // Function to load inventory from localStorage
 function loadInventory() {
-  let savedInventory = localStorage.getItem('playerInventory');
+    let savedInventory = localStorage.getItem('playerInventory');
 
-  try {
-    savedInventory = JSON.parse(savedInventory);
-    if (!Array.isArray(savedInventory)) {
-      savedInventory = [];
-    }
-  } catch (error) {
-    console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
-    savedInventory = [];
-  }
-
-  // Clear existing inventory
-  inventoryInstance.items = [];
-
-  // Populate the inventory instance with saved data
-  savedInventory.forEach(item => {
-    const newItem = inventoryInstance.addResource(
-      { name: item.resource.name, naturalYield: item.resource.naturalYield || 1 },
-      item.amount,
-      item.state,
-      item.vintage,
-      item.quality,
-      item.fieldName,
-      item.fieldPrestige,
-      item.storage
-    );
-
-    // Restore oxidation value if it exists
-    if (newItem && typeof item.oxidation === 'number') {
-      newItem.oxidation = item.oxidation;
-    }
-
-    // Restore grape characteristics if they exist
-    if (newItem && item.state === 'Grapes') {
-      const characteristics = [
-        'sweetness',
-        'acidity',
-        'tannins',
-        'body',
-        'spice',
-        'aroma'
-      ];
-
-      characteristics.forEach(char => {
-        if (typeof item[char] === 'number') {
-          newItem[char] = item[char];
+    try {
+        savedInventory = JSON.parse(savedInventory);
+        if (!Array.isArray(savedInventory)) {
+            savedInventory = [];
         }
-      });
+    } catch (error) {
+        console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
+        savedInventory = [];
     }
 
-    // Restore special features if they exist
-    if (newItem && Array.isArray(item.specialFeatures)) {
-      newItem.specialFeatures = item.specialFeatures;
-    }
+    inventoryInstance.items = [];
 
-    // Restore ripeness if it exists
-    if (typeof item.ripeness === 'number') {
-      newItem.ripeness = item.ripeness;
-    }
-  });
+    savedInventory.forEach(item => {
+        const newItem = inventoryInstance.addResource(
+            { name: item.resource.name, naturalYield: item.resource.naturalYield || 1 },
+            item.amount,
+            item.state,
+            item.vintage,
+            item.quality,
+            item.fieldName,
+            item.fieldPrestige,
+            item.storage
+        );
+
+        if (newItem) {
+            // Assign all optional properties with default values
+            newItem.oxidation = item.oxidation || 0;
+            newItem.specialFeatures = Array.isArray(item.specialFeatures) ? item.specialFeatures : [];
+            newItem.ripeness = item.ripeness || 0;
+
+            // Restore grape characteristics with defaults
+            if (item.state === 'Grapes') {
+                const characteristics = ['sweetness', 'acidity', 'tannins', 'body', 'spice', 'aroma'];
+                characteristics.forEach(char => {
+                    newItem[char] = typeof item[char] === 'number' ? item[char] : 0.5;
+                });
+            }
+        }
+    });
 }
 
 // Load the inventory at the start
