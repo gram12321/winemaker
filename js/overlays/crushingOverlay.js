@@ -650,7 +650,14 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
                 params.specialFeatures = ['Green Flavors'];
             }
             
-            performCrushing(params.selectedStorages, processedAmount, params.totalGrapes, params.destemming);
+            performCrushing(
+                params.selectedStorages, 
+                processedAmount, 
+                params.totalGrapes, 
+                params.destemming,
+                params.grapeStorageId, // Add this parameter
+                params.resourceName    // Add this parameter
+            );
         },
         null,
         { 
@@ -659,7 +666,9 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             totalGrapes,
             selectedMethod,
             destemming,
-            grapeRipeness: grapeResource.ripeness
+            grapeRipeness: grapeResource.ripeness,
+            grapeStorageId: selectedGrape.dataset.storage,    // Store grape storage ID
+            resourceName: selectedGrape.dataset.resource      // Store resource name
         }
     );
 
@@ -671,6 +680,7 @@ function handleCrushingStart(overlayContainer) {
     if (!validation.valid) return false;
 
     const { selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes } = validation.data;
+
     const mustAmount = calculateMustAmount(totalGrapes);
 
     if (mustAmount > totalAvailableSpace) {
@@ -685,17 +695,18 @@ function handleCrushingStart(overlayContainer) {
     return crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
 }
 
-export function performCrushing(selectedStorages, mustAmount, totalGrapes, destemming) {  // destemming is now passed as parameter
+export function performCrushing(selectedStorages, mustAmount, totalGrapes, destemming, grapeStorageId, resourceName) {
     const grapeAmountToRemove = Math.min(mustAmount / 0.6, totalGrapes);
+
     if (grapeAmountToRemove <= 0) {
-        return false; // Skip if no grapes to crush
+        return false;
     }
 
-    // Get the grape resource with more specific criteria
-    const selectedGrapes = Array.from(selectedStorages)[0];  // Get first storage to find original source
+    // Find grape resource using passed parameters instead of DOM
     const grapeResource = inventoryInstance.items.find(item => 
         item.state === 'Grapes' &&
-        item.storage === selectedGrapes?.value && // Match the specific storage
+        item.storage === grapeStorageId &&
+        item.resource.name === resourceName &&
         item.amount > 0
     );
 
@@ -708,7 +719,6 @@ export function performCrushing(selectedStorages, mustAmount, totalGrapes, deste
     let success = true;
 
     // Remove the amount of grapes corresponding to the processed amount
-    const resourceName = grapeResource.resource.name;
     const vintage = grapeResource.vintage;
     const quality = grapeResource.quality;
     const fieldName = grapeResource.fieldName;
