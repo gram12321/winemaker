@@ -353,10 +353,7 @@ function populateGrapesTable(overlayContainer, buildings, playerInventory) {
 
     building.slots.forEach(slot => {
       slot.tools.forEach(tool => {
-        // Fixed the condition for tool checks
-        if (tool.supportedResources?.includes('Grapes') && 
-            tool.capacity > 0 && 
-            tool.assignable) {  // Removed the double negative, just check if assignable is true
+        if (tool.supportedResources?.includes('Grapes')) {
           const toolId = `${tool.name} #${tool.instanceNumber}`;
           const matchingInventoryItems = playerInventory.filter(item => 
             item.storage === toolId &&
