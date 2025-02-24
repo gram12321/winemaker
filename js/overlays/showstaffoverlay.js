@@ -1,5 +1,5 @@
 import { getFlagIconHTML, formatNumber, getColorClass, getSkillLevelInfo } from '../utils.js';  
-import { specializedRoles } from '../overlays/hireStaffOptionsOverlay.js'; 
+import { specializedRoles } from './staffSearchOverlay.js'; 
 import { showModalOverlay } from './overlayUtils.js';
 
 export function showStaffOverlay(staffData) {

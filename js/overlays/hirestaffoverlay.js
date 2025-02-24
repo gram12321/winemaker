@@ -5,7 +5,7 @@ import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
 import taskManager from '../taskManager.js';  
 import { showModalOverlay, hideOverlay } from './overlayUtils.js'; 
-import { specializedRoles } from './hireStaffOptionsOverlay.js';
+import { specializedRoles } from './staffSearchOverlay.js';
 
 export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, specializedRoles = []) {
     const createdStaffOptions = Array.from(

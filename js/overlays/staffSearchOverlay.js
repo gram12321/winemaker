@@ -7,13 +7,13 @@ import { addTransaction} from '../finance.js'
 import { getMoney } from '../database/adminFunctions.js';
 
 
-export function showHireStaffOptionsOverlay() {
-    const overlayContainer = showStandardOverlay(createHireStaffOptionsHTML());
-    setupHireStaffOptionsEventListeners(overlayContainer);
+export function showStaffSearchOverlay() {
+    const overlayContainer = showStandardOverlay(createStaffSearchHTML());
+    setupStaffSearchEventListeners(overlayContainer);
     return overlayContainer;
 }
 
-function createHireStaffOptionsHTML() {
+function createStaffSearchHTML() {
     const initialCandidates = 5;
     const initialSkill = 0.3; // Updated to use 0.1-1.0 scale
     const initialCost = calculateSearchCost(initialCandidates, initialSkill, []);
@@ -171,7 +171,7 @@ export function performStaffSearch(target, params) {
     );
 }
 
-function setupHireStaffOptionsEventListeners(overlayContainer) {
+function setupStaffSearchEventListeners(overlayContainer) {
     const candidatesSlider = overlayContainer.querySelector('#candidates-slider');
     const skillSlider = overlayContainer.querySelector('#skill-slider');
     const roleCheckboxes = overlayContainer.querySelectorAll('.role-checkbox');

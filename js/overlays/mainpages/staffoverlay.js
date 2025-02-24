@@ -1,5 +1,5 @@
 import { displayStaff } from '/js/staff.js';
-import { showHireStaffOptionsOverlay } from '/js/overlays/hireStaffOptionsOverlay.js';
+import { showStaffSearchOverlay } from '/js/overlays/StaffSearchOverlay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import { loadStaff, loadTeams, saveTeams  } from '/js/database/initiation.js';
 import { addConsoleMessage } from '/js/console.js';
@@ -369,7 +369,7 @@ function setupHireStaffButton(overlay) {
     const hireStaffBtn = overlay.querySelector('#hire-staff-btn');
     if (hireStaffBtn) {
         hireStaffBtn.addEventListener('click', () => {
-            showHireStaffOptionsOverlay();
+            showStaffSearchOverlay();
         });
     }
 }

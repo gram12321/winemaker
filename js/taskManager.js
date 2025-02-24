@@ -16,7 +16,7 @@ import { performClearing } from './overlays/clearingOverlay.js';  // Add this im
 import { performPlanting } from './overlays/plantingOverlay.js';  // Add this import
 import { performUproot } from './overlays/uprootOverlay.js';  // Add this import
 import { performBuildBuilding, performUpgradeBuilding } from './buildings.js';  // Update import
-import { performStaffSearch } from './overlays/hireStaffOptionsOverlay.js';  // Add this import
+import { performStaffSearch } from './overlays/staffSearchOverlay.js';  // Add this import
 
 
 // Internal mapping for display names
