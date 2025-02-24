@@ -33,6 +33,8 @@ function loadInventory() {
             Array.isArray(item.specialFeatures) ? item.specialFeatures : []
         );
     });
+
+    return inventoryInstance; // Add this line to return the instance
 }
 
 // Load the inventory at the start

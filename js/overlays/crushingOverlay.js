@@ -211,7 +211,7 @@ function updateStorageProgress() {
 
 // Update the setupCrushingEventListeners to only allow clicking on available methods
 function setupCrushingEventListeners(overlay) {
-    const crushBtn = overlay.querySelector('.crush-btn');
+    const crushBtns = overlay.querySelectorAll('.crush-btn');
     const closeBtn = overlay.querySelector('.close-btn');
     const noCrushingCheckbox = overlay.querySelector('#no-crushing');
     const methodRadios = overlay.querySelectorAll('input[name="crushing-method"]');
@@ -220,7 +220,7 @@ function setupCrushingEventListeners(overlay) {
     function validateCrushingSelection() {
         const hasMethodSelected = Array.from(methodRadios).some(radio => radio.checked);
         const isNoCrushing = noCrushingCheckbox.checked;
-        crushBtn.disabled = !hasMethodSelected && !isNoCrushing;
+        crushBtns.forEach(btn => btn.disabled = !hasMethodSelected && !isNoCrushing);
     }
 
     // Handle crushing method selection
@@ -252,15 +252,16 @@ function setupCrushingEventListeners(overlay) {
         validateCrushingSelection();
     });
 
-    if (crushBtn) {
-        crushBtn.disabled = true; // Initially disabled
-        crushBtn.addEventListener('click', () => {
+    // Setup both crush buttons
+    crushBtns.forEach(btn => {
+        btn.disabled = true; // Initially disabled
+        btn.addEventListener('click', () => {
             if (handleCrushingStart(overlay)) {
                 showWineryOverlay();
                 hideOverlay(overlay);
             }
         });
-    }
+    });
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
@@ -294,11 +295,11 @@ function setupCrushingEventListeners(overlay) {
 
 function populateTables(overlayContainer) {
   const buildings = loadBuildings();
-  const inventoryInstance = loadInventory();
+  const inventory = loadInventory();  // This now returns the instance
   const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
 
-  populateMustStorageTable(overlayContainer, buildings, inventoryInstance.items, selectedGrape);
-  populateGrapesTable(overlayContainer, buildings, inventoryInstance.items);
+  populateMustStorageTable(overlayContainer, buildings, inventory.items, selectedGrape);
+  populateGrapesTable(overlayContainer, buildings, inventory.items);
 }
 
 function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
