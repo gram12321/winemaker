@@ -4,7 +4,7 @@ import { showWineryOverlay } from './mainpages/wineryoverlay.js';
 import { inventoryInstance } from '../resource.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
-import { getBuildingTools  } from '../buildings.js';
+import { getBuildingTools } from '../classes/buildingClasses.js'; 
 import { loadBuildings, storeBuildings, loadInventory } from '../database/adminFunctions.js';
 import { createOverlayHTML, createTable, createMethodSelector, createCheckbox } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';

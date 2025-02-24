@@ -1,6 +1,6 @@
 import { getFlagIconHTML } from '../utils.js';
 import { loadBuildings } from '../database/adminFunctions.js';
-import { Building, Tool } from '../buildings.js';
+import { Building, Tool } from '/js/classes/buildingClasses.js'; 
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { updateAllDisplays } from '../displayManager.js';

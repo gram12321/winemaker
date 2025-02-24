@@ -1,6 +1,6 @@
 import { inventoryInstance } from '/js/resource.js';
-import { Building } from '/js/buildings.js';
-import { Tool, getBuildingTools  } from '/js/buildings.js';
+import { Building, Tool, getBuildingTools  } from '/js/classes/buildingClasses.js';
+
 
 // Function to load inventory from localStorage
 function loadInventory() {

@@ -3,13 +3,14 @@ import { renderCompanyInfo } from './company.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
 import { displayStaff } from './staff.js';
-import { updateBuildingCards, updateBuildButtonStates } from './buildings.js';
+import { updateBuildingCards, updateBuildButtonStates } from './overlays/mainpages/buildingsoverlay.js';
 import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
 import { updateVineyardTable } from './overlays/mainpages/vineyardoverlay.js';
 import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
 import { loadCashFlow, updateIncomeStatement } from './finance.js';
 import { setupTeamSections, updateTeamMembersSection } from './overlays/mainpages/staffoverlay.js';
 import { updateUpgradesList } from './overlays/mainpages/financeoverlay.js';
+
 
 // Central function to update all displays
 export function updateAllDisplays() {

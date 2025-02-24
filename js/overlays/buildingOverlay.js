@@ -1,4 +1,4 @@
-import { getBuildingTools, createTool, Building } from '../buildings.js';
+import { Building, createTool, getBuildingTools } from '../classes/buildingClasses.js';
 import { addConsoleMessage } from '/js/console.js';
 import { storeBuildings, loadBuildings } from '/js/database/adminFunctions.js';
 import { addTransaction } from '../finance.js';

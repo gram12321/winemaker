@@ -1,8 +1,8 @@
 import { db, collection, getDocs, getDoc, deleteDoc, setDoc, doc } from './firebase.js';
 import { createNewStaff, getDefaultTeams, Staff } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
-import { getFarmlandsStore, setFarmlandsStore } from '/js/database/adminFunctions.js';
-import { Building } from '/js/buildings.js'; // Add this import
+import { setFarmlandsStore } from '/js/database/adminFunctions.js';
+import { Building } from '/js/classes/buildingClasses.js'; 
 
 // Move staff functions here
 export function saveStaff(staffMembers) {

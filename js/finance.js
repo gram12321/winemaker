@@ -1,8 +1,7 @@
-// Import required utilities and functions
 import { formatNumber } from './utils.js';
 import { renderCompanyInfo } from './company.js';
 import { getTransactions, getMoney, getGameState, loadBuildings, getFarmlands, storeTransactions, updateMoney, getRecurringTransactions, updateRecurringTransactions } from './database/adminFunctions.js';
-import { Building } from './buildings.js';
+import { Building } from './classes/buildingClasses.js'
 import { inventoryInstance } from './resource.js';
 import { calculateWinePrice } from './sales.js';
 import { saveCompanyInfo } from './database/initiation.js';

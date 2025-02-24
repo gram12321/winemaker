@@ -7,7 +7,9 @@ import { performHarvest } from './overlays/harvestOverlay.js';
 import { performCrushing } from './overlays/crushingOverlay.js';
 import { performFermentation } from './wineprocessing.js';
 import { showHireStaffOverlay } from './overlays/hirestaffoverlay.js';
-import { Building, updateBuildingCards, updateBuildButtonStates } from './buildings.js';
+import { updateBuildingCards } from './overlays/mainpages/buildingsoverlay.js';
+import { updateBuildButtonStates } from './overlays/mainpages/buildingsoverlay.js';
+import { Building } from '/js/classes/buildingClasses.js'; 
 import { performUpgrade } from './upgrade.js'; // Add this import
 import { addTransaction } from './finance.js';
 import { setupStaffWagesRecurringTransaction } from './staff.js';

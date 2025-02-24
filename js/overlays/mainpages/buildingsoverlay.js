@@ -4,7 +4,8 @@ import { buildBuilding, upgradeBuilding } from '/js/buildings.js';
 import { updateAllDisplays } from '/js/displayManager.js';
 import { showBuildingOverlay } from '/js/overlays/buildingOverlay.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
-
+import { Building } from '/js/classes/buildingClasses.js';  // Add this import
+import taskManager from '/js/taskManager.js';  // Add this import
 
 export function showBuildingsOverlay() {
     const overlay = showMainViewOverlay(createBuildingsOverlayHTML());
@@ -63,6 +64,79 @@ function createBuildingsOverlayHTML() {
             </div>
         </div>
     `;
+}
+
+export function updateBuildButtonStates() { // Disable build and upgrade buttons if not allowed (No money or already built)
+  const buildings = loadBuildings();
+  const currentMoney = parseInt(localStorage.getItem('money')) || 0;
+  const activeTasks = taskManager.getAllTasks();
+
+  const buildButtons = document.querySelectorAll('.build-button');
+  const upgradeButtons = document.querySelectorAll('.upgrade-button');
+
+  buildButtons.forEach((button, index) => {
+    const buildingName = button.getAttribute('data-building-name');
+    const upgradeButton = upgradeButtons[index];
+    const existingBuilding = buildings.find(b => b.name === buildingName);
+    const buildCost = Building.BUILDINGS[buildingName]?.baseCost || 500000;
+    const hasBuildingTask = activeTasks.some(task => 
+      task.name === 'Building & Maintenance' && 
+      task.params.buildingName === buildingName
+    );
+
+    if (existingBuilding) {
+      button.disabled = true;
+      button.textContent = "Built";
+
+      const building = new Building(buildingName, existingBuilding.level);
+      const upgradeCost = building.getUpgradeCost();
+      upgradeButton.disabled = currentMoney < upgradeCost;
+    } else if (hasBuildingTask) {
+      button.disabled = true;
+      button.textContent = "Building...";
+    } else {
+      button.disabled = currentMoney < buildCost;
+      button.textContent = "Build";
+    }
+  });
+}
+
+export function updateBuildingCards() {
+  const buildings = loadBuildings();
+
+  document.querySelectorAll('.building-card').forEach(cardDiv => {
+    const detailDiv = cardDiv.querySelector('.building-details');
+    if (!detailDiv) return;
+
+    const buildingName = detailDiv.getAttribute('data-building-name');
+    if (!buildingName) return;
+
+    const buildingData = buildings.find(b => b.name === buildingName);
+    const isBuilt = buildingData !== undefined;
+
+    // Create proper Building instance if building exists
+    const building = isBuilt ? new Building(buildingData.name, buildingData.level) : null;
+    if (building && buildingData.slots) {
+      building.slots = buildingData.slots;
+    }
+
+    cardDiv.classList.toggle('unbuilt-card', !isBuilt);
+
+    detailDiv.innerHTML = `
+      <p><strong>${buildingName}</strong></p>
+      <p>Status: ${isBuilt ? "Operational" : "Unbuilt"}</p>
+      <p>Level: ${isBuilt ? building.level : 0}</p>
+      <p>Upgrade Cost: ${isBuilt ? `€${building.getUpgradeCost()}` : "N/A"}</p>
+      <p>Capacity: ${isBuilt ? building.capacity : 0}</p>
+      <p>Content: <br> ${isBuilt ? building.listContents() : "No tools stored."}</p>
+    `;
+
+    if (isBuilt) {
+      cardDiv.onclick = () => showBuildingOverlay(building);
+    } else {
+      cardDiv.onclick = null;
+    }
+  });
 }
 
 function setupBuildingsEventListeners(overlay) {
