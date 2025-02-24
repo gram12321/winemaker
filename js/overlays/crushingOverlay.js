@@ -6,7 +6,7 @@ import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools  } from '../buildings.js';
 import { loadBuildings, storeBuildings } from '../database/adminFunctions.js';
-import { createOverlayHTML, createTable, createMethodSelector } from '../components/createOverlayHTML.js';
+import { createOverlayHTML, createTable, createMethodSelector, createCheckbox } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateCrushingCharacteristics } from '../utils/crushingCharacteristics.js';
@@ -656,6 +656,7 @@ function handleCrushingStart(overlayContainer) {
     if (!validation.valid) return false;
 
     const { selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes } = validation.data;
+
     const mustAmount = calculateMustAmount(totalGrapes);
 
     if (mustAmount > totalAvailableSpace) {
@@ -676,11 +677,14 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     // Now grapeAmount is explicitly passed and matches what we want to remove
     const grapeAmountToRemove = grapeAmount;
     if (grapeAmountToRemove <= 0) {
-        return false; // Skip if no grapes to crush
+        return false;
     }
 
+    // Find grape resource using passed parameters instead of DOM
     const grapeResource = inventoryInstance.items.find(item => 
         item.state === 'Grapes' &&
+        item.storage === grapeStorageId &&
+        item.resource.name === resourceName &&
         item.amount > 0
     );
 
@@ -693,7 +697,6 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     let success = true;
 
     // Remove the amount of grapes corresponding to the processed amount
-    const resourceName = grapeResource.resource.name;
     const vintage = grapeResource.vintage;
     const quality = grapeResource.quality;
     const fieldName = grapeResource.fieldName;
@@ -752,7 +755,7 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     // Add special features based on destemming choice
     if (!destemming) {
         // Calculate chance of getting green flavors based on ripeness
-        const ripeness = grapeResource.ripeness || 0.5; // Default to 0.5 if not set
+        const ripeness = grapeResource.ripeness;
         const greenFlavorChance = (1 - ripeness) * 0.05;
         
         const roll = Math.random();
@@ -868,12 +871,12 @@ function createCrushingMethodSection() {
             methodRadioName: 'crushing-method'
         })}
         <div class="crushing-options mt-3">
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="destemming-checkbox">
-                <label class="form-check-label" for="destemming-checkbox">
-                    De-stemming (Removes stems before crushing, improves body and tannins but requires more work)
-                </label>
-            </div>
+            ${createCheckbox({
+                id: 'destemming-checkbox',
+                label: 'De-stemming (Removes stems before crushing, improves body and tannins but requires more work)',
+                disabled: false,
+                checked: false
+            })}
         </div>
     `;
 }
