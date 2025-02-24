@@ -1,16 +1,13 @@
 import { saveTasks, loadBuildings, storeBuildings,  loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { updateAllDisplays } from './displayManager.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
-import { getFlagIconHTML, getColorClass, formatNumber } from './utils.js';
+import { getFlagIconHTML, getColorClass } from './utils.js';
 import { bookkeeping, performBookkeeping, maintenance, performMaintenance } from './administration.js'; // Update this line
 import { performHarvest } from './overlays/harvestOverlay.js';
 import { performCrushing } from './overlays/crushingOverlay.js';
 import { performFermentation } from './wineprocessing.js';
 import { showHireStaffOverlay } from './overlays/hirestaffoverlay.js';
-import { updateBuildingCards } from './overlays/mainpages/buildingsoverlay.js';
-import { updateBuildButtonStates } from './overlays/mainpages/buildingsoverlay.js';
 import { Building } from '/js/classes/buildingClasses.js'; 
-import { performUpgrade } from './upgrade.js'; // Add this import
 import { addTransaction } from './finance.js';
 import { setupStaffWagesRecurringTransaction } from './staff.js';
 import { addConsoleMessage } from './console.js';
