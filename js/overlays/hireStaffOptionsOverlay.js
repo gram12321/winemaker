@@ -127,112 +127,107 @@ function calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
     return Math.round(baseWork * numberOfCandidates * skillWorkMultiplier * roleWorkMultiplier);
 }
 
+export function staffSearch(numberOfCandidates, skillLevel, selectedRoles) {
+    const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
+    const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles);
+
+    // Check if player has enough money
+    const currentMoney = getMoney();
+    if (currentMoney < totalCost) {
+        addConsoleMessage(`Insufficient funds for staff search. Required: €${formatNumber(totalCost)}, Available: €${formatNumber(currentMoney)}`);
+        return;
+    }
+
+    // Add transaction for search cost
+    addTransaction('Expense', `Staff Search Cost (${numberOfCandidates} ${skillLevels[skillLevel].name} candidates)`, -totalCost);
+
+    // Create task
+    taskManager.addCompletionTask(
+        'Staff Search',
+        'administration',
+        totalWork,
+        performStaffSearch,
+        null,
+        { 
+            numberOfCandidates, 
+            skillModifier: skillLevels[skillLevel].modifier,
+            selectedRoles
+        }
+    );
+
+    const rolesText = selectedRoles.length > 0 
+        ? ` specializing in ${selectedRoles.map(r => specializedRoles[r].title).join(', ')}`
+        : '';
+    addConsoleMessage(
+        `Started searching for ${numberOfCandidates} ${skillLevels[skillLevel].name}-level candidates${rolesText} (Cost: €${formatNumber(totalCost)})`
+    );
+}
+
+export function performStaffSearch(target, params) {
+    showHireStaffOverlay(
+        params.numberOfCandidates, 
+        params.skillModifier,
+        params.selectedRoles
+    );
+}
+
 function setupHireStaffOptionsEventListeners(overlayContainer) {
     const candidatesSlider = overlayContainer.querySelector('#candidates-slider');
     const skillSlider = overlayContainer.querySelector('#skill-slider');
-    const candidatesValue = overlayContainer.querySelector('#candidates-value');
-    const skillValue = overlayContainer.querySelector('#skill-display');  // Updated selector
-    const totalCostDisplay = overlayContainer.querySelector('#total-cost');
     const roleCheckboxes = overlayContainer.querySelectorAll('.role-checkbox');
-    const totalWorkDisplay = overlayContainer.querySelector('#total-work');
 
     function updateDisplay() {
         const numberOfCandidates = parseInt(candidatesSlider.value);
-        const skillLevel = parseFloat(skillSlider.value); // Updated to use float
+        const skillLevel = parseFloat(skillSlider.value);
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.dataset.role);
 
-        const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
-        const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, skillLevel, selectedRoles);
-        const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles);
-
-        // Update candidates
-        if (candidatesValue) {
-            candidatesValue.textContent = numberOfCandidates;
-        }
-
-        // Update skill level - using parent container to avoid element removal issues
-        const skillInfo = getSkillLevelInfo(skillLevel);
-        const skillLevelContainer = overlayContainer.querySelector('.skill-level-container');
-        if (skillLevelContainer) {
-            skillLevelContainer.innerHTML = `Skill Level: ${skillInfo.formattedName}`;
-        }
-        
-        // Update costs
-        const costPerCandidateElement = overlayContainer.querySelector('.planting-overlay-info-box span:last-child');
-        if (costPerCandidateElement) {
-            costPerCandidateElement.textContent = `€${formatNumber(costPerCandidate)}`;
-        }
-        if (totalCostDisplay) {
-            totalCostDisplay.innerHTML = `€${formatNumber(totalCost)}`;
-        }
-        if (totalWorkDisplay) {
-            totalWorkDisplay.innerHTML = totalWork;
-        }
-
-       
+        updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, selectedRoles);
     }
 
+    // Setup slider and checkbox event listeners
     candidatesSlider.addEventListener('input', updateDisplay);
     skillSlider.addEventListener('input', updateDisplay);
+    roleCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateDisplay);
+    });
 
+    // Setup search button
     const searchBtn = overlayContainer.querySelector('.search-btn');
     searchBtn.addEventListener('click', () => {
         const numberOfCandidates = parseInt(candidatesSlider.value);
-        const skillLevel = parseFloat(skillSlider.value); // Updated to use float
+        const skillLevel = parseFloat(skillSlider.value);
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
             .map(cb => cb.dataset.role);
-        const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
-        const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles); // Calculate total work
 
-        // Check if player has enough money
-        const currentMoney = getMoney();
-        if (currentMoney < totalCost) {
-            addConsoleMessage(`Insufficient funds for staff search. Required: €${formatNumber(totalCost)}, Available: €${formatNumber(currentMoney)}`);
-            return;
-        }
-
-        // Add transaction for search cost
-        addTransaction('Expense', `Staff Search Cost (${numberOfCandidates} ${skillLevels[skillLevel].name} candidates)`, -totalCost);
-
-        taskManager.addCompletionTask(
-            'Staff Search',
-            'administration',
-            totalWork, // Use calculated total work
-            (target, params) => {
-                showHireStaffOverlay(
-                    params.numberOfCandidates, 
-                    params.skillModifier,
-                    params.selectedRoles
-                );
-            },
-            null,
-            { 
-                numberOfCandidates, 
-                skillModifier: skillLevels[skillLevel].modifier,
-                selectedRoles
-            },
-            () => {
-                const rolesText = selectedRoles.length > 0 
-                    ? ` specializing in ${selectedRoles.map(r => specializedRoles[r].title).join(', ')}`
-                    : '';
-                addConsoleMessage(
-                    `Started searching for ${numberOfCandidates} ${skillLevels[skillLevel].name}-level candidates${rolesText} (Cost: €${formatNumber(totalCost)})`
-                );
-                hideOverlay(overlayContainer);
-            }
-        );
+        staffSearch(numberOfCandidates, skillLevel, selectedRoles);
+        hideOverlay(overlayContainer);
     });
 
+    // Setup close button
     const closeBtn = overlayContainer.querySelector('.close-btn');
     closeBtn.addEventListener('click', () => {
         hideOverlay(overlayContainer);
     });
+}
 
-    // Add event listeners for checkboxes
-    roleCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateDisplay);
-    });
+function updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, selectedRoles) {
+    const candidatesValue = overlayContainer.querySelector('#candidates-value');
+    const skillLevelContainer = overlayContainer.querySelector('.skill-level-container');
+    const totalCostDisplay = overlayContainer.querySelector('#total-cost');
+    const totalWorkDisplay = overlayContainer.querySelector('#total-work');
+    const costPerCandidateElement = overlayContainer.querySelector('.planting-overlay-info-box span:last-child');
+
+    const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
+    const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, skillLevel);
+    const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles);
+    const skillInfo = getSkillLevelInfo(skillLevel);
+
+    if (candidatesValue) candidatesValue.textContent = numberOfCandidates;
+    if (skillLevelContainer) skillLevelContainer.innerHTML = `Skill Level: ${skillInfo.formattedName}`;
+    if (costPerCandidateElement) costPerCandidateElement.textContent = `€${formatNumber(costPerCandidate)}`;
+    if (totalCostDisplay) totalCostDisplay.innerHTML = `€${formatNumber(totalCost)}`;
+    if (totalWorkDisplay) totalWorkDisplay.innerHTML = totalWork;
 }
