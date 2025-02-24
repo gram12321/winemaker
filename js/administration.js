@@ -115,9 +115,17 @@ function validateMaintenance() {
 }
 
 function calculateMaintenanceWork(building, spilloverWork = 0) {
-    // Use upgrade cost instead of base cost to reflect current building value
-    const currentValue = building.getUpgradeCost();
-    const baseWork = Math.round(currentValue / 10000);
+    // Get building value from upgrade cost
+    const buildingValue = building.getUpgradeCost();
+    
+    // Calculate total value of all tools in the building
+    const toolValue = building.slots
+        .flatMap(slot => slot.tools)
+        .reduce((total, tool) => total + tool.cost, 0);
+
+    // Combined value determines base work (1 work per €10,000 of value)
+    const baseWork = Math.round((buildingValue + toolValue) / 10000);
+    
     return Math.round(baseWork + spilloverWork);
 }
 
