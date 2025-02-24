@@ -19,7 +19,7 @@ function loadInventory() {
     inventoryInstance.items = [];
 
     savedInventory.forEach(item => {
-        const newItem = inventoryInstance.addResource(
+        inventoryInstance.addResource(
             { name: item.resource.name, naturalYield: item.resource.naturalYield || 1 },
             item.amount,
             item.state,
@@ -27,23 +27,11 @@ function loadInventory() {
             item.quality,
             item.fieldName,
             item.fieldPrestige,
-            item.storage
+            item.storage,
+            item.oxidation || 0,
+            item.ripeness || 0,
+            Array.isArray(item.specialFeatures) ? item.specialFeatures : []
         );
-
-        if (newItem) {
-            // Assign all optional properties with default values
-            newItem.oxidation = item.oxidation || 0;
-            newItem.specialFeatures = Array.isArray(item.specialFeatures) ? item.specialFeatures : [];
-            newItem.ripeness = item.ripeness || 0;
-
-            // Restore grape characteristics with defaults
-            if (item.state === 'Grapes') {
-                const characteristics = ['sweetness', 'acidity', 'tannins', 'body', 'spice', 'aroma'];
-                characteristics.forEach(char => {
-                    newItem[char] = typeof item[char] === 'number' ? item[char] : 0.5;
-                });
-            }
-        }
     });
 }
 

@@ -54,7 +54,8 @@ export class Resource {
 }
 
 export class InventoryItem {
-  constructor(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
+  constructor(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage, 
+              oxidation = 0, ripeness = 0, specialFeatures = []) {
     this.resource = resource;
     this.amount = amount;
     this.state = state;
@@ -63,29 +64,27 @@ export class InventoryItem {
     this.fieldName = fieldName;
     this.fieldPrestige = fieldPrestige;
     this.storage = storage;
-    this.oxidation = 0; // Initialize oxidation at 0
+    this.oxidation = oxidation;
+    this.ripeness = ripeness;
+    this.specialFeatures = specialFeatures;
 
-    // Add new array for special features
-    this.specialFeatures = [];
-
-    // Initialize base characteristics with resource-specific values
+    // Get base characteristics with default of 0.5 for each property
     const baseCharacteristics = resource.wineCharacteristics || {
-      acidity: 0,
-      aroma: 0,
-      body: 0,
-      spice: 0,
-      sweetness: 0,
-      tannins: 0
+      acidity: 0.5,
+      aroma: 0.5,
+      body: 0.5,
+      spice: 0.5,
+      sweetness: 0.5,
+      tannins: 0.5
     };
 
-    // Apply base values plus grape characteristics
-    this.acidity = 0.5 + (baseCharacteristics.acidity || 0);
-    this.aroma = 0.5 + (baseCharacteristics.aroma || 0);
-    this.body = 0.5 + (baseCharacteristics.body || 0);
-    this.spice = 0.5 + (baseCharacteristics.spice || 0);
-    this.sweetness = 0.5 + (baseCharacteristics.sweetness || 0);
-    this.tannins = 0.5 + (baseCharacteristics.tannins || 0);
-
+    // Assign characteristics directly
+    this.acidity = baseCharacteristics.acidity;
+    this.aroma = baseCharacteristics.aroma;
+    this.body = baseCharacteristics.body;
+    this.spice = baseCharacteristics.spice;
+    this.sweetness = baseCharacteristics.sweetness;
+    this.tannins = baseCharacteristics.tannins;
   }
 
   // Add helper methods for special features
@@ -134,7 +133,8 @@ export class Inventory {
     return this.items.filter(item => item.storage === storageId);
   }
 
-  addResource(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage) {
+  addResource(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage, 
+              oxidation = 0, ripeness = 0, specialFeatures = []) {
     // Ensure we're passing a proper Resource object
     let resourceObj;
     if (typeof resource === 'string') {
@@ -154,7 +154,9 @@ export class Inventory {
       existingItem.amount += amount;
       return existingItem;
     } else {
-      const newItem = new InventoryItem(resourceObj, amount, state, vintage, quality, fieldName, fieldPrestige, storage);
+      const newItem = new InventoryItem(resourceObj, amount, state, vintage, quality, 
+                                      fieldName, fieldPrestige, storage, oxidation, 
+                                      ripeness, specialFeatures);
       this.items.push(newItem);
       return newItem;
     }
