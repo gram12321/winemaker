@@ -5,7 +5,7 @@ import { inventoryInstance } from '../resource.js';
 import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools  } from '../buildings.js';
-import { loadBuildings, storeBuildings } from '../database/adminFunctions.js';
+import { loadBuildings, storeBuildings, loadInventory } from '../database/adminFunctions.js';
 import { createOverlayHTML, createTable, createMethodSelector, createCheckbox } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
@@ -200,7 +200,7 @@ function updateStorageProgress() {
     const grapesDisplay = document.getElementById('selected-grapes');
     
     storageDisplay.textContent = `${formatNumber(totalStorage)} L`;
-    grapesDisplay.textContent = `≈ ${formatNumber(estimatedMust)} L`;  // Added ≈ symbol
+    grapesDisplay.textContent = `≈ ${formatNumber(estimatedMust)} L`;  
 
     const progressPercentage = Math.min((totalStorage / estimatedMust) * 100, 100);
     const storageProgress = document.getElementById('selected-storage-progress');
@@ -293,12 +293,12 @@ function setupCrushingEventListeners(overlay) {
 }
 
 function populateTables(overlayContainer) {
-  const buildings = JSON.parse(localStorage.getItem('buildings')) || [];
-  const playerInventory = JSON.parse(localStorage.getItem('playerInventory')) || [];
+  const buildings = loadBuildings();
+  const inventoryInstance = loadInventory();
   const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
 
-  populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape);
-  populateGrapesTable(overlayContainer, buildings, playerInventory);
+  populateMustStorageTable(overlayContainer, buildings, inventoryInstance.items, selectedGrape);
+  populateGrapesTable(overlayContainer, buildings, inventoryInstance.items);
 }
 
 function populateMustStorageTable(overlayContainer, buildings, playerInventory, selectedGrape) {
