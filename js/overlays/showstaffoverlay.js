@@ -1,14 +1,11 @@
-import { getFlagIconHTML, formatNumber, getColorClass, getSkillLevelInfo } from '../utils.js'; // Import getSkillLevelInfo
-import { specializedRoles } from '../overlays/hireStaffOptionsOverlay.js'; // Import specializedRoles
+import { getFlagIconHTML, formatNumber, getColorClass, getSkillLevelInfo } from '../utils.js';  
+import { specializedRoles } from '../overlays/hireStaffOptionsOverlay.js'; 
 import { showModalOverlay } from './overlayUtils.js';
 
 export function showStaffOverlay(staffData) {
   const content = getStaffOverlayHTML(staffData);
-  
-  // Convert DOM element to its HTML string
   const overlayContainer = showModalOverlay('staffOverlay', content.outerHTML);
   
-  // Setup any required event listeners using overlayContainer
   setupStaffOverlayEventListeners(overlayContainer, staffData);
   
   return overlayContainer;
@@ -72,10 +69,9 @@ function setupStaffOverlayEventListeners(overlay, staffData) {
     });
   }
 
-  // Add click outside to close
   overlay.addEventListener('click', (event) => {
     if (event.target === overlay) {
       overlay.remove();
     }
-  }); // fixed syntax error here
+  }); 
 }

@@ -1,10 +1,10 @@
 import { createNewStaff, setupStaffWagesRecurringTransaction } from '../staff.js';
-import { getFlagIconHTML, skillLevels, getSkillLevelInfo, formatNumber, getColorClass } from '../utils.js';
+import { getFlagIconHTML, getSkillLevelInfo, formatNumber, getColorClass } from '../utils.js';
 import { saveStaff, loadStaff } from '../database/initiation.js';
 import { addConsoleMessage } from '../console.js';
 import { addTransaction } from '../finance.js';
-import taskManager from '../taskManager.js';  // Changed this line - removed TaskType
-import { showModalOverlay, showStandardOverlay, hideOverlay } from './overlayUtils.js'; // Change this import
+import taskManager from '../taskManager.js';  
+import { showModalOverlay, hideOverlay } from './overlayUtils.js'; 
 import { specializedRoles } from './hireStaffOptionsOverlay.js';
 
 export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, specializedRoles = []) {
@@ -13,7 +13,6 @@ export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, s
         () => createNewStaff(skillModifier, specializedRoles)
     );
     
-    // Add console.log to debug content creation
     const content = createHireStaffHTML(createdStaffOptions);
     
     const overlayContainer = showModalOverlay('hireStaffOverlay', content);

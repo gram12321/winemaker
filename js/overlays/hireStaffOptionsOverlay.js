@@ -6,48 +6,6 @@ import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 import { addTransaction} from '../finance.js'
 import { getMoney } from '../database/adminFunctions.js';
 
-// Add new constant for specialized roles
-export const specializedRoles = {
-    field: { title: "Vineyard Manager", description: "Expert in vineyard operations" },
-    winery: { title: "Master Winemaker", description: "Specialist in wine production" },
-    administration: { title: "Estate Administrator", description: "Expert in business operations" },
-    sales: { title: "Sales Director", description: "Specialist in wine marketing and sales" },
-    maintenance: { title: "Technical Director", description: "Expert in facility maintenance" }
-};
-
-function calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles) {
-    const baseCost = 2000;
-    const skillMultiplier = skillLevels[skillLevel].costMultiplier;
-    
-    // Exponential scaling based on candidates and skill
-    const candidateScaling = Math.pow(numberOfCandidates, 1.5);
-    const skillScaling = Math.pow(skillMultiplier, 1.8);
-    
-    // Linear scaling for specialized roles (2x per role)
-    const specializationMultiplier = selectedRoles.length > 0 ? Math.pow(2, selectedRoles.length) : 1;
-    
-    // Combine all scalings
-    const totalMultiplier = (candidateScaling * skillScaling * specializationMultiplier);
-    
-    return Math.round(baseCost * totalMultiplier);
-}
-
-// Add new function to calculate per-candidate cost
-function calculatePerCandidateCost(totalCandidates, skillLevel) {
-    // Calculate total cost and divide by number of candidates
-    // This ensures the per-candidate cost also scales with the total number of candidates
-    const totalCost = calculateSearchCost(totalCandidates, skillLevel, []);
-    return Math.round(totalCost / totalCandidates);
-}
-
-// Adjusted function to calculate total work required
-function calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
-    const baseWork = 10;
-    const skillWorkMultiplier = 1 + (skillLevel - 0.1) * 0.5; // Skill level has a moderate impact
-    const roleWorkMultiplier = 1 + selectedRoles.length * 0.3; // Specialized roles have a smaller impact
-
-    return Math.round(baseWork * numberOfCandidates * skillWorkMultiplier * roleWorkMultiplier);
-}
 
 export function showHireStaffOptionsOverlay() {
     const overlayContainer = showStandardOverlay(createHireStaffOptionsHTML());
@@ -123,6 +81,50 @@ function createHireStaffOptionsHTML() {
             </section>
         </div>
     `;
+}
+
+
+// Add new constant for specialized roles
+export const specializedRoles = {
+    field: { title: "Vineyard Manager", description: "Expert in vineyard operations" },
+    winery: { title: "Master Winemaker", description: "Specialist in wine production" },
+    administration: { title: "Estate Administrator", description: "Expert in business operations" },
+    sales: { title: "Sales Director", description: "Specialist in wine marketing and sales" },
+    maintenance: { title: "Technical Director", description: "Expert in facility maintenance" }
+};
+
+function calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles) {
+    const baseCost = 2000;
+    const skillMultiplier = skillLevels[skillLevel].costMultiplier;
+    
+    // Exponential scaling based on candidates and skill
+    const candidateScaling = Math.pow(numberOfCandidates, 1.5);
+    const skillScaling = Math.pow(skillMultiplier, 1.8);
+    
+    // Linear scaling for specialized roles (2x per role)
+    const specializationMultiplier = selectedRoles.length > 0 ? Math.pow(2, selectedRoles.length) : 1;
+    
+    // Combine all scalings
+    const totalMultiplier = (candidateScaling * skillScaling * specializationMultiplier);
+    
+    return Math.round(baseCost * totalMultiplier);
+}
+
+// Add new function to calculate per-candidate cost
+function calculatePerCandidateCost(totalCandidates, skillLevel) {
+    // Calculate total cost and divide by number of candidates
+    // This ensures the per-candidate cost also scales with the total number of candidates
+    const totalCost = calculateSearchCost(totalCandidates, skillLevel, []);
+    return Math.round(totalCost / totalCandidates);
+}
+
+// Adjusted function to calculate total work required
+function calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
+    const baseWork = 10;
+    const skillWorkMultiplier = 1 + (skillLevel - 0.1) * 0.5; // Skill level has a moderate impact
+    const roleWorkMultiplier = 1 + selectedRoles.length * 0.3; // Specialized roles have a smaller impact
+
+    return Math.round(baseWork * numberOfCandidates * skillWorkMultiplier * roleWorkMultiplier);
 }
 
 function setupHireStaffOptionsEventListeners(overlayContainer) {
