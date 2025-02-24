@@ -429,7 +429,7 @@ function updateCrushingData(selectedGrape, selectedStorage) {
         const grapeAmount = parseFloat(selectedGrape.dataset.amount);
         const estimatedMust = calculateMustAmount(grapeAmount, true); // Use rounded estimate
         document.getElementById('must-expected').textContent = 
-            `≈ ${formatNumber(estimatedMust)} L`;  // Added ≈ symbol
+            `≈ ${formatNumber(estimatedMust)} L`;  
 
         const selectedStorages = document.querySelectorAll('input[name="must-storage"]:checked');
         let totalStorage = 0;
@@ -666,7 +666,7 @@ function handleCrushingStart(overlayContainer) {
     return crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGrapes);
 }
 
-// Update performCrushing to be more explicit about the amounts
+
 export function performCrushing(selectedStorages, mustAmount, grapeAmount, destemming) {
 
     // Now grapeAmount is explicitly passed and matches what we want to remove
