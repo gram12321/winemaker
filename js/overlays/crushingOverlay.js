@@ -208,8 +208,6 @@ function updateStorageProgress() {
     storageProgress.setAttribute('aria-valuenow', progressPercentage);
 }
 
-
-// Update the setupCrushingEventListeners to only allow clicking on available methods
 function setupCrushingEventListeners(overlay) {
     const crushBtns = overlay.querySelectorAll('.crush-btn');
     const closeBtn = overlay.querySelector('.close-btn');

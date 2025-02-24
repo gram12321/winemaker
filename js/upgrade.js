@@ -85,47 +85,59 @@ function checkRequirements(upgrade, target = null) {
   return true;
 }
 
-// Function to start an upgrade/research task
-export function startUpgradeTask(upgradeId, target = null) {
-  const upgrade = upgrades.find(p => p.id === upgradeId);
-  if (!upgrade) {
-    addConsoleMessage(`Upgrade with ID ${upgradeId} not found.`, false, true);
-    return;
-  }
+// Function to start an upgrade
+export function upgrade(upgradeId, target = null) {
+    const upgrade = upgrades.find(p => p.id === upgradeId);
+    if (!upgrade) {
+        addConsoleMessage(`Upgrade with ID ${upgradeId} not found.`, false, true);
+        return;
+    }
 
-  if (!checkRequirements(upgrade, target)) {
-    return;
-  }
+    if (!checkRequirements(upgrade, target)) {
+        return;
+    }
 
-  // Deduct the required money
-  addTransaction('Expense', `Started upgrade on ${upgrade.name}`, -upgrade.requirements.money);
+    // Deduct the required money
+    addTransaction('Expense', `Started upgrade on ${upgrade.name}`, -upgrade.requirements.money);
 
-  // Set target based on upgrade type
-  const upgradeTarget = upgrade.applicableTo === 'farmland' ? target : upgrade.name;
+    // Set target based on upgrade type
+    const upgradeTarget = upgrade.applicableTo === 'farmland' ? target : upgrade.name;
 
-  // Start the task using taskManager
-  taskManager.addCompletionTask(
-    'Upgrade',
-    upgrade.taskParameters.taskType,
-    upgrade.taskParameters.totalWork,
-    (target, params) => {
-      // Apply benefits upon completion
-      applyUpgradeBenefits(upgrade, target);
-      // Mark upgrade as completed if it's not farmland-specific
-      if (upgrade.applicableTo !== 'farmland') {
+    // Start the task using taskManager - Fix parameter order and callback
+    taskManager.addCompletionTask(
+        'Upgrade',
+        upgrade.taskParameters.taskType,
+        upgrade.taskParameters.totalWork,
+        performUpgrade,  // Just pass the function reference
+        upgradeTarget,
+        { upgrade, target }  // Keep the params object as is
+    );
+}
+
+// Function to perform the upgrade (called by taskManager)
+export function performUpgrade(target, params) {
+    // Add null check for params
+    if (!params || !params.upgrade) {
+        console.error('Invalid upgrade parameters:', params);
+        return;
+    }
+
+    const { upgrade } = params;
+    applyUpgradeBenefits(upgrade, params.target);
+    
+    // Mark upgrade as completed if it's not farmland-specific
+    if (upgrade.applicableTo !== 'farmland') {
         upgrade.completed = true;
-      } else {
+    } else {
         // For farmland upgrades, check if all farmlands have it
         const farmlands = getFarmlands();
         const allFarmlandsUpgraded = farmlands.every(f => f.upgrades && f.upgrades.includes(upgrade.id));
         upgrade.completed = allFarmlandsUpgraded;
-      }
-      addConsoleMessage(`Upgrade on ${upgrade.name} completed. Benefits applied.`);
-      updateUpgradesList();
-      storeUpgrades(upgrades);
-    },
-    upgradeTarget
-  );
+    }
+    
+    addConsoleMessage(`Upgrade on ${upgrade.name} completed. Benefits applied.`);
+    updateUpgradesList();
+    storeUpgrades(upgrades);
 }
 
 // Function to check if an upgrade is available

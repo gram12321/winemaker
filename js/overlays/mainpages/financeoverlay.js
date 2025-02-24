@@ -1,6 +1,6 @@
 import { loadCashFlow, updateIncomeStatement } from '/js/finance.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
-import { startUpgradeTask, getBenefitsDescription } from '/js/upgrade.js';
+import { upgrade, getBenefitsDescription } from '/js/upgrade.js';  // Change import here
 import { getMoney } from '/js/company.js';
 import { categorizeUpgrades } from '../../upgrade.js';
 import { getFarmlands } from '/js/database/adminFunctions.js';
@@ -311,18 +311,18 @@ function setupFinanceEventListeners(overlay) {
             const farmlandSelect = e.target.closest('.upgrade-item').querySelector('.farmland-select');
             
             // Add null check and handle upgrades that don't require farmland
-            const upgrade = upgrades.find(u => u.id === upgradeId);
-            if (upgrade.applicableTo === 'farmland') {
+            const upgradeItem = upgrades.find(u => u.id === upgradeId);
+            if (upgradeItem.applicableTo === 'farmland') {
                 if (!farmlandSelect || !farmlandSelect.value) {
                     addConsoleMessage('Please select a farmland to apply the upgrade.', false, true);
                     return;
                 }
                 const farmlandId = parseInt(farmlandSelect.value, 10);
                 const farmland = getFarmlands().find(f => f.id === farmlandId);
-                startUpgradeTask(upgradeId, farmland);
+                upgrade(upgradeId, farmland);  // Changed from startUpgradeTask to upgrade
             } else {
                 // For non-farmland upgrades, just start the task without a target
-                startUpgradeTask(upgradeId);
+                upgrade(upgradeId);  // Changed from startUpgradeTask to upgrade
             }
             
             // Refresh the upgrades list to reflect the new status

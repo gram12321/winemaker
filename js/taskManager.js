@@ -9,8 +9,7 @@ import { performFermentation } from './wineprocessing.js';
 import { showHireStaffOverlay } from './overlays/hirestaffoverlay.js';
 import { Building, updateBuildingCards, updateBuildButtonStates } from './buildings.js';
 import { updateUpgradesList } from './overlays/mainpages/financeoverlay.js';
-import { applyUpgradeBenefits, upgrades } from './upgrade.js';
-import { displayFarmland } from './overlays/mainpages/landoverlay.js';
+import { applyUpgradeBenefits, upgrades, performUpgrade } from './upgrade.js'; // Add this import
 import { addTransaction } from './finance.js';
 import { setupStaffWagesRecurringTransaction } from './staff.js';
 import { addConsoleMessage } from './console.js';
@@ -139,6 +138,10 @@ class TaskManager {
         });
 
         this.tasks.forEach(task => {
+            if (!task.callback) {
+                console.warn(`Task ${task.name} has no callback, skipping...`);
+                return;
+            }
             let appliedWork = 0;
             task.assignedStaff.forEach(staff => {
                 let relevantSkill = 0;
@@ -378,15 +381,7 @@ class TaskManager {
     getTaskCallback(taskName, taskType) {
         switch (taskName.toLowerCase()) {
             case 'upgrade':
-                return (target, params) => {
-                    const upgrade = upgrades.find(p => p.name.toLowerCase() === target.toLowerCase());
-                    if (upgrade) {
-                        applyUpgradeBenefits(upgrade);
-                        upgrade.completed = true;
-                        addConsoleMessage(`Upgrade on ${upgrade.name} completed. Benefits applied.`);
-                        updateUpgradesList();
-                    }
-                };
+                return performUpgrade;  // Just return the function directly
             case 'building & maintenance':
                 return (target, params) => {
                     if (params.buildingCost) {
@@ -512,3 +507,4 @@ class TaskManager {
 
 const taskManager = new TaskManager();
 export default taskManager;
+
