@@ -114,6 +114,13 @@ function validateMaintenance() {
     return spilloverByBuilding;
 }
 
+function calculateMaintenanceWork(building, spilloverWork = 0) {
+    // Use upgrade cost instead of base cost to reflect current building value
+    const currentValue = building.getUpgradeCost();
+    const baseWork = Math.round(currentValue / 10000);
+    return Math.round(baseWork + spilloverWork);
+}
+
 export function maintenance() {
     const { week, season, year } = getGameState();
     
@@ -125,10 +132,7 @@ export function maintenance() {
 
     // Create new maintenance tasks for each building
     buildings.forEach(building => {
-        const baseWork = 100;
-        const levelMultiplier = Math.pow(1.2, building.level);
-        const spilloverWork = spilloverByBuilding[building.name] || 0;
-        const totalWork = Math.round((baseWork * levelMultiplier) + spilloverWork);
+        const totalWork = calculateMaintenanceWork(building, spilloverByBuilding[building.name] || 0);
 
         taskManager.addCompletionTask(
             'Maintain',
@@ -136,7 +140,7 @@ export function maintenance() {
             totalWork,
             performMaintenance,
             building,
-            { year }  // Removed maintenanceCost from params
+            { year }
         );
     });
 }
