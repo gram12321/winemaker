@@ -680,11 +680,8 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
         return false;
     }
 
-    // Find grape resource using passed parameters instead of DOM
     const grapeResource = inventoryInstance.items.find(item => 
         item.state === 'Grapes' &&
-        item.storage === grapeStorageId &&
-        item.resource.name === resourceName &&
         item.amount > 0
     );
 
@@ -697,6 +694,7 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     let success = true;
 
     // Remove the amount of grapes corresponding to the processed amount
+    const resourceName = grapeResource.resource.name;
     const vintage = grapeResource.vintage;
     const quality = grapeResource.quality;
     const fieldName = grapeResource.fieldName;
