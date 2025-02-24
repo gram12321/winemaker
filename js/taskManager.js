@@ -18,6 +18,7 @@ import { loadStaff, saveStaff, loadTeams } from './database/initiation.js';
 import { performClearing } from './overlays/clearingOverlay.js';  // Add this import
 import { performPlanting } from './overlays/plantingOverlay.js';  // Add this import
 import { performUproot } from './overlays/uprootOverlay.js';  // Add this import
+import { performBuildBuilding, performUpgradeBuilding } from './buildings.js';  // Update import
 
 
 // Internal mapping for display names
@@ -382,29 +383,9 @@ class TaskManager {
     getTaskCallback(taskName, taskType) {
         switch (taskName.toLowerCase()) {
             case 'upgrade':
-                return performUpgrade;
+                return performUpgradeBuilding;  // Update this line
             case 'building & maintenance':
-                return (target, params) => {
-                    if (params.buildingCost) {
-                        const newBuilding = new Building(target);
-                        const buildings = loadBuildings();
-                        buildings.push(newBuilding);
-                        storeBuildings(buildings);
-                        addConsoleMessage(`${target} has been built successfully. Cost: €${formatNumber(params.buildingCost)}. Capacity: ${newBuilding.capacity}`);
-                    } else if (params.upgradeCost) {
-                        const buildings = loadBuildings();
-                        const buildingToUpgrade = buildings.find(b => b.name === target);
-                        if (buildingToUpgrade) {
-                            const building = new Building(buildingToUpgrade.name, buildingToUpgrade.level, buildingToUpgrade.tools || []);
-                            building.upgrade();
-                            const updatedBuildings = buildings.map(b => b.name === target ? building : b);
-                            storeBuildings(updatedBuildings);
-                            addConsoleMessage(`${target} has been upgraded to level ${building.level}. Cost: €${formatNumber(params.upgradeCost)}. New Capacity: ${building.capacity}`);
-                        }
-                    }
-                    updateBuildingCards();
-                    updateBuildButtonStates();
-                };
+                return performBuildBuilding;
             case 'planting':
                 return (target, progress, params) => {
                     if (progress >= 1) {
