@@ -193,7 +193,7 @@
   justify-content: center;
 }
 
-/* Specific for wineinfooverlay */
+/* Specific for ressourceinfovoverlay */
 .characteristic-icon {
   width: 30px;
   height: 30px;
@@ -201,3 +201,12 @@
   margin-right: 8px;
 }
 
+/* Specific for fieldoverlay */
+.upgrade-icon {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+  margin-right: 8px;
+  border-radius: var(--radius-md);
+}
+  

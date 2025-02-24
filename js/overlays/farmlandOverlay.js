@@ -10,6 +10,7 @@ import {calculateAgeContribution,
   calculateFragilityBonusContribution } from '/js/farmland.js';
 import { showResourceInfoOverlay } from './resourceInfoOverlay.js';
 import { showModalOverlay } from './overlayUtils.js';
+import { upgrades } from '../upgrade.js';  // Add this import
 
 export function showFarmlandOverlay(farmlandData) {
   // Calculate additional values needed for display
@@ -123,6 +124,10 @@ function getFarmlandOverlayHTML(farmlandData, ...params) {
                   '(Certified)' : ''}</td></tr>
                 <tr><td>Farmland Prestige</td><td class="${prestigeColorClass} overlay-tooltip" title="${prestigeTooltip}">${formatNumber(farmlandPrestige * 100)}%</td></tr>
                 <tr><td>Farmland Health</td><td class="${healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
+                <tr>
+                  <td>Field Upgrades</td>
+                  <td>${getUpgradeIconsHTML(farmlandData)}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -130,5 +135,23 @@ function getFarmlandOverlayHTML(farmlandData, ...params) {
       </div>
     </div>
   `;
+}
+
+function getUpgradeIconsHTML(farmland) {
+  if (!farmland.upgrades || farmland.upgrades.length === 0) {
+    return 'None';
+  }
+
+  return farmland.upgrades.map(upgradeId => {
+    const upgrade = upgrades.find(u => u.id === upgradeId);
+    if (!upgrade) return '';
+    
+    const iconName = upgrade.name.toLowerCase().replace(/\s+/g, '');
+    return `<img src="../assets/icon/small/upgrades/${iconName}.webp" 
+                alt="${upgrade.name}" 
+                title="${upgrade.name}"
+                class="upgrade-icon"
+                onerror="this.style.display='none'">`;
+  }).join(' ');
 }
 
