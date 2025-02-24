@@ -1,15 +1,14 @@
-import { saveTasks, updateFarmland, loadBuildings, storeBuildings,  loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
+import { saveTasks, loadBuildings, storeBuildings,  loadTasks as loadTasksFromStorage } from './database/adminFunctions.js';
 import { updateAllDisplays } from './displayManager.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass, formatNumber } from './utils.js';
-import { bookkeeping, maintenanceBuildings } from './administration.js'; // Update this line
+import { bookkeeping, maintenance, performMaintenance } from './administration.js'; // Update this line
 import { performHarvest } from './overlays/harvestOverlay.js';
 import { performCrushing } from './overlays/crushingOverlay.js';
 import { performFermentation } from './wineprocessing.js';
 import { showHireStaffOverlay } from './overlays/hirestaffoverlay.js';
 import { Building, updateBuildingCards, updateBuildButtonStates } from './buildings.js';
-import { updateUpgradesList } from './overlays/mainpages/financeoverlay.js';
-import { applyUpgradeBenefits, upgrades, performUpgrade } from './upgrade.js'; // Add this import
+import { performUpgrade } from './upgrade.js'; // Add this import
 import { addTransaction } from './finance.js';
 import { setupStaffWagesRecurringTransaction } from './staff.js';
 import { addConsoleMessage } from './console.js';
@@ -120,7 +119,7 @@ class TaskManager {
 
     checkDateTriggeredTasks() {
         bookkeeping();
-        maintenanceBuildings(); // Add this line to trigger building maintenance
+        maintenance(); // Add this line to trigger building maintenance
     }
 
     processWeek() {
@@ -456,9 +455,7 @@ class TaskManager {
                     }
                 };
             case 'maintain':
-                return (target, params) => {
-                    addConsoleMessage(`Maintenance of ${target.name} completed successfully.`);
-                };
+                return performMaintenance;
             case 'bookkeeping':
                 return (target, params) => {
                     const { prevSeason, prevYear } = params;

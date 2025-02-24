@@ -3,6 +3,7 @@ import { extractSeasonAndYear, formatNumber } from './utils.js';
 import taskManager from './taskManager.js';
 import { getGameState, getTransactions } from './database/adminFunctions.js';
 import { calculateRealPrestige } from './company.js'; // Add this import
+import { loadBuildings, storeBuildings } from './database/adminFunctions.js'; // Add this import
 
 
 export function bookkeeping() {
@@ -70,13 +71,7 @@ export function bookkeeping() {
   );
 }
 
-export function maintenanceBuildings() {
-    const { week, season, year } = getGameState();
-    
-    // Only trigger on first week of Spring
-    if (week !== 1 || season !== 'Spring') return;
-
-    const buildings = JSON.parse(localStorage.getItem('buildings') || '[]');
+function validateMaintenance() {
     const existingTasks = taskManager.getAllTasks().filter(task => 
         task.name.startsWith('Maintain') && task.type === 'completion'
     );
@@ -85,6 +80,7 @@ export function maintenanceBuildings() {
     const spilloverByBuilding = {};
     const currentPrestige = calculateRealPrestige();
     
+    // Handle existing incomplete tasks
     existingTasks.forEach(task => {
         const buildingName = task.target.name;
         const remainingWork = task.totalWork - task.appliedWork;
@@ -103,23 +99,36 @@ export function maintenanceBuildings() {
         taskManager.removeTask(task.id);
     });
 
+    return spilloverByBuilding;
+}
+
+export function maintenance() {
+    const { week, season, year } = getGameState();
+    
+    // Only trigger on first week of Spring
+    if (week !== 1 || season !== 'Spring') return;
+
+    const buildings = loadBuildings();
+    const spilloverByBuilding = validateMaintenance();
+
+    // Create new maintenance tasks for each building
     buildings.forEach(building => {
         const baseWork = 100;
         const levelMultiplier = Math.pow(1.2, building.level);
         const spilloverWork = spilloverByBuilding[building.name] || 0;
         const totalWork = Math.round((baseWork * levelMultiplier) + spilloverWork);
 
-        const taskName = `Maintain ${building.name}`;
-
         taskManager.addCompletionTask(
-            'Building & Maintenance',
-            'maintenance',  // Changed from TASK_TYPES.MAINTENANCE
+            'Maintain',
+            'maintenance',
             totalWork,
-            (target, params) => {
-                addConsoleMessage(`Maintenance of ${building.name} completed successfully!`);
-            },
+            performMaintenance,
             building,
-            { year }
+            { year }  // Removed maintenanceCost from params
         );
     });
+}
+
+export function performMaintenance(target) {
+    addConsoleMessage(`Maintenance of ${target.name} completed successfully.`);
 }
