@@ -2,7 +2,7 @@ import { saveTasks, loadBuildings, storeBuildings,  loadTasks as loadTasksFromSt
 import { updateAllDisplays } from './displayManager.js';
 import { showAssignStaffOverlay } from './overlays/assignStaffOverlay.js';
 import { getFlagIconHTML, getColorClass, formatNumber } from './utils.js';
-import { bookkeeping, maintenance, performMaintenance } from './administration.js'; // Update this line
+import { bookkeeping, performBookkeeping, maintenance, performMaintenance } from './administration.js'; // Update this line
 import { performHarvest } from './overlays/harvestOverlay.js';
 import { performCrushing } from './overlays/crushingOverlay.js';
 import { performFermentation } from './wineprocessing.js';
@@ -380,7 +380,7 @@ class TaskManager {
     getTaskCallback(taskName, taskType) {
         switch (taskName.toLowerCase()) {
             case 'upgrade':
-                return performUpgrade;  // Just return the function directly
+                return performUpgrade;
             case 'building & maintenance':
                 return (target, params) => {
                     if (params.buildingCost) {
@@ -457,10 +457,7 @@ class TaskManager {
             case 'maintain':
                 return performMaintenance;
             case 'bookkeeping':
-                return (target, params) => {
-                    const { prevSeason, prevYear } = params;
-                    addConsoleMessage(`Bookkeeping for ${prevSeason} ${prevYear} completed successfully.`);
-                };
+                return performBookkeeping;
             case 'clearing':
                 return (target, progress, params) => {
                     if (progress >= 1) {
