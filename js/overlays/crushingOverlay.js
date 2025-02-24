@@ -598,12 +598,7 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
         item.state === 'Grapes' &&
         item.resource.name === selectedGrape.dataset.resource
     );
-
-    if (!grapeResource) {
-        addConsoleMessage("Could not find grape resource");
-        return false;
-    }
-    
+   
     // Get the task ID before creating the task
     const taskId = taskManager.taskIdCounter + 1;
     
@@ -684,11 +679,6 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
         item.state === 'Grapes' &&
         item.amount > 0
     );
-
-    if (!grapeResource) {
-        addConsoleMessage("Grapes not found in storage");
-        return false;
-    }
 
     let remainingMust = mustAmount;
     let success = true;
