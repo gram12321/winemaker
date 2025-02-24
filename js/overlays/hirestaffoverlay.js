@@ -99,7 +99,7 @@ function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
     overlayContainer.querySelectorAll('.hire-staff-button').forEach(button => {
         button.addEventListener('click', () => {
             const staffIndex = parseInt(button.dataset.staffIndex);
-            hireSelectedStaff(createdStaffOptions[staffIndex]);
+            hiringProcess(createdStaffOptions[staffIndex]);
         });
     });
 
@@ -109,7 +109,7 @@ function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
     });
 }
 
-function hireSelectedStaff(staff) {
+export function hiringProcess(staff) {
     const hiringExpense = staff.wage * 12;
     const currentMoney = parseFloat(localStorage.getItem('money') || '0');
 
@@ -122,21 +122,10 @@ function hireSelectedStaff(staff) {
         'Hiring Process',
         'administration', 
         20,
-        (target, params) => {
-            const { staff, hiringExpense } = params;
-            const staffMembers = loadStaff();
-            staffMembers.push(staff);
-            saveStaff(staffMembers);
-
-            addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
-            setupStaffWagesRecurringTransaction(); // Update wages after staff is actually hired
-            const flagIconHTML = getFlagIconHTML(staff.nationality);
-            addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
-        },
+        performHiringProcess,
         null,
         { staff, hiringExpense },
-        (target, params) => {
-            const { staff } = params;
+        () => {
             addConsoleMessage(`Started hiring process for ${staff.firstName} ${staff.lastName}...`, true);
             const overlay = document.querySelector('.overlay');
             if (overlay) {
@@ -144,4 +133,16 @@ function hireSelectedStaff(staff) {
             }
         }
     );
+}
+
+export function performHiringProcess(target, params) {
+    const { staff, hiringExpense } = params;
+    const staffMembers = loadStaff();
+    staffMembers.push(staff);
+    saveStaff(staffMembers);
+
+    addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
+    setupStaffWagesRecurringTransaction(); // Update wages after staff is actually hired
+    const flagIconHTML = getFlagIconHTML(staff.nationality);
+    addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
 }

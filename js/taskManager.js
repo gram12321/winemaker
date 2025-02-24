@@ -6,7 +6,7 @@ import { bookkeeping, performBookkeeping, maintenance, performMaintenance } from
 import { performHarvest } from './overlays/harvestOverlay.js';
 import { performCrushing } from './overlays/crushingOverlay.js';
 import { performFermentation } from './wineprocessing.js';
-import { showHireStaffOverlay } from './overlays/hirestaffoverlay.js';
+import { showHireStaffOverlay, performHiringProcess } from './overlays/hirestaffoverlay.js';  // Add this import
 import { Building } from '/js/classes/buildingClasses.js'; 
 import { addTransaction } from './finance.js';
 import { setupStaffWagesRecurringTransaction } from './staff.js';
@@ -393,16 +393,7 @@ class TaskManager {
             case 'staff search':
                 return performStaffSearch;
             case 'hiring process':
-                return (target, params) => {
-                    const { staff, hiringExpense } = params;
-                    const staffMembers = loadStaff();
-                    staffMembers.push(staff);
-                    saveStaff(staffMembers);
-                    addTransaction('Expense', `Hiring expense for ${staff.firstName} ${staff.lastName}`, -hiringExpense);
-                    const flagIconHTML = getFlagIconHTML(staff.nationality);
-                    addConsoleMessage(`${staff.firstName} ${staff.lastName} ${flagIconHTML} has joined your company!`, true);
-                    setupStaffWagesRecurringTransaction();
-                };
+                return performHiringProcess;
             case 'harvesting':
                 return (target, progress, params) => {
                     if (!params.lastProgress) params.lastProgress = 0;
