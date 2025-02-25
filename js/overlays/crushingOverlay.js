@@ -854,7 +854,7 @@ function createCrushingMethodSection() {
 
     return `
         ${createMethodSelector({
-            title: 'Select Crushing Method',
+            title: 'Select Crushing Method',  // This already uses textCenter internally
             methods,
             defaultMethod: 'Hand Crushing',
             showSkipOption: true,

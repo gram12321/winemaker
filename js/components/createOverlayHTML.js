@@ -128,8 +128,8 @@ function createInfoBox({
     id = null
 }) {
     return `
-        <div class="planting-overlay-info-box">
-            <span>${label}: </span>
+        <div class="info-box">
+            <span><strong>${label}:</strong> </span>
             <span ${id ? `id="${id}"` : ''}>${value}</span>
         </div>
     `;

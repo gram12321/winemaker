@@ -7,7 +7,6 @@ export function createWorkCalculationTable(data) {
         density, 
         tasks = [], 
         totalWork,
-        // Add new winery-specific properties
         amount,
         unit,
         location = 'field', // 'field' or 'winery'
@@ -39,12 +38,17 @@ export function createWorkCalculationTable(data) {
                                     <td>Field Size:</td>
                                     <td><span id="field-size">${formatNumber(acres, acres < 10 ? 2 : 0)}</span> acres</td>
                                 </tr>
-                            ` : `
+                            ` : ''}
+                            ${amount !== undefined ? `
                                 <tr>
                                     <td>Amount:</td>
-                                    <td><span id="process-amount">${formatNumber(amount)}</span> ${unit}</td>
+                                    <td>
+                                        ${typeof amount === 'number' 
+                                            ? `<span id="process-amount">${formatNumber(amount)}</span> ${unit}`
+                                            : `${amount} ${unit}`}
+                                    </td>
                                 </tr>
-                            `}
+                            ` : ''}
                             ${tasks.length > 0 ? `
                                 <tr>
                                     <td>Task:</td>

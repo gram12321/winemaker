@@ -22,7 +22,14 @@ function createStaffSearchHTML() {
     const skillInfo = getSkillLevelInfo(initialSkill);
     const initialWork = calculateTotalWork(initialCandidates, initialSkill, []);
     const searchWorkData = calculateSearchWorkData(initialCandidates, initialSkill, []);
-    const hiringWorkData = estimateHiringWorkData();
+    const hiringWorkData = estimateHiringWorkData(initialSkill, []); // Remove numberOfCandidates parameter
+
+    // Calculate combined work
+    const combinedWorkMin = searchWorkData.totalWork + hiringWorkData.totalWork;
+    const combinedWorkMax = searchWorkData.totalWork + hiringWorkData.maxWork;
+    const combinedWorkDisplay = combinedWorkMax ? 
+        `${formatNumber(combinedWorkMin)} - ${formatNumber(combinedWorkMax)}` : 
+        formatNumber(combinedWorkMin);
 
     const content = `
         <div class="form-group mb-4 d-flex justify-content-center">
@@ -86,7 +93,7 @@ function createStaffSearchHTML() {
             })}
             ${createInfoBox({
                 label: 'Total Work',
-                value: initialWork,
+                value: combinedWorkDisplay,
                 id: 'total-work'
             })}
         </div>
@@ -175,7 +182,7 @@ function calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles) 
     };
 }
 
-function estimateHiringWorkData(skillLevel = 0.1, selectedRoles = []) {
+function estimateHiringWorkData(skillLevel = 0.1, selectedRoles = []) {  // Remove numberOfCandidates parameter
     const minWage = 600;
     const maxWage = 3000;
     
@@ -183,7 +190,7 @@ function estimateHiringWorkData(skillLevel = 0.1, selectedRoles = []) {
         skillLevel, 
         selectedRoles, 
         maxWage,
-        null // Pass null for methodName when calculating maxWork
+        null
     ).totalWork;
     
     return calculateHiringWork(
@@ -293,20 +300,29 @@ function updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, s
     const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles);
     const skillInfo = getSkillLevelInfo(skillLevel);
 
+    // Update work calculation displays
+    const searchWorkData = calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles);
+    const hiringWorkData = estimateHiringWorkData(skillLevel, selectedRoles);
+
+    // Calculate combined work display
+    const combinedWorkMin = searchWorkData.totalWork + hiringWorkData.totalWork;
+    const combinedWorkMax = searchWorkData.totalWork + hiringWorkData.maxWork;
+    const combinedWorkDisplay = combinedWorkMax ? 
+        `${formatNumber(combinedWorkMin)} - ${formatNumber(combinedWorkMax)}` : 
+        formatNumber(combinedWorkMin);
+
     if (candidatesValue) candidatesValue.textContent = numberOfCandidates;
     if (skillLevelContainer) skillLevelContainer.innerHTML = `Skill Level: ${skillInfo.formattedName}`;
     if (costPerCandidateElement) costPerCandidateElement.textContent = `€${formatNumber(costPerCandidate)}`;
     if (totalCostDisplay) totalCostDisplay.innerHTML = `€${formatNumber(totalCost)}`;
-    if (totalWorkDisplay) totalWorkDisplay.innerHTML = totalWork;
+    if (totalWorkDisplay) totalWorkDisplay.innerHTML = combinedWorkDisplay;
 
-    // Update work calculation displays
-    const searchWorkData = calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles);
+    // Update tables
     const searchContainer = overlayContainer.querySelector('#search-work-calculation');
     if (searchContainer) {
         searchContainer.innerHTML = createWorkCalculationTable(searchWorkData);
     }
 
-    const hiringWorkData = estimateHiringWorkData(skillLevel, selectedRoles);  // Update function name
     const hiringContainer = overlayContainer.querySelector('#hiring-work-calculation');
     if (hiringContainer) {
         hiringContainer.innerHTML = createWorkCalculationTable(hiringWorkData);

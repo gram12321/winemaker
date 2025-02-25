@@ -135,8 +135,8 @@ export function calculateHiringWork(skillLevel, specializedRoles, wage, methodNa
     const combinedModifier = skillModifier + wageModifier + (specializationMultiplier - 1);
 
     return {
-        amount: 'Per',
-        unit: 'candidate',
+        amount: 'Per', 
+        unit: 'candidate',  // This makes it show "Per candidate" in the table
         tasks: ['Hiring Process'],
         totalWork,
         methodName: methodName || `Standard Hiring Process`,

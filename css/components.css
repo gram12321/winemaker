@@ -1,5 +1,5 @@
 /* Info Boxes */
-.planting-overlay-info-box {
+.info-box {
     background-color: var(--color-background);
     border-radius: var(--radius-md);
     padding: 15px;
