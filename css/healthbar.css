@@ -1,0 +1,68 @@
+
+/* Health Bar Styles - These are specific to clearing functionality */
+.health-bar-container {
+    margin-top: 15px;
+}
+
+.health-bar {
+    height: 20px;
+    background: var(--color-background);
+    border: 1px solid var(--color-accent);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    margin: 5px 0;
+}
+
+.health-bar-base {
+    height: 100%;
+    background: var(--color-background);
+    position: absolute;
+    width: 100%;
+}
+
+.health-bar-current {
+    height: 100%;
+    background: var(--color-primary);
+    position: absolute;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.health-bar-improvement {
+    height: 100%;
+    background: var(--color-accent);
+    position: absolute;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+}
+
+.health-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: var(--color-text);
+}
+
+.health-improvement {
+    color: var(--color-accent);
+    margin-left: 10px;
+}
+
+/* Health bar visualization colors */
+.health-bar-improvement.improvement-positive {
+    background: var(--color-positive);
+}
+
+.health-bar-improvement.improvement-negative {
+    background: var(--color-negative);
+}
+
+/* Health percentage text colors */
+.health-improvement.improvement-positive {
+    color: var(--color-positive);
+}
+
+.health-improvement.improvement-negative {
+    color: var(--color-negative);
+}
