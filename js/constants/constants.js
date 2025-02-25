@@ -19,7 +19,9 @@ export const TASKS = {
     },
     VEGETATION: { name: 'Vegetation', rate: 0.5 },
     DEBRIS: { name: 'Debris', rate: 0.4 },
-    AMENDMENT: { name: 'Amendment', rate: 0.8 }
+    AMENDMENT: { name: 'Amendment', rate: 0.8 },
+    'Staff Search': { name: 'Staff Search', type: 'administration' },
+    'Hiring Process': { name: 'Hiring Process', type: 'administration' }
 };
 
 // Then update WORK_RATES to use these:

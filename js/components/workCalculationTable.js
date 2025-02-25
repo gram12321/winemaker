@@ -19,7 +19,8 @@ export function createWorkCalculationTable(data) {
         maxAltitude, 
         medianAltitude, 
         robustness, 
-        fragilityEffect 
+        fragilityEffect,
+        maxWork // Add this new property
     } = data;
 
     const showDensity = location === 'field' && tasks.some(task => DENSITY_BASED_TASKS.includes(task));
@@ -96,7 +97,12 @@ export function createWorkCalculationTable(data) {
                             ` : ''}
                             <tr class="table-primary">
                                 <td><strong>Total Work:</strong></td>
-                                <td><strong><span id="total-work">${formatNumber(totalWork)}</span> units</strong></td>
+                                <td><strong>
+                                    ${maxWork ? 
+                                        `<span id="total-work">${formatNumber(totalWork)} - ${formatNumber(maxWork)}</span> units` :
+                                        `<span id="total-work">${formatNumber(totalWork)}</span> units`
+                                    }
+                                </strong></td>
                             </tr>
                         </tbody>
                     </table>

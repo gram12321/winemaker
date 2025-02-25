@@ -44,9 +44,9 @@ function createHireStaffHTML(createdStaffOptions) {
                 <p>Here are the possible candidates:</p>
             </div>
         </div>
-        <div class="info-grid">
+        <div class="info-grid" id="candidates-grid">
             ${createdStaffOptions.map((staff, index) => `
-                <div class="info-section">
+                <div class="info-section" id="candidate-${index}">
                     <div class="card-header text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">${staff.firstName} ${staff.lastName}</h3>
                         <button class="btn btn-alternative btn-sm hire-staff-button" data-staff-index="${index}">Hire</button>
@@ -99,14 +99,60 @@ function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
     overlayContainer.querySelectorAll('.hire-staff-button').forEach(button => {
         button.addEventListener('click', () => {
             const staffIndex = parseInt(button.dataset.staffIndex);
-            hiringProcess(createdStaffOptions[staffIndex]);
+            const staff = createdStaffOptions[staffIndex];
+            
+            // Start hiring process
+            hiringProcess(staff);
+            
+            // Remove the hired candidate's section
+            const candidateSection = overlayContainer.querySelector(`#candidate-${staffIndex}`);
+            if (candidateSection) {
+                candidateSection.remove();
+            }
+            
+            // If no candidates left, close the overlay
+            const remainingCandidates = overlayContainer.querySelector('#candidates-grid').children;
+            if (remainingCandidates.length === 0) {
+                hideOverlay(overlayContainer);
+            }
         });
     });
 
-    // Add event listener for close button
+    // Only close button closes the overlay
     overlayContainer.querySelector('.close-btn').addEventListener('click', () => {
         hideOverlay(overlayContainer);
     });
+}
+
+export function calculateHiringWork(skillLevel, specializedRoles, wage, methodName = null, maxWork = null) {
+    const baseWork = 15;
+    const skillModifier = Math.log10((skillLevel * 10) + 1);
+    const wageModifier = Math.log10(wage / 500);
+    const specializationMultiplier = specializedRoles.length > 0 ? 
+        Math.pow(1.5, specializedRoles.length) : 1;
+
+    const totalWork = Math.round((baseWork + (baseWork * skillModifier) + (baseWork * wageModifier)) * specializationMultiplier);
+    const combinedModifier = skillModifier + wageModifier + (specializationMultiplier - 1);
+
+    return {
+        amount: 'Per',
+        unit: 'candidate',
+        tasks: ['Hiring Process'],
+        totalWork,
+        methodName: methodName || `Standard Hiring Process`,
+        location: 'administration',
+        methodModifier: combinedModifier,
+        ...(maxWork !== null && { maxWork }) // Changed from arguments.length check to explicit parameter
+    };
+}
+
+function calculateHiringWorkData(staff) {
+    return calculateHiringWork(
+        staff.skillLevel, 
+        staff.specializedRoles, 
+        staff.wage,
+        `Hiring ${staff.firstName} ${staff.lastName}`
+    );
 }
 
 export function hiringProcess(staff) {
@@ -118,19 +164,17 @@ export function hiringProcess(staff) {
         return;
     }
 
+    const workData = calculateHiringWorkData(staff);
+
     taskManager.addCompletionTask(
         'Hiring Process',
         'administration', 
-        20,
+        workData.totalWork,  // Use calculated work amount
         performHiringProcess,
         null,
         { staff, hiringExpense },
         () => {
             addConsoleMessage(`Started hiring process for ${staff.firstName} ${staff.lastName}...`, true);
-            const overlay = document.querySelector('.overlay');
-            if (overlay) {
-                hideOverlay(overlay);
-            }
         }
     );
 }

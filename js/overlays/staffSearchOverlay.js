@@ -3,9 +3,10 @@ import { formatNumber, skillLevels, getSkillLevelInfo  } from '../utils.js';
 import { showHireStaffOverlay } from './hirestaffoverlay.js';
 import taskManager from '../taskManager.js';
 import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
-import { addTransaction} from '../finance.js'
+import { addTransaction} from '../finance.js';
 import { getMoney } from '../database/adminFunctions.js';
-
+import { createWorkCalculationTable } from '../components/workCalculationTable.js';
+import { calculateHiringWork } from './hirestaffoverlay.js';
 
 export function showStaffSearchOverlay() {
     const overlayContainer = showStandardOverlay(createStaffSearchHTML());
@@ -19,6 +20,10 @@ function createStaffSearchHTML() {
     const initialCost = calculateSearchCost(initialCandidates, initialSkill, []);
     const skillInfo = getSkillLevelInfo(initialSkill);
     const initialWork = calculateTotalWork(initialCandidates, initialSkill, []);
+
+    // Calculate work data for both tasks
+    const searchWorkData = calculateSearchWorkData(initialCandidates, initialSkill, []);
+    const hiringWorkData = estimateHiringWorkData();
 
     return `
         <div class="overlay-content overlay-container" style="text-align: center; padding: 10px;">
@@ -74,6 +79,18 @@ function createStaffSearchHTML() {
                         </div>
                     </div>
 
+                    <div class="work-calculations mt-4">
+                        <h4>Staff Search Process</h4>
+                        <div id="search-work-calculation">
+                            ${createWorkCalculationTable(searchWorkData)}
+                        </div>
+
+                        <h4 class="mt-4">Hiring Process</h4>
+                        <div id="hiring-work-calculation">
+                            ${createWorkCalculationTable(hiringWorkData)}
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-center mt-4">
                         <button class="btn btn-primary search-btn">Start Search</button>
                     </div>
@@ -82,7 +99,6 @@ function createStaffSearchHTML() {
         </div>
     `;
 }
-
 
 // Add new constant for specialized roles
 export const specializedRoles = {
@@ -125,6 +141,38 @@ function calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
     const roleWorkMultiplier = 1 + selectedRoles.length * 0.3; // Specialized roles have a smaller impact
 
     return Math.round(baseWork * numberOfCandidates * skillWorkMultiplier * roleWorkMultiplier);
+}
+
+function calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles) {
+    return {
+        amount: numberOfCandidates,
+        unit: 'candidates',
+        tasks: ['Staff Search'],
+        totalWork: calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles),
+        methodName: `${skillLevels[skillLevel].name} Level Search`,
+        methodModifier: skillLevel - 0.1, // Show how much extra work compared to basic search
+        location: 'administration'
+    };
+}
+
+function estimateHiringWorkData(skillLevel = 0.1, selectedRoles = []) {
+    const minWage = 600;
+    const maxWage = 3000;
+    
+    const maxWorkValue = calculateHiringWork(
+        skillLevel, 
+        selectedRoles, 
+        maxWage,
+        null // Pass null for methodName when calculating maxWork
+    ).totalWork;
+    
+    return calculateHiringWork(
+        skillLevel, 
+        selectedRoles, 
+        minWage,
+        `${selectedRoles.length > 0 ? 'Complex' : 'Standard'} ${skillLevels[skillLevel].name} Level Hiring`,
+        maxWorkValue
+    );
 }
 
 export function staffSearch(numberOfCandidates, skillLevel, selectedRoles) {
@@ -230,4 +278,17 @@ function updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, s
     if (costPerCandidateElement) costPerCandidateElement.textContent = `€${formatNumber(costPerCandidate)}`;
     if (totalCostDisplay) totalCostDisplay.innerHTML = `€${formatNumber(totalCost)}`;
     if (totalWorkDisplay) totalWorkDisplay.innerHTML = totalWork;
+
+    // Update work calculation displays
+    const searchWorkData = calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles);
+    const searchContainer = overlayContainer.querySelector('#search-work-calculation');
+    if (searchContainer) {
+        searchContainer.innerHTML = createWorkCalculationTable(searchWorkData);
+    }
+
+    const hiringWorkData = estimateHiringWorkData(skillLevel, selectedRoles);  // Update function name
+    const hiringContainer = overlayContainer.querySelector('#hiring-work-calculation');
+    if (hiringContainer) {
+        hiringContainer.innerHTML = createWorkCalculationTable(hiringWorkData);
+    }
 }
