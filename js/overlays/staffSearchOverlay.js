@@ -249,14 +249,20 @@ export function performStaffSearch(target, params) {
 function setupStaffSearchEventListeners(overlayContainer) {
     const candidatesSlider = overlayContainer.querySelector('#candidates-slider');
     const skillSlider = overlayContainer.querySelector('#skill-slider');
-    const roleCheckboxes = overlayContainer.querySelectorAll('.role-checkbox');
+    const candidatesValue = overlayContainer.querySelector('#candidates-slider-value');
+    const skillValue = overlayContainer.querySelector('#skill-slider-value');
+    const roleCheckboxes = overlayContainer.querySelectorAll('.specialized-roles-container .form-check-input');
 
     function updateDisplay() {
         const numberOfCandidates = parseInt(candidatesSlider.value);
         const skillLevel = parseFloat(skillSlider.value);
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
-            .map(cb => cb.dataset.role);
+            .map(cb => cb.id.replace('-role', '')); 
+
+        // Update slider value displays
+        if (candidatesValue) candidatesValue.textContent = numberOfCandidates;
+        if (skillValue) skillValue.textContent = skillLevel;
 
         updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, selectedRoles);
     }
@@ -289,15 +295,13 @@ function setupStaffSearchEventListeners(overlayContainer) {
 }
 
 function updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, selectedRoles) {
-    const candidatesValue = overlayContainer.querySelector('#candidates-value');
     const skillLevelContainer = overlayContainer.querySelector('.skill-level-container');
     const totalCostDisplay = overlayContainer.querySelector('#total-cost');
     const totalWorkDisplay = overlayContainer.querySelector('#total-work');
-    const costPerCandidateElement = overlayContainer.querySelector('.planting-overlay-info-box span:last-child');
+    const costPerCandidateElement = overlayContainer.querySelector('.info-box span:last-child'); // Updated selector
 
     const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
     const costPerCandidate = calculatePerCandidateCost(numberOfCandidates, skillLevel);
-    const totalWork = calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles);
     const skillInfo = getSkillLevelInfo(skillLevel);
 
     // Update work calculation displays
@@ -306,18 +310,23 @@ function updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, s
 
     // Calculate combined work display
     const combinedWorkMin = searchWorkData.totalWork + hiringWorkData.totalWork;
-    const combinedWorkMax = searchWorkData.totalWork + hiringWorkData.maxWork;
-    const combinedWorkDisplay = combinedWorkMax ? 
-        `${formatNumber(combinedWorkMin)} - ${formatNumber(combinedWorkMax)}` : 
-        formatNumber(combinedWorkMin);
+    const combinedWorkMax = hiringWorkData.maxWork ? 
+        searchWorkData.totalWork + hiringWorkData.maxWork : 
+        null;
 
-    if (candidatesValue) candidatesValue.textContent = numberOfCandidates;
+    // Update values
     if (skillLevelContainer) skillLevelContainer.innerHTML = `Skill Level: ${skillInfo.formattedName}`;
     if (costPerCandidateElement) costPerCandidateElement.textContent = `€${formatNumber(costPerCandidate)}`;
     if (totalCostDisplay) totalCostDisplay.innerHTML = `€${formatNumber(totalCost)}`;
-    if (totalWorkDisplay) totalWorkDisplay.innerHTML = combinedWorkDisplay;
+    
+    // Update total work display
+    if (totalWorkDisplay) {
+        totalWorkDisplay.innerHTML = combinedWorkMax ? 
+            `${formatNumber(combinedWorkMin)} - ${formatNumber(combinedWorkMax)}` : 
+            formatNumber(combinedWorkMin);
+    }
 
-    // Update tables
+    // Update work calculation tables
     const searchContainer = overlayContainer.querySelector('#search-work-calculation');
     if (searchContainer) {
         searchContainer.innerHTML = createWorkCalculationTable(searchWorkData);
