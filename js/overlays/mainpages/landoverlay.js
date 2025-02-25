@@ -31,11 +31,11 @@ function setupLandEventListeners(overlay) {
 
 function createLandOverlayHTML() {
     return `
-        <div class="mainview-overlay-content overlay-container">
-            <h2 class="mb-4">Farmland Management</h2>
+        <div id="farmland-container" class="mainview-overlay-content overlay-container">
+            <h2 id="farmland-title" class="mb-4">Farmland Management</h2>
             <section id="landoverlay-section" class="overlay-section card mb-4">
-                <img src="/assets/pic/farming_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Farming">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                <img id="farmland-header-img" src="/assets/pic/farming_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Farming">
+                <div id="farmland-header" class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Owned Farmland</h3>
                     <button id="buy-land-btn" class="btn btn-light btn-sm">Buy Land</button>
                 </div>
