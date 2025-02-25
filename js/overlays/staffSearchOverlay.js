@@ -92,12 +92,20 @@ function createStaffSearchHTML() {
         </div>
 
         <div class="work-calculations mt-4">
-            <h4>Staff Search Process</h4>
+            ${createTextCenter({
+                text: 'Staff Search Process',
+                isHeadline: true,
+                headlineLevel: 4
+            })}
             <div id="search-work-calculation">
                 ${createWorkCalculationTable(searchWorkData)}
             </div>
 
-            <h4 class="mt-4">Hiring Process</h4>
+            ${createTextCenter({
+                text: 'Hiring Process',
+                isHeadline: true,
+                headlineLevel: 4
+            })}
             <div id="hiring-work-calculation">
                 ${createWorkCalculationTable(hiringWorkData)}
             </div>

@@ -6,7 +6,7 @@ import taskManager from '../taskManager.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools } from '../classes/buildingClasses.js'; 
 import { loadBuildings, storeBuildings, loadInventory } from '../database/adminFunctions.js';
-import { createOverlayHTML, createTable, createMethodSelector, createCheckbox } from '../components/createOverlayHTML.js';
+import { createOverlayHTML, createTable, createMethodSelector, createCheckbox, createTextCenter  } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateCrushingCharacteristics } from '../utils/crushingCharacteristics.js';
@@ -47,9 +47,11 @@ function updateGrapeImage(resourceName) {
 
 function createCrushingHTML() {
     const content = `     
-            <div class="text-center">
-                <h3 class="h5 mb-0">Grape Crushing</h3>
-            </div>
+            ${createTextCenter({
+                text: 'Grape Crushing',
+                isHeadline: true,
+                headlineLevel: 5
+            })}
 
             <div class="card-body">
                 <div class="crushing-process">
@@ -65,9 +67,11 @@ function createCrushingHTML() {
         
             ${createProgressSection()}
         
-            <div class="text-center">
-                <h3 class="h5 mb-0">Select Grapes</h3>
-            </div>
+            ${createTextCenter({
+                text: 'Select Grapes',
+                isHeadline: true,
+                headlineLevel: 5
+            })}
 
             <section id="select-grape-section">
                 <div class="card-body">
@@ -79,9 +83,11 @@ function createCrushingHTML() {
                 </div>
             </section>
         
-            <div class="text-center">
-                <h3 class="h5 mb-0">Select Storage</h3>
-            </div>
+            ${createTextCenter({
+                text: 'Select Storage',
+                isHeadline: true,
+                headlineLevel: 5
+            })}
             
             <section id="must-section">
                 <div class="card-body">

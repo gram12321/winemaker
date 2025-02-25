@@ -140,14 +140,22 @@ function createTextCenter({
     mutedText = null,
     className = '',
     format = null, // Add format parameter to handle different formatting functions
-    formatOptions = {} // Add options for formatting
+    formatOptions = {}, // Add options for formatting
+    isHeadline = false,  // Add parameter for headlines
+    headlineLevel = 5,   // Default to h5 (bootstrap's preferred size for sections)
+    noMargin = true      // Default to no margin for consistency
 }) {
     // Format the text if a format function is provided
     const formattedText = format ? format(text, formatOptions) : text;
     
+    // If it's a headline, wrap in appropriate h-tag with bootstrap classes
+    const content = isHeadline 
+        ? `<h${headlineLevel} class="h${headlineLevel} ${noMargin ? 'mb-0' : ''}">${formattedText}</h${headlineLevel}>`
+        : `<div>${formattedText}</div>`;
+    
     return `
         <div class="text-center ${className}">
-            <div>${formattedText}</div>
+            ${content}
             ${mutedText ? `<div class="text-muted">${mutedText}</div>` : ''}
         </div>
     `;
