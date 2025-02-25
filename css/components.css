@@ -71,6 +71,10 @@ input[type="range"]::-webkit-slider-thumb:hover {
     box-sizing: border-box; /* Add this */
 }
 
+.checkbox-styled:hover {
+    background: rgba(197, 165, 114, 0.1);
+}
+
 .checkbox-styled input[type="checkbox"] {
     width: 18px;
     height: 18px;
