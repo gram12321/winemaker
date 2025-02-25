@@ -214,12 +214,20 @@ function setupCrushingEventListeners(overlay) {
     const noCrushingCheckbox = overlay.querySelector('#no-crushing');
     const methodRadios = overlay.querySelectorAll('input[name="crushing-method"]');
 
-    // Move validateCrushingSelection outside the function scope
+    // Validate and enable/disable crush buttons based on selections
     function validateCrushingSelection() {
-        const hasMethodSelected = Array.from(methodRadios).some(radio => radio.checked);
-        const isNoCrushing = noCrushingCheckbox.checked;
-        crushBtns.forEach(btn => btn.disabled = !hasMethodSelected && !isNoCrushing);
+        const hasGrapeSelected = overlay.querySelector('.grape-select:checked') !== null;
+        const hasStorageSelected = overlay.querySelectorAll('input[name="must-storage"]:checked').length > 0;
+        crushBtns.forEach(btn => btn.disabled = !(hasGrapeSelected && hasStorageSelected));
     }
+
+    // Add validation check to grape and storage selection events
+    overlay.addEventListener('change', (event) => {
+        if (event.target.classList.contains('grape-select') || 
+            event.target.getAttribute('name') === 'must-storage') {
+            validateCrushingSelection();
+        }
+    });
 
     // Handle crushing method selection
     methodRadios.forEach(radio => {
@@ -459,19 +467,17 @@ function updateCrushingData(selectedGrape, selectedStorage) {
 }
 
 function validateCrushingInputs(overlayContainer) {
-    // 1. Check crushing method selection
-    const selectedMethod = overlayContainer.querySelector('input[name="crushing-method"]:checked')?.value;
-    const skipCrushing = overlayContainer.querySelector('#no-crushing').checked;
-
-    if (!skipCrushing && !selectedMethod) {
-        addConsoleMessage("Please select a crushing method or check 'Skip crushing'");
-        return { valid: false };
-    }
-
-    // 2. Check grape selection
+    // 1. Check grape selection
     const selectedGrape = overlayContainer.querySelector('.grape-select:checked');
     if (!selectedGrape) {
         addConsoleMessage("Please select grapes to crush");
+        return { valid: false };
+    }
+
+    // 2. Check storage selection and compatibility
+    const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
+    if (selectedStorages.length === 0) {
+        addConsoleMessage("Please select at least one storage container for the must");
         return { valid: false };
     }
 
@@ -487,12 +493,6 @@ function validateCrushingInputs(overlayContainer) {
     }
 
     // 4. Check storage selection and compatibility
-    const selectedStorages = overlayContainer.querySelectorAll('input[name="must-storage"]:checked');
-    if (selectedStorages.length === 0) {
-        addConsoleMessage("Please select at least one storage container for the must");
-        return { valid: false };
-    }
-
     const selectedStorageIds = Array.from(selectedStorages).map(storage => storage.value);
     const existingStorageTasks = taskManager.getAllTasks().filter(task => {
         if (task.name !== 'Crushing' || !task.params?.selectedStorages) return false;
