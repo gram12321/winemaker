@@ -51,7 +51,7 @@ function createClearingOverlayHTML(farmland) {
     const initialWorkData = calculateClearingWorkData(farmland, []);
 
     const content = `
-        <div class="clearing-options">
+        <div class="clearing-options checkbox-container">
             ${createCheckbox({
                 id: 'remove-vines',
                 label: `Vine Replanting ${!farmland.plantedResourceName ? '(No vines planted)' : ''}`,

@@ -87,10 +87,11 @@ function createCheckbox({
     label,
     disabled = false,
     checked = false,
-    labelClass = ''
+    labelClass = '',
+    styled = true  // Changed default to true
 }) {
     return `
-        <div class="form-check mb-3">
+        <div class="${styled ? 'checkbox-styled' : 'form-check mb-3'}">
             <input type="checkbox" class="form-check-input" id="${id}"
                 ${disabled ? 'disabled' : ''}
                 ${checked ? 'checked' : ''}>
@@ -137,11 +138,16 @@ function createInfoBox({
 function createTextCenter({
     text,
     mutedText = null,
-    className = ''
+    className = '',
+    format = null, // Add format parameter to handle different formatting functions
+    formatOptions = {} // Add options for formatting
 }) {
+    // Format the text if a format function is provided
+    const formattedText = format ? format(text, formatOptions) : text;
+    
     return `
         <div class="text-center ${className}">
-            <div>${text}</div>
+            <div>${formattedText}</div>
             ${mutedText ? `<div class="text-muted">${mutedText}</div>` : ''}
         </div>
     `;

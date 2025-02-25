@@ -7,6 +7,7 @@ import { addTransaction} from '../finance.js';
 import { getMoney } from '../database/adminFunctions.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateHiringWork } from './hirestaffoverlay.js';
+import { createOverlayHTML, createSlider, createInfoBox, createTextCenter, createCheckbox } from '../components/createOverlayHTML.js';
 
 export function showStaffSearchOverlay() {
     const overlayContainer = showStandardOverlay(createStaffSearchHTML());
@@ -16,88 +17,99 @@ export function showStaffSearchOverlay() {
 
 function createStaffSearchHTML() {
     const initialCandidates = 5;
-    const initialSkill = 0.3; // Updated to use 0.1-1.0 scale
+    const initialSkill = 0.3;
     const initialCost = calculateSearchCost(initialCandidates, initialSkill, []);
     const skillInfo = getSkillLevelInfo(initialSkill);
     const initialWork = calculateTotalWork(initialCandidates, initialSkill, []);
-
-    // Calculate work data for both tasks
     const searchWorkData = calculateSearchWorkData(initialCandidates, initialSkill, []);
     const hiringWorkData = estimateHiringWorkData();
 
-    return `
-        <div class="overlay-content overlay-container" style="text-align: center; padding: 10px;">
-            <section class="overlay-section card mb-4">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Staff Search Options</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
-                </div>
-                <div class="card-body">
-                    <div class="form-group mb-4 d-flex justify-content-center">
-                        <div class="slider-container">
-                            <label for="candidates-slider" class="form-label">Number of Candidates:</label>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <span class="mr-2">Min (3)</span>
-                                <input type="range" class="custom-range" id="candidates-slider" min="3" max="10" step="1" value="${initialCandidates}">
-                                <span class="ml-2">Max (10)</span>
-                            </div>
-                            <div>Selected candidates: <span id="candidates-value">${initialCandidates}</span></div>
-                            <label for="skill-slider" class="form-label mt-3">Required Skill Level:</label>
-                            <div class="d-flex align-items-center justify-content-center">
-                                <span class="mr-2">${skillLevels[0.1].name}</span>
-                                <input type="range" class="custom-range" id="skill-slider" 
-                                    min="0.1" max="1.0" step="0.1" value="${initialSkill}">
-                                <span class="ml-2">${skillLevels[1.0].name}</span>
-                            </div>
-                            <div class="skill-level-container">Skill Level: <span id="skill-display">${skillInfo.formattedName}</span></div>
-                        </div>
-                        <div class="specialized-roles-container" style="padding-left: 10px;">
-                            <label class="form-label">Specialized Role Requirements:</label>
-                            ${Object.entries(specializedRoles).map(([key, role]) => `
-                                <div class="role-checkbox">
-                                    <input type="checkbox" id="${key}-role" class="role-checkbox" data-role="${key}">
-                                    <label for="${key}-role" title="${role.description}">${role.title}</label>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
+    const content = `
+        <div class="form-group mb-4 d-flex justify-content-center">
+            <div class="slider-container">
+                ${createSlider({
+                    id: 'candidates-slider',
+                    label: 'Number of Candidates:',
+                    min: 3,
+                    max: 10,
+                    step: 1,
+                    value: initialCandidates,
+                    showValue: true,
+                    valuePrefix: 'Selected candidates: ',
+                    lowLabel: 'Min (3)',
+                    highLabel: 'Max (10)'
+                })}
 
-                    <hr class="overlay-divider">
+                ${createSlider({
+                    id: 'skill-slider',
+                    label: 'Required Skill Level:',
+                    min: 0.1,
+                    max: 1.0,
+                    step: 0.1,
+                    value: initialSkill,
+                    lowLabel: skillLevels[0.1].name,
+                    highLabel: skillLevels[1.0].name
+                })}
+                ${createTextCenter({
+                    text: initialSkill,  // Pass the skill level value directly
+                    className: 'skill-level-container',
+                    format: (value) => `Skill Level: ${getSkillLevelInfo(value).formattedName}`  // Format the entire string here
+                })}
+            </div>
 
-                    <div class="cost-details d-flex justify-content-sm-around">
-                        <div class="planting-overlay-info-box" style="padding-right: 10px;">
-                            <span>Cost per candidate:</span><br>
-                            <span>€${formatNumber(Math.round(calculateSearchCost(1, initialSkill, [])))}</span>
-                        </div>
-                        <div class="planting-overlay-info-box" style="padding-right: 10px;">
-                            <span>Total Cost:</span><br>
-                            <span id="total-cost">€${formatNumber(initialCost)}</span>
-                        </div>
-                        <div class="planting-overlay-info-box" style="padding-right: 10px;">
-                            <span>Total Work:</span><br>
-                            <span id="total-work">${initialWork}</span>
-                        </div>
-                    </div>
+            <div class="specialized-roles-container checkbox-container">
+                <label class="form-label">Specialized Role Requirements:</label>
+                ${Object.entries(specializedRoles).map(([key, role]) => 
+                    createCheckbox({
+                        id: `${key}-role`,
+                        label: role.title,
+                        className: 'role-checkbox',
+                        dataset: { role: key },
+                        title: role.description,
+                        styled: true // Use the new styled checkbox
+                    })
+                ).join('')}
+            </div>
+        </div>
 
-                    <div class="work-calculations mt-4">
-                        <h4>Staff Search Process</h4>
-                        <div id="search-work-calculation">
-                            ${createWorkCalculationTable(searchWorkData)}
-                        </div>
+        <hr class="overlay-divider">
 
-                        <h4 class="mt-4">Hiring Process</h4>
-                        <div id="hiring-work-calculation">
-                            ${createWorkCalculationTable(hiringWorkData)}
-                        </div>
-                    </div>
+        <div class="cost-details d-flex justify-content-sm-around">
+            ${createInfoBox({
+                label: 'Cost per candidate',
+                value: `€${formatNumber(Math.round(calculateSearchCost(1, initialSkill, [])))}`
+            })}
+            ${createInfoBox({
+                label: 'Total Cost',
+                value: `€${formatNumber(initialCost)}`,
+                id: 'total-cost'
+            })}
+            ${createInfoBox({
+                label: 'Total Work',
+                value: initialWork,
+                id: 'total-work'
+            })}
+        </div>
 
-                    <div class="d-flex justify-content-center mt-4">
-                        <button class="btn btn-primary search-btn">Start Search</button>
-                    </div>
-                </div>
-            </section>
+        <div class="work-calculations mt-4">
+            <h4>Staff Search Process</h4>
+            <div id="search-work-calculation">
+                ${createWorkCalculationTable(searchWorkData)}
+            </div>
+
+            <h4 class="mt-4">Hiring Process</h4>
+            <div id="hiring-work-calculation">
+                ${createWorkCalculationTable(hiringWorkData)}
+            </div>
         </div>
     `;
+
+    return createOverlayHTML({
+        title: 'Staff Search Options',
+        content,
+        buttonText: 'Start Search',
+        buttonClass: 'btn-primary search-btn'
+    });
 }
 
 // Add new constant for specialized roles
