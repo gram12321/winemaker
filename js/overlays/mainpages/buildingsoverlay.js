@@ -23,7 +23,7 @@ function createBuildingsOverlayHTML() {
             <h3>Buildings</h3>
             <div class="row">
               <div class="col-md-6">
-                <div class="building-card">
+                <div class="building-card" id="building-card-toolshed">
                   <div class="icon" style="background-image: url('/assets/icon/menu/toolshed.webp');"></div>
                   <div class="details building-details" data-building-name="Tool Shed"></div>
                 </div>
@@ -32,7 +32,7 @@ function createBuildingsOverlayHTML() {
               </div>
 
               <div class="col-md-6">
-                <div class="building-card">
+                <div class="building-card" id="building-card-warehouse">
                   <div class="icon" style="background-image: url('/assets/icon/menu/warehouse.webp');"></div>
                   <div class="details building-details" data-building-name="Warehouse"></div>
                 </div>
@@ -41,7 +41,7 @@ function createBuildingsOverlayHTML() {
               </div>
 
               <div class="col-md-6">
-                <div class="building-card">
+                <div class="building-card" id="building-card-office">
                   <div class="icon" style="background-image: url('/assets/icon/menu/office.webp');"></div>
                   <div class="details building-details" data-building-name="Office"></div>
                 </div>
@@ -50,7 +50,7 @@ function createBuildingsOverlayHTML() {
               </div>
 
               <div class="col-md-6">
-                <div class="building-card">
+                <div class="building-card" id="building-card-winecellar">
                   <div class="icon" style="background-image: url('/assets/icon/menu/winecellar.webp');"></div>
                   <div class="details building-details" data-building-name="Wine Cellar"></div>
                 </div>
@@ -59,7 +59,7 @@ function createBuildingsOverlayHTML() {
               </div>
 
               <div class="col-md-6">
-                <div class="building-card">
+                <div class="building-card" id="building-card-winery">
                   <div class="icon" style="background-image: url('/assets/icon/menu/winery.webp');"></div>
                   <div class="details building-details" data-building-name="Winery"></div>
                 </div>
