@@ -238,6 +238,56 @@ const GENERAL_TUTORIALS = {
     ]
   },
   
+  BUILDINGS: {
+    title: 'Building and Maintenance',
+    content: 'Welcome to the Winery! Here you can see what buildings we have allready, what we can build and how we can upgrade them. Its important we have enough space in our buildings for the tools we need. For now i would recommand that we check that we have some storage room in the place for the harvest (Harvesting tools in the winery). While its nice to have some tools for crushing and pressing its not a nessesy as we can must the grapes without. However we cannot make any wine out of the must if we do not have somekind of Fermenting Wessel inplace in the Winery . ',
+  },
+
+  BUILDINGS: {
+    title: 'Building Management',
+    pages: [
+      {
+        title: 'Welcome to Building Management',
+        content: 'Welcome to the Winery! Here you can see what buildings we have allready, what we can build and how we can upgrade them. Its important we have enough space in our buildings for the tools we need. For now i would recommand that we check that we have some storage room in the place for the harvest (Harvesting tools in the winery). While its nice to have some tools for crushing and pressing its not a nessesy as we can must the grapes without. However we cannot make any wine out of the must if we do not have somekind of Fermenting Wessel inplace in the Winery.',
+      },
+
+      {
+        title: 'Building and Maintenance',
+        content: 'We should maintaine the buildings well. There is severe drawbacks if we dont maintain them enough. Tools inside the building will take damege (Not implementet), and if the buildings decay to much it will hurt the whole winerys prestige.',
+      },
+
+      {
+        title: 'Tool Shed',
+        content: 'The Tool Shed is where you store your basic farming equipment. Items like tractors, trimmers, and harvest bins are kept here. Each building has slots that can hold tools, small similar tools can share the same slot up, we use weight capacity of the "slot" in the building to desripe how many of a tool that can fit into one spot in the building.',
+        highlightElement: 'building-card-toolshed'  // Will need to add this ID to the building card
+      },
+      {
+        title: 'Warehouse',
+        content: 'The Warehouse provides storage for larger equipment and temporary grape storage during harvest. You\'ll find forklifts and pallet jacks here. These are general tools that can be used in a multiple of operations in the "Year Wheel of the winery". We also have large storage bins here, used for the harvest. The warehouse has larger slot capacities than the tool shed, and the tools in general are larger here.',
+        highlightElement: 'building-card-warehouse'
+      },
+      {
+        title: 'Winery',
+        content: 'The Winery is where grape processing happens. This building houses your crushing, pressing, and fermentation equipment. These specialized tools are crucial for wine production. As i mentioned we cannot do the fermentation process without atleast one fermentation wessel',
+        highlightElement: 'building-card-winery'
+      },
+      {
+        title: 'Wine Cellar',
+        content: 'The Wine Cellar is for aging and storing your finished wines. As you expand, you\'ll need more cellar space to age different varieties and vintages. You can see the value of the wines in the wine cellar in the Finance section. ',
+        highlightElement: 'building-card-winecellar'
+      },
+      {
+        title: 'Office',
+        content: 'The Office handles administrative tasks. Better office equipment can improve the efficiency of administrative work and marketing efforts.',
+        highlightElement: 'building-card-office'
+      },
+      {
+        title: 'Building Management',
+        content: 'Click on any building to see its contents and manage tools. You can buy new tools, sell existing ones for 50% of their value, and upgrade buildings to increase their capacity. Each upgrade adds more slots for tools.',
+      }
+    ]
+  },
+
   VINEYARD: {
     title: 'Vineyard Management',
     content: 'Welcome to your vineyard! Here you can manage your fields, plant vines, and harvest grapes. Monitor ripeness levels carefully to achieve the best quality harvest.',

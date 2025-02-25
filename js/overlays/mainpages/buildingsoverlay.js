@@ -9,6 +9,11 @@ import taskManager from '/js/taskManager.js';  // Add this import
 
 export function showBuildingsOverlay() {
     const overlay = showMainViewOverlay(createBuildingsOverlayHTML());
+
+    if (tutorialManager.shouldShowTutorial('BUILDINGS')) {
+      tutorialManager.showTutorial('BUILDINGS');
+  }
+
     setupBuildingsEventListeners(overlay);
 }
 
