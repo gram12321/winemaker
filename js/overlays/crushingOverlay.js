@@ -876,37 +876,34 @@ function createCrushingMethodSection() {
 
 function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
     const tons = grapeAmount / 1000;
-    let methodModifier = 0;
-    let methodName = null;
     
-    if (selectedMethod) {
-        // Hand crushing is baseline (no modifier)
-        if (selectedMethod === 'Hand Crushing') {
-            methodModifier = 0;  // Changed from 1.0 to 0
-            methodName = 'Hand Crushing';
-        } else {
-            const tool = getBuildingTools().find(t => t.name === selectedMethod);
-            if (tool) {
-                // Change from reducing work to directly using speedBonus
-                methodModifier = -(1 - (1 / tool.speedBonus));  // This gives us the work reduction percentage
-                methodName = tool.name;
-            }
-        }
-    }
-
+    // Get base work using CRUSHING task from constants
     let totalWork = calculateTotalWork(tons, {
         tasks: ['CRUSHING']
     });
 
-    // Apply method modifier
-    if (methodModifier !== 0) {
-        totalWork *= (1 + methodModifier);  // This will reduce work for better tools
+    // Update workModifiers array to match other tasks
+    const workModifiers = [];
+
+    // Add method modifier if any
+    if (selectedMethod && selectedMethod !== 'Hand Crushing') {
+        const tool = getBuildingTools().find(t => t.name === selectedMethod);
+        if (tool) {
+            workModifiers.push(-(1 - (1 / tool.speedBonus)));
+        }
     }
 
-    // Add work if destemming is checked
-    const destemming = document.getElementById('destemming-checkbox')?.checked || false;
-    if (destemming) {
-        totalWork *= 1.2; // 20% more work for destemming
+    // Add destemming modifier if selected
+    if (document.getElementById('destemming-checkbox')?.checked) {
+        workModifiers.push(0.2); // 20% more work
+    }
+
+    // Apply all modifiers
+    if (workModifiers.length > 0) {
+        totalWork = calculateTotalWork(tons, {
+            tasks: ['CRUSHING'],
+            workModifiers: workModifiers
+        });
     }
 
     return {
@@ -915,8 +912,6 @@ function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
         tasks: ['CRUSHING'],
         totalWork,
         location: 'winery',
-        methodModifier,
-        methodName,
-        destemming
+        methodName: selectedMethod || null
     };
 }
