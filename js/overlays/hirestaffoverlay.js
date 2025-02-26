@@ -6,7 +6,7 @@ import { addTransaction } from '../finance.js';
 import taskManager from '../taskManager.js';  
 import { showModalOverlay, hideOverlay } from './overlayUtils.js'; 
 import { specializedRoles } from './staffSearchOverlay.js';
-import { BASE_WORK_UNITS } from '../constants/constants.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
 
 export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, selectedRoles = []) {
     const createdStaffOptions = Array.from(
@@ -126,33 +126,33 @@ function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
 }
 
 export function calculateHiringWork(skillLevel, specializedRoles, wage, methodName = null, maxWork = null) {
-    const baseWork = 25;
-    // Much stronger skill impact (0.1 = minimal impact, 1.0 = 4x work)
-    const skillModifier = Math.pow(skillLevel * 2, 2);
-    // Stronger wage impact (500 = 0.5x, 3000 = 3x)
-    const wageModifier = Math.pow(wage / 1000, 2);
-    // Keep strong specialization multiplier (each role adds 50% multiplicatively)
-    const specializationMultiplier = Math.pow(1.5, specializedRoles.length);
+    const workFactors = {
+        tasks: ['STAFF_HIRING'],
+        workModifiers: [
+            Math.pow(skillLevel * 2, 2) - 1,     // Skill impact (0.1 = minimal impact, 1.0 = 4x work)
+            Math.pow(wage / 1000, 2) - 1,        // Wage impact (500 = 0.5x, 3000 = 3x)
+            Math.pow(1.5, specializedRoles.length) - 1  // Role impact (each adds 50%)
+        ]
+    };
 
-    // Multiply everything together for exponential scaling
-    const totalWork = Math.round(baseWork * skillModifier * wageModifier * specializationMultiplier);
+    const totalWork = calculateTotalWork(1, workFactors);
 
     return {
-        amount: 'Per', 
+        amount: 'Per',
         unit: 'candidate',
         tasks: ['Hiring Process'],
         totalWork,
         methodName: methodName || `Standard Hiring Process`,
         location: 'administration',
-        methodModifier: (skillModifier + wageModifier + specializationMultiplier - 3), // Adjusted to show relative increase
+        methodModifier: (Math.pow(wage / 1000, 2) + Math.pow(skillLevel * 2, 2) - 2),
         ...(maxWork !== null && { maxWork })
     };
 }
 
 function calculateHiringWorkData(staff) {
     return calculateHiringWork(
-        staff.skillLevel, 
-        staff.specializedRoles, 
+        staff.skillLevel,
+        staff.specializedRoles,
         staff.wage,
         `Hiring ${staff.firstName} ${staff.lastName}`
     );

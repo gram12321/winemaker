@@ -6,6 +6,10 @@ export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
 export const DEFAULT_FARMLAND_HEALTH = 0.5; // 50% is the default/reset value
 export const ORGANIC_YEARS_REQUIRED = 3; // years needed for organic certification
 
+// Staff wage constants
+export const BASE_WEEKLY_WAGE = 500; // Base weekly wage for lowest skill
+export const SKILL_WAGE_MULTIPLIER = 1000; // Multiplier for skills
+
 // Define density-based tasks
 export const DENSITY_BASED_TASKS = ['PLANTING', 'UPROOTING', 'HARVESTING'];
 

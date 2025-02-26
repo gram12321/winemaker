@@ -5,6 +5,7 @@ import { addRecurringTransaction } from './finance.js'; // Assume you have addRe
 import { showStaffOverlay } from './overlays/showstaffoverlay.js'; // Import the new staff overlay
 import { specializedRoles } from './overlays/staffSearchOverlay.js'; // Keep this import
 import { loadStaff } from './database/initiation.js';
+import { BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER } from './constants/constants.js';
 
 // Remove the duplicate declaration and just export the imported specializedRoles
 export { specializedRoles };
@@ -114,9 +115,6 @@ export function createNewStaff(skillModifier = 0.5, specializedRoles = []) {
         sales: { sales: randomizeSkills(skillModifier, specializedRoles.includes('sales')) },
         maintenance: { maintenance: randomizeSkills(skillModifier, specializedRoles.includes('maintenance')) }
     };
-
-    const BASE_WEEKLY_WAGE = 500; // Base weekly wage for lowest skill
-    const SKILL_WAGE_MULTIPLIER = 1000; // Multiplier for skills
 
     // Calculate wage based on skills
     const calculateWage = (skills) => {

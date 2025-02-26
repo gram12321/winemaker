@@ -9,6 +9,7 @@ import { createWorkCalculationTable } from '../components/workCalculationTable.j
 import { calculateHiringWork } from './hirestaffoverlay.js';
 import { createOverlayHTML, createSlider, createInfoBox, createTextCenter, createCheckbox } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
+import { BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER } from '../constants/constants.js';
 
 export function showStaffSearchOverlay() {
     const overlayContainer = showStandardOverlay(createStaffSearchHTML());
@@ -152,24 +153,28 @@ function calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles) {
     return Math.round(baseCost * totalMultiplier);
 }
 
-// Add new function to calculate per-candidate cost
+// Add new function to calculate per-candidate cost used for display but not in calculations since we dont need per candidate in calculations 
 function calculatePerCandidateCost(totalCandidates, skillLevel) {
-    // Calculate total cost and divide by number of candidates
-    // This ensures the per-candidate cost also scales with the total number of candidates
     const totalCost = calculateSearchCost(totalCandidates, skillLevel, []);
     return Math.round(totalCost / totalCandidates);
 }
 
 function calculateStaffSearchTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
+    // Convert additive modifiers to multiplicative ones:
+    // Old: (1 + 0.5) meant 1.5x
+    // New: Just use 1.5 directly as multiplier
+    const skillMultiplier = 0.5 + (skillLevel * 5.5); // Goes from 1.0 to 6.0
+    const roleMultiplier = Math.pow(1.5, selectedRoles.length); // 1.0, 1.5, 2.25, etc.
+    const candidateMultiplier = Math.pow(numberOfCandidates / 2, 2); // Quadratic scaling
+
     return {
         tasks: ['STAFF_SEARCH'],
         taskMultipliers: {
-            STAFF_SEARCH: Math.pow(numberOfCandidates / 2, 2) // Candidate multiplier
+            // Combine all multipliers into one
+            STAFF_SEARCH: skillMultiplier * roleMultiplier * candidateMultiplier
         },
-        workModifiers: [
-            (0.5 + (skillLevel * 5.5)) - 1, // Skill multiplier
-            Math.pow(1.5, selectedRoles.length) - 1 // Role Multiplier
-        ]
+        // No modifiers needed since we're using pure multiplication
+        workModifiers: []
     };
 }
 
@@ -177,34 +182,66 @@ function createStaffSearchWorkData(numberOfCandidates, skillLevel, selectedRoles
     const workFactors = calculateStaffSearchTotalWork(numberOfCandidates, skillLevel, selectedRoles);
     
     return {
-        amount: numberOfCandidates,  // Show actual number of candidates in display
+        amount: numberOfCandidates,
         unit: 'candidates',
         tasks: ['Staff Search'],
-        totalWork: calculateTotalWork(1, workFactors), // 1 amount because rate is already scaled by numberOfCandidates
+        totalWork: calculateTotalWork(1, workFactors),
         methodName: `${skillLevels[skillLevel].name} Level Search`,
+        // Show the skill multiplier - 1 to match display expectations
         methodModifier: (0.5 + (skillLevel * 5.5)) - 1,
         location: 'administration'
     };
 }
 
-function estimateHiringWorkData(skillLevel = 0.1, selectedRoles = []) {  // Remove numberOfCandidates parameter
-    const minWage = 600;
-    const maxWage = 3000;
+function estimateHiringWorkData(skillLevel = 0.1, selectedRoles = []) {
+    // Get min/max possible skills for this search level
+    const minSkill = skillLevel * 0.4;  // Minimum possible skill
+    const maxSkill = 0.6 + (skillLevel * 0.4);  // Maximum possible skill
     
-    const maxWorkValue = calculateHiringWork(
-        skillLevel, 
-        selectedRoles, 
-        maxWage,
-        null
-    ).totalWork;
-    
-    return calculateHiringWork(
-        skillLevel, 
-        selectedRoles, 
-        minWage,
-        `${selectedRoles.length > 0 ? 'Complex' : 'Standard'} ${skillLevels[skillLevel].name} Level Hiring`,
-        maxWorkValue
-    );
+    // Calculate wages based on min/max skills
+    const specializationBonus = selectedRoles.length > 0 ? Math.pow(1.3, selectedRoles.length) : 1;
+    const minWeeklyWage = (BASE_WEEKLY_WAGE + (minSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
+    const maxWeeklyWage = (BASE_WEEKLY_WAGE + (maxSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
+
+    // Create workFactors for min/max scenarios
+    const baseWorkFactors = {
+        tasks: ['STAFF_HIRING'],
+        workModifiers: [
+            Math.pow(skillLevel * 2, 2) - 1,     // Skill impact
+            Math.pow(1.5, selectedRoles.length) - 1  // Role impact
+        ]
+    };
+
+    // Rest of function remains the same, but use new wage calculations
+    const minWorkFactors = {
+        ...baseWorkFactors,
+        workModifiers: [
+            ...baseWorkFactors.workModifiers,
+            Math.pow(minWeeklyWage / 1000, 2) - 1
+        ]
+    };
+
+    const maxWorkFactors = {
+        ...baseWorkFactors,
+        workModifiers: [
+            ...baseWorkFactors.workModifiers,
+            Math.pow(maxWeeklyWage / 1000, 2) - 1
+        ]
+    };
+
+    const minWork = calculateTotalWork(1, minWorkFactors);
+    const maxWork = calculateTotalWork(1, maxWorkFactors);
+
+    return {
+        amount: 'Per',
+        unit: 'candidate',
+        tasks: ['Hiring Process'],
+        totalWork: minWork,
+        maxWork: maxWork,
+        methodName: `${selectedRoles.length > 0 ? 'Complex' : 'Standard'} ${skillLevels[skillLevel].name} Level Hiring`,
+        location: 'administration',
+        methodModifier: (Math.pow(minWeeklyWage / 1000, 2) + Math.pow(skillLevel * 2, 2) - 2)
+    };
 }
 
 export function staffSearch(numberOfCandidates, skillLevel, selectedRoles) {
