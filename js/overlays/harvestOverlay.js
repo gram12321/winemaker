@@ -9,7 +9,7 @@ import { regionAltitudeRanges, grapeSuitability } from '../names.js';
 import { loadFarmlands } from '../database/adminFunctions.js';
 import { showModalOverlay } from './overlayUtils.js';
 import { createOverlayHTML, createTextCenter, createTable } from '../components/createOverlayHTML.js';
-import { calculateTotalWork } from '../utils/workCalculator.js';
+import { calculateFieldTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateHarvestCharacteristics } from '../utils/harvestCharacteristics.js';
 import { applyHarvestOxidation } from '../utils/oxidationIndex.js';
@@ -47,7 +47,7 @@ function calculateHarvestWorkData(farmland, totalHarvest) {
         altitudeParams.altitudeEffect     // altitude penalty
     ];
 
-    const totalWork = calculateTotalWork(farmland.acres, {
+    const totalWork = calculateFieldTotalWork(farmland.acres, {
         density: farmland.density,
         tasks: ['HARVESTING'],
         workModifiers

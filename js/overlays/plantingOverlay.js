@@ -2,13 +2,12 @@ import { formatNumber, getFlagIconHTML, getColorClass } from '../utils.js';
 import { addTransaction } from '../finance.js';
 import { addConsoleMessage } from '../console.js';
 import { allResources, getResourceByName } from '../resource.js';  // Add getResourceByName to import
-import { displayFarmland  } from '../overlays/mainpages/landoverlay.js';
 import { updateFarmland, getFarmlands } from '../database/adminFunctions.js';
 import taskManager from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
-import { calculateTotalWork } from '../utils/workCalculator.js';
+import { calculateFieldTotalWork } from '../utils/workCalculator.js';
 import { updateAllDisplays } from '../displayManager.js';
 import { createOverlayHTML } from '../components/createOverlayHTML.js';
 import { createSlider, createSelect, createInfoBox } from '../components/createOverlayHTML.js';
@@ -250,7 +249,7 @@ function calculatePlantingWorkData(farmland, density) {
     const fragilityEffect = (1 - robustness);
 
     // Calculate total work
-    const totalWork = calculateTotalWork(farmland.acres, {
+    const totalWork = calculateFieldTotalWork(farmland.acres, {
         density: density,
         tasks: ['PLANTING'],
         workModifiers: [altitudeEffect, fragilityEffect]
