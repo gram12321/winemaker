@@ -6,6 +6,14 @@ import { formatNumber } from '/js/utils.js';
 import taskManager from '/js/taskManager.js';
 import { updateBuildingCards, updateBuildButtonStates } from '/js/overlays/mainpages/buildingsoverlay.js';
 import { Building } from '/js/classes/buildingClasses.js';
+import { calculateTotalWork } from './utils/workCalculator.js';
+
+// New shared work calculation function
+function calculateConstructionWork(buildingCost) {
+    return calculateTotalWork(buildingCost, {
+        tasks: ['CONSTRUCTION']
+    });
+}
 
 export function performBuildBuilding(target, params) {
     const { buildingName, buildingCost } = params;
@@ -29,6 +37,7 @@ export function buildBuilding(buildingName) {
     }
 
     const buildingCost = Building.BUILDINGS[buildingName]?.baseCost || 500000;
+    const constructionWork = calculateConstructionWork(buildingCost);
 
     // Initial state changes
     const buildButton = document.querySelector(`.build-button[data-building-name="${buildingName}"]`);
@@ -45,11 +54,11 @@ export function buildBuilding(buildingName) {
     // Add initial message
     addConsoleMessage(`Construction of ${buildingName} has begun. <span style="color: red">€${formatNumber(buildingCost)}</span> has been deducted from your account. When complete, capacity will be ${new Building(buildingName).calculateCapacity()} spaces.`);
 
-    // Create building task
+    // Create building task with new work calculation
     taskManager.addCompletionTask(
         'Building & Maintenance',
         'maintenance',
-        buildingCost / 1000,
+        constructionWork,
         performBuildBuilding,
         null,
         { buildingName, buildingCost }
@@ -87,6 +96,7 @@ export function upgradeBuilding(buildingName) {
 
     const building = new Building(buildingData.name, buildingData.level, buildingData.tools || []);
     const upgradeCost = building.getUpgradeCost();
+    const constructionWork = calculateConstructionWork(upgradeCost);
 
     // Add to transaction history
     addTransaction('Expense', `Upgrade of ${buildingName}`, -upgradeCost);
@@ -94,11 +104,11 @@ export function upgradeBuilding(buildingName) {
     // Add initial message
     addConsoleMessage(`Upgrade of ${buildingName} has begun. <span style="color: red">€${formatNumber(upgradeCost)}</span> has been deducted from your account.`);
 
-    // Create upgrade task
+    // Create upgrade task with new work calculation
     taskManager.addCompletionTask(
         'Building & Maintenance',
         'maintenance',
-        upgradeCost / 1000,
+        constructionWork,
         performUpgradeBuilding,
         null,
         { buildingName, upgradeCost }

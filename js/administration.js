@@ -123,7 +123,6 @@ function calculateMaintenanceWork(building, spilloverWork = 0) {
         .reduce((total, tool) => total + tool.cost, 0);
     
     const totalValue = buildingValue + toolValue;
-    const valueInHundredK = totalValue / 100000; // Convert to rate units
 
     const workFactors = {
         tasks: ['MAINTENANCE'],
@@ -135,7 +134,8 @@ function calculateMaintenanceWork(building, spilloverWork = 0) {
         workFactors.workModifiers.push(0.1);
     }
 
-    const totalWork = calculateTotalWork(valueInHundredK, workFactors);
+    // Pass total value directly - rate in TASKS will handle the division by 100,000
+    const totalWork = calculateTotalWork(totalValue, workFactors);
     
     return Math.round(totalWork + spilloverWork);
 }
