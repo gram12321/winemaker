@@ -7,14 +7,14 @@ import { loadBuildings, storeBuildings } from './database/adminFunctions.js'; //
 import { calculateTotalWork } from './utils/workCalculator.js';
 
 function calculateBookkeepingWork(prevSeason, prevYear) {
-    const transactions = getTransactions();
-    const prevSeasonTransactions = transactions.filter(transaction => {
+    const transactions = getTransactions().filter(transaction => {
         const { season, year } = extractSeasonAndYear(transaction.date);
         return season === prevSeason && year === prevYear;
     });
 
-    // Calculate base work from transactions
-    return prevSeasonTransactions.length * 10;
+    return calculateTotalWork(transactions.length, {
+        tasks: ['BOOKKEEPING']
+    });
 }
 
 function validateBookkeeping() {
