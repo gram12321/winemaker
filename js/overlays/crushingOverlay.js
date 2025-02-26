@@ -7,7 +7,7 @@ import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { getBuildingTools } from '../classes/buildingClasses.js'; 
 import { loadBuildings, storeBuildings, loadInventory } from '../database/adminFunctions.js';
 import { createOverlayHTML, createTable, createMethodSelector, createCheckbox, createTextCenter  } from '../components/createOverlayHTML.js';
-import { calculateFieldTotalWork } from '../utils/workCalculator.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateCrushingCharacteristics } from '../utils/crushingCharacteristics.js';
 
@@ -894,7 +894,7 @@ function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
         }
     }
 
-    let totalWork = calculateFieldTotalWork(tons, {
+    let totalWork = calculateTotalWork(tons, {
         tasks: ['CRUSHING']
     });
 

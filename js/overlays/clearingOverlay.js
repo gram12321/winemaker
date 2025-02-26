@@ -5,7 +5,7 @@ import taskManager from '../taskManager.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createHealthBar, updateHealthBar } from '../components/healthBar.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
-import { calculateFieldTotalWork } from '../utils/workCalculator.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
 import { DEFAULT_FARMLAND_HEALTH, } from '../constants/constants.js';
 import { updateAllDisplays } from '../displayManager.js';
 import { createOverlayHTML, createSlider, createCheckbox, createTextCenter } from '../components/createOverlayHTML.js';
@@ -26,7 +26,7 @@ function calculateClearingWorkData(farmland, selectedTasks, replantingIntensity 
         }
     });
 
-    let totalWork = calculateFieldTotalWork(farmland.acres, {
+    let totalWork = calculateTotalWork(farmland.acres, {
         density: farmland.density,
         tasks: tasks,
         taskMultipliers: {

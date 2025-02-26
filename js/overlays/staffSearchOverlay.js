@@ -8,7 +8,7 @@ import { getMoney } from '../database/adminFunctions.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateHiringWork } from './hirestaffoverlay.js';
 import { createOverlayHTML, createSlider, createInfoBox, createTextCenter, createCheckbox } from '../components/createOverlayHTML.js';
-import { calculateNonFieldTotalWork } from '../utils/workCalculator.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
 
 export function showStaffSearchOverlay() {
     const overlayContainer = showStandardOverlay(createStaffSearchHTML());
@@ -20,9 +20,7 @@ function createStaffSearchHTML() {
     const initialCandidates = 5;
     const initialSkill = 0.3;
     const initialCost = calculateSearchCost(initialCandidates, initialSkill, []);
-    const skillInfo = getSkillLevelInfo(initialSkill);
-    const initialWork = calculateNonFieldTotalWork(initialCandidates, initialSkill, []);
-    const searchWorkData = calculateSearchWorkData(initialCandidates, initialSkill, []);
+    const searchWorkData = createStaffSearchWorkData(initialCandidates, initialSkill, []);
     const hiringWorkData = estimateHiringWorkData(initialSkill, []); // Remove numberOfCandidates parameter
 
     // Calculate combined work
@@ -162,25 +160,29 @@ function calculatePerCandidateCost(totalCandidates, skillLevel) {
     return Math.round(totalCost / totalCandidates);
 }
 
-function calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles) {
-    const workFactors = {
+function calculateStaffSearchTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
+    return {
         tasks: ['STAFF_SEARCH'],
         taskMultipliers: {
             STAFF_SEARCH: Math.pow(numberOfCandidates / 2, 2) // Candidate multiplier
         },
         workModifiers: [
-            (0.5 + (skillLevel * 5.5)) - 1, // Fix: This is incorrectly showing in UI
+            (0.5 + (skillLevel * 5.5)) - 1, // Skill multiplier
             Math.pow(1.5, selectedRoles.length) - 1 // Role Multiplier
         ]
     };
+}
 
+function createStaffSearchWorkData(numberOfCandidates, skillLevel, selectedRoles) {
+    const workFactors = calculateStaffSearchTotalWork(numberOfCandidates, skillLevel, selectedRoles);
+    
     return {
-        amount: 1,
+        amount: numberOfCandidates,  // Show actual number of candidates in display
         unit: 'candidates',
         tasks: ['Staff Search'],
-        totalWork: calculateNonFieldTotalWork(1, workFactors),
+        totalWork: calculateTotalWork(1, workFactors), // 1 amount because rate is already scaled by numberOfCandidates
         methodName: `${skillLevels[skillLevel].name} Level Search`,
-        methodModifier: (0.5 + (skillLevel * 5.5)) - 1, // Now shows correct percentage in UI
+        methodModifier: (0.5 + (skillLevel * 5.5)) - 1,
         location: 'administration'
     };
 }
@@ -207,7 +209,7 @@ function estimateHiringWorkData(skillLevel = 0.1, selectedRoles = []) {  // Remo
 
 export function staffSearch(numberOfCandidates, skillLevel, selectedRoles) {
     const totalCost = calculateSearchCost(numberOfCandidates, skillLevel, selectedRoles);
-    const totalWork = calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles).totalWork;
+    const totalWork = createStaffSearchWorkData(numberOfCandidates, skillLevel, selectedRoles).totalWork;
 
     // Check if player has enough money
     const currentMoney = getMoney();
@@ -311,7 +313,7 @@ function updateDisplayValues(overlayContainer, numberOfCandidates, skillLevel, s
     const skillInfo = getSkillLevelInfo(skillLevel);
 
     // Update work calculation displays
-    const searchWorkData = calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles);
+    const searchWorkData = createStaffSearchWorkData(numberOfCandidates, skillLevel, selectedRoles);
     const hiringWorkData = estimateHiringWorkData(skillLevel, selectedRoles);
 
     // Calculate combined work display

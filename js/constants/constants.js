@@ -2,6 +2,13 @@
 export const BASE_WORK_UNITS = 50; // work units per standard week
 export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
 
+// Farmland Constants 
+export const DEFAULT_FARMLAND_HEALTH = 0.5; // 50% is the default/reset value
+export const ORGANIC_YEARS_REQUIRED = 3; // years needed for organic certification
+
+// Define density-based tasks
+export const DENSITY_BASED_TASKS = ['PLANTING', 'UPROOTING', 'HARVESTING'];
+
 export const TASKS = {
     // Field tasks (rate in acres/week)
     PLANTING: { name: 'Planting', rate: 0.7 },
@@ -34,24 +41,4 @@ export const TASKS = {
     }
 };
 
-// Then update WORK_RATES to use these:
-export const WORK_RATES = Object.fromEntries(
-    Object.entries(TASKS).map(([key, task]) => [key, task.rate])
-);
-
-// Define density-based tasks
-export const DENSITY_BASED_TASKS = ['PLANTING', 'UPROOTING', 'HARVESTING'];
-
-// Apply density ratio to work rates for density-based tasks
-export function Workrate(taskType, baseRate, density) {
-    if (DENSITY_BASED_TASKS.includes(taskType)) {
-        const densityRatio = density / DEFAULT_VINE_DENSITY;
-        return baseRate / densityRatio;  // More vines = lower acres/week rate
-    }
-    return baseRate;
-}
-
-// Farmland Constants 
-export const DEFAULT_FARMLAND_HEALTH = 0.5; // 50% is the default/reset value
-export const ORGANIC_YEARS_REQUIRED = 3; // years needed for organic certification
 

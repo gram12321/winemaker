@@ -1,64 +1,39 @@
 import { BASE_WORK_UNITS, TASKS, DENSITY_BASED_TASKS, DEFAULT_VINE_DENSITY } from '../constants/constants.js';
 
-// Move rate calculations from constants.js to here
-export const WORK_RATES = Object.fromEntries(
-    Object.entries(TASKS).map(([key, task]) => [key, task.rate])
-);
+// Universal work calculation that handles both field and non-field tasks:
+// 1. Get task's base processing rate (adjusted for density if applicable)
+// 2. Calculate work weeks needed based on amount/rate
+// 3. Add any initial setup work defined for the task
+// 4. Convert to work units (weeks * BASE_WORK_UNITS)
+// 5. Apply modifiers
+// 6. Return total work rounded up to nearest whole number
 
-export function calculateWorkRate(taskType, baseRate, density) {
-    if (DENSITY_BASED_TASKS.includes(taskType)) {
-        const densityRatio = density / DEFAULT_VINE_DENSITY;
-        return baseRate / densityRatio;  // More vines = lower acres/week rate
-    }
-    return baseRate;
-}
 
-function calculateWorkWeeks(amount, taskType, density = null, taskMultiplier = 1.0) {
-    const baseRate = WORK_RATES[taskType];
-    const rate = density ? 
-        calculateWorkRate(taskType, baseRate, density) : // Field tasks use density
-        baseRate;                                        // Non-field tasks use base rate
-    
-    return (amount * taskMultiplier) / rate;
-}
-
-// Both field and non-field calculations now follow the same pattern:
-// 1. Calculate work weeks based on amount (acres or units) and rate
-// 2. Convert to work units
-// 3. Apply modifiers
-
-export function calculateFieldTotalWork(acres, factors = {}) {
-    const { density, tasks = [], taskMultipliers = {}, workModifiers = [] } = factors;
-    
-    const baseWork = tasks.reduce((total, taskType) => {
-        const workWeeks = calculateWorkWeeks(
-            acres,
-            taskType, 
-            density,
-            taskMultipliers[taskType] || 1.0
-        );
-        return total + (workWeeks * BASE_WORK_UNITS);
-    }, 0);
-
-    return Math.ceil(
-        workModifiers.reduce((work, modifier) => work * (1 + modifier), baseWork)
-    );
-}
-
-export function calculateNonFieldTotalWork(amount, factors = {}) {
-    const { tasks = [], taskMultipliers = {}, workModifiers = [] } = factors;
+export function calculateTotalWork(amount, factors = {}) {
+    const { density = null, tasks = [], taskMultipliers = {}, workModifiers = [] } = factors;
 
     const baseWork = tasks.reduce((total, taskType) => {
-        const workWeeks = calculateWorkWeeks(
-            amount,
-            taskType,
-            null, // No density for non-field tasks
-            taskMultipliers[taskType] || 1.0
-        );
-        return total + (workWeeks * BASE_WORK_UNITS);
+        const task = TASKS[taskType];
+        const baseRate = task.rate;
+        
+        // Adjust rate for density if it's a density task
+        const rate = DENSITY_BASED_TASKS.includes(taskType) && density ? 
+            baseRate / (density / DEFAULT_VINE_DENSITY) : 
+            baseRate;
+        
+        // Calculate work weeks and convert to work units
+        const workWeeks = (amount * (taskMultipliers[taskType] || 1.0)) / rate;
+        const workUnits = workWeeks * BASE_WORK_UNITS;
+        
+        // Add any initial work defined for the task
+        const initialWork = task.initialWork || 0;
+        
+        return total + initialWork + workUnits;
     }, 0);
 
-    return Math.ceil(
-        workModifiers.reduce((work, modifier) => work * (1 + modifier), baseWork)
-    );
+    // Apply modifiers
+    const totalWork = workModifiers.reduce((work, modifier) => 
+        work * (1 + modifier), baseWork);
+
+    return Math.ceil(totalWork);
 }

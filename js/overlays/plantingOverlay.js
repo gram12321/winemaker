@@ -7,7 +7,7 @@ import taskManager from '../taskManager.js';
 import { regionAltitudeRanges } from '../names.js';
 import { hideOverlay, showStandardOverlay, setupStandardOverlayClose } from './overlayUtils.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
-import { calculateFieldTotalWork } from '../utils/workCalculator.js';
+import { calculateTotalWork } from '../utils/workCalculator.js';
 import { updateAllDisplays } from '../displayManager.js';
 import { createOverlayHTML } from '../components/createOverlayHTML.js';
 import { createSlider, createSelect, createInfoBox } from '../components/createOverlayHTML.js';
@@ -249,7 +249,7 @@ function calculatePlantingWorkData(farmland, density) {
     const fragilityEffect = (1 - robustness);
 
     // Calculate total work
-    const totalWork = calculateFieldTotalWork(farmland.acres, {
+    const totalWork = calculateTotalWork(farmland.acres, {
         density: density,
         tasks: ['PLANTING'],
         workModifiers: [altitudeEffect, fragilityEffect]
