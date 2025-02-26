@@ -8,6 +8,7 @@ import { getMoney } from '../database/adminFunctions.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateHiringWork } from './hirestaffoverlay.js';
 import { createOverlayHTML, createSlider, createInfoBox, createTextCenter, createCheckbox } from '../components/createOverlayHTML.js';
+import { BASE_WORK_UNITS } from '../constants/constants.js';
 
 export function showStaffSearchOverlay() {
     const overlayContainer = showStandardOverlay(createStaffSearchHTML());
@@ -163,11 +164,17 @@ function calculatePerCandidateCost(totalCandidates, skillLevel) {
 
 // Adjusted function to calculate total work required
 function calculateTotalWork(numberOfCandidates, skillLevel, selectedRoles) {
-    const baseWork = 10;
-    const skillWorkMultiplier = 1 + (skillLevel - 0.1) * 0.5; // Skill level has a moderate impact
-    const roleWorkMultiplier = 1 + selectedRoles.length * 0.3; // Specialized roles have a smaller impact
+    const baseWork = 25;
+    // Much steeper candidate scaling (3 candidates = ~10 work, 10 candidates = ~200 work)
+    const candidateMultiplier = Math.pow(numberOfCandidates / 2, 2);
+    // Much stronger skill impact (0.1 = 0.5x, 1.0 = 3x)
+    const skillWorkMultiplier = 0.5 + (skillLevel * 2.5);
+    // Stronger role multiplier (each role adds 50% multiplicatively)
+    const roleWorkMultiplier = Math.pow(1.5, selectedRoles.length);
 
-    return Math.round(baseWork * numberOfCandidates * skillWorkMultiplier * roleWorkMultiplier);
+    const totalWork = Math.round(baseWork * candidateMultiplier * skillWorkMultiplier * roleWorkMultiplier);
+
+    return totalWork;
 }
 
 function calculateSearchWorkData(numberOfCandidates, skillLevel, selectedRoles) {
@@ -230,9 +237,11 @@ export function staffSearch(numberOfCandidates, skillLevel, selectedRoles) {
         }
     );
 
+    // Fix the roles text by using the specializedRoles object properly
     const rolesText = selectedRoles.length > 0 
-        ? ` specializing in ${selectedRoles.map(r => specializedRoles[r].title).join(', ')}`
+        ? ` specializing in ${selectedRoles.map(roleKey => specializedRoles[roleKey].title).join(', ')}`
         : '';
+
     addConsoleMessage(
         `Started searching for ${numberOfCandidates} ${skillLevels[skillLevel].name}-level candidates${rolesText} (Cost: €${formatNumber(totalCost)})`
     );
@@ -242,7 +251,7 @@ export function performStaffSearch(target, params) {
     showHireStaffOverlay(
         params.numberOfCandidates, 
         params.skillModifier,
-        params.selectedRoles
+        params.selectedRoles || [] // Ensure selectedRoles is always an array
     );
 }
 
@@ -279,9 +288,10 @@ function setupStaffSearchEventListeners(overlayContainer) {
     searchBtn.addEventListener('click', () => {
         const numberOfCandidates = parseInt(candidatesSlider.value);
         const skillLevel = parseFloat(skillSlider.value);
+        // Fix: Use id.replace('-role', '') instead of dataset.role to match the way we handle roles elsewhere
         const selectedRoles = Array.from(roleCheckboxes)
             .filter(cb => cb.checked)
-            .map(cb => cb.dataset.role);
+            .map(cb => cb.id.replace('-role', ''));
 
         staffSearch(numberOfCandidates, skillLevel, selectedRoles);
         hideOverlay(overlayContainer);

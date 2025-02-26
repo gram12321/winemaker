@@ -91,15 +91,15 @@ function randomizeSkills(skillModifier = 0.5, specializedRole = null) {
     
     // For specialized roles, add a percentage-based bonus that scales with skill
     if (specializedRole) {
-        // Bonus is 20-40% of remaining potential (1.0 - baseValue)
-        // Higher skill = bigger percentage of the remaining gap
         const remainingPotential = 1.0 - baseValue;
         const bonusPercentage = 0.2 + (skillModifier * 0.2); // 20-40%
         const bonus = remainingPotential * bonusPercentage;
-        return Math.min(1.0, baseValue + bonus).toFixed(2);
+        // Return number directly, no .toFixed(2)
+        return Math.min(1.0, baseValue + bonus);
     }
     
-    return baseValue.toFixed(2);
+    // Return number directly, no .toFixed(2)
+    return baseValue;
 }
 
 export function createNewStaff(skillModifier = 0.5, specializedRoles = []) {
@@ -115,21 +115,36 @@ export function createNewStaff(skillModifier = 0.5, specializedRoles = []) {
         maintenance: { maintenance: randomizeSkills(skillModifier, specializedRoles.includes('maintenance')) }
     };
 
-    const skillMultiplier = 100;
+    const BASE_WEEKLY_WAGE = 500; // Base weekly wage for lowest skill
+    const SKILL_WAGE_MULTIPLIER = 1000; // Multiplier for skills
 
     // Calculate wage based on skills
-    const calculateWage = (skills) => (
-        skills.field.field * skillMultiplier +
-        skills.winery.winery * skillMultiplier +
-        skills.administration.administration * skillMultiplier +
-        skills.sales.sales * skillMultiplier +
-        skills.maintenance.maintenance * skillMultiplier
-    );
+    const calculateWage = (skills) => {
+        // Get average of all skills
+        const avgSkill = (
+            skills.field.field +
+            skills.winery.winery +
+            skills.administration.administration +
+            skills.sales.sales +
+            skills.maintenance.maintenance
+        ) / 5;
+
+        // Add bonus for specialized roles (30% per specialization)
+        const specializationBonus = specializedRoles.length > 0 ? 
+            Math.pow(1.3, specializedRoles.length) : 1;
+
+        // Calculate monthly wage:
+        // Base (500/week) + Skill bonus (up to 1000/week extra) * specialization bonus
+        const weeklyWage = (BASE_WEEKLY_WAGE + (avgSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
+        
+        // Convert to monthly (multiply by 52/12)
+        return Math.round(weeklyWage * 52/12) || BASE_WEEKLY_WAGE * 52/12; // Fallback to base wage if calculation fails
+    };
 
     const newStaff = new Staff(firstName, lastName, skills, skillModifier);
     newStaff.specializedRoles = specializedRoles;  // Set specialized roles
     newStaff.workforce = 50;
-    newStaff.wage = Math.round((0.75 + Math.random() * 1.25) * calculateWage(skills));
+    newStaff.wage = calculateWage(skills);
     
     return newStaff;
 }
@@ -181,22 +196,22 @@ export function displayStaff() {
         });
 
         const assignedTaskDetail = assignedTasks.length > 0 ? assignedTasks.join('<br>') : 'None';
-        const totalSkills = parseFloat(staff.skills.field.field) + 
-                          parseFloat(staff.skills.winery.winery) + 
-                          parseFloat(staff.skills.administration.administration) + 
-                          parseFloat(staff.skills.sales.sales) + 
-                          parseFloat(staff.skills.maintenance.maintenance);
+        const totalSkills = staff.skills.field.field + 
+                          staff.skills.winery.winery + 
+                          staff.skills.administration.administration + 
+                          staff.skills.sales.sales + 
+                          staff.skills.maintenance.maintenance;
         const maxTotalSkills = 5.0;
         const containerWidth = (totalSkills / maxTotalSkills) * 100;
         
         const skillsHTML = `
           <div class="skill-bar-outer">
             <div class="skill-bar-container" style="width: ${containerWidth}%">
-              <div class="skill-bar field-skill-bar" style="width: ${(parseFloat(staff.skills.field.field) / totalSkills) * 100}%;" title="Field Skill: ${staff.skills.field.field}">F</div>
-              <div class="skill-bar winery-skill-bar" style="width: ${(parseFloat(staff.skills.winery.winery) / totalSkills) * 100}%;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
-              <div class="skill-bar admin-skill-bar" style="width: ${(parseFloat(staff.skills.administration.administration) / totalSkills) * 100}%;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
-              <div class="skill-bar sales-skill-bar" style="width: ${(parseFloat(staff.skills.sales.sales) / totalSkills) * 100}%;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
-              <div class="skill-bar maintenance-skill-bar" style="width: ${(parseFloat(staff.skills.maintenance.maintenance) / totalSkills) * 100}%;" title="Maintenance Skill: ${staff.skills.maintenance.maintenance}">M</div>
+              <div class="skill-bar field-skill-bar" style="width: ${(staff.skills.field.field / totalSkills) * 100}%;" title="Field Skill: ${staff.skills.field.field}">F</div>
+              <div class="skill-bar winery-skill-bar" style="width: ${(staff.skills.winery.winery / totalSkills) * 100}%;" title="Winery Skill: ${staff.skills.winery.winery}">W</div>
+              <div class="skill-bar admin-skill-bar" style="width: ${(staff.skills.administration.administration / totalSkills) * 100}%;" title="Administration Skill: ${staff.skills.administration.administration}">A</div>
+              <div class="skill-bar sales-skill-bar" style="width: ${(staff.skills.sales.sales / totalSkills) * 100}%;" title="Sales Skill: ${staff.skills.sales.sales}">S</div>
+              <div class="skill-bar maintenance-skill-bar" style="width: ${(staff.skills.maintenance.maintenance / totalSkills) * 100}%;" title="Maintenance Skill: ${staff.skills.maintenance.maintenance}">M</div>
             </div>
           </div>
         `;

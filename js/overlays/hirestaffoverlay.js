@@ -6,14 +6,15 @@ import { addTransaction } from '../finance.js';
 import taskManager from '../taskManager.js';  
 import { showModalOverlay, hideOverlay } from './overlayUtils.js'; 
 import { specializedRoles } from './staffSearchOverlay.js';
+import { BASE_WORK_UNITS } from '../constants/constants.js';
 
-export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, specializedRoles = []) {
+export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, selectedRoles = []) {
     const createdStaffOptions = Array.from(
         {length: numberOfOptions}, 
-        () => createNewStaff(skillModifier, specializedRoles)
+        () => createNewStaff(skillModifier, selectedRoles)
     );
     
-    const content = createHireStaffHTML(createdStaffOptions);
+    const content = createHireStaffHTML(createdStaffOptions, selectedRoles);
     
     const overlayContainer = showModalOverlay('hireStaffOverlay', content);
 
@@ -21,10 +22,10 @@ export function showHireStaffOverlay(numberOfOptions = 5, skillModifier = 0.5, s
     return overlayContainer;
 }
 
-function createHireStaffHTML(createdStaffOptions) {
+function createHireStaffHTML(createdStaffOptions, selectedRoles) {
     const skillInfo = getSkillLevelInfo(createdStaffOptions[0]?.skillLevel || 0.1);
-    const specializationText = createdStaffOptions[0]?.specializedRoles?.length > 0 
-        ? `We have been specifically looking for ${createdStaffOptions[0].specializedRoles.map(role => 
+    const specializationText = selectedRoles.length > 0 
+        ? `We have been specifically looking for ${selectedRoles.map(role => 
             `<span style="color: var(--skill-${role});">${specializedRoles[role].title}</span>`).join(', ')}.<br>`
         : '';
 
@@ -125,24 +126,26 @@ function setupHireStaffEventListeners(overlayContainer, createdStaffOptions) {
 }
 
 export function calculateHiringWork(skillLevel, specializedRoles, wage, methodName = null, maxWork = null) {
-    const baseWork = 15;
-    const skillModifier = Math.log10((skillLevel * 10) + 1);
-    const wageModifier = Math.log10(wage / 500);
-    const specializationMultiplier = specializedRoles.length > 0 ? 
-        Math.pow(1.5, specializedRoles.length) : 1;
+    const baseWork = 25;
+    // Much stronger skill impact (0.1 = minimal impact, 1.0 = 4x work)
+    const skillModifier = Math.pow(skillLevel * 2, 2);
+    // Stronger wage impact (500 = 0.5x, 3000 = 3x)
+    const wageModifier = Math.pow(wage / 1000, 2);
+    // Keep strong specialization multiplier (each role adds 50% multiplicatively)
+    const specializationMultiplier = Math.pow(1.5, specializedRoles.length);
 
-    const totalWork = Math.round((baseWork + (baseWork * skillModifier) + (baseWork * wageModifier)) * specializationMultiplier);
-    const combinedModifier = skillModifier + wageModifier + (specializationMultiplier - 1);
+    // Multiply everything together for exponential scaling
+    const totalWork = Math.round(baseWork * skillModifier * wageModifier * specializationMultiplier);
 
     return {
         amount: 'Per', 
-        unit: 'candidate',  // This makes it show "Per candidate" in the table
+        unit: 'candidate',
         tasks: ['Hiring Process'],
         totalWork,
         methodName: methodName || `Standard Hiring Process`,
         location: 'administration',
-        methodModifier: combinedModifier,
-        ...(maxWork !== null && { maxWork }) // Changed from arguments.length check to explicit parameter
+        methodModifier: (skillModifier + wageModifier + specializationMultiplier - 3), // Adjusted to show relative increase
+        ...(maxWork !== null && { maxWork })
     };
 }
 
