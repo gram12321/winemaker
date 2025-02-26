@@ -42,6 +42,12 @@ export const TASKS = {
         type: 'administration',
         rate: 1.0,  // Can process 1 hire/week
         initialWork: 25  // Contract preparation, initial paperwork, etc
+    },
+    MAINTENANCE: {
+        name: 'Building Maintenance',
+        type: 'maintenance',
+        rate: 100000,  // Can maintain €100,000 worth of value per week
+        initialWork: 10  // Base setup work for any maintenance task is low. You can maintain a small building just for one day work. 
     }
 };
 

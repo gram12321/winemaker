@@ -4,6 +4,7 @@ import taskManager from './taskManager.js';
 import { getGameState, getTransactions } from './database/adminFunctions.js';
 import { calculateRealPrestige } from './company.js'; // Add this import
 import { loadBuildings, storeBuildings } from './database/adminFunctions.js'; // Add this import
+import { calculateTotalWork } from './utils/workCalculator.js';
 
 function calculateBookkeepingWork(prevSeason, prevYear) {
     const transactions = getTransactions();
@@ -115,18 +116,28 @@ function validateMaintenance() {
 }
 
 function calculateMaintenanceWork(building, spilloverWork = 0) {
-    // Get building value from upgrade cost
+    // Get total value to maintain (building + tools)
     const buildingValue = building.getUpgradeCost();
-    
-    // Calculate total value of all tools in the building
     const toolValue = building.slots
         .flatMap(slot => slot.tools)
         .reduce((total, tool) => total + tool.cost, 0);
-
-    // Combined value determines base work (1 work per €10,000 of value)
-    const baseWork = Math.round((buildingValue + toolValue) / 10000);
     
-    return Math.round(baseWork + spilloverWork);
+    const totalValue = buildingValue + toolValue;
+    const valueInHundredK = totalValue / 100000; // Convert to rate units
+
+    const workFactors = {
+        tasks: ['MAINTENANCE'],
+        workModifiers: []
+    };
+
+    // Add spillover penalty if any (10% more work)
+    if (spilloverWork > 0) {
+        workFactors.workModifiers.push(0.1);
+    }
+
+    const totalWork = calculateTotalWork(valueInHundredK, workFactors);
+    
+    return Math.round(totalWork + spilloverWork);
 }
 
 export function maintenance() {
