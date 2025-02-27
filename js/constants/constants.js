@@ -49,7 +49,6 @@ export const TASKS = {
         rate: 500000,  // Can maintain €500,000 worth of value per week
         initialWork: 10  // Base setup work for any maintenance task is low. You can maintain a small building just for one day work. 
     },
-
     CONSTRUCTION: {
         name: 'Building Construction',
         type: 'maintenance',
