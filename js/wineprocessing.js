@@ -2,48 +2,40 @@ import { inventoryInstance } from './resource.js';
 import { saveInventory } from './database/adminFunctions.js';
 import { addConsoleMessage } from './console.js';
 import taskManager from './taskManager.js';
+import { formatNumber } from './utils.js';
+import { calculateFermentationWorkData } from './overlays/fermentationOverlay.js';
 
-export function fermentation(selectedResource, storage, mustAmount) {
-    // Check for existing fermentation tasks with the same storage
+export function fermentation(selectedResource, storage, mustAmount, params = {}) {
+    // Check for existing fermentation tasks
     const existingTasks = taskManager.getAllTasks().filter(task => 
         task.name === 'Fermentation' && 
         task.target === storage
     );
 
     if (existingTasks.length > 0) {
-        addConsoleMessage("A fermentation task is already in progress for this must storage");
+        addConsoleMessage("A fermentation task is already in progress for this must");
         return false;
     }
 
-    // Check if there's any work progress
-    const workProgress = taskManager.getTaskProgress('Fermentation');
-    if (workProgress <= 0) {
-        addConsoleMessage("No work has been done on fermentation yet");
-        return false;
-    }
-
-    const resource = inventoryInstance.items.find(item => 
-        item.resource.name === selectedResource && 
-        item.state === 'Must' &&
-        item.storage === storage
-    );
-
-    if (!resource || resource.amount < 1) {
-        addConsoleMessage(`Unable to ferment ${selectedResource}. Ensure there is sufficient quantity of Must.`);
-        return;
-    }
-
-    // Add fermentation as a progressive task
+    // Create fermentation task
+    const workData = calculateFermentationWorkData(mustAmount, params.selectedMethod);
+    
     taskManager.addProgressiveTask(
         'Fermentation',
         'winery',
-        100, // totalWork for fermentation
-        (target, progress, params) => {
-            performFermentation(target, progress, params);
-        },
-        null, // No target needed for fermentation
-        { selectedResource, storage, mustAmount, vintage: resource.vintage, quality: resource.quality, fieldName: resource.fieldName, fieldPrestige: resource.fieldPrestige }
+        workData.totalWork,
+        performFermentation,
+        storage,
+        {
+            selectedResource,
+            storage,
+            mustAmount,
+            ...params
+        }
     );
+
+    addConsoleMessage(`Started fermentation of ${formatNumber(mustAmount)}L of ${selectedResource} must from ${params.fieldName}`);
+    return true;
 }
 
 export function performFermentation(target, progress, params) {
@@ -75,5 +67,5 @@ export function performFermentation(target, progress, params) {
     );
 
     saveInventory();
-    addConsoleMessage(`${mustAmount} liters of ${selectedResource} must has been fermented into ${bottleAmount} bottles.`);
+    addConsoleMessage(`${formatNumber(mustAmount)} liters of ${selectedResource} must has been fermented into ${formatNumber(bottleAmount)} bottles.`);
 }

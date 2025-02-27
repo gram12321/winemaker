@@ -60,6 +60,12 @@ export const TASKS = {
         type: 'administration',
         rate: 50,  // Can process 50 transactions/week
         initialWork: 5  // Very easy to start/stop, minimal setup needed
+    },
+    FERMENTATION: {
+        name: 'Fermentation',
+        type: 'winery',
+        rate: 5.0,  // Can ferment 5000L per week (after converting to kL)
+        initialWork: 25  // Setup fermentation vessels, yeast preparation, etc.
     }
 };
 
