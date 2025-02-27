@@ -263,11 +263,6 @@ function calculateWorkPerWeek(staffCheckboxes, toolCheckboxes, validTools, task)
                 const tool = tools[0];
                 if (tool) {
                     const bonus = Math.pow(tool.speedBonus, quantity);
-                    console.log(`Individual Tool: ${tool.name}`, {
-                        quantity,
-                        singleBonus: tool.speedBonus,
-                        combinedBonus: bonus
-                    });
                     toolSpeedBonus *= bonus;
                 }
             } else {
