@@ -207,32 +207,45 @@ function updateFermentationData(selectedMust) {
         const expectedWine = Math.floor(amount * 0.9 / 0.75);
         document.getElementById('wine-expected').textContent = `${formatNumber(expectedWine)} bottles`;
 
-        // Update work calculation
+        // Update work calculation with selected storage
         const workSection = document.querySelector('.fermentation-work-section');
         if (workSection) {
-            const selectedMethod = document.querySelector('input[name="fermentation-method"]:checked')?.value;
             workSection.innerHTML = createWorkCalculationTable(
-                calculateFermentationWorkData(amount, selectedMethod)
+                calculateFermentationWorkData(
+                    parseFloat(selectedMust.dataset.amount),
+                    selectedMust.dataset.storage
+                )
             );
         }
     }
 }
 
-export function calculateFermentationWorkData(mustAmount, selectedMethod = null) {
-    // Get base work using FERMENTATION task from constants
+export function calculateFermentationWorkData(mustAmount, storage = null) {
     const workFactors = {
         tasks: ['FERMENTATION'],
         workModifiers: []
     };
 
-    // Add method modifier if any
-    if (selectedMethod && selectedMethod !== 'Basic Fermentation') {
-        const methodModifiers = {
-            'Temperature Controlled': -0.3 // 30% faster
-            // Add more methods here
-        };
-        if (methodModifiers[selectedMethod]) {
-            workFactors.workModifiers.push(methodModifiers[selectedMethod]);
+    let containerSpeedBonus = 0;
+    let containerName = null;
+
+    // Get container's speed bonus if storage is selected
+    if (storage) {
+        const buildings = loadBuildings();
+        const container = buildings.flatMap(b => 
+            b.slots.flatMap(slot => 
+                slot.tools.find(t => 
+                    t.getStorageId() === storage && 
+                    t.supportedResources?.includes('Must')
+                )
+            )
+        ).find(t => t);
+
+        if (container?.speedBonus) {
+            // Convert speed bonus to work reduction
+            containerSpeedBonus = -(1 - (1 / container.speedBonus));
+            containerName = container.name;
+            workFactors.workModifiers.push(containerSpeedBonus);
         }
     }
 
@@ -244,7 +257,10 @@ export function calculateFermentationWorkData(mustAmount, selectedMethod = null)
         tasks: ['FERMENTATION'],
         totalWork,
         location: 'winery',
-        methodName: selectedMethod || 'Basic Fermentation'
+        methodName: 'Basic Fermentation',
+        methodModifier: 0,
+        storageName: containerName,
+        storageModifier: containerSpeedBonus
     };
 }
 

@@ -19,7 +19,9 @@ export function createWorkCalculationTable(data) {
         medianAltitude, 
         robustness, 
         fragilityEffect,
-        maxWork // Add this new property
+        maxWork, // Add this new property
+        storageModifier = 0,  // Add new property
+        storageName = null   // Add new property
     } = data;
 
     const showDensity = location === 'field' && tasks.some(task => DENSITY_BASED_TASKS.includes(task));
@@ -94,6 +96,19 @@ export function createWorkCalculationTable(data) {
                                             <br>
                                             <small class="text-muted">
                                                 ${methodModifier > 0 ? '+' : ''}${formatNumber(methodModifier * 100)}% work modifier
+                                            </small>
+                                        ` : ''}
+                                    </td>
+                                </tr>
+                            ` : ''}
+                            ${storageName ? `
+                                <tr>
+                                    <td>Storage Vessel:</td>
+                                    <td>${storageName}
+                                        ${storageModifier !== 0 ? `
+                                            <br>
+                                            <small class="text-muted">
+                                                ${storageModifier > 0 ? '+' : ''}${formatNumber(storageModifier * 100)}% work modifier
                                             </small>
                                         ` : ''}
                                     </td>

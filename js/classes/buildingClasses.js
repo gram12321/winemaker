@@ -252,7 +252,7 @@ const ToolManager = (() => {
         // Warehouse Tools
         new Tool('Forklift', 'Warehouse', 1.2, 25000, 0, [], 6, ['crushing', 'fermentation', 'Building & Maintenance'], 'task', true),  // Used forklift
         new Tool('Pallet Jack', 'Warehouse', 1.1, 3500, 0, [], 3, ['crushing', 'fermentation', 'Building & Maintenance'], 'individual', true),
-        new Tool('Macro Bin', 'Warehouse', 1.05, 2500, 1000, ['Grapes'], 2, ['harvesting'], 'individual', false),
+        new Tool('Macro Bin', 'Warehouse', 1.0, 2500, 1000, ['Grapes'], 2, ['harvesting'], 'individual', false),
         new Tool('Grape Gondola', 'Warehouse', 1.0, 15000, 8000, ['Grapes'], 8, ['harvesting'], 'task', false),
 
         // Winery Tools - some not assignable
@@ -262,10 +262,10 @@ const ToolManager = (() => {
         new Tool('Crusher-Destemmer', 'Winery', 3.0, 45000, 0, ['Grapes'], 4, ['crushing'], 'task', false),
         new Tool('Pneumatic Press', 'Winery', 1.4, 85000, 0, ['Grapes'], 5, ['pressing'], 'task', false),
         new Tool('Advanced Press', 'Winery', 1.5, 175000, 0, ['Grapes'], 6, ['pressing'], 'task', false),
-        new Tool('Plastic Fermentation Bin', 'Winery', 1.0, 12000, 1000, ['Must'], 3, ['fermentation'], 'task', false),
+        new Tool('Plastic Fermentation Bin', 'Winery', 0.9, 12000, 1000, ['Must'], 3, ['fermentation'], 'task', false),
         new Tool('Stainless Steel Tank', 'Winery', 1.2, 35000, 2000, ['Must'], 5, ['fermentation'], 'task', false),
         new Tool('Concrete Tank', 'Winery', 1.3, 65000, 3000, ['Must'], 8, ['fermentation'], 'task', false),
-        new Tool('Oak Fermentation Barrel', 'Winery', 1.4, 95000, 500, ['Must'], 2, ['fermentation'], 'task', false),
+        new Tool('Oak Fermentation Barrel', 'Winery', 1.5, 95000, 500, ['Must'], 2, ['fermentation'], 'task', false),
 
         // Office Tools
         new Tool('Desk', 'Office', 1.1, 1200, 0, [], 1, ['administration'], 'individual', true),  // Commercial office desk
