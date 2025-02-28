@@ -1,9 +1,8 @@
 import { balanceCalculator, archetypes } from '../utils/balanceCalculator.js';
 
-// Test Cases
-console.log("=== Balance Calculator Test Suite ===");
+console.log("=== Balance Calculator Test Suite ===\n");
 
-// Test 1: Perfect Sweet Wine
+// Test 1: Perfect Sweet Wine (Archetype Test)
 const perfectSweet = {
     sweetness: 0.95,
     acidity: 0.9,
@@ -13,141 +12,143 @@ const perfectSweet = {
     spice: 0.7
 };
 console.log("Test 1 - Perfect Sweet Wine:", 
-    balanceCalculator(perfectSweet, archetypes.sweetWine), "Expected: archetype~99% dynamic 95%");
+    balanceCalculator(perfectSweet, archetypes.sweetWine),
+    "Expected: ~99%");
 
-// Test 2: Rejected Sweet Wine (Too Low Acidity)
-const rejectedSweet = {
-    sweetness: 0.9,
-    acidity: 0.4,
-    tannins: 0.5,
-    aroma: 0.5,
-    body: 0.5,
-    spice: 0.5
+console.log("\n=== Synergy vs No-Synergy in Archetypes Test ===");
+
+// Test 2A: Bold Red with Synergy-qualifying values (but within archetype ranges)
+const boldRedWithSynergy = {
+    sweetness: 0.2,     // Within archetype range
+    acidity: 0.5,       // Within archetype range (changed from 0.75)
+    tannins: 0.75,      // Within archetype range
+    aroma: 0.5,         // Within archetype range
+    body: 0.75,         // Within archetype range
+    spice: 0.75         // Within archetype range
 };
-console.log("Test 2 - Rejected Sweet Wine:", 
-    balanceCalculator(rejectedSweet, archetypes.sweetWine), "Expected: >40%");
 
-// Test 3: Perfect Bold Red
-const perfectBold = {
-    sweetness: 0.2,     // Keep - good for bold red
-    acidity: 0.6,      // Keep - balanced with aroma
-    tannins: 0.85,     // Matches with body and spice
-    aroma: 0.5,        // Increased to better match ideal range
-    body: 0.85,        // Adjusted to match tannins
-    spice: 0.85        // Adjusted to match tannins/body
+// Test 2B: Bold Red without Synergy-qualifying values but same archetype fit
+const boldRedNoSynergy = {
+    sweetness: 0.2,     // Same archetype fit
+    acidity: 0.6,       // Different but still in archetype range
+    tannins: 0.75,      // Same archetype fit
+    aroma: 0.5,         // Same
+    body: 0.75,         // Same
+    spice: 0.75         // Same
 };
-console.log("Test 3 - Perfect Bold Red:", 
-    balanceCalculator(perfectBold, archetypes.boldRed), "Expected: ~96%");
 
-// Test 4: Unbalanced Bold Red (High Tannins with Minimal Body)
-const unbalancedBold = {
-    sweetness: 0.05,
+console.log("Test 2A - Bold Red with Synergy Values:", 
+    balanceCalculator(boldRedWithSynergy, archetypes.boldRed));
+console.log("Test 2B - Bold Red without Synergy Values:", 
+    balanceCalculator(boldRedNoSynergy, archetypes.boldRed),
+    "Expected: Test 2A and 2B should have identical scores (synergies shouldn't affect archetype scoring)");
+
+console.log("\n=== Dynamic Balance Synergy Test ===");
+
+// Test 3: Same wines but without archetype (should now show difference due to synergy)
+console.log("Test 3A - Dynamic Balance with Synergy:", 
+    balanceCalculator(boldRedWithSynergy, null));
+console.log("Test 3B - Dynamic Balance without Synergy:", 
+    balanceCalculator(boldRedNoSynergy, null),
+    "Expected: Test 3A should score higher than 3B due to synergy bonus in dynamic calculation");
+
+console.log("\n=== Synergy Bonus Tests ===");
+
+// Test 1: Perfect synergy between body and spice
+const bodySpiceSynergy = {
+    sweetness: 0.5,
     acidity: 0.5,
-    tannins: 1.0,      // Maximum tannins
-    aroma: 0.7,
-    body: 0.7,         // Minimum acceptable body
-    spice: 0.8         // Creates imbalance with tannins
-};
-console.log("Test 4 - Unbalanced Bold Red:", 
-    balanceCalculator(unbalancedBold, archetypes.boldRed), "Expected: <70%");
-
-// Test 5: Edge Case - All Zeros
-const allZeros = {
-    sweetness: 0,
-    acidity: 0,
-    tannins: 0,
-    aroma: 0,
-    body: 0,
-    spice: 0
-};
-console.log("Test 5 - All Zeros:", 
-    balanceCalculator(allZeros, archetypes.boldRed), "Expected: <40%");
-
-// Test 6: Edge Case - All Ones
-const allOnes = {
-    sweetness: 1,
-    acidity: 1,
-    tannins: 1,
-    aroma: 1,
-    body: 1,
-    spice: 1
-};
-console.log("Test 6 - All Ones:", 
-    balanceCalculator(allOnes, archetypes.boldRed), "Expected: <40%");
-
-console.log("\n=== Acidity Down Penalty Test Cases ===");
-
-// Test 7-8: Slightly Off Acidity (0.45) Comparison
-const slightAciditySpiceCase = {
-    sweetness: 0.5,
-    acidity: 0.45,   // Slightly below midpoint
     tannins: 0.5,
     aroma: 0.5,
-    body: 0.5,
-    spice: 0.25     // Out of range, will get penalty
+    body: 0.7,    // Perfect range for synergy
+    spice: 0.7    // Matching body exactly
 };
+console.log("Test 1 - Body-Spice Synergy:", 
+    balanceCalculator(bodySpiceSynergy, null), 
+    "Expected: High score with synergy bonus");
 
-const slightAcidityTanninCase = {
+// Test 2: Same wine without synergy
+const noSynergy = {
     sweetness: 0.5,
-    acidity: 0.45,   // Slightly below midpoint
-    tannins: 0.25,   // Out of range, but no special penalty
+    acidity: 0.5,
+    tannins: 0.5,
+    aroma: 0.5,
+    body: 0.5,    // No synergy range
+    spice: 0.5    // No synergy range
+};
+console.log("Test 2 - No Synergy:", 
+    balanceCalculator(noSynergy, null),
+    "Expected: Lower than Test 1");
+
+console.log("\n=== Penalty System Tests ===");
+
+// Test 3: High tannins with reduced sweetness penalty
+const highTanninLowSweet = {
+    sweetness: 0.3,   // Low sweetness
+    acidity: 0.5,
+    tannins: 0.8,     // High tannins
     aroma: 0.5,
     body: 0.5,
     spice: 0.5
 };
+console.log("Test 3 - High Tannins, Low Sweet (Compatible):", 
+    balanceCalculator(highTanninLowSweet, null),
+    "Expected: Moderate score, reduced penalties");
 
-console.log("Test 7 - Slight Acidity Down + Spice Down:", 
-    balanceCalculator(slightAciditySpiceCase, archetypes.boldRed));
-console.log("Test 8 - Slight Acidity Down + Tannin Down:", 
-    balanceCalculator(slightAcidityTanninCase, archetypes.boldRed),
-    "Expected: Test 7 should be lower than Test 8");
-
-// Test 9-10: Out of Range Acidity (0.30) Comparison
-const outRangeAciditySpiceCase = {
-    sweetness: 0.5,
-    acidity: 0.30,   // Out of acceptable range
-    tannins: 0.5,
-    aroma: 0.5,
-    body: 0.5,
-    spice: 0.25     // Out of range, will get penalty
-};
-
-const outRangeAcidityTanninCase = {
-    sweetness: 0.5,
-    acidity: 0.30,   // Out of acceptable range
-    tannins: 0.25,   // Out of range, but no special penalty
+// Test 4: High tannins with high sweetness penalty
+const highTanninHighSweet = {
+    sweetness: 0.8,   // High sweetness
+    acidity: 0.5,
+    tannins: 0.8,     // High tannins
     aroma: 0.5,
     body: 0.5,
     spice: 0.5
 };
+console.log("Test 4 - High Tannins, High Sweet (Conflict):", 
+    balanceCalculator(highTanninHighSweet, null),
+    "Expected: Much lower than Test 3");
 
-console.log("Test 9 - Out Range Acidity + Spice Down:", 
-    balanceCalculator(outRangeAciditySpiceCase, archetypes.boldRed));
-console.log("Test 10 - Out Range Acidity + Tannin Down:", 
-    balanceCalculator(outRangeAcidityTanninCase, archetypes.boldRed),
-    "Expected: Test 9 should be significantly lower than Test 10");
+console.log("\n=== Multiple Synergy Test ===");
 
-// Test 11-12: Extreme Acidity (0.10) Comparison
-const extremeAciditySpiceCase = {
-    sweetness: 0.5,
-    acidity: 0.10,   // Extremely low acidity
-    tannins: 0.5,
-    aroma: 0.5,
-    body: 0.5,
-    spice: 0.05     // Out of range, will get penalty
+// Test 5: Wine with multiple synergies
+const multiSynergy = {
+    sweetness: 0.5,    // Moderate (good for aroma balance)
+    acidity: 0.75,     // High (synergy with tannins)
+    tannins: 0.75,     // High (synergy with acidity)
+    aroma: 0.7,        // Higher than body (synergy)
+    body: 0.6,         // Good range for body-spice
+    spice: 0.65        // Close to body
 };
+console.log("Test 5 - Multiple Synergies:", 
+    balanceCalculator(multiSynergy, null),
+    "Expected: Very high score with multiple bonuses");
 
-const extremeAcidityTanninCase = {
-    sweetness: 0.5,
-    acidity: 0.10,   // Extremely low acidity
-    tannins: 0.05,   // Out of range, but no special penalty
-    aroma: 0.5,
-    body: 0.5,
-    spice: 0.5
+console.log("\n=== Archetype with Synergy Test ===");
+
+// Test 6: Bold Red that also hits synergies
+const boldRedSynergy = {
+    sweetness: 0.2,     // Good for bold red
+    acidity: 0.75,      // High (synergy with tannins)
+    tannins: 0.8,       // Perfect for bold red + synergy
+    aroma: 0.5,         // Within archetype range
+    body: 0.75,         // Good for bold red
+    spice: 0.77         // Close to body, good for bold red
 };
+console.log("Test 6 - Bold Red with Synergies:", 
+    balanceCalculator(boldRedSynergy, archetypes.boldRed),
+    "Expected: High score from both archetype and synergies");
 
-console.log("Test 11 - Extreme Acidity Down + Spice Down:", 
-    balanceCalculator(extremeAciditySpiceCase, archetypes.boldRed));
-console.log("Test 12 - Extreme Acidity Down + Tannin Down:", 
-    balanceCalculator(extremeAcidityTanninCase, archetypes.boldRed),
-    "Expected: Test 11 should be drastically lower than Test 12");
+console.log("\n=== Extreme Values Test ===");
+
+// Test 7: Extreme values with compensating relationships
+const extremeBalanced = {
+    sweetness: 0.9,    // Very high
+    acidity: 0.85,     // Balanced with sweetness
+    tannins: 0.2,      // Very low (good with high sweet)
+    aroma: 0.5,
+    body: 0.7,         // Good range
+    spice: 0.65        // Close to body
+};
+console.log("Test 7 - Extreme but Balanced Values:", 
+    balanceCalculator(extremeBalanced, null),
+    "Expected: Decent score despite extremes");

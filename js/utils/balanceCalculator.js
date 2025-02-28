@@ -21,6 +21,17 @@ const balanceAdjustments = {
             formula: (diff) => 1 + Math.pow(diff, 2)
         }
     ],
+    acidity_up: [
+        { 
+            target: "sweetness_range",
+            formula: (diff) => diff * -0.5  // Opposite of down's 0.5
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 0.67,  // Inverse of down's 1.5
+            formula: (diff) => 1 - (Math.pow(diff, 2) * 0.5)  // Reduced penalty
+        }
+    ],
     aroma_up: [
         {
             target: "body_range",
@@ -30,6 +41,17 @@ const balanceAdjustments = {
             target: "spice_penalty",
             penaltyMod: 1.3,
             formula: (diff) => 1 + Math.pow(diff, 1.2)
+        }
+    ],
+    aroma_down: [
+        {
+            target: "body_range",
+            formula: (diff) => diff * -0.3  // Opposite of up's 0.3
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 0.77,  // Inverse of up's 1.3
+            formula: (diff) => 1 - (Math.pow(diff, 1.2) * 0.5)  // Reduced penalty
         }
     ],
     body_up: [
@@ -45,6 +67,21 @@ const balanceAdjustments = {
             target: "aroma_penalty",
             penaltyMod: 1.5,
             formula: (diff) => 1 + Math.pow(diff, 1.5)
+        }
+    ],
+    body_down: [
+        { 
+            target: "spice_range",
+            formula: (diff) => diff * -0.5  // Opposite of up's 0.5
+        },
+        { 
+            target: "tannins_range",
+            formula: (diff) => diff * -0.6  // Opposite of up's 0.6
+        },
+        {
+            target: "aroma_penalty",
+            penaltyMod: 0.67,  // Inverse of up's 1.5
+            formula: (diff) => 1 - (Math.pow(diff, 1.5) * 0.5)  // Reduced penalty
         }
     ],
     sweetness_up: [
@@ -68,6 +105,24 @@ const balanceAdjustments = {
             }
         }
     ],
+    sweetness_down: [
+        { 
+            target: "acidity_range",
+            formula: (diff) => diff * -0.5  // Opposite of up's 0.5
+        },
+        {
+            target: "spice_penalty",
+            penaltyMod: 1,  // Same as up's base multiplier
+            formula: (diff) => {
+                let steps = Math.floor(diff * 10);
+                let penalty = 1;
+                for (let i = 0; i < steps; i++) {
+                    penalty *= 0.8;  // Decrease by 20% each step (opposite of up's increase)
+                }
+                return penalty;
+            }
+        }
+    ],
     tannins_up: [
         { 
             target: "body_range",
@@ -83,6 +138,21 @@ const balanceAdjustments = {
             formula: (diff) => 1 + Math.pow(diff, 2)
         }
     ],
+    tannins_down: [
+        { 
+            target: "body_range",
+            formula: (diff) => diff * -0.5  // Opposite of up's 0.5
+        },
+        { 
+            target: "aroma_range",
+            formula: (diff) => diff * -0.4  // Opposite of up's 0.4
+        },
+        {
+            target: "sweetness_penalty",
+            penaltyMod: 0.5,  // Inverse of up's 2
+            formula: (diff) => 1 - (Math.pow(diff, 2) * 0.5)  // Reduced penalty
+        }
+    ],
     spice_down: [
         {
             target: "body_penalty",
@@ -94,7 +164,49 @@ const balanceAdjustments = {
             penaltyMod: 1.5,
             formula: (diff) => 1 + Math.pow(diff, 1.3)
         }
+    ],
+    spice_up: [
+        {
+            target: "body_penalty",
+            penaltyMod: 0.5,  // Inverse of down's 2
+            formula: (diff) => 1 - (Math.pow(diff, 1.5) * 0.5)  // Reduced penalty
+        },
+        {
+            target: "aroma_penalty",
+            penaltyMod: 0.67,  // Inverse of down's 1.5
+            formula: (diff) => 1 - (Math.pow(diff, 1.3) * 0.5)  // Reduced penalty
+        }
     ]
+};
+
+// Add new constant for synergy definitions
+const synergyBonuses = {
+    acidityTannins: {
+        characteristics: ["acidity", "tannins"],
+        // Both need to be high (above 0.7) for bonus
+        condition: (wine) => wine.acidity > 0.7 && wine.tannins > 0.7,
+        // Bonus increases based on how high both values are
+        bonus: (wine) => (wine.acidity + wine.tannins - 1.4) * 0.1
+    },
+    bodySpice: {
+        characteristics: ["body", "spice"],
+        // Both need to be between 0.6-0.8 for perfect harmony
+        condition: (wine) => wine.body >= 0.6 && wine.body <= 0.8 && 
+                           wine.spice >= 0.6 && wine.spice <= 0.8,
+        // Bonus based on how close they are to each other
+        bonus: (wine) => 0.1 * (1 - Math.abs(wine.body - wine.spice))
+    },
+    aromaBalance: {
+        characteristics: ["aroma", "body", "sweetness"],
+        // Aroma should be slightly higher than body, sweetness should be moderate
+        condition: (wine) => wine.aroma > wine.body && 
+                           wine.sweetness >= 0.4 && wine.sweetness <= 0.6,
+        // Bonus for perfect ratios
+        bonus: (wine) => {
+            const aromaBodyRatio = wine.aroma / wine.body;
+            return aromaBodyRatio >= 1.1 && aromaBodyRatio <= 1.3 ? 0.15 : 0.05;
+        }
+    }
 };
 
 // archetype constants
@@ -149,24 +261,48 @@ export const archetypes = {
   };
 
 export function balanceCalculator(wine, archetype) {
-    // Calculate dynamic balance first (always applies)
-    let dynamicBalance = dynamicBalanceScore(wine, baseBalancedRanges);
+    console.group('Balance Calculation Details:');
+    
+    // Calculate synergy first since we need it for deduction calculations
+    let synergyBonus = 0;
+    for (const synergy of Object.values(synergyBonuses)) {
+        if (synergy.condition(wine)) {
+            const bonus = synergy.bonus(wine);
+            console.log('Synergy bonus (' + synergy.characteristics.join('+') + '): reducing deductions by ' + (bonus * 100).toFixed(2) + '%');
+            synergyBonus += bonus;
+        }
+    }
+    synergyBonus = Math.min(synergyBonus, 0.2);
 
-    // Calculate archetype scores if wine qualifies
-    let archetypeBalance = 0;
-    if (qualifiesForArchetype(wine, archetype)) {
+    // Calculate dynamic balance with synergy affecting deductions
+    let dynamicBalance = dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus);
+    console.log('Raw Dynamic Balance:', dynamicBalance.toFixed(4));
+    
+    let finalScore;
+    // Calculate archetype score if applicable
+    if (archetype && qualifiesForArchetype(wine, archetype)) {
         let midpointScore = distanceScore(wine, archetype);
         let groupBalance = balanceScore(wine, archetype);
-        archetypeBalance = calculateSteppedBalance((midpointScore + groupBalance) / 2);
+        let archetypeBalance = (midpointScore + groupBalance) / 2;
+        
+        console.log('\nArchetype (' + archetype.name + ') Scores:');
+        console.log('Midpoint Score:', midpointScore.toFixed(4));
+        console.log('Group Balance:', groupBalance.toFixed(4));
+        console.log('Combined Archetype Score:', archetypeBalance.toFixed(4));
+        
+        // Take best score between archetype and dynamic
+        finalScore = Math.max(archetypeBalance, dynamicBalance);
+        console.log('\nChosen Score (best of archetype/dynamic):', finalScore.toFixed(4));
+    } else {
+        finalScore = dynamicBalance;
+        console.log('\nFinal Dynamic Score:', finalScore.toFixed(4));
     }
 
-    // Apply stepped balance calculation
-    let dynamicScore = calculateSteppedBalance(dynamicBalance);
-
-    // Final score calculation - take highest score instead of weighted average
-    return qualifiesForArchetype(wine, archetype) ? 
-        Math.max(archetypeBalance, dynamicScore) : 
-        dynamicScore;
+    const steppedScore = calculateSteppedBalance(finalScore);
+    console.log('After Stepped Calculation:', steppedScore.toFixed(4));
+    
+    console.groupEnd();
+    return steppedScore;
 }
 
 function calculateSteppedBalance(score) {
@@ -266,10 +402,27 @@ function applyPenaltyAdjustments(wine) { // this has the problem that the penalt
     return penaltyMultipliers;
 }
 
-function dynamicBalanceScore(wine, baseBalancedRanges) {
+function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
+    console.group('Dynamic Balance Details:');
+    
     let adjustedRanges = applyRangeAdjustments(wine, baseBalancedRanges);
     let penaltyMultipliers = applyPenaltyAdjustments(wine);
     let totalDeduction = 0;
+    
+    console.log('\nAdjusted Ranges:');
+    for (const [char, range] of Object.entries(adjustedRanges)) {
+        const baseRange = baseBalancedRanges[char];
+        if (range[0] !== baseRange[0] || range[1] !== baseRange[1]) {
+            console.log(`${char}: [${baseRange[0].toFixed(2)}, ${baseRange[1].toFixed(2)}] → [${range[0].toFixed(2)}, ${range[1].toFixed(2)}]`);
+        }
+    }
+
+    console.log('\nPenalty Multipliers:');
+    for (const [key, value] of Object.entries(penaltyMultipliers)) {
+        if (value !== 1) {
+            console.log(`${key}: ${value.toFixed(2)}x`);
+        }
+    }
 
     for (const characteristic in wine) {
         if (!adjustedRanges[characteristic]) continue;
@@ -284,6 +437,7 @@ function dynamicBalanceScore(wine, baseBalancedRanges) {
 
         if (value >= min && value <= max) {
             insideRangeDeduction = Math.abs(value - midpoint);
+            console.log(`${characteristic}: Inside range deviation: ${insideRangeDeduction.toFixed(4)}`);
         } else {
             insideRangeDeduction = Math.abs(value < min ? min - midpoint : max - midpoint);
             
@@ -294,6 +448,7 @@ function dynamicBalanceScore(wine, baseBalancedRanges) {
                 let stepSize = Math.min(0.1, outsideDistance - (i * 0.1));
                 outOfRangeDeduction += stepSize * Math.pow(2, i + 1);
             }
+            console.log(`${characteristic}: Outside range penalty: ${outOfRangeDeduction.toFixed(4)}`);
         }
 
         let rawDeduction = insideRangeDeduction + outOfRangeDeduction;
@@ -301,18 +456,30 @@ function dynamicBalanceScore(wine, baseBalancedRanges) {
         // Apply penalties
         let penaltyKey = characteristic + "_penalty";
         let adjustmentPenalty = penaltyMultipliers[penaltyKey] || 1;
+        if (adjustmentPenalty !== 1) {
+            console.log(`${characteristic}: Penalty multiplier: ${adjustmentPenalty.toFixed(2)}x`);
+        }
         rawDeduction *= adjustmentPenalty;
+
+        // Apply synergy reduction to deductions instead of final score
+        if (synergyBonus > 0) {
+            rawDeduction *= (1 - synergyBonus); // Reduce the deduction instead of boosting final score
+            console.log(`${characteristic}: Synergy reduction: ${(synergyBonus * 100).toFixed(2)}%`);
+        }
 
         // Apply exponential decay to the deduction
         let normalizedDeduction = 1 - Math.exp(-rawDeduction);
+        console.log(`${characteristic}: Final deduction: ${normalizedDeduction.toFixed(4)}`);
         totalDeduction += normalizedDeduction;
     }
 
     let avgDeduction = totalDeduction / Object.keys(wine).length;
-    return 1 - avgDeduction;
+    let finalScore = 1 - avgDeduction;
+    console.log(`\nFinal Dynamic Score: ${finalScore.toFixed(4)}`);
+    
+    console.groupEnd();
+    return finalScore;
 }
-
-
 
 // Archtype calculations
 function distanceScore(wine, archetype) {
