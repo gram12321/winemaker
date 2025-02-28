@@ -60,21 +60,21 @@ const bodySpiceSynergy = {
     acidity: 0.5,
     tannins: 0.5,
     aroma: 0.5,
-    body: 0.7,    // Perfect range for synergy
-    spice: 0.7    // Matching body exactly
+    body: 0.7,    // Within synergy range
+    spice: 0.7    // Exactly matches body
 };
 console.log("Test 1 - Body-Spice Synergy:", 
     balanceCalculator(bodySpiceSynergy, null), 
     "Expected: High score with synergy bonus");
 
-// Test 2: Same wine without synergy
+// Test 2: Same wine but without synergy-qualifying values
 const noSynergy = {
     sweetness: 0.5,
     acidity: 0.5,
     tannins: 0.5,
     aroma: 0.5,
-    body: 0.5,    // No synergy range
-    spice: 0.5    // No synergy range
+    body: 0.5,    // Outside synergy range
+    spice: 0.4    // Not matching body
 };
 console.log("Test 2 - No Synergy:", 
     balanceCalculator(noSynergy, null),

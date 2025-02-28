@@ -376,25 +376,25 @@ function applyRangeAdjustments(wine, baseBalancedRanges) {
     return adjustedRanges;
 }
 
-function applyPenaltyAdjustments(wine) { // this has the problem that the penalty are non exponential while the basic reduction are exponential, resulting in that the penalty adjustments are not as severe as the normal reduction. Expecially for extream unbalanced wines. It still gives ekstra penalty so we leave it for now
+function applyPenaltyAdjustments(wine) {
     let penaltyMultipliers = {};
 
     for (const characteristic in wine) {
         let diff = wine[characteristic] - ((baseBalancedRanges[characteristic][0] + baseBalancedRanges[characteristic][1]) / 2);
 
-        if (diff !== 0) {
+        if (Math.abs(diff) > 0.001) { // Add small threshold to avoid floating point issues
             let adjustmentKey = characteristic + (diff > 0 ? "_up" : "_down");
             if (!balanceAdjustments[adjustmentKey]) continue;
 
             for (const adjustment of balanceAdjustments[adjustmentKey]) {
                 let target = adjustment.target;
-                if (!target.includes("_penalty")) continue; // Only adjust penalties
+                if (!target.includes("_penalty")) continue;
 
                 let penaltyMod = adjustment.penaltyMod || 1;
-                let shiftAmount = adjustment.formula(diff);
+                let shiftAmount = adjustment.formula(Math.abs(diff)); // Use absolute diff
 
                 if (!penaltyMultipliers[target]) penaltyMultipliers[target] = 1;
-                penaltyMultipliers[target] *= shiftAmount * penaltyMod; // Apply penalty multiplier
+                penaltyMultipliers[target] *= shiftAmount * penaltyMod;
             }
         }
     }
@@ -461,10 +461,12 @@ function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
         }
         rawDeduction *= adjustmentPenalty;
 
-        // Apply synergy reduction to deductions instead of final score
+        // Apply synergy reduction to deductions
         if (synergyBonus > 0) {
-            rawDeduction *= (1 - synergyBonus); // Reduce the deduction instead of boosting final score
-            console.log(`${characteristic}: Synergy reduction: ${(synergyBonus * 100).toFixed(2)}%`);
+            rawDeduction *= (1 - synergyBonus);
+            // Add more detailed logging
+            console.log(`${characteristic}: Before synergy: ${rawDeduction.toFixed(4)}`);
+            console.log(`${characteristic}: After synergy (${synergyBonus * 100}% reduction): ${(rawDeduction * (1 - synergyBonus)).toFixed(4)}`);
         }
 
         // Apply exponential decay to the deduction
