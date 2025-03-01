@@ -455,7 +455,7 @@ export const archetypes = {
     },
 
     orangeWine: {
-        name: "Orange Wine",
+        name: "Old World Dry Orange Wine",
         description: "Complex skin-contact white wine with bold character",
         requirements: {
             requiredColor: "white",
