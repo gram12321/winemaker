@@ -257,6 +257,105 @@ export const archetypes = {
         ["tannins", "body", "spice"],  // These must be similar
         ["acidity", "aroma"]  // These should not be too far apart
       ]
+    },
+
+    lightWhite: {
+        name: "Light White",
+        idealRanges: {
+            sweetness: [0.2, 0.4],   // Slightly off-dry
+            acidity: [0.6, 0.9],     // High acidity
+            tannins: [0.0, 0.2],     // Very low tannins
+            aroma: [0.6, 0.9],       // High aromatics
+            body: [0.1, 0.3],        // Light body
+            spice: [0.1, 0.3]        // Low spice
+        },
+        importance: {
+            sweetness: 0.7,
+            acidity: 1.0,
+            tannins: 0.3,
+            aroma: 0.9,
+            body: 0.8,
+            spice: 0.4
+        },
+        balanceGroups: [
+            ["acidity", "aroma"],     // High acidity should match aromatics
+            ["body", "spice"]         // Light body should match low spice
+        ]
+    },
+
+    sparklingWine: {
+        name: "Sparkling Wine",
+        idealRanges: {
+            sweetness: [0.2, 0.4],    // Low sweetness
+            acidity: [0.7, 1.0],      // Very high acidity
+            tannins: [0.0, 0.2],      // Very low tannins
+            aroma: [0.4, 0.7],        // Moderate aromatics
+            body: [0.2, 0.4],         // Light body
+            spice: [0.1, 0.3]         // Low spice
+        },
+        importance: {
+            sweetness: 0.8,
+            acidity: 1.0,             // Acidity is crucial
+            tannins: 0.3,
+            aroma: 0.7,
+            body: 0.9,                // Body balance is important
+            spice: 0.4
+        },
+        balanceGroups: [
+            ["acidity", "body"],      // Crisp acidity needs light body
+            ["sweetness", "aroma"],    // Sweetness balances aromatics
+            ["tannins", "spice"]      // Both should be minimal
+        ]
+    },
+
+    roseWine: {
+        name: "Rosé Wine",
+        idealRanges: {
+            sweetness: [0.3, 0.5],    // Moderate sweetness
+            acidity: [0.5, 0.8],      // Medium-high acidity
+            tannins: [0.2, 0.4],      // Low-medium tannins
+            aroma: [0.6, 0.9],        // High aromatics
+            body: [0.3, 0.5],         // Medium-light body
+            spice: [0.2, 0.4]         // Low-medium spice
+        },
+        importance: {
+            sweetness: 0.8,
+            acidity: 0.9,
+            tannins: 0.6,
+            aroma: 1.0,               // Aromatics are crucial
+            body: 0.7,
+            spice: 0.6
+        },
+        balanceGroups: [
+            ["sweetness", "acidity", "aroma"],  // Three-way balance
+            ["tannins", "body"],               // Light structure
+            ["spice", "body"]                  // Delicate balance
+        ]
+    },
+
+    dessertWine: {
+        name: "Dessert Wine",
+        idealRanges: {
+            sweetness: [0.8, 1.0],    // Very sweet
+            acidity: [0.6, 0.8],      // High acidity to balance sweetness
+            tannins: [0.1, 0.3],      // Low tannins
+            aroma: [0.7, 1.0],        // Very aromatic
+            body: [0.6, 0.8],         // Medium-full body
+            spice: [0.3, 0.5]         // Moderate spice
+        },
+        importance: {
+            sweetness: 1.0,
+            acidity: 0.9,
+            tannins: 0.3,
+            aroma: 0.8,
+            body: 0.7,
+            spice: 0.5
+        },
+        balanceGroups: [
+            ["sweetness", "acidity"], // Critical balance between sweet and acid
+            ["aroma", "body"],        // Aromatics should match body
+            ["spice", "tannins"]      // Keep both low-moderate
+        ]
     }
   };
 
