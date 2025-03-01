@@ -243,8 +243,8 @@ const synergyBonuses = {
 
 /**
  * @typedef {Object} WineRequirements
- * @property {string[]} [requiredGrapes] - Required grape varieties
- * @property {string[]} [forbiddenGrapes] - Forbidden grape varieties
+ * @property {string[]} [requiredGrapes] - Specific required grape varieties
+ * @property {string} [requiredColor] - Required grape color ('red' or 'white')
  * @property {number} [minimumQuality] - Minimum quality required (0-1)
  * @property {number} [minimumVintage] - Minimum vintage year required
  * @property {number} [minimumPrestige] - Minimum field prestige required
@@ -254,9 +254,10 @@ const synergyBonuses = {
 
 export const archetypes = {
     sweetWine: {
-        name: "Sweet Wine",
-        description: "Rich, sweet wine with high acidity for balance",
+        name: "Sweet White Wine",
+        description: "Rich, sweet white wine with high acidity for balance",
         requirements: {
+            requiredColor: "white",
             minimumQuality: 0.6,
             oxidationRange: [0, 0.1],
             ripenessRange: [0.7, 1.0]
@@ -289,6 +290,7 @@ export const archetypes = {
         name: "Bold Red",
         description: "Full-bodied red wine with high tannins",
         requirements: {
+            requiredColor: "red",
             minimumQuality: 0.7,
             minimumPrestige: 0.6,
             forbiddenGrapes: ["Chardonnay", "Sauvignon Blanc"]
@@ -321,6 +323,7 @@ export const archetypes = {
         name: "High Quality Light White",
         description: "Crisp, light-bodied white wine",
         requirements: {
+            requiredColor: "white",
             requiredGrapes: ["Chardonnay", "Sauvignon Blanc"],
             minimumQuality: 0.6,
             oxidationRange: [0, 0.2],
@@ -386,6 +389,7 @@ export const archetypes = {
         name: "Rosé Wine",
         description: "Light, fresh wine with delicate aromatics",
         requirements: {
+            requiredColor: "red",
             minimumQuality: 0.65,
             oxidationRange: [0, 0.2],
             ripenessRange: [0.7, 0.9],
@@ -421,7 +425,6 @@ export const archetypes = {
         description: "Traditional Chardonnay with balanced oak influence",
         requirements: {
             requiredGrapes: ["Chardonnay"],
-            forbiddenGrapes: ["Sauvignon Blanc", "Primitivo"],
             minimumQuality: 0.7,
             minimumPrestige: 0.5,
             oxidationRange: [0, 0.3],
@@ -449,6 +452,39 @@ export const archetypes = {
             ["acidity", "sweetness"],
             ["body", "aroma"]
         ]
+    },
+
+    orangeWine: {
+        name: "Orange Wine",
+        description: "Complex skin-contact white wine with bold character",
+        requirements: {
+            requiredColor: "white",
+            minimumQuality: 0.7,
+            oxidationRange: [0, 0.4],
+            ripenessRange: [0.8, 1.0]
+        },
+        characteristics: {
+            idealRanges: {
+                sweetness: [0.0, 0.3],
+                acidity: [0.7, 1.0],
+                tannins: [0.6, 0.9],
+                aroma: [0.6, 0.9],
+                body: [0.5, 0.8],
+                spice: [0.5, 0.8]
+            },
+            importance: {
+                sweetness: 0.8,
+                acidity: 1.0,
+                tannins: 1.0,
+                aroma: 0.9,
+                body: 0.7,
+                spice: 0.7
+            }
+        },
+        balanceGroups: [
+            ["tannins", "acidity"],
+            ["spice", "body"]
+        ]
     }
 };
 
@@ -457,9 +493,11 @@ function qualifiesForArchetype(wine, archetype) {
     if (!wine || !archetype.requirements) return true;
     const reqs = archetype.requirements;
 
-    // Check grape requirements
+    // Check grape requirements (specific varieties)
     if (reqs.requiredGrapes && !reqs.requiredGrapes.includes(wine.resource.name)) return false;
-    if (reqs.forbiddenGrapes && reqs.forbiddenGrapes.includes(wine.resource.name)) return false;
+
+    // Check grape color requirement
+    if (reqs.requiredColor && wine.resource.grapeColor !== reqs.requiredColor) return false;
 
     // Check quality requirement
     if (reqs.minimumQuality && wine.quality < reqs.minimumQuality) return false;
