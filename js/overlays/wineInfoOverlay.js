@@ -1,7 +1,7 @@
 import { showModalOverlay } from './overlayUtils.js';
 import { createTextCenter } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
-import { archetypes, balanceCalculator, calculateNearestArchetype } from '../utils/balanceCalculator.js';
+import { balanceCalculator, calculateNearestArchetype } from '../utils/balanceCalculator.js';
 
 export function showWineInfoOverlay(wineItem) {
     const overlayContainer = showModalOverlay('wineInfoOverlay', createWineInfoOverlayHTML(wineItem));

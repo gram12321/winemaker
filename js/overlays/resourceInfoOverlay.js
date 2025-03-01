@@ -1,8 +1,8 @@
 import { getResourceByName } from '../resource.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { grapeSuitability } from '../names.js';
-import { hideOverlay, showModalOverlay } from './overlayUtils.js';
-import { createTable, createTextCenter } from '../components/createOverlayHTML.js';
+import { showModalOverlay } from './overlayUtils.js';
+import { createTextCenter } from '../components/createOverlayHTML.js';
 
 export function showResourceInfoOverlay(resourceName) {
   const resource = getResourceByName(resourceName);
