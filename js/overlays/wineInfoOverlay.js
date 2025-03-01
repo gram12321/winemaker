@@ -1,7 +1,7 @@
 import { showModalOverlay } from './overlayUtils.js';
 import { createTextCenter } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
-import { balanceCalculator, calculateNearestArchetype } from '../utils/balanceCalculator.js';
+import { balanceCalculator, calculateNearestArchetype, baseBalancedRanges } from '../utils/balanceCalculator.js';
 
 export function showWineInfoOverlay(wineItem) {
     const overlayContainer = showModalOverlay('wineInfoOverlay', createWineInfoOverlayHTML(wineItem));
@@ -78,19 +78,18 @@ function createWineInfoOverlayHTML(wine) {
                         spice: wine.spice,
                         sweetness: wine.sweetness,
                         tannins: wine.tannins
-                    }).sort(([a], [b]) => a.localeCompare(b)).map(([trait, value]) => {
-                        const colorClass = getColorClass(value);
-                        return `
-                            <tr>
-                                <td>
-                                    <img src="/assets/icon/small/${trait}.png" 
-                                         alt="${trait}" 
-                                         class="characteristic-icon">
-                                    ${trait.charAt(0).toUpperCase() + trait.slice(1)}
-                                </td>
-                                <td class="${colorClass}">${(value * 100).toFixed(0)}%</td>
-                            </tr>`;
-                    }).join('')}
+                    }).sort(([a], [b]) => a.localeCompare(b)).map(([trait, value]) => `
+                        <tr>
+                            <td>
+                                <img src="/assets/icon/small/${trait}.png" 
+                                     alt="${trait}" 
+                                     class="characteristic-icon">
+                                ${trait.charAt(0).toUpperCase() + trait.slice(1)}
+                            </td>
+                            <td class="characteristic-bar-cell">
+                                ${createCharacteristicBar(trait, value)}
+                            </td>
+                        </tr>`).join('')}
                 </tbody>
             </table>
         </div>`;
@@ -109,6 +108,26 @@ function createWineInfoOverlayHTML(wine) {
             <div class="info-grid">
                 ${baseInfoSection}
                 ${characteristicsSection}
+            </div>
+        </div>`;
+}
+
+function createCharacteristicBar(trait, value) {
+    // Get the balanced range for this trait from balanceCalculator.js
+    const [minBalance, maxBalance] = baseBalancedRanges[trait];
+    
+    return `
+        <div class="characteristic-bar-container">
+            <div class="characteristic-bar">
+                <!-- Background bar -->
+                <div class="bar-background"></div>
+                <!-- Green zone for balanced range -->
+                <div class="balanced-range" style="left: ${minBalance * 100}%; width: ${(maxBalance - minBalance) * 100}%"></div>
+                <!-- Value marker -->
+                <div class="value-marker" style="left: ${value * 100}%"></div>
+            </div>
+            <div class="bar-labels">
+                <span class="value-label" style="left: ${value * 100}%">${(value * 100).toFixed(0)}%</span>
             </div>
         </div>`;
 }

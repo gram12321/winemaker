@@ -1,6 +1,6 @@
 //Constants
 
-const baseBalancedRanges = {
+export const baseBalancedRanges = {
     acidity: [0.4, 0.6],
     aroma: [0.3, 0.7],
     body: [0.4, 0.8],
