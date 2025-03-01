@@ -44,13 +44,14 @@ const grapeCharacteristics = {
 };
 
 export class Resource {
-    constructor(name, naturalYield, fragile, proneToOxidation) {
-        this.name = name;
-        this.naturalYield = naturalYield;
-        this.fragile = fragile;
-        this.proneToOxidation = proneToOxidation;
-        this.wineCharacteristics = grapeCharacteristics[name];
-    }
+  constructor(name, naturalYield, fragile, proneToOxidation, grapeColor) {
+    this.name = name;
+    this.naturalYield = naturalYield;
+    this.fragile = fragile;
+    this.proneToOxidation = proneToOxidation;
+    this.grapeColor = grapeColor;
+    this.wineCharacteristics = grapeCharacteristics[name];
+  }
 }
 
 export class InventoryItem {
@@ -217,12 +218,12 @@ export class Inventory {
 
 export const inventoryInstance = new Inventory();
 
-export const allResources = [ // Resource(name, naturalYield, fragile, proneToOxidation)
-  new Resource('Barbera', 1, 1, 0.4),      // Moderately resistant to oxidation
-  new Resource('Chardonnay', 0.9, 1, 0.7), // Highly prone to oxidation
-  new Resource('Pinot Noir', 0.7, 0.4, 0.8), // Very prone to oxidation
-  new Resource('Primitivo', 0.85, 0.8, 0.3),  // More resistant to oxidation
-  new Resource('Sauvignon Blanc', 0.95, 0.9, 0.9) // Extremely prone to oxidation
+export const allResources = [ // Resource(name, naturalYield, fragile, proneToOxidation, grapeColor)
+  new Resource('Barbera', 1, 1, 0.4, 'red'),      // Moderately resistant to oxidation
+  new Resource('Chardonnay', 0.9, 1, 0.7, 'white'), // Highly prone to oxidation
+  new Resource('Pinot Noir', 0.7, 0.4, 0.8, 'red'), // Very prone to oxidation
+  new Resource('Primitivo', 0.85, 0.8, 0.3, 'red'),  // More resistant to oxidation
+  new Resource('Sauvignon Blanc', 0.95, 0.9, 0.9, 'white') // Extremely prone to oxidation
 ];
 
 export function getResourceByName(name) {

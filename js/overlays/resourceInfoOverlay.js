@@ -3,6 +3,7 @@ import { formatNumber, getColorClass } from '../utils.js';
 import { grapeSuitability } from '../names.js';
 import { showModalOverlay } from './overlayUtils.js';
 import { createTextCenter } from '../components/createOverlayHTML.js';
+import { baseBalancedRanges } from '../utils/balanceCalculator.js';
 
 export function showResourceInfoOverlay(resourceName) {
   const resource = getResourceByName(resourceName);
@@ -29,26 +30,46 @@ function createResourceInfoOverlayHTML(resource) {
       <table class="data-table">
         <tbody>
           <tr><td>Name</td><td>${resource.name}</td></tr>
+          <tr><td>Grape Color</td><td style="text-transform: capitalize">${resource.grapeColor}</td></tr>
           <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
           <tr><td>Grape Fragile</td><td class="${fragileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
         </tbody>
       </table>
     </div>`;
 
-  // Create characteristics section
+  // Update characteristics section with base balanced ranges
   const characteristicsSection = `
     <div class="info-section">
-      ${createTextCenter({ text: '<h4>Wine Characteristics</h4>' })}
+      ${createTextCenter({ text: '<h4>Grape Characteristics</h4>' })}
       <table class="data-table">
         <tbody>
           ${Object.entries(resource.wineCharacteristics)
+            .sort(([a], [b]) => a.localeCompare(b))
             .map(([trait, value]) => {
               const displayValue = 0.5 + value;
-              const colorClass = getColorClass(displayValue);
+              const [minBalance, maxBalance] = baseBalancedRanges[trait];
               return `
                 <tr>
-                  <td>${trait.charAt(0).toUpperCase() + trait.slice(1)}</td>
-                  <td class="${colorClass}">${(displayValue * 100).toFixed(0)}%</td>
+                  <td>
+                    <img src="/assets/icon/small/${trait}.png" 
+                         alt="${trait}" 
+                         class="characteristic-icon">
+                    ${trait.charAt(0).toUpperCase() + trait.slice(1)}
+                  </td>
+                  <td class="characteristic-bar-cell">
+                    <div class="characteristic-bar-container">
+                      <div class="characteristic-bar">
+                        <div class="bar-background"></div>
+                        <div class="balanced-range" style="left: ${minBalance * 100}%; width: ${(maxBalance - minBalance) * 100}%"></div>
+                        <div class="value-marker" style="left: ${displayValue * 100}%"></div>
+                      </div>
+                      <div class="bar-labels">
+                        <span class="value-label" style="left: ${displayValue * 100}%">
+                          ${(displayValue * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                  </td>
                 </tr>`;
             }).join('')}
         </tbody>
