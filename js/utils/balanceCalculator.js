@@ -210,179 +210,285 @@ const synergyBonuses = {
 };
 
 // archetype constants
+/**
+ * @typedef {Object} RegionalRequirements
+ * @property {string} [country] - Required country of origin
+ * @property {string[]} [regions] - Allowed regions
+ * @property {string[]} [terrainTypes] - Required terrain types
+ * @property {string[]} [soilTypes] - Required soil types
+ */
+
+/**
+ * @typedef {Object} ProcessingRequirements
+ * @property {number} [minAgingMonths] - Minimum aging time in months
+ * @property {string[]} [barrelTypes] - Required barrel types
+ * @property {string[]} [fermentationTypes] - Required fermentation methods
+ */
+
+/**
+ * @typedef {Object} CharacteristicRanges
+ * @property {Object.<string, number[]>} idealRanges - Min/max for each characteristic
+ * @property {Object.<string, number>} importance - Importance weight of each characteristic
+ */
+
+/**
+ * @typedef {Object} IWineArchetype
+ * @property {string} name - Name of the archetype
+ * @property {string} description - Description of the wine style
+ * @property {RegionalRequirements} [regionalReqs] - Region-related requirements
+ * @property {ProcessingRequirements} [processingReqs] - Production-related requirements
+ * @property {CharacteristicRanges} characteristics - Characteristic ranges and importance
+ * @property {string[][]} balanceGroups - Groups of characteristics that should be balanced
+ */
+
+/**
+ * @typedef {Object} WineRequirements
+ * @property {string[]} [requiredGrapes] - Required grape varieties
+ * @property {string[]} [forbiddenGrapes] - Forbidden grape varieties
+ * @property {number} [minimumQuality] - Minimum quality required (0-1)
+ * @property {number} [minimumVintage] - Minimum vintage year required
+ * @property {number} [minimumPrestige] - Minimum field prestige required
+ * @property {[number, number]} [oxidationRange] - [min, max] allowed oxidation (0-1)
+ * @property {[number, number]} [ripenessRange] - [min, max] required ripeness (0-1)
+ */
+
 export const archetypes = {
     sweetWine: {
-      name: "Sweet Wine",
-      idealRanges: {
-        sweetness: [0.8, 1.0],  
-        acidity: [0.8, 1.0],    
-        tannins: [0.3, 0.7],  
-        aroma: [0.3, 0.7],     
-        body: [0.3, 0.7],       
-        spice: [0.3, 0.7]       
-      },
-      importance: { 
-        sweetness: 1.0, 
-        acidity: 1.0,
-        tannins: 0.5,
-        aroma: 0.5,
-        body: 0.5,
-        spice: 0.5
-      },
-      balanceGroups: [
-        ["sweetness", "acidity"],  // These must be in balance
-        ["tannins", "aroma", "body", "spice"]  // These should be similar
-      ]
+        name: "Sweet Wine",
+        description: "Rich, sweet wine with high acidity for balance",
+        requirements: {
+            minimumQuality: 0.6,
+            oxidationRange: [0, 0.1],
+            ripenessRange: [0.7, 1.0]
+        },
+        characteristics: {
+            idealRanges: {
+                sweetness: [0.8, 1.0],
+                acidity: [0.8, 1.0],
+                tannins: [0.3, 0.7],
+                aroma: [0.3, 0.7],
+                body: [0.3, 0.7],
+                spice: [0.3, 0.7]
+            },
+            importance: {
+                sweetness: 1.0,
+                acidity: 1.0,
+                tannins: 0.5,
+                aroma: 0.5,
+                body: 0.5,
+                spice: 0.5
+            }
+        },
+        balanceGroups: [
+            ["sweetness", "acidity"],
+            ["tannins", "aroma", "body", "spice"]
+        ]
     },
-  
+
     boldRed: {
-      name: "Bold Red",
-      idealRanges: {
-        sweetness: [0.0, 0.4],  
-        acidity: [0.3, 0.7],    
-        tannins: [0.7, 1.0],  
-        aroma: [0.3, 0.7],     // Need to match with acidity
-        body: [0.7, 1.0],       
-        spice: [0.7, 1.0]       
-      },
-      importance: { 
-        sweetness: 0.5, 
-        acidity: 0.8,
-        tannins: 1.0,
-        aroma: 0.7,
-        body: 1.0,
-        spice: 0.7
-      },
-      balanceGroups: [
-        ["tannins", "body", "spice"],  // These must be similar
-        ["acidity", "aroma"]  // These should not be too far apart
-      ]
+        name: "Bold Red",
+        description: "Full-bodied red wine with high tannins",
+        requirements: {
+            minimumQuality: 0.7,
+            minimumPrestige: 0.6,
+            forbiddenGrapes: ["Chardonnay", "Sauvignon Blanc"]
+        },
+        characteristics: {
+            idealRanges: {
+                sweetness: [0.0, 0.4],
+                acidity: [0.3, 0.7],
+                tannins: [0.7, 1.0],
+                aroma: [0.3, 0.7],
+                body: [0.7, 1.0],
+                spice: [0.7, 1.0]
+            },
+            importance: {
+                sweetness: 0.5,
+                acidity: 0.8,
+                tannins: 1.0,
+                aroma: 0.7,
+                body: 1.0,
+                spice: 0.7
+            }
+        },
+        balanceGroups: [
+            ["tannins", "body", "spice"],
+            ["acidity", "aroma"]
+        ]
     },
 
     lightWhite: {
-        name: "Light White",
-        idealRanges: {
-            sweetness: [0.2, 0.4],   // Slightly off-dry
-            acidity: [0.6, 0.9],     // High acidity
-            tannins: [0.0, 0.2],     // Very low tannins
-            aroma: [0.6, 0.9],       // High aromatics
-            body: [0.1, 0.3],        // Light body
-            spice: [0.1, 0.3]        // Low spice
+        name: "High Quality Light White",
+        description: "Crisp, light-bodied white wine",
+        requirements: {
+            requiredGrapes: ["Chardonnay", "Sauvignon Blanc"],
+            minimumQuality: 0.6,
+            oxidationRange: [0, 0.2],
+            ripenessRange: [0.8, 1.0]
         },
-        importance: {
-            sweetness: 0.7,
-            acidity: 1.0,
-            tannins: 0.3,
-            aroma: 0.9,
-            body: 0.8,
-            spice: 0.4
+        characteristics: {
+            idealRanges: {
+                sweetness: [0.2, 0.4],
+                acidity: [0.6, 0.9],
+                tannins: [0.0, 0.2],
+                aroma: [0.6, 0.9],
+                body: [0.1, 0.3],
+                spice: [0.1, 0.3]
+            },
+            importance: {
+                sweetness: 0.7,
+                acidity: 1.0,
+                tannins: 0.3,
+                aroma: 0.9,
+                body: 0.8,
+                spice: 0.4
+            }
         },
         balanceGroups: [
-            ["acidity", "aroma"],     // High acidity should match aromatics
-            ["body", "spice"]         // Light body should match low spice
+            ["acidity", "aroma"],
+            ["body", "spice"]
         ]
     },
 
     sparklingWine: {
-        name: "Sparkling Wine",
-        idealRanges: {
-            sweetness: [0.2, 0.4],    // Low sweetness
-            acidity: [0.7, 1.0],      // Very high acidity
-            tannins: [0.0, 0.2],      // Very low tannins
-            aroma: [0.4, 0.7],        // Moderate aromatics
-            body: [0.2, 0.4],         // Light body
-            spice: [0.1, 0.3]         // Low spice
+        name: "Brut Sparkling Wine",
+        description: "Crisp, effervescent wine with high acidity",
+        requirements: {
+            oxidationRange: [0, 0.15],  // Very sensitive to oxidation
         },
-        importance: {
-            sweetness: 0.8,
-            acidity: 1.0,             // Acidity is crucial
-            tannins: 0.3,
-            aroma: 0.7,
-            body: 0.9,                // Body balance is important
-            spice: 0.4
+        characteristics: {
+            idealRanges: {
+                sweetness: [0.0, 0.3
+                ],
+                acidity: [0.7, 1.0],
+                tannins: [0.0, 0.2],
+                aroma: [0.4, 0.7],
+                body: [0.2, 0.4],
+                spice: [0.1, 0.3]
+            },
+            importance: {
+                sweetness: 0.8,
+                acidity: 1.0,
+                tannins: 0.3,
+                aroma: 0.7,
+                body: 0.9,
+                spice: 0.4
+            }
         },
         balanceGroups: [
-            ["acidity", "body"],      // Crisp acidity needs light body
-            ["sweetness", "aroma"],    // Sweetness balances aromatics
-            ["tannins", "spice"]      // Both should be minimal
+            ["acidity", "body"],
+            ["sweetness", "aroma"],
+            ["tannins", "spice"]
         ]
     },
 
     roseWine: {
         name: "Rosé Wine",
-        idealRanges: {
-            sweetness: [0.3, 0.5],    // Moderate sweetness
-            acidity: [0.5, 0.8],      // Medium-high acidity
-            tannins: [0.2, 0.4],      // Low-medium tannins
-            aroma: [0.6, 0.9],        // High aromatics
-            body: [0.3, 0.5],         // Medium-light body
-            spice: [0.2, 0.4]         // Low-medium spice
+        description: "Light, fresh wine with delicate aromatics",
+        requirements: {
+            minimumQuality: 0.65,
+            oxidationRange: [0, 0.2],
+            ripenessRange: [0.7, 0.9],
+            minimumPrestige: 0.4
         },
-        importance: {
-            sweetness: 0.8,
-            acidity: 0.9,
-            tannins: 0.6,
-            aroma: 1.0,               // Aromatics are crucial
-            body: 0.7,
-            spice: 0.6
-        },
-        balanceGroups: [
-            ["sweetness", "acidity", "aroma"],  // Three-way balance
-            ["tannins", "body"],               // Light structure
-            ["spice", "body"]                  // Delicate balance
-        ]
-    },
-
-    dessertWine: {
-        name: "Dessert Wine",
-        idealRanges: {
-            sweetness: [0.8, 1.0],    // Very sweet
-            acidity: [0.6, 0.8],      // High acidity to balance sweetness
-            tannins: [0.1, 0.3],      // Low tannins
-            aroma: [0.7, 1.0],        // Very aromatic
-            body: [0.6, 0.8],         // Medium-full body
-            spice: [0.3, 0.5]         // Moderate spice
-        },
-        importance: {
-            sweetness: 1.0,
-            acidity: 0.9,
-            tannins: 0.3,
-            aroma: 0.8,
-            body: 0.7,
-            spice: 0.5
+        characteristics: {
+            idealRanges: {
+                sweetness: [0.3, 0.5],
+                acidity: [0.5, 0.8],
+                tannins: [0.2, 0.4],
+                aroma: [0.6, 0.9],
+                body: [0.3, 0.5],
+                spice: [0.2, 0.4]
+            },
+            importance: {
+                sweetness: 0.8,
+                acidity: 0.9,
+                tannins: 0.6,
+                aroma: 1.0,
+                body: 0.7,
+                spice: 0.6
+            }
         },
         balanceGroups: [
-            ["sweetness", "acidity"], // Critical balance between sweet and acid
-            ["aroma", "body"],        // Aromatics should match body
-            ["spice", "tannins"]      // Keep both low-moderate
+            ["sweetness", "acidity", "aroma"],
+            ["tannins", "body"],
+            ["spice", "body"]
         ]
     },
 
     classicChardonnay: {
         name: "Classic Chardonnay",
-        requiredGrape: "Chardonnay",  // New property for grape requirement
-        idealRanges: {
-            sweetness: [0.3, 0.5],
-            acidity: [0.5, 0.7],
-            tannins: [0.0, 0.2],
-            aroma: [0.6, 0.9],
-            body: [0.4, 0.6],
-            spice: [0.2, 0.4]
+        description: "Traditional Chardonnay with balanced oak influence",
+        requirements: {
+            requiredGrapes: ["Chardonnay"],
+            forbiddenGrapes: ["Sauvignon Blanc", "Primitivo"],
+            minimumQuality: 0.7,
+            minimumPrestige: 0.5,
+            oxidationRange: [0, 0.3],
+            ripenessRange: [0.8, 1.0]
         },
-        importance: {
-            sweetness: 0.7,
-            acidity: 0.8,
-            tannins: 0.3,
-            aroma: 1.0,
-            body: 0.8,
-            spice: 0.5
+        characteristics: {
+            idealRanges: {
+                sweetness: [0.3, 0.5],
+                acidity: [0.5, 0.7],
+                tannins: [0.0, 0.2],
+                aroma: [0.6, 0.9],
+                body: [0.4, 0.6],
+                spice: [0.2, 0.4]
+            },
+            importance: {
+                sweetness: 0.7,
+                acidity: 0.8,
+                tannins: 0.3,
+                aroma: 1.0,
+                body: 0.8,
+                spice: 0.5
+            }
         },
         balanceGroups: [
             ["acidity", "sweetness"],
             ["body", "aroma"]
         ]
     }
-  };
+};
+
+// Update qualifiesForArchetype function to handle new requirement structure
+function qualifiesForArchetype(wine, archetype) {
+    if (!wine || !archetype.requirements) return true;
+    const reqs = archetype.requirements;
+
+    // Check grape requirements
+    if (reqs.requiredGrapes && !reqs.requiredGrapes.includes(wine.resource.name)) return false;
+    if (reqs.forbiddenGrapes && reqs.forbiddenGrapes.includes(wine.resource.name)) return false;
+
+    // Check quality requirement
+    if (reqs.minimumQuality && wine.quality < reqs.minimumQuality) return false;
+
+    // Check vintage requirement
+    if (reqs.minimumVintage && wine.vintage < reqs.minimumVintage) return false;
+
+    // Check field prestige
+    if (reqs.minimumPrestige && wine.fieldPrestige < reqs.minimumPrestige) return false;
+
+    // Check oxidation range
+    if (reqs.oxidationRange) {
+        const [minOx, maxOx] = reqs.oxidationRange;
+        if (wine.oxidation < minOx || wine.oxidation > maxOx) return false;
+    }
+
+    // Check ripeness range
+    if (reqs.ripenessRange) {
+        const [minRipe, maxRipe] = reqs.ripenessRange;
+        if (wine.ripeness < minRipe || wine.ripeness > maxRipe) return false;
+    }
+
+    // Check characteristic ranges
+    for (const [trait, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
+        if (wine[trait] < min || wine[trait] > max) return false;
+    }
+
+    return true;
+}
 
 export function balanceCalculator(wine, archetype) {
     console.group('Balance Calculation Details:');
@@ -658,36 +764,21 @@ function balanceScore(wine, archetype) {
     return totalWeight > 0 ? totalScore / totalWeight : 0; // Normalize
 }
 
-function qualifiesForArchetype(wine, archetype) {
-    // Check grape requirement if specified
-    if (archetype.requiredGrape && wine.resource?.name !== archetype.requiredGrape) {
-        return false;
-    }
-
-    // Check characteristic ranges as before
-    for (const characteristic in archetype.idealRanges) {
-        const [min, max] = archetype.idealRanges[characteristic];
-        if (wine[characteristic] < min || wine[characteristic] > max) {
-            return false; // Reject immediately
-        }
-    }
-    return true;
-}
-
-  function calculateNearestArchetype(wine) {
+function calculateNearestArchetype(wine) {
     let bestDistance = Infinity;
     let nearestArchetype = null;
 
     for (const [key, archetype] of Object.entries(archetypes)) {
-        // Skip if grape requirement doesn't match
-        if (archetype.requiredGrape && wine.resource?.name !== archetype.requiredGrape) {
+        // Skip if required grapes don't match
+        if (archetype.requirements?.requiredGrapes && 
+            !archetype.requirements.requiredGrapes.includes(wine.resource?.name)) {
             continue;
         }
 
         let totalDistance = 0;
         
-        // Calculate total distance from ideal ranges for each characteristic
-        for (const [characteristic, range] of Object.entries(archetype.idealRanges)) {
+        // Access idealRanges through characteristics property
+        for (const [characteristic, range] of Object.entries(archetype.characteristics.idealRanges)) {
             const value = wine[characteristic];
             const [min, max] = range;
             
