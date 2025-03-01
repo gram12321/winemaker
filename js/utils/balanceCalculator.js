@@ -292,8 +292,7 @@ export const archetypes = {
         requirements: {
             requiredColor: "red",
             minimumQuality: 0.7,
-            minimumPrestige: 0.6,
-            forbiddenGrapes: ["Chardonnay", "Sauvignon Blanc"]
+            minimumPrestige: 0.6
         },
         characteristics: {
             idealRanges: {
@@ -324,8 +323,7 @@ export const archetypes = {
         description: "Crisp, light-bodied white wine",
         requirements: {
             requiredColor: "white",
-            requiredGrapes: ["Chardonnay", "Sauvignon Blanc"],
-            minimumQuality: 0.6,
+            minimumQuality: 0.8,
             oxidationRange: [0, 0.2],
             ripenessRange: [0.8, 1.0]
         },
