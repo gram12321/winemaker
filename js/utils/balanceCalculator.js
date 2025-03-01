@@ -356,6 +356,31 @@ export const archetypes = {
             ["aroma", "body"],        // Aromatics should match body
             ["spice", "tannins"]      // Keep both low-moderate
         ]
+    },
+
+    classicChardonnay: {
+        name: "Classic Chardonnay",
+        requiredGrape: "Chardonnay",  // New property for grape requirement
+        idealRanges: {
+            sweetness: [0.3, 0.5],
+            acidity: [0.5, 0.7],
+            tannins: [0.0, 0.2],
+            aroma: [0.6, 0.9],
+            body: [0.4, 0.6],
+            spice: [0.2, 0.4]
+        },
+        importance: {
+            sweetness: 0.7,
+            acidity: 0.8,
+            tannins: 0.3,
+            aroma: 1.0,
+            body: 0.8,
+            spice: 0.5
+        },
+        balanceGroups: [
+            ["acidity", "sweetness"],
+            ["body", "aroma"]
+        ]
     }
   };
 
@@ -634,6 +659,12 @@ function balanceScore(wine, archetype) {
 }
 
 function qualifiesForArchetype(wine, archetype) {
+    // Check grape requirement if specified
+    if (archetype.requiredGrape && wine.resource?.name !== archetype.requiredGrape) {
+        return false;
+    }
+
+    // Check characteristic ranges as before
     for (const characteristic in archetype.idealRanges) {
         const [min, max] = archetype.idealRanges[characteristic];
         if (wine[characteristic] < min || wine[characteristic] > max) {
@@ -648,6 +679,11 @@ function qualifiesForArchetype(wine, archetype) {
     let nearestArchetype = null;
 
     for (const [key, archetype] of Object.entries(archetypes)) {
+        // Skip if grape requirement doesn't match
+        if (archetype.requiredGrape && wine.resource?.name !== archetype.requiredGrape) {
+            continue;
+        }
+
         let totalDistance = 0;
         
         // Calculate total distance from ideal ranges for each characteristic
