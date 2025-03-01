@@ -98,7 +98,7 @@ function createWineInfoOverlayHTML(wine) {
         <div class="overlay-card">
             <div class="imgbox">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">${wine.resource.name} (${wine.vintage})</h3>
+                    <h3 class="h5 mb-0">${wine.fieldName}, ${wine.resource.name} (${wine.vintage})</h3>
                     <button class="btn btn-light btn-sm close-btn">Close</button>
                 </div>
                 <img src="/assets/icon/grape/icon_${wine.resource.name.toLowerCase()}.webp" 
