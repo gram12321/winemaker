@@ -1,7 +1,7 @@
 import { showModalOverlay } from './overlayUtils.js';
 import { createTextCenter } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
-import { balanceCalculator, calculateNearestArchetype, baseBalancedRanges } from '../utils/balanceCalculator.js';
+import { balanceCalculator, calculateNearestArchetype, baseBalancedRanges, applyRangeAdjustments  } from '../utils/balanceCalculator.js';
 
 export function showWineInfoOverlay(wineItem) {
     const overlayContainer = showModalOverlay('wineInfoOverlay', createWineInfoOverlayHTML(wineItem));
@@ -87,7 +87,7 @@ function createWineInfoOverlayHTML(wine) {
                                 ${trait.charAt(0).toUpperCase() + trait.slice(1)}
                             </td>
                             <td class="characteristic-bar-cell">
-                                ${createCharacteristicBar(trait, value)}
+                                ${createCharacteristicBar(trait, value, wine)}  <!-- Pass wine object here -->
                             </td>
                         </tr>`).join('')}
                 </tbody>
@@ -112,17 +112,32 @@ function createWineInfoOverlayHTML(wine) {
         </div>`;
 }
 
-function createCharacteristicBar(trait, value) {
-    // Get the balanced range for this trait from balanceCalculator.js
-    const [minBalance, maxBalance] = baseBalancedRanges[trait];
+function createCharacteristicBar(trait, value, wine) {  // Add wine parameter here
+    // Get both base and adjusted ranges
+    const [minBalance, maxBalance] = baseBalancedRanges[trait] || [0, 1]; // Add fallback values
+    
+    // Create wineData object with all characteristics for adjustment calculation
+    const wineData = {
+        acidity: wine.acidity,
+        aroma: wine.aroma,
+        body: wine.body,
+        spice: wine.spice,
+        sweetness: wine.sweetness,
+        tannins: wine.tannins
+    };
+
+    const adjustedRanges = applyRangeAdjustments(wineData, baseBalancedRanges);
+    const [adjustedMin, adjustedMax] = adjustedRanges[trait] || [0, 1]; // Add fallback values
     
     return `
         <div class="characteristic-bar-container">
             <div class="characteristic-bar">
                 <!-- Background bar -->
                 <div class="bar-background"></div>
-                <!-- Green zone for balanced range -->
+                <!-- Base balanced range (green zone) -->
                 <div class="balanced-range" style="left: ${minBalance * 100}%; width: ${(maxBalance - minBalance) * 100}%"></div>
+                <!-- Adjusted range (orange zone) -->
+                <div class="adjusted-range" style="left: ${adjustedMin * 100}%; width: ${(adjustedMax - adjustedMin) * 100}%"></div>
                 <!-- Value marker -->
                 <div class="value-marker" style="left: ${value * 100}%"></div>
             </div>

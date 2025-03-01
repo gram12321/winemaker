@@ -346,7 +346,7 @@ function calculateSteppedBalance(score) {
 }
 
 
-function applyRangeAdjustments(wine, baseBalancedRanges) {
+export function applyRangeAdjustments(wine, baseBalancedRanges) {
     let adjustedRanges = structuredClone(baseBalancedRanges);
 
     for (const characteristic in wine) {
@@ -376,7 +376,7 @@ function applyRangeAdjustments(wine, baseBalancedRanges) {
     return adjustedRanges;
 }
 
-function applyPenaltyAdjustments(wine) {
+export function applyPenaltyAdjustments(wine) {
     let penaltyMultipliers = {};
 
     for (const characteristic in wine) {
