@@ -216,10 +216,14 @@ function qualifiesForArchetype(wine, archetype) {
     const reqs = archetype.requirements;
 
     // Check grape requirements (specific varieties)
-    if (reqs.requiredGrapes && !reqs.requiredGrapes.includes(wine.resource.name)) return false;
+    if (reqs.requiredGrapes && (!wine.resource || !reqs.requiredGrapes.includes(wine.resource.name))) {
+        return false;
+    }
 
-    // Check grape color requirement
-    if (reqs.requiredColor && wine.resource.grapeColor !== reqs.requiredColor) return false;
+    // Check grape color requirement with null safety
+    if (reqs.requiredColor && (!wine.resource || wine.resource.grapeColor !== reqs.requiredColor)) {
+        return false;
+    }
 
     // Check quality requirement
     if (reqs.minimumQuality && wine.quality < reqs.minimumQuality) return false;
@@ -240,6 +244,21 @@ function qualifiesForArchetype(wine, archetype) {
     if (reqs.ripenessRange) {
         const [minRipe, maxRipe] = reqs.ripenessRange;
         if (wine.ripeness < minRipe || wine.ripeness > maxRipe) return false;
+    }
+
+    // Check processing requirements
+    if (archetype.processingReqs) {
+        // Check ecological requirement
+        if (archetype.processingReqs.requireEcological && 
+            (!wine.fieldSource || wine.fieldSource.conventional !== 'Ecological')) {
+            return false;
+        }
+
+        // Check processing methods if specified
+        if (archetype.processingReqs.allowedMethods && 
+            !archetype.processingReqs.allowedMethods.includes(wine.crushingMethod)) {
+            return false;
+        }
     }
 
     // Check characteristic ranges

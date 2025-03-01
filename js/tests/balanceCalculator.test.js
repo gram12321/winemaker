@@ -1,4 +1,5 @@
-import { balanceCalculator, archetypes } from '../utils/balanceCalculator.js';
+import { balanceCalculator } from '../utils/balanceCalculator.js';
+import { archetypes } from '../constants/archetypes.js';
 
 console.log("=== Balance Calculator Test Suite ===\n");
 

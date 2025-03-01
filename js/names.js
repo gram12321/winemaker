@@ -2,7 +2,7 @@
 
 // Country to Region mapping
 const countryRegionMap = {
-  "France": ["Bordeaux", "Burgundy (Bourgogne)", "Champagne", "Loire Valley", "Rhone Valley"],
+  "France": ["Bordeaux", "Burgundy (Bourgogne)", "Champagne", "Loire Valley", "Rhone Valley", "Jura"],
   "Germany": ["Ahr", "Mosel", "Pfalz", "Rheingau", "Rheinhessen"],
   "Italy": ["Piedmont", "Puglia", "Sicily", "Tuscany", "Veneto"],
   "Spain": ["Jumilla", "La Mancha", "Ribera del Duero", "Rioja", "Sherry (Jerez)"],
@@ -128,7 +128,8 @@ const grapeSuitability = {
     "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, 'Pinot Noir': 0.9, Primitivo: 0.3, 'Sauvignon Blanc': 0.7 },
     Champagne: { Barbera: 0.2, Chardonnay: 0.9, 'Pinot Noir': 0.8, Primitivo: 0.2, 'Sauvignon Blanc': 0.6 },
     "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, 'Pinot Noir': 0.7, Primitivo: 0.3, 'Sauvignon Blanc': 1.0 },
-    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, 'Pinot Noir': 0.5, Primitivo: 0.7, 'Sauvignon Blanc': 0.7 }
+    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, 'Pinot Noir': 0.5, Primitivo: 0.7, 'Sauvignon Blanc': 0.7 },
+    "Jura": { Barbera: 0.3, Chardonnay: 0.9, 'Pinot Noir': 0.8, Primitivo: 0.2, 'Sauvignon Blanc': 0.6 },
   },
   Spain: {
     Rioja: { Barbera: 0.85, Chardonnay: 0.7, 'Pinot Noir': 0.4, Primitivo: 0.5, 'Sauvignon Blanc': 0.6 },
@@ -198,6 +199,10 @@ const regionAspectRatings = {
     "Rhone Valley": {
       "North": 0.25, "Northeast": 0.50, "East": 0.70, "Southeast": 1.00, "South": 0.90,
       "Southwest": 0.85, "West": 0.65, "Northwest": 0.40
+    },
+    "Jura": {
+      "North": 0.20, "Northeast": 0.45, "East": 0.65, "Southeast": 0.95, "South": 1.00,
+      "Southwest": 0.85, "West": 0.60, "Northwest": 0.35
     },
   },
   "Spain": {
@@ -281,7 +286,8 @@ const regionSoilTypes = {
     "Burgundy (Bourgogne)": ["Limestone", "Marl", "Clay", "Gravel", "Silt"],
     "Champagne": ["Chalk", "Limestone", "Marl", "Clay", "Sand"],
     "Loire Valley": ["Limestone", "Clay", "Flint", "Gravel", "Alluvial Soil"],
-    "Rhone Valley": ["Granite", "Clay", "Pebbles", "Sand", "Schist"]
+    "Rhone Valley": ["Granite", "Clay", "Pebbles", "Sand", "Schist"],
+    "Jura": ["Marl", "Clay", "Limestone", "Gravel", "Shale"]
   },
   "Spain": {
     "Rioja": ["Clay", "Limestone", "Alluvial Soil", "Sand", "Marl"],
@@ -319,7 +325,8 @@ const regionAltitudeRanges = {
     "Burgundy (Bourgogne)": [200, 500],
     "Champagne": [70, 300],
     "Loire Valley": [10, 300],
-    "Rhone Valley": [100, 400]
+    "Rhone Valley": [100, 400],
+    "Jura": [250, 450]
   },
   "Spain": {
     "Rioja": [300, 700],
@@ -409,7 +416,7 @@ const regionRealPriceRanges = {
   "Jumilla, Spain": [5000, 25000], // [2024.2914, 10121.456] per acre
   "Rheinhessen, Germany": [10000, 40000], // [4048.5827, 16194.331] per acre
   "Puglia, Italy": [5000, 30000], // [2024.2914, 12145.748] per acre
-
+  "Jura, France": [25000, 45000], 
 };
 
 const regionPrestigeRankings = {
@@ -425,6 +432,7 @@ const regionPrestigeRankings = {
   "Rioja, Spain": 0.70,
   "Willamette Valley (Oregon), United States": 0.67,
   "Ribera del Duero, Spain": 0.65,
+  "Jura, France": 0.65,
   "Central Coast (California), United States": 0.63,
   "Loire Valley, France": 0.61,
   "Rhone Valley, France": 0.60,
