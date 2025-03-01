@@ -129,6 +129,13 @@ function createCharacteristicBar(trait, value, wine) {  // Add wine parameter he
     const adjustedRanges = applyRangeAdjustments(wineData, baseBalancedRanges);
     const [adjustedMin, adjustedMax] = adjustedRanges[trait] || [0, 1]; // Add fallback values
     
+    // Calculate the center range (25% on each side of middle)
+    const rangeSize = adjustedMax - adjustedMin;
+    const centerSize = rangeSize * 0.25;
+    const adjustedMiddle = (adjustedMin + adjustedMax) / 2;
+    const centerMin = adjustedMiddle - centerSize;
+    const centerMax = adjustedMiddle + centerSize;
+    
     return `
         <div class="characteristic-bar-container">
             <div class="characteristic-bar">
@@ -136,8 +143,12 @@ function createCharacteristicBar(trait, value, wine) {  // Add wine parameter he
                 <div class="bar-background"></div>
                 <!-- Base balanced range (green zone) -->
                 <div class="balanced-range" style="left: ${minBalance * 100}%; width: ${(maxBalance - minBalance) * 100}%"></div>
-                <!-- Adjusted range (orange zone) -->
-                <div class="adjusted-range" style="left: ${adjustedMin * 100}%; width: ${(adjustedMax - adjustedMin) * 100}%"></div>
+                <!-- Lower part of adjusted range -->
+                <div class="adjusted-range adjusted-range-outer" style="left: ${adjustedMin * 100}%; width: ${(centerMin - adjustedMin) * 100}%"></div>
+                <!-- Center optimal part -->
+                <div class="adjusted-range adjusted-range-center" style="left: ${centerMin * 100}%; width: ${(centerMax - centerMin) * 100}%"></div>
+                <!-- Upper part of adjusted range -->
+                <div class="adjusted-range adjusted-range-outer" style="left: ${centerMax * 100}%; width: ${(adjustedMax - centerMax) * 100}%"></div>
                 <!-- Value marker -->
                 <div class="value-marker" style="left: ${value * 100}%"></div>
             </div>

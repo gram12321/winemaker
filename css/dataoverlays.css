@@ -235,7 +235,7 @@
 .balanced-range {
     position: absolute;
     height: 100%;
-    background: #d0d0d0;
+    background: #3d2e2e;
     opacity: 0.3;
     border-radius: 4px;
     z-index: 1;
@@ -244,10 +244,18 @@
 .adjusted-range {
     position: absolute;
     height: 100%;
-    background: #157306;
     opacity: 0.3;
-    border-radius: 4px;
     z-index: 2;
+}
+
+.adjusted-range-outer {
+    background: #157306;  /* Light green */
+
+}
+
+.adjusted-range-center {
+    background: #0B4C04;  /* Deep green */
+    border-radius: 0;  /* No border radius for center section */
 }
 
 .value-marker {
