@@ -458,10 +458,7 @@ export const archetypes = {
         name: "Old World Dry Orange Wine",
         description: "Complex skin-contact white wine with bold character",
         requirements: {
-            requiredColor: "white",
-            minimumQuality: 0.7,
-            oxidationRange: [0, 0.4],
-            ripenessRange: [0.8, 1.0]
+            requiredColor: "white"
         },
         characteristics: {
             idealRanges: {
