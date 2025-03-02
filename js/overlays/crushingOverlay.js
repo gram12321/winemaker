@@ -673,12 +673,8 @@ function handleCrushingStart(overlayContainer) {
 
 
 export function performCrushing(selectedStorages, mustAmount, grapeAmount, destemming) {
-
-    // Now grapeAmount is explicitly passed and matches what we want to remove
     const grapeAmountToRemove = grapeAmount;
-    if (grapeAmountToRemove <= 0) {
-        return false;
-    }
+    if (grapeAmountToRemove <= 0) return false;
 
     const grapeResource = inventoryInstance.items.find(item => 
         item.state === 'Grapes' &&
@@ -688,27 +684,46 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     let remainingMust = mustAmount;
     let success = true;
 
-    // Remove the amount of grapes corresponding to the processed amount
+    // Copy all relevant properties from grapes
     const resourceName = grapeResource.resource.name;
     const vintage = grapeResource.vintage;
     const quality = grapeResource.quality;
     const fieldName = grapeResource.fieldName;
     const fieldPrestige = grapeResource.fieldPrestige;
 
-    // Copy all grape characteristics
-    const baseCharacteristics = {
+    // Copy all properties needed by archetypes
+    const baseProperties = {
+        // Wine characteristics
         acidity: grapeResource.acidity,
         aroma: grapeResource.aroma,
         body: grapeResource.body,
         spice: grapeResource.spice,
         sweetness: grapeResource.sweetness,
         tannins: grapeResource.tannins,
-        oxidation: grapeResource.oxidation || 0
+        
+        // Required by archetypes
+        oxidation: grapeResource.oxidation || 0,
+        ripeness: grapeResource.ripeness || 0,
+        crushingMethod: destemming ? 'Destemming' : 'Standard',
+        fieldSource: grapeResource.fieldSource || {
+            conventional: 'Traditional',
+            altitude: null,
+            soil: null,
+            terrain: null
+        }
     };
 
     // Calculate modified characteristics based on crushing process
-    const characteristics = calculateCrushingCharacteristics(baseCharacteristics, {
-        destemming  // Use the parameter value
+    const characteristics = calculateCrushingCharacteristics(baseProperties, {
+        destemming
+    });
+
+    // Add the fieldSource and other required properties to the characteristics
+    Object.assign(characteristics, {
+        oxidation: baseProperties.oxidation,
+        ripeness: baseProperties.ripeness,
+        crushingMethod: baseProperties.crushingMethod,
+        fieldSource: baseProperties.fieldSource
     });
 
     let removed = inventoryInstance.removeResource(
@@ -770,23 +785,42 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
 
         if (amountToStore > 0) {
             const newMust = inventoryInstance.addResource(
-                { name: resourceName, naturalYield: 1 },
+                { 
+                    name: resourceName, 
+                    naturalYield: 1,
+                    grapeColor: grapeResource.resource.grapeColor // Make sure we preserve grape color
+                },
                 amountToStore,
                 'Must',
                 vintage,
                 quality,
                 fieldName,
                 fieldPrestige,
-                mustStorage
+                mustStorage,
+                characteristics.oxidation,  // Pass oxidation
+                characteristics.ripeness    // Pass ripeness
             );
 
-            // Apply modified characteristics and special features to the new must
+            // Apply all characteristics and properties to the new must
             if (newMust) {
                 Object.assign(newMust, characteristics);
-                if (characteristics.specialFeatures) {
-                    characteristics.specialFeatures.forEach(feature => {
+                
+                // Ensure special features are properly transferred
+                if (grapeResource.specialFeatures) {
+                    grapeResource.specialFeatures.forEach(feature => {
                         newMust.addSpecialFeature(feature);
                     });
+                }
+                
+                // Add green flavors if applicable (no destemming)
+                if (!destemming) {
+                    const ripeness = characteristics.ripeness;
+                    const greenFlavorChance = (1 - ripeness) * 0.05;
+                    
+                    if (Math.random() < greenFlavorChance) {
+                        addConsoleMessage(`The must has developed green flavors due to stems being present during crushing.`);
+                        newMust.addSpecialFeature('Green Flavors');
+                    }
                 }
             }
 

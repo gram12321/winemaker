@@ -5,12 +5,14 @@ import { Building, Tool, getBuildingTools  } from '/js/classes/buildingClasses.j
 // Function to load inventory from localStorage
 function loadInventory() {
     let savedInventory = localStorage.getItem('playerInventory');
+    console.log('Raw saved inventory:', savedInventory);
 
     try {
         savedInventory = JSON.parse(savedInventory);
         if (!Array.isArray(savedInventory)) {
             savedInventory = [];
         }
+        console.log('Parsed saved inventory:', savedInventory);
     } catch (error) {
         console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
         savedInventory = [];
@@ -19,8 +21,13 @@ function loadInventory() {
     inventoryInstance.items = [];
 
     savedInventory.forEach(item => {
-        inventoryInstance.addResource(
-            { name: item.resource.name, naturalYield: item.resource.naturalYield || 1 },
+        console.log('Loading item:', item);
+        const newItem = inventoryInstance.addResource(
+            { 
+                name: item.resource.name, 
+                naturalYield: item.resource.naturalYield || 1,
+                grapeColor: item.resource.grapeColor 
+            },
             item.amount,
             item.state,
             item.vintage,
@@ -32,6 +39,52 @@ function loadInventory() {
             item.ripeness || 0,
             Array.isArray(item.specialFeatures) ? item.specialFeatures : []
         );
+        
+        if (newItem) {
+            console.log('Characteristics before copying:', {
+                sweetness: newItem.sweetness,
+                acidity: newItem.acidity,
+                tannins: newItem.tannins,
+                body: newItem.body,
+                spice: newItem.spice,
+                aroma: newItem.aroma
+            });
+
+            // Copy wine characteristics
+            const characteristics = [
+                'sweetness',
+                'acidity',
+                'tannins',
+                'body',
+                'spice',
+                'aroma'
+            ];
+
+            characteristics.forEach(char => {
+                if (typeof item[char] === 'number') {
+                    newItem[char] = item[char];
+                    console.log(`Copying ${char}: ${item[char]}`);
+                }
+            });
+
+            console.log('Characteristics after copying:', {
+                sweetness: newItem.sweetness,
+                acidity: newItem.acidity,
+                tannins: newItem.tannins,
+                body: newItem.body,
+                spice: newItem.spice,
+                aroma: newItem.aroma
+            });
+
+            // Copy other properties
+            if (item.fieldSource) {
+                newItem.fieldSource = item.fieldSource;
+            }
+            if (item.crushingMethod) {
+                newItem.crushingMethod = item.crushingMethod;
+            }
+        }
+        console.log('Created item:', newItem);
     });
 
     return inventoryInstance; // Add this line to return the instance
@@ -42,12 +95,12 @@ loadInventory();
 
 // Function to save inventory to localStorage
 function saveInventory() {
-  // Save all item properties including grape characteristics
   const itemsToSave = inventoryInstance.items.map(item => {
     const savedItem = {
       resource: {
         name: item.resource.name,
-        naturalYield: item.resource.naturalYield
+        naturalYield: item.resource.naturalYield,
+        grapeColor: item.resource.grapeColor  // Add grapeColor
       },
       amount: item.amount,
       state: item.state,
@@ -56,33 +109,42 @@ function saveInventory() {
       fieldName: item.fieldName,
       fieldPrestige: item.fieldPrestige,
       storage: item.storage,
-      oxidation: item.oxidation, // Save oxidation value
-      specialFeatures: item.specialFeatures || [], // Add this line
-      ripeness: item.ripeness // Add ripeness to saved properties
+      oxidation: item.oxidation || 0,
+      ripeness: item.ripeness || 0,
+      crushingMethod: item.crushingMethod || null,  // Add crushing method
+      fieldSource: item.fieldSource ? {
+        conventional: item.fieldSource.conventional
+      } : null,
+      specialFeatures: item.specialFeatures || []
     };
 
-    // Add grape characteristics if they exist
-    if (item.state === 'Grapes') {
-      const characteristics = [
-        'sweetness',
-        'acidity',
-        'tannins',
-        'body',
-        'spice',
-        'aroma'
-      ];
+    // Add all wine characteristics for every state (not just Grapes)
+    const characteristics = [
+      'sweetness',
+      'acidity',
+      'tannins',
+      'body',
+      'spice',
+      'aroma'
+    ];
 
-      characteristics.forEach(char => {
-        if (typeof item[char] === 'number') {
-          savedItem[char] = item[char];
-        }
-      });
-    }
+    characteristics.forEach(char => {
+      if (typeof item[char] === 'number') {
+        savedItem[char] = item[char];
+      } else {
+        savedItem[char] = 0; // Default to 0 if undefined
+      }
+    });
 
     return savedItem;
   });
 
+  console.log('Saving inventory to localStorage:', itemsToSave);
   localStorage.setItem('playerInventory', JSON.stringify(itemsToSave));
+  
+  // Verify what was actually saved
+  const savedData = localStorage.getItem('playerInventory');
+  console.log('Verification - Raw data in localStorage:', savedData);
 }
 
 

@@ -1,4 +1,5 @@
 import { archetypes } from './../constants/archetypes.js';
+import { loadInventory } from '../database/adminFunctions.js';
 
 export const baseBalancedRanges = {
     acidity: [0.4, 0.6],
@@ -212,66 +213,294 @@ const synergyBonuses = {
 
 // Update qualifiesForArchetype function to handle new requirement structure
 function qualifiesForArchetype(wine, archetype) {
-    if (!wine || !archetype.requirements) return true;
+    console.group(`Archetype Qualification Check - ${archetype.name}`);
+    
+    // Log complete wine object properties
+    console.log('Wine properties available:', wine); // Log the entire wine object first
+    console.log('Wine properties table:');
+    console.table({
+        // Direct property access instead of creating new object
+        resource: wine.resource,
+        quality: wine.quality,
+        vintage: wine.vintage,
+        fieldPrestige: wine.fieldPrestige,
+        oxidation: wine.oxidation,
+        ripeness: wine.ripeness,
+        crushingMethod: wine.crushingMethod,
+        fieldSource: wine.fieldSource,
+        sweetness: wine.sweetness,
+        acidity: wine.acidity,
+        tannins: wine.tannins,
+        aroma: wine.aroma,
+        body: wine.body,
+        spice: wine.spice
+    });
+
+    // Log complete archetype requirements
+    console.log('Archetype complete requirements:');
+    const requirements = {
+        // Basic requirements
+        requiredGrapes: archetype.requirements?.requiredGrapes ?? 'not required',
+        requiredColor: archetype.requirements?.requiredColor ?? 'not required',
+        minimumQuality: archetype.requirements?.minimumQuality ?? 'not required',
+        minimumVintage: archetype.requirements?.minimumVintage ?? 'not required',
+        minimumPrestige: archetype.requirements?.minimumPrestige ?? 'not required',
+        oxidationRange: archetype.requirements?.oxidationRange ? 
+            `${archetype.requirements.oxidationRange[0]}-${archetype.requirements.oxidationRange[1]}` : 
+            'not required',
+        ripenessRange: archetype.requirements?.ripenessRange ?
+            `${archetype.requirements.ripenessRange[0]}-${archetype.requirements.ripenessRange[1]}` :
+            'not required',
+        
+        // Processing requirements
+        requireEcological: archetype.processingReqs?.requireEcological ?? 'not required',
+        allowedMethods: archetype.processingReqs?.allowedMethods?.join(', ') ?? 'not required',
+        
+        // Characteristic ranges
+        ...Object.fromEntries(
+            Object.entries(archetype.characteristics.idealRanges)
+            .map(([key, [min, max]]) => [key, `${min}-${max}`])
+        )
+    };
+    console.table(requirements);
+
+    console.log('Wine object:', wine);
+    console.log('Archetype requirements:', archetype.requirements);
+
+    if (!wine || !archetype.requirements) {
+        console.log('No wine or no requirements - defaulting to true');
+        console.groupEnd();
+        return true;
+    }
     const reqs = archetype.requirements;
 
     // Check grape requirements (specific varieties)
-    if (reqs.requiredGrapes && (!wine.resource || !reqs.requiredGrapes.includes(wine.resource.name))) {
-        return false;
+    if (reqs.requiredGrapes) {
+        console.log('Testing grape variety:', {
+            required: reqs.requiredGrapes,
+            actual: wine.resource?.name,
+            pass: wine.resource && reqs.requiredGrapes.includes(wine.resource.name)
+        });
+        if (!wine.resource || !reqs.requiredGrapes.includes(wine.resource.name)) {
+            console.log('Failed: Grape variety requirement not met');
+            console.groupEnd();
+            return false;
+        }
     }
 
-    // Check grape color requirement with null safety
-    if (reqs.requiredColor && (!wine.resource || wine.resource.grapeColor !== reqs.requiredColor)) {
-        return false;
+    // Check grape color requirement
+    if (reqs.requiredColor) {
+        console.log('Testing grape color:', {
+            required: reqs.requiredColor,
+            actual: wine.resource?.grapeColor,
+            pass: wine.resource && wine.resource.grapeColor === reqs.requiredColor
+        });
+        if (!wine.resource || wine.resource.grapeColor !== reqs.requiredColor) {
+            console.log('Failed: Grape color requirement not met');
+            console.groupEnd();
+            return false;
+        }
     }
 
     // Check quality requirement
-    if (reqs.minimumQuality && wine.quality < reqs.minimumQuality) return false;
+    if (reqs.minimumQuality) {
+        console.log('Testing quality:', {
+            required: reqs.minimumQuality,
+            actual: wine.quality,
+            pass: wine.quality >= reqs.minimumQuality
+        });
+        if (wine.quality < reqs.minimumQuality) {
+            console.log('Failed: Quality requirement not met');
+            console.groupEnd();
+            return false;
+        }
+    }
 
     // Check vintage requirement
-    if (reqs.minimumVintage && wine.vintage < reqs.minimumVintage) return false;
+    if (reqs.minimumVintage) {
+        console.log('Testing vintage:', {
+            required: reqs.minimumVintage,
+            actual: wine.vintage,
+            pass: wine.vintage >= reqs.minimumVintage
+        });
+        if (wine.vintage < reqs.minimumVintage) {
+            console.log('Failed: Vintage requirement not met');
+            console.groupEnd();
+            return false;
+        }
+    }
 
     // Check field prestige
-    if (reqs.minimumPrestige && wine.fieldPrestige < reqs.minimumPrestige) return false;
+    if (reqs.minimumPrestige) {
+        console.log('Testing field prestige:', {
+            required: reqs.minimumPrestige,
+            actual: wine.fieldPrestige,
+            pass: wine.fieldPrestige >= reqs.minimumPrestige
+        });
+        if (wine.fieldPrestige < reqs.minimumPrestige) {
+            console.log('Failed: Field prestige requirement not met');
+            console.groupEnd();
+            return false;
+        }
+    }
 
     // Check oxidation range
     if (reqs.oxidationRange) {
         const [minOx, maxOx] = reqs.oxidationRange;
-        if (wine.oxidation < minOx || wine.oxidation > maxOx) return false;
+        console.log('Testing oxidation:', {
+            required: `${minOx}-${maxOx}`,
+            actual: wine.oxidation,
+            pass: wine.oxidation >= minOx && wine.oxidation <= maxOx
+        });
+        if (wine.oxidation < minOx || wine.oxidation > maxOx) {
+            console.log('Failed: Oxidation requirement not met');
+            console.groupEnd();
+            return false;
+        }
     }
 
     // Check ripeness range
     if (reqs.ripenessRange) {
         const [minRipe, maxRipe] = reqs.ripenessRange;
-        if (wine.ripeness < minRipe || wine.ripeness > maxRipe) return false;
+        console.log('Testing ripeness:', {
+            required: `${minRipe}-${maxRipe}`,
+            actual: wine.ripeness,
+            pass: wine.ripeness >= minRipe && wine.ripeness <= maxRipe
+        });
+        if (wine.ripeness < minRipe || wine.ripeness > maxRipe) {
+            console.log('Failed: Ripeness requirement not met');
+            console.groupEnd();
+            return false;
+        }
     }
 
     // Check processing requirements
     if (archetype.processingReqs) {
         // Check ecological requirement
-        if (archetype.processingReqs.requireEcological && 
-            (!wine.fieldSource || wine.fieldSource.conventional !== 'Ecological')) {
-            return false;
+        if (archetype.processingReqs.requireEcological) {
+            console.log('Testing ecological requirement:', {
+                required: true,
+                actual: wine.fieldSource?.conventional,
+                pass: wine.fieldSource && wine.fieldSource.conventional === 'Ecological'
+            });
+            if (!wine.fieldSource || wine.fieldSource.conventional !== 'Ecological') {
+                console.log('Failed: Ecological requirement not met');
+                console.groupEnd();
+                return false;
+            }
         }
 
-        // Check processing methods if specified
-        if (archetype.processingReqs.allowedMethods && 
-            !archetype.processingReqs.allowedMethods.includes(wine.crushingMethod)) {
-            return false;
+        // Check processing methods
+        if (archetype.processingReqs.allowedMethods) {
+            console.log('Testing processing method:', {
+                allowed: archetype.processingReqs.allowedMethods,
+                actual: wine.crushingMethod,
+                pass: archetype.processingReqs.allowedMethods.includes(wine.crushingMethod)
+            });
+            if (!archetype.processingReqs.allowedMethods.includes(wine.crushingMethod)) {
+                console.log('Failed: Processing method requirement not met');
+                console.groupEnd();
+                return false;
+            }
         }
     }
 
     // Check characteristic ranges
     for (const [trait, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
-        if (wine[trait] < min || wine[trait] > max) return false;
+        console.log(`Testing ${trait}:`, {
+            required: `${min}-${max}`,
+            actual: wine[trait],
+            pass: wine[trait] >= min && wine[trait] <= max
+        });
+        if (wine[trait] < min || wine[trait] > max) {
+            console.log(`Failed: ${trait} requirement not met`);
+            console.groupEnd();
+            return false;
+        }
+    }
+
+    console.log('All requirements passed!');
+    console.groupEnd();
+    return true;
+}
+
+function validateWineObject(wine, archetype) {
+    // Base characteristics are always required
+    const baseCharacteristics = [
+        'sweetness',
+        'acidity',
+        'tannins',
+        'aroma',
+        'body',
+        'spice'
+    ];
+
+    const missing = baseCharacteristics.filter(prop => wine[prop] === undefined);
+    
+    if (missing.length > 0) {
+        throw new Error(`Wine object is missing base characteristics: ${missing.join(', ')}`);
+    }
+
+    // Only check archetype-specific requirements if we're testing against an archetype
+    if (archetype) {
+        const archetypeProperties = [
+            'resource',
+            'quality',
+            'vintage',
+            'fieldPrestige',
+            'oxidation',
+            'ripeness',
+            'crushingMethod',
+            'fieldSource'
+        ];
+
+        const requiredProps = new Set();
+
+        // Only add properties that are actually used by this archetype
+        if (archetype.requirements?.requiredGrapes || archetype.requirements?.requiredColor) {
+            requiredProps.add('resource');
+        }
+        if (archetype.requirements?.minimumQuality) {
+            requiredProps.add('quality');
+        }
+        if (archetype.requirements?.minimumVintage) {
+            requiredProps.add('vintage');
+        }
+        if (archetype.requirements?.minimumPrestige) {
+            requiredProps.add('fieldPrestige');
+        }
+        if (archetype.requirements?.oxidationRange) {
+            requiredProps.add('oxidation');
+        }
+        if (archetype.requirements?.ripenessRange) {
+            requiredProps.add('ripeness');
+        }
+        if (archetype.processingReqs?.allowedMethods) {
+            requiredProps.add('crushingMethod');
+        }
+        if (archetype.processingReqs?.requireEcological) {
+            requiredProps.add('fieldSource');
+        }
+
+        const missingArchetypeProps = Array.from(requiredProps).filter(prop => wine[prop] === undefined);
+        
+        if (missingArchetypeProps.length > 0) {
+            throw new Error(`Wine object is missing required archetype properties: ${missingArchetypeProps.join(', ')}`);
+        }
     }
 
     return true;
 }
 
 export function balanceCalculator(wine, archetype) {
+    // Ensure inventory is loaded
+    loadInventory();
+    
     console.group('Balance Calculation Details:');
     
+    // Validate wine object with archetype context
+    validateWineObject(wine, archetype);
+
     // Calculate synergy first since we need it for deduction calculations
     let synergyBonus = 0;
     for (const synergy of Object.values(synergyBonuses)) {
@@ -355,14 +584,16 @@ function calculateSteppedBalance(score) {
 }
 
 
-export function applyRangeAdjustments(wine, baseBalancedRanges) {
+export function applyRangeAdjustments(characteristics, baseBalancedRanges) {
+    // This function now expects just the characteristics object
     let adjustedRanges = structuredClone(baseBalancedRanges);
 
-    for (const characteristic in wine) {
-        // Calculate distance from midpoint of base range
+    for (const characteristic in characteristics) {
+        if (!baseBalancedRanges[characteristic]) continue;
+        
         const [baseMin, baseMax] = baseBalancedRanges[characteristic];
         const baseMidpoint = (baseMin + baseMax) / 2;
-        const diff = wine[characteristic] - baseMidpoint;
+        const diff = characteristics[characteristic] - baseMidpoint;
 
         if (diff !== 0) {
             let adjustmentKey = characteristic + (diff > 0 ? "_up" : "_down");
@@ -372,10 +603,7 @@ export function applyRangeAdjustments(wine, baseBalancedRanges) {
                 let targetCharacteristic = adjustment.target.replace("_range", "");
                 if (!baseBalancedRanges[targetCharacteristic]) continue;
 
-                // Calculate range adjustment
                 let shiftAmount = adjustment.formula(Math.abs(diff));
-                
-                // Apply shift to both min and max of target range
                 adjustedRanges[targetCharacteristic][0] += shiftAmount;
                 adjustedRanges[targetCharacteristic][1] += shiftAmount;
             }
@@ -389,6 +617,9 @@ export function applyPenaltyAdjustments(wine) {
     let penaltyMultipliers = {};
 
     for (const characteristic in wine) {
+        // Skip if characteristic isn't in baseBalancedRanges
+        if (!baseBalancedRanges[characteristic]) continue;
+
         let diff = wine[characteristic] - ((baseBalancedRanges[characteristic][0] + baseBalancedRanges[characteristic][1]) / 2);
 
         if (Math.abs(diff) > 0.001) { // Add small threshold to avoid floating point issues

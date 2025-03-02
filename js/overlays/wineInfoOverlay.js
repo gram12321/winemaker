@@ -10,20 +10,12 @@ export function showWineInfoOverlay(wineItem) {
 }
 
 function calculateWineBalance(wine) {
-    const wineData = {
-        acidity: wine.acidity,
-        aroma: wine.aroma,
-        body: wine.body,
-        spice: wine.spice,
-        sweetness: wine.sweetness,
-        tannins: wine.tannins
-    };
-
+    // Instead of creating a new object, use the complete wine object directly
     // Get nearest archetype and check if wine qualifies
-    const { archetype, distance, qualifies } = calculateNearestArchetype(wineData);
+    const { archetype, distance, qualifies } = calculateNearestArchetype(wine);
     
     // Calculate balance score for the nearest archetype
-    const score = balanceCalculator(wineData, archetype);
+    const score = balanceCalculator(wine, archetype);
 
     return {
         score: score,
@@ -112,12 +104,12 @@ function createWineInfoOverlayHTML(wine) {
         </div>`;
 }
 
-function createCharacteristicBar(trait, value, wine) {  // Add wine parameter here
+function createCharacteristicBar(trait, value, wine) {
     // Get both base and adjusted ranges
-    const [minBalance, maxBalance] = baseBalancedRanges[trait] || [0, 1]; // Add fallback values
+    const [minBalance, maxBalance] = baseBalancedRanges[trait] || [0, 1];
     
-    // Create wineData object with all characteristics for adjustment calculation
-    const wineData = {
+    // Only pass the characteristics needed for range adjustments
+    const characteristics = {
         acidity: wine.acidity,
         aroma: wine.aroma,
         body: wine.body,
@@ -126,7 +118,7 @@ function createCharacteristicBar(trait, value, wine) {  // Add wine parameter he
         tannins: wine.tannins
     };
 
-    const adjustedRanges = applyRangeAdjustments(wineData, baseBalancedRanges);
+    const adjustedRanges = applyRangeAdjustments(characteristics, baseBalancedRanges);
     const [adjustedMin, adjustedMax] = adjustedRanges[trait] || [0, 1]; // Add fallback values
     
     // Calculate the center range (25% on each side of middle)

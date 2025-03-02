@@ -68,24 +68,31 @@ export class InventoryItem {
     this.oxidation = oxidation;
     this.ripeness = ripeness;
     this.specialFeatures = specialFeatures;
-
-    // Get base characteristics with default of 0.5 for each property
-    const baseCharacteristics = resource.wineCharacteristics || {
-      acidity: 0.5,
-      aroma: 0.5,
-      body: 0.5,
-      spice: 0.5,
-      sweetness: 0.5,
-      tannins: 0.5
+    this.crushingMethod = null;  // Add crushing method
+    this.fieldSource = {
+      conventional: 'Traditional',  // Default to Traditional
+      altitude: null,
+      soil: null,
+      terrain: null
     };
 
-    // Assign characteristics directly
-    this.acidity = baseCharacteristics.acidity;
-    this.aroma = baseCharacteristics.aroma;
-    this.body = baseCharacteristics.body;
-    this.spice = baseCharacteristics.spice;
-    this.sweetness = baseCharacteristics.sweetness;
-    this.tannins = baseCharacteristics.tannins;
+    // Get base characteristics with default of 0 for each property
+    const baseCharacteristics = resource.wineCharacteristics || {
+      acidity: 0,
+      aroma: 0,
+      body: 0,
+      spice: 0,
+      sweetness: 0,
+      tannins: 0
+    };
+
+    // Assign characteristics by adding modifiers to 0.5
+    this.acidity = 0.5 + baseCharacteristics.acidity;
+    this.aroma = 0.5 + baseCharacteristics.aroma;
+    this.body = 0.5 + baseCharacteristics.body;
+    this.spice = 0.5 + baseCharacteristics.spice;
+    this.sweetness = 0.5 + baseCharacteristics.sweetness;
+    this.tannins = 0.5 + baseCharacteristics.tannins;
   }
 
   // Add helper methods for special features
@@ -93,10 +100,6 @@ export class InventoryItem {
     if (!this.specialFeatures.includes(feature)) {
       this.specialFeatures.push(feature);
     }
-  }
-
-  hasSpecialFeature(feature) {
-    return this.specialFeatures.includes(feature);
   }
 
   getDisplayInfo() {

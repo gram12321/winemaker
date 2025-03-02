@@ -245,6 +245,16 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
 
     // Get base characteristics from resource
     const resourceObj = getResourceByName(farmland.plantedResourceName);
+
+    // Add field source information
+    const fieldSource = {
+        conventional: farmland.conventional || 'Traditional', // Add farming method
+        altitude: farmland.altitude,
+        soil: farmland.soil,
+        terrain: farmland.terrain
+    };
+
+    // Get harvested characteristics and ensure all required properties
     const harvestedCharacteristics = calculateHarvestCharacteristics(
         resourceObj.wineCharacteristics,
         harvestParams
@@ -288,8 +298,11 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             });
             matchingGrapes.amount = totalAmount;
             matchingGrapes.quality = ((matchingGrapes.quality * matchingGrapes.amount) + (quality * amountForTool)) / totalAmount;
-            // Add ripeness value from farmland
             matchingGrapes.ripeness = currentFarmland.ripeness;
+            matchingGrapes.fieldSource = fieldSource;
+            matchingGrapes.vintage = gameYear;
+            matchingGrapes.resource.grapeColor = resourceObj.grapeColor;
+            matchingGrapes.oxidation = 0; // Start with no oxidation
             applyHarvestOxidation(matchingGrapes);
         } else {
             const newGrapes = inventoryInstance.addResource(
@@ -300,12 +313,17 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                 quality,
                 farmland.name,
                 farmland.farmlandPrestige,
-                selectedTool
+                selectedTool,
+                0, // Initial oxidation
+                currentFarmland.ripeness // Pass ripeness
             );
+            
             if (newGrapes) {
+                // Ensure all characteristics are set
                 Object.assign(newGrapes, harvestedCharacteristics);
-                // Add ripeness value from farmland
-                newGrapes.ripeness = currentFarmland.ripeness;
+                newGrapes.fieldSource = fieldSource;
+                newGrapes.resource.grapeColor = resourceObj.grapeColor;
+                newGrapes.crushingMethod = null; // Will be set during crushing
                 applyHarvestOxidation(newGrapes);
             }
         }
