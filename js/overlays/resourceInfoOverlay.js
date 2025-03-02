@@ -2,8 +2,9 @@ import { getResourceByName } from '../resource.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { grapeSuitability } from '../names.js';
 import { showModalOverlay } from './overlayUtils.js';
-import { createTextCenter } from '../components/createOverlayHTML.js';
+import { createTextCenter, createTable, createOverlayHTML } from '../components/createOverlayHTML.js';
 import { baseBalancedRanges } from '../utils/balanceCalculator.js';
+import { createCharacteristicBar } from '../components/characteristicBar.js';
 
 export function showResourceInfoOverlay(resourceName) {
   const resource = getResourceByName(resourceName);
@@ -18,118 +19,129 @@ export function showResourceInfoOverlay(resourceName) {
 }
 
 function createResourceInfoOverlayHTML(resource) {
-  const naturalYieldPercentage = resource.naturalYield * 100;
-  const naturalYieldColorClass = getColorClass(resource.naturalYield);
-  const fragilePercentage = resource.fragile * 100;
-  const fragileColorClass = getColorClass(resource.naturalYield);
+  const displayInfo = {
+    naturalYield: resource.naturalYield * 100,
+    naturalYieldClass: getColorClass(resource.naturalYield),
+    fragility: resource.fragile * 100,
+    fragileClass: getColorClass(resource.naturalYield),
+    characteristics: resource.wineCharacteristics || {},
+    name: resource.name,
+    grapeColor: resource.grapeColor
+  };
 
-  // Create base information section
+  // Create base information section using createTable
   const baseInfoSection = `
     <div class="info-section">
-      ${createTextCenter({ text: '<h4>Base Information</h4>' })}
-      <table class="data-table">
-        <tbody>
-          <tr><td>Name</td><td>${resource.name}</td></tr>
-          <tr><td>Grape Color</td><td style="text-transform: capitalize">${resource.grapeColor}</td></tr>
-          <tr><td>Natural Yield</td><td class="${naturalYieldColorClass}">${formatNumber(naturalYieldPercentage)}%</td></tr>
-          <tr><td>Grape Fragile</td><td class="${fragileColorClass}">${formatNumber(fragilePercentage)}%</td></tr>
-        </tbody>
-      </table>
+      ${createTextCenter({ text: 'Base Information', isHeadline: true })}
+      ${createTable({
+        className: 'data-table',
+        headers: [],
+        id: 'resource-info-table',
+        tableClassName: 'table'
+      })}
+      <tbody>
+        <tr><td>Name</td><td>${displayInfo.name}</td></tr>
+        <tr><td>Grape Color</td><td style="text-transform: capitalize">${displayInfo.grapeColor}</td></tr>
+        <tr><td>Natural Yield</td><td class="${displayInfo.naturalYieldClass}">${formatNumber(displayInfo.naturalYield)}%</td></tr>
+        <tr><td>Grape Fragile</td><td class="${displayInfo.fragileClass}">${formatNumber(displayInfo.fragility)}%</td></tr>
+      </tbody>
     </div>`;
 
-  // Update characteristics section with base balanced ranges
+  // Show characteristics section using createTable
   const characteristicsSection = `
     <div class="info-section">
-      ${createTextCenter({ text: '<h4>Grape Characteristics</h4>' })}
-      <table class="data-table">
-        <tbody>
-          ${Object.entries(resource.wineCharacteristics)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([trait, value]) => {
-              const displayValue = 0.5 + value;
-              const [minBalance, maxBalance] = baseBalancedRanges[trait];
-              return `
-                <tr>
-                  <td>
-                    <img src="/assets/icon/small/${trait}.png" 
-                         alt="${trait}" 
-                         class="characteristic-icon">
-                    ${trait.charAt(0).toUpperCase() + trait.slice(1)}
-                  </td>
-                  <td class="characteristic-bar-cell">
-                    <div class="characteristic-bar-container">
-                      <div class="characteristic-bar">
-                        <div class="bar-background"></div>
-                        <div class="balanced-range" style="left: ${minBalance * 100}%; width: ${(maxBalance - minBalance) * 100}%"></div>
-                        <div class="value-marker" style="left: ${displayValue * 100}%"></div>
-                      </div>
-                      <div class="bar-labels">
-                        <span class="value-label" style="left: ${displayValue * 100}%">
-                          ${(displayValue * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                </tr>`;
-            }).join('')}
-        </tbody>
-      </table>
+      ${createTextCenter({ text: 'Grape Characteristics', isHeadline: true })}
+      ${createTable({
+        className: 'data-table',
+        headers: [],
+        id: 'characteristics-table',
+        tableClassName: 'table'
+      })}
+      <tbody>
+        ${Object.entries(displayInfo.characteristics)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([trait, value]) => {
+            const displayValue = 0.5 + value;
+            const [minBalance, maxBalance] = baseBalancedRanges[trait];
+            return createCharacteristicRow(trait, displayValue, minBalance, maxBalance);
+          }).join('')}
+      </tbody>
     </div>`;
 
-  // Generate regions section
-  let countryButtons = '';
-  let regionsTable = '';
+  // Create regional suitability section
+  const regionsSection = createRegionalSuitabilitySection(resource);
+
+  return createOverlayHTML({
+    title: resource.name,
+    content: `
+      <div class="overlay-card resource-overlay">
+        <div class="imgbox">
+          <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" 
+               class="card-img-top process-image mx-auto d-block" 
+               alt="${resource.name}">
+        </div>
+        <div class="info-grid">
+          ${baseInfoSection}
+          ${characteristicsSection}
+          ${regionsSection}
+        </div>
+      </div>
+    `,
+    buttonText: '',
+    isModal: true
+  });
+}
+
+function createRegionalSuitabilitySection(resource) {
   const sortedCountries = Object.keys(grapeSuitability).sort();
-  sortedCountries.forEach((country, index) => {
+  let countryButtons = sortedCountries.map(country => 
+    `<button class="btn btn-secondary btn-sm toggle-country" data-country="${country}">${country}</button>`
+  ).join('');
+
+  let regionsTable = sortedCountries.map((country, index) => {
     const countryContent = Object.entries(grapeSuitability[country])
       .filter(([_, suitability]) => suitability[resource.name])
       .map(([region, suitability]) => {
         const suitabilityValue = suitability[resource.name];
-        const colorClass = getColorClass(suitabilityValue);
         return `<tr>
           <td>${region}</td>
-          <td class="${colorClass}">${(suitabilityValue * 100).toFixed(0)}%</td>
+          <td class="${getColorClass(suitabilityValue)}">${(suitabilityValue * 100).toFixed(0)}%</td>
         </tr>`;
       }).join('');
 
-    countryButtons += `
-      <button class="btn btn-secondary btn-sm toggle-country" data-country="${country}">${country}</button>
-    `;
-    regionsTable += `
-      <div class="country-section" id="regions-${country.replace(/\s+/g, '-')}" style="display: ${index === 0 ? 'block' : 'none'};">
-        <table class="data-table">
-          <tbody>
-            ${countryContent}
-          </tbody>
-        </table>
-      </div>
-    `;
-  });
+    return `
+      <div class="country-section" id="regions-${country.replace(/\s+/g, '-')}" 
+           style="display: ${index === 0 ? 'block' : 'none'};">
+        ${createTable({
+          className: 'data-table',
+          headers: [],
+          tableClassName: 'table'
+        })}
+        <tbody>${countryContent}</tbody>
+      </div>`;
+  }).join('');
 
   return `
-    <div class="overlay-card resource-overlay">
-      <div class="imgbox">
-        <div class="card-header text-white d-flex justify-content-between align-items-center">
-          <h3 class="h5 mb-0">${resource.name}</h3>
-          <button class="btn btn-light btn-sm close-btn">Close</button>
-        </div>
-        <img src="/assets/icon/grape/icon_${resource.name.toLowerCase()}.webp" class="card-img-top process-image mx-auto d-block" alt="${resource.name}">
-      </div>  
-      <div class="info-grid">
-        ${baseInfoSection}
-        ${characteristicsSection}
-        <div class="info-section">
-          ${createTextCenter({ text: '<h4>Regional Suitability</h4>' })}
-          <div class="country-buttons">
-            ${countryButtons}
-          </div>
-          <div class="mt-3">
-            ${regionsTable}
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
+    <div class="info-section">
+      ${createTextCenter({ text: 'Regional Suitability', isHeadline: true })}
+      <div class="country-buttons">${countryButtons}</div>
+      <div class="mt-3">${regionsTable}</div>
+    </div>`;
+}
+
+function createCharacteristicRow(trait, value, minBalance, maxBalance) {
+  return `
+    <tr>
+      <td>
+        <img src="/assets/icon/small/${trait}.png" 
+             alt="${trait}" 
+             class="characteristic-icon">
+        ${trait.charAt(0).toUpperCase() + trait.slice(1)}
+      </td>
+      <td class="characteristic-bar-cell">
+        ${createCharacteristicBar(trait, value, minBalance, maxBalance)}
+      </td>
+    </tr>`;
 }
 
 function setupResourceInfoEventListeners(details, overlay) {

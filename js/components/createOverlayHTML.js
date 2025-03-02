@@ -1,4 +1,4 @@
-import { getFlagIconHTML } from '../utils.js';
+    import { getFlagIconHTML } from '../utils.js';
 
 export function createOverlayHTML({ 
     title,

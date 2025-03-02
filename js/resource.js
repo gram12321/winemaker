@@ -104,7 +104,9 @@ export class InventoryItem {
 
   getDisplayInfo() {
     return {
+      // Basic information
       name: `${this.fieldName}, ${this.resource.name}, ${this.vintage}`,
+      qualityDisplay: this.getQualityDisplay(),
       quality: this.quality,
       amount: this.amount,
       storage: this.storage,
@@ -112,7 +114,23 @@ export class InventoryItem {
       resource: this.resource,
       vintage: this.vintage,
       fieldPrestige: this.fieldPrestige,
-      state: this.state
+      state: this.state,
+
+      // Wine characteristics
+      characteristics: {
+        sweetness: this.sweetness,
+        acidity: this.acidity,
+        tannins: this.tannins,
+        aroma: this.aroma,
+        body: this.body,
+        spice: this.spice
+      },
+
+      crushingMethod: this.crushingMethod,
+      oxidation: this.oxidation,
+      ripeness: this.ripeness,
+      fieldSource: this.fieldSource,
+      specialFeatures: this.specialFeatures || []
     };
   }
 

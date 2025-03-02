@@ -1,7 +1,8 @@
 import { showModalOverlay } from './overlayUtils.js';
-import { createTextCenter } from '../components/createOverlayHTML.js';
+import { createTextCenter, createTable, createOverlayHTML } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
 import { balanceCalculator, calculateNearestArchetype, baseBalancedRanges, applyRangeAdjustments  } from '../utils/balanceCalculator.js';
+import { createCharacteristicBar } from '../components/characteristicBar.js';
 
 export function showWineInfoOverlay(wineItem) {
     const overlayContainer = showModalOverlay('wineInfoOverlay', createWineInfoOverlayHTML(wineItem));
@@ -10,11 +11,8 @@ export function showWineInfoOverlay(wineItem) {
 }
 
 function calculateWineBalance(wine) {
-    // Instead of creating a new object, use the complete wine object directly
-    // Get nearest archetype and check if wine qualifies
+
     const { archetype, distance, qualifies } = calculateNearestArchetype(wine);
-    
-    // Calculate balance score for the nearest archetype
     const score = balanceCalculator(wine, archetype);
 
     return {
@@ -27,127 +25,102 @@ function calculateWineBalance(wine) {
 
 function createWineInfoOverlayHTML(wine) {
     const balanceInfo = calculateWineBalance(wine);
+    const displayInfo = wine.getDisplayInfo();
     const balanceColorClass = getColorClass(balanceInfo.score);
 
-    // Create base information section
+    // Create base information section using createTable
     const baseInfoSection = `
         <div class="info-section">
-            ${createTextCenter({ text: '<h4>Product Information</h4>' })}
-            <table class="data-table">
-                <tbody>
-                    <tr><td>Name</td><td>${wine.resource.name}</td></tr>
-                    <tr><td>Vintage</td><td>${wine.vintage}</td></tr>
-                    <tr><td>Field</td><td>${wine.fieldName}</td></tr>
-                    <tr><td>Quality</td><td class="${getColorClass(wine.quality)}">${(wine.quality * 100).toFixed(0)}%</td></tr>
-                    <tr><td>Balance</td><td class="${balanceColorClass}">${(balanceInfo.score * 100).toFixed(1)}%</td></tr>
-                    <tr><td>${balanceInfo.qualifies ? 'Archetype' : 'Nearest Archetype'}</td>
-                        <td>${balanceInfo.archetype}${!balanceInfo.qualifies ? 
-                            ` (${(balanceInfo.distance * 100).toFixed(1)}% away)` : 
-                            ''}</td></tr>
-                    <tr><td>Amount</td><td>${formatAmount(wine)}</td></tr>
-                    <tr>
-                        <td>State</td>
-                        <td>
-                            <img src="/assets/icon/small/${wine.state.toLowerCase()}.png" 
-                                 alt="${wine.state}" 
-                                 class="characteristic-icon">
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            ${createTextCenter({ text: 'Product Information', isHeadline: true })}
+            ${createTable({
+                className: 'data-table',
+                headers: [],
+                id: 'wine-info-table',
+                tableClassName: 'table'
+            })}
+            <tbody>
+                <tr><td>Name</td><td>${displayInfo.name}</td></tr>
+                <tr><td>Vintage</td><td>${displayInfo.vintage}</td></tr>
+                <tr><td>Field</td><td>${displayInfo.fieldName}</td></tr>
+                <tr><td>Quality</td><td>${displayInfo.qualityDisplay}</td></tr>
+                <tr><td>Balance</td><td class="${balanceColorClass}">${(balanceInfo.score * 100).toFixed(1)}%</td></tr>
+                <tr><td>${balanceInfo.qualifies ? 'Archetype' : 'Nearest Archetype'}</td>
+                    <td>${balanceInfo.archetype}${!balanceInfo.qualifies ? 
+                        ` (${(balanceInfo.distance * 100).toFixed(1)}% away)` : 
+                        ''}</td></tr>
+                <tr><td>Amount</td><td>${formatAmount(wine)}</td></tr>
+                <tr>
+                    <td>State</td>
+                    <td>
+                        <img src="/assets/icon/small/${displayInfo.state.toLowerCase()}.png" 
+                             alt="${displayInfo.state}" 
+                             class="characteristic-icon">
+                    </td>
+                </tr>
+            </tbody>
         </div>`;
 
-    // Show characteristics section for all stages
+    // Show characteristics section using createTable
     const characteristicsSection = `
         <div class="info-section">
-            ${createTextCenter({ text: `<h4>${wine.state} Characteristics</h4>` })}
-            <table class="data-table">
-                <tbody>
-                    ${Object.entries({
-                        acidity: wine.acidity,
-                        aroma: wine.aroma,
-                        body: wine.body,
-                        spice: wine.spice,
-                        sweetness: wine.sweetness,
-                        tannins: wine.tannins
-                    }).sort(([a], [b]) => a.localeCompare(b)).map(([trait, value]) => `
-                        <tr>
-                            <td>
-                                <img src="/assets/icon/small/${trait}.png" 
-                                     alt="${trait}" 
-                                     class="characteristic-icon">
-                                ${trait.charAt(0).toUpperCase() + trait.slice(1)}
-                            </td>
-                            <td class="characteristic-bar-cell">
-                                ${createCharacteristicBar(trait, value, wine)}  <!-- Pass wine object here -->
-                            </td>
-                        </tr>`).join('')}
-                </tbody>
-            </table>
+            ${createTextCenter({ 
+                text: `${displayInfo.state} Characteristics`, 
+                isHeadline: true 
+            })}
+            ${createTable({
+                className: 'data-table',
+                headers: [],
+                id: 'characteristics-table',
+                tableClassName: 'table'
+            })}
+            <tbody>
+                ${Object.entries(displayInfo.characteristics)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([trait, value]) => createCharacteristicRow(trait, value, displayInfo.characteristics))
+                    .join('')}
+            </tbody>
         </div>`;
 
-    return `
-        <div class="overlay-card">
-            <div class="imgbox">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">${wine.fieldName}, ${wine.resource.name} (${wine.vintage})</h3>
-                    <button class="btn btn-light btn-sm close-btn">Close</button>
+    // Use createOverlayHTML for consistent structure
+    return createOverlayHTML({
+        title: `${displayInfo.fieldName}, ${displayInfo.resource.name} (${displayInfo.vintage})`,
+        content: `
+            <div class="overlay-card">
+                <div class="imgbox">
+                    <img src="/assets/icon/grape/icon_${displayInfo.resource.name.toLowerCase()}.webp" 
+                         class="card-img-top process-image mx-auto d-block" 
+                         alt="${displayInfo.resource.name}">
                 </div>
-                <img src="/assets/icon/grape/icon_${wine.resource.name.toLowerCase()}.webp" 
-                     class="card-img-top process-image mx-auto d-block" 
-                     alt="${wine.resource.name}">
+                <div class="info-grid">
+                    ${baseInfoSection}
+                    ${characteristicsSection}
+                </div>
             </div>
-            <div class="info-grid">
-                ${baseInfoSection}
-                ${characteristicsSection}
-            </div>
-        </div>`;
+        `,
+        buttonText: '',  // No action button needed
+        isModal: true
+    });
+}
+
+function createCharacteristicRow(trait, value, characteristics) {
+    return `<tr>
+        <td>
+            <img src="/assets/icon/small/${trait}.png" 
+                 alt="${trait}" 
+                 class="characteristic-icon">
+            ${trait.charAt(0).toUpperCase() + trait.slice(1)}
+        </td>
+        <td class="characteristic-bar-cell">
+            ${createCharacteristicBar(trait, value, characteristics)}
+        </td>
+    </tr>`;
 }
 
 function createCharacteristicBar(trait, value, wine) {
-    // Get both base and adjusted ranges
     const [minBalance, maxBalance] = baseBalancedRanges[trait] || [0, 1];
     
-    // Only pass the characteristics needed for range adjustments
-    const characteristics = {
-        acidity: wine.acidity,
-        aroma: wine.aroma,
-        body: wine.body,
-        spice: wine.spice,
-        sweetness: wine.sweetness,
-        tannins: wine.tannins
-    };
-
-    const adjustedRanges = applyRangeAdjustments(characteristics, baseBalancedRanges);
-    const [adjustedMin, adjustedMax] = adjustedRanges[trait] || [0, 1]; // Add fallback values
-    
-    // Calculate the center range (25% on each side of middle)
-    const rangeSize = adjustedMax - adjustedMin;
-    const centerSize = rangeSize * 0.25;
-    const adjustedMiddle = (adjustedMin + adjustedMax) / 2;
-    const centerMin = adjustedMiddle - centerSize;
-    const centerMax = adjustedMiddle + centerSize;
-    
-    return `
-        <div class="characteristic-bar-container">
-            <div class="characteristic-bar">
-                <!-- Background bar -->
-                <div class="bar-background"></div>
-                <!-- Base balanced range (green zone) -->
-                <div class="balanced-range" style="left: ${minBalance * 100}%; width: ${(maxBalance - minBalance) * 100}%"></div>
-                <!-- Lower part of adjusted range -->
-                <div class="adjusted-range adjusted-range-outer" style="left: ${adjustedMin * 100}%; width: ${(centerMin - adjustedMin) * 100}%"></div>
-                <!-- Center optimal part -->
-                <div class="adjusted-range adjusted-range-center" style="left: ${centerMin * 100}%; width: ${(centerMax - centerMin) * 100}%"></div>
-                <!-- Upper part of adjusted range -->
-                <div class="adjusted-range adjusted-range-outer" style="left: ${centerMax * 100}%; width: ${(adjustedMax - centerMax) * 100}%"></div>
-                <!-- Value marker -->
-                <div class="value-marker" style="left: ${value * 100}%"></div>
-            </div>
-            <div class="bar-labels">
-                <span class="value-label" style="left: ${value * 100}%">${(value * 100).toFixed(0)}%</span>
-            </div>
-        </div>`;
+    const adjustedRanges = applyRangeAdjustments(wine, baseBalancedRanges);
+    return createCharacteristicBar(trait, value, minBalance, maxBalance, adjustedRanges[trait]);
 }
 
 function formatAmount(item) {
