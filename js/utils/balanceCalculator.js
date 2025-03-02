@@ -213,31 +213,12 @@ const synergyBonuses = {
 
 // Update qualifiesForArchetype function to handle new requirement structure
 function qualifiesForArchetype(wine, archetype) {
-    console.group(`Archetype Qualification Check - ${archetype.name}`);
-    
-    // Log complete wine object properties
-    console.log('Wine properties available:', wine); // Log the entire wine object first
-    console.log('Wine properties table:');
-    console.table({
-        // Direct property access instead of creating new object
-        resource: wine.resource,
-        quality: wine.quality,
-        vintage: wine.vintage,
-        fieldPrestige: wine.fieldPrestige,
-        oxidation: wine.oxidation,
-        ripeness: wine.ripeness,
-        crushingMethod: wine.crushingMethod,
-        fieldSource: wine.fieldSource,
-        sweetness: wine.sweetness,
-        acidity: wine.acidity,
-        tannins: wine.tannins,
-        aroma: wine.aroma,
-        body: wine.body,
-        spice: wine.spice
-    });
+    if (!wine || !archetype.requirements) {
+        return true;
+    }
+    const reqs = archetype.requirements;
 
-    // Log complete archetype requirements
-    console.log('Archetype complete requirements:');
+    // Build requirements object for validation
     const requirements = {
         // Basic requirements
         requiredGrapes: archetype.requirements?.requiredGrapes ?? 'not required',
@@ -262,99 +243,36 @@ function qualifiesForArchetype(wine, archetype) {
             .map(([key, [min, max]]) => [key, `${min}-${max}`])
         )
     };
-    console.table(requirements);
 
-    console.log('Wine object:', wine);
-    console.log('Archetype requirements:', archetype.requirements);
-
-    if (!wine || !archetype.requirements) {
-        console.log('No wine or no requirements - defaulting to true');
-        console.groupEnd();
-        return true;
-    }
-    const reqs = archetype.requirements;
-
-    // Check grape requirements (specific varieties)
-    if (reqs.requiredGrapes) {
-        console.log('Testing grape variety:', {
-            required: reqs.requiredGrapes,
-            actual: wine.resource?.name,
-            pass: wine.resource && reqs.requiredGrapes.includes(wine.resource.name)
-        });
-        if (!wine.resource || !reqs.requiredGrapes.includes(wine.resource.name)) {
-            console.log('Failed: Grape variety requirement not met');
-            console.groupEnd();
-            return false;
-        }
+    // Check all requirements
+    if (reqs.requiredGrapes && (!wine.resource || !reqs.requiredGrapes.includes(wine.resource.name))) {
+        return false;
     }
 
-    // Check grape color requirement
-    if (reqs.requiredColor) {
-        console.log('Testing grape color:', {
-            required: reqs.requiredColor,
-            actual: wine.resource?.grapeColor,
-            pass: wine.resource && wine.resource.grapeColor === reqs.requiredColor
-        });
-        if (!wine.resource || wine.resource.grapeColor !== reqs.requiredColor) {
-            console.log('Failed: Grape color requirement not met');
-            console.groupEnd();
-            return false;
-        }
+    // Check grape color
+    if (reqs.requiredColor && (!wine.resource || wine.resource.grapeColor !== reqs.requiredColor)) {
+        return false;
     }
 
     // Check quality requirement
-    if (reqs.minimumQuality) {
-        console.log('Testing quality:', {
-            required: reqs.minimumQuality,
-            actual: wine.quality,
-            pass: wine.quality >= reqs.minimumQuality
-        });
-        if (wine.quality < reqs.minimumQuality) {
-            console.log('Failed: Quality requirement not met');
-            console.groupEnd();
-            return false;
-        }
+    if (reqs.minimumQuality && wine.quality < reqs.minimumQuality) {
+        return false;
     }
 
     // Check vintage requirement
-    if (reqs.minimumVintage) {
-        console.log('Testing vintage:', {
-            required: reqs.minimumVintage,
-            actual: wine.vintage,
-            pass: wine.vintage >= reqs.minimumVintage
-        });
-        if (wine.vintage < reqs.minimumVintage) {
-            console.log('Failed: Vintage requirement not met');
-            console.groupEnd();
-            return false;
-        }
+    if (reqs.minimumVintage && wine.vintage < reqs.minimumVintage) {
+        return false;
     }
 
     // Check field prestige
-    if (reqs.minimumPrestige) {
-        console.log('Testing field prestige:', {
-            required: reqs.minimumPrestige,
-            actual: wine.fieldPrestige,
-            pass: wine.fieldPrestige >= reqs.minimumPrestige
-        });
-        if (wine.fieldPrestige < reqs.minimumPrestige) {
-            console.log('Failed: Field prestige requirement not met');
-            console.groupEnd();
-            return false;
-        }
+    if (reqs.minimumPrestige && wine.fieldPrestige < reqs.minimumPrestige) {
+        return false;
     }
 
     // Check oxidation range
     if (reqs.oxidationRange) {
         const [minOx, maxOx] = reqs.oxidationRange;
-        console.log('Testing oxidation:', {
-            required: `${minOx}-${maxOx}`,
-            actual: wine.oxidation,
-            pass: wine.oxidation >= minOx && wine.oxidation <= maxOx
-        });
         if (wine.oxidation < minOx || wine.oxidation > maxOx) {
-            console.log('Failed: Oxidation requirement not met');
-            console.groupEnd();
             return false;
         }
     }
@@ -362,44 +280,21 @@ function qualifiesForArchetype(wine, archetype) {
     // Check ripeness range
     if (reqs.ripenessRange) {
         const [minRipe, maxRipe] = reqs.ripenessRange;
-        console.log('Testing ripeness:', {
-            required: `${minRipe}-${maxRipe}`,
-            actual: wine.ripeness,
-            pass: wine.ripeness >= minRipe && wine.ripeness <= maxRipe
-        });
         if (wine.ripeness < minRipe || wine.ripeness > maxRipe) {
-            console.log('Failed: Ripeness requirement not met');
-            console.groupEnd();
             return false;
         }
     }
 
     // Check processing requirements
     if (archetype.processingReqs) {
-        // Check ecological requirement
         if (archetype.processingReqs.requireEcological) {
-            console.log('Testing ecological requirement:', {
-                required: true,
-                actual: wine.fieldSource?.conventional,
-                pass: wine.fieldSource && wine.fieldSource.conventional === 'Ecological'
-            });
             if (!wine.fieldSource || wine.fieldSource.conventional !== 'Ecological') {
-                console.log('Failed: Ecological requirement not met');
-                console.groupEnd();
                 return false;
             }
         }
 
-        // Check processing methods
         if (archetype.processingReqs.allowedMethods) {
-            console.log('Testing processing method:', {
-                allowed: archetype.processingReqs.allowedMethods,
-                actual: wine.crushingMethod,
-                pass: archetype.processingReqs.allowedMethods.includes(wine.crushingMethod)
-            });
             if (!archetype.processingReqs.allowedMethods.includes(wine.crushingMethod)) {
-                console.log('Failed: Processing method requirement not met');
-                console.groupEnd();
                 return false;
             }
         }
@@ -407,25 +302,16 @@ function qualifiesForArchetype(wine, archetype) {
 
     // Check characteristic ranges
     for (const [trait, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
-        console.log(`Testing ${trait}:`, {
-            required: `${min}-${max}`,
-            actual: wine[trait],
-            pass: wine[trait] >= min && wine[trait] <= max
-        });
         if (wine[trait] < min || wine[trait] > max) {
-            console.log(`Failed: ${trait} requirement not met`);
-            console.groupEnd();
             return false;
         }
     }
 
-    console.log('All requirements passed!');
-    console.groupEnd();
     return true;
 }
 
 function validateWineObject(wine, archetype) {
-    // Base characteristics are always required
+    // Validate only essential characteristics
     const baseCharacteristics = [
         'sweetness',
         'acidity',
@@ -441,62 +327,12 @@ function validateWineObject(wine, archetype) {
         throw new Error(`Wine object is missing base characteristics: ${missing.join(', ')}`);
     }
 
-    // Only check archetype-specific requirements if we're testing against an archetype
-    if (archetype) {
-        const archetypeProperties = [
-            'resource',
-            'quality',
-            'vintage',
-            'fieldPrestige',
-            'oxidation',
-            'ripeness',
-            'crushingMethod',
-            'fieldSource'
-        ];
-
-        const requiredProps = new Set();
-
-        // Only add properties that are actually used by this archetype
-        if (archetype.requirements?.requiredGrapes || archetype.requirements?.requiredColor) {
-            requiredProps.add('resource');
-        }
-        if (archetype.requirements?.minimumQuality) {
-            requiredProps.add('quality');
-        }
-        if (archetype.requirements?.minimumVintage) {
-            requiredProps.add('vintage');
-        }
-        if (archetype.requirements?.minimumPrestige) {
-            requiredProps.add('fieldPrestige');
-        }
-        if (archetype.requirements?.oxidationRange) {
-            requiredProps.add('oxidation');
-        }
-        if (archetype.requirements?.ripenessRange) {
-            requiredProps.add('ripeness');
-        }
-        if (archetype.processingReqs?.allowedMethods) {
-            requiredProps.add('crushingMethod');
-        }
-        if (archetype.processingReqs?.requireEcological) {
-            requiredProps.add('fieldSource');
-        }
-
-        const missingArchetypeProps = Array.from(requiredProps).filter(prop => wine[prop] === undefined);
-        
-        if (missingArchetypeProps.length > 0) {
-            throw new Error(`Wine object is missing required archetype properties: ${missingArchetypeProps.join(', ')}`);
-        }
-    }
-
     return true;
 }
 
 export function balanceCalculator(wine, archetype) {
     // Ensure inventory is loaded
     loadInventory();
-    
-    console.group('Balance Calculation Details:');
     
     // Validate wine object with archetype context
     validateWineObject(wine, archetype);
@@ -505,42 +341,25 @@ export function balanceCalculator(wine, archetype) {
     let synergyBonus = 0;
     for (const synergy of Object.values(synergyBonuses)) {
         if (synergy.condition(wine)) {
-            const bonus = synergy.bonus(wine);
-            console.log('Synergy bonus (' + synergy.characteristics.join('+') + '): reducing deductions by ' + (bonus * 100).toFixed(2) + '%');
-            synergyBonus += bonus;
+            synergyBonus += synergy.bonus(wine);
         }
     }
     synergyBonus = Math.min(synergyBonus, 0.2);
 
     // Calculate dynamic balance with synergy affecting deductions
     let dynamicBalance = dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus);
-    console.log('Raw Dynamic Balance:', dynamicBalance.toFixed(4));
     
     let finalScore;
-    // Calculate archetype score if applicable
     if (archetype && qualifiesForArchetype(wine, archetype)) {
         let midpointScore = distanceScore(wine, archetype);
         let groupBalance = balanceScore(wine, archetype);
         let archetypeBalance = (midpointScore + groupBalance) / 2;
-        
-        console.log('\nArchetype (' + archetype.name + ') Scores:');
-        console.log('Midpoint Score:', midpointScore.toFixed(4));
-        console.log('Group Balance:', groupBalance.toFixed(4));
-        console.log('Combined Archetype Score:', archetypeBalance.toFixed(4));
-        
-        // Take best score between archetype and dynamic
         finalScore = Math.max(archetypeBalance, dynamicBalance);
-        console.log('\nChosen Score (best of archetype/dynamic):', finalScore.toFixed(4));
     } else {
         finalScore = dynamicBalance;
-        console.log('\nFinal Dynamic Score:', finalScore.toFixed(4));
     }
 
-    const steppedScore = calculateSteppedBalance(finalScore);
-    console.log('After Stepped Calculation:', steppedScore.toFixed(4));
-    
-    console.groupEnd();
-    return steppedScore;
+    return calculateSteppedBalance(finalScore);
 }
 
 function calculateSteppedBalance(score) {
@@ -625,7 +444,6 @@ export function applyRangeAdjustments(wine, baseBalancedRanges) {
         }
     }
 
-    console.groupEnd();
     return adjustedRanges;
 }
 
@@ -659,26 +477,9 @@ export function applyPenaltyAdjustments(wine) {
 }
 
 function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
-    console.group('Dynamic Balance Details:');
-    
     let adjustedRanges = applyRangeAdjustments(wine, baseBalancedRanges);
     let penaltyMultipliers = applyPenaltyAdjustments(wine);
     let totalDeduction = 0;
-    
-    console.log('\nAdjusted Ranges:');
-    for (const [char, range] of Object.entries(adjustedRanges)) {
-        const baseRange = baseBalancedRanges[char];
-        if (range[0] !== baseRange[0] || range[1] !== baseRange[1]) {
-            console.log(`${char}: [${baseRange[0].toFixed(2)}, ${baseRange[1].toFixed(2)}] → [${range[0].toFixed(2)}, ${range[1].toFixed(2)}]`);
-        }
-    }
-
-    console.log('\nPenalty Multipliers:');
-    for (const [key, value] of Object.entries(penaltyMultipliers)) {
-        if (value !== 1) {
-            console.log(`${key}: ${value.toFixed(2)}x`);
-        }
-    }
 
     for (const characteristic in wine) {
         if (!adjustedRanges[characteristic]) continue;
@@ -687,13 +488,11 @@ function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
         const midpoint = (min + max) / 2;
         const value = wine[characteristic];
 
-        // Calculate raw deductions
         let insideRangeDeduction = 0;
         let outOfRangeDeduction = 0;
 
         if (value >= min && value <= max) {
             insideRangeDeduction = Math.abs(value - midpoint);
-            console.log(`${characteristic}: Inside range deviation: ${insideRangeDeduction.toFixed(4)}`);
         } else {
             insideRangeDeduction = Math.abs(value < min ? min - midpoint : max - midpoint);
             
@@ -704,7 +503,6 @@ function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
                 let stepSize = Math.min(0.1, outsideDistance - (i * 0.1));
                 outOfRangeDeduction += stepSize * Math.pow(2, i + 1);
             }
-            console.log(`${characteristic}: Outside range penalty: ${outOfRangeDeduction.toFixed(4)}`);
         }
 
         let rawDeduction = insideRangeDeduction + outOfRangeDeduction;
@@ -712,31 +510,19 @@ function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
         // Apply penalties
         let penaltyKey = characteristic + "_penalty";
         let adjustmentPenalty = penaltyMultipliers[penaltyKey] || 1;
-        if (adjustmentPenalty !== 1) {
-            console.log(`${characteristic}: Penalty multiplier: ${adjustmentPenalty.toFixed(2)}x`);
-        }
         rawDeduction *= adjustmentPenalty;
 
         // Apply synergy reduction to deductions
         if (synergyBonus > 0) {
             rawDeduction *= (1 - synergyBonus);
-            // Add more detailed logging
-            console.log(`${characteristic}: Before synergy: ${rawDeduction.toFixed(4)}`);
-            console.log(`${characteristic}: After synergy (${synergyBonus * 100}% reduction): ${(rawDeduction * (1 - synergyBonus)).toFixed(4)}`);
         }
 
         // Apply exponential decay to the deduction
         let normalizedDeduction = 1 - Math.exp(-rawDeduction);
-        console.log(`${characteristic}: Final deduction: ${normalizedDeduction.toFixed(4)}`);
         totalDeduction += normalizedDeduction;
     }
 
-    let avgDeduction = totalDeduction / Object.keys(wine).length;
-    let finalScore = 1 - avgDeduction;
-    console.log(`\nFinal Dynamic Score: ${finalScore.toFixed(4)}`);
-    
-    console.groupEnd();
-    return finalScore;
+    return 1 - (totalDeduction / Object.keys(wine).length);
 }
 
 // Archtype calculations
