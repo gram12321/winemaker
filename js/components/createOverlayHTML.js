@@ -294,6 +294,33 @@ function createIconLabel({
     `;
 }
 
+function createRegionalSection({
+    title,
+    countries,
+    createContent,
+    defaultCountry = 0
+}) {
+    const countryButtons = countries.map(country => 
+        `<button class="btn btn-secondary btn-sm toggle-country" data-country="${country}">${country}</button>`
+    ).join('');
+
+    const regionsContent = countries.map((country, index) => `
+        <div class="country-section" id="regions-${country.replace(/\s+/g, '-')}" 
+             style="display: ${index === defaultCountry ? 'block' : 'none'};">
+            ${createContent(country)}
+        </div>`
+    ).join('');
+
+    return `
+        <div class="info-section">
+            <div class="text-center">
+                <div><h4>${title}</h4></div>
+            </div>
+            <div class="country-buttons">${countryButtons}</div>
+            <div class="mt-3">${regionsContent}</div>
+        </div>`;
+}
+
 export {
     createSlider,
     createCheckbox,
@@ -303,5 +330,6 @@ export {
     createTable,
     createMethodSelector,
     createInfoTable,
-    createIconLabel
+    createIconLabel,
+    createRegionalSection
 };

@@ -584,16 +584,33 @@ function calculateSteppedBalance(score) {
 }
 
 
-export function applyRangeAdjustments(characteristics, baseBalancedRanges) {
-    // This function now expects just the characteristics object
+export function applyRangeAdjustments(wine, baseBalancedRanges) {
+    // Define the valid characteristics we want to work with
+    const validCharacteristics = [
+        'sweetness',
+        'acidity',
+        'tannins',
+        'aroma',
+        'body',
+        'spice'
+    ];
+
+    // Extract only the valid characteristics from the wine object
+    const characteristics = {};
+    validCharacteristics.forEach(char => {
+        if (typeof wine[char] === 'number') {
+            characteristics[char] = wine[char];
+        }
+    });
+
     let adjustedRanges = structuredClone(baseBalancedRanges);
 
+    // Process only valid characteristics
     for (const characteristic in characteristics) {
-        if (!baseBalancedRanges[characteristic]) continue;
-        
         const [baseMin, baseMax] = baseBalancedRanges[characteristic];
         const baseMidpoint = (baseMin + baseMax) / 2;
-        const diff = characteristics[characteristic] - baseMidpoint;
+        const value = characteristics[characteristic];
+        const diff = value - baseMidpoint;
 
         if (diff !== 0) {
             let adjustmentKey = characteristic + (diff > 0 ? "_up" : "_down");
@@ -610,6 +627,7 @@ export function applyRangeAdjustments(characteristics, baseBalancedRanges) {
         }
     }
 
+    console.groupEnd();
     return adjustedRanges;
 }
 

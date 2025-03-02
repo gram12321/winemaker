@@ -5,14 +5,12 @@ import { Building, Tool, getBuildingTools  } from '/js/classes/buildingClasses.j
 // Function to load inventory from localStorage
 function loadInventory() {
     let savedInventory = localStorage.getItem('playerInventory');
-    console.log('Raw saved inventory:', savedInventory);
 
     try {
         savedInventory = JSON.parse(savedInventory);
         if (!Array.isArray(savedInventory)) {
             savedInventory = [];
         }
-        console.log('Parsed saved inventory:', savedInventory);
     } catch (error) {
         console.warn("Failed to parse playerInventory from localStorage. Initializing with empty array.");
         savedInventory = [];
@@ -139,12 +137,8 @@ function saveInventory() {
     return savedItem;
   });
 
-  console.log('Saving inventory to localStorage:', itemsToSave);
+
   localStorage.setItem('playerInventory', JSON.stringify(itemsToSave));
-  
-  // Verify what was actually saved
-  const savedData = localStorage.getItem('playerInventory');
-  console.log('Verification - Raw data in localStorage:', savedData);
 }
 
 

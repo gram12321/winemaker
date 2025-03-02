@@ -1,5 +1,5 @@
 import { showModalOverlay } from './overlayUtils.js';
-import { createTextCenter, createInfoTable, createIconLabel } from '../components/createOverlayHTML.js';
+import { createTextCenter, createInfoTable, createIconLabel, createTable, createOverlayHTML } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
 import { balanceCalculator, calculateNearestArchetype, baseBalancedRanges, applyRangeAdjustments  } from '../utils/balanceCalculator.js';
 import { createCharacteristicBar } from '../components/characteristicBar.js';
@@ -53,29 +53,25 @@ function createWineInfoOverlayHTML(wine) {
                         icon: displayInfo.state.toLowerCase(),
                         value: ''
                     }
-                ]
+                ],
+                className: 'data-table wine-info-table'  // Add wine-info-table class
             })}
         </div>`;
 
-    // Show characteristics section using createTable
     const characteristicsSection = `
         <div class="info-section">
             ${createTextCenter({ 
                 text: `${displayInfo.state} Characteristics`, 
                 isHeadline: true 
             })}
-            ${createTable({
-                className: 'data-table',
-                headers: [],
-                id: 'characteristics-table',
-                tableClassName: 'table'
-            })}
-            <tbody>
-                ${Object.entries(displayInfo.characteristics)
-                    .sort(([a], [b]) => a.localeCompare(b))
-                    .map(([trait, value]) => createCharacteristicRow(trait, value, displayInfo.characteristics))
-                    .join('')}
-            </tbody>
+            <table class="data-table wine-info-table">
+                <tbody>
+                    ${Object.entries(displayInfo.characteristics)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([trait, value]) => createCharacteristicRow(trait, value, displayInfo.characteristics))
+                        .join('')}
+                </tbody>
+            </table>
         </div>`;
 
     // Use createOverlayHTML for consistent structure
@@ -100,18 +96,22 @@ function createWineInfoOverlayHTML(wine) {
 }
 
 function createCharacteristicRow(trait, value, characteristics) {
-    return `<tr>
-        <td>${createIconLabel({ icon: trait, text: trait.charAt(0).toUpperCase() + trait.slice(1) })}</td>
-        <td class="characteristic-bar-cell">
-            ${createCharacteristicBar(trait, value, characteristics)}
-        </td>
-    </tr>`;
+    return `<tr>${getCharacteristicBar(trait, value, characteristics)}</tr>`;
 }
 
-function createCharacteristicBar(trait, value, wine) {
+// Helper function to get the characteristic bar with proper ranges
+function getCharacteristicBar(trait, value, characteristics) {
     const [minBalance, maxBalance] = baseBalancedRanges[trait] || [0, 1];
+    // Make sure we pass a proper characteristics object
+    const adjustedRanges = applyRangeAdjustments({
+        sweetness: characteristics.sweetness,
+        acidity: characteristics.acidity,
+        tannins: characteristics.tannins,
+        aroma: characteristics.aroma,
+        body: characteristics.body,
+        spice: characteristics.spice
+    }, baseBalancedRanges);
     
-    const adjustedRanges = applyRangeAdjustments(wine, baseBalancedRanges);
     return createCharacteristicBar(trait, value, minBalance, maxBalance, adjustedRanges[trait]);
 }
 

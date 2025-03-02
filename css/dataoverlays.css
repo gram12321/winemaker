@@ -279,3 +279,12 @@
     font-size: 0.8em;
     top: 2px;
 }
+
+/* Wine and Resource Info specific table styles */
+.wine-info-table.data-table,
+.resource-info-table.data-table {
+    margin: 15px auto;
+    width: 100%;
+    padding: 10px;
+}
+
