@@ -321,6 +321,36 @@ function createRegionalSection({
         </div>`;
 }
 
+function createMultipleBtnSection({
+    title,
+    buttons,
+    createContent,
+    defaultButton = 0,
+    btnStyle = 'btn-secondary btn-sm',
+    btnGroupClass = 'country-buttons',  // Change back to original class
+    contentClass = 'country-section'    // Change back to original class
+}) {
+    const buttonElements = buttons.map(btn => 
+        `<button class="btn ${btnStyle} toggle-country" data-country="${btn}">${btn}</button>`  // Add back toggle-country class
+    ).join('');
+
+    const sections = buttons.map((btn, index) => `
+        <div class="${contentClass}" id="regions-${btn.replace(/\s+/g, '-')}" 
+             style="display: ${index === defaultButton ? 'block' : 'none'};">
+            ${createContent(btn)}
+        </div>`
+    ).join('');
+
+    return `
+        <div class="info-section">
+            <div class="text-center">
+                <div><h4>${title}</h4></div>
+            </div>
+            <div class="${btnGroupClass}">${buttonElements}</div>
+            <div class="mt-3">${sections}</div>
+        </div>`;
+}
+
 export {
     createSlider,
     createCheckbox,
@@ -331,5 +361,6 @@ export {
     createMethodSelector,
     createInfoTable,
     createIconLabel,
-    createRegionalSection
+    createRegionalSection,
+    createMultipleBtnSection
 };

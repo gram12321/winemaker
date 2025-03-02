@@ -9,7 +9,8 @@ import {
     createOverlayHTML, 
     createInfoTable, 
     createIconLabel,
-    createRegionalSection 
+    createRegionalSection,
+    createMultipleBtnSection 
 } from '../components/createOverlayHTML.js';
 import { createCharacteristicBar } from '../components/characteristicBar.js';
 
@@ -107,9 +108,12 @@ function createResourceInfoOverlayHTML(resource) {
 function createRegionalSuitabilitySection(resource) {
     const sortedCountries = Object.keys(grapeSuitability).sort();
     
-    return createRegionalSection({
+    return createMultipleBtnSection({
         title: 'Regional Suitability',
-        countries: sortedCountries,
+        buttons: sortedCountries,
+        btnStyle: 'btn-secondary btn-sm toggle-country',
+        btnGroupClass: 'country-buttons',
+        contentClass: 'country-section',
         createContent: (country) => `
             <table class="data-table">
                 <tbody>
@@ -149,23 +153,22 @@ function setupResourceInfoEventListeners(details, overlay) {
     }
   });  
 
-  // Setup toggle button event listeners for countries
+  // Update selector back to the original one that matches the CSS
   const toggleButtons = details.querySelectorAll('.toggle-country');
   toggleButtons.forEach(button => {
     button.addEventListener('click', () => {
       const country = button.getAttribute('data-country').replace(/\s+/g, '-');
       const regionsContainer = details.querySelector(`#regions-${country}`);
       
-      // Hide all other country sections
+      // Hide all other sections
       details.querySelectorAll('.country-section').forEach(section => {
         section.style.display = 'none';
       });
 
-      // Show the selected country section
+      // Show the selected section
       if (regionsContainer) {
         regionsContainer.style.display = 'block';
       }
     });
   });
-
 }
