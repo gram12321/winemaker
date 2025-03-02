@@ -585,8 +585,7 @@ function calculateSteppedBalance(score) {
 
 
 export function applyRangeAdjustments(wine, baseBalancedRanges) {
-    // Define the valid characteristics we want to work with
-    const validCharacteristics = [
+    const Characteristics = [
         'sweetness',
         'acidity',
         'tannins',
@@ -595,9 +594,8 @@ export function applyRangeAdjustments(wine, baseBalancedRanges) {
         'spice'
     ];
 
-    // Extract only the valid characteristics from the wine object
     const characteristics = {};
-    validCharacteristics.forEach(char => {
+    Characteristics.forEach(char => {
         if (typeof wine[char] === 'number') {
             characteristics[char] = wine[char];
         }
