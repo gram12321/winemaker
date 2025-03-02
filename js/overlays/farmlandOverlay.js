@@ -81,7 +81,8 @@ function createLandDetailsSection(farmlandData, displayInfo) {
                         label: 'Acres', 
                         value: displayInfo.formattedSize 
                     }
-                ]
+                ],
+                className: 'data-table farmland-info-table'  // Add farmland-info-table class
             })}
 
             ${createTextCenter({ text: 'Terrain Details', isHeadline: true })}
@@ -100,7 +101,8 @@ function createLandDetailsSection(farmlandData, displayInfo) {
                         value: `${farmlandData.aspect} (${formatNumber(displayInfo.aspectRating * 100)}%)`,
                         valueClass: displayInfo.colorClass 
                     }
-                ]
+                ],
+                className: 'data-table farmland-info-table'  // Add farmland-info-table class
             })}
         </div>
     `;
@@ -110,25 +112,37 @@ function createFieldStatusSection(farmlandData, displayInfo, prestigeTooltip) {
     return `
         <div class="info-section">
             ${createTextCenter({ text: 'Field Status', isHeadline: true })}
-            ${createTable({
-                className: 'data-table',
-                headers: [],
-                tableClassName: 'table',
-                id: 'field-status'
+            ${createInfoTable({
+                rows: [
+                    { label: 'Status', value: farmlandData.status },
+                    { label: 'Ripeness', value: formatNumber(farmlandData.ripeness ?? 0, 2) },
+                    { label: 'Land Value', value: `€${formatNumber(displayInfo.landValue)}` },
+                    { label: 'Density', value: formatNumber(farmlandData.density || 0) },
+                    { 
+                        label: 'Planted Resource', 
+                        value: farmlandData.plantedResourceName || 'None',
+                        id: 'plantedResource'
+                    },
+                    { label: 'Farming Method', value: getFarmingMethodText(farmlandData) },
+                    { 
+                        label: 'Farmland Prestige',
+                        value: `${formatNumber(displayInfo.farmlandPrestige * 100)}%`,
+                        valueClass: displayInfo.prestigeColorClass,
+                        tooltip: prestigeTooltip
+                    },
+                    { 
+                        label: 'Farmland Health',
+                        value: `${formatNumber(farmlandData.farmlandHealth * 100)}%`,
+                        valueClass: displayInfo.healthColorClass
+                    },
+                    { 
+                        label: 'Field Upgrades',
+                        value: getUpgradeIconsHTML(farmlandData)
+                    }
+                ],
+                className: 'data-table farmland-info-table'
             })}
-            <tbody>
-                <tr><td>Status</td><td>${farmlandData.status}</td></tr>
-                <tr><td>Ripeness</td><td>${formatNumber(farmlandData.ripeness ?? 0, 2)}</td></tr>
-                <tr><td>Land Value</td><td>€${formatNumber(displayInfo.landValue)}</td></tr>
-                <tr><td>Density</td><td>${formatNumber(farmlandData.density || 0)}</td></tr>
-                <tr><td>Planted Resource</td><td id="plantedResource">${farmlandData.plantedResourceName || 'None'}</td></tr>
-                <tr><td>Farming Method</td><td>${getFarmingMethodText(farmlandData)}</td></tr>
-                <tr><td>Farmland Prestige</td><td class="${displayInfo.prestigeColorClass} overlay-tooltip" title="${prestigeTooltip}">${formatNumber(displayInfo.farmlandPrestige * 100)}%</td></tr>
-                <tr><td>Farmland Health</td><td class="${displayInfo.healthColorClass}">${formatNumber(farmlandData.farmlandHealth * 100)}%</td></tr>
-                <tr><td>Field Upgrades</td><td>${getUpgradeIconsHTML(farmlandData)}</td></tr>
-            </tbody>
-        </div>
-    `;
+        </div>`;
 }
 
 function getFarmingMethodText(farmlandData) {

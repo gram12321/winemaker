@@ -265,9 +265,13 @@
     top: 2px;
 }
 
-/* Wine and Resource Info specific table styles */
+
+
+/* Overlay Table Styles */
+.overlay-table.data-table,
 .wine-info-table.data-table,
-.resource-info-table.data-table {
+.resource-info-table.data-table,
+.farmland-info-table.data-table {
     margin: 15px auto;
     width: 100%;
     padding: 10px;
