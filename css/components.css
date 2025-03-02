@@ -94,3 +94,18 @@ input[type="range"]::-webkit-slider-thumb:hover {
     vertical-align: middle; /* Add this */
     line-height: 18px; /* Add this to match checkbox height */
 }
+
+/* Multiple Button Section Component */
+.section-btn-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    justify-content: center;
+}
+
+.section-content {
+    background: var(--color-background);
+    padding: 15px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-accent);
+}

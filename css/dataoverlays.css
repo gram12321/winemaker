@@ -178,21 +178,6 @@
   overflow-y: none;     /* Move scroll to grid */
 }
 
-/* Resource overlay specific styles */
-.resource-overlay .country-section {
-  background: var(--color-background);
-  padding: 15px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-accent);
-}
-
-.resource-overlay .country-buttons {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Display 3 buttons per row */
-  gap: 3px;
-  justify-content: center;
-}
-
 /* Specific for ressourceinfovoverlay */
 .characteristic-icon {
   width: 30px;

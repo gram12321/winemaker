@@ -327,15 +327,15 @@ function createMultipleBtnSection({
     createContent,
     defaultButton = 0,
     btnStyle = 'btn-secondary btn-sm',
-    btnGroupClass = 'country-buttons',  // Change back to original class
-    contentClass = 'country-section'    // Change back to original class
+    btnGroupClass = 'section-btn-group',    // More generic name
+    contentClass = 'section-content'         // More generic name
 }) {
     const buttonElements = buttons.map(btn => 
-        `<button class="btn ${btnStyle} toggle-country" data-country="${btn}">${btn}</button>`  // Add back toggle-country class
+        `<button class="btn ${btnStyle}" data-section="${btn}">${btn}</button>`
     ).join('');
 
     const sections = buttons.map((btn, index) => `
-        <div class="${contentClass}" id="regions-${btn.replace(/\s+/g, '-')}" 
+        <div class="${contentClass}" id="section-${btn.replace(/\s+/g, '-')}" 
              style="display: ${index === defaultButton ? 'block' : 'none'};">
             ${createContent(btn)}
         </div>`

@@ -111,9 +111,9 @@ function createRegionalSuitabilitySection(resource) {
     return createMultipleBtnSection({
         title: 'Regional Suitability',
         buttons: sortedCountries,
-        btnStyle: 'btn-secondary btn-sm toggle-country',
-        btnGroupClass: 'country-buttons',
-        contentClass: 'country-section',
+        btnStyle: 'btn-secondary btn-sm',
+        btnGroupClass: 'section-btn-group',    // Use new generic class
+        contentClass: 'section-content',        // Use new generic class
         createContent: (country) => `
             <table class="data-table">
                 <tbody>
@@ -154,20 +154,20 @@ function setupResourceInfoEventListeners(details, overlay) {
   });  
 
   // Update selector back to the original one that matches the CSS
-  const toggleButtons = details.querySelectorAll('.toggle-country');
+  const toggleButtons = details.querySelectorAll('.section-btn-group .btn');
   toggleButtons.forEach(button => {
     button.addEventListener('click', () => {
-      const country = button.getAttribute('data-country').replace(/\s+/g, '-');
-      const regionsContainer = details.querySelector(`#regions-${country}`);
+      const sectionId = button.getAttribute('data-section').replace(/\s+/g, '-');
+      const container = details.querySelector(`#section-${sectionId}`);
       
       // Hide all other sections
-      details.querySelectorAll('.country-section').forEach(section => {
+      details.querySelectorAll('.section-content').forEach(section => {
         section.style.display = 'none';
       });
 
       // Show the selected section
-      if (regionsContainer) {
-        regionsContainer.style.display = 'block';
+      if (container) {
+        container.style.display = 'block';
       }
     });
   });
