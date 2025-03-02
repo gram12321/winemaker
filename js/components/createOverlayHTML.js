@@ -1,4 +1,4 @@
-    import { getFlagIconHTML } from '../utils.js';
+import { getFlagIconHTML } from '../utils.js';
 
 export function createOverlayHTML({ 
     title,
@@ -227,6 +227,73 @@ function createMethodSelector({
     `;
 }
 
+function createInfoTable({
+    rows = [],
+    className = 'data-table',
+    tableClassName = 'table'
+}) {
+    return `
+        <table class="${tableClassName} ${className}">
+            <tbody>
+                ${rows.map(row => {
+                    if (row.tooltip) {
+                        return createTooltipRow(row);
+                    }
+                    if (row.icon) {
+                        return createIconRow(row);
+                    }
+                    return createBasicRow(row);
+                }).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+function createBasicRow({ label, value, valueClass = '' }) {
+    return `
+        <tr>
+            <td>${label}</td>
+            <td${valueClass ? ` class="${valueClass}"` : ''}>${value}</td>
+        </tr>
+    `;
+}
+
+function createTooltipRow({ label, value, valueClass = '', tooltip }) {
+    return `
+        <tr>
+            <td>${label}</td>
+            <td class="${valueClass} overlay-tooltip" title="${tooltip}">${value}</td>
+        </tr>
+    `;
+}
+
+function createIconRow({ label, icon, value, valueClass = '', id = '' }) {
+    return `
+        <tr>
+            <td>
+                ${createIconLabel({ icon, text: label })}
+            </td>
+            <td${valueClass ? ` class="${valueClass}"` : ''}${id ? ` id="${id}"` : ''}>${value}</td>
+        </tr>
+    `;
+}
+
+function createIconLabel({ 
+    icon, 
+    text, 
+    iconClass = 'characteristic-icon',
+    iconPath = '/assets/icon/small'
+}) {
+    return `
+        <div class="icon-label">
+            <img src="${iconPath}/${icon}.png" 
+                 alt="${text}" 
+                 class="${iconClass}">
+            ${text}
+        </div>
+    `;
+}
+
 export {
     createSlider,
     createCheckbox,
@@ -234,5 +301,7 @@ export {
     createInfoBox,
     createTextCenter,
     createTable,
-    createMethodSelector
+    createMethodSelector,
+    createInfoTable,
+    createIconLabel
 };

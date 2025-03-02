@@ -1,5 +1,5 @@
 import { showModalOverlay } from './overlayUtils.js';
-import { createTextCenter, createTable, createOverlayHTML } from '../components/createOverlayHTML.js';
+import { createTextCenter, createInfoTable, createIconLabel } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
 import { balanceCalculator, calculateNearestArchetype, baseBalancedRanges, applyRangeAdjustments  } from '../utils/balanceCalculator.js';
 import { createCharacteristicBar } from '../components/characteristicBar.js';
@@ -28,36 +28,33 @@ function createWineInfoOverlayHTML(wine) {
     const displayInfo = wine.getDisplayInfo();
     const balanceColorClass = getColorClass(balanceInfo.score);
 
-    // Create base information section using createTable
     const baseInfoSection = `
         <div class="info-section">
             ${createTextCenter({ text: 'Product Information', isHeadline: true })}
-            ${createTable({
-                className: 'data-table',
-                headers: [],
-                id: 'wine-info-table',
-                tableClassName: 'table'
+            ${createInfoTable({
+                rows: [
+                    { label: 'Name', value: displayInfo.name },
+                    { label: 'Vintage', value: displayInfo.vintage },
+                    { label: 'Field', value: displayInfo.fieldName },
+                    { label: 'Quality', value: displayInfo.qualityDisplay },
+                    { 
+                        label: 'Balance', 
+                        value: `${(balanceInfo.score * 100).toFixed(1)}%`,
+                        valueClass: balanceColorClass 
+                    },
+                    { 
+                        label: balanceInfo.qualifies ? 'Archetype' : 'Nearest Archetype',
+                        value: `${balanceInfo.archetype}${!balanceInfo.qualifies ? 
+                            ` (${(balanceInfo.distance * 100).toFixed(1)}% away)` : ''}`
+                    },
+                    { label: 'Amount', value: formatAmount(wine) },
+                    { 
+                        label: 'State',
+                        icon: displayInfo.state.toLowerCase(),
+                        value: ''
+                    }
+                ]
             })}
-            <tbody>
-                <tr><td>Name</td><td>${displayInfo.name}</td></tr>
-                <tr><td>Vintage</td><td>${displayInfo.vintage}</td></tr>
-                <tr><td>Field</td><td>${displayInfo.fieldName}</td></tr>
-                <tr><td>Quality</td><td>${displayInfo.qualityDisplay}</td></tr>
-                <tr><td>Balance</td><td class="${balanceColorClass}">${(balanceInfo.score * 100).toFixed(1)}%</td></tr>
-                <tr><td>${balanceInfo.qualifies ? 'Archetype' : 'Nearest Archetype'}</td>
-                    <td>${balanceInfo.archetype}${!balanceInfo.qualifies ? 
-                        ` (${(balanceInfo.distance * 100).toFixed(1)}% away)` : 
-                        ''}</td></tr>
-                <tr><td>Amount</td><td>${formatAmount(wine)}</td></tr>
-                <tr>
-                    <td>State</td>
-                    <td>
-                        <img src="/assets/icon/small/${displayInfo.state.toLowerCase()}.png" 
-                             alt="${displayInfo.state}" 
-                             class="characteristic-icon">
-                    </td>
-                </tr>
-            </tbody>
         </div>`;
 
     // Show characteristics section using createTable
@@ -104,12 +101,7 @@ function createWineInfoOverlayHTML(wine) {
 
 function createCharacteristicRow(trait, value, characteristics) {
     return `<tr>
-        <td>
-            <img src="/assets/icon/small/${trait}.png" 
-                 alt="${trait}" 
-                 class="characteristic-icon">
-            ${trait.charAt(0).toUpperCase() + trait.slice(1)}
-        </td>
+        <td>${createIconLabel({ icon: trait, text: trait.charAt(0).toUpperCase() + trait.slice(1) })}</td>
         <td class="characteristic-bar-cell">
             ${createCharacteristicBar(trait, value, characteristics)}
         </td>

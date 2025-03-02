@@ -3,7 +3,7 @@ import { regionAspectRatings, calculateAndNormalizePriceFactor } from '/js/names
 import { calculateAgeContribution, calculateLandValueContribution, calculatePrestigeRankingContribution, calculateFragilityBonusContribution } from '/js/farmland.js';
 import { showResourceInfoOverlay } from './resourceInfoOverlay.js';
 import { showModalOverlay } from './overlayUtils.js';
-import { createTextCenter, createTable, createOverlayHTML } from '../components/createOverlayHTML.js';
+import { createTextCenter, createTable, createOverlayHTML, createInfoTable } from '../components/createOverlayHTML.js';
 import { upgrades } from '../upgrade.js';
 
 export function showFarmlandOverlay(farmlandData) {
@@ -67,30 +67,41 @@ function createLandDetailsSection(farmlandData, displayInfo) {
     return `
         <div class="info-section">
             ${createTextCenter({ text: 'Land Details', isHeadline: true })}
-            ${createTable({
-                className: 'data-table',
-                headers: [],
-                tableClassName: 'table',
-                id: 'land-details'
+            ${createInfoTable({
+                rows: [
+                    { 
+                        label: 'Country', 
+                        value: `${displayInfo.flagIcon} ${farmlandData.country}` 
+                    },
+                    { 
+                        label: 'Region', 
+                        value: farmlandData.region 
+                    },
+                    { 
+                        label: 'Acres', 
+                        value: displayInfo.formattedSize 
+                    }
+                ]
             })}
-            <tbody>
-                <tr><td>Country</td><td>${displayInfo.flagIcon} ${farmlandData.country}</td></tr>
-                <tr><td>Region</td><td>${farmlandData.region}</td></tr>
-                <tr><td>Acres</td><td>${displayInfo.formattedSize}</td></tr>
-            </tbody>
 
             ${createTextCenter({ text: 'Terrain Details', isHeadline: true })}
-            ${createTable({
-                className: 'data-table',
-                headers: [],
-                tableClassName: 'table',
-                id: 'terrain-details'
+            ${createInfoTable({
+                rows: [
+                    { 
+                        label: 'Soil', 
+                        value: farmlandData.soil 
+                    },
+                    { 
+                        label: 'Altitude', 
+                        value: `${farmlandData.altitude}m` 
+                    },
+                    { 
+                        label: 'Aspect',
+                        value: `${farmlandData.aspect} (${formatNumber(displayInfo.aspectRating * 100)}%)`,
+                        valueClass: displayInfo.colorClass 
+                    }
+                ]
             })}
-            <tbody>
-                <tr><td>Soil</td><td>${farmlandData.soil}</td></tr>
-                <tr><td>Altitude</td><td>${farmlandData.altitude}m</td></tr>
-                <tr><td>Aspect</td><td class="${displayInfo.colorClass}">${farmlandData.aspect} (${formatNumber(displayInfo.aspectRating * 100)}%)</td></tr>
-            </tbody>
         </div>
     `;
 }

@@ -2,7 +2,7 @@ import { getResourceByName } from '../resource.js';
 import { formatNumber, getColorClass } from '../utils.js';
 import { grapeSuitability } from '../names.js';
 import { showModalOverlay } from './overlayUtils.js';
-import { createTextCenter, createTable, createOverlayHTML } from '../components/createOverlayHTML.js';
+import { createTextCenter, createTable, createOverlayHTML, createInfoTable, createIconLabel } from '../components/createOverlayHTML.js';
 import { baseBalancedRanges } from '../utils/balanceCalculator.js';
 import { createCharacteristicBar } from '../components/characteristicBar.js';
 
@@ -29,22 +29,30 @@ function createResourceInfoOverlayHTML(resource) {
     grapeColor: resource.grapeColor
   };
 
-  // Create base information section using createTable
+  // Create base information section using createInfoTable
   const baseInfoSection = `
     <div class="info-section">
       ${createTextCenter({ text: 'Base Information', isHeadline: true })}
-      ${createTable({
-        className: 'data-table',
-        headers: [],
-        id: 'resource-info-table',
-        tableClassName: 'table'
+      ${createInfoTable({
+        rows: [
+          { label: 'Name', value: displayInfo.name },
+          { 
+            label: 'Grape Color', 
+            value: displayInfo.grapeColor,
+            valueClass: 'text-capitalize' 
+          },
+          { 
+            label: 'Natural Yield', 
+            value: `${formatNumber(displayInfo.naturalYield)}%`,
+            valueClass: displayInfo.naturalYieldClass 
+          },
+          { 
+            label: 'Grape Fragile', 
+            value: `${formatNumber(displayInfo.fragility)}%`,
+            valueClass: displayInfo.fragileClass 
+          }
+        ]
       })}
-      <tbody>
-        <tr><td>Name</td><td>${displayInfo.name}</td></tr>
-        <tr><td>Grape Color</td><td style="text-transform: capitalize">${displayInfo.grapeColor}</td></tr>
-        <tr><td>Natural Yield</td><td class="${displayInfo.naturalYieldClass}">${formatNumber(displayInfo.naturalYield)}%</td></tr>
-        <tr><td>Grape Fragile</td><td class="${displayInfo.fragileClass}">${formatNumber(displayInfo.fragility)}%</td></tr>
-      </tbody>
     </div>`;
 
   // Show characteristics section using createTable
@@ -132,12 +140,7 @@ function createRegionalSuitabilitySection(resource) {
 function createCharacteristicRow(trait, value, minBalance, maxBalance) {
   return `
     <tr>
-      <td>
-        <img src="/assets/icon/small/${trait}.png" 
-             alt="${trait}" 
-             class="characteristic-icon">
-        ${trait.charAt(0).toUpperCase() + trait.slice(1)}
-      </td>
+      <td>${createIconLabel({ icon: trait, text: trait.charAt(0).toUpperCase() + trait.slice(1) })}</td>
       <td class="characteristic-bar-cell">
         ${createCharacteristicBar(trait, value, minBalance, maxBalance)}
       </td>
