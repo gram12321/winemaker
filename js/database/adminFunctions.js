@@ -1,7 +1,6 @@
 import { inventoryInstance } from '/js/resource.js';
 import { Building, Tool, getBuildingTools  } from '/js/classes/buildingClasses.js';
 
-
 // Function to load inventory from localStorage
 function loadInventory() {
     let savedInventory = localStorage.getItem('playerInventory');
@@ -19,7 +18,7 @@ function loadInventory() {
     inventoryInstance.items = [];
 
     savedInventory.forEach(item => {
-        console.log('Loading item:', item);
+        // Create base item with essential properties
         const newItem = inventoryInstance.addResource(
             { 
                 name: item.resource.name, 
@@ -39,42 +38,14 @@ function loadInventory() {
         );
         
         if (newItem) {
-            console.log('Characteristics before copying:', {
-                sweetness: newItem.sweetness,
-                acidity: newItem.acidity,
-                tannins: newItem.tannins,
-                body: newItem.body,
-                spice: newItem.spice,
-                aroma: newItem.aroma
-            });
-
             // Copy wine characteristics
-            const characteristics = [
-                'sweetness',
-                'acidity',
-                'tannins',
-                'body',
-                'spice',
-                'aroma'
-            ];
-
-            characteristics.forEach(char => {
+            ['sweetness', 'acidity', 'tannins', 'body', 'spice', 'aroma'].forEach(char => {
                 if (typeof item[char] === 'number') {
                     newItem[char] = item[char];
-                    console.log(`Copying ${char}: ${item[char]}`);
                 }
             });
 
-            console.log('Characteristics after copying:', {
-                sweetness: newItem.sweetness,
-                acidity: newItem.acidity,
-                tannins: newItem.tannins,
-                body: newItem.body,
-                spice: newItem.spice,
-                aroma: newItem.aroma
-            });
-
-            // Copy other properties
+            // Copy processing information
             if (item.fieldSource) {
                 newItem.fieldSource = item.fieldSource;
             }
@@ -82,10 +53,9 @@ function loadInventory() {
                 newItem.crushingMethod = item.crushingMethod;
             }
         }
-        console.log('Created item:', newItem);
     });
 
-    return inventoryInstance; // Add this line to return the instance
+    return inventoryInstance;
 }
 
 // Load the inventory at the start
@@ -93,54 +63,40 @@ loadInventory();
 
 // Function to save inventory to localStorage
 function saveInventory() {
-  const itemsToSave = inventoryInstance.items.map(item => {
-    const savedItem = {
-      resource: {
-        name: item.resource.name,
-        naturalYield: item.resource.naturalYield,
-        grapeColor: item.resource.grapeColor  // Add grapeColor
-      },
-      amount: item.amount,
-      state: item.state,
-      vintage: item.vintage,
-      quality: item.quality,
-      fieldName: item.fieldName,
-      fieldPrestige: item.fieldPrestige,
-      storage: item.storage,
-      oxidation: item.oxidation || 0,
-      ripeness: item.ripeness || 0,
-      crushingMethod: item.crushingMethod || null,  // Add crushing method
-      fieldSource: item.fieldSource ? {
-        conventional: item.fieldSource.conventional
-      } : null,
-      specialFeatures: item.specialFeatures || []
-    };
+    const itemsToSave = inventoryInstance.items.map(item => ({
+        resource: {
+            name: item.resource.name,
+            naturalYield: item.resource.naturalYield,
+            grapeColor: item.resource.grapeColor
+        },
+        amount: item.amount,
+        state: item.state,
+        vintage: item.vintage,
+        quality: item.quality,
+        fieldName: item.fieldName,
+        fieldPrestige: item.fieldPrestige,
+        storage: item.storage,
+        oxidation: item.oxidation || 0,
+        ripeness: item.ripeness || 0,
+        crushingMethod: item.crushingMethod || null,
+        fieldSource: item.fieldSource ? {
+            conventional: item.fieldSource.conventional,
+            altitude: item.fieldSource.altitude,
+            soil: item.fieldSource.soil,
+            terrain: item.fieldSource.terrain
+        } : null,
+        specialFeatures: item.specialFeatures || [],
+        // Save wine characteristics
+        sweetness: item.sweetness || 0,
+        acidity: item.acidity || 0,
+        tannins: item.tannins || 0,
+        body: item.body || 0,
+        spice: item.spice || 0,
+        aroma: item.aroma || 0
+    }));
 
-    // Add all wine characteristics for every state (not just Grapes)
-    const characteristics = [
-      'sweetness',
-      'acidity',
-      'tannins',
-      'body',
-      'spice',
-      'aroma'
-    ];
-
-    characteristics.forEach(char => {
-      if (typeof item[char] === 'number') {
-        savedItem[char] = item[char];
-      } else {
-        savedItem[char] = 0; // Default to 0 if undefined
-      }
-    });
-
-    return savedItem;
-  });
-
-
-  localStorage.setItem('playerInventory', JSON.stringify(itemsToSave));
+    localStorage.setItem('playerInventory', JSON.stringify(itemsToSave));
 }
-
 
 export function saveWineOrders(wineOrders) {
   localStorage.setItem('wineOrders', JSON.stringify(wineOrders));

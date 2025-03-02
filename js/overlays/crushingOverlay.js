@@ -684,32 +684,30 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     let remainingMust = mustAmount;
     let success = true;
 
-    // Copy all relevant properties from grapes
+    // Copy all relevant properties from grapes, ensuring proper types
     const resourceName = grapeResource.resource.name;
-    const vintage = grapeResource.vintage;
-    const quality = grapeResource.quality;
+    const vintage = parseInt(grapeResource.vintage);
+    const quality = parseFloat(grapeResource.quality);  // Ensure quality is a number
     const fieldName = grapeResource.fieldName;
-    const fieldPrestige = grapeResource.fieldPrestige;
+    const fieldPrestige = parseFloat(grapeResource.fieldPrestige);  // Ensure prestige is a number
 
-    // Copy all properties needed by archetypes
+    // Create clean base properties object with proper number types
     const baseProperties = {
-        // Wine characteristics
-        acidity: grapeResource.acidity,
-        aroma: grapeResource.aroma,
-        body: grapeResource.body,
-        spice: grapeResource.spice,
-        sweetness: grapeResource.sweetness,
-        tannins: grapeResource.tannins,
+        // Wine characteristics - ensure all are numbers
+        acidity: parseFloat(grapeResource.acidity) || 0,
+        aroma: parseFloat(grapeResource.aroma) || 0,
+        body: parseFloat(grapeResource.body) || 0,
+        spice: parseFloat(grapeResource.spice) || 0,
+        sweetness: parseFloat(grapeResource.sweetness) || 0,
+        tannins: parseFloat(grapeResource.tannins) || 0,
         
-        // Required by archetypes
-        oxidation: grapeResource.oxidation || 0,
-        ripeness: grapeResource.ripeness || 0,
+        // Required by archetypes - ensure all are numbers
+        oxidation: parseFloat(grapeResource.oxidation) || 0,
+        ripeness: parseFloat(grapeResource.ripeness) || 0,
         crushingMethod: destemming ? 'Destemming' : 'Standard',
-        fieldSource: grapeResource.fieldSource || {
-            conventional: 'Traditional',
-            altitude: null,
-            soil: null,
-            terrain: null
+        fieldSource: {
+            ...grapeResource.fieldSource,
+            conventional: grapeResource.fieldSource?.conventional || 'Traditional'
         }
     };
 

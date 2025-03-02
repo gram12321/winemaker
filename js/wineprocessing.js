@@ -58,21 +58,26 @@ export function performFermentation(target, progress, params) {
         return false;
     }
 
-    // Copy all properties needed for wine characteristics
-    const wineProperties = {
-        // Base characteristics
-        acidity: mustItem.acidity,
-        aroma: mustItem.aroma,
-        body: mustItem.body,
-        spice: mustItem.spice,
-        sweetness: mustItem.sweetness,
-        tannins: mustItem.tannins,
+    // Create clean base properties object with proper number types
+    const baseProperties = {
+        // Wine characteristics - ensure all are numbers
+        acidity: parseFloat(mustItem.acidity) || 0,
+        aroma: parseFloat(mustItem.aroma) || 0,
+        body: parseFloat(mustItem.body) || 0,
+        spice: parseFloat(mustItem.spice) || 0,
+        sweetness: parseFloat(mustItem.sweetness) || 0,
+        tannins: parseFloat(mustItem.tannins) || 0,
         
         // Required properties for archetypes
-        oxidation: mustItem.oxidation || 0,
-        ripeness: mustItem.ripeness || 0,
-        crushingMethod: mustItem.crushingMethod,
-        fieldSource: mustItem.fieldSource,
+        oxidation: parseFloat(mustItem.oxidation) || 0,
+        ripeness: parseFloat(mustItem.ripeness) || 0,
+        crushingMethod: mustItem.crushingMethod || 'Standard',
+        fieldSource: mustItem.fieldSource || {
+            conventional: 'Traditional',
+            altitude: null,
+            soil: null,
+            terrain: null
+        },
         specialFeatures: mustItem.specialFeatures || []
     };
 
@@ -99,20 +104,25 @@ export function performFermentation(target, progress, params) {
         fieldName,
         fieldPrestige,
         'Wine Cellar',
-        wineProperties.oxidation,
-        wineProperties.ripeness
+        baseProperties.oxidation,
+        baseProperties.ripeness
     );
 
     // Apply all properties to the new wine
     if (newWine) {
-        Object.assign(newWine, wineProperties);
+        // Copy wine characteristics
+        ['sweetness', 'acidity', 'tannins', 'body', 'spice', 'aroma'].forEach(char => {
+            newWine[char] = baseProperties[char];
+        });
         
-        // Make sure special features are properly transferred
-        if (wineProperties.specialFeatures) {
-            wineProperties.specialFeatures.forEach(feature => {
-                newWine.addSpecialFeature(feature);
-            });
-        }
+        // Copy processing information
+        newWine.crushingMethod = baseProperties.crushingMethod;
+        newWine.fieldSource = baseProperties.fieldSource;
+        
+        // Copy special features
+        baseProperties.specialFeatures.forEach(feature => {
+            newWine.addSpecialFeature(feature);
+        });
     }
 
     saveInventory();
