@@ -50,8 +50,22 @@ function createWineInfoOverlayHTML(wine) {
                     { label: 'Amount', value: formatAmount(wine) },
                     { 
                         label: 'State',
-                        icon: displayInfo.state.toLowerCase(),
-                        value: ''
+                        value: `<div class="icon-label">
+                            <img src="/assets/icon/small/${displayInfo.state.toLowerCase()}.png" 
+                                 alt="State" 
+                                 class="characteristic-icon">
+                        </div>`
+                    },
+                    { 
+                        label: 'Special Features',
+                        value: displayInfo.specialFeatures.length > 0 ? 
+                            displayInfo.specialFeatures.map(feature => 
+                                `<img src="/assets/icon/small/specialfeatures/${feature.toLowerCase().replace(/\s+/g, '')}.webp" 
+                                     alt="${feature}" 
+                                     title="${feature}"
+                                     class="specialfeatures-icon">`
+                            ).join('') : 
+                            'None'
                     }
                 ],
                 className: 'data-table wine-info-table'  // Add wine-info-table class

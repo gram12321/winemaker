@@ -187,7 +187,7 @@
 }
 
 /* Specific for fieldoverlay */
-.upgrade-icon {
+.upgrade-icon, .specialfeatures-icon {
   width: 30px;
   height: 30px;
   vertical-align: middle;
