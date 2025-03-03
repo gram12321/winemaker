@@ -41,6 +41,38 @@
  */
 
 export const archetypes = {
+    frenchWine: {
+        name: "French Wine",
+        description: "Any wine produced in France",
+        regionalReqs: {
+            country: "France"
+        },
+        // Need minimal characteristics definition for balance calculation
+        characteristics: {
+            idealRanges: {
+                sweetness: [0, 1],
+                acidity: [0, 1],
+                tannins: [0, 1],
+                aroma: [0, 1],
+                body: [0, 1],
+                spice: [0, 1]
+            },
+            importance: {
+                sweetness: 1,
+                acidity: 1,
+                tannins: 1,
+                aroma: 1,
+                body: 1,
+                spice: 1
+            }
+        },
+        balanceGroups: [
+            ["sweetness", "acidity"],
+            ["body", "tannins"],
+            ["aroma", "spice"]
+        ]
+    },
+
     sweetWine: {
         name: "Sweet White Wine",
         description: "Rich, sweet white wine with high acidity for balance",

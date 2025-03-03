@@ -210,100 +210,110 @@ const synergyBonuses = {
     }
 };
 
+// Add new helper functions for requirement checking
+function checkSpecificRequirement(wine, requirement, value) {
+    switch(requirement) {
+        case 'requiredColor':
+            return wine.resource?.grapeColor === value;
+            
+        case 'requiredGrapes':
+            return Array.isArray(value) && value.includes(wine.resource?.name);
+            
+        case 'minimumQuality':
+            return wine.quality >= value;
+            
+        case 'minimumVintage':
+            return wine.vintage >= value;
+            
+        case 'minimumPrestige':
+            return wine.fieldPrestige >= value;
+            
+        case 'oxidationRange':
+            return wine.oxidation >= value[0] && wine.oxidation <= value[1];
+            
+        case 'ripenessRange':
+            return wine.ripeness >= value[0] && wine.ripeness <= value[1];
+    }
+    return false;
+}
+
+function checkProcessingRequirements(wine, processingReqs) {
+    if (!processingReqs) return true;
+    
+    // Check ecological requirement
+    if (processingReqs.requireEcological && 
+        (!wine.fieldSource?.conventional === 'Ecological')) {
+        return false;
+    }
+    
+    // Check crushing methods
+    if (processingReqs.allowedMethods && 
+        !processingReqs.allowedMethods.includes(wine.crushingMethod)) {
+        return false;
+    }
+    
+    return true;
+}
+
+function checkRegionalRequirements(wine, regionalReqs) {
+    if (!regionalReqs) return true;
+    
+    // Check country
+    if (regionalReqs.country && wine.country !== regionalReqs.country) {
+        return false;
+    }
+    
+    // Check regions
+    if (regionalReqs.regions && !regionalReqs.regions.includes(wine.region)) {
+        return false;
+    }
+    
+    // Check soil types
+    if (regionalReqs.soilTypes && 
+        !regionalReqs.soilTypes.includes(wine.fieldSource?.soil)) {
+        return false;
+    }
+    
+    // Check terrain types
+    if (regionalReqs.terrainTypes && 
+        !regionalReqs.terrainTypes.includes(wine.fieldSource?.terrain)) {
+        return false;
+    }
+    
+    return true;
+}
 
 // Update qualifiesForArchetype function to handle new requirement structure
 function qualifiesForArchetype(wine, archetype) {
-    if (!wine || !archetype.requirements) {
-        return true;
-    }
-    const reqs = archetype.requirements;
-
-    // Build requirements object for validation
-    const requirements = {
-        // Basic requirements
-        requiredGrapes: archetype.requirements?.requiredGrapes ?? 'not required',
-        requiredColor: archetype.requirements?.requiredColor ?? 'not required',
-        minimumQuality: archetype.requirements?.minimumQuality ?? 'not required',
-        minimumVintage: archetype.requirements?.minimumVintage ?? 'not required',
-        minimumPrestige: archetype.requirements?.minimumPrestige ?? 'not required',
-        oxidationRange: archetype.requirements?.oxidationRange ? 
-            `${archetype.requirements.oxidationRange[0]}-${archetype.requirements.oxidationRange[1]}` : 
-            'not required',
-        ripenessRange: archetype.requirements?.ripenessRange ?
-            `${archetype.requirements.ripenessRange[0]}-${archetype.requirements.ripenessRange[1]}` :
-            'not required',
-        
-        // Processing requirements
-        requireEcological: archetype.processingReqs?.requireEcological ?? 'not required',
-        allowedMethods: archetype.processingReqs?.allowedMethods?.join(', ') ?? 'not required',
-        
-        // Characteristic ranges
-        ...Object.fromEntries(
-            Object.entries(archetype.characteristics.idealRanges)
-            .map(([key, [min, max]]) => [key, `${min}-${max}`])
-        )
-    };
-
-    // Check all requirements
-    if (reqs.requiredGrapes && (!wine.resource || !reqs.requiredGrapes.includes(wine.resource.name))) {
+    if (!wine || !archetype) {
         return false;
     }
 
-    // Check grape color
-    if (reqs.requiredColor && (!wine.resource || wine.resource.grapeColor !== reqs.requiredColor)) {
-        return false;
-    }
-
-    // Check quality requirement
-    if (reqs.minimumQuality && wine.quality < reqs.minimumQuality) {
-        return false;
-    }
-
-    // Check vintage requirement
-    if (reqs.minimumVintage && wine.vintage < reqs.minimumVintage) {
-        return false;
-    }
-
-    // Check field prestige
-    if (reqs.minimumPrestige && wine.fieldPrestige < reqs.minimumPrestige) {
-        return false;
-    }
-
-    // Check oxidation range
-    if (reqs.oxidationRange) {
-        const [minOx, maxOx] = reqs.oxidationRange;
-        if (wine.oxidation < minOx || wine.oxidation > maxOx) {
-            return false;
-        }
-    }
-
-    // Check ripeness range
-    if (reqs.ripenessRange) {
-        const [minRipe, maxRipe] = reqs.ripenessRange;
-        if (wine.ripeness < minRipe || wine.ripeness > maxRipe) {
-            return false;
+    // Check basic requirements
+    if (archetype.requirements) {
+        for (const [requirement, value] of Object.entries(archetype.requirements)) {
+            if (!checkSpecificRequirement(wine, requirement, value)) {
+                return false;
+            }
         }
     }
 
     // Check processing requirements
-    if (archetype.processingReqs) {
-        if (archetype.processingReqs.requireEcological) {
-            if (!wine.fieldSource || wine.fieldSource.conventional !== 'Ecological') {
-                return false;
-            }
-        }
+    if (!checkProcessingRequirements(wine, archetype.processingReqs)) {
+        return false;
+    }
 
-        if (archetype.processingReqs.allowedMethods) {
-            if (!archetype.processingReqs.allowedMethods.includes(wine.crushingMethod)) {
-                return false;
-            }
-        }
+    // Check regional requirements
+    if (!checkRegionalRequirements(wine, archetype.regionalReqs)) {
+        return false;
     }
 
     // Check characteristic ranges
-    for (const [trait, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
-        if (wine[trait] < min || wine[trait] > max) {
-            return false;
+    if (archetype.characteristics?.idealRanges) {
+        for (const [trait, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
+            if (wine[trait] < min || wine[trait] > max) {
+                return false;
+            }
         }
     }
 
@@ -330,12 +340,81 @@ function validateWineObject(wine, archetype) {
     return true;
 }
 
+function logArchetypeTest(wine, archetype) {
+    console.log(`\nTesting against ${archetype.name}:`);
+    
+    // Check basic requirements
+    if (archetype.requirements) {
+        for (const [req, value] of Object.entries(archetype.requirements)) {
+            const passed = checkSpecificRequirement(wine, req, value);
+            console.log(`  ${req}: ${passed ? '✓' : '✗'} (required: ${JSON.stringify(value)}, got: ${wine[req]})`);
+        }
+    }
+
+    // Check processing requirements
+    if (archetype.processingReqs) {
+        const procPassed = checkProcessingRequirements(wine, archetype.processingReqs);
+        console.log(`  Processing Requirements: ${procPassed ? '✓' : '✗'}`);
+        if (!procPassed) {
+            if (archetype.processingReqs.requireEcological) {
+                console.log(`    Ecological Required: got ${wine.fieldSource?.conventional}`);
+            }
+            if (archetype.processingReqs.allowedMethods) {
+                console.log(`    Method Required: got ${wine.crushingMethod}`);
+            }
+        }
+    }
+
+    // Check regional requirements
+    if (archetype.regionalReqs) {
+        const regPassed = checkRegionalRequirements(wine, archetype.regionalReqs);
+        console.log(`  Regional Requirements: ${regPassed ? '✓' : '✗'}`);
+        if (!regPassed) {
+            console.log(`    Country: ${wine.country || 'unknown'} (required: ${archetype.regionalReqs.country || 'any'})`);
+            console.log(`    Region: ${wine.region || 'unknown'} (required: ${archetype.regionalReqs.regions?.join(', ') || 'any'})`);
+            console.log(`    Soil: ${wine.fieldSource?.soil || 'unknown'} (required: ${archetype.regionalReqs.soilTypes?.join(', ') || 'any'})`);
+        }
+    }
+
+    // Check characteristics
+    if (archetype.characteristics?.idealRanges) {
+        console.log('  Characteristics:');
+        for (const [trait, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
+            const value = wine[trait];
+            const passed = value >= min && value <= max;
+            console.log(`    ${trait}: ${passed ? '✓' : '✗'} (${value.toFixed(2)} in [${min}-${max}])`);
+        }
+    }
+
+    // Calculate scores
+    const midpointScore = distanceScore(wine, archetype);
+    const groupBalance = balanceScore(wine, archetype);
+    const archetypeBalance = (midpointScore + groupBalance) / 2;
+    const dynamicBalance = dynamicBalanceScore(wine, baseBalancedRanges, 0);
+    const finalScore = Math.max(archetypeBalance, dynamicBalance);
+
+    console.log('\n  Scores:');
+    console.log(`    Midpoint Score: ${(midpointScore * 100).toFixed(1)}%`);
+    console.log(`    Group Balance: ${(groupBalance * 100).toFixed(1)}%`);
+    console.log(`    Archetype Balance: ${(archetypeBalance * 100).toFixed(1)}%`);
+    console.log(`    Dynamic Balance: ${(dynamicBalance * 100).toFixed(1)}%`);
+    console.log(`    Final Score: ${(finalScore * 100).toFixed(1)}%`);
+}
+
 export function balanceCalculator(wine, archetype) {
     // Ensure inventory is loaded
     loadInventory();
     
     // Validate wine object with archetype context
     validateWineObject(wine, archetype);
+
+    console.log('\n=== Wine Balance Analysis ===');
+    console.log('Testing wine against all archetypes...');
+
+    // Test against all archetypes and log results
+    for (const [name, arch] of Object.entries(archetypes)) {
+        logArchetypeTest(wine, arch);
+    }
 
     // Calculate synergy first since we need it for deduction calculations
     let synergyBonus = 0;
@@ -476,6 +555,57 @@ export function applyPenaltyAdjustments(wine) {
     return penaltyMultipliers;
 }
 
+export function distanceScore(wine, archetype) {
+    if (!archetype?.characteristics?.idealRanges) return 0;
+    let totalScore = 0;
+    let totalWeight = 0;
+
+    for (const [characteristic, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
+        const midpoint = (min + max) / 2;
+        const value = wine[characteristic];
+        const importance = archetype.characteristics.importance?.[characteristic] || 1;
+
+        let distance = Math.abs(value - midpoint) / (max - min);
+        let score = Math.pow(1 - Math.pow(distance, 2), importance);
+
+        totalScore += score * importance;
+        totalWeight += importance;
+    }
+
+    return totalWeight > 0 ? totalScore / totalWeight : 0;
+}
+
+export function balanceScore(wine, archetype) {
+    if (!archetype?.balanceGroups) return 0;
+    let totalScore = 0;
+    let totalWeight = 0;
+    
+    for (const group of archetype.balanceGroups) {
+        let values = group.map(char => wine[char]);
+        
+        let weight = group.reduce((sum, char) => {
+            const importance = archetype.characteristics?.importance?.[char] || 1;
+            return sum + importance;
+        }, 0) / group.length;
+
+        let pairwiseDistances = [];
+        for (let i = 0; i < values.length; i++) {
+            for (let j = i + 1; j < values.length; j++) {
+                let difference = Math.abs(values[i] - values[j]);
+                pairwiseDistances.push(difference);
+            }
+        }
+
+        const avgDistance = pairwiseDistances.reduce((a, b) => a + b, 0) / pairwiseDistances.length;
+        const score = Math.pow(1 - Math.pow(avgDistance, 2), weight);
+
+        totalScore += score * weight;
+        totalWeight += weight;
+    }
+
+    return totalWeight > 0 ? totalScore / totalWeight : 0;
+}
+
 function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
     let adjustedRanges = applyRangeAdjustments(wine, baseBalancedRanges);
     let penaltyMultipliers = applyPenaltyAdjustments(wine);
@@ -526,56 +656,6 @@ function dynamicBalanceScore(wine, baseBalancedRanges, synergyBonus) {
 }
 
 // Archtype calculations
-function distanceScore(wine, archetype) {
-    let totalScore = 0;
-    let totalWeight = 0;
-
-    for (const characteristic in archetype.idealRanges) {
-        const [min, max] = archetype.idealRanges[characteristic];
-        const midpoint = (min + max) / 2;  // Fixed: removed 'and', replaced with '+'
-        const value = wine[characteristic];
-        const importance = archetype.importance[characteristic] || 1;
-
-        let distance = Math.abs(value - midpoint) / (max - min); // Normalize distance
-        let score = Math.pow(1 - Math.pow(distance, 2), importance); // Exponential decay
-
-        totalScore += score * importance;
-        totalWeight += importance;
-    }
-
-    return totalWeight > 0 ? totalScore / totalWeight : 0; // Normalize to 0-1
-}
-
-function balanceScore(wine, archetype) {
-    let totalScore = 0;
-    let totalWeight = 0;
-    
-    for (const group of archetype.balanceGroups) {
-        let values = group.map(char => wine[char]).filter(v => v !== undefined);
-        if (values.length < 2) continue; // Skip groups with only 1 characteristic
-
-        let weight = group.reduce((sum, char) => sum + (archetype.importance[char] || 1), 0) / group.length;  // Fixed: added dot before reduce
-
-        let pairwiseDistances = [];
-
-        // Compute all pairwise distances
-        for (let i = 0; i < values.length; i++) {
-            for (let j = i + 1; j < values.length; j++) {
-                let difference = Math.abs(values[i] - values[j]); // Absolute difference
-                pairwiseDistances.push(difference);
-            }
-        }
-
-        let avgDistance = pairwiseDistances.reduce((a, b) => a + b, 0) / pairwiseDistances.length;
-        let score = Math.pow(1 - Math.pow(avgDistance, 2), weight); // Exponential decay
-
-        totalScore += score * weight;
-        totalWeight += weight;
-    }
-
-    return totalWeight > 0 ? totalScore / totalWeight : 0; // Normalize
-}
-
 function calculateNearestArchetype(wine) {
     let bestDistance = Infinity;
     let nearestArchetype = null;
@@ -614,4 +694,4 @@ function calculateNearestArchetype(wine) {
     };
 }
 
-export { calculateNearestArchetype };
+export { calculateNearestArchetype, dynamicBalanceScore };
