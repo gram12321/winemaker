@@ -246,12 +246,13 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
     // Get base characteristics from resource
     const resourceObj = getResourceByName(farmland.plantedResourceName);
 
-    // Add field source information
+    // Add field source information with region and country
     const fieldSource = {
-        conventional: farmland.conventional || 'Traditional', // Add farming method
+        conventional: farmland.conventional || 'Traditional', 
         altitude: farmland.altitude,
         soil: farmland.soil,
-        terrain: farmland.terrain
+        terrain: farmland.terrain,
+        aspect: farmland.aspect
     };
 
     // Get harvested characteristics and ensure all required properties
@@ -303,6 +304,9 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             matchingGrapes.vintage = gameYear;
             matchingGrapes.resource.grapeColor = resourceObj.grapeColor;
             matchingGrapes.oxidation = 0; // Start with no oxidation
+            // Add country and region directly
+            matchingGrapes.country = farmland.country;
+            matchingGrapes.region = farmland.region;
             applyHarvestOxidation(matchingGrapes);
         } else {
             const newGrapes = inventoryInstance.addResource(
@@ -324,6 +328,9 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                 newGrapes.fieldSource = fieldSource;
                 newGrapes.resource.grapeColor = resourceObj.grapeColor;
                 newGrapes.crushingMethod = null; // Will be set during crushing
+                // Add country and region directly
+                newGrapes.country = farmland.country;
+                newGrapes.region = farmland.region;
                 applyHarvestOxidation(newGrapes);
             }
         }

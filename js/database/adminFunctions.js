@@ -45,6 +45,10 @@ function loadInventory() {
                 }
             });
 
+            // Add country and region if they exist in saved data
+            if (item.country) newItem.country = item.country;
+            if (item.region) newItem.region = item.region;
+            
             // Copy processing information
             if (item.fieldSource) {
                 newItem.fieldSource = item.fieldSource;
@@ -79,11 +83,15 @@ function saveInventory() {
         oxidation: item.oxidation || 0,
         ripeness: item.ripeness || 0,
         crushingMethod: item.crushingMethod || null,
+        // Add country and region
+        country: item.country || null,
+        region: item.region || null,
         fieldSource: item.fieldSource ? {
             conventional: item.fieldSource.conventional,
             altitude: item.fieldSource.altitude,
             soil: item.fieldSource.soil,
-            terrain: item.fieldSource.terrain
+            terrain: item.fieldSource.terrain,
+            aspect: item.fieldSource.aspect
         } : null,
         specialFeatures: item.specialFeatures || [],
         // Save wine characteristics
