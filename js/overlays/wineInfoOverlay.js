@@ -1,7 +1,8 @@
 import { showModalOverlay } from './overlayUtils.js';
-import { createTextCenter, createInfoTable, createIconLabel, createTable, createOverlayHTML } from '../components/createOverlayHTML.js';
+import { createTextCenter, createInfoTable, createOverlayHTML } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
-import { balanceCalculator, calculateNearestArchetype, baseBalancedRanges, applyRangeAdjustments  } from '../utils/balanceCalculator.js';
+import { balanceCalculator, baseBalancedRanges, applyRangeAdjustments } from '../utils/balanceCalculator.js';
+import { calculateNearestArchetype, processWineObject } from '../utils/archetypeUtils.js';
 import { createCharacteristicBar } from '../components/characteristicBar.js';
 
 export function showWineInfoOverlay(wineItem) {
@@ -11,9 +12,9 @@ export function showWineInfoOverlay(wineItem) {
 }
 
 function calculateWineBalance(wine) {
-
-    const { archetype, distance, qualifies } = calculateNearestArchetype(wine);
-    const score = balanceCalculator(wine, archetype);
+    const processedWine = processWineObject(wine);
+    const { archetype, distance, qualifies } = calculateNearestArchetype(processedWine);
+    const score = balanceCalculator(processedWine, archetype);
 
     return {
         score: score,
