@@ -1,5 +1,11 @@
 import { loadInventory } from '../database/adminFunctions.js';
-import { calculateNearestArchetype, processWineObject, validateWineObject, findBestArchetypeMatch, testWineAgainstArchetype } from './archetypeUtils.js';
+import { 
+    calculateNearestArchetype, 
+    processWineObject,
+    validateWineObject,
+    findBestArchetypeMatch,
+    testWineAgainstArchetype 
+} from './archetypeUtils.js';
 import { archetypes } from '../constants/archetypes.js';
 
 export const baseBalancedRanges = {
@@ -48,7 +54,7 @@ const balanceAdjustments = {
     aroma_down: [
         {
             target: "body_range",
-            formula: (diff) => diff * -0.3  // Opposite of up's 0.3
+            formula: (diff) => diff * -0.3
         },
         {
             target: "spice_penalty",
@@ -74,11 +80,11 @@ const balanceAdjustments = {
     body_down: [
         { 
             target: "spice_range",
-            formula: (diff) => diff * -0.5  // Opposite of up's 0.5
+            formula: (diff) => diff * -0.5
         },
         { 
             target: "tannins_range",
-            formula: (diff) => diff * -0.6  // Opposite of up's 0.6
+            formula: (diff) => diff * -0.6
         },
         {
             target: "aroma_penalty",
@@ -110,7 +116,7 @@ const balanceAdjustments = {
     sweetness_down: [
         { 
             target: "acidity_range",
-            formula: (diff) => diff * -0.5  // Opposite of up's 0.5
+            formula: (diff) => diff * -0.5
         },
         {
             target: "spice_penalty",
@@ -143,11 +149,11 @@ const balanceAdjustments = {
     tannins_down: [
         { 
             target: "body_range",
-            formula: (diff) => diff * -0.5  // Opposite of up's 0.5
+            formula: (diff) => diff * -0.5
         },
         { 
             target: "aroma_range",
-            formula: (diff) => diff * -0.4  // Opposite of up's 0.4
+            formula: (diff) => diff * -0.4
         },
         {
             target: "sweetness_penalty",
@@ -181,7 +187,7 @@ const balanceAdjustments = {
     ]
 };
 
-// Add new constant for synergy definitions
+// Synergy bonuses that enhance the balance score
 const synergyBonuses = {
     acidityTannins: {
         characteristics: ["acidity", "tannins"],
@@ -222,23 +228,7 @@ export function balanceCalculator(wine, archetype) {
     try {
         validateWineObject(processedWine);
     } catch (e) {
-        console.error('Wine validation failed:', e.message);
-        console.log('Wine object:', wine);
         return 0;
-    }
-
-    console.log('\n=== Wine Balance Analysis ===');
-    console.log('Wine:', processedWine);
-    console.log('Testing wine against all archetypes...');
-
-    // Test against all archetypes and log results
-    for (const [name, arch] of Object.entries(archetypes)) {
-        const result = testWineAgainstArchetype(
-            processedWine, 
-            arch, 
-            () => dynamicBalanceScore(processedWine, baseBalancedRanges, 0)
-        );
-        result.log.forEach(line => console.log(line));
     }
 
     // Find best matching archetype
@@ -260,13 +250,9 @@ export function balanceCalculator(wine, archetype) {
     let finalScore;
     if (bestMatch.qualifies && bestMatch.archetype) {
         finalScore = Math.max(bestMatch.score, dynamicBalance);
-        console.log(`\nWine qualifies as "${bestMatch.archetype.name}" with score: ${(bestMatch.score * 100).toFixed(1)}%`);
     } else {
         finalScore = dynamicBalance;
-        console.log('\nWine does not qualify for any archetype. Using dynamic balance score.');
     }
-
-    console.log(`Final balance score: ${(calculateSteppedBalance(finalScore) * 100).toFixed(1)}%`);
     
     return calculateSteppedBalance(finalScore);
 }

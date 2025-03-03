@@ -1,14 +1,7 @@
 import { archetypes } from './../constants/archetypes.js';
 
-/**
- * Checks if a specific requirement is met by a wine
- * @param {Object} wine - The wine object to check
- * @param {string} requirement - The requirement type
- * @param {*} value - The required value
- * @returns {boolean} - Whether the requirement is met
- */
+// Checks if a specific requirement is met by a wine
 export function checkSpecificRequirement(wine, requirement, value) {
-    // Add proper debug information showing exact property access
     let actualValue;
     
     switch(requirement) {
@@ -43,17 +36,11 @@ export function checkSpecificRequirement(wine, requirement, value) {
             
         default:
             actualValue = wine[requirement];
-            console.log(`Unknown requirement: ${requirement}, value: ${value}, actual: ${actualValue}`);
             return false;
     }
 }
 
-/**
- * Checks if wine meets processing requirements
- * @param {Object} wine - The wine object to check
- * @param {Object} processingReqs - The processing requirements
- * @returns {boolean} - Whether all requirements are met
- */
+// Checks if wine meets processing requirements
 export function checkProcessingRequirements(wine, processingReqs) {
     if (!processingReqs) return true;
     
@@ -72,12 +59,7 @@ export function checkProcessingRequirements(wine, processingReqs) {
     return true;
 }
 
-/**
- * Checks if wine meets regional requirements
- * @param {Object} wine - The wine object to check
- * @param {Object} regionalReqs - The regional requirements
- * @returns {boolean} - Whether all requirements are met
- */
+// Checks if wine meets regional requirements
 export function checkRegionalRequirements(wine, regionalReqs) {
     if (!regionalReqs) return true;
     
@@ -86,7 +68,6 @@ export function checkRegionalRequirements(wine, regionalReqs) {
     
     // Check country
     if (regionalReqs.country && country !== regionalReqs.country) {
-        console.debug(`Country check failed: Required ${regionalReqs.country}, got ${country}`);
         return false;
     }
     
@@ -95,33 +76,25 @@ export function checkRegionalRequirements(wine, regionalReqs) {
     
     // Check regions
     if (regionalReqs.regions && (!region || !regionalReqs.regions.includes(region))) {
-        console.debug(`Region check failed: Required one of ${regionalReqs.regions.join(', ')}, got ${region}`);
         return false;
     }
     
     // Check soil types
     if (regionalReqs.soilTypes && 
         (!wine.fieldSource?.soil || !regionalReqs.soilTypes.includes(wine.fieldSource.soil))) {
-        console.debug(`Soil check failed: Required one of ${regionalReqs.soilTypes.join(', ')}, got ${wine.fieldSource?.soil}`);
         return false;
     }
     
     // Check terrain types
     if (regionalReqs.terrainTypes && 
         (!wine.fieldSource?.terrain || !regionalReqs.terrainTypes.includes(wine.fieldSource.terrain))) {
-        console.debug(`Terrain check failed: Required one of ${regionalReqs.terrainTypes.join(', ')}, got ${wine.fieldSource?.terrain}`);
         return false;
     }
     
     return true;
 }
 
-/**
- * Checks if a wine qualifies for a given archetype
- * @param {Object} wine - The wine object to check
- * @param {Object} archetype - The archetype to check against
- * @returns {boolean} - Whether the wine qualifies for the archetype
- */
+// Checks if a wine qualifies for a given archetype
 export function qualifiesForArchetype(wine, archetype) {
     if (!wine || !archetype) {
         return false;
@@ -158,12 +131,7 @@ export function qualifiesForArchetype(wine, archetype) {
     return true;
 }
 
-/**
- * Calculates how close a wine is to the ideal values of an archetype
- * @param {Object} wine - The wine object
- * @param {Object} archetype - The archetype to check against
- * @returns {number} - Score between 0-1 indicating closeness to ideal
- */
+// Calculates how close a wine is to the ideal values of an archetype
 export function distanceScore(wine, archetype) {
     if (!archetype?.characteristics?.idealRanges) return 0;
     let totalScore = 0;
@@ -184,12 +152,7 @@ export function distanceScore(wine, archetype) {
     return totalWeight > 0 ? totalScore / totalWeight : 0;
 }
 
-/**
- * Calculates score based on how well balanced the wine's characteristics are
- * @param {Object} wine - The wine object
- * @param {Object} archetype - The archetype with balance groups
- * @returns {number} - Score between 0-1 indicating balance quality
- */
+// Calculates score based on how well balanced the wine's characteristics are
 export function balanceScore(wine, archetype) {
     if (!archetype?.balanceGroups) return 0;
     let totalScore = 0;
@@ -221,11 +184,7 @@ export function balanceScore(wine, archetype) {
     return totalWeight > 0 ? totalScore / totalWeight : 0;
 }
 
-/**
- * Finds the nearest matching archetype for a wine
- * @param {Object} wine - The wine object
- * @returns {Object} - Object containing the nearest archetype, distance, and whether it qualifies
- */
+// Finds the nearest matching archetype for a wine
 export function calculateNearestArchetype(wine) {
     let bestDistance = Infinity;
     let nearestArchetype = null;
@@ -264,12 +223,7 @@ export function calculateNearestArchetype(wine) {
     };
 }
 
-/**
- * Formats a requirement for display
- * @param {string} requirement - The requirement type
- * @param {*} value - The requirement value
- * @returns {string} - Human-readable description of the requirement
- */
+// Formats a requirement for display
 export function formatRequirement(requirement, value) {
     switch(requirement) {
         case 'requiredColor':
@@ -311,11 +265,7 @@ export function formatRequirement(requirement, value) {
     }
 }
 
-/**
- * Enhances a wine object by converting string values to numbers
- * @param {Object} wine - The wine object to process
- * @returns {Object} - The processed wine object with proper types
- */
+// Enhances a wine object by converting string values to numbers
 export function processWineObject(wine) {
     return {
         ...wine,
@@ -331,11 +281,7 @@ export function processWineObject(wine) {
     };
 }
 
-/**
- * Finds the best archetype match for a wine
- * @param {Object} wine - The wine object to match
- * @returns {Object} - Object containing the best matching archetype and score
- */
+// Finds the best archetype match for a wine
 export function findBestArchetypeMatch(wine) {
     let bestMatch = { archetype: null, score: 0, qualifies: false };
     
@@ -360,12 +306,7 @@ export function findBestArchetypeMatch(wine) {
     return bestMatch;
 }
 
-/**
- * Validates that a wine object contains all required base characteristics
- * @param {Object} wine - The wine object to validate
- * @returns {boolean} - Whether the wine is valid
- * @throws {Error} - If wine is missing required characteristics
- */
+// Validates that a wine object contains all required base characteristics
 export function validateWineObject(wine) {
     const baseCharacteristics = [
         'sweetness', 'acidity', 'tannins', 
@@ -381,18 +322,10 @@ export function validateWineObject(wine) {
     return true;
 }
 
-/**
- * Creates detailed log messages for testing wine against archetype
- * @param {Object} wine - The wine object to test
- * @param {Object} archetype - The archetype to test against
- * @param {function} dynamicBalanceScoreFn - Function to calculate dynamic balance
- * @returns {Object} - Object containing log messages and test results
- */
+// Creates detailed log messages for testing wine against archetype
 export function testWineAgainstArchetype(wine, archetype, dynamicBalanceScoreFn) {
     let qualifies = true;
     let log = [];
-    
-    log.push(`Testing against ${archetype.name}:`);
     
     // Check basic requirements
     if (archetype.requirements) {
@@ -427,8 +360,6 @@ export function testWineAgainstArchetype(wine, archetype, dynamicBalanceScoreFn)
             
             const passed = checkSpecificRequirement(wine, req, value);
             qualifies = qualifies && passed;
-            
-            log.push(`  ${req}: ${passed ? '✓' : '✗'} (required: ${JSON.stringify(value)}, got: ${JSON.stringify(actualValue)})`);
         }
     }
 
@@ -436,48 +367,22 @@ export function testWineAgainstArchetype(wine, archetype, dynamicBalanceScoreFn)
     if (archetype.processingReqs) {
         const procPassed = checkProcessingRequirements(wine, archetype.processingReqs);
         qualifies = qualifies && procPassed;
-        
-        log.push(`  Processing Requirements: ${procPassed ? '✓' : '✗'}`);
-        if (!procPassed) {
-            if (archetype.processingReqs.requireEcological) {
-                log.push(`    Ecological Required: got ${wine.fieldSource?.conventional}`);
-            }
-            if (archetype.processingReqs.allowedMethods) {
-                log.push(`    Method Required: ${archetype.processingReqs.allowedMethods.join(', ')}, got ${wine.crushingMethod || 'none'}`);
-            }
-        }
     }
 
     // Check regional requirements
     if (archetype.regionalReqs) {
         const regPassed = checkRegionalRequirements(wine, archetype.regionalReqs);
         qualifies = qualifies && regPassed;
-        
-        log.push(`  Regional Requirements: ${regPassed ? '✓' : '✗'}`);
-        if (!regPassed) {
-            if (archetype.regionalReqs.country) {
-                log.push(`    Country: ${wine.country || 'unknown'} (required: ${archetype.regionalReqs.country})`);
-            }
-            if (archetype.regionalReqs.regions) {
-                log.push(`    Region: ${wine.region || 'unknown'} (required one of: ${archetype.regionalReqs.regions.join(', ')})`);
-            }
-            if (archetype.regionalReqs.soilTypes) {
-                log.push(`    Soil: ${wine.fieldSource?.soil || 'unknown'} (required one of: ${archetype.regionalReqs.soilTypes.join(', ')})`);
-            }
-        }
     }
 
     // Check characteristics
     let charsPassed = true;
     if (archetype.characteristics?.idealRanges) {
-        log.push('  Characteristics:');
         for (const [trait, [min, max]] of Object.entries(archetype.characteristics.idealRanges)) {
             const rawValue = wine[trait];
             const value = typeof rawValue === 'string' ? parseFloat(rawValue) : rawValue;
             const passed = value !== undefined && value >= min && value <= max;
             charsPassed = charsPassed && passed;
-            
-            log.push(`    ${trait}: ${passed ? '✓' : '✗'} (${value?.toFixed(2) || 'undefined'} in [${min}-${max}])`);
         }
     }
     qualifies = qualifies && charsPassed;
@@ -488,14 +393,6 @@ export function testWineAgainstArchetype(wine, archetype, dynamicBalanceScoreFn)
     const archetypeBalance = (midpointScore + groupBalance) / 2;
     const dynamicBalance = dynamicBalanceScoreFn(wine);
     const finalScore = qualifies ? Math.max(archetypeBalance, dynamicBalance) : dynamicBalance;
-
-    log.push('\n  Scores:');
-    log.push(`    Midpoint Score: ${(midpointScore * 100).toFixed(1)}%`);
-    log.push(`    Group Balance: ${(groupBalance * 100).toFixed(1)}%`);
-    log.push(`    Archetype Balance: ${(archetypeBalance * 100).toFixed(1)}%`);
-    log.push(`    Dynamic Balance: ${(dynamicBalance * 100).toFixed(1)}%`);
-    log.push(`    Final Score: ${(finalScore * 100).toFixed(1)}%`);
-    log.push(`    Qualifies: ${qualifies ? 'Yes' : 'No'}`);
 
     return {
         qualifies,
