@@ -30,8 +30,22 @@ A web-based simulation game where players manage their own winery, from vineyard
 - **Enhanced Building System**: Expanded building maintenance and tool management
 - **Advanced Farmland Health**: Dynamic field health system affected by management decisions
 - **Improved Financial Tools**: Enhanced bookkeeping and transaction tracking
+- **Work Calculation System**: Detailed work calculation based on task complexity and staff skills
+- **Tutorial System**: Interactive tutorials to guide new players
 
-### Team Management System (teamManagementOverlay.js)
+## Core Systems & Functions
+
+### Staff Search & Hiring System (staffSearchOverlay.js - 286 lines)
+- `showStaffSearchOverlay()`: Displays staff search interface with options
+- `calculateSearchCost()`: Determines cost based on candidates, skill level, and specializations
+- `staffSearch()`: Initiates the staff search process
+- `specializationRoles`: Defines specialized roles like Vineyard Manager, Master Winemaker, etc.
+- Search options including:
+  - Number of candidates
+  - Required skill level
+  - Specialized role requirements
+
+### Team Management System (Integrated in staffoverlay.js)
 - Team creation and assignment
 - Specialized role management
 - Team performance tracking
