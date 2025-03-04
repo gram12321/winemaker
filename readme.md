@@ -45,7 +45,7 @@ A web-based simulation game where players manage their own winery, from vineyard
   - Required skill level
   - Specialized role requirements
 
-### Team Management System (teamManagementOverlay.js - 142 lines)
+### Team Management System (Integrated in staffoverlay.js)
 - Team creation and assignment
 - Specialized role management
 - Team performance tracking
