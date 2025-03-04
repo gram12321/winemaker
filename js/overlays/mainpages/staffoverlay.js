@@ -1,9 +1,9 @@
 import { displayStaff } from '/js/staff.js';
-import { showStaffSearchOverlay } from '/js/overlays/StaffSearchOverlay.js';
 import { showMainViewOverlay } from '../overlayUtils.js';
 import { loadStaff, loadTeams, saveTeams  } from '/js/database/initiation.js';
 import { addConsoleMessage } from '/js/console.js';
 import { getDefaultTeams } from '../../staff.js';
+import { showStaffSearchOverlay } from '../staffSearchOverlay.js';
     
 
 let teams = []; // In-memory storage for teams

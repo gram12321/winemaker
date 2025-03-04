@@ -6,7 +6,6 @@ import { showStandardOverlay, hideOverlay } from './overlayUtils.js';
 import { addTransaction} from '../finance.js';
 import { getMoney } from '../database/adminFunctions.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
-import { calculateHiringWork } from './hirestaffoverlay.js';
 import { createOverlayHTML, createSlider, createInfoBox, createTextCenter, createCheckbox } from '../components/createOverlayHTML.js';
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER } from '../constants/constants.js';
