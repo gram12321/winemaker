@@ -687,9 +687,13 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     // Copy all relevant properties from grapes, ensuring proper types
     const resourceName = grapeResource.resource.name;
     const vintage = parseInt(grapeResource.vintage);
-    const quality = parseFloat(grapeResource.quality);  // Ensure quality is a number
+    const quality = parseFloat(grapeResource.quality);
     const fieldName = grapeResource.fieldName;
-    const fieldPrestige = parseFloat(grapeResource.fieldPrestige);  // Ensure prestige is a number
+    const fieldPrestige = parseFloat(grapeResource.fieldPrestige);
+    const country = grapeResource.country;
+    const region = grapeResource.region;
+
+
 
     // Create clean base properties object with proper number types
     const baseProperties = {
@@ -708,7 +712,10 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
         fieldSource: {
             ...grapeResource.fieldSource,
             conventional: grapeResource.fieldSource?.conventional || 'Traditional'
-        }
+        },
+
+        country: country,
+        region: region
     };
 
     // Calculate modified characteristics based on crushing process
@@ -721,7 +728,9 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
         oxidation: baseProperties.oxidation,
         ripeness: baseProperties.ripeness,
         crushingMethod: baseProperties.crushingMethod,
-        fieldSource: baseProperties.fieldSource
+        fieldSource: baseProperties.fieldSource,
+        country: baseProperties.country,
+        region: baseProperties.region
     });
 
     let removed = inventoryInstance.removeResource(
@@ -802,6 +811,9 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
             // Apply all characteristics and properties to the new must
             if (newMust) {
                 Object.assign(newMust, characteristics);
+                newMust.country = characteristics.country;
+                newMust.region = characteristics.region;
+                
                 
                 // Ensure special features are properly transferred
                 if (grapeResource.specialFeatures) {

@@ -17,6 +17,24 @@ export function fermentation(selectedResource, storage, mustAmount, params = {})
         return false;
     }
 
+    // Find the must item to ensure we have all necessary data
+    const mustItem = inventoryInstance.items.find(item => 
+        item.storage === storage &&
+        item.state === 'Must' &&
+        item.resource.name === selectedResource
+    );
+
+    if (mustItem) {
+        // Ensure we pass field prestige from the must item if not provided in params
+        if (!params.fieldPrestige && mustItem.fieldPrestige) {
+            params.fieldPrestige = mustItem.fieldPrestige;
+        }
+        
+        // Ensure we pass country and region data
+        params.country = mustItem.country;
+        params.region = mustItem.region;
+    }
+    
     // Create fermentation task
     const workData = calculateFermentationWorkData(mustAmount, params.selectedMethod);
     
@@ -39,7 +57,7 @@ export function fermentation(selectedResource, storage, mustAmount, params = {})
 }
 
 export function performFermentation(target, progress, params) {
-    const { selectedResource, storage, mustAmount, vintage, quality, fieldName, fieldPrestige } = params;
+    const { selectedResource, storage, mustAmount, vintage, quality, fieldName, fieldPrestige, country, region } = params;
     if (mustAmount <= 0) return false;
     
     const wineVolume = mustAmount * 0.9 * progress;
@@ -78,7 +96,11 @@ export function performFermentation(target, progress, params) {
             soil: null,
             terrain: null
         },
-        specialFeatures: mustItem.specialFeatures || []
+        specialFeatures: mustItem.specialFeatures || [],
+        
+        // Essential region data
+        country: mustItem.country,
+        region: mustItem.region
     };
 
     // Remove the must
@@ -102,7 +124,7 @@ export function performFermentation(target, progress, params) {
         vintage,
         quality,
         fieldName,
-        fieldPrestige,
+        fieldPrestige || mustItem.fieldPrestige || 0.1,
         'Wine Cellar',
         baseProperties.oxidation,
         baseProperties.ripeness
@@ -123,6 +145,10 @@ export function performFermentation(target, progress, params) {
         baseProperties.specialFeatures.forEach(feature => {
             newWine.addSpecialFeature(feature);
         });
+        
+        newWine.country = baseProperties.country;
+        newWine.region = baseProperties.region;
+        
     }
 
     saveInventory();
