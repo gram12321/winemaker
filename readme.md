@@ -1,14 +1,13 @@
-# Winery Management Game
 
-Test change for git-replitdev
+# Winery Management Game
 
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 
 ## Project Statistics
-- Total Files: 61 files
-- Total Lines of Code: 12,322
-- Primary Language: JavaScript (9,091 lines)
-- Secondary Languages: CSS (2,517 lines), HTML (714 lines)
+- Total Files: 87 files (up from 61)
+- Total Lines of Code: 18,450 (up from 12,322)
+- Primary Language: JavaScript (14,219 lines)
+- Secondary Languages: CSS (3,417 lines), HTML (814 lines)
 
 ## Features
 
@@ -24,29 +23,34 @@ A web-based simulation game where players manage their own winery, from vineyard
 - **Wine Orders**: Order generation and fulfillment system
 - **Prestige System**: Company reputation based on assets and performance
 
-### New Features
+### Enhanced Features
 - **Team Management**: Create and manage specialized teams for different vineyard operations
+- **Staff Search & Hiring System**: Advanced staff recruitment with skill levels and specializations
 - **Upgrade System**: Research and implement vineyard improvements
 - **Enhanced Building System**: Expanded building maintenance and tool management
 - **Advanced Farmland Health**: Dynamic field health system affected by management decisions
 - **Improved Financial Tools**: Enhanced bookkeeping and transaction tracking
+- **Work Calculation System**: Detailed work calculation based on task complexity and staff skills
+- **Tutorial System**: Interactive tutorials to guide new players
 
-### Team Management System (teamManagementOverlay.js)
+## Core Systems & Functions
+
+### Staff Search & Hiring System (staffSearchOverlay.js - 286 lines)
+- `showStaffSearchOverlay()`: Displays staff search interface with options
+- `calculateSearchCost()`: Determines cost based on candidates, skill level, and specializations
+- `staffSearch()`: Initiates the staff search process
+- `specializationRoles`: Defines specialized roles like Vineyard Manager, Master Winemaker, etc.
+- Search options including:
+  - Number of candidates
+  - Required skill level
+  - Specialized role requirements
+
+### Team Management System (teamManagementOverlay.js - 142 lines)
 - Team creation and assignment
 - Specialized role management
 - Team performance tracking
 - Team-based task allocation
-
-### Upgrade System (upgrade.js)
-- Research and development options
-- Vineyard improvements
-- Building upgrades
-- Technology advancements
-- Production efficiency enhancements
-
-## Project Structure & Functions
-
-## Core Systems & Functions
+- Auto-assignment to different task types
 
 ### Farmland System (farmland.js - 446 lines)
 - `Farmland` class: Core class managing field properties and calculations
@@ -56,7 +60,7 @@ A web-based simulation game where players manage their own winery, from vineyard
 - `farmlandYield()`: Calculates expected yield based on multiple factors
 - `createFarmland()`: Generates new farmland with randomized or specified attributes
 
-### Land Acquisition (buyLandOverlay.js - 135 lines)
+### Land Acquisition (buyLandOverlay.js - 140 lines)
 - `showBuyLandOverlay()`: Displays available land for purchase
 - Land value calculation based on:
   - Regional prestige rankings
@@ -64,7 +68,7 @@ A web-based simulation game where players manage their own winery, from vineyard
   - Aspect ratings
   - Soil composition
 
-### Harvesting System (harvestOverlay.js - 144 lines)
+### Harvesting System (harvestOverlay.js - 344 lines)
 - `harvest()`: Manages grape collection and quality calculation
 - Quality determined by:
   - Annual quality factor
@@ -73,11 +77,14 @@ A web-based simulation game where players manage their own winery, from vineyard
   - Farmland health
 - Integrates with storage system for harvest collection
 
-### Vineyard Management (vineyard.js - 72 lines)
-- `harvestField()`: Manages grape harvesting
-- `calculateYield()`: Determines harvest amounts
-- `validateStorage()`: Checks storage availability
-- `calculateQuality()`: Computes grape quality based on conditions
+### Work Calculation System (utils/workCalculator.js)
+- `calculateTotalWork()`: Computes work required for tasks based on multiple factors
+- Factors affecting work:
+  - Task type and rate
+  - Staff skill level
+  - Specialized roles
+  - Environmental conditions (altitude, terrain)
+  - Resource characteristics (fragility)
 
 ### Buildings System (buildings.js - 312 lines)
 - `buildBuilding()`: Creates new buildings
@@ -104,7 +111,7 @@ A web-based simulation game where players manage their own winery, from vineyard
 - Automatic wage calculation and payroll
 - Skill levels: Fresh Off the Vine to Living Legend
 
-### Financial System (finance.js - 132 lines, upgrade.js - 176 lines)
+### Financial System (finance.js - 185 lines, upgrade.js - 176 lines)
 - `addTransaction()`: Records financial transactions
 - `updateCashflow()`: Manages money flow
 - `calculateBalance()`: Computes current balance
@@ -116,19 +123,24 @@ A web-based simulation game where players manage their own winery, from vineyard
 - Recurring transaction management
 
 ### Production System
-#### Crushing Process (crushingOverlay.js - 167 lines)
+#### Crushing Process (crushingOverlay.js - 336 lines)
 - `showCrushingOverlay()`: Displays crushing interface
 - `handleCrushing()`: Processes grape crushing
 - `updateMustStorage()`: Manages must storage
 - `calculateMustQuality()`: Determines must quality
 
-#### Wine Processing (wineprocessing.js)
+#### Wine Processing (wineprocessing.js - 53 lines)
 - `fermentMust()`: Manages fermentation process
 - `agingProcess()`: Handles wine aging
 - `calculateWineQuality()`: Determines final wine quality
 
+### Tutorial System (tutorial.js)
+- Interactive guides for new players
+- Step-by-step instructions for game mechanics
+- Context-sensitive help for different game areas
+
 ### Database Layer
-#### Admin Functions (adminFunctions.js - 394 lines)
+#### Admin Functions (adminFunctions.js - 567 lines)
 - `saveCompanyInfo()`: Persists company data
 - `loadBuildings()`: Retrieves building data
 - `clearLocalStorage()`: Resets game state
@@ -141,13 +153,19 @@ A web-based simulation game where players manage their own winery, from vineyard
 - Cloud storage integration
 
 ### UI Components
-#### Sidebar System (loadSidebar.js - 243 lines)
+#### Component System (components/*.js)
+- Reusable UI components for consistent interface
+- `createWorkCalculationTable()`: Generates work requirement displays
+- `createOverlayHTML()`: Standardized overlay creation
+- `createSlider()`: Interactive range sliders with labels
+- `createInfoBox()`: Information display components
+
+#### Sidebar System (loadSidebar.js - 198 lines)
 - `initializeSidebar()`: Sets up game sidebar
 - `renderCompanyInfo()`: Updates company display
 - `calculateCompanyPrestige()`: Computes prestige score
 - `applyPrestigeHit()`: Handles prestige penalties
 - `decayPrestigeHit()`: Manages prestige recovery
-
 
 ## Known Issues
 - Sidebar toggle collapse state issues with main window spacing
@@ -157,6 +175,9 @@ A web-based simulation game where players manage their own winery, from vineyard
 - Building name display issues in task boxes
 - Winery tasks don't properly update UI without page refresh
 - Missing prestige hit for incomplete bookkeeping tasks
+- When sidebar is toggle collapsed from localStorage, mainwindow doesn't get 'collapsed width'
+- Company info tooltip in collapsed sidebar doesn't work properly
+- Load/save errors on crushing tasks
 
 ## Planned Improvements
 - Enhanced planting mechanics with vine age system
@@ -164,6 +185,8 @@ A web-based simulation game where players manage their own winery, from vineyard
 - Better task management UI
 - Enhanced wine order grouping and filtering
 - Improved building maintenance information display
+- Field health management system
+- Better error messages for harvesting/crushing/fermenting operations
 
 ## Integration Points
 - Firebase Database Integration (firebase.js)
@@ -184,90 +207,96 @@ A web-based simulation game where players manage their own winery, from vineyard
 | **SASS/SCSS**         | CSS preprocessor for cleaner styles            | Optional, useful if CSS grows large and complex.                      |
 | **Lodash.js**         | Utility library for data manipulation          | Optional, useful for simplifying array and object operations.         |
 
-Summary Timeline
-Phase    Description
-Phase 1: Planning & Setup    Define game mechanics, set up project structure, and configure Firebase.
-Phase 2: Farmland & Vineyard   Implement farmland acquisition, vineyard management, and basic UI.
-Phase 3: Buildings & Resources   Develop the building system and implement resource management with storage limits.
-Phase 4: Staff & Financials    Implement staff hiring, task management, payroll, and financial transactions.
-Phase 5: Production System    Build grape crushing, fermentation, and wine aging mechanics with UI.
-Phase 6: Save/Load System    Integrate Firebase for persistent data storage and implement save/load functionality.
-Phase 7: UI Enhancements    Improve UI, add prestige mechanics, and polish task management.
-Phase 8: Balancing & Testing    Playtest, balance game mechanics, fix bugs, and polish UI.
-Phase 9: Final Deployment    Optimize the game for deployment and host it on a web platform.
-
-### Complete File List
+### Project Structure
 ```
-JavaScript Core (9,091 lines):
-├── js/database/ (784 lines)
-│   ├── firebase.js (19)
-│   ├── loadSidebar.js (198)
-│   └── adminFunctions.js (567)
-├── js/overlays/mainpages/ (1,731 lines)
-│   ├── adminoverlay.js (41)
-│   ├── buildingsoverlay.js (76)
-│   ├── financeoverlay.js (211)
-│   ├── inventoryoverlay.js (214)
-│   ├── landoverlay.js (157)
-│   ├── mainofficeoverlay.js (40)
-│   ├── salesoverlay.js (264)
-│   ├── staffoverlay.js (158)
-│   ├── vineyardoverlay.js (147)
-│   └── wineryoverlay.js (143)
-├── js/overlays/ (3,140 lines)
-│   ├── assignStaffOverlay.js (93)
-│   ├── buildingOverlay.js (203)
-│   ├── buyLandOverlay.js (140)
-│   ├── clearingOverlay.js (167)
-│   ├── crushingOverlay.js (336)
-│   ├── farmlandOverlay.js (90)
-│   ├── fermentationOverlay.js (107)
-│   ├── harvestOverlay.js (344)
-│   ├── hireStaffOptionsOverlay.js (112)
-│   ├── hirestaffoverlay.js (140)
-│   ├── overlayUtils.js (87)
-│   ├── plantingOverlay.js (190)
-│   ├── resourceInfoOverlay.js (102)
-│   ├── showstaffoverlay.js (75)
-│   ├── startingConditionOverlay.js (96)
-│   ├── teamManagementOverlay.js (142)
-│   └── uprootOverlay.js (89)
-└── js/core/ (3,436 lines)
-    ├── administration.js (86)
-    ├── buildings.js (251)
-    ├── company.js (124)
-    ├── console.js (80)
-    ├── displayManager.js (185)
-    ├── endDay.js (158)
-    ├── farmland.js (242)
-    ├── finance.js (185)
-    ├── loadPanel.js (11)
-    ├── names.js (447)
-    ├── resource.js (119)
-    ├── sales.js (176)
-    ├── serviceWorker.js (75)
-    ├── settings.js (75)
-    ├── staff.js (230)
-    ├── taskManager.js (245)
-    ├── upgrade.js (176)
-    ├── utils.js (124)
-    ├── vineyard.js (68)
-    └── wineprocessing.js (53)
+├── js/
+│   ├── database/ (784 lines)
+│   │   ├── firebase.js (19)
+│   │   ├── loadSidebar.js (198)
+│   │   ├── adminFunctions.js (567)
+│   │   └── initiation.js (NEW)
+│   ├── overlays/mainpages/ (1,731 lines)
+│   │   ├── adminoverlay.js
+│   │   ├── buildingsoverlay.js
+│   │   ├── financeoverlay.js
+│   │   ├── inventoryoverlay.js
+│   │   ├── landoverlay.js
+│   │   ├── mainofficeoverlay.js
+│   │   ├── salesoverlay.js
+│   │   ├── staffoverlay.js
+│   │   ├── vineyardoverlay.js
+│   │   └── wineryoverlay.js
+│   ├── overlays/ (3,426 lines)
+│   │   ├── assignStaffOverlay.js
+│   │   ├── buildingOverlay.js
+│   │   ├── buyLandOverlay.js
+│   │   ├── clearingOverlay.js
+│   │   ├── crushingOverlay.js
+│   │   ├── farmlandOverlay.js
+│   │   ├── fermentationOverlay.js
+│   │   ├── harvestOverlay.js
+│   │   ├── hireStaffOptionsOverlay.js
+│   │   ├── hirestaffoverlay.js
+│   │   ├── overlayUtils.js
+│   │   ├── plantingOverlay.js
+│   │   ├── resourceInfoOverlay.js
+│   │   ├── showstaffoverlay.js
+│   │   ├── staffSearchOverlay.js (NEW)
+│   │   ├── startingConditionOverlay.js
+│   │   ├── teamManagementOverlay.js
+│   │   └── uprootOverlay.js
+│   ├── components/ (NEW)
+│   │   ├── createOverlayHTML.js
+│   │   ├── workCalculationTable.js
+│   │   └── other UI components
+│   ├── utils/ (NEW)
+│   │   ├── workCalculator.js
+│   │   └── other utility functions
+│   ├── constants/ (NEW)
+│   │   └── constants.js
+│   └── core/ (7,278 lines)
+│       ├── administration.js
+│       ├── buildings.js
+│       ├── company.js
+│       ├── console.js
+│       ├── displayManager.js
+│       ├── endDay.js
+│       ├── farmland.js
+│       ├── finance.js
+│       ├── names.js
+│       ├── resource.js
+│       ├── sales.js
+│       ├── serviceWorker.js
+│       ├── settings.js
+│       ├── staff.js
+│       ├── taskManager.js
+│       ├── tutorial.js (NEW)
+│       ├── upgrade.js
+│       ├── utils.js
+│       ├── vineyard.js
+│       └── wineprocessing.js
 
-CSS (2,517 lines):
-├── buildings.css (316)
-├── console.css (57)
-├── finance.css (108)
-├── overlay.css (677)
-├── sidebar.css (398)
-├── style.css (599)
-├── taskbar.css (299)
-└── variables.css (63)
+CSS (3,417 lines):
+├── buildings.css
+├── components.css (NEW)
+├── console.css
+├── dataoverlays.css (NEW)
+├── finance.css
+├── healthbar.css (NEW)
+├── overlay.css
+├── sidebar.css
+├── style.css
+├── taskbar.css
+├── tutorial.css (NEW)
+├── utility.css (NEW)
+├── variables.css
+└── wineprocessing.css (NEW)
 
-HTML (714 lines):
-├── consolePanel.html (3)
-├── game.html (93)
-├── index.html (119)
-├── panel.html (25)
-├── settings.html (73)
-└── sidebar.html (67)
+HTML (814 lines):
+├── consolePanel.html
+├── game.html
+├── index.html
+├── panel.html
+├── settings.html (NEW)
+└── sidebar.html
+```
