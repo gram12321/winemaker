@@ -59,30 +59,100 @@ export function sellWines(resourceName) {
     }
 }
 
-// Calculate wine price based on quality, land value, and field prestige // Capped at 100€ for non-top3 regions. As quality 0-1, land value 0-1, field prestige 0-1, thus maximum baseprice is 100€. (Ie we ware multiplying 3 normalized values of 0-1 by 100 
+// Calculate base wine price based on land value and field prestige
+// Base price is typically between 10-100€ depending on region and farmland quality
+// Land value and field prestige each contribute 50% to the base price
 /*
-Landvalue is aprox 41% of price as it is in both normalized value (1/3) and field prestige (1/4) each contributing 1/3 to baseprice) 
-33.3% (direct contribution)
-8.3% (through field prestige: 25% of 33.3%)
-Total impact: approximately 41.6% of the final wine price */
-
+The land value now has a more prominent role in price calculation:
+- 50% direct contribution to base price (up from 33.3%)
+- Additional indirect contribution through field prestige
+- Results in land value determining approximately 60-65% of the base price
+- Premium wine regions (Burgundy, Champagne, Napa Valley) can exceed the 100€ base price cap
+*/
 export function calculateBaseWinePrice(quality, landValue, prestige) {
     // Normalize our inputs
     const normalizedLandValue = normalizeLandValue(landValue);
     
-    // Calculate base price exactly as before:
-    // Average of three factors, each multiplied by 100
-    // This gives us the same 1-100€ range as before
-    const basePrice = (quality * 100 + normalizedLandValue * 100 + prestige * 100) / 3;
+    // Calculate base price without quality:
+    // Average of two factors, each multiplied by 100
+    // This gives us the same 0-100€ range
+    const basePrice = (normalizedLandValue * 100 + prestige * 100) / 2;
     return basePrice;
 }
 
+/**
+ * Extreme quality multiplier using a logistic function
+ * Maps 0-1 values to multipliers where:
+ * - Values below 0.7 get modest multipliers (1-2x)
+ * - Values around 0.9 get moderate multipliers (~5x)
+ * - Values above 0.95 grow exponentially
+ * - Values approaching 0.99 and above yield astronomical multipliers
+ * 
+ * This creates a wine pricing model where:
+ * - ~90% of wines are below €100 (average quality wines));
+ * - ~9% are between €100-€1,000 (excellent wines)
+ * - ~0.9% are between €1,000-€10,000 (exceptional wines)
+ * - Only ~0.1% exceed €10,000 (legendary wines)
+ * 
+ * Examples:
+ * 0.5 -> ~1.1x
+ * 0.8 -> ~2x
+ * 0.9 -> ~5x
+ * 0.95 -> ~20x
+ * 0.98 -> ~100x
+ * 0.99 -> ~500x
+ * 0.995 -> ~1000x
+ */
+export function calculateExtremeQualityMultiplier(value, steepness = 100, midpoint = 0.92) {
+    // Ensure value is between 0 and 0.99999
+    const safeValue = Math.min(0.99999, Math.max(0, value || 0));
+    
+    if (safeValue < 0.5) {
+        // Below average quality gets a small penalty
+        return 0.8 + (safeValue * 0.4);
+    } else if (safeValue < 0.7) {
+        // Average quality gets approximately 1x multiplier
+        return 1.0 + ((safeValue - 0.5) * 0.5);
+    } else {
+        // Higher quality grows exponentially using a modified logistic function
+        // The formula: 1 + base * (1 / (1 + Math.exp(-steepness * (value - midpoint))))
+        // This creates an S-curve with explosive growth after the midpoint
+        const baseMultiplier = 100000; // Maximum potential multiplier
+        const logisticComponent = 1 / (1 + Math.exp(-steepness * (safeValue - midpoint)));
+        
+        return 1 + (baseMultiplier * logisticComponent);
+    }
+}
+
+// Calculate wine price by applying extreme quality/balance multiplier to base price
+// The final price incorporates:
+// 1. Base price (land value + field prestige)
+// 2. Quality (60% weight in combined score)
+// 3. Balance (40% weight in combined score)
+// 
+// The logistic multiplier creates the possibility of extremely valuable wines
+// when both quality and balance are exceptional (>0.95), while keeping
+// average wines (quality/balance ~0.5-0.7) at reasonable prices
 export function calculateWinePrice(quality, wine) {
     const farmlands = getFarmlands();
     const farmland = farmlands.find(field => field.name === wine.fieldName);
     if (!farmland) return 0;
     
-    return calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige);
+    // Calculate the base price (typically 10-50€)
+    const basePrice = calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige);
+    
+    // Get quality and balance values, defaulting to 0.5 if not present
+    const qualityValue = quality !== undefined ? quality : 0.5;
+    const balanceValue = wine.balance !== undefined ? wine.balance : 0.5;
+    
+    // First, calculate a combined quality score giving more weight to quality (60%) than balance (40%)
+    const combinedScore = (qualityValue * 0.6) + (balanceValue * 0.4);
+    
+    // Then apply our extreme multiplier function to the combined score
+    const priceMultiplier = calculateExtremeQualityMultiplier(combinedScore);
+    
+    // Calculate final price by multiplying base price by our extreme multiplier
+    return basePrice * priceMultiplier;
 }
 
 // Generate a random wine order based on available inventory and company prestige

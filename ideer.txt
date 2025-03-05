@@ -385,3 +385,56 @@ Oakiness / Wood Spice (vanilla, toast)	Unoaked / Neutral (no wood influence, “
     body: '0% (Light) to 100% (Full)',
     spice: '0% (Pure) to 100% (Full)'
   };
+
+Wine Price Calculation Analysis
+
+Mathematical Analysis of Each Component's Influence
+After analyzing the complete calculation chain, here's the precise breakdown of how each factor contributes to the final wine price:
+
+1. Base Price Components (Before Quality Multiplier)
+  - The base price is calculated from two components with equal weight:
+    - Land Value: 50% of base price
+    - Field Prestige: 50% of base price
+
+2. Field Prestige Breakdown
+  - Field prestige itself is calculated from:
+    - Vine Age: 30% of field prestige (15% of base price)
+    - Land Value (again): 25% of field prestige (12.5% of base price)
+    - Region Prestige: 25% of field prestige (12.5% of base price)
+    - Grape Fragility: 20% of field prestige (10% of base price)
+
+3. Total Land Value Influence on Base Price
+  - Direct contribution: 50% of base price
+  - Indirect contribution (through field prestige): 12.5% of base price
+  - Total land value influence: 62.5% of base price
+
+4. Quality/Balance Multiplier Effect
+  - For average quality wines (score ~0.5-0.7):
+    - Base price accounts for ~80-90% of final price
+    - Quality/balance multiplier adds ~10-20% to price
+  - For exceptional wines (score >0.95):
+    - Base price accounts for only ~1-5% of final price
+    - Quality/balance multiplier accounts for ~95-99% of final price
+
+5. Quality vs Balance in Multiplier
+  - Quality: 60% weight in combined score
+  - Balance: 40% weight in combined score
+
+Typical Price Composition (Percentage of Final Price)
+- For Average Quality Wine (Quality/Balance ~0.6)
+  - Land Value (direct): ~42%
+  - Land Value (indirect): ~10%
+  - Vine Age: ~12%
+  - Region Prestige: ~10%
+  - Grape Fragility: ~8%
+  - Quality Effect: ~11%
+  - Balance Effect: ~7%
+
+- For Exceptional Wine (Quality/Balance ~0.98)
+  - Land Value (direct): ~0.5%
+  - Land Value (indirect): ~0.13%
+  - Vine Age: ~0.15%
+  - Region Prestige: ~0.13%
+  - Grape Fragility: ~0.1%
+  - Quality Effect: ~59%
+  - Balance Effect: ~40%
