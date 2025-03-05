@@ -132,11 +132,34 @@ function createTestFarmland(params = {}) {
 
 // Test cases
 export const testCases = [
+    // Low quality wines
+    {
+        name: "Very Low Quality Wine from Spain",
+        wine: createTestWine({ quality: 0.3, balance: 0.3, fieldPrestige: 0.2 }),
+        farmland: createTestFarmland({ landvalue: 5000, vineAge: '2', region: 'La Mancha', country: 'Spain' }),
+        quality: 0.3
+    },
+    {
+        name: "Low Quality Wine from La Mancha",
+        wine: createTestWine({ quality: 0.4, balance: 0.3, fieldPrestige: 0.2 }),
+        farmland: createTestFarmland({ landvalue: 10000, vineAge: '3', region: 'La Mancha', country: 'Spain' }),
+        quality: 0.4
+    },
+    
+    // Average quality wines
     {
         name: "Average Quality Wine from Bordeaux",
         wine: createTestWine({ quality: 0.7, balance: 0.6, fieldPrestige: 0.5 }),
         farmland: createTestFarmland({ landvalue: 50000, vineAge: '10', region: 'Bordeaux' }),
         quality: 0.7
+    },
+    
+    // Good quality wines
+    {
+        name: "Good Quality Wine from Tuscany",
+        wine: createTestWine({ quality: 0.85, balance: 0.8, fieldPrestige: 0.6 }),
+        farmland: createTestFarmland({ landvalue: 120000, vineAge: '15', region: 'Tuscany', country: 'Italy' }),
+        quality: 0.85
     },
     {
         name: "High Quality Wine from Burgundy",
@@ -144,17 +167,27 @@ export const testCases = [
         farmland: createTestFarmland({ landvalue: 800000, vineAge: '30', region: 'Burgundy (Bourgogne)', country: 'France' }),
         quality: 0.9
     },
+    
+    // Exceptional wines
     {
         name: "Exceptional Wine from Champagne",
-        wine: createTestWine({ quality: 0.98, balance: 0.97, fieldPrestige: 0.95 }),
-        farmland: createTestFarmland({ landvalue: 1500000, vineAge: '50', region: 'Champagne', country: 'France' }),
-        quality: 0.98
+        wine: createTestWine({ quality: 0.95, balance: 0.93, fieldPrestige: 0.9 }),
+        farmland: createTestFarmland({ landvalue: 1000000, vineAge: '10', region: 'Champagne', country: 'France' }),
+        quality: 0.95
     },
     {
-        name: "Low Quality Wine from La Mancha",
-        wine: createTestWine({ quality: 0.4, balance: 0.3, fieldPrestige: 0.2 }),
-        farmland: createTestFarmland({ landvalue: 10000, vineAge: '3', region: 'La Mancha', country: 'Spain' }),
-        quality: 0.4
+        name: "Nearly Perfect Wine from Champagne",
+        wine: createTestWine({ quality: 0.98, balance: 0.97, fieldPrestige: 0.95 }),
+        farmland: createTestFarmland({ landvalue: 1500000, vineAge: '15', region: 'Champagne', country: 'France' }),
+        quality: 0.98
+    },
+    
+    // Legendary wines
+    {
+        name: "Legendary Wine from Burgundy",
+        wine: createTestWine({ quality: 0.99, balance: 0.99, fieldPrestige: 0.98 }),
+        farmland: createTestFarmland({ landvalue: 2000000, vineAge: '8', region: 'Burgundy (Bourgogne)', country: 'France' }),
+        quality: 0.99
     }
 ];
 

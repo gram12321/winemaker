@@ -83,44 +83,44 @@ export function calculateBaseWinePrice(quality, landValue, prestige) {
 /**
  * Extreme quality multiplier using a logistic function
  * Maps 0-1 values to multipliers where:
- * - Values below 0.7 get modest multipliers (1-2x)
- * - Values around 0.9 get moderate multipliers (~5x)
- * - Values above 0.95 grow exponentially
- * - Values approaching 0.99 and above yield astronomical multipliers
+ * - Values below 0.7 get modest multipliers (0.8-1.25x)
+ * - Values around 0.9 get moderate multipliers (~3-5x)
+ * - Values above 0.95 grow more quickly (~10-50x)
+ * - Only values approaching 0.99+ yield astronomical multipliers (>100x)
  * 
  * This creates a wine pricing model where:
- * - ~90% of wines are below €100 (average quality wines));
+ * - ~90% of wines are below €100 (average quality wines)
  * - ~9% are between €100-€1,000 (excellent wines)
  * - ~0.9% are between €1,000-€10,000 (exceptional wines)
- * - Only ~0.1% exceed €10,000 (legendary wines)
- * 
- * Examples:
- * 0.5 -> ~1.1x
- * 0.8 -> ~2x
- * 0.9 -> ~5x
- * 0.95 -> ~20x
- * 0.98 -> ~100x
- * 0.99 -> ~500x
- * 0.995 -> ~1000x
+ * - Only ~0.1% exceed €10,000 (legendary wines, requiring >0.98 quality AND balance)
  */
-export function calculateExtremeQualityMultiplier(value, steepness = 100, midpoint = 0.92) {
+export function calculateExtremeQualityMultiplier(value, steepness = 80, midpoint = 0.95) {
     // Ensure value is between 0 and 0.99999
     const safeValue = Math.min(0.99999, Math.max(0, value || 0));
     
     if (safeValue < 0.5) {
-        // Below average quality gets a small penalty
+        // Below average quality gets a small penalty but never below 0.8x
         return 0.8 + (safeValue * 0.4);
     } else if (safeValue < 0.7) {
         // Average quality gets approximately 1x multiplier
         return 1.0 + ((safeValue - 0.5) * 0.5);
+    } else if (safeValue < 0.9) {
+        // Good quality gets a modest boost (1.25x-3x)
+        return 1.25 + ((safeValue - 0.7) * 8.75);
+    } else if (safeValue < 0.95) {
+        // Excellent quality gets a stronger boost (3x-10x)
+        return 3 + ((safeValue - 0.9) * 140);
+    } else if (safeValue < 0.98) {
+        // Exceptional quality (0.95-0.98) gets a significant boost (10x-50x)
+        return 10 + ((safeValue - 0.95) * 1333.33);
     } else {
-        // Higher quality grows exponentially using a modified logistic function
-        // The formula: 1 + base * (1 / (1 + Math.exp(-steepness * (value - midpoint))))
-        // This creates an S-curve with explosive growth after the midpoint
-        const baseMultiplier = 100000; // Maximum potential multiplier
-        const logisticComponent = 1 / (1 + Math.exp(-steepness * (safeValue - midpoint)));
+        // Only truly extraordinary quality (>0.98) gets the extreme multipliers
+        // This makes astronomical prices much rarer
+        const ultraQualityFactor = safeValue - 0.98;
+        const baseMultiplier = 50;
+        const exponentialGrowth = Math.pow(10000, ultraQualityFactor * 5); // 0-2 range becomes 1-10000
         
-        return 1 + (baseMultiplier * logisticComponent);
+        return baseMultiplier * exponentialGrowth;
     }
 }
 
