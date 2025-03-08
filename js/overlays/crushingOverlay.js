@@ -10,6 +10,7 @@ import { createOverlayHTML, createTable, createMethodSelector, createCheckbox, c
 import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateCrushingCharacteristics } from '../utils/crushingCharacteristics.js';
+import { calculateWineBalance } from '../utils/balanceCalculator.js';
 
 export function showCrushingOverlay() {
     const overlayContent = createCrushingHTML();
@@ -817,9 +818,6 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     // Add even distribution of must among containers
     const storageArray = Array.from(selectedStorages);
     const mustPerStorage = remainingMust / storageArray.length;
-
-    // Import balance calculator
-    import { calculateWineBalance } from '../utils/balanceCalculator.js';
 
     // Distribute must evenly among containers
     for (const storage of storageArray) {
