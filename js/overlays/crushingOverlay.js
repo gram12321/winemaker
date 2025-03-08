@@ -604,6 +604,11 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
         item.resource.name === selectedGrape.dataset.resource
     );
 
+    if (!grapeResource) {
+        console.error("Cannot find grape resource for crushing in", selectedGrape.dataset.storage);
+        return false;
+    }
+
     // Get the task ID before creating the task
     const taskId = taskManager.taskIdCounter + 1;
 
@@ -625,6 +630,11 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
         }
     }
 
+    // Store grape storage information for later use
+    const grapeStorageId = selectedGrape.dataset.storage;
+    const resourceName = selectedGrape.dataset.resource;
+    const vintage = selectedGrape.dataset.vintage;
+
     taskManager.addProgressiveTask(
         'Crushing',
         'winery',
@@ -637,13 +647,16 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
             params.lastProgress = progress;
             performCrushing(params.selectedStorages, mustAmount, grapesToProcess, params.destemming);
         },
-        null,
+        grapeStorageId, // Use grape storage ID as target for easier lookup
         { 
             selectedGrape, 
             selectedStorages: Array.from(selectedStorages), 
             totalGrapes,
             selectedMethod,
             destemming,
+            grapeStorageId,
+            resourceName,
+            vintage,
             grapeRipeness: grapeResource.ripeness
         }
     );
@@ -676,10 +689,30 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     const grapeAmountToRemove = grapeAmount;
     if (grapeAmountToRemove <= 0) return false;
 
+    // Get the current task to find the grape information
+    const currentTask = taskManager.getAllTasks().find(task => 
+        task.name === 'Crushing' && 
+        task.params?.selectedGrape
+    );
+
+    if (!currentTask || !currentTask.params) {
+        console.error("Cannot find current crushing task or task params");
+        return false;
+    }
+
+    // Get grape information from the task params
+    const grapeStorageId = currentTask.params.selectedGrape.dataset.storage;
+    
     const grapeResource = inventoryInstance.items.find(item => 
+        item.storage === grapeStorageId &&
         item.state === 'Grapes' &&
         item.amount > 0
     );
+
+    if (!grapeResource) {
+        console.error("Cannot find grape resource for crushing");
+        return false;
+    }
 
     let remainingMust = mustAmount;
     let success = true;
@@ -786,7 +819,7 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     const mustPerStorage = remainingMust / storageArray.length;
 
     // Import balance calculator
-    const { calculateWineBalance } = require('../utils/balanceCalculator.js');
+    import { calculateWineBalance } from '../utils/balanceCalculator.js';
 
     // Distribute must evenly among containers
     for (const storage of storageArray) {

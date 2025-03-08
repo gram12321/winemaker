@@ -125,7 +125,7 @@ export function performFermentation(target, progress, params) {
     };
 
     // Calculate balance using the utility function
-    const { calculateWineBalance } = require('./utils/balanceCalculator.js');
+    import { calculateWineBalance } from './utils/balanceCalculator.js';
     const balanceInfo = calculateWineBalance(wineForBalanceCalc);
 
     // Add the wine with all properties
