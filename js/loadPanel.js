@@ -104,10 +104,14 @@ function initializePanel() {
                 showStaffOverlay();
             });
 
-            document.getElementById('winepedia-link').addEventListener('click', function() {
-                closeAllOverlays();
-                showWinepediaOverlay();
-            });
+            // Fix: Use the correct ID from sidebar.html
+            const winepediaLink = document.getElementById('winepedia-link');
+            if (winepediaLink) {
+                winepediaLink.addEventListener('click', function() {
+                    closeAllOverlays();
+                    showWinepediaOverlay();
+                });
+            }
 
             document.getElementById('settings-link').addEventListener('click', function() {
                 closeAllOverlays();
