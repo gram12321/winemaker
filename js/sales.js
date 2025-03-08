@@ -158,26 +158,44 @@ export function generateWineOrder() {
     }
 
     // Order price will typically be somewhat lower than the custom price (haggling)
-    const randomFactor = 0.8 + Math.random() * 0.3;
+    const minHagglingFactor = 0.8;
+    const maxHagglingFactor = 1.1;
+    const randomFactor = minHagglingFactor + Math.random() * (maxHagglingFactor - minHagglingFactor);
     const orderPrice = selectedWine.customPrice * randomFactor;
     console.log(`[Wine Order] Haggling factor: ${randomFactor.toFixed(2)}, Negotiated price: €${orderPrice.toFixed(2)} (before type adjustment)`);
+    console.log(`[Wine Order] Haggling range: €${(selectedWine.customPrice * minHagglingFactor).toFixed(2)} to €${(selectedWine.customPrice * maxHagglingFactor).toFixed(2)}`);
 
     // Calculate base amount
-    const randomBaseFactor = 0.5 + Math.random() * 1.5;
+    const minBaseFactor = 0.5;
+    const maxBaseFactor = 2.0;
+    const randomBaseFactor = minBaseFactor + Math.random() * (maxBaseFactor - minBaseFactor);
     const prestigeEffect = 1 + 2 * selectedWine.fieldPrestige;
     const baseAmount = Math.round(randomBaseFactor * prestigeEffect * amountAdjustment);
 
+    // Calculate possible amount range
+    const minPossibleAmount = Math.round(minBaseFactor * prestigeEffect * amountAdjustment);
+    const maxPossibleAmount = Math.round(maxBaseFactor * prestigeEffect * amountAdjustment);
+
     console.log(`[Wine Order] Amount calculation:`);
-    console.log(`  - Random base factor: ${randomBaseFactor.toFixed(2)}`);
+    console.log(`  - Random base factor: ${randomBaseFactor.toFixed(2)} (range: ${minBaseFactor.toFixed(1)}-${maxBaseFactor.toFixed(1)})`);
     console.log(`  - Field prestige effect: ${prestigeEffect.toFixed(2)} (from prestige ${selectedWine.fieldPrestige.toFixed(2)})`);
     console.log(`  - Price difference adjustment: ${amountAdjustment.toFixed(2)}`);
-    console.log(`  - Base amount before type multiplier: ${baseAmount}`);
+    console.log(`  - Base amount before type multiplier: ${baseAmount} (possible range: ${minPossibleAmount}-${maxPossibleAmount})`);
 
     const finalAmount = Math.max(1, Math.round(baseAmount * selectedOrderType.amountMultiplier));
     const finalPrice = orderPrice * selectedOrderType.priceMultiplier;
 
+    // Calculate possible final amount range
+    const minFinalAmount = Math.max(1, Math.round(minPossibleAmount * selectedOrderType.amountMultiplier));
+    const maxFinalAmount = Math.max(1, Math.round(maxPossibleAmount * selectedOrderType.amountMultiplier));
+    
+    // Calculate possible final price range
+    const minFinalPrice = selectedWine.customPrice * minHagglingFactor * selectedOrderType.priceMultiplier;
+    const maxFinalPrice = selectedWine.customPrice * maxHagglingFactor * selectedOrderType.priceMultiplier;
+
     console.log(`[Wine Order] Final order: type=${selectedOrderTypeKey} (multipliers: amount=${selectedOrderType.amountMultiplier}, price=${selectedOrderType.priceMultiplier})`);
-    console.log(`[Wine Order] Final amount: ${finalAmount}, Final price: €${finalPrice.toFixed(2)}`);
+    console.log(`[Wine Order] Final amount: ${finalAmount} (possible range: ${minFinalAmount}-${maxFinalAmount})`);
+    console.log(`[Wine Order] Final price: €${finalPrice.toFixed(2)} (possible range: €${minFinalPrice.toFixed(2)}-€${maxFinalPrice.toFixed(2)})`);
 
     const newOrder = {
         type: selectedOrderTypeKey,
@@ -276,6 +294,8 @@ export function shouldGenerateWineOrder() {
         baseChance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
     }
 
+    console.log(`[Order Generation] Base chance calculation: ${(baseChance * 100).toFixed(1)}% (based on company prestige ${companyPrestige.toFixed(1)})`);
+
     // Adjust chance based on pricing strategy
     let priceModifier = 1.0;
 
@@ -290,6 +310,7 @@ export function shouldGenerateWineOrder() {
     });
 
     const avgDeviation = totalDeviation / winesWithPrices.length;
+    console.log(`[Order Generation] Average price deviation: ${(avgDeviation * 100).toFixed(1)}% from base prices`);
 
     // Adjust chance based on pricing strategy:
     // Lower prices (negative deviation) increase chance
@@ -298,11 +319,18 @@ export function shouldGenerateWineOrder() {
     if (avgDeviation < 0) {
         // Cheaper than base price - increase chance (up to +50%)
         priceModifier = 1 + Math.min(Math.abs(avgDeviation), 0.5);
+        console.log(`[Order Generation] Lower prices: increasing order chance by ${((priceModifier - 1) * 100).toFixed(1)}%`);
     } else {
         // More expensive than base price - decrease chance (down to -70%)
         priceModifier = 1 - Math.min(avgDeviation * 1.4, 0.7);
+        console.log(`[Order Generation] Higher prices: decreasing order chance by ${((1 - priceModifier) * 100).toFixed(1)}%`);
     }
 
     const finalChance = Math.min(baseChance * priceModifier, 0.99);
-    return Math.random() < finalChance;
+    const randomValue = Math.random();
+    const willGenerate = randomValue < finalChance;
+    
+    console.log(`[Order Generation] Final chance: ${(finalChance * 100).toFixed(1)}%, Random value: ${(randomValue * 100).toFixed(1)}%, Will generate: ${willGenerate}`);
+    
+    return willGenerate;
 }
