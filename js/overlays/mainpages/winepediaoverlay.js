@@ -20,7 +20,24 @@ function setupWinepediaEventListeners(overlay) {
             const grapeName = card.querySelector('h3').textContent;
             const grapeResource = allResources.find(r => r.name === grapeName);
             if (grapeResource) {
-                showWineInfoOverlay({ resource: grapeResource });
+                const wineItem = {
+                    resource: grapeResource,
+                    state: 'Resource Info',
+                    vintage: '',
+                    quality: grapeResource.naturalYield,
+                    fieldName: '',
+                    getDisplayInfo: function() {
+                        return {
+                            resource: this.resource,
+                            state: this.state,
+                            vintage: this.vintage,
+                            quality: this.quality,
+                            fieldName: this.fieldName,
+                            characteristics: this.resource.wineCharacteristics || {}
+                        };
+                    }
+                };
+                showWineInfoOverlay(wineItem);
             }
         });
     });
