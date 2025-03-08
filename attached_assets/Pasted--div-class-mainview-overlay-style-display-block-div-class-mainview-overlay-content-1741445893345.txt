@@ -1,0 +1,10 @@
+<div class="mainview-overlay" style="display: block;">
+        <div class="mainview-overlay-content">
+            <h3>Sales</h3>
+
+            <!-- Wine Cellar Inventory Section -->
+            
+            <!-- Wine Orders Section -->
+          
+        </div>
+    </div>
