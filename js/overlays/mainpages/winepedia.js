@@ -18,12 +18,12 @@ function createWinepediaOverlayHTML() {
             <h2 class="mb-4">Winepedia</h2>
             <div class="overlay-sections">
                 <section class="overlay-section card mb-4">
-                    <img src="/assets/pic/vineyard_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="WineKipedia">
+                    <img src="/assets/pic/vineyard_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Winepedia">
                     <div class="card-header text-white d-flex justify-content-between align-items-center">
                         <h3 class="h5 mb-0">Wine Knowledge Base</h3>
                     </div>
                     <div class="card-body">
-                        <p>Welcome to the WineKipedia - your comprehensive guide to wine knowledge!</p>
+                        <p>Welcome to the Winepedia - your comprehensive guide to wine knowledge!</p>
                         
                         <div class="row mt-4">
                             <div class="col-md-4">
@@ -32,26 +32,6 @@ function createWinepediaOverlayHTML() {
                                     <div class="card-body">
                                         <p>Explore different grape varieties and their characteristics.</p>
                                         <button class="btn btn-outline-primary grape-varieties-btn">Learn More</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-header">Wine Regions</div>
-                                    <div class="card-body">
-                                        <p>Discover famous wine regions around the world.</p>
-                                        <button class="btn btn-outline-primary wine-regions-btn">Learn More</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-header">Winemaking Process</div>
-                                    <div class="card-body">
-                                        <p>Understand the art and science of winemaking.</p>
-                                        <button class="btn btn-outline-primary winemaking-btn">Learn More</button>
                                     </div>
                                 </div>
                             </div>

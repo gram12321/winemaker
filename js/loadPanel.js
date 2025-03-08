@@ -42,7 +42,7 @@ import { showVineyardOverlay } from './overlays/mainpages/vineyardoverlay.js';
 import { showBuildingsOverlay } from './overlays/mainpages/buildingsoverlay.js';
 import { showStaffOverlay } from './overlays/mainpages/staffoverlay.js';
 import { showSettingsOverlay } from './overlays/mainpages/settingsoverlay.js';
-import { showWineKipediaOverlay } from './overlays/mainpages/winekipedia.js';
+import { showWinepediaOverlay } from './overlays/mainpages/winepedia.js';
 
 function closeAllOverlays() {
     // Implement logic to close all existing overlays
@@ -106,7 +106,7 @@ function initializePanel() {
 
             document.getElementById('winekipedia-link').addEventListener('click', function() {
                 closeAllOverlays();
-                showWineKipediaOverlay();
+                showWinepediaOverlay();
             });
 
             document.getElementById('settings-link').addEventListener('click', function() {
