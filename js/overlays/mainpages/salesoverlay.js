@@ -15,7 +15,7 @@ function createSalesOverlayHTML() {
     return `
         <div class="mainview-content">
             <h2 class="mainview-header">Sales Department</h2>
-            
+
             <div class="price-setting-container mb-4">
                 <div class="card">
                     <div class="card-header">
@@ -38,7 +38,7 @@ function createSalesOverlayHTML() {
                     </div>
                 </div>
             </div>
-            
+
             <section id="wine-cellar-section">
                 <h3>Wine Cellar Inventory</h3>
                 <table class="table table-hover overlay-table">
@@ -100,13 +100,13 @@ function setupSalesOverlayEventListeners(overlay) {
     const setPriceBtn = document.getElementById('set-price-btn');
     const currentPriceDisplay = document.getElementById('current-price-display');
     const basePriceReference = document.getElementById('base-price-reference');
-    
+
     // Load saved price if available
     const savedPrice = localStorage.getItem('wineCustomPrice');
     if (savedPrice) {
         priceInput.value = savedPrice;
         currentPriceDisplay.textContent = `€${parseFloat(savedPrice).toFixed(2)}`;
-        
+
         // Calculate and show a sample base price for reference
         const sampleWine = inventoryInstance.getItemsByState('Bottles')[0];
         if (sampleWine) {
@@ -114,24 +114,24 @@ function setupSalesOverlayEventListeners(overlay) {
             basePriceReference.textContent = `≈ €${basePrice.toFixed(2)} based on quality and characteristics`;
         }
     }
-    
+
     // Set up event listener for price button
     setPriceBtn.addEventListener('click', () => {
         const price = parseFloat(priceInput.value);
         if (!isNaN(price) && price >= 0) {
             localStorage.setItem('wineCustomPrice', price);
             currentPriceDisplay.textContent = `€${price.toFixed(2)}`;
-            
+
             // Regenerate orders with the new price
             displayWineOrders();
-            
+
             // Update the display of wine cellar inventory with new prices
             displayWineCellarInventory();
         } else {
             alert('Please enter a valid price');
         }
     });
-    
+
     displayWineCellarInventory();
     displayWineOrders();
 }
@@ -148,7 +148,7 @@ export function displayWineCellarInventory() {
         const displayInfo = wine.getDisplayInfo();
         const calculatedPrice = calculateWinePrice(wine.quality, wine);
         const sellingPrice = customPrice || 0; // Use custom price if set, otherwise 0
-        
+
         // Calculate price comparison for visual indicator
         let priceComparison = '';
         if (customPrice) {
@@ -255,23 +255,24 @@ function refreshDisplay() {
 export function displayWineOrders() {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
-    
+
     // Only load orders if a price is set
     const customPrice = localStorage.getItem('wineCustomPrice');
-    
+
     if (customPrice) {
         currentOrders = loadWineOrders();
-        
+
         // If no orders yet, try to generate some based on the price
         if (currentOrders.length === 0) {
             for (let i = 0; i < 3; i++) {
                 if (shouldGenerateWineOrder(parseFloat(customPrice))) {
                     // This will add orders to storage
+                    sellOrderWine(i); //Added to fix the error
                 }
             }
             currentOrders = loadWineOrders();
         }
-        
+
         setupEventListeners();
         populateResourceFilter();
         refreshDisplay();
@@ -287,7 +288,6 @@ export function displayWineOrders() {
             </tr>
         `;
     }
-}
 }
 
 function displayFilteredOrders(filteredOrders) {
