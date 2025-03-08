@@ -341,6 +341,25 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             
             applyHarvestOxidation(matchingGrapes);
         } else {
+            // Create new grapes with balance as the last parameter
+            const processedWine = processWineObject({
+                ...harvestedCharacteristics,
+                resource: {
+                    name: resourceObj.name,
+                    grapeColor: resourceObj.grapeColor
+                },
+                quality: quality,
+                fieldPrestige: farmland.farmlandPrestige,
+                oxidation: 0,
+                ripeness: currentFarmland.ripeness,
+                vintage: gameYear,
+                country: farmland.country,
+                region: farmland.region
+            });
+            
+            const { archetype } = calculateNearestArchetype(processedWine);
+            const balance = balanceCalculator(processedWine, archetype);
+            
             const newGrapes = inventoryInstance.addResource(
                 resourceObj,
                 amountForTool,
@@ -351,7 +370,9 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                 farmland.farmlandPrestige,
                 selectedTool,
                 0, // Initial oxidation
-                currentFarmland.ripeness // Pass ripeness
+                currentFarmland.ripeness, // Pass ripeness
+                [], // Special features
+                balance // Pass calculated balance
             );
             
             if (newGrapes) {
@@ -363,30 +384,6 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                 // Add country and region directly
                 newGrapes.country = farmland.country;
                 newGrapes.region = farmland.region;
-                
-                // Calculate initial balance based on characteristics
-                const tempWine = {
-                    ...harvestedCharacteristics,
-                    resource: {
-                        name: resourceObj.name,
-                        grapeColor: resourceObj.grapeColor
-                    },
-                    quality: quality,
-                    fieldPrestige: farmland.farmlandPrestige,
-                    oxidation: 0,
-                    ripeness: currentFarmland.ripeness,
-                    vintage: gameYear,
-                    country: farmland.country,
-                    region: farmland.region
-                };
-                
-                // Process and calculate balance
-                const processedWine = processWineObject(tempWine);
-                const { archetype } = calculateNearestArchetype(processedWine);
-                const balance = balanceCalculator(processedWine, archetype);
-                
-                // Update the balance property
-                newGrapes.balance = balance;
                 
                 applyHarvestOxidation(newGrapes);
             }
