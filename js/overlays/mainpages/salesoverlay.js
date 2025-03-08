@@ -1,4 +1,3 @@
-
 import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
 import { calculateWinePrice, shouldGenerateWineOrder } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
@@ -13,7 +12,8 @@ export function showSalesOverlay() {
     setupSalesOverlayEventListeners(overlay);
 }
 
-function createSalesOverlayHTML() {
+// Create HTML for the sales overlay
+export function createSalesOverlayHTML() {
     return `
         <div class="mainview-overlay-content">
             <h3>Sales</h3>
@@ -100,21 +100,21 @@ function setupPriceSettingUI(overlay) {
     const currentPriceDisplay = overlay.querySelector('#current-price-display');
     const basePriceReference = overlay.querySelector('#base-price-reference');
     const setPriceBtn = overlay.querySelector('#set-price-btn');
-    
+
     // Load current price if exists
     const savedPrice = localStorage.getItem('wineCustomPrice');
     if (savedPrice) {
         currentPriceDisplay.textContent = `€${parseFloat(savedPrice).toFixed(2)}`;
         winePriceInput.value = savedPrice;
     }
-    
+
     // Calculate a reference base price from bottled wines
     const bottledWines = inventoryInstance.getItemsByState('Bottles');
     if (bottledWines.length > 0) {
         // Find the average base price of all bottled wines
         let totalBasePrice = 0;
         let wineCount = 0;
-        
+
         bottledWines.forEach(wine => {
             const basePrice = calculateWinePrice(wine.quality, wine);
             if (basePrice > 0) {
@@ -122,7 +122,7 @@ function setupPriceSettingUI(overlay) {
                 wineCount++;
             }
         });
-        
+
         if (wineCount > 0) {
             const avgBasePrice = totalBasePrice / wineCount;
             basePriceReference.textContent = `€${avgBasePrice.toFixed(2)}`;
@@ -132,7 +132,7 @@ function setupPriceSettingUI(overlay) {
     } else {
         basePriceReference.textContent = "No bottled wines available";
     }
-    
+
     // Set price button event
     if (setPriceBtn) {
         setPriceBtn.addEventListener('click', () => {
@@ -160,7 +160,7 @@ export function displayWineCellarInventory() {
     tableBody.innerHTML = '';
 
     const bottledWines = inventoryInstance.getItemsByState('Bottles');
-    
+
     if (bottledWines.length === 0) {
         const row = document.createElement('tr');
         row.innerHTML = `<td colspan="6" class="text-center">No bottled wines in inventory</td>`;
@@ -173,7 +173,7 @@ export function displayWineCellarInventory() {
 
         // Calculate the potential price of this wine
         const winePrice = calculateWinePrice(wine.quality, wine);
-        
+
         row.innerHTML = `
             <td>${wine.resource.name} (${wine.vintage})</td>
             <td>${wine.storage}</td>
@@ -203,62 +203,49 @@ export function displayWineCellarInventory() {
 }
 
 // Display wine orders
-function displayWineOrders() {
+export function displayWineOrders() {
     const ordersTableBody = document.getElementById('wine-orders-table-body');
     if (!ordersTableBody) return;
 
     ordersTableBody.innerHTML = '';
 
     const wineOrders = loadWineOrders();
-    
+
     if (wineOrders.length === 0) {
         const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="7" class="text-center">No pending wine orders</td>`;
+        row.innerHTML = `<td colspan="7" class="text-center">No wine orders available</td>`;
         ordersTableBody.appendChild(row);
         return;
     }
 
-    wineOrders.forEach((order, index) => {
+    wineOrders.forEach((order) => {
         const row = document.createElement('tr');
-        const totalValue = order.wineOrderPrice * order.amount;
-        
         row.innerHTML = `
-            <td>${order.resourceName} (${order.vintage})</td>
-            <td>${order.type}</td>
-            <td>${order.amount}</td>
+            <td>${order.resource}</td>
+            <td>${order.vintage}</td>
             <td>${formatQualityDisplay(order.quality)}</td>
-            <td>€${order.wineOrderPrice.toFixed(2)}</td>
-            <td>€${totalValue.toFixed(2)}</td>
+            <td>${formatNumber(order.price, 2)}€</td>
+            <td>${order.amount}</td>
+            <td>${order.orderType}</td>
             <td>
-                <button class="btn btn-success btn-sm fulfill-order-btn" data-index="${index}">
-                    Fulfill Order
-                </button>
-                <button class="btn btn-danger btn-sm decline-order-btn" data-index="${index}">
-                    Decline
+                <button class="btn btn-success btn-sm sell-order-btn" 
+                        data-order-id="${order.id}">
+                    Sell
                 </button>
             </td>
         `;
         ordersTableBody.appendChild(row);
     });
 
-    // Attach event listeners to order buttons
-    const fulfillButtons = document.querySelectorAll('.fulfill-order-btn');
-    fulfillButtons.forEach((button) => {
+    // Attach event listeners to sell order buttons
+    const sellOrderButtons = document.querySelectorAll('.sell-order-btn');
+    sellOrderButtons.forEach((button) => {
         button.addEventListener('click', function() {
-            const orderIndex = parseInt(this.getAttribute('data-index'));
-            sellOrderWine(orderIndex);
+            const orderId = this.getAttribute('data-order-id');
+            sellOrderWine(orderId);
+            displayWineCellarInventory();
             displayWineOrders();
-        });
-    });
-
-    const declineButtons = document.querySelectorAll('.decline-order-btn');
-    declineButtons.forEach((button) => {
-        button.addEventListener('click', function() {
-            const orderIndex = parseInt(this.getAttribute('data-index'));
-            const wineOrders = loadWineOrders();
-            wineOrders.splice(orderIndex, 1);
-            saveWineOrders(wineOrders);
-            displayWineOrders();
+            updateAllDisplays();
         });
     });
 }
