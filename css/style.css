@@ -606,3 +606,26 @@ input[type="radio"]:hover {
     margin-top: 0.5rem;
 }
 
+/* Wine sales styles */
+.custom-price-input {
+    background-color: var(--panel-bg);
+    color: var(--panel-text);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    width: 100px;
+    font-size: 0.9em;
+}
+
+.custom-price-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(114, 47, 55, 0.25);
+}
+
+.input-group-text {
+    background-color: var(--color-accent);
+    color: var(--panel-text);
+    border: 1px solid var(--color-accent);
+}
+

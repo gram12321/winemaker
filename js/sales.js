@@ -35,7 +35,13 @@ export function sellWines(resourceName) {
             return;
         }
 
-        const sellingPrice = calculateWinePrice(bottledWine.quality, bottledWine);
+        // Check if custom price is set
+        if (!bottledWine.customPrice) {
+            addConsoleMessage('Cannot sell wine without a custom price set.');
+            return;
+        }
+
+        const sellingPrice = parseFloat(bottledWine.customPrice);
 
         if (inventoryInstance.removeResource(
             { name: resourceName }, 
@@ -88,15 +94,15 @@ export function calculateWinePrice(quality, wine) {
     return calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige, wine.balance);
 }
 
-// Generate a random wine order based on available inventory and company prestige
+// Generate a random wine order based on available inventory, custom pricing, and company prestige
 export function generateWineOrder() {
-    // Get all bottled wines from inventory
-    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottles');
+    // Get all bottled wines with custom prices from inventory
+    const bottledWines = inventoryInstance.items.filter(item => 
+        item.state === 'Bottles' && item.customPrice);
 
-    // Check if we have any bottles to sell
+    // Check if we have any bottles with custom prices
     if (bottledWines.length === 0) {
-        addConsoleMessage("A customer wants to buy wine, but there are no bottles in the wine cellar.");
-        return;
+        return; // Don't generate orders if no wines have custom prices
     }
 
     const orderTypes = {
@@ -117,11 +123,48 @@ export function generateWineOrder() {
     const selectedOrderTypeKey = orderTypeKeys[Math.floor(Math.random() * orderTypeKeys.length)];
     const selectedOrderType = orderTypes[selectedOrderTypeKey];
 
-    const baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
-    const basePrice = (0.5 + Math.random() * 1.5) * calculateWinePrice(
+    // Calculate base price without modifiers
+    const basePrice = calculateWinePrice(
         selectedWine.quality,
         selectedWine
     );
+    
+    // Calculate price deviation (how far the custom price is from the base price)
+    const customPrice = parseFloat(selectedWine.customPrice);
+    const priceDeviation = (customPrice - basePrice) / basePrice; // as percentage
+    
+    // Adjust order generation based on price deviation
+    let baseAmount, orderProbability;
+    
+    if (priceDeviation <= -0.3) {
+        // Very cheap - high demand, high amount
+        baseAmount = Math.round((1.5 + Math.random() * 2) * (1 + 2 * selectedWine.fieldPrestige));
+        orderProbability = 0.9;
+    } else if (priceDeviation <= -0.1) {
+        // Moderately cheap - good demand
+        baseAmount = Math.round((1.0 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
+        orderProbability = 0.7;
+    } else if (priceDeviation <= 0.1) {
+        // Fair price - normal demand
+        baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
+        orderProbability = 0.5;
+    } else if (priceDeviation <= 0.3) {
+        // Expensive - lower demand
+        baseAmount = Math.round((0.3 + Math.random() * 1.0) * (1 + 2 * selectedWine.fieldPrestige));
+        orderProbability = 0.3;
+    } else {
+        // Very expensive - very low demand
+        baseAmount = Math.round((0.1 + Math.random() * 0.5) * (1 + 2 * selectedWine.fieldPrestige));
+        orderProbability = 0.1;
+    }
+    
+    // Only create order if it passes the probability check
+    if (Math.random() > orderProbability) {
+        return;
+    }
+
+    // Order price is based on the custom price with small random variations
+    const orderPrice = customPrice * (0.9 + Math.random() * 0.2) * selectedOrderType.priceMultiplier;
 
     const newOrder = {
         type: selectedOrderTypeKey,
@@ -129,8 +172,8 @@ export function generateWineOrder() {
         fieldName: selectedWine.fieldName,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
-        amount: baseAmount * selectedOrderType.amountMultiplier,
-        wineOrderPrice: basePrice * selectedOrderType.priceMultiplier
+        amount: Math.max(1, baseAmount * selectedOrderType.amountMultiplier),
+        wineOrderPrice: orderPrice
     };
 
     addWineOrder(newOrder);
@@ -155,10 +198,16 @@ export function sellOrderWine(orderIndex) {
         item.resource.name === order.resourceName &&
         item.state === 'Bottles' &&
         item.vintage === order.vintage &&
-        item.quality === order.quality
+        item.quality === order.quality &&
+        item.customPrice // Only sell wines with custom prices set
     );
 
-    if (!bottledWine || bottledWine.amount < order.amount) {
+    if (!bottledWine) {
+        addConsoleMessage('No wine with custom price found to fulfill this order.');
+        return false;
+    }
+    
+    if (bottledWine.amount < order.amount) {
         addConsoleMessage('Insufficient inventory to complete this order.');
         return false;
     }
@@ -196,6 +245,13 @@ export function sellOrderWine(orderIndex) {
 }
 
 export function shouldGenerateWineOrder() {
+    // Check if any wine has a custom price set
+    const hasCustomPricedWines = inventoryInstance.getItemsByState('Bottles').some(wine => wine.customPrice);
+    
+    if (!hasCustomPricedWines) {
+        return false; // Don't generate orders if no wine has a custom price
+    }
+    
     const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
     let chance;
 

@@ -1,3 +1,4 @@
+
 import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
 import { calculateWinePrice, sellWines, sellOrderWine } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
@@ -9,6 +10,72 @@ import { updateAllDisplays } from '/js/displayManager.js';
 export function showSalesOverlay() {
     const overlay = showMainViewOverlay(createSalesOverlayHTML());
     setupSalesOverlayEventListeners(overlay);
+}
+
+function createSalesOverlayHTML() {
+    return `
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Wine Cellar Inventory Section -->
+            <section id="winecellar-section" class="overlay-section card mb-4">
+                <img src="/assets/pic/cellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
+                <div class="card-header text-white">
+                    <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Wine</th>
+                                <th>Storage</th>
+                                <th>Amount</th>
+                                <th>Quality</th>
+                                <th>Base Price</th>
+                                <th>Custom Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="winecellar-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Wine Orders Section -->
+            <section id="orders-section" class="overlay-section card mb-4">
+                <img src="/assets/pic/sales_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Sales">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Wine Orders</h3>
+                    <div class="filters d-flex gap-2">
+                        <select id="type-filter" class="form-control form-control-sm d-inline-block w-auto">
+                            <option value="">All Types</option>
+                            <option value="Private Order">Private Order</option>
+                            <option value="Engross Order">Engross Order</option>
+                        </select>
+                        <select id="resource-filter" class="form-control form-control-sm d-inline-block w-auto">
+                            <option value="">All Wines</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Order Type</th>
+                            <th>Wine</th>
+                            <th>Quality</th>
+                            <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
+                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price/Bottle ↕</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wine-orders-table-body">
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+    `;
 }
 
 function setupSalesOverlayEventListeners(overlay) {
@@ -25,20 +92,61 @@ export function displayWineCellarInventory() {
     bottledWines.forEach(wine => {
         const row = document.createElement('tr');
         const displayInfo = wine.getDisplayInfo();
-        const sellingPrice = calculateWinePrice(wine.quality, wine);
+        const basePrice = calculateWinePrice(wine.quality, wine);
+        const customPrice = wine.customPrice || '';
 
         row.innerHTML = `
             <td><strong>${displayInfo.name}</strong></td>
             <td>${displayInfo.storage}</td>
             <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${formatQualityDisplay(wine.quality)}</td>
-            <td style="text-align: center;"><strong>Bulk Sale</strong></td>
-            <td>€${sellingPrice.toFixed(2)}</td>
-            <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}">Sell</button></td>
+            <td>€${basePrice.toFixed(2)}</td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">€</span>
+                    <input type="number" class="form-control custom-price-input" min="0.01" step="0.01" value="${customPrice}" 
+                           data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" 
+                           data-wine-storage="${wine.storage}" placeholder="Set price">
+                </div>
+            </td>
+            <td>
+                <button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" 
+                        data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}"
+                        ${!customPrice ? 'disabled' : ''}>
+                    Sell
+                </button>
+            </td>
         `;
 
+        // Event listeners
+        const priceInput = row.querySelector('.custom-price-input');
         const sellButton = row.querySelector('.sell-wine-btn');
+        
+        priceInput.addEventListener('input', (e) => {
+            const price = parseFloat(e.target.value);
+            const wineName = e.target.dataset.wineName;
+            const wineVintage = e.target.dataset.wineVintage;
+            const wineStorage = e.target.dataset.wineStorage;
+            
+            // Update the wine's custom price
+            const wineItem = inventoryInstance.items.find(item => 
+                item.resource.name === wineName && 
+                item.vintage === wineVintage && 
+                item.storage === wineStorage && 
+                item.state === 'Bottles'
+            );
+            
+            if (wineItem) {
+                wineItem.customPrice = price || null;
+                inventoryInstance.save();
+            }
+            
+            // Enable/disable sell button
+            sellButton.disabled = !price;
+        });
+
         sellButton.addEventListener('click', () => {
+            if (sellButton.disabled) return;
             sellWines(sellButton.dataset.wineName);
             displayWineCellarInventory();
         });
@@ -51,51 +159,11 @@ let currentOrders = [];
 let currentSortKey = null;
 let currentSortDirection = 'asc';
 
-function populateResourceFilter() {
-    const resourceFilter = document.getElementById('resource-filter');
-    const uniqueResources = [...new Set(currentOrders.map(order => order.resourceName))];
-    resourceFilter.innerHTML = '<option value="">All Wines</option>';
-    uniqueResources.forEach(resource => {
-        resourceFilter.innerHTML += `<option value="${resource}">${resource}</option>`;
-    });
-}
-
-// Filter wine orders based on selected type and resource filters
-function filterOrders(orders) {
-    // Get current filter values from the UI
-    const typeFilter = document.getElementById('type-filter')?.value;
-    const resourceFilter = document.getElementById('resource-filter')?.value;
-
-    return orders.filter(order => {
-        const matchesType = !typeFilter || order.type === typeFilter;
-        const matchesResource = !resourceFilter || order.resourceName === resourceFilter;
-        return matchesType && matchesResource;
-    });
-}
-
-function sortOrders(orders, sortKey, direction) {
-    return [...orders].sort((a, b) => {
-        const aValue = parseFloat(a[sortKey]);
-        const bValue = parseFloat(b[sortKey]);
-        return direction === 'asc' ? aValue - bValue : bValue - aValue;
-    });
-}
-
 function setupEventListeners() {
-    const typeFilter = document.getElementById('type-filter');
-    const resourceFilter = document.getElementById('resource-filter');
-    const newTypeFilter = typeFilter.cloneNode(true);
-    const newResourceFilter = resourceFilter.cloneNode(true);
-
-    typeFilter.parentNode.replaceChild(newTypeFilter, typeFilter);
-    resourceFilter.parentNode.replaceChild(newResourceFilter, resourceFilter);
-
-    newTypeFilter.addEventListener('change', refreshDisplay);
-    newResourceFilter.addEventListener('change', refreshDisplay);
-
-    document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.addEventListener('click', () => {
-            const sortKey = th.dataset.sort;
+    // Sort headers
+    document.querySelectorAll('th[data-sort]').forEach(header => {
+        header.addEventListener('click', () => {
+            const sortKey = header.getAttribute('data-sort');
             if (currentSortKey === sortKey) {
                 currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
             } else {
@@ -104,6 +172,53 @@ function setupEventListeners() {
             }
             refreshDisplay();
         });
+    });
+
+    // Filters
+    document.getElementById('type-filter').addEventListener('change', refreshDisplay);
+    document.getElementById('resource-filter').addEventListener('change', refreshDisplay);
+}
+
+function populateResourceFilter() {
+    const resourceFilter = document.getElementById('resource-filter');
+    const resources = new Set();
+
+    currentOrders.forEach(order => {
+        resources.add(order.resourceName);
+    });
+
+    // Clear existing options except the first one
+    while (resourceFilter.options.length > 1) {
+        resourceFilter.remove(1);
+    }
+
+    // Add new options
+    Array.from(resources).sort().forEach(resource => {
+        const option = document.createElement('option');
+        option.value = resource;
+        option.textContent = resource;
+        resourceFilter.appendChild(option);
+    });
+}
+
+function filterOrders(orders) {
+    const typeFilter = document.getElementById('type-filter').value;
+    const resourceFilter = document.getElementById('resource-filter').value;
+
+    return orders.filter(order => {
+        if (typeFilter && order.type !== typeFilter) return false;
+        if (resourceFilter && order.resourceName !== resourceFilter) return false;
+        return true;
+    });
+}
+
+function sortOrders(orders, key, direction) {
+    return [...orders].sort((a, b) => {
+        if (direction === 'asc') {
+            return a[key] - b[key];
+        } else {
+            return b[key] - a[key];
+        }
     });
 }
 
@@ -162,101 +277,28 @@ function displayFilteredOrders(filteredOrders) {
             : '';
 
         const displayAmount = `${order.amount} Bottles`;
+        const priceCellClass = "";
 
         row.innerHTML = `
-            <td style="text-align: center;"><strong>${typeInfo}<br>${order.type}</strong></td>
-            <td><strong>${order.fieldName || ''}</strong>, ${order.resourceName || ''}, ${order.vintage || ''}</td>
+            <td class="text-center">${typeInfo}</td>
+            <td><strong>${order.resourceName}</strong><br><small>Vintage ${order.vintage}</small></td>
             <td>${formatQualityDisplay(quality)}</td>
-            <td>${displayAmount}</td>
-            <td>€${formatNumber(order.wineOrderPrice, 2)}</td>
+            <td style="text-align: right;">${displayAmount}</td>
+            <td class="${priceCellClass}" style="text-align: right;">€${order.wineOrderPrice.toFixed(2)}</td>
             <td>
-                <button class="btn-alternative sell-order-btn" data-original-index="${originalIndex}">Sell</button>
-                <button class="btn refuse-order-btn" data-original-index="${originalIndex}">Refuse</button>
+                <button class="btn-alternative complete-order-btn" data-order-index="${originalIndex}">
+                    Complete Order
+                </button>
             </td>
         `;
 
-        const sellButton = row.querySelector('.sell-order-btn');
-        sellButton.addEventListener('click', () => {
-            const orderIndex = parseInt(sellButton.dataset.originalIndex);
+        row.querySelector('.complete-order-btn').addEventListener('click', (e) => {
+            const orderIndex = parseInt(e.target.dataset.orderIndex);
             if (sellOrderWine(orderIndex)) {
-                updateAllDisplays();
+                displayWineOrders();
             }
-        });
-
-        const refuseButton = row.querySelector('.refuse-order-btn');
-        refuseButton.addEventListener('click', () => {
-            const orderIndex = parseInt(refuseButton.dataset.originalIndex);
-            const wineOrders = loadWineOrders();
-            wineOrders.splice(orderIndex, 1);
-            saveWineOrders(wineOrders);
-            updateAllDisplays();
         });
 
         wineOrdersTableBody.appendChild(row);
     });
-}
-
-function createSalesOverlayHTML() {
-    return `
-        <div class="mainview-overlay-content">
-            <h3>Sales</h3>
-
-            <!-- Wine Cellar Inventory Section -->
-            <section id="inventory-section" class="overlay-section card mb-4">
-                <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
-                </div>
-                <div class="card-body">
-                <table class="table overlay-table">
-                    <thead>
-                        <tr>
-                            <th>Wine</th>
-                            <th>Storage</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Order Type</th>
-                            <th>Bulk Price</th>
-                            <th>Bulk Sales</th>
-                        </tr>
-                    </thead>
-                    <tbody id="winecellar-table-body">
-                    </tbody>
-                </table>
-            </section>
-
-            <!-- Wine Orders Section -->
-            <section id="orders-section" class="overlay-section card mb-4">
-                <img src="/assets/pic/sales_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Sales">
-                <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Wine Orders</h3>
-                    <div class="filters d-flex gap-2">
-                        <select id="type-filter" class="form-control form-control-sm d-inline-block w-auto">
-                            <option value="">All Types</option>
-                            <option value="Private Order">Private Order</option>
-                            <option value="Engross Order">Engross Order</option>
-                        </select>
-                        <select id="resource-filter" class="form-control form-control-sm d-inline-block w-auto">
-                            <option value="">All Wines</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="card-body">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Order Type</th>
-                            <th>Wine</th>
-                            <th>Quality</th>
-                            <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
-                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price/Bottle ↕</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wine-orders-table-body">
-                    </tbody>
-                </table>
-            </section>
-        </div>
-    `;
 }
