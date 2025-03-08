@@ -58,15 +58,15 @@ function createCrushingHTML() {
                     ${createCrushingProcess()}
                 </div>
             </div>
-        
+
         <hr class="overlay-divider">
 
             ${createCrushingMethodSection()}
-            
+
         <hr class="overlay-divider">    
-        
+
             ${createProgressSection()}
-        
+
             ${createTextCenter({
                 text: 'Select Grapes',
                 isHeadline: true,
@@ -82,13 +82,13 @@ function createCrushingHTML() {
                     })}
                 </div>
             </section>
-        
+
             ${createTextCenter({
                 text: 'Select Storage',
                 isHeadline: true,
                 headlineLevel: 5
             })}
-            
+
             <section id="must-section">
                 <div class="card-body">
                     ${createTable({
@@ -99,7 +99,7 @@ function createCrushingHTML() {
                 </div>
             </section>
 
-            
+
         <!-- Add work calculation section -->
         <div class="crushing-work-section">
             ${createWorkCalculationTable(calculateCrushingWorkData(0))}
@@ -204,7 +204,7 @@ function updateStorageProgress() {
 
     const storageDisplay = document.getElementById('selected-storage');
     const grapesDisplay = document.getElementById('selected-grapes');
-    
+
     storageDisplay.textContent = `${formatNumber(totalStorage)} L`;
     grapesDisplay.textContent = `≈ ${formatNumber(estimatedMust)} L`;  
 
@@ -430,7 +430,7 @@ function updateCrushingData(selectedGrape, selectedStorage) {
         const fieldName = selectedGrape.dataset.field;
         const resourceName = selectedGrape.dataset.resource;
         const vintage = selectedGrape.dataset.vintage;
-        
+
         document.getElementById('grape-amount').textContent = amount >= 1000 ? 
             `${formatNumber(amount / 1000, 2)} t` : 
             `${formatNumber(amount)} kg`;
@@ -597,16 +597,16 @@ function crushing(selectedGrape, selectedStorages, totalAvailableSpace, totalGra
     const workData = calculateCrushingWorkData(totalGrapes);
     const selectedMethod = document.querySelector('input[name="crushing-method"]:checked')?.value;
     const destemming = document.getElementById('destemming-checkbox')?.checked || false;
-    
+
     const grapeResource = inventoryInstance.items.find(item => 
         item.storage === selectedGrape.dataset.storage &&
         item.state === 'Grapes' &&
         item.resource.name === selectedGrape.dataset.resource
     );
-   
+
     // Get the task ID before creating the task
     const taskId = taskManager.taskIdCounter + 1;
-    
+
     // Find and assign the selected crushing tool
     if (selectedMethod && selectedMethod !== 'Hand Crushing') {
         const buildings = loadBuildings();
@@ -704,7 +704,7 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
         spice: parseFloat(grapeResource.spice) || 0,
         sweetness: parseFloat(grapeResource.sweetness) || 0,
         tannins: parseFloat(grapeResource.tannins) || 0,
-        
+
         // Required by archetypes - ensure all are numbers
         oxidation: parseFloat(grapeResource.oxidation) || 0,
         ripeness: parseFloat(grapeResource.ripeness) || 0,
@@ -772,9 +772,9 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
         // Calculate chance of getting green flavors based on ripeness
         const ripeness = grapeResource.ripeness;
         const greenFlavorChance = (1 - ripeness) * 0.05;
-        
+
         const roll = Math.random();
-        
+
         if (roll < greenFlavorChance) {
             addConsoleMessage(`The must has developed green flavors due to stems being present during crushing.`);
             characteristics.specialFeatures = ['Green Flavors'];
@@ -784,6 +784,9 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
     // Add even distribution of must among containers
     const storageArray = Array.from(selectedStorages);
     const mustPerStorage = remainingMust / storageArray.length;
+
+    // Import balance calculator
+    const { calculateWineBalance } = require('../utils/balanceCalculator.js');
 
     // Distribute must evenly among containers
     for (const storage of storageArray) {
@@ -813,25 +816,29 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
                 Object.assign(newMust, characteristics);
                 newMust.country = characteristics.country;
                 newMust.region = characteristics.region;
-                
-                
+
+
                 // Ensure special features are properly transferred
                 if (grapeResource.specialFeatures) {
                     grapeResource.specialFeatures.forEach(feature => {
                         newMust.addSpecialFeature(feature);
                     });
                 }
-                
+
                 // Add green flavors if applicable (no destemming)
                 if (!destemming) {
                     const ripeness = characteristics.ripeness;
                     const greenFlavorChance = (1 - ripeness) * 0.05;
-                    
+
                     if (Math.random() < greenFlavorChance) {
                         addConsoleMessage(`The must has developed green flavors due to stems being present during crushing.`);
                         newMust.addSpecialFeature('Green Flavors');
                     }
                 }
+
+                //Calculate and add balance
+                const balanceInfo = calculateWineBalance(newMust);
+                newMust.balance = balanceInfo.score;
             }
 
             remainingMust -= amountToStore;
@@ -920,7 +927,7 @@ function createCrushingMethodSection() {
 
 function calculateCrushingWorkData(grapeAmount, selectedMethod = null) {
     const tons = grapeAmount / 1000;
-    
+
     // Get base work using CRUSHING task from constants
     let totalWork = calculateTotalWork(tons, {
         tasks: ['CRUSHING']
