@@ -1,6 +1,7 @@
 
 import { showMainViewOverlay } from '../overlayUtils.js';
 import tutorialManager from '/js/tutorial.js';
+import { allResources } from '/js/resource.js';
 
 export function showWinepediaOverlay() {
     const overlay = showMainViewOverlay(createWinepediaOverlayHTML());
@@ -12,74 +13,97 @@ export function showWinepediaOverlay() {
 }
 
 function setupWinepediaEventListeners(overlay) {
-    // Grape varieties section
-    const grapeVarietiesBtn = overlay.querySelector('.grape-varieties-btn');
-    if (grapeVarietiesBtn) {
-        grapeVarietiesBtn.addEventListener('click', () => {
-            showGrapeVarietiesSection();
-        });
-    }
+    // Tab switching
+    const tabs = overlay.querySelectorAll('.winepedia-tab');
+    const tabContents = overlay.querySelectorAll('.tab-content');
     
-    // Wine regions section
-    const wineRegionsBtn = overlay.querySelector('.wine-regions-btn');
-    if (wineRegionsBtn) {
-        wineRegionsBtn.addEventListener('click', () => {
-            showWineRegionsSection();
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            tab.classList.add('active');
+            const targetContent = overlay.querySelector(`#${tab.dataset.target}`);
+            if (targetContent) {
+                targetContent.classList.add('active');
+            }
         });
-    }
-    
-    // Winemaking process section
-    const winemakingBtn = overlay.querySelector('.winemaking-btn');
-    if (winemakingBtn) {
-        winemakingBtn.addEventListener('click', () => {
-            showWinemakingSection();
-        });
-    }
+    });
 }
 
 function createWinepediaOverlayHTML() {
     return `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Winepedia</h2>
-            <div class="overlay-sections">
-                <section class="overlay-section card mb-4">
-                    <img src="/assets/pic/vineyard_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Winepedia">
-                    <div class="card-header text-white d-flex justify-content-between align-items-center">
-                        <h3 class="h5 mb-0">Wine Knowledge Base</h3>
-                    </div>
-                    <div class="card-body">
-                        <p>Welcome to the Winepedia - your comprehensive guide to wine knowledge!</p>
-                        
-                        <div class="row mt-4">
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-header">Grape Varieties</div>
-                                    <div class="card-body">
-                                        <p>Explore different grape varieties and their characteristics.</p>
-                                        <button class="btn btn-outline-primary grape-varieties-btn">Learn More</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            
+            <div class="tabs-container mb-4">
+                <div class="tabs">
+                    <button class="winepedia-tab active" data-target="grapeVarieties">Grape Varieties</button>
+                    <button class="winepedia-tab" data-target="wineRegions">Wine Regions</button>
+                    <button class="winepedia-tab" data-target="winemaking">Winemaking</button>
+                </div>
+            </div>
+
+            <div class="tab-content active" id="grapeVarieties">
+                <div class="grape-varieties-grid">
+                    ${createGrapeVarietiesContent()}
+                </div>
+            </div>
+
+            <div class="tab-content" id="wineRegions">
+                <h3>Wine Regions</h3>
+                <p>Content coming soon...</p>
+            </div>
+
+            <div class="tab-content" id="winemaking">
+                <h3>Winemaking Process</h3>
+                <p>Content coming soon...</p>
             </div>
         </div>
     `;
 }
 
-// Placeholder functions for the different sections
-function showGrapeVarietiesSection() {
-    console.log("Grape varieties section clicked");
-    // Implementation to be added later
+function createGrapeVarietiesContent() {
+    return allResources.map(grape => `
+        <div class="grape-card">
+            <div class="grape-header">
+                <img src="/assets/icon/grape/icon_${grape.name.toLowerCase()}.webp" 
+                     alt="${grape.name}" 
+                     class="grape-icon"
+                     onerror="this.src='/assets/pic/grapes.webp'">
+                <h3>${grape.name}</h3>
+            </div>
+            <div class="grape-characteristics">
+                <div class="characteristic">
+                    <span class="label">Natural Yield:</span>
+                    <span class="value">${(grape.naturalYield * 100).toFixed(0)}%</span>
+                </div>
+                <div class="characteristic">
+                    <span class="label">Color:</span>
+                    <span class="value">${grape.grapeColor}</span>
+                </div>
+                <div class="characteristic">
+                    <span class="label">Oxidation Prone:</span>
+                    <span class="value">${(grape.proneToOxidation * 100).toFixed(0)}%</span>
+                </div>
+                ${createCharacteristicsHTML(grape.wineCharacteristics)}
+            </div>
+        </div>
+    `).join('');
 }
 
-function showWineRegionsSection() {
-    console.log("Wine regions section clicked");
-    // Implementation to be added later
+function createCharacteristicsHTML(characteristics) {
+    if (!characteristics) return '';
+    
+    return Object.entries(characteristics).map(([key, value]) => `
+        <div class="characteristic">
+            <span class="label">${key.charAt(0).toUpperCase() + key.slice(1)}:</span>
+            <span class="value">${formatCharacteristicValue(value)}</span>
+        </div>
+    `).join('');
 }
 
-function showWinemakingSection() {
-    console.log("Winemaking process section clicked");
-    // Implementation to be added later
+function formatCharacteristicValue(value) {
+    const percentage = ((value + 0.5) * 100).toFixed(0);
+    return `${percentage}%`;
 }
