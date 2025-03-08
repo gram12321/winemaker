@@ -217,10 +217,21 @@ const synergyBonuses = {
     }
 };
 
+// Function to calculate wine balance and archetype info - moved from wineInfoOverlay.js
+export function calculateWineBalance(wine) {
+    const processedWine = processWineObject(wine);
+    const { archetype, distance, qualifies } = calculateNearestArchetype(processedWine);
+    const score = balanceCalculator(processedWine, archetype);
+
+    return {
+        score: score,
+        archetype: archetype.name,
+        qualifies: qualifies,
+        distance: distance
+    };
+}
+
 export function balanceCalculator(wine, archetype) {
-    // Ensure inventory is loaded
-    loadInventory();
-    
     // Process wine object to ensure consistent data types
     const processedWine = processWineObject(wine);
     
