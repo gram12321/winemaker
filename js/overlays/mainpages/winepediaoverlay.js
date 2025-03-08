@@ -73,21 +73,6 @@ function createGrapeVarietiesContent() {
                      onerror="this.src='/assets/pic/grapes.webp'">
                 <h3>${grape.name}</h3>
             </div>
-            <div class="grape-characteristics">
-                <div class="characteristic">
-                    <span class="label">Natural Yield:</span>
-                    <span class="value">${(grape.naturalYield * 100).toFixed(0)}%</span>
-                </div>
-                <div class="characteristic">
-                    <span class="label">Color:</span>
-                    <span class="value">${grape.grapeColor}</span>
-                </div>
-                <div class="characteristic">
-                    <span class="label">Oxidation Prone:</span>
-                    <span class="value">${(grape.proneToOxidation * 100).toFixed(0)}%</span>
-                </div>
-                ${createCharacteristicsHTML(grape.wineCharacteristics)}
-            </div>
         </div>
     `).join('');
 }

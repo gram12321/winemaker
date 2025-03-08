@@ -65,26 +65,7 @@
     object-fit: contain;
 }
 
-.grape-characteristics {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
 
-.characteristic {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-}
-
-.characteristic .label {
-    color: var(--color-text);
-    font-weight: 500;
-}
-
-.characteristic .value {
-    color: var(--color-accent);
-}
 
 /* 5. Data Overlays */
 
