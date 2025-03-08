@@ -187,22 +187,7 @@ export function initializeSidebar() {
                 } else {
                     console.error('Main link element not found');
                 }
-                // Attach event listener to the winepedia link after sidebar loads
-                const winepediaLink = document.getElementById('winepedia-link');
-                if (winepediaLink) {
-                    winepediaLink.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        import('/js/overlays/mainpages/winepedia.js')
-                            .then(module => {
-                                module.showWinepediaOverlay();
-                            })
-                            .catch(error => {
-                                console.error('Error loading Winepedia overlay:', error);
-                            });
-                    });
-                } else {
-                    console.error('Winepedia link element not found');
-                }
+
 
                 // Render company information
                 renderCompanyInfo();
