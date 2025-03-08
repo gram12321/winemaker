@@ -14,33 +14,30 @@ export function showSalesOverlay() {
 
 function createSalesOverlayHTML() {
     return `
-    <div class="overlay-content">
-        <h2 class="overlay-title">Wine Sales</h2>
-        <div class="row">
-            <!-- Wine Cellar Inventory Section -->
-            <section id="winecellar-section" class="overlay-section card mb-4">
-                <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
-                <div class="card-header text-white">
-                    <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Wine</th>
-                                <th>Storage</th>
-                                <th>Quantity</th>
-                                <th>Quality</th>
-                                <th>Base Price</th>
-                                <th>Your Price</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="winecellar-table-body">
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+    <div class="row">
+        <!-- Wine Cellar Inventory Section -->
+        <section id="winecellar-section" class="overlay-section card mb-4">
+            <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
+            <div class="card-header text-white">
+                <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Wine</th>
+                            <th>Storage</th>
+                            <th>Quantity</th>
+                            <th>Quality</th>
+                            <th>Base Price</th>
+                            <th>Your Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="winecellar-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
             <!-- Wine Orders Section -->
             <section id="orders-section" class="overlay-section card mb-4">
