@@ -230,7 +230,4 @@ export function initializeSidebar() {
         .catch(error => console.error('Error loading sidebar:', error));
 }
 
-function showWinepediaOverlay() {
-    console.log("Winepedia overlay placeholder function called");
-    // Replace this with the actual implementation to show the Winepedia overlay
-}
+import { showWinepediaOverlay } from '/js/overlays/mainpages/winepediaoverlay.js';
