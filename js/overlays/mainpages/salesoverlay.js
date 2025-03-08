@@ -104,7 +104,7 @@ export function displayWineCellarInventory() {
             <td>€${basePrice.toFixed(2)}</td>
             <td>
                 <div class="input-group input-group-sm">
-                    <span class="input-group-text">€</span>
+                    <span>€ </span>
                     <input type="number" class="form-control price-input" 
                            data-wine-name="${wine.resource.name}" 
                            data-wine-vintage="${wine.vintage}" 
