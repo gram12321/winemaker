@@ -1,32 +1,47 @@
-
 import { showMainViewOverlay } from '../overlayUtils.js';
+import { showWineInfoOverlay } from '../wineInfoOverlay.js';
 import tutorialManager from '/js/tutorial.js';
 import { allResources } from '/js/resource.js';
 
 export function showWinepediaOverlay() {
     const overlay = showMainViewOverlay(createWinepediaOverlayHTML());
     setupWinepediaEventListeners(overlay);
-    
+
     if (tutorialManager.shouldShowTutorial('WINEPEDIA')) {
         tutorialManager.showTutorial('WINEPEDIA');
     }
 }
 
 function setupWinepediaEventListeners(overlay) {
-    // Tab switching
+    // Add click handlers for grape cards
+    const grapeCards = overlay.querySelectorAll('.grape-card');
+    grapeCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const grapeName = card.querySelector('h3').textContent;
+            const grapeResource = allResources.find(r => r.name === grapeName);
+            if (grapeResource) {
+                showWineInfoOverlay({ resource: grapeResource });
+            }
+        });
+    });
+
+    // Setup tab navigation
     const tabs = overlay.querySelectorAll('.winepedia-tab');
-    const tabContents = overlay.querySelectorAll('.tab-content');
-    
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(content => content.classList.remove('active'));
-            
+            const target = tab.dataset.target;
+
+            // Update active tab
+            overlay.querySelectorAll('.winepedia-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            const targetContent = overlay.querySelector(`#${tab.dataset.target}`);
-            if (targetContent) {
-                targetContent.classList.add('active');
-            }
+
+            // Update active content
+            overlay.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                if (content.id === target) {
+                    content.classList.add('active');
+                }
+            });
         });
     });
 }
@@ -35,7 +50,7 @@ function createWinepediaOverlayHTML() {
     return `
         <div class="mainview-overlay-content overlay-container">
             <h2 class="mb-4">Winepedia</h2>
-            
+
             <div class="tabs-container mb-4">
                 <div class="tabs">
                     <button class="winepedia-tab active" data-target="grapeVarieties">Grape Varieties</button>
@@ -79,7 +94,7 @@ function createGrapeVarietiesContent() {
 
 function createCharacteristicsHTML(characteristics) {
     if (!characteristics) return '';
-    
+
     return Object.entries(characteristics).map(([key, value]) => `
         <div class="characteristic">
             <span class="label">${key.charAt(0).toUpperCase() + key.slice(1)}:</span>

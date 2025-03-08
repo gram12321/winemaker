@@ -1,76 +1,4 @@
-
-/* Winepedia Styles */
-.tabs-container {
-    border-bottom: 2px solid var(--color-accent);
-    margin-bottom: 20px;
-}
-
-.tabs {
-    display: flex;
-    gap: 10px;
-}
-
-.winepedia-tab {
-    padding: 10px 20px;
-    background: transparent;
-    border: 2px solid var(--color-accent);
-    border-bottom: none;
-    color: var(--color-text);
-    cursor: pointer;
-    border-radius: 8px 8px 0 0;
-}
-
-.winepedia-tab.active {
-    background: var(--color-accent);
-    color: var(--panel-text);
-}
-
-.tab-content {
-    display: none;
-    padding: 20px;
-    background: var(--color-background);
-    border-radius: 0 0 8px 8px;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.grape-varieties-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-.grape-card {
-    background: rgba(0, 0, 0, 0.2);
-    border: 2px solid var(--color-accent);
-    border-radius: 8px;
-    padding: 15px;
-}
-
-.grape-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--color-accent);
-}
-
-.grape-icon {
-    width: 48px;
-    height: 48px;
-    object-fit: contain;
-}
-
-
-
 /* 5. Data Overlays */
-
-
-/* Shared Modal Overlay Components for dataoverlays */
 .overlay-card {
   background-color: var(--color-background);
   border: 1px solid var(--color-accent);
@@ -346,3 +274,44 @@
     padding: 10px;
 }
 
+.grape-varieties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.grape-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--color-accent);
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer; /* Added cursor: pointer */
+}
+
+.grape-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-accent);
+}
+
+.grape-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+
+/* Added JavaScript for click handling (needs to be included in your main JS file) */
+document.addEventListener('DOMContentLoaded', function() {
+  const grapeCards = document.querySelectorAll('.grape-card');
+  grapeCards.forEach(card => {
+    card.addEventListener('click', function() {
+      // Replace 'wineinfooverlay' with the actual ID or selector of your overlay
+      document.getElementById('wineinfooverlay').style.display = 'block'; 
+    });
+  });
+});
