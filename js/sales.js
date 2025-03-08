@@ -122,11 +122,6 @@ export function generateWineOrder() {
     const farmlands = getFarmlands();
     const farmland = farmlands.find(field => field.name === selectedWine.fieldName);
 
-    if (!farmland) {
-        addConsoleMessage('Error: Could not generate wine order due to missing farmland data.');
-        return;
-    }
-
     const orderTypeKeys = Object.keys(orderTypes);
     const selectedOrderTypeKey = orderTypeKeys[Math.floor(Math.random() * orderTypeKeys.length)];
     const selectedOrderType = orderTypes[selectedOrderTypeKey];
