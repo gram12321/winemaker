@@ -157,7 +157,7 @@ export class Inventory {
   }
 
   addResource(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage, 
-              oxidation = 0, ripeness = 0, specialFeatures = [], balance = 0) {
+              oxidation = 0, ripeness = 0, specialFeatures = [], balance = 0, customPrice = null) {
     // Ensure we're passing a proper Resource object
     let resourceObj;
     if (typeof resource === 'string') {
@@ -172,7 +172,7 @@ export class Inventory {
     }
 
     const existingItem = this.findMatchingItem(resourceObj, state, vintage, quality, fieldName, storage);
-    
+
     if (existingItem) {
       existingItem.amount += amount;
       return existingItem;
@@ -180,6 +180,7 @@ export class Inventory {
       const newItem = new InventoryItem(resourceObj, amount, state, vintage, quality, 
                                       fieldName, fieldPrestige, storage, oxidation, 
                                       ripeness, specialFeatures, balance);
+      newItem.customPrice = customPrice; //Adding custom price
       this.items.push(newItem);
       return newItem;
     }

@@ -32,15 +32,44 @@ export function displayWineCellarInventory() {
             <td>${displayInfo.storage}</td>
             <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${formatQualityDisplay(wine.quality)}</td>
-            <td style="text-align: center;"><strong>Bulk Sale</strong></td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">€</span>
+                    <input type="number" class="form-control price-input" min="0.01" step="0.01" placeholder="Enter price" 
+                           data-base-price="${sellingPrice.toFixed(2)}" value="${wine.customPrice ? wine.customPrice.toFixed(2) : ''}">
+                </div>
+            </td>
             <td>€${sellingPrice.toFixed(2)}</td>
-            <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}">Sell</button></td>
+            <td>
+                <button class="btn-alternative set-price-btn" 
+                        data-wine-name="${wine.resource.name}" 
+                        data-wine-vintage="${wine.vintage}" 
+                        data-wine-storage="${wine.storage}">
+                    Set Price
+                </button>
+            </td>
         `;
 
-        const sellButton = row.querySelector('.sell-wine-btn');
-        sellButton.addEventListener('click', () => {
-            sellWines(sellButton.dataset.wineName);
-            displayWineCellarInventory();
+        const priceInput = row.querySelector('.price-input');
+        const setPriceButton = row.querySelector('.set-price-btn');
+        
+        setPriceButton.addEventListener('click', () => {
+            const price = parseFloat(priceInput.value);
+            if (!isNaN(price) && price > 0) {
+                // Save the custom price and update the display
+                const wineItem = inventoryInstance.items.find(item => 
+                    item.resource.name === wine.resource.name && 
+                    item.vintage === wine.vintage &&
+                    item.storage === wine.storage
+                );
+                if (wineItem) {
+                    wineItem.customPrice = price;
+                    inventoryInstance.save();
+                    displayWineCellarInventory();
+                }
+            } else {
+                alert("Please enter a valid price.");
+            }
         });
 
         tableBody.appendChild(row);

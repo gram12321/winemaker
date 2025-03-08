@@ -23,40 +23,52 @@ export function addWineOrder(order) {
     saveWineOrders(wineOrders);
 }
 
-export function sellWines(resourceName) {
+export function sellWines(resourceName, amount = 1) {
     const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
 
     if (bottledWine && bottledWine.amount > 0) {
+        // Check if custom price is set
+        if (!bottledWine.customPrice) {
+            addConsoleMessage('Please set a selling price for this wine first.');
+            return false;
+        }
+
         const farmlands = getFarmlands();
         const farmland = farmlands.find(field => field.name === bottledWine.fieldName);
 
         if (!farmland) {
             addConsoleMessage('Error: Could not find farmland data.');
-            return;
+            return false;
         }
 
-        const sellingPrice = calculateWinePrice(bottledWine.quality, bottledWine);
+        // Use the custom price instead of calculated price
+        const sellingPrice = bottledWine.customPrice;
+        const saleAmount = Math.min(amount, bottledWine.amount);
 
         if (inventoryInstance.removeResource(
             { name: resourceName }, 
-            1, 
+            saleAmount, 
             'Bottles', 
             bottledWine.vintage, 
             bottledWine.storage
         )) {
+            const totalPrice = sellingPrice * saleAmount;
+            
             addConsoleMessage(
-                `Sold 1 bottle of ${bottledWine.resource.name}, ` +
+                `Sold ${saleAmount} ${saleAmount === 1 ? 'bottle' : 'bottles'} of ${bottledWine.resource.name}, ` +
                 `Vintage ${bottledWine.vintage}, ` +
                 `Quality ${(bottledWine.quality * 100).toFixed(0)}% ` +
-                `for €${sellingPrice.toFixed(2)}.`
+                `for €${totalPrice.toFixed(2)} (€${sellingPrice.toFixed(2)}/bottle).`
             );
 
-            addTransaction('Income', 'Wine Sale', sellingPrice);
-            setPrestigeHit(getPrestigeHit() + sellingPrice / 1000);
+            addTransaction('Income', 'Wine Sale', totalPrice);
+            setPrestigeHit(getPrestigeHit() + totalPrice / 1000);
             calculateRealPrestige();
             inventoryInstance.save();
+            return true;
         }
     }
+    return false;
 }
 
 // Calculate wine price based on quality, land value, and field prestige // Capped at 100€ for non-top3 regions. As quality 0-1, land value 0-1, field prestige 0-1, thus maximum baseprice is 100€. (Ie we ware multiplying 3 normalized values of 0-1 by 100 
@@ -90,12 +102,14 @@ export function calculateWinePrice(quality, wine) {
 
 // Generate a random wine order based on available inventory and company prestige
 export function generateWineOrder() {
-    // Get all bottled wines from inventory
-    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottles');
+    // Get all bottled wines from inventory that have custom prices set
+    const bottledWines = inventoryInstance.items.filter(item => 
+        item.state === 'Bottles' && item.customPrice && item.customPrice > 0
+    );
 
-    // Check if we have any bottles to sell
+    // Check if we have any bottles with prices to sell
     if (bottledWines.length === 0) {
-        addConsoleMessage("A customer wants to buy wine, but there are no bottles in the wine cellar.");
+        addConsoleMessage("A customer might be interested in wine, but you need to set prices for your bottles first.");
         return;
     }
 
@@ -116,11 +130,33 @@ export function generateWineOrder() {
     const orderTypeKeys = Object.keys(orderTypes);
     const selectedOrderTypeKey = orderTypeKeys[Math.floor(Math.random() * orderTypeKeys.length)];
     const selectedOrderType = orderTypes[selectedOrderTypeKey];
-
-    const baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
-    const basePrice = (0.5 + Math.random() * 1.5) * calculateWinePrice(
-        selectedWine.quality,
-        selectedWine
+    
+    // Calculate base price for reference
+    const calculatedBasePrice = calculateWinePrice(selectedWine.quality, selectedWine);
+    
+    // Calculate price based on custom price and deviation from base price
+    // If custom price is lower than base, orders are more likely and with higher volumes
+    // If custom price is higher than base, orders are less likely and with lower volumes
+    const priceDifference = selectedWine.customPrice / calculatedBasePrice;
+    
+    // Adjust amount based on price difference
+    let amountAdjustment = 1;
+    if (priceDifference < 1) {
+        // Lower price means more bottles ordered (up to +50%)
+        amountAdjustment = 1 + Math.min((1 - priceDifference) * 1.25, 0.5);
+    } else if (priceDifference > 1) {
+        // Higher price means fewer bottles ordered (down to -60%)
+        amountAdjustment = 1 - Math.min((priceDifference - 1) * 0.75, 0.6);
+    }
+    
+    // Order price will typically be somewhat lower than the custom price (haggling)
+    const orderPrice = selectedWine.customPrice * (0.8 + Math.random() * 0.3);
+    
+    // Adjust base amount
+    const baseAmount = Math.round(
+        (0.5 + Math.random() * 1.5) * 
+        (1 + 2 * selectedWine.fieldPrestige) * 
+        amountAdjustment
     );
 
     const newOrder = {
@@ -129,8 +165,8 @@ export function generateWineOrder() {
         fieldName: selectedWine.fieldName,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
-        amount: baseAmount * selectedOrderType.amountMultiplier,
-        wineOrderPrice: basePrice * selectedOrderType.priceMultiplier
+        amount: Math.max(1, Math.round(baseAmount * selectedOrderType.amountMultiplier)),
+        wineOrderPrice: orderPrice * selectedOrderType.priceMultiplier
     };
 
     addWineOrder(newOrder);
@@ -160,6 +196,12 @@ export function sellOrderWine(orderIndex) {
 
     if (!bottledWine || bottledWine.amount < order.amount) {
         addConsoleMessage('Insufficient inventory to complete this order.');
+        return false;
+    }
+
+    // Make sure a custom price is set
+    if (!bottledWine.customPrice) {
+        addConsoleMessage('Please set a selling price for this wine before accepting orders.');
         return false;
     }
 
@@ -196,14 +238,51 @@ export function sellOrderWine(orderIndex) {
 }
 
 export function shouldGenerateWineOrder() {
-    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
-    let chance;
-
-    if (companyPrestige <= 100) {
-        chance = 0.2 + (companyPrestige / 100) * (0.5 - 0.2);
-    } else {
-        chance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
+    // Get all bottled wines with custom prices
+    const winesWithPrices = inventoryInstance.getItemsByState('Bottles').filter(wine => wine.customPrice > 0);
+    
+    // If no wines have prices set, return false - no orders should be generated
+    if (winesWithPrices.length === 0) {
+        return false;
     }
-
-    return Math.random() < Math.min(chance, 0.99);
+    
+    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
+    let baseChance;
+    
+    // Calculate base chance based on company prestige
+    if (companyPrestige <= 100) {
+        baseChance = 0.2 + (companyPrestige / 100) * (0.5 - 0.2);
+    } else {
+        baseChance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
+    }
+    
+    // Adjust chance based on pricing strategy
+    let priceModifier = 1.0;
+    
+    // Calculate average price deviation from base price
+    let totalDeviation = 0;
+    winesWithPrices.forEach(wine => {
+        const basePrice = calculateWinePrice(wine.quality, wine);
+        if (basePrice > 0) {
+            const deviation = (wine.customPrice - basePrice) / basePrice;
+            totalDeviation += deviation;
+        }
+    });
+    
+    const avgDeviation = totalDeviation / winesWithPrices.length;
+    
+    // Adjust chance based on pricing strategy:
+    // Lower prices (negative deviation) increase chance
+    // Higher prices (positive deviation) decrease chance
+    // The effect is stronger for larger deviations
+    if (avgDeviation < 0) {
+        // Cheaper than base price - increase chance (up to +50%)
+        priceModifier = 1 + Math.min(Math.abs(avgDeviation), 0.5);
+    } else {
+        // More expensive than base price - decrease chance (down to -70%)
+        priceModifier = 1 - Math.min(avgDeviation * 1.4, 0.7);
+    }
+    
+    const finalChance = Math.min(baseChance * priceModifier, 0.99);
+    return Math.random() < finalChance;
 }
