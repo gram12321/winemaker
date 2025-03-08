@@ -1,0 +1,76 @@
+<div class="mainview-overlay" style="display: block;">
+        <div class="mainview-overlay-content">
+            <h3>Sales</h3>
+
+            <!-- Wine Cellar Inventory Section -->
+            <section id="inventory-section" class="overlay-section card mb-4">
+                <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
+                </div>
+                <div class="card-body">
+                <table class="table overlay-table">
+                    <thead>
+                        <tr>
+                            <th>Wine</th>
+                            <th>Storage</th>
+                            <th>Amount</th>
+                            <th>Quality</th>
+                            <th>Order Type</th>
+                            <th>Bulk Price</th>
+                            <th>Bulk Sales</th>
+                        </tr>
+                    </thead>
+                    <tbody id="winecellar-table-body"><tr>
+            <td><strong>Inès, Barbera, 2026</strong></td>
+            <td>Wine Cellar</td>
+            <td>130 bottles</td>
+            <td>House Pour <span class="color-class-2">(27%)</span></td>
+            <td style="text-align: center;"><strong>Bulk Sale</strong></td>
+            <td>€0.00</td>
+            <td><button class="btn-alternative sell-wine-btn" data-wine-name="Barbera" data-wine-vintage="2026" data-wine-storage="Wine Cellar">Sell</button></td>
+        </tr></tbody>
+                </table>
+            </div></section>
+
+            <!-- Wine Orders Section -->
+            <section id="orders-section" class="overlay-section card mb-4">
+                <img src="/assets/pic/sales_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Sales">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Wine Orders</h3>
+                    <div class="filters d-flex gap-2">
+                        <select id="type-filter" class="form-control form-control-sm d-inline-block w-auto">
+                            <option value="">All Types</option>
+                            <option value="Private Order">Private Order</option>
+                            <option value="Engross Order">Engross Order</option>
+                        </select>
+                        <select id="resource-filter" class="form-control form-control-sm d-inline-block w-auto"><option value="">All Wines</option><option value="Barbera">Barbera</option></select>
+                    </div>
+                </div>
+                <div class="card-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Order Type</th>
+                            <th>Wine</th>
+                            <th>Quality</th>
+                            <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
+                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price/Bottle ↕</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wine-orders-table-body"><tr>
+            <td style="text-align: center;"><strong><img src="/assets/icon/icon_engrossorder.webp" alt="Engross Order" class="status-image"><br>Engross Order</strong></td>
+            <td><strong>Inès</strong>, Barbera, 2026</td>
+            <td>House Pour <span class="color-class-2">(27%)</span></td>
+            <td>40 Bottles</td>
+            <td>€380,58</td>
+            <td>
+                <button class="btn-alternative sell-order-btn" data-original-index="0">Sell</button>
+                <button class="btn refuse-order-btn" data-original-index="0">Refuse</button>
+            </td>
+        </tr></tbody>
+                </table>
+            </div></section>
+        </div>
+    </div>
