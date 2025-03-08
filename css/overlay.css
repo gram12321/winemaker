@@ -285,6 +285,8 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   transition: all 0.2s ease;
   padding: 8px 12px;
   margin: 4px 0;
+  width: 100%;
+  max-width: 120px;
 }
 
 .price-input:focus {
