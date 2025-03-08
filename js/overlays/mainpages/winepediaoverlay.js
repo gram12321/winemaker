@@ -35,7 +35,8 @@ function setupWinepediaEventListeners(overlay) {
                             quality: this.quality,
                             fieldName: this.fieldName,
                             characteristics: this.resource.wineCharacteristics || {},
-                            amount: this.amount
+                            amount: this.amount,
+                            specialFeatures: []
                         };
                     }
                 };
