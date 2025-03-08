@@ -25,6 +25,13 @@ export function addWineOrder(order) {
 
 export function sellWines(resourceName) {
     const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
+    const customPrice = parseFloat(localStorage.getItem('wineCustomPrice'));
+
+    // Don't sell if no price is set
+    if (!customPrice) {
+        addConsoleMessage('Cannot sell wine: No price has been set.');
+        return;
+    }
 
     if (bottledWine && bottledWine.amount > 0) {
         const farmlands = getFarmlands();
@@ -35,7 +42,8 @@ export function sellWines(resourceName) {
             return;
         }
 
-        const sellingPrice = calculateWinePrice(bottledWine.quality, bottledWine);
+        // Use the custom price set by the user
+        const sellingPrice = customPrice;
 
         if (inventoryInstance.removeResource(
             { name: resourceName }, 
@@ -44,11 +52,22 @@ export function sellWines(resourceName) {
             bottledWine.vintage, 
             bottledWine.storage
         )) {
+            // Calculate the base price for reference
+            const basePrice = calculateWinePrice(bottledWine.quality, bottledWine);
+            const priceDiff = ((sellingPrice - basePrice) / basePrice) * 100;
+            let priceComment = '';
+            
+            if (priceDiff > 20) {
+                priceComment = ' (Excellent price!)';
+            } else if (priceDiff < -20) {
+                priceComment = ' (Below market value)';
+            }
+            
             addConsoleMessage(
                 `Sold 1 bottle of ${bottledWine.resource.name}, ` +
                 `Vintage ${bottledWine.vintage}, ` +
                 `Quality ${(bottledWine.quality * 100).toFixed(0)}% ` +
-                `for €${sellingPrice.toFixed(2)}.`
+                `for €${sellingPrice.toFixed(2)}${priceComment}.`
             );
 
             addTransaction('Income', 'Wine Sale', sellingPrice);
@@ -195,15 +214,46 @@ export function sellOrderWine(orderIndex) {
     return false;
 }
 
-export function shouldGenerateWineOrder() {
+export function shouldGenerateWineOrder(customPrice) {
+    // Don't generate orders if no price is set
+    if (!customPrice) return false;
+    
     const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
-    let chance;
-
+    
+    // Get sample wine to compare prices
+    const bottledWines = inventoryInstance.getItemsByState('Bottles');
+    if (bottledWines.length === 0) return false;
+    
+    // Choose a random wine to calculate base price
+    const randomWine = bottledWines[Math.floor(Math.random() * bottledWines.length)];
+    const basePrice = calculateWinePrice(randomWine.quality, randomWine);
+    
+    // Calculate price difference as percentage
+    const priceDifference = ((customPrice - basePrice) / basePrice);
+    
+    // Base chance from company prestige
+    let prestigeChance;
     if (companyPrestige <= 100) {
-        chance = 0.2 + (companyPrestige / 100) * (0.5 - 0.2);
+        prestigeChance = 0.2 + (companyPrestige / 100) * (0.5 - 0.2);
     } else {
-        chance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
+        prestigeChance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
     }
-
-    return Math.random() < Math.min(chance, 0.99);
+    
+    // Modify chance based on price difference
+    // Lower prices increase chance, higher prices decrease chance
+    let priceModifier;
+    if (priceDifference <= -0.3) { // Very low price (30% or more below base)
+        priceModifier = 0.4; // Much higher chance
+    } else if (priceDifference <= -0.1) { // Somewhat low price (10-30% below base)
+        priceModifier = 0.2; // Higher chance
+    } else if (priceDifference <= 0.1) { // Close to base price (±10%)
+        priceModifier = 0; // Neutral effect
+    } else if (priceDifference <= 0.3) { // Somewhat high price (10-30% above base)
+        priceModifier = -0.2; // Lower chance
+    } else { // Very high price (30% or more above base)
+        priceModifier = -0.35; // Much lower chance
+    }
+    
+    const finalChance = Math.min(Math.max(prestigeChance + priceModifier, 0.05), 0.99);
+    return Math.random() < finalChance;
 }

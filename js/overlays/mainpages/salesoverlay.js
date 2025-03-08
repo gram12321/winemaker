@@ -1,5 +1,5 @@
 import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
-import { calculateWinePrice, sellWines, sellOrderWine } from '/js/sales.js';
+import { calculateWinePrice, calculateBaseWinePrice, sellWines, sellOrderWine, shouldGenerateWineOrder } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
@@ -11,7 +11,127 @@ export function showSalesOverlay() {
     setupSalesOverlayEventListeners(overlay);
 }
 
+function createSalesOverlayHTML() {
+    return `
+        <div class="mainview-content">
+            <h2 class="mainview-header">Sales Department</h2>
+            
+            <div class="price-setting-container mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Wine Pricing</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="wine-price-input">Set Wine Price (€):</label>
+                                    <input type="number" id="wine-price-input" class="form-control" placeholder="Enter price" min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <button id="set-price-btn" class="btn mt-2">Set Price</button>
+                                <p class="mt-2 mb-0"><small>Current Price: <span id="current-price-display">Not set</span></small></p>
+                                <p><small>Base Price Reference: <span id="base-price-reference">-</span></small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <section id="wine-cellar-section">
+                <h3>Wine Cellar Inventory</h3>
+                <table class="table table-hover overlay-table">
+                    <thead>
+                        <tr>
+                            <th>Wine</th>
+                            <th>Storage</th>
+                            <th>Amount</th>
+                            <th>Quality</th>
+                            <th>Sale Type</th>
+                            <th>Price</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="winecellar-table-body">
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="wine-orders-section">
+                <h3>Wine Orders</h3>
+                <div class="filter-controls">
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-4">
+                            <select id="resource-filter" class="form-control form-control-sm">
+                                <option value="">All Resources</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select id="vintage-filter" class="form-control form-control-sm">
+                                <option value="">All Vintages</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-hover overlay-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="type" style="cursor: pointer">Order Type ↕</th>
+                            <th data-sort="resourceName" style="cursor: pointer">Resource ↕</th>
+                            <th data-sort="vintage" style="cursor: pointer">Vintage ↕</th>
+                            <th data-sort="quality" style="cursor: pointer">Quality ↕</th>
+                            <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
+                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price/Bottle ↕</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wine-orders-table-body">
+                    </tbody>
+                </table>
+            </section>
+        </div>
+    `;
+}
+
 function setupSalesOverlayEventListeners(overlay) {
+    // Set up price input and button
+    const priceInput = document.getElementById('wine-price-input');
+    const setPriceBtn = document.getElementById('set-price-btn');
+    const currentPriceDisplay = document.getElementById('current-price-display');
+    const basePriceReference = document.getElementById('base-price-reference');
+    
+    // Load saved price if available
+    const savedPrice = localStorage.getItem('wineCustomPrice');
+    if (savedPrice) {
+        priceInput.value = savedPrice;
+        currentPriceDisplay.textContent = `€${parseFloat(savedPrice).toFixed(2)}`;
+        
+        // Calculate and show a sample base price for reference
+        const sampleWine = inventoryInstance.getItemsByState('Bottles')[0];
+        if (sampleWine) {
+            const basePrice = calculateWinePrice(sampleWine.quality, sampleWine);
+            basePriceReference.textContent = `≈ €${basePrice.toFixed(2)} based on quality and characteristics`;
+        }
+    }
+    
+    // Set up event listener for price button
+    setPriceBtn.addEventListener('click', () => {
+        const price = parseFloat(priceInput.value);
+        if (!isNaN(price) && price >= 0) {
+            localStorage.setItem('wineCustomPrice', price);
+            currentPriceDisplay.textContent = `€${price.toFixed(2)}`;
+            
+            // Regenerate orders with the new price
+            displayWineOrders();
+            
+            // Update the display of wine cellar inventory with new prices
+            displayWineCellarInventory();
+        } else {
+            alert('Please enter a valid price');
+        }
+    });
+    
     displayWineCellarInventory();
     displayWineOrders();
 }
@@ -21,11 +141,24 @@ export function displayWineCellarInventory() {
     tableBody.innerHTML = '';
 
     const bottledWines = inventoryInstance.getItemsByState('Bottles');
+    const customPrice = parseFloat(localStorage.getItem('wineCustomPrice'));
 
     bottledWines.forEach(wine => {
         const row = document.createElement('tr');
         const displayInfo = wine.getDisplayInfo();
-        const sellingPrice = calculateWinePrice(wine.quality, wine);
+        const calculatedPrice = calculateWinePrice(wine.quality, wine);
+        const sellingPrice = customPrice || 0; // Use custom price if set, otherwise 0
+        
+        // Calculate price comparison for visual indicator
+        let priceComparison = '';
+        if (customPrice) {
+            const priceDiff = ((sellingPrice - calculatedPrice) / calculatedPrice) * 100;
+            if (priceDiff > 10) {
+                priceComparison = '<span class="color-class-0">(High)</span>';
+            } else if (priceDiff < -10) {
+                priceComparison = '<span class="color-class-7">(Low)</span>';
+            }
+        }
 
         row.innerHTML = `
             <td><strong>${displayInfo.name}</strong></td>
@@ -33,15 +166,19 @@ export function displayWineCellarInventory() {
             <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${formatQualityDisplay(wine.quality)}</td>
             <td style="text-align: center;"><strong>Bulk Sale</strong></td>
-            <td>€${sellingPrice.toFixed(2)}</td>
-            <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}">Sell</button></td>
+            <td>€${sellingPrice.toFixed(2)} ${priceComparison}</td>
+            <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}" ${!customPrice ? 'disabled' : ''}>Sell</button></td>
         `;
 
         const sellButton = row.querySelector('.sell-wine-btn');
-        sellButton.addEventListener('click', () => {
-            sellWines(sellButton.dataset.wineName);
-            displayWineCellarInventory();
-        });
+        if (customPrice) {
+            sellButton.addEventListener('click', () => {
+                sellWines(sellButton.dataset.wineName);
+                displayWineCellarInventory();
+            });
+        } else {
+            sellButton.title = "Set a price to enable selling";
+        }
 
         tableBody.appendChild(row);
     });
@@ -118,11 +255,39 @@ function refreshDisplay() {
 export function displayWineOrders() {
     const wineOrdersTableBody = document.getElementById('wine-orders-table-body');
     wineOrdersTableBody.innerHTML = '';
-    currentOrders = loadWineOrders();  // Changed from getCurrentWineOrders
-
-    setupEventListeners();
-    populateResourceFilter();
-    refreshDisplay();
+    
+    // Only load orders if a price is set
+    const customPrice = localStorage.getItem('wineCustomPrice');
+    
+    if (customPrice) {
+        currentOrders = loadWineOrders();
+        
+        // If no orders yet, try to generate some based on the price
+        if (currentOrders.length === 0) {
+            for (let i = 0; i < 3; i++) {
+                if (shouldGenerateWineOrder(parseFloat(customPrice))) {
+                    // This will add orders to storage
+                }
+            }
+            currentOrders = loadWineOrders();
+        }
+        
+        setupEventListeners();
+        populateResourceFilter();
+        refreshDisplay();
+    } else {
+        // Display message if no price is set
+        wineOrdersTableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">
+                    <div class="alert alert-info">
+                        Please set a wine price above to generate orders
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
 }
 
 function displayFilteredOrders(filteredOrders) {
