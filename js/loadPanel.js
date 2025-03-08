@@ -104,7 +104,7 @@ function initializePanel() {
                 showStaffOverlay();
             });
 
-            document.getElementById('winekipedia-link').addEventListener('click', function() {
+            document.getElementById('winepedia-link').addEventListener('click', function() {
                 closeAllOverlays();
                 showWinepediaOverlay();
             });
