@@ -32,7 +32,6 @@ export function displayWineCellarInventory() {
             <td>${displayInfo.storage}</td>
             <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${formatQualityDisplay(wine.quality)}</td>
-            <td style="text-align: center;"><strong>Bulk Sale</strong></td>
             <td>€${sellingPrice.toFixed(2)}</td>
             <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}">Sell</button></td>
         `;
@@ -198,31 +197,29 @@ function displayFilteredOrders(filteredOrders) {
 
 function createSalesOverlayHTML() {
     return `
-        <div class="mainview-overlay-content">
-            <h3>Sales</h3>
-
-            <!-- Wine Cellar Inventory Section -->
-            <section id="inventory-section" class="overlay-section card mb-4">
-                <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
+        <div class="container-fluid">
+            <!-- Wine Cellar Section -->
+            <section id="wine-cellar-section" class="overlay-section card mb-4">
+                <img src="/assets/pic/winery_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
                 </div>
                 <div class="card-body">
-                <table class="table overlay-table">
-                    <thead>
-                        <tr>
-                            <th>Wine</th>
-                            <th>Storage</th>
-                            <th>Amount</th>
-                            <th>Quality</th>
-                            <th>Order Type</th>
-                            <th>Bulk Price</th>
-                            <th>Bulk Sales</th>
-                        </tr>
-                    </thead>
-                    <tbody id="winecellar-table-body">
-                    </tbody>
-                </table>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Wine</th>
+                                <th>Storage</th>
+                                <th>Amount</th>
+                                <th>Quality</th>
+                                <th>Price</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="winecellar-table-body">
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- Wine Orders Section -->

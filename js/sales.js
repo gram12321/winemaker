@@ -88,15 +88,45 @@ export function calculateWinePrice(quality, wine) {
     return calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige, wine.balance);
 }
 
-// Generate a random wine order based on available inventory and company prestige
-export function generateWineOrder() {
-    // Get all bottled wines from inventory
-    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottles');
+// Store user-set prices for wines
+const userPrices = {};
 
-    // Check if we have any bottles to sell
+// Set a price for a specific wine
+export function setWinePrice(resourceName, vintage, fieldName, price) {
+    const key = `${resourceName}_${vintage}_${fieldName}`;
+    userPrices[key] = parseFloat(price);
+    localStorage.setItem('userWinePrices', JSON.stringify(userPrices));
+    return true;
+}
+
+// Get the user-set price for a specific wine
+export function getWinePrice(resourceName, vintage, fieldName) {
+    const key = `${resourceName}_${vintage}_${fieldName}`;
+    const prices = JSON.parse(localStorage.getItem('userWinePrices') || '{}');
+    return prices[key] || null;
+}
+
+// Load all user-set prices
+export function loadUserPrices() {
+    const prices = JSON.parse(localStorage.getItem('userWinePrices') || '{}');
+    Object.assign(userPrices, prices);
+    return userPrices;
+}
+
+// Generate a random wine order based on available inventory and user-set prices
+export function generateWineOrder() {
+    // Get all bottled wines from inventory that have a price set
+    const bottledWines = inventoryInstance.items.filter(item => {
+        if (item.state !== 'Bottles') return false;
+        
+        // Check if this wine has a price set
+        const key = `${item.resource.name}_${item.vintage}_${item.fieldName}`;
+        return userPrices[key] !== undefined;
+    });
+
+    // Check if we have any bottles with prices set
     if (bottledWines.length === 0) {
-        addConsoleMessage("A customer wants to buy wine, but there are no bottles in the wine cellar.");
-        return;
+        return; // Don't generate orders if no prices are set
     }
 
     const orderTypes = {
@@ -113,24 +143,47 @@ export function generateWineOrder() {
         return;
     }
 
+    // Get the base price and user-set price
+    const basePrice = calculateWinePrice(selectedWine.quality, selectedWine);
+    const userPrice = getWinePrice(selectedWine.resource.name, selectedWine.vintage, selectedWine.fieldName);
+    
+    if (userPrice === null) return; // Shouldn't happen but just in case
+    
+    // Calculate price difference percentage from base price
+    const priceDiffPercent = (userPrice - basePrice) / basePrice;
+    
+    // Modify order generation probability based on price difference
+    const priceAdjustmentFactor = Math.max(0, 1 - Math.abs(priceDiffPercent));
+    
+    // If price is higher than base, fewer orders. If lower, more orders.
+    if (priceDiffPercent > 0) {
+        // Price is higher than base, reduce chance of orders
+        if (Math.random() > priceAdjustmentFactor) {
+            return; // Skip order generation
+        }
+    }
+    
     const orderTypeKeys = Object.keys(orderTypes);
     const selectedOrderTypeKey = orderTypeKeys[Math.floor(Math.random() * orderTypeKeys.length)];
     const selectedOrderType = orderTypes[selectedOrderTypeKey];
 
-    const baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
-    const basePrice = (0.5 + Math.random() * 1.5) * calculateWinePrice(
-        selectedWine.quality,
-        selectedWine
-    );
+    // Adjust amount based on price - more bottles for cheaper wine
+    let amountMultiplier = selectedOrderType.amountMultiplier;
+    if (priceDiffPercent < 0) {
+        // Increase orders for cheaper wine
+        amountMultiplier *= (1 + Math.abs(priceDiffPercent) * 0.5);
+    }
 
+    const baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
+    
     const newOrder = {
         type: selectedOrderTypeKey,
         resourceName: selectedWine.resource.name,
         fieldName: selectedWine.fieldName,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
-        amount: baseAmount * selectedOrderType.amountMultiplier,
-        wineOrderPrice: basePrice * selectedOrderType.priceMultiplier
+        amount: Math.round(baseAmount * amountMultiplier),
+        wineOrderPrice: userPrice
     };
 
     addWineOrder(newOrder);
@@ -196,6 +249,12 @@ export function sellOrderWine(orderIndex) {
 }
 
 export function shouldGenerateWineOrder() {
+    // Only generate orders if there's at least one wine with a price set
+    const prices = loadUserPrices();
+    if (Object.keys(prices).length === 0) {
+        return false;
+    }
+    
     const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
     let chance;
 
