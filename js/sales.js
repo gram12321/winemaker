@@ -95,13 +95,13 @@ Total impact: approximately 41.6% of the final wine price */
 export function calculateBaseWinePrice(quality, landValue, prestige, balance = 0.5) {
     // Normalize our inputs
     const normalizedLandValue = normalizeLandValue(landValue);
-
+    
     // Calculate base price using only land value and prestige
     const basePriceLandAndPrestige = (normalizedLandValue * 100 + prestige * 100) / 2;
-
+    
     // Multiply by balance and quality factors with no default
     const basePrice = basePriceLandAndPrestige * balance * quality;
-
+    
     return basePrice;
 }
 
@@ -109,7 +109,7 @@ export function calculateWinePrice(quality, wine) {
     const farmlands = getFarmlands();
     const farmland = farmlands.find(field => field.name === wine.fieldName);
     if (!farmland) return 0;
-
+    
     // Use the wine's balance value in price calculation
     return calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige, wine.balance);
 }
@@ -147,15 +147,15 @@ export function generateWineOrder() {
         selectedWine.vintage, 
         selectedWine.storage
     );
-
+    
     const basePrice = calculateWinePrice(
         selectedWine.quality,
         selectedWine
     );
-
+    
     // Calculate price percentage difference
     const priceDifference = (customPrice / basePrice) - 1;
-
+    
     // Adjust order generation based on price difference
     // More orders for lower prices, fewer orders for higher prices
     let orderChanceMultiplier = 1;
@@ -166,7 +166,7 @@ export function generateWineOrder() {
         // Higher price than base - decreased chance
         orderChanceMultiplier = 1 - Math.min(priceDifference * 0.8, 0.8);
     }
-
+    
     // Skip order generation if random chance exceeds our multiplier
     if (Math.random() > orderChanceMultiplier) {
         return;
@@ -177,7 +177,7 @@ export function generateWineOrder() {
     const selectedOrderType = orderTypes[selectedOrderTypeKey];
 
     const baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
-
+    
     // Calculate order price based on custom price
     const finalOrderPrice = customPrice * selectedOrderType.priceMultiplier;
 
@@ -242,12 +242,12 @@ export function sellOrderWine(orderIndex) {
         addTransaction('Income', 'Wine Sale', totalSellingPrice);
         setPrestigeHit(getPrestigeHit() + totalSellingPrice / 1000);
         calculateRealPrestige();
-
+        
         if (!removeWineOrder(orderIndex)) {
             addConsoleMessage('Error removing wine order.');
             return false;
         }
-
+        
         inventoryInstance.save();
         displayWineCellarInventory();
         return true;
@@ -261,11 +261,11 @@ export function shouldGenerateWineOrder() {
     const anyCustomPriced = bottledWines.some(wine => 
         hasCustomPrice(wine.resource.name, wine.vintage, wine.storage)
     );
-
+    
     if (!anyCustomPriced) {
         return false; // Don't generate orders if no wines have custom prices
     }
-
+    
     const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
     let chance;
 
