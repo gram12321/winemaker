@@ -201,7 +201,7 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  
+
 }
 
 /* Section-specific Header Styles */
@@ -275,5 +275,23 @@ body.sidebar-collapsed.panel-collapsed .mainview-overlay {
 .skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
 .skills-column { min-width: 150px; }
 
+/* Add any overlay specific styles here */
 
+/* Custom styling for price inputs in sales overlay */
+.price-input {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  color: var(--color-text);
+  transition: all 0.2s ease;
+}
 
+.price-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(114, 47, 55, 0.25);
+}
+
+.input-group-text {
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-accent);
+  color: var(--panel-text);
+}

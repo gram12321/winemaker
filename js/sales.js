@@ -23,8 +23,29 @@ export function addWineOrder(order) {
     saveWineOrders(wineOrders);
 }
 
-export function sellWines(resourceName) {
-    const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
+// Store custom prices for wines
+const customWinePrices = new Map();
+
+export function setCustomWinePrice(resourceName, vintage, storage, price) {
+    const key = `${resourceName}-${vintage}-${storage}`;
+    customWinePrices.set(key, parseFloat(price));
+}
+
+export function getCustomWinePrice(resourceName, vintage, storage) {
+    const key = `${resourceName}-${vintage}-${storage}`;
+    return customWinePrices.get(key) || null;
+}
+
+export function hasCustomPrice(resourceName, vintage, storage) {
+    const key = `${resourceName}-${vintage}-${storage}`;
+    return customWinePrices.has(key);
+}
+
+export function sellWines(resourceName, vintage, storage) {
+    const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => 
+        item.resource.name === resourceName && 
+        item.vintage === vintage && 
+        item.storage === storage);
 
     if (bottledWine && bottledWine.amount > 0) {
         const farmlands = getFarmlands();
@@ -35,7 +56,12 @@ export function sellWines(resourceName) {
             return;
         }
 
-        const sellingPrice = calculateWinePrice(bottledWine.quality, bottledWine);
+        // Get custom price or calculate base price
+        const customPrice = getCustomWinePrice(resourceName, vintage, storage);
+        if (customPrice === null) {
+            addConsoleMessage('Cannot sell wine without a custom price. Please set a price first.');
+            return;
+        }
 
         if (inventoryInstance.removeResource(
             { name: resourceName }, 
@@ -48,11 +74,11 @@ export function sellWines(resourceName) {
                 `Sold 1 bottle of ${bottledWine.resource.name}, ` +
                 `Vintage ${bottledWine.vintage}, ` +
                 `Quality ${(bottledWine.quality * 100).toFixed(0)}% ` +
-                `for €${sellingPrice.toFixed(2)}.`
+                `for €${customPrice.toFixed(2)}.`
             );
 
-            addTransaction('Income', 'Wine Sale', sellingPrice);
-            setPrestigeHit(getPrestigeHit() + sellingPrice / 1000);
+            addTransaction('Income', 'Wine Sale', customPrice);
+            setPrestigeHit(getPrestigeHit() + customPrice / 1000);
             calculateRealPrestige();
             inventoryInstance.save();
         }
@@ -90,13 +116,15 @@ export function calculateWinePrice(quality, wine) {
 
 // Generate a random wine order based on available inventory and company prestige
 export function generateWineOrder() {
-    // Get all bottled wines from inventory
-    const bottledWines = inventoryInstance.items.filter(item => item.state === 'Bottles');
+    // Get only bottled wines with custom prices
+    const bottledWines = inventoryInstance.items.filter(item => 
+        item.state === 'Bottles' && 
+        hasCustomPrice(item.resource.name, item.vintage, item.storage)
+    );
 
-    // Check if we have any bottles to sell
+    // Check if we have any bottles with prices to sell
     if (bottledWines.length === 0) {
-        addConsoleMessage("A customer wants to buy wine, but there are no bottles in the wine cellar.");
-        return;
+        return; // Silently return, no message needed as this is now expected behavior
     }
 
     const orderTypes = {
@@ -113,15 +141,45 @@ export function generateWineOrder() {
         return;
     }
 
+    // Get custom price and calculate base price for comparison
+    const customPrice = getCustomWinePrice(
+        selectedWine.resource.name, 
+        selectedWine.vintage, 
+        selectedWine.storage
+    );
+    
+    const basePrice = calculateWinePrice(
+        selectedWine.quality,
+        selectedWine
+    );
+    
+    // Calculate price percentage difference
+    const priceDifference = (customPrice / basePrice) - 1;
+    
+    // Adjust order generation based on price difference
+    // More orders for lower prices, fewer orders for higher prices
+    let orderChanceMultiplier = 1;
+    if (priceDifference < 0) {
+        // Lower price than base - increased chance
+        orderChanceMultiplier = 1 + Math.min(Math.abs(priceDifference), 0.5);
+    } else {
+        // Higher price than base - decreased chance
+        orderChanceMultiplier = 1 - Math.min(priceDifference * 0.8, 0.8);
+    }
+    
+    // Skip order generation if random chance exceeds our multiplier
+    if (Math.random() > orderChanceMultiplier) {
+        return;
+    }
+
     const orderTypeKeys = Object.keys(orderTypes);
     const selectedOrderTypeKey = orderTypeKeys[Math.floor(Math.random() * orderTypeKeys.length)];
     const selectedOrderType = orderTypes[selectedOrderTypeKey];
 
     const baseAmount = Math.round((0.5 + Math.random() * 1.5) * (1 + 2 * selectedWine.fieldPrestige));
-    const basePrice = (0.5 + Math.random() * 1.5) * calculateWinePrice(
-        selectedWine.quality,
-        selectedWine
-    );
+    
+    // Calculate order price based on custom price
+    const finalOrderPrice = customPrice * selectedOrderType.priceMultiplier;
 
     const newOrder = {
         type: selectedOrderTypeKey,
@@ -129,8 +187,9 @@ export function generateWineOrder() {
         fieldName: selectedWine.fieldName,
         vintage: selectedWine.vintage,
         quality: selectedWine.quality,
+        storage: selectedWine.storage, // Add storage for identification
         amount: baseAmount * selectedOrderType.amountMultiplier,
-        wineOrderPrice: basePrice * selectedOrderType.priceMultiplier
+        wineOrderPrice: finalOrderPrice
     };
 
     addWineOrder(newOrder);
@@ -138,7 +197,7 @@ export function generateWineOrder() {
         `Created ${newOrder.type} for ${newOrder.amount} bottles of ` +
         `${newOrder.resourceName}, Vintage ${newOrder.vintage}, ` +
         `Quality ${(newOrder.quality * 100).toFixed(0)}%, ` +
-        `Price €${newOrder.wineOrderPrice.toFixed(2)}.`
+        `Price €${finalOrderPrice.toFixed(2)}.`
     );
 }
 
@@ -155,7 +214,8 @@ export function sellOrderWine(orderIndex) {
         item.resource.name === order.resourceName &&
         item.state === 'Bottles' &&
         item.vintage === order.vintage &&
-        item.quality === order.quality
+        item.quality === order.quality &&
+        (order.storage ? item.storage === order.storage : true)
     );
 
     if (!bottledWine || bottledWine.amount < order.amount) {
@@ -196,6 +256,16 @@ export function sellOrderWine(orderIndex) {
 }
 
 export function shouldGenerateWineOrder() {
+    // First check if any wines have custom prices set
+    const bottledWines = inventoryInstance.getItemsByState('Bottles');
+    const anyCustomPriced = bottledWines.some(wine => 
+        hasCustomPrice(wine.resource.name, wine.vintage, wine.storage)
+    );
+    
+    if (!anyCustomPriced) {
+        return false; // Don't generate orders if no wines have custom prices
+    }
+    
     const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
     let chance;
 
