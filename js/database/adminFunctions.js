@@ -34,9 +34,10 @@ function loadInventory() {
             item.storage,
             item.oxidation || 0,
             item.ripeness || 0,
-            Array.isArray(item.specialFeatures) ? item.specialFeatures : []
+            Array.isArray(item.specialFeatures) ? item.specialFeatures : [],
+            item.balance || 0
         );
-        
+
         if (newItem) {
             // Copy wine characteristics
             ['sweetness', 'acidity', 'tannins', 'body', 'spice', 'aroma'].forEach(char => {
@@ -48,7 +49,7 @@ function loadInventory() {
             // Add country and region if they exist in saved data
             if (item.country) newItem.country = item.country;
             if (item.region) newItem.region = item.region;
-            
+
             // Copy processing information
             if (item.fieldSource) {
                 newItem.fieldSource = item.fieldSource;
@@ -100,7 +101,8 @@ function saveInventory() {
         tannins: item.tannins || 0,
         body: item.body || 0,
         spice: item.spice || 0,
-        aroma: item.aroma || 0
+        aroma: item.aroma || 0,
+        balance: item.balance || 0 // Add balance to saved data
     }));
 
     localStorage.setItem('playerInventory', JSON.stringify(itemsToSave));
@@ -171,12 +173,12 @@ export function loadBuildings() {
     const buildingsData = JSON.parse(buildingsJSON);
     return buildingsData.map(buildingData => {
       const building = new Building(buildingData.name, buildingData.level);
-      
+
       if (buildingData.slots) {
         building.slots = buildingData.slots.map(slotData => ({
           tools: slotData.tools.map(toolData => {
             const defaultTool = getBuildingTools().find(t => t.name === toolData.name);
-            
+
             const tool = new Tool(
               toolData.name,
               toolData.buildingType,
@@ -381,4 +383,3 @@ export {
   loadInventory,
   saveInventory
 };
-
