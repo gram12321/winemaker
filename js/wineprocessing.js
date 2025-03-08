@@ -4,6 +4,7 @@ import { addConsoleMessage } from './console.js';
 import taskManager from './taskManager.js';
 import { formatNumber } from './utils.js';
 import { calculateFermentationWorkData } from './overlays/fermentationOverlay.js';
+import { calculateWineBalance } from './utils/balanceCalculator.js';
 
 export function fermentation(selectedResource, storage, mustAmount, params = {}) {
     // Check for existing fermentation tasks
@@ -125,7 +126,7 @@ export function performFermentation(target, progress, params) {
     };
 
     // Calculate balance using the utility function
-    import { calculateWineBalance } from './utils/balanceCalculator.js';
+    
     const balanceInfo = calculateWineBalance(wineForBalanceCalc);
 
     // Add the wine with all properties
