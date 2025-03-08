@@ -199,7 +199,7 @@ export function sellOrderWine(orderIndex) {
         item.state === 'Bottles' &&
         item.vintage === order.vintage &&
         item.quality === order.quality &&
-        item.customPrice // Only sell wines with custom prices set
+        item.customPrice // Only sell wines with custom prices sett
     );
 
     if (!bottledWine) {
