@@ -26,6 +26,7 @@ function setupWinepediaEventListeners(overlay) {
                     vintage: '',
                     quality: grapeResource.naturalYield,
                     fieldName: '',
+                    amount: 0,
                     getDisplayInfo: function() {
                         return {
                             resource: this.resource,
@@ -33,7 +34,8 @@ function setupWinepediaEventListeners(overlay) {
                             vintage: this.vintage,
                             quality: this.quality,
                             fieldName: this.fieldName,
-                            characteristics: this.resource.wineCharacteristics || {}
+                            characteristics: this.resource.wineCharacteristics || {},
+                            amount: this.amount
                         };
                     }
                 };
