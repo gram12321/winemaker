@@ -191,8 +191,6 @@ export function sellOrderWine(orderIndex) {
         return false;
     }
 
-    const totalSellingPrice = order.wineOrderPrice * order.amount;
-    
     // Use the order's original price * amount for total selling price
     const totalSellingPrice = order.wineOrderPrice * order.amount;
 
