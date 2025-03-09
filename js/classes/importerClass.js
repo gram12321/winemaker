@@ -15,6 +15,40 @@ export class Importer {
         this.wineTradition = wineTradition;
         this.type = type;
         this.winePreferences = [];
+        this.buyMultiplicator = this.calculateBuyMultiplicator();
+    }
+
+    calculateBuyMultiplicator() {
+        // Base multiplier starts at 1
+        let multiplier = 1.0;
+
+        // Adjust based on importer type
+        switch(this.type) {
+            case IMPORTER_TYPES.PRIVATE:
+                multiplier *= 1.2; // Private importers pay premium
+                break;
+            case IMPORTER_TYPES.RESTAURANT:
+                multiplier *= 1.1; // Restaurants pay slightly above average
+                break;
+            case IMPORTER_TYPES.WINE_SHOP:
+                multiplier *= 1.0; // Wine shops pay average
+                break;
+            case IMPORTER_TYPES.CHAIN_STORE:
+                multiplier *= 0.9; // Chain stores get bulk discount
+                break;
+        }
+
+        // Adjust based on market share (larger share = better bulk pricing)
+        multiplier *= (1 - (this.marketShare / 200)); // Max 50% reduction for largest market share
+
+        // Adjust based on purchasing power
+        multiplier *= (1 + this.purchasingPower);
+
+        // Adjust based on wine tradition (higher tradition = willing to pay more for quality)
+        multiplier *= (1 + (this.wineTradition * 0.2));
+
+        // Ensure multiplier stays within reasonable bounds (0.5 to 2.0)
+        return Math.max(0.5, Math.min(2.0, multiplier));
     }
 }
 
