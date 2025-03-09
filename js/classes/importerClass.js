@@ -26,16 +26,16 @@ export class Importer {
         // Adjust based on importer type
         switch(this.type) {
             case IMPORTER_TYPES.CHAIN_STORE:
-                multiplier *= 2.0; // Chain stores buy in bulk
+                multiplier *= 10.0; // Chain stores buy in bulk
                 break;
             case IMPORTER_TYPES.WINE_SHOP:
-                multiplier *= 1.5; // Wine shops buy moderate amounts
+                multiplier *= 5.5; // Wine shops buy moderate amounts
                 break;
             case IMPORTER_TYPES.RESTAURANT:
-                multiplier *= 1.2; // Restaurants buy smaller amounts
+                multiplier *= 2.2; // Restaurants buy smaller amounts
                 break;
             case IMPORTER_TYPES.PRIVATE:
-                multiplier *= 0.8; // Private importers buy smallest amounts
+                multiplier *= 0.5; // Private importers buy smallest amounts
                 break;
         }
 
