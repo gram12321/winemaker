@@ -197,8 +197,7 @@ export function sellOrderWine(orderIndex) {
     console.log('[Wine Sale] Order details:', {
         offeredPrice: order.wineOrderPrice,
         amount: order.amount,
-        totalSellingPrice: totalSellingPrice,
-        bottledWinePrice: bottledWine.customPrice // Log for debugging
+        totalSellingPrice: totalSellingPrice
     });
 
     if (inventoryInstance.removeResource(
