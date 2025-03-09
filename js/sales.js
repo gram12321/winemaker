@@ -188,7 +188,7 @@ export function generateWineOrder() {
     // Calculate possible final amount range
     const minFinalAmount = Math.max(1, Math.round(minPossibleAmount * selectedOrderType.amountMultiplier));
     const maxFinalAmount = Math.max(1, Math.round(maxPossibleAmount * selectedOrderType.amountMultiplier));
-    
+
     // Calculate possible final price range
     const minFinalPrice = selectedWine.customPrice * minHagglingFactor * selectedOrderType.priceMultiplier;
     const maxFinalPrice = selectedWine.customPrice * maxHagglingFactor * selectedOrderType.priceMultiplier;
@@ -235,12 +235,6 @@ export function sellOrderWine(orderIndex) {
 
     if (!bottledWine || bottledWine.amount < order.amount) {
         addConsoleMessage('Insufficient inventory to complete this order.');
-        return false;
-    }
-
-    // Make sure a custom price is set
-    if (!bottledWine.customPrice) {
-        addConsoleMessage('Please set a selling price for this wine before accepting orders.');
         return false;
     }
 
@@ -330,8 +324,8 @@ export function shouldGenerateWineOrder() {
     const finalChance = Math.min(baseChance * priceModifier, 0.99);
     const randomValue = Math.random();
     const willGenerate = randomValue < finalChance;
-    
+
     console.log(`[Order Generation] Final chance: ${(finalChance * 100).toFixed(1)}%, Random value: ${(randomValue * 100).toFixed(1)}%, Will generate: ${willGenerate}`);
-    
+
     return willGenerate;
 }
