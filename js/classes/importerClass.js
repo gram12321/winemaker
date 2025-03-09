@@ -15,10 +15,38 @@ export class Importer {
         this.wineTradition = wineTradition;
         this.type = type;
         this.winePreferences = [];
-        this.buyMultiplicator = this.calculateBuyMultiplicator();
+        this.buyPriceMultiplicator = this.calculateBuyPriceMultiplicator();
+        this.buyAmountMultiplicator = this.calculateBuyAmountMultiplicator();
     }
 
-    calculateBuyMultiplicator() {
+    calculateBuyAmountMultiplicator() {
+        // Base multiplier starts at 1
+        let multiplier = 1.0;
+
+        // Adjust based on importer type
+        switch(this.type) {
+            case IMPORTER_TYPES.CHAIN_STORE:
+                multiplier *= 2.0; // Chain stores buy in bulk
+                break;
+            case IMPORTER_TYPES.WINE_SHOP:
+                multiplier *= 1.5; // Wine shops buy moderate amounts
+                break;
+            case IMPORTER_TYPES.RESTAURANT:
+                multiplier *= 1.2; // Restaurants buy smaller amounts
+                break;
+            case IMPORTER_TYPES.PRIVATE:
+                multiplier *= 0.8; // Private importers buy smallest amounts
+                break;
+        }
+
+        // Adjust based on market share
+        multiplier *= (1 + (this.marketShare / 100));
+
+        // Ensure multiplier stays within reasonable bounds (0.5 to 3.0)
+        return Math.max(0.5, Math.min(3.0, multiplier));
+    }
+
+    calculateBuyPriceMultiplicator() {
         // Base multiplier starts at 1
         let multiplier = 1.0;
 
