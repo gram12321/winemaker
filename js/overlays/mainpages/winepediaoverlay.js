@@ -1,5 +1,5 @@
 import { showMainViewOverlay } from '../overlayUtils.js';
-import { showWineInfoOverlay } from '../wineInfoOverlay.js';
+import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
 import tutorialManager from '/js/tutorial.js';
 import { allResources } from '/js/resource.js';
 
@@ -20,27 +20,7 @@ function setupWinepediaEventListeners(overlay) {
             const grapeName = card.querySelector('h3').textContent;
             const grapeResource = allResources.find(r => r.name === grapeName);
             if (grapeResource) {
-                const wineItem = {
-                    resource: grapeResource,
-                    state: 'Resource Info',
-                    vintage: '',
-                    quality: grapeResource.naturalYield,
-                    fieldName: '',
-                    amount: 0,
-                    getDisplayInfo: function() {
-                        return {
-                            resource: this.resource,
-                            state: this.state,
-                            vintage: this.vintage,
-                            quality: this.quality,
-                            fieldName: this.fieldName,
-                            characteristics: this.resource.wineCharacteristics || {},
-                            amount: this.amount,
-                            specialFeatures: []
-                        };
-                    }
-                };
-                showWineInfoOverlay(wineItem);
+                showResourceInfoOverlay(grapeResource);
             }
         });
     });
