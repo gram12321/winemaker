@@ -88,7 +88,7 @@ function createWinepediaOverlayHTML() {
 
 function createImportersContent() {
     const importers = initializeImporters();
-    
+
     setTimeout(() => {
         const countryFilter = document.getElementById('country-filter');
         if (countryFilter) {
@@ -96,7 +96,7 @@ function createImportersContent() {
                 const selectedCountry = e.target.value;
                 const table = document.getElementById('importers-table');
                 const rows = table.getElementsByTagName('tr');
-                
+
                 for (let i = 1; i < rows.length; i++) {
                     const countryCell = rows[i].cells[0];
                     const countryName = countryCell.textContent.trim();
@@ -113,7 +113,23 @@ function createImportersContent() {
         { label: 'Wine Tradition', key: 'wineTradition', format: (value) => `${(value * 100).toFixed(0)}%` }
     ];
 
-    const rows = importers.map(importer => ({
+    const sortData = (data, key) => {
+        return data.sort((a, b) => {
+            const aVal = a[key];
+            const bVal = b[key];
+
+            if (typeof aVal === 'number') {
+                return aVal - bVal;
+            } else {
+                return aVal.localeCompare(bVal);
+            }
+        });
+    };
+
+    let sortedImporters = importers;
+    let sortOrder = 1; // 1 for ascending, -1 for descending
+
+    const rows = sortedImporters.map(importer => ({
         cells: [
             {
                 content: `<span class="flag-icon flag-icon-${getCountryCode(importer.country)}"></span> ${importer.country}`,
@@ -138,7 +154,7 @@ function createImportersContent() {
             <table class="data-table" id="importers-table">
                 <thead>
                     <tr>
-                        ${headers.map(header => `<th>${header.label}</th>`).join('')}
+                        ${headers.map((header, index) => `<th><span class="sortable" data-sort="${header.key}">${header.label}</span></th>`).join('')}
                     </tr>
                 </thead>
                 <tbody>
