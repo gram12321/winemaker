@@ -285,7 +285,7 @@ export function shouldGenerateWineOrder() {
         return false;
     }
 
-    const companyPrestige = parseFloat(localStorage.getItem('companyPrestige')) || 0;
+    const companyPrestige = calculateRealPrestige();
     let baseChance;
 
     // Calculate base chance based on company prestige
