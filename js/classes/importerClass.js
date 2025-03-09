@@ -40,7 +40,7 @@ export class Importer {
         }
 
         // Adjust based on market share
-        multiplier *= (1 + (this.marketShare / 100));
+        multiplier *= (1 + (this.marketShare);
 
         // Adjust based on purchasing power
         multiplier *= (1 + this.purchasingPower);
@@ -73,6 +73,9 @@ export class Importer {
 
         // Adjust based on market share (larger share = better bulk pricing)
         multiplier *= (1 - (this.marketShare / 200)); // Max 50% reduction for largest market share
+
+        // Adjust based on wine tradition
+        multiplier *= (1 + (this.wineTradition * 0.2));
 
         return multiplier;
     }
