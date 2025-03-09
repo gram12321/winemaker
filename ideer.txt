@@ -385,3 +385,19 @@ Oakiness / Wood Spice (vanilla, toast)	Unoaked / Neutral (no wood influence, “
     body: '0% (Light) to 100% (Full)',
     spice: '0% (Pure) to 100% (Full)'
   };
+
+
+// Get order chance
+
+Prestige	Base Order Chance
+1	20.30%
+5	21.50%
+10	23.00%
+25	27.50%
+50	35.00%
+75	42.50%
+100	50.00%
+250	64.77%
+500	74.25%
+1000	82.05%
+10000	98.22%
