@@ -44,7 +44,8 @@ export function displayWineCellarInventory() {
                 <button class="btn-alternative set-price-btn" 
                         data-wine-name="${wine.resource.name}" 
                         data-wine-vintage="${wine.vintage}" 
-                        data-wine-storage="${wine.storage}">
+                        data-wine-storage="${wine.storage}"
+                        data-wine-field="${wine.fieldName}">
                     Set Price
                 </button>
             </td>
@@ -58,9 +59,10 @@ export function displayWineCellarInventory() {
             if (!isNaN(price) && price > 0) {
                 // Save the custom price and update the display
                 const wineItem = inventoryInstance.items.find(item => 
-                    item.resource.name === wine.resource.name && 
-                    item.vintage === wine.vintage &&
-                    item.storage === wine.storage
+                    item.resource.name === setPriceButton.dataset.wineName && 
+                    item.vintage === parseInt(setPriceButton.dataset.wineVintage) &&
+                    item.storage === setPriceButton.dataset.wineStorage &&
+                    item.fieldName === setPriceButton.dataset.wineField
                 );
                 if (wineItem) {
                     wineItem.customPrice = price;
