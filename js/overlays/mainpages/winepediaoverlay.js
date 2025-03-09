@@ -89,6 +89,23 @@ function createWinepediaOverlayHTML() {
 function createImportersContent() {
     const importers = initializeImporters();
     
+    setTimeout(() => {
+        const countryFilter = document.getElementById('country-filter');
+        if (countryFilter) {
+            countryFilter.addEventListener('change', (e) => {
+                const selectedCountry = e.target.value;
+                const table = document.getElementById('importers-table');
+                const rows = table.getElementsByTagName('tr');
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const countryCell = rows[i].cells[0];
+                    const countryName = countryCell.textContent.trim();
+                    rows[i].style.display = !selectedCountry || countryName.includes(selectedCountry) ? '' : 'none';
+                }
+            });
+        }
+    }, 100);
+
     const headers = [
         { label: 'Country', key: 'country' },
         { label: 'Market Share', key: 'marketShare', format: (value) => `${value.toFixed(1)}%` },
@@ -110,7 +127,15 @@ function createImportersContent() {
 
     return `
         <div class="data-table-container">
-            <table class="data-table">
+            <div class="filters d-flex gap-2 mb-3">
+                <select id="country-filter" class="form-control form-control-sm d-inline-block w-auto">
+                    <option value="">All Countries</option>
+                    ${[...new Set(importers.map(imp => imp.country))].map(country => 
+                        `<option value="${country}">${country}</option>`
+                    ).join('')}
+                </select>
+            </div>
+            <table class="data-table" id="importers-table">
                 <thead>
                     <tr>
                         ${headers.map(header => `<th>${header.label}</th>`).join('')}
