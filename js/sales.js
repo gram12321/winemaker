@@ -6,6 +6,7 @@ import { inventoryInstance } from './resource.js';
 import { displayWineCellarInventory } from './overlays/mainpages/salesoverlay.js';
 import { calculateRealPrestige } from './company.js';
 import { loadWineOrders, saveWineOrders, getFarmlands } from './database/adminFunctions.js';
+import {updateAllDisplays } from './displayManager.js';
 
 export function removeWineOrder(index) {
     const wineOrders = loadWineOrders();
