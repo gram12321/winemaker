@@ -42,9 +42,9 @@ function setupWinepediaEventListeners(overlay) {
                 console.group('Importer Multiplicators');
                 importers.forEach(importer => {
                     console.log(
-                        `${importer.country} - ${importer.type} (Market Share: ${importer.marketShare.toFixed(1)}%):\n` +
-                        `  Price Multiplicator: ${importer.buyPriceMultiplicator.toFixed(2)}\n` +
-                        `  Amount Multiplicator: ${importer.buyAmountMultiplicator.toFixed(2)}`
+                        `${importer.country} - ${importer.type} (Market Share: ${(importer.marketShare || 0).toFixed(1)}%):\n` +
+                        `  Price Multiplicator: ${(importer.buyPriceMultiplicator || 0).toFixed(2)}\n` +
+                        `  Amount Multiplicator: ${(importer.buyAmountMultiplicator || 0).toFixed(2)}`
                     );
                 });
                 console.groupEnd();
