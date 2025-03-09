@@ -68,7 +68,7 @@ export function generateWineOrder() {
 
     const orderTypes = {
         "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
-        "Engross Order": { amountMultiplier: 10, priceMultiplier: 0.85 }
+        "Engross Order": { amountMultiplier: 6, priceMultiplier: 0.85 }
     };
 
     // Instead of pure random selection, we'll weight the probability based on price attractiveness
