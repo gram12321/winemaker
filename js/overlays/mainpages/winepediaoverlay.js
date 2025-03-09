@@ -101,7 +101,7 @@ function createGrapeVarietiesContent() {
             </div>
             <hr>
             <div class="grape-description">
-                <p>Description: ${getGrapeDescription(grape)}</p>
+                <p>${getGrapeDescription(grape)}</p>
             </div>
         </div>
     `).join('');
