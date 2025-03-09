@@ -214,6 +214,7 @@ export function generateWineOrder() {
         `Quality ${(newOrder.quality * 100).toFixed(0)}%, ` +
         `Price €${newOrder.wineOrderPrice.toFixed(2)}.`
     );
+    updateAllDisplays();
 }
 
 export function sellOrderWine(orderIndex) {
