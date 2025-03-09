@@ -42,8 +42,13 @@ export class Importer {
         // Adjust based on market share
         multiplier *= (1 + (this.marketShare / 100));
 
-        // Ensure multiplier stays within reasonable bounds (0.5 to 3.0)
-        return Math.max(0.5, Math.min(3.0, multiplier));
+        // Adjust based on purchasing power
+        multiplier *= (1 + this.purchasingPower);
+
+        // Adjust based on wine tradition
+        multiplier *= (1 + (this.wineTradition * 0.2));
+
+        return multiplier;
     }
 
     calculateBuyPriceMultiplicator() {
@@ -69,14 +74,7 @@ export class Importer {
         // Adjust based on market share (larger share = better bulk pricing)
         multiplier *= (1 - (this.marketShare / 200)); // Max 50% reduction for largest market share
 
-        // Adjust based on purchasing power
-        multiplier *= (1 + this.purchasingPower);
-
-        // Adjust based on wine tradition (higher tradition = willing to pay more for quality)
-        multiplier *= (1 + (this.wineTradition * 0.2));
-
-        // Ensure multiplier stays within reasonable bounds (0.5 to 2.0)
-        return Math.max(0.5, Math.min(2.0, multiplier));
+        return multiplier;
     }
 }
 
