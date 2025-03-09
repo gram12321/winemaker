@@ -13,6 +13,8 @@ import { calculateTotalWork } from '../utils/workCalculator.js';
 import { createWorkCalculationTable } from '../components/workCalculationTable.js';
 import { calculateHarvestCharacteristics } from '../utils/harvestCharacteristics.js';
 import { applyHarvestOxidation } from '../utils/oxidationIndex.js';
+import { balanceCalculator } from '../utils/balanceCalculator.js';
+import { calculateNearestArchetype, processWineObject } from '../utils/archetypeUtils.js';
 
 export function showHarvestOverlay(farmland, farmlandId) {
     const overlayContainer = showModalOverlay('harvestOverlay', createHarvestOverlayHTML(farmland));
@@ -307,8 +309,57 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
             // Add country and region directly
             matchingGrapes.country = farmland.country;
             matchingGrapes.region = farmland.region;
+            
+            // For existing grapes, recalculate the balance based on the mixed characteristics
+            const tempWine = {
+                sweetness: matchingGrapes.sweetness,
+                acidity: matchingGrapes.acidity,
+                tannins: matchingGrapes.tannins,
+                aroma: matchingGrapes.aroma,
+                body: matchingGrapes.body,
+                spice: matchingGrapes.spice,
+                resource: {
+                    name: resourceObj.name,
+                    grapeColor: resourceObj.grapeColor
+                },
+                quality: matchingGrapes.quality,
+                fieldPrestige: matchingGrapes.fieldPrestige,
+                oxidation: matchingGrapes.oxidation,
+                ripeness: matchingGrapes.ripeness,
+                vintage: matchingGrapes.vintage,
+                country: matchingGrapes.country,
+                region: matchingGrapes.region
+            };
+            
+            // Process and calculate balance
+            const processedWine = processWineObject(tempWine);
+            const { archetype } = calculateNearestArchetype(processedWine);
+            const balance = balanceCalculator(processedWine, archetype);
+            
+            // Update the balance property
+            matchingGrapes.balance = balance;
+            
             applyHarvestOxidation(matchingGrapes);
         } else {
+            // Create new grapes with balance as the last parameter
+            const processedWine = processWineObject({
+                ...harvestedCharacteristics,
+                resource: {
+                    name: resourceObj.name,
+                    grapeColor: resourceObj.grapeColor
+                },
+                quality: quality,
+                fieldPrestige: farmland.farmlandPrestige,
+                oxidation: 0,
+                ripeness: currentFarmland.ripeness,
+                vintage: gameYear,
+                country: farmland.country,
+                region: farmland.region
+            });
+            
+            const { archetype } = calculateNearestArchetype(processedWine);
+            const balance = balanceCalculator(processedWine, archetype);
+            
             const newGrapes = inventoryInstance.addResource(
                 resourceObj,
                 amountForTool,
@@ -319,7 +370,9 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                 farmland.farmlandPrestige,
                 selectedTool,
                 0, // Initial oxidation
-                currentFarmland.ripeness // Pass ripeness
+                currentFarmland.ripeness, // Pass ripeness
+                [], // Special features
+                balance // Pass calculated balance
             );
             
             if (newGrapes) {
@@ -331,6 +384,7 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
                 // Add country and region directly
                 newGrapes.country = farmland.country;
                 newGrapes.region = farmland.region;
+                
                 applyHarvestOxidation(newGrapes);
             }
         }

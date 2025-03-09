@@ -56,7 +56,7 @@ export class Resource {
 
 export class InventoryItem {
   constructor(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage, 
-              oxidation = 0, ripeness = 0, specialFeatures = []) {
+              oxidation = 0, ripeness = 0, specialFeatures = [], balance = 0) {
     this.resource = resource;
     this.amount = amount;
     this.state = state;
@@ -69,6 +69,7 @@ export class InventoryItem {
     this.ripeness = ripeness;
     this.specialFeatures = specialFeatures;
     this.crushingMethod = null;  // Add crushing method
+    this.balance = balance;  // Initialize balance
     this.fieldSource = {
       conventional: 'Traditional',  // Default to Traditional
       altitude: null,
@@ -156,7 +157,7 @@ export class Inventory {
   }
 
   addResource(resource, amount, state, vintage, quality, fieldName, fieldPrestige, storage, 
-              oxidation = 0, ripeness = 0, specialFeatures = []) {
+              oxidation = 0, ripeness = 0, specialFeatures = [], balance = 0, customPrice = null) {
     // Ensure we're passing a proper Resource object
     let resourceObj;
     if (typeof resource === 'string') {
@@ -171,14 +172,15 @@ export class Inventory {
     }
 
     const existingItem = this.findMatchingItem(resourceObj, state, vintage, quality, fieldName, storage);
-    
+
     if (existingItem) {
       existingItem.amount += amount;
       return existingItem;
     } else {
       const newItem = new InventoryItem(resourceObj, amount, state, vintage, quality, 
                                       fieldName, fieldPrestige, storage, oxidation, 
-                                      ripeness, specialFeatures);
+                                      ripeness, specialFeatures, balance);
+      newItem.customPrice = customPrice; //Adding custom price
       this.items.push(newItem);
       return newItem;
     }

@@ -1,7 +1,7 @@
 import { showModalOverlay } from './overlayUtils.js';
 import { createTextCenter, createInfoTable, createOverlayHTML } from '../components/createOverlayHTML.js';
 import { getColorClass } from '../utils.js';
-import { balanceCalculator, baseBalancedRanges, applyRangeAdjustments } from '../utils/balanceCalculator.js';
+import { baseBalancedRanges, applyRangeAdjustments } from '../utils/balanceCalculator.js';
 import { calculateNearestArchetype, processWineObject } from '../utils/archetypeUtils.js';
 import { createCharacteristicBar } from '../components/characteristicBar.js';
 
@@ -11,23 +11,11 @@ export function showWineInfoOverlay(wineItem) {
     return overlayContainer;
 }
 
-function calculateWineBalance(wine) {
+function createWineInfoOverlayHTML(wine) {
+    const displayInfo = wine.getDisplayInfo();
     const processedWine = processWineObject(wine);
     const { archetype, distance, qualifies } = calculateNearestArchetype(processedWine);
-    const score = balanceCalculator(processedWine, archetype);
-
-    return {
-        score: score,
-        archetype: archetype.name,
-        qualifies: qualifies,
-        distance: distance
-    };
-}
-
-function createWineInfoOverlayHTML(wine) {
-    const balanceInfo = calculateWineBalance(wine);
-    const displayInfo = wine.getDisplayInfo();
-    const balanceColorClass = getColorClass(balanceInfo.score);
+    const balanceColorClass = getColorClass(wine.balance);
 
     const baseInfoSection = `
         <div class="info-section">
@@ -40,13 +28,13 @@ function createWineInfoOverlayHTML(wine) {
                     { label: 'Quality', value: displayInfo.qualityDisplay },
                     { 
                         label: 'Balance', 
-                        value: `${(balanceInfo.score * 100).toFixed(1)}%`,
+                        value: `${(wine.balance * 100).toFixed(1)}%`,
                         valueClass: balanceColorClass 
                     },
                     { 
-                        label: balanceInfo.qualifies ? 'Archetype' : 'Nearest Archetype',
-                        value: `${balanceInfo.archetype}${!balanceInfo.qualifies ? 
-                            ` (${(balanceInfo.distance * 100).toFixed(1)}% away)` : ''}`
+                        label: qualifies ? 'Archetype' : 'Nearest Archetype',
+                        value: `${archetype.name}${!qualifies ? 
+                            ` (${(distance * 100).toFixed(1)}% away)` : ''}`
                     },
                     { label: 'Amount', value: formatAmount(wine) },
                     { 

@@ -1,4 +1,3 @@
-
 import { showBuildingsOverlay } from '/js/overlays/mainpages/buildingsoverlay.js';
 import { showAchievementOverlay } from '/js/overlays/mainpages/achievementoverlay.js';
 import { showLandOverlay } from '/js/overlays/mainpages/landoverlay.js';
@@ -176,7 +175,7 @@ export function initializeSidebar() {
                 } else {
                     console.error('Main link element not found');
                 }
-                
+
                 // Attach event listener to the main link
                 const achievementLink = document.getElementById('achievement-link');
                 if (achievementLink) {
@@ -186,6 +185,17 @@ export function initializeSidebar() {
                     });
                 } else {
                     console.error('Main link element not found');
+                }
+
+                // Attach event listener to the winepedia link after sidebar loads
+                const winepediaLink = document.getElementById('winepedia-link');
+                if (winepediaLink) {
+                    winepediaLink.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent default navigation
+                        showWinepediaOverlay(); // Show winepedia overlay
+                    });
+                } else {
+                    console.error('Winepedia link element not found');
                 }
 
 
@@ -220,3 +230,4 @@ export function initializeSidebar() {
         .catch(error => console.error('Error loading sidebar:', error));
 }
 
+import { showWinepediaOverlay } from '/js/overlays/mainpages/winepediaoverlay.js';

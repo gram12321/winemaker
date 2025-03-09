@@ -1,7 +1,4 @@
 /* 5. Data Overlays */
-
-
-/* Shared Modal Overlay Components for dataoverlays */
 .overlay-card {
   background-color: var(--color-background);
   border: 1px solid var(--color-accent);
@@ -277,3 +274,44 @@
     padding: 10px;
 }
 
+.grape-varieties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.grape-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--color-accent);
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer; /* Added cursor: pointer */
+}
+
+.grape-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-accent);
+}
+
+.grape-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+
+/* Added JavaScript for click handling (needs to be included in your main JS file) */
+document.addEventListener('DOMContentLoaded', function() {
+  const grapeCards = document.querySelectorAll('.grape-card');
+  grapeCards.forEach(card => {
+    card.addEventListener('click', function() {
+      // Replace 'wineinfooverlay' with the actual ID or selector of your overlay
+      document.getElementById('wineinfooverlay').style.display = 'block'; 
+    });
+  });
+});

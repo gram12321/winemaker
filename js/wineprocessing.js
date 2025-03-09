@@ -4,6 +4,7 @@ import { addConsoleMessage } from './console.js';
 import taskManager from './taskManager.js';
 import { formatNumber } from './utils.js';
 import { calculateFermentationWorkData } from './overlays/fermentationOverlay.js';
+import { calculateWineBalance } from './utils/balanceCalculator.js';
 
 export function fermentation(selectedResource, storage, mustAmount, params = {}) {
     // Check for existing fermentation tasks
@@ -112,6 +113,22 @@ export function performFermentation(target, progress, params) {
         storage
     );
 
+    // Prepare wine object for balance calculation
+    const wineForBalanceCalc = {
+        ...baseProperties,
+        resource: {
+            name: selectedResource,
+            grapeColor: mustItem.resource.grapeColor
+        },
+        quality: quality,
+        fieldPrestige: fieldPrestige || mustItem.fieldPrestige || 0.1,
+        vintage: vintage
+    };
+
+    // Calculate balance using the utility function
+    
+    const balanceInfo = calculateWineBalance(wineForBalanceCalc);
+
     // Add the wine with all properties
     const newWine = inventoryInstance.addResource(
         { 
@@ -127,7 +144,9 @@ export function performFermentation(target, progress, params) {
         fieldPrestige || mustItem.fieldPrestige || 0.1,
         'Wine Cellar',
         baseProperties.oxidation,
-        baseProperties.ripeness
+        baseProperties.ripeness,
+        baseProperties.specialFeatures,
+        balanceInfo.score // Pass balance score as the last parameter
     );
 
     // Apply all properties to the new wine
@@ -148,9 +167,8 @@ export function performFermentation(target, progress, params) {
         
         newWine.country = baseProperties.country;
         newWine.region = baseProperties.region;
-        
     }
 
     saveInventory();
-    addConsoleMessage(`${formatNumber(mustAmount)} liters of ${selectedResource} must has been fermented into ${formatNumber(bottleAmount)} bottles.`);
+    addConsoleMessage(`${formatNumber(mustAmount)} liters of ${selectedResource} must has been fermented into ${formatNumber(bottleAmount)} bottles with balance ${(balanceInfo.score * 100).toFixed(1)}%.`);
 }

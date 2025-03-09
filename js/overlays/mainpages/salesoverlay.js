@@ -1,5 +1,5 @@
 import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
-import { calculateWinePrice, sellWines, sellOrderWine } from '/js/sales.js';
+import { calculateWinePrice, sellOrderWine } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
@@ -32,15 +32,46 @@ export function displayWineCellarInventory() {
             <td>${displayInfo.storage}</td>
             <td>${formatNumber(displayInfo.amount)} bottles</td>
             <td>${formatQualityDisplay(wine.quality)}</td>
-            <td style="text-align: center;"><strong>Bulk Sale</strong></td>
+            <td>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text">€</span>
+                    <input type="number" class="form-control price-input" min="0.01" step="0.01" placeholder="Enter price" 
+                           data-base-price="${sellingPrice.toFixed(2)}" value="${wine.customPrice ? wine.customPrice.toFixed(2) : ''}">
+                </div>
+            </td>
             <td>€${sellingPrice.toFixed(2)}</td>
-            <td><button class="btn-alternative sell-wine-btn" data-wine-name="${wine.resource.name}" data-wine-vintage="${wine.vintage}" data-wine-storage="${wine.storage}">Sell</button></td>
+            <td>
+                <button class="btn-alternative set-price-btn" 
+                        data-wine-name="${wine.resource.name}" 
+                        data-wine-vintage="${wine.vintage}" 
+                        data-wine-storage="${wine.storage}"
+                        data-wine-field="${wine.fieldName}">
+                    Set Price
+                </button>
+            </td>
         `;
 
-        const sellButton = row.querySelector('.sell-wine-btn');
-        sellButton.addEventListener('click', () => {
-            sellWines(sellButton.dataset.wineName);
-            displayWineCellarInventory();
+        const priceInput = row.querySelector('.price-input');
+        const setPriceButton = row.querySelector('.set-price-btn');
+        
+        setPriceButton.addEventListener('click', () => {
+            const price = parseFloat(priceInput.value);
+            if (!isNaN(price) && price > 0) {
+                // Save the custom price and update the display
+                const wineItem = inventoryInstance.items.find(item => 
+                    item.resource.name === setPriceButton.dataset.wineName && 
+                    item.vintage === parseInt(setPriceButton.dataset.wineVintage) &&
+                    item.storage === setPriceButton.dataset.wineStorage &&
+                    item.fieldName === setPriceButton.dataset.wineField
+                );
+                if (wineItem) {
+                    wineItem.customPrice = price;
+                    inventoryInstance.save();
+                    displayWineCellarInventory();
+                }
+            } else {
+                alert("Please enter a valid price.");
+            }
         });
 
         tableBody.appendChild(row);

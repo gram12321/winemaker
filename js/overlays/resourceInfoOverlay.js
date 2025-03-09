@@ -15,7 +15,9 @@ import {
 import { createCharacteristicBar } from '../components/characteristicBar.js';
 
 export function showResourceInfoOverlay(resourceName) {
-  const resource = getResourceByName(resourceName);
+  const resource = typeof resourceName === 'string' ? 
+    getResourceByName(resourceName) : 
+    resourceName;
   if (!resource) {
     console.error('Resource not found.');
     return;
