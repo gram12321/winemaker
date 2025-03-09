@@ -191,8 +191,13 @@ export function sellOrderWine(orderIndex) {
         return false;
     }
 
-    // Calculate total selling price using the order's offered price
+    // Calculate and use the final selling price from the order
     const totalSellingPrice = order.wineOrderPrice * order.amount;
+    console.log(`[Wine Sale] Order details:`, {
+        wineOrderPrice: order.wineOrderPrice,
+        amount: order.amount,
+        total: totalSellingPrice
+    });
 
     if (inventoryInstance.removeResource(
         bottledWine.resource, 
