@@ -91,19 +91,3 @@ function createGrapeVarietiesContent() {
         </div>
     `).join('');
 }
-
-function createCharacteristicsHTML(characteristics) {
-    if (!characteristics) return '';
-
-    return Object.entries(characteristics).map(([key, value]) => `
-        <div class="characteristic">
-            <span class="label">${key.charAt(0).toUpperCase() + key.slice(1)}:</span>
-            <span class="value">${formatCharacteristicValue(value)}</span>
-        </div>
-    `).join('');
-}
-
-function formatCharacteristicValue(value) {
-    const percentage = ((value + 0.5) * 100).toFixed(0);
-    return `${percentage}%`;
-}
