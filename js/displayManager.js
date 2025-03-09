@@ -31,11 +31,8 @@ export function updateAllDisplays() {
         if (typeof displayWineCellarInventory === 'function' && document.getElementById('winecellar-table-body')) {
             displayWineCellarInventory();
         }
-        if (typeof displayWineOrders === 'function') {
-            const ordersTable = document.getElementById('wine-orders-table-body');
-            if (ordersTable || document.querySelector('.mainview-overlay-content')) {
-                displayWineOrders();
-            }
+        if (typeof displayWineOrders === 'function' && document.getElementById('wine-orders-table-body')) {
+            displayWineOrders();
         }
 
         // Staff display
