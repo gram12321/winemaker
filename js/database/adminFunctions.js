@@ -379,6 +379,28 @@ export function getRecurringTransactions() {
   return JSON.parse(localStorage.getItem('recurringTransactions')) || [];
 }
 
+// ----- IMPORTES ---- 
+
+// Save importers to localStorage
+export function saveImporters(importers) {
+    localStorage.setItem('importers', JSON.stringify(importers));
+}
+
+// Load importers from localStorage
+export function loadImporters() {
+    const storedImporters = localStorage.getItem('importers');
+    if (!storedImporters) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(storedImporters);
+    } catch (error) {
+        console.error('Failed to parse importers from localStorage', error);
+        return null;
+    }
+}
+
 export {
   loadInventory,
   saveInventory

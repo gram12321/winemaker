@@ -1,5 +1,4 @@
-
-// importerClass.js - Defines the Importer class for wine importers from different countries
+import { loadImporters, saveImporters } from '../database/adminFunctions.js';
 
 export class Importer {
     constructor(country, marketShare, purchasingPower, wineTradition) {
@@ -58,25 +57,7 @@ function generateBalancedMarketShares(count) {
     return randomValues.map(value => (value / sum) * 100);
 }
 
-// Save importers to localStorage
-export function saveImporters(importers) {
-    localStorage.setItem('importers', JSON.stringify(importers));
-}
 
-// Load importers from localStorage
-export function loadImporters() {
-    const storedImporters = localStorage.getItem('importers');
-    if (!storedImporters) {
-        return null;
-    }
-    
-    try {
-        return JSON.parse(storedImporters);
-    } catch (error) {
-        console.error('Failed to parse importers from localStorage', error);
-        return null;
-    }
-}
 
 // Initialize importers if they don't exist
 export function initializeImporters() {
