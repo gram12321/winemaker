@@ -1,5 +1,5 @@
 import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
-import { calculateWinePrice, sellWines, sellOrderWine } from '/js/sales.js';
+import { calculateWinePrice, sellOrderWine } from '/js/sales.js';
 import { inventoryInstance } from '/js/resource.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';

@@ -24,54 +24,6 @@ export function addWineOrder(order) {
     saveWineOrders(wineOrders);
 }
 
-export function sellWines(resourceName, amount = 1) {
-    const bottledWine = inventoryInstance.getItemsByState('Bottles').find(item => item.resource.name === resourceName);
-
-    if (bottledWine && bottledWine.amount > 0) {
-        // Check if custom price is set
-        if (!bottledWine.customPrice) {
-            addConsoleMessage('Please set a selling price for this wine first.');
-            return false;
-        }
-
-        const farmlands = getFarmlands();
-        const farmland = farmlands.find(field => field.name === bottledWine.fieldName);
-
-        if (!farmland) {
-            addConsoleMessage('Error: Could not find farmland data.');
-            return false;
-        }
-
-        // Use the custom price instead of calculated price
-        const sellingPrice = bottledWine.customPrice;
-        const saleAmount = Math.min(amount, bottledWine.amount);
-
-        if (inventoryInstance.removeResource(
-            { name: resourceName }, 
-            saleAmount, 
-            'Bottles', 
-            bottledWine.vintage, 
-            bottledWine.storage
-        )) {
-            const totalPrice = sellingPrice * saleAmount;
-
-            addConsoleMessage(
-                `Sold ${saleAmount} ${saleAmount === 1 ? 'bottle' : 'bottles'} of ${bottledWine.resource.name}, ` +
-                `Vintage ${bottledWine.vintage}, ` +
-                `Quality ${(bottledWine.quality * 100).toFixed(0)}% ` +
-                `for €${totalPrice.toFixed(2)} (€${sellingPrice.toFixed(2)}/bottle).`
-            );
-
-            addTransaction('Income', 'Wine Sale', totalPrice);
-            setPrestigeHit(getPrestigeHit() + totalPrice / 1000);
-            calculateRealPrestige();
-            inventoryInstance.save();
-            return true;
-        }
-    }
-    return false;
-}
-
 // Calculate wine price based on quality, land value, and field prestige // Capped at 100€ for non-top3 regions. As quality 0-1, land value 0-1, field prestige 0-1, thus maximum baseprice is 100€. (Ie we ware multiplying 3 normalized values of 0-1 by 100 
 /*
 Landvalue is aprox 41% of price as it is in both normalized value (1/3) and field prestige (1/4) each contributing 1/3 to baseprice) 
