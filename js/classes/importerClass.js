@@ -40,7 +40,7 @@ export class Importer {
         }
 
         // Adjust based on market share
-        multiplier *= (1 + (this.marketShare);
+        multiplier *= (1 + this.marketShare);
 
         // Adjust based on purchasing power
         multiplier *= (1 + this.purchasingPower);
