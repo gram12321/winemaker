@@ -88,48 +88,46 @@ function createWinepediaOverlayHTML() {
 
 function createImportersContent() {
     const importers = initializeImporters();
-    let importersByCountry = {};
     
-    // Group importers by country
-    importers.forEach(importer => {
-        if (!importersByCountry[importer.country]) {
-            importersByCountry[importer.country] = [];
-        }
-        importersByCountry[importer.country].push(importer);
-    });
+    const headers = [
+        { label: 'Country', key: 'country' },
+        { label: 'Market Share', key: 'marketShare', format: (value) => `${value.toFixed(1)}%` },
+        { label: 'Purchasing Power', key: 'purchasingPower', format: (value) => `${(value * 100).toFixed(0)}%` },
+        { label: 'Wine Tradition', key: 'wineTradition', format: (value) => `${(value * 100).toFixed(0)}%` }
+    ];
 
-    return Object.entries(importersByCountry).map(([country, countryImporters]) => `
-        <div class="country-section">
-            <div class="country-header">
-                <span class="flag-icon flag-icon-${getCountryCode(country)}"></span>
-                <h3>${country}</h3>
-            </div>
-            <div class="importers-grid">
-                ${countryImporters.map(importer => `
-                    <div class="importer-card">
-                        <div class="importer-header">
-                            <span class="flag-icon flag-icon-${getCountryCode(importer.country)}"></span>
-                            <h4>${importer.country} Importer</h4>
-                        </div>
-                        <div class="importer-stats">
-                            <div class="stat-item">
-                                <span>Market Share:</span>
-                                <strong>${importer.marketShare.toFixed(1)}%</strong>
-                            </div>
-                            <div class="stat-item">
-                                <span>Purchasing Power:</span>
-                                <strong>${(importer.purchasingPower * 100).toFixed(0)}%</strong>
-                            </div>
-                            <div class="stat-item">
-                                <span>Wine Tradition:</span>
-                                <strong>${(importer.wineTradition * 100).toFixed(0)}%</strong>
-                            </div>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
+    const rows = importers.map(importer => ({
+        cells: [
+            {
+                content: `<span class="flag-icon flag-icon-${getCountryCode(importer.country)}"></span> ${importer.country}`,
+                className: 'text-left'
+            },
+            { content: `${importer.marketShare.toFixed(1)}%` },
+            { content: `${(importer.purchasingPower * 100).toFixed(0)}%` },
+            { content: `${(importer.wineTradition * 100).toFixed(0)}%` }
+        ]
+    }));
+
+    return `
+        <div class="data-table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        ${headers.map(header => `<th>${header.label}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows.map(row => `
+                        <tr>
+                            ${row.cells.map(cell => `
+                                <td class="${cell.className || ''}">${cell.content}</td>
+                            `).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
         </div>
-    `).join('');
+    `;
 }
 
 function getCountryCode(country) {
