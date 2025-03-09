@@ -2,6 +2,7 @@ import { showMainViewOverlay } from '../overlayUtils.js';
 import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
 import tutorialManager from '/js/tutorial.js';
 import { allResources } from '/js/resource.js';
+import { initializeImporters } from '/js/classes/importerClass.js';
 
 export function showWinepediaOverlay() {
     const overlay = showMainViewOverlay(createWinepediaOverlayHTML());
@@ -56,6 +57,7 @@ function createWinepediaOverlayHTML() {
                     <button class="winepedia-tab active" data-target="grapeVarieties">Grape Varieties</button>
                     <button class="winepedia-tab" data-target="wineRegions">Wine Regions</button>
                     <button class="winepedia-tab" data-target="winemaking">Winemaking</button>
+                    <button class="winepedia-tab" data-target="importers">Importers</button>
                 </div>
             </div>
 
@@ -74,8 +76,71 @@ function createWinepediaOverlayHTML() {
                 <h3>Winemaking Process</h3>
                 <p>Content coming soon...</p>
             </div>
+
+            <div class="tab-content" id="importers">
+                <div class="importers-grid">
+                    ${createImportersContent()}
+                </div>
+            </div>
         </div>
     `;
+}
+
+function createImportersContent() {
+    const importers = initializeImporters();
+    let importersByCountry = {};
+    
+    // Group importers by country
+    importers.forEach(importer => {
+        if (!importersByCountry[importer.country]) {
+            importersByCountry[importer.country] = [];
+        }
+        importersByCountry[importer.country].push(importer);
+    });
+
+    return Object.entries(importersByCountry).map(([country, countryImporters]) => `
+        <div class="country-section">
+            <div class="country-header">
+                <span class="flag-icon flag-icon-${getCountryCode(country)}"></span>
+                <h3>${country}</h3>
+            </div>
+            <div class="importers-grid">
+                ${countryImporters.map(importer => `
+                    <div class="importer-card">
+                        <div class="importer-header">
+                            <span class="flag-icon flag-icon-${getCountryCode(importer.country)}"></span>
+                            <h4>${importer.country} Importer</h4>
+                        </div>
+                        <div class="importer-stats">
+                            <div class="stat-item">
+                                <span>Market Share:</span>
+                                <strong>${importer.marketShare.toFixed(1)}%</strong>
+                            </div>
+                            <div class="stat-item">
+                                <span>Purchasing Power:</span>
+                                <strong>${(importer.purchasingPower * 100).toFixed(0)}%</strong>
+                            </div>
+                            <div class="stat-item">
+                                <span>Wine Tradition:</span>
+                                <strong>${(importer.wineTradition * 100).toFixed(0)}%</strong>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function getCountryCode(country) {
+    const countryCodeMap = {
+        'France': 'fr',
+        'Germany': 'de',
+        'Italy': 'it',
+        'Spain': 'es',
+        'United States': 'us'
+    };
+    return countryCodeMap[country] || 'unknown';
 }
 
 function getGrapeDescription(grape) {
