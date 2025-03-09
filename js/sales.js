@@ -239,6 +239,7 @@ export function sellOrderWine(orderIndex) {
         return false;
     }
 
+    // Use the original offered price from the order
     const totalSellingPrice = order.wineOrderPrice * order.amount;
 
     if (inventoryInstance.removeResource(
