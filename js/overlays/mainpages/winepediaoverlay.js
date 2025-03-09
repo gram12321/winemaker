@@ -78,6 +78,17 @@ function createWinepediaOverlayHTML() {
     `;
 }
 
+function getGrapeDescription(grape) {
+    const descriptions = {
+        'Barbera': 'A versatile grape known for high acidity and moderate tannins, producing medium-bodied wines.',
+        'Chardonnay': 'A noble grape variety producing aromatic, medium-bodied wines with moderate acidity.',
+        'Pinot Noir': 'A delicate grape creating light-bodied, aromatic wines with high acidity and soft tannins.',
+        'Primitivo': 'A robust grape yielding full-bodied, aromatic wines with natural sweetness and high tannins.',
+        'Sauvignon Blanc': 'A crisp grape variety producing aromatic, light-bodied wines with high acidity.'
+    };
+    return descriptions[grape.name] || 'A unique grape variety with distinctive characteristics.';
+}
+
 function createGrapeVarietiesContent() {
     return allResources.map(grape => `
         <div class="grape-card">
@@ -87,6 +98,10 @@ function createGrapeVarietiesContent() {
                      class="grape-icon"
                      onerror="this.src='/assets/pic/grapes.webp'">
                 <h3>${grape.name}</h3>
+            </div>
+            <hr>
+            <div class="grape-description">
+                <p>Description: ${getGrapeDescription(grape)}</p>
             </div>
         </div>
     `).join('');
