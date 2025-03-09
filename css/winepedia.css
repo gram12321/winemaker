@@ -85,3 +85,27 @@
     height: 48px;
     object-fit: contain;
 }
+
+
+.sortable {
+    cursor: pointer;
+    position: relative;
+    padding-right: 15px;
+}
+
+.sortable::after {
+    content: '↕';
+    position: absolute;
+    right: 0;
+    opacity: 0.5;
+}
+
+.sortable.asc::after {
+    content: '↑';
+    opacity: 1;
+}
+
+.sortable.desc::after {
+    content: '↓';
+    opacity: 1;
+}

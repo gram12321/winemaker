@@ -88,8 +88,51 @@ function createWinepediaOverlayHTML() {
 
 function createImportersContent() {
     const importers = initializeImporters();
+    let currentSort = { key: null, direction: 'asc' };
 
     setTimeout(() => {
+        // Setup sorting
+        const headers = document.querySelectorAll('.sortable');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const key = header.dataset.sort;
+                if (currentSort.key === key) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.key = key;
+                    currentSort.direction = 'asc';
+                }
+                
+                // Update arrows
+                headers.forEach(h => h.classList.remove('asc', 'desc'));
+                header.classList.add(currentSort.direction);
+                
+                // Sort table
+                const table = document.getElementById('importers-table');
+                const rows = Array.from(table.querySelectorAll('tbody tr'));
+                const sortedRows = rows.sort((a, b) => {
+                    let aVal = a.cells[Array.from(a.parentNode.parentNode.querySelector('thead tr').cells)
+                        .findIndex(cell => cell.querySelector(`[data-sort="${key}"]`))].textContent.trim();
+                    let bVal = b.cells[Array.from(b.parentNode.parentNode.querySelector('thead tr').cells)
+                        .findIndex(cell => cell.querySelector(`[data-sort="${key}"]`))].textContent.trim();
+                    
+                    // Convert to numbers if possible
+                    if (!isNaN(parseFloat(aVal))) {
+                        aVal = parseFloat(aVal);
+                        bVal = parseFloat(bVal);
+                    }
+                    
+                    return currentSort.direction === 'asc' 
+                        ? (aVal > bVal ? 1 : -1)
+                        : (aVal < bVal ? 1 : -1);
+                });
+                
+                // Update table
+                const tbody = table.querySelector('tbody');
+                sortedRows.forEach(row => tbody.appendChild(row));
+            });
+        });
+
         const countryFilter = document.getElementById('country-filter');
         if (countryFilter) {
             countryFilter.addEventListener('change', (e) => {
