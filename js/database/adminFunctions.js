@@ -45,6 +45,11 @@ function loadInventory() {
                     newItem[char] = item[char];
                 }
             });
+            
+            // Copy custom price if it exists
+            if (item.customPrice !== undefined) {
+                newItem.customPrice = item.customPrice;
+            }
 
             // Add country and region if they exist in saved data
             if (item.country) newItem.country = item.country;
@@ -102,7 +107,8 @@ function saveInventory() {
         body: item.body || 0,
         spice: item.spice || 0,
         aroma: item.aroma || 0,
-        balance: item.balance || 0 // Add balance to saved data
+        balance: item.balance || 0, // Add balance to saved data
+        customPrice: item.customPrice // Save custom price
     }));
 
     localStorage.setItem('playerInventory', JSON.stringify(itemsToSave));
