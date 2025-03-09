@@ -125,6 +125,7 @@ async function clearLocalStorage() {
   localStorage.removeItem('teams'); 
   localStorage.removeItem('panelCollapsed'); 
   localStorage.removeItem('sidebarCollapsed'); 
+  localStorage.removeItem('importers'); 
   localStorage.removeItem('upgrades'); // Clear upgrades data
   localStorage.removeItem('seenTutorials'); // Clear tutorial progress
   //localStorage.removeItem('tutorialsEnabled'); // Clear tutorial settings
