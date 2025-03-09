@@ -191,15 +191,13 @@ export function sellOrderWine(orderIndex) {
         return false;
     }
 
-    console.log('[Wine Sale] Order details:', {
-        orderPrice: order.wineOrderPrice,
-        customPrice: bottledWine.customPrice,
-        amount: order.amount,
-        totalPrice: order.wineOrderPrice * order.amount
-    });
-
-    // Use the order's original offered price
     const totalSellingPrice = order.wineOrderPrice * order.amount;
+    
+    console.log('[Wine Sale] Order details:', {
+        offeredPrice: order.wineOrderPrice,
+        amount: order.amount,
+        totalSellingPrice: totalSellingPrice
+    });
 
     if (inventoryInstance.removeResource(
         bottledWine.resource, 
