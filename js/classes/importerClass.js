@@ -1,11 +1,19 @@
 import { loadImporters, saveImporters } from '../database/adminFunctions.js';
 
+export const IMPORTER_TYPES = {
+    PRIVATE: 'Private Importer',
+    RESTAURANT: 'Restaurant',
+    WINE_SHOP: 'Wine Shop',
+    CHAIN_STORE: 'Chain Store'
+};
+
 export class Importer {
-    constructor(country, marketShare, purchasingPower, wineTradition) {
+    constructor(country, marketShare, purchasingPower, wineTradition, type) {
         this.country = country;
         this.marketShare = marketShare;
         this.purchasingPower = purchasingPower;
         this.wineTradition = wineTradition;
+        this.type = type;
         this.winePreferences = [];
     }
 }
@@ -32,11 +40,16 @@ export function generateImporters() {
         
         // Create importers for this country
         for (let i = 0; i < importerCount; i++) {
+            // Randomly select an importer type
+            const types = Object.values(IMPORTER_TYPES);
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            
             const importer = new Importer(
                 country,
                 marketShares[i],
                 preset.purchasingPower,
-                preset.wineTradition
+                preset.wineTradition,
+                randomType
             );
             allImporters.push(importer);
         }
