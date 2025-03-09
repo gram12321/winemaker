@@ -20,7 +20,7 @@ function setupWinepediaEventListeners(overlay) {
             const grapeName = card.querySelector('h3').textContent;
             const grapeResource = allResources.find(r => r.name === grapeName);
             if (grapeResource) {
-                showResourceInfoOverlay(grapeResource);
+                showResourceInfoOverlay(grapeResource.name);
             }
         });
     });
