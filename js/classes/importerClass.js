@@ -1,4 +1,5 @@
 import { loadImporters, saveImporters } from '../database/adminFunctions.js';
+import { calculateRealPrestige } from '../company.js';
 
 export const IMPORTER_TYPES = {
     PRIVATE: 'Private Importer',
@@ -6,6 +7,41 @@ export const IMPORTER_TYPES = {
     WINE_SHOP: 'Wine Shop',
     CHAIN_STORE: 'Chain Store'
 };
+
+/**
+ * Calculate importer relationship based on company prestige and market share
+ * Uses a logarithmic scaling for prestige and a power-based scaling for market share
+ * to create the desired relationship values:
+ * - Zero prestige → ~0.1 relationship
+ * - Prestige 100 → ~15 relationship
+ * - Prestige 1000 → ~25 relationship
+ * - 0.1% market share → ~1.16 divisor
+ * - 1% market share → ~1.77 divisor
+ * - 5% market share → ~4.4 divisor
+ * - 10% market share → ~10 divisor
+ */
+export function calculateImporterRelationship(marketShare) {
+    const companyPrestige = calculateRealPrestige();
+    
+    // Very low base relationship
+    const baseRelationship = 0.1;
+    
+    // Prestige contribution with logarithmic scaling (diminishing returns)
+    // This gives ~15 at prestige 100 and ~25 at prestige 1000
+    const prestigeContribution = Math.log(companyPrestige + 1) * 3.3;
+    
+    // Market share impact - more aggressive formula for larger importers
+    // Uses a combination of power functions to match the specified divisor values
+    const marketShareImpact = 1 + 0.7 * Math.pow(marketShare, 0.25) + Math.pow(marketShare, 0.9);
+    
+    // Calculate final relationship
+    // Higher prestige increases relationship
+    // Higher market share decreases relationship
+    const relationship = baseRelationship + (prestigeContribution / marketShareImpact);
+    
+    // Ensure relationship is at least the base value
+    return Math.max(baseRelationship, relationship);
+}
 
 export class Importer {
     constructor(country, marketShare, purchasingPower, wineTradition, type) {
@@ -17,6 +53,7 @@ export class Importer {
         this.winePreferences = [];
         this.buyPriceMultiplicator = this.calculateBuyPriceMultiplicator();
         this.buyAmountMultiplicator = this.calculateBuyAmountMultiplicator();
+        this.relationship = this.calculateRelationship(); // Initialize relationship
     }
 
     calculateBuyAmountMultiplicator() {
@@ -79,6 +116,17 @@ export class Importer {
 
         return multiplier;
     }
+    
+
+    calculateRelationship() {
+        // Use the shared calculation function
+        return calculateImporterRelationship(this.marketShare);
+    }
+    
+    updateRelationship() {
+        this.relationship = this.calculateRelationship();
+        return this.relationship;
+    }
 }
 
 // Country presets with default purchasingPower and wineTradition values
@@ -133,8 +181,6 @@ function generateBalancedMarketShares(count) {
     return randomValues.map(value => (value / sum) * 100);
 }
 
-
-
 // Initialize importers if they don't exist
 export function initializeImporters() {
     const existingImporters = loadImporters();
@@ -144,4 +190,21 @@ export function initializeImporters() {
         return newImporters;
     }
     return existingImporters;
+}
+
+
+export function updateAllImporterRelationships() {
+    const importers = loadImporters();
+    if (!importers) return;
+    
+    importers.forEach(importer => {
+        if (importer instanceof Importer) {
+            importer.updateRelationship();
+        } else {
+            importer.relationship = calculateImporterRelationship(importer.marketShare);
+        }
+    });
+    
+    saveImporters(importers);
+    return importers;
 }

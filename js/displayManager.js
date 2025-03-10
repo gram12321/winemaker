@@ -10,6 +10,7 @@ import { updateWineryStorage } from './overlays/mainpages/wineryoverlay.js';
 import { loadCashFlow, updateIncomeStatement } from './finance.js';
 import { setupTeamSections, updateTeamMembersSection } from './overlays/mainpages/staffoverlay.js';
 import { updateUpgradesList } from './overlays/mainpages/financeoverlay.js';
+import { updateAllImporterRelationships } from './classes/importerClass.js';
 
 
 // Central function to update all displays
@@ -17,6 +18,9 @@ export function updateAllDisplays() {
 
     // Import all necessary display functions
     try {
+        // Update importer relationships based on current company prestige
+        updateAllImporterRelationships();
+        
         // Company info in sidebar
         if (typeof renderCompanyInfo === 'function' && document.getElementById('companyInfo')) {
             renderCompanyInfo();

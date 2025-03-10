@@ -1,4 +1,3 @@
-
 /* Winepedia Styles */
 .tabs-container {
     border-bottom: 2px solid var(--color-accent);
@@ -86,7 +85,6 @@
     object-fit: contain;
 }
 
-
 .sortable {
     cursor: pointer;
     position: relative;
@@ -108,4 +106,40 @@
 .sortable.desc::after {
     content: '↓';
     opacity: 1;
+}
+
+/* Importer relationship styling */
+.relationship {
+    font-weight: bold;
+}
+
+.relationship-excellent {
+    color: #1e7e34;
+}
+
+.relationship-good {
+    color: #28a745;
+}
+
+.relationship-average {
+    color: #ffc107;
+}
+
+.relationship-poor {
+    color: #dc3545;
+}
+
+/* Country header styling */
+.country-header {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.country-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 10px !important;
+}
+
+.flag-icon {
+    margin-right: 5px;
 }
