@@ -204,6 +204,91 @@ export function logWinePriceCalculation(basePrice, quality, wine, farmland) {
     return finalPrice;
 }
 
+export function calculateOrderAmount(selectedWine, calculatedBasePrice, orderType) {
+    const orderTypes = {
+        "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
+        "Engross Order": { amountMultiplier: 12, priceMultiplier: 0.85 }
+    };
+    
+    const selectedOrderType = orderTypes[orderType];
+    
+    // Calculate price difference from base price (ratio of custom price to calculated base price)
+    const priceDifference = selectedWine.customPrice / calculatedBasePrice;
+    
+    // Enhanced price adjustment with more aggressive formula for discounts
+    let amountAdjustment = 1.0;
+    
+    if (priceDifference < 1) {
+        // Lower price than base (discount)
+        // Calculate percentage below base price (0 to 1 scale where 1 = 100% discount)
+        const discountLevel = 1 - priceDifference;
+        
+        // New formula that more closely matches our desired curve:
+        // 10% discount -> 10% boost
+        // 25% discount -> ~35% boost
+        // 50% discount -> ~75% boost
+        // 75% discount -> ~100% boost
+        // 90% discount -> ~300% boost
+        // 99% discount -> ~1000% boost
+        if (discountLevel <= 0.1) {
+            // Linear for small discounts: 1:1 boost up to 10%
+            amountAdjustment = 1 + discountLevel;
+        } else if (discountLevel <= 0.5) {
+            // Progressive growth between 10-50% discount
+            // 0.1 -> 1.1, 0.25 -> 1.35, 0.5 -> 1.75
+            amountAdjustment = 1 + (discountLevel * (1 + discountLevel));
+        } else if (discountLevel <= 0.9) {
+            // Higher growth between 50-90% discount
+            // 0.5 -> 1.75, 0.75 -> 2.0, 0.9 -> 4.0
+            const factor = 1 + (discountLevel - 0.5) * 3;
+            amountAdjustment = 1.75 + (discountLevel * factor);
+        } else {
+            // Extreme growth approaching infinity as discount approaches 100%
+            // 0.9 -> 4.0, 0.99 -> 10.0, 0.999 -> 100.0
+            amountAdjustment = 1 + (1 / (1 - discountLevel) * discountLevel * 10);
+        }
+    } else if (priceDifference > 1) {
+        // Higher price than base (premium pricing)
+        // Calculate percentage above base price (0 to infinity scale)
+        const premiumLevel = priceDifference - 1;
+        
+        // Keep similar formula as before for premium prices
+        amountAdjustment = 1 - Math.min((Math.atan(premiumLevel * 2) / Math.PI) * 0.95, 0.95);
+    }
+    
+    // Random base factor between 0.1 and 6.0
+    const minBaseFactor = 0.1;
+    const maxBaseFactor = 6.0;
+    const randomBaseFactor = minBaseFactor + Math.random() * (maxBaseFactor - minBaseFactor);
+    
+    // Field prestige effect scales from 1.0 to 7.0 based on field prestige (0-1)
+    const minPrestigeEffect = 1.0;
+    const maxPrestigeEffect = 7.0;
+    const prestigeEffect = minPrestigeEffect + (maxPrestigeEffect - minPrestigeEffect) * selectedWine.fieldPrestige;
+    
+    // Calculate base amount
+    const baseAmount = Math.round(randomBaseFactor * prestigeEffect * amountAdjustment);
+    
+    // Apply order type multiplier
+    const finalAmount = Math.max(1, Math.round(baseAmount * selectedOrderType.amountMultiplier));
+    
+    return {
+        baseAmount,
+        finalAmount,
+        amountAdjustment,
+        randomBaseFactor,
+        prestigeEffect,
+        orderTypeMultiplier: selectedOrderType.amountMultiplier,
+        minPossibleBaseAmount: Math.round(minBaseFactor * prestigeEffect * amountAdjustment),
+        maxPossibleBaseAmount: Math.round(maxBaseFactor * prestigeEffect * amountAdjustment),
+        // Add range values for better logging
+        minPrestigeEffect,
+        maxPrestigeEffect,
+        minBaseFactor,
+        maxBaseFactor
+    };
+}
+
 // Generate a random wine order based on available inventory and company prestige
 export function generateWineOrder() {
     // Get all bottled wines from inventory that have custom prices set
@@ -219,7 +304,7 @@ export function generateWineOrder() {
 
     const orderTypes = {
         "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
-        "Engross Order": { amountMultiplier: 6, priceMultiplier: 0.85 }
+        "Engross Order": { amountMultiplier: 12, priceMultiplier: 0.85 }
     };
 
     // Instead of pure random selection, we'll weight the probability based on price attractiveness
@@ -250,7 +335,7 @@ export function generateWineOrder() {
         totalWeight += weight;
     }
     
-    // Now select a wine based on weighted probability
+    // Select a wine based on weighted probability
     let randomWeight = Math.random() * totalWeight;
     let selectedWine = bottledWines[0]; // Default fallback
     
@@ -269,25 +354,21 @@ export function generateWineOrder() {
     // Calculate base price for reference
     const calculatedBasePrice = calculateWinePrice(selectedWine.quality, selectedWine);
 
-    // Calculate price based on custom price and deviation from base price
-    // If custom price is lower than base, orders are more likely and with higher volumes
-    // If custom price is higher than base, orders are less likely and with lower volumes
-    const priceDifference = selectedWine.customPrice / calculatedBasePrice;
-
     console.log(`[Wine Order] Selected wine: ${selectedWine.resource.name}, Vintage: ${selectedWine.vintage}, Quality: ${(selectedWine.quality * 100).toFixed(1)}%`);
     console.log(`[Wine Order] Base price calculation: €${calculatedBasePrice.toFixed(2)}, Custom price set: €${selectedWine.customPrice.toFixed(2)}`);
+    
+    // Calculate price difference ratio
+    const priceDifference = selectedWine.customPrice / calculatedBasePrice;
     console.log(`[Wine Order] Price difference ratio: ${priceDifference.toFixed(2)} (custom/base)`);
 
-    // Adjust amount based on price difference
-    let amountAdjustment = 1;
+    // Calculate order amount and log details
+    const amountCalculation = calculateOrderAmount(selectedWine, calculatedBasePrice, selectedOrderTypeKey);
+    
+    // Price adjustment log
     if (priceDifference < 1) {
-        // Lower price means more bottles ordered (up to +50%)
-        amountAdjustment = 1 + Math.min((1 - priceDifference) * 1.25, 0.5);
-        console.log(`[Wine Order] Lower price: increasing order amount by ${((amountAdjustment - 1) * 100).toFixed(1)}%`);
+        console.log(`[Wine Order] Lower price: increasing order amount by ${((amountCalculation.amountAdjustment - 1) * 100).toFixed(1)}%`);
     } else if (priceDifference > 1) {
-        // Higher price means fewer bottles ordered (down to -60%)
-        amountAdjustment = 1 - Math.min((priceDifference - 1) * 0.75, 0.6);
-        console.log(`[Wine Order] Higher price: decreasing order amount by ${((1 - amountAdjustment) * 100).toFixed(1)}%`);
+        console.log(`[Wine Order] Higher price: decreasing order amount by ${((1 - amountCalculation.amountAdjustment) * 100).toFixed(1)}%`);
     } else {
         console.log(`[Wine Order] Price matches base price, no adjustment needed`);
     }
@@ -300,36 +381,22 @@ export function generateWineOrder() {
     console.log(`[Wine Order] Haggling factor: ${randomFactor.toFixed(2)}, Negotiated price: €${orderPrice.toFixed(2)} (before type adjustment)`);
     console.log(`[Wine Order] Haggling range: €${(selectedWine.customPrice * minHagglingFactor).toFixed(2)} to €${(selectedWine.customPrice * maxHagglingFactor).toFixed(2)}`);
 
-    // Calculate base amount
-    const minBaseFactor = 0.5;
-    const maxBaseFactor = 2.0;
-    const randomBaseFactor = minBaseFactor + Math.random() * (maxBaseFactor - minBaseFactor);
-    const prestigeEffect = 1 + 2 * selectedWine.fieldPrestige;
-    const baseAmount = Math.round(randomBaseFactor * prestigeEffect * amountAdjustment);
-
-    // Calculate possible amount range
-    const minPossibleAmount = Math.round(minBaseFactor * prestigeEffect * amountAdjustment);
-    const maxPossibleAmount = Math.round(maxBaseFactor * prestigeEffect * amountAdjustment);
-
+    // Log amount calculation details
     console.log(`[Wine Order] Amount calculation:`);
-    console.log(`  - Random base factor: ${randomBaseFactor.toFixed(2)} (range: ${minBaseFactor.toFixed(1)}-${maxBaseFactor.toFixed(1)})`);
-    console.log(`  - Field prestige effect: ${prestigeEffect.toFixed(2)} (from prestige ${selectedWine.fieldPrestige.toFixed(2)})`);
-    console.log(`  - Price difference adjustment: ${amountAdjustment.toFixed(2)}`);
-    console.log(`  - Base amount before type multiplier: ${baseAmount} (possible range: ${minPossibleAmount}-${maxPossibleAmount})`);
+    console.log(`  - Random base factor: ${amountCalculation.randomBaseFactor.toFixed(2)} (range: ${amountCalculation.minBaseFactor.toFixed(1)}-${amountCalculation.maxBaseFactor.toFixed(1)})`);
+    console.log(`  - Field prestige effect: ${amountCalculation.prestigeEffect.toFixed(2)} (from prestige ${selectedWine.fieldPrestige.toFixed(2)}, range: ${amountCalculation.minPrestigeEffect.toFixed(1)}-${amountCalculation.maxPrestigeEffect.toFixed(1)})`);
+    console.log(`  - Price difference adjustment: ${amountCalculation.amountAdjustment.toFixed(2)}`);
+    console.log(`  - Base amount before type multiplier: ${amountCalculation.baseAmount} (possible range: ${amountCalculation.minPossibleBaseAmount}-${amountCalculation.maxPossibleBaseAmount})`);
 
-    const finalAmount = Math.max(1, Math.round(baseAmount * selectedOrderType.amountMultiplier));
+    const finalAmount = amountCalculation.finalAmount;
     const finalPrice = orderPrice * selectedOrderType.priceMultiplier;
-
-    // Calculate possible final amount range
-    const minFinalAmount = Math.max(1, Math.round(minPossibleAmount * selectedOrderType.amountMultiplier));
-    const maxFinalAmount = Math.max(1, Math.round(maxPossibleAmount * selectedOrderType.amountMultiplier));
 
     // Calculate possible final price range
     const minFinalPrice = selectedWine.customPrice * minHagglingFactor * selectedOrderType.priceMultiplier;
     const maxFinalPrice = selectedWine.customPrice * maxHagglingFactor * selectedOrderType.priceMultiplier;
 
     console.log(`[Wine Order] Final order: type=${selectedOrderTypeKey} (multipliers: amount=${selectedOrderType.amountMultiplier}, price=${selectedOrderType.priceMultiplier})`);
-    console.log(`[Wine Order] Final amount: ${finalAmount} (possible range: ${minFinalAmount}-${maxFinalAmount})`);
+    console.log(`[Wine Order] Final amount: ${finalAmount}`);
     console.log(`[Wine Order] Final price: €${finalPrice.toFixed(2)} (possible range: €${minFinalPrice.toFixed(2)}-€${maxFinalPrice.toFixed(2)})`);
 
     const newOrder = {
@@ -398,11 +465,6 @@ export function sellOrderWine(orderIndex) {
         addTransaction('Income', 'Wine Sale', totalSellingPrice);
         setPrestigeHit(getPrestigeHit() + totalSellingPrice / 10000);
         calculateRealPrestige();
-
-        if (!removeWineOrder(orderIndex)) {
-            addConsoleMessage('Error removing wine order.');
-            return false;
-        }
 
         inventoryInstance.save();
         displayWineCellarInventory();

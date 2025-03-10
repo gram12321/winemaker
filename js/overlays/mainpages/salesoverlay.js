@@ -12,6 +12,23 @@ export function showSalesOverlay() {
 }
 
 function setupSalesOverlayEventListeners(overlay) {
+    // Set up tab navigation
+    const tabs = overlay.querySelectorAll('.sales-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.dataset.view;
+            
+            // Update active tab
+            overlay.querySelectorAll('.sales-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Show/hide content sections
+            overlay.querySelectorAll('.sales-section').forEach(section => {
+                section.style.display = section.id === `${target}-section` ? 'block' : 'none';
+            });
+        });
+    });
+
     displayWineCellarInventory();
     displayWineOrders();
 }
@@ -231,9 +248,18 @@ function createSalesOverlayHTML() {
     return `
         <div class="mainview-overlay-content">
             <h3>Sales</h3>
+            
+            <!-- Tab Navigation -->
+            <div class="d-flex flex-column">
+                <div class="btn-group mb-4">
+                    <button class="btn btn-outline-primary sales-tab active" data-view="cellar">Wine Cellar</button>
+                    <button class="btn btn-outline-primary sales-tab" data-view="orders">Orders</button>
+                    <button class="btn btn-outline-primary sales-tab" data-view="contracts">Contracts</button>
+                </div>
+            </div>
 
             <!-- Wine Cellar Inventory Section -->
-            <section id="inventory-section" class="overlay-section card mb-4">
+            <section id="cellar-section" class="sales-section overlay-section card mb-4">
                 <img src="/assets/pic/winecellar_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Cellar">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Wine Cellar Inventory</h3>
@@ -257,7 +283,7 @@ function createSalesOverlayHTML() {
             </section>
 
             <!-- Wine Orders Section -->
-            <section id="orders-section" class="overlay-section card mb-4">
+            <section id="orders-section" class="sales-section overlay-section card mb-4" style="display: none;">
                 <img src="/assets/pic/sales_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Sales">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 class="h5 mb-0">Wine Orders</h3>
@@ -287,6 +313,21 @@ function createSalesOverlayHTML() {
                     <tbody id="wine-orders-table-body">
                     </tbody>
                 </table>
+            </section>
+
+            <!-- Contracts Section -->
+            <section id="contracts-section" class="sales-section overlay-section card mb-4" style="display: none;">
+                <img src="/assets/pic/contract_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Contracts" onerror="this.src='/assets/pic/sales_dalle.webp'">
+                <div class="card-header text-white d-flex justify-content-between align-items-center">
+                    <h3 class="h5 mb-0">Wine Contracts</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center py-5">
+                        <h4>Coming Soon</h4>
+                        <p class="mb-4">Wine contracts will allow you to secure long-term agreements with importers for stable income.</p>
+                        <p><i class="fas fa-file-contract fa-4x text-muted"></i></p>
+                    </div>
+                </div>
             </section>
         </div>
     `;
