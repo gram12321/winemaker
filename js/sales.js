@@ -126,14 +126,8 @@ export function calculateWinePrice(quality, wine, skipLogging = false) {
     const basePrice = calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige);
     const qualityValue = quality;
     const balanceValue = wine.balance;
-    
-    // First, calculate a combined quality score giving more weight to quality (50%) than balance (50%)
     const combinedScore = ((qualityValue + balanceValue) / 2);
-    
-    // Then apply our extreme multiplier function to the combined score
     const priceMultiplier = calculateExtremeQualityMultiplier(combinedScore);
-    
-    // Calculate final price by multiplying base price by our extreme multiplier
     const finalPrice = basePrice * priceMultiplier;
     
     // Log detailed price calculation information (unless skipLogging is true)
@@ -144,10 +138,7 @@ export function calculateWinePrice(quality, wine, skipLogging = false) {
     return finalPrice;
 }
 
-/**
- * Logs detailed information about wine price calculation
- * Similar to the analysis done in the wine price tests
- */
+
 export function logWinePriceCalculation(basePrice, quality, wine, farmland) {
     // Check if we have all needed data
     if (!farmland || !wine) {
@@ -326,18 +317,9 @@ export function calculateOrderAmount(selectedWine, calculatedBasePrice, orderTyp
     };
 }
 
-/**
- * Negotiate and calculate the final price for a wine order
- * Applies haggling and other price adjustments
- * @param {Object} selectedWine - The wine being ordered
- * @param {number} calculatedBasePrice - The calculated base price of the wine
- * @param {string} orderType - The type of order (Private Order or Engross Order)
- * @returns {Object} An object containing price details including final price, haggling factor, etc.
- */
 export function negotiateOrderPrice(selectedWine, calculatedBasePrice, orderType) {
     const selectedOrderType = WINE_ORDER_TYPES[orderType];
     
-    // Calculate price difference ratio
     const priceDifference = selectedWine.customPrice / calculatedBasePrice;
     
     // Order price will typically be somewhat lower than the custom price (haggling)
@@ -366,7 +348,6 @@ export function negotiateOrderPrice(selectedWine, calculatedBasePrice, orderType
     };
 }
 
-// Generate a random wine order based on available inventory and company prestige
 export function generateWineOrder() {
     // Get all bottled wines from inventory that have custom prices set
     const bottledWines = inventoryInstance.items.filter(item => 
