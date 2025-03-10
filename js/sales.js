@@ -7,6 +7,7 @@ import { displayWineCellarInventory } from './overlays/mainpages/salesoverlay.js
 import { calculateRealPrestige } from './company.js';
 import { loadWineOrders, saveWineOrders, getFarmlands } from './database/adminFunctions.js';
 import {updateAllDisplays } from './displayManager.js';
+import { calculateAgeContribution, calculateLandValueContribution, calculatePrestigeRankingContribution, calculateFragilityBonusContribution } from './farmland.js';
 
 export function removeWineOrder(index) {
     const wineOrders = loadWineOrders();
@@ -65,10 +66,10 @@ export function calculateExtremeQualityMultiplier(value, steepness = 80, midpoin
     
     if (safeValue < 0.5) {
         // Below average quality gets a small penalty but never below 0.8x
-        return 0.8 + (safeValue * 0.4);
+        return 1 + (safeValue * 0.4);
     } else if (safeValue < 0.7) {
         // Average quality gets approximately 1x multiplier
-        return 1.0 + ((safeValue - 0.5) * 0.5);
+        return 1.1 + ((safeValue - 0.5) * 0.5);
     } else if (safeValue < 0.9) {
         // Good quality gets a modest boost (1.25x-3x)
         return 1.25 + ((safeValue - 0.7) * 8.75);
@@ -92,8 +93,8 @@ export function calculateExtremeQualityMultiplier(value, steepness = 80, midpoin
 // Calculate wine price by applying extreme quality/balance multiplier to base price
 // The final price incorporates:
 // 1. Base price (land value + field prestige)
-// 2. Quality (60% weight in combined score)
-// 3. Balance (40% weight in combined score)
+// 2. Quality (50% weight in combined score)
+// 3. Balance (50% weight in combined score)
 // 
 // The logistic multiplier creates the possibility of extremely valuable wines
 // when both quality and balance are exceptional (>0.95), while keeping
@@ -105,19 +106,102 @@ export function calculateWinePrice(quality, wine) {
     
     // Calculate the base price (typically 10-50€)
     const basePrice = calculateBaseWinePrice(quality, farmland.landvalue, wine.fieldPrestige);
+    const qualityValue = quality;
+    const balanceValue = wine.balance;
     
-    // Get quality and balance values, defaulting to 0.5 if not present
-    const qualityValue = quality !== undefined ? quality : 0.5;
-    const balanceValue = wine.balance !== undefined ? wine.balance : 0.5;
-    
-    // First, calculate a combined quality score giving more weight to quality (60%) than balance (40%)
-    const combinedScore = (qualityValue * 0.6) + (balanceValue * 0.4);
+    // First, calculate a combined quality score giving more weight to quality (50%) than balance (50%)
+    const combinedScore = ((qualityValue + balanceValue) / 2);
     
     // Then apply our extreme multiplier function to the combined score
     const priceMultiplier = calculateExtremeQualityMultiplier(combinedScore);
     
     // Calculate final price by multiplying base price by our extreme multiplier
-    return basePrice * priceMultiplier;
+    const finalPrice = basePrice * priceMultiplier;
+    
+    // Log detailed price calculation information
+    logWinePriceCalculation(basePrice, quality, wine, farmland);
+    
+    return finalPrice;
+}
+
+/**
+ * Logs detailed information about wine price calculation
+ * Similar to the analysis done in the wine price tests
+ */
+export function logWinePriceCalculation(basePrice, quality, wine, farmland) {
+    // Check if we have all needed data
+    if (!farmland || !wine) {
+        console.log("[Wine Price] Missing data for price calculation");
+        return;
+    }
+    
+    // Get quality and balance values
+    const qualityValue = quality !== undefined ? quality : 0;
+    const balanceValue = wine.balance !== undefined ? wine.balance : 0;
+    
+    // 1. Calculate normalized land value
+    const normalizedLandValue = normalizeLandValue(farmland.landvalue);
+    console.log(`[Wine Price] Normalized land value: ${normalizedLandValue.toFixed(3)} (from ${farmland.landvalue}€)`);
+    
+    // 2. Calculate base price components
+    const landValueComponent = normalizedLandValue * 100 / 2; // 50% of base price
+    const fieldPrestigeComponent = wine.fieldPrestige * 100 / 2; // 50% of base price
+    console.log(`[Wine Price] Base price calculation:`);
+    console.log(`  - Land value component: €${landValueComponent.toFixed(2)} (${normalizedLandValue.toFixed(3)} * 100 / 2)`);
+    console.log(`  - Field prestige component: €${fieldPrestigeComponent.toFixed(2)} (${wine.fieldPrestige.toFixed(3)} * 100 / 2)`);
+    console.log(`  - Total base price: €${basePrice.toFixed(2)}`);
+    
+    // 3. Calculate combined quality score and multiplier
+    const combinedScore = (qualityValue + balanceValue) / 2;
+    const priceMultiplier = calculateExtremeQualityMultiplier(combinedScore);
+    console.log(`[Wine Price] Quality multiplier calculation:`);
+    console.log(`  - Quality: ${qualityValue.toFixed(3)}`);
+    console.log(`  - Balance: ${balanceValue.toFixed(3)}`);
+    console.log(`  - Combined score: ${combinedScore.toFixed(3)}`);
+    console.log(`  - Resulting multiplier: ${priceMultiplier.toFixed(2)}x`);
+    
+    // 4. Calculate final price
+    const finalPrice = basePrice * priceMultiplier;
+    console.log(`[Wine Price] Final price: €${finalPrice.toFixed(2)} (€${basePrice.toFixed(2)} * ${priceMultiplier.toFixed(2)})`);
+    
+    // 5. Break down field prestige components to track ultimate sources
+    if (wine.fieldPrestige > 0) {
+        console.log(`[Wine Price] Field prestige breakdown:`);
+        const vineAgeContribution = calculateAgeContribution(farmland.vineAge);
+        console.log(`  - Vine age (${farmland.vineAge} years): ${vineAgeContribution.toFixed(3)} contribution`);
+        
+        const landPrestigeContribution = calculateLandValueContribution(farmland.landvalue);
+        console.log(`  - Land value (${farmland.landvalue}€): ${landPrestigeContribution.toFixed(3)} contribution`);
+        
+        const regionPrestigeContribution = calculatePrestigeRankingContribution(farmland.region, farmland.country);
+        console.log(`  - Region reputation (${farmland.region}, ${farmland.country}): ${regionPrestigeContribution.toFixed(3)} contribution`);
+        
+        const fragilityContribution = calculateFragilityBonusContribution(farmland.plantedResourceName);
+        console.log(`  - Grape type (${farmland.plantedResourceName}): ${fragilityContribution.toFixed(3)} contribution`);
+        
+        const totalContribution = vineAgeContribution + landPrestigeContribution + regionPrestigeContribution + fragilityContribution;
+        console.log(`  - Total field prestige: ${wine.fieldPrestige.toFixed(3)} (from ${totalContribution.toFixed(3)} total contribution)`);
+    }
+    
+    // 6. Calculate percentage of land value's total influence
+    const directLandValueContribution = landValueComponent;
+    const indirectLandValueContribution = calculateLandValueContribution(farmland.landvalue) / wine.fieldPrestige * fieldPrestigeComponent;
+    const totalLandValueInfluence = directLandValueContribution + indirectLandValueContribution;
+    const landValuePercentage = (totalLandValueInfluence / basePrice) * 100;
+    console.log(`[Wine Price] Total land value influence: ${landValuePercentage.toFixed(1)}% of base price`);
+    
+    // 7. Output percentage contribution to final price
+    const qualityEffect = (finalPrice - basePrice) * 0.5; // 50% weight from quality
+    const balanceEffect = (finalPrice - basePrice) * 0.5; // 50% weight from balance
+    
+    console.log(`[Wine Price] Factor contribution to final price:`);
+    console.log(`  - Land value (direct): €${directLandValueContribution.toFixed(2)} (${(directLandValueContribution/finalPrice*100).toFixed(1)}%)`);
+    console.log(`  - Land value (through prestige): €${indirectLandValueContribution.toFixed(2)} (${(indirectLandValueContribution/finalPrice*100).toFixed(1)}%)`);
+    console.log(`  - Other prestige factors: €${(fieldPrestigeComponent-indirectLandValueContribution).toFixed(2)} (${((fieldPrestigeComponent-indirectLandValueContribution)/finalPrice*100).toFixed(1)}%)`);
+    console.log(`  - Quality effect: €${qualityEffect.toFixed(2)} (${(qualityEffect/finalPrice*100).toFixed(1)}%)`);
+    console.log(`  - Balance effect: €${balanceEffect.toFixed(2)} (${(balanceEffect/finalPrice*100).toFixed(1)}%)`);
+    
+    return finalPrice;
 }
 
 // Generate a random wine order based on available inventory and company prestige
@@ -176,13 +260,6 @@ export function generateWineOrder() {
             selectedWine = entry.wine;
             break;
         }
-    }
-    const farmlands = getFarmlands();
-    const farmland = farmlands.find(field => field.name === selectedWine.fieldName);
-
-    if (!farmland) {
-        addConsoleMessage('Error: Could not generate wine order due to missing farmland data.');
-        return;
     }
 
     const orderTypeKeys = Object.keys(orderTypes);
