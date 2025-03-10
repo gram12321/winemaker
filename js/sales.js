@@ -396,7 +396,7 @@ export function sellOrderWine(orderIndex) {
         );
 
         addTransaction('Income', 'Wine Sale', totalSellingPrice);
-        setPrestigeHit(getPrestigeHit() + totalSellingPrice / 1000);
+        setPrestigeHit(getPrestigeHit() + totalSellingPrice / 10000);
         calculateRealPrestige();
 
         if (!removeWineOrder(orderIndex)) {
