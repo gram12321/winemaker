@@ -117,7 +117,7 @@ export function calculateExtremeQualityMultiplier(value, steepness = 80, midpoin
 // The logistic multiplier creates the possibility of extremely valuable wines
 // when both quality and balance are exceptional (>0.95), while keeping
 // average wines (quality/balance ~0.5-0.7) at reasonable prices
-export function calculateWinePrice(quality, wine) {
+export function calculateWinePrice(quality, wine, skipLogging = false) {
     const farmlands = getFarmlands();
     const farmland = farmlands.find(field => field.name === wine.fieldName);
     if (!farmland) return 0;
@@ -136,8 +136,10 @@ export function calculateWinePrice(quality, wine) {
     // Calculate final price by multiplying base price by our extreme multiplier
     const finalPrice = basePrice * priceMultiplier;
     
-    // Log detailed price calculation information
-    logWinePriceCalculation(basePrice, quality, wine, farmland);
+    // Log detailed price calculation information (unless skipLogging is true)
+    if (!skipLogging) {
+        logWinePriceCalculation(basePrice, quality, wine, farmland);
+    }
     
     return finalPrice;
 }
@@ -594,7 +596,7 @@ export function shouldGenerateWineOrder() {
     
     // Check each wine individually
     for (const wine of winesWithPrices) {
-        const basePrice = calculateWinePrice(wine.quality, wine);
+        const basePrice = calculateWinePrice(wine.quality, wine, true); // Add skipLogging=true here
         if (basePrice <= 0) continue;
         
         const deviation = (wine.customPrice - basePrice) / basePrice;
