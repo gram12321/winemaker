@@ -8,7 +8,12 @@ import { calculateRealPrestige } from './company.js';
 import { loadWineOrders, saveWineOrders, getFarmlands } from './database/adminFunctions.js';
 import {updateAllDisplays } from './displayManager.js';
 import { calculateAgeContribution, calculateLandValueContribution, calculatePrestigeRankingContribution, calculateFragilityBonusContribution } from './farmland.js';
-import { WINE_ORDER_TYPES } from './constants/constants.js';
+import { 
+    WINE_ORDER_TYPES, 
+    ORDER_AMOUNT_FACTORS, 
+    PRICE_NEGOTIATION,
+    ORDER_GENERATION
+} from './constants/constants.js';
 
 // Helper function for better console logging
 function logTable(title, data, collapsed = false) {
@@ -251,6 +256,12 @@ export function calculateOrderAmount(selectedWine, calculatedBasePrice, orderTyp
         // Calculate percentage below base price (0 to 1 scale where 1 = 100% discount)
         const discountLevel = 1 - priceDifference;
         
+        // Define discount threshold constants locally
+        const SMALL_DISCOUNT_THRESHOLD = 0.1;   // 10% discount threshold
+        const MEDIUM_DISCOUNT_THRESHOLD = 0.5;  // 50% discount threshold
+        const LARGE_DISCOUNT_THRESHOLD = 0.9;   // 90% discount threshold
+        const MAX_DISCOUNT_MODIFIER = 10;       // Maximum discount modifier (10x)
+        
         // New formula that more closely matches our desired curve:
         // 10% discount -> 10% boost
         // 25% discount -> ~35% boost
@@ -258,41 +269,45 @@ export function calculateOrderAmount(selectedWine, calculatedBasePrice, orderTyp
         // 75% discount -> ~100% boost
         // 90% discount -> ~300% boost
         // 99% discount -> ~1000% boost
-        if (discountLevel <= 0.1) {
+        if (discountLevel <= SMALL_DISCOUNT_THRESHOLD) {
             // Linear for small discounts: 1:1 boost up to 10%
             amountAdjustment = 1 + discountLevel;
-        } else if (discountLevel <= 0.5) {
+        } else if (discountLevel <= MEDIUM_DISCOUNT_THRESHOLD) {
             // Progressive growth between 10-50% discount
             // 0.1 -> 1.1, 0.25 -> 1.35, 0.5 -> 1.75
             amountAdjustment = 1 + (discountLevel * (1 + discountLevel));
-        } else if (discountLevel <= 0.9) {
+        } else if (discountLevel <= LARGE_DISCOUNT_THRESHOLD) {
             // Higher growth between 50-90% discount
             // 0.5 -> 1.75, 0.75 -> 2.0, 0.9 -> 4.0
-            const factor = 1 + (discountLevel - 0.5) * 3;
+            const factor = 1 + (discountLevel - MEDIUM_DISCOUNT_THRESHOLD) * 3;
             amountAdjustment = 1.75 + (discountLevel * factor);
         } else {
             // Extreme growth approaching infinity as discount approaches 100%
             // 0.9 -> 4.0, 0.99 -> 10.0, 0.999 -> 100.0
             amountAdjustment = 1 + (1 / (1 - discountLevel) * discountLevel * 10);
+            
+            // Cap at MAX_DISCOUNT_MODIFIER to avoid excessive orders
+            amountAdjustment = Math.min(amountAdjustment, MAX_DISCOUNT_MODIFIER);
         }
     } else if (priceDifference > 1) {
         // Higher price than base (premium pricing)
         // Calculate percentage above base price (0 to infinity scale)
         const premiumLevel = priceDifference - 1;
         
-        // Keep similar formula as before for premium prices
-        amountAdjustment = 1 - Math.min((Math.atan(premiumLevel * 2) / Math.PI) * 0.95, 0.95);
+        // Define premium pricing constants locally
+        const PREMIUM_REDUCTION_FACTOR = 2.0;  // How aggressively premium prices reduce amount
+        const MAX_PREMIUM_REDUCTION = 0.95;    // Maximum reduction (95%)
+        
+        // Premium pricing formula using arctangent
+        amountAdjustment = 1 - Math.min((Math.atan(premiumLevel * PREMIUM_REDUCTION_FACTOR) / Math.PI) * MAX_PREMIUM_REDUCTION, MAX_PREMIUM_REDUCTION);
     }
     
-    // Random base factor between 0.1 and 6.0
-    const minBaseFactor = 0.1;
-    const maxBaseFactor = 6.0;
-    const randomBaseFactor = minBaseFactor + Math.random() * (maxBaseFactor - minBaseFactor);
+    // Random base factor between MIN_BASE_FACTOR and MAX_BASE_FACTOR
+    const { MIN_BASE_FACTOR, MAX_BASE_FACTOR, MIN_PRESTIGE_EFFECT, MAX_PRESTIGE_EFFECT } = ORDER_AMOUNT_FACTORS;
+    const randomBaseFactor = MIN_BASE_FACTOR + Math.random() * (MAX_BASE_FACTOR - MIN_BASE_FACTOR);
     
-    // Field prestige effect scales from 1.0 to 7.0 based on field prestige (0-1)
-    const minPrestigeEffect = 1.0;
-    const maxPrestigeEffect = 7.0;
-    const prestigeEffect = minPrestigeEffect + (maxPrestigeEffect - minPrestigeEffect) * selectedWine.fieldPrestige;
+    // Field prestige effect scales from MIN_PRESTIGE_EFFECT to MAX_PRESTIGE_EFFECT based on field prestige (0-1)
+    const prestigeEffect = MIN_PRESTIGE_EFFECT + (MAX_PRESTIGE_EFFECT - MIN_PRESTIGE_EFFECT) * selectedWine.fieldPrestige;
     
     // Calculate base amount
     const baseAmount = Math.round(randomBaseFactor * prestigeEffect * amountAdjustment);
@@ -307,41 +322,40 @@ export function calculateOrderAmount(selectedWine, calculatedBasePrice, orderTyp
         randomBaseFactor,
         prestigeEffect,
         orderTypeMultiplier: selectedOrderType.amountMultiplier,
-        minPossibleBaseAmount: Math.round(minBaseFactor * prestigeEffect * amountAdjustment),
-        maxPossibleBaseAmount: Math.round(maxBaseFactor * prestigeEffect * amountAdjustment),
-        // Add range values for better logging
-        minPrestigeEffect,
-        maxPrestigeEffect,
-        minBaseFactor,
-        maxBaseFactor
+        minPossibleBaseAmount: Math.round(MIN_BASE_FACTOR * prestigeEffect * amountAdjustment),
+        maxPossibleBaseAmount: Math.round(MAX_BASE_FACTOR * prestigeEffect * amountAdjustment),
+        minPrestigeEffect: MIN_PRESTIGE_EFFECT,
+        maxPrestigeEffect: MAX_PRESTIGE_EFFECT,
+        minBaseFactor: MIN_BASE_FACTOR,
+        maxBaseFactor: MAX_BASE_FACTOR
     };
 }
 
 export function negotiateOrderPrice(selectedWine, calculatedBasePrice, orderType) {
     const selectedOrderType = WINE_ORDER_TYPES[orderType];
     
+    // Calculate price difference ratio
     const priceDifference = selectedWine.customPrice / calculatedBasePrice;
     
     // Order price will typically be somewhat lower than the custom price (haggling)
-    const minHagglingFactor = 0.5;
-    const maxHagglingFactor = 1.4;
-    const randomFactor = minHagglingFactor + Math.random() * (maxHagglingFactor - minHagglingFactor);
+    const { MIN_HAGGLING_FACTOR, MAX_HAGGLING_FACTOR } = PRICE_NEGOTIATION;
+    const randomFactor = MIN_HAGGLING_FACTOR + Math.random() * (MAX_HAGGLING_FACTOR - MIN_HAGGLING_FACTOR);
     const negotiatedPrice = selectedWine.customPrice * randomFactor;
     
     // Apply order type price multiplier
     const finalPrice = negotiatedPrice * selectedOrderType.priceMultiplier;
     
     // Calculate possible final price range
-    const minFinalPrice = selectedWine.customPrice * minHagglingFactor * selectedOrderType.priceMultiplier;
-    const maxFinalPrice = selectedWine.customPrice * maxHagglingFactor * selectedOrderType.priceMultiplier;
+    const minFinalPrice = selectedWine.customPrice * MIN_HAGGLING_FACTOR * selectedOrderType.priceMultiplier;
+    const maxFinalPrice = selectedWine.customPrice * MAX_HAGGLING_FACTOR * selectedOrderType.priceMultiplier;
     
     return {
         priceDifference,
         negotiatedPrice,
         finalPrice,
         randomFactor, // Haggling factor
-        minHagglingFactor,
-        maxHagglingFactor,
+        minHagglingFactor: MIN_HAGGLING_FACTOR,
+        maxHagglingFactor: MAX_HAGGLING_FACTOR,
         minFinalPrice,
         maxFinalPrice,
         priceMultiplier: selectedOrderType.priceMultiplier
@@ -550,14 +564,16 @@ export function shouldGenerateWineOrder() {
     }
 
     const companyPrestige = calculateRealPrestige();
+    const { MIN_BASE_CHANCE, MID_PRESTIGE_CHANCE, MAX_BASE_CHANCE, PRESTIGE_THRESHOLD, MIN_DIMINISHING_FACTOR } = ORDER_GENERATION;
     let baseChance;
 
     // Calculate base chance based on company prestige
-    // Raise the floor from 0.02 to 0.05 to make early game slightly easier
-    if (companyPrestige <= 100) {
-        baseChance = 0.05 + (companyPrestige / 100) * (0.5 - 0.05);
+    if (companyPrestige <= PRESTIGE_THRESHOLD) {
+        // Linear scaling from MIN_BASE_CHANCE to MID_PRESTIGE_CHANCE for early game
+        baseChance = MIN_BASE_CHANCE + (companyPrestige / PRESTIGE_THRESHOLD) * (MID_PRESTIGE_CHANCE - MIN_BASE_CHANCE);
     } else {
-        baseChance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
+        // Use arctangent for diminishing returns as prestige grows beyond threshold
+        baseChance = MID_PRESTIGE_CHANCE + (Math.atan((companyPrestige - PRESTIGE_THRESHOLD) / 200) / Math.PI) * (MAX_BASE_CHANCE - MID_PRESTIGE_CHANCE);
     }
 
     // Apply diminishing returns factor based on number of wines
