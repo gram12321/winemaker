@@ -11,6 +11,7 @@ import { loadCashFlow, updateIncomeStatement } from './finance.js';
 import { setupTeamSections, updateTeamMembersSection } from './overlays/mainpages/staffoverlay.js';
 import { updateUpgradesList } from './overlays/mainpages/financeoverlay.js';
 import { updateAllImporterRelationships } from './classes/importerClass.js';
+import { refreshImporterRelationships } from './overlays/mainpages/winepediaoverlay.js';
 
 
 // Central function to update all displays
@@ -20,6 +21,9 @@ export function updateAllDisplays() {
     try {
         // Update importer relationships based on current company prestige
         updateAllImporterRelationships();
+        
+        // Refresh the importer relationships in the Winepedia if it's open
+        refreshImporterRelationships();
         
         // Company info in sidebar
         if (typeof renderCompanyInfo === 'function' && document.getElementById('companyInfo')) {

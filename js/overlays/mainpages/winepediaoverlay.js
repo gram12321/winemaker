@@ -2,7 +2,7 @@ import { showMainViewOverlay } from '../overlayUtils.js';
 import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
 import tutorialManager from '/js/tutorial.js';
 import { allResources } from '/js/resource.js';
-import { initializeImporters } from '/js/classes/importerClass.js';
+import { initializeImporters, calculateImporterRelationship } from '/js/classes/importerClass.js';
 import { getColorClass } from '/js/utils.js';
 
 export function showWinepediaOverlay() {
@@ -101,6 +101,61 @@ function createWinepediaOverlayHTML() {
     `;
 }
 
+/**
+ * Simple function to refresh importer relationships in the table
+ * Only updates the relationship cells without modifying the table structure
+ * or loading importers from storage
+ */
+export function refreshImporterRelationships() {
+    // Check if the importers table exists and is visible
+    const importersTable = document.getElementById('importers-table');
+    if (!importersTable) return;
+    
+    const importersTab = document.getElementById('importers');
+    if (!importersTab || !importersTab.classList.contains('active')) return;
+    
+    // Get all table rows
+    const rows = importersTable.querySelectorAll('tbody tr');
+    
+    // Update each row's relationship cell directly
+    rows.forEach(row => {
+        // Only process if we have enough cells
+        if (row.cells.length < 6) return;
+        
+        // Get the market share cell (index 2)
+        const marketShareText = row.cells[2].textContent.trim();
+        // Parse the market share (removing the % sign)
+        const marketShare = parseFloat(marketShareText.replace('%', ''));
+        
+        if (!isNaN(marketShare)) {
+            // Calculate new relationship value directly
+            const relationshipValue = calculateImporterRelationship(marketShare);
+            
+            // Update the relationship cell (index 5)
+            const relationshipCell = row.cells[5];
+            relationshipCell.innerHTML = formatRelationship(relationshipValue);
+        }
+    });
+}
+
+// Helper function for relationship display, extracted for reuse
+function formatRelationship(value) {
+    // Normalize relationship to 0-1 range for getColorClass
+    const normalizedValue = value ? Math.min(value / 100, 1) : 0;
+    const colorClass = getColorClass(normalizedValue);
+    
+    // Round to one decimal place
+    const formattedValue = value ? value.toFixed(1) : '0.0';
+    
+    // Return with stars based on value
+    let stars = '';
+    if (value >= 100) stars = ' ★★★';
+    else if (value >= 50) stars = ' ★★';
+    else if (value >= 20) stars = ' ★';
+    
+    return `<span class="${colorClass}">${formattedValue}${stars}</span>`;
+}
+
 function createImportersContent() {
     const importers = initializeImporters();
     let currentSort = { key: null, direction: 'asc' };
@@ -172,24 +227,6 @@ function createImportersContent() {
         { label: 'Wine Tradition', key: 'wineTradition', format: (value) => `${(value * 100).toFixed(0)}%` },
         { label: 'Relationship', key: 'relationship' }
     ];
-
-    // Helper function for relationship display - uses getColorClass
-    function formatRelationship(value) {
-        // Normalize relationship to 0-1 range for getColorClass
-        const normalizedValue = value ? Math.min(value / 100, 1) : 0;
-        const colorClass = getColorClass(normalizedValue);
-        
-        // Round to one decimal place
-        const formattedValue = value ? value.toFixed(1) : '0.0';
-        
-        // Return with stars based on value
-        let stars = '';
-        if (value >= 100) stars = ' ★★★';
-        else if (value >= 50) stars = ' ★★';
-        else if (value >= 20) stars = ' ★';
-        
-        return `<span class="${colorClass}">${formattedValue}${stars}</span>`;
-    }
 
     let tableHtml = `
         <div class="data-table-container">
