@@ -507,8 +507,9 @@ export function shouldGenerateWineOrder() {
     let baseChance;
 
     // Calculate base chance based on company prestige
+    // Raise the floor from 0.02 to 0.05 to make early game slightly easier
     if (companyPrestige <= 100) {
-        baseChance = 0.2 + (companyPrestige / 100) * (0.5 - 0.2);
+        baseChance = 0.05 + (companyPrestige / 100) * (0.5 - 0.05);
     } else {
         baseChance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
     }
@@ -534,8 +535,26 @@ export function shouldGenerateWineOrder() {
         
         // Adjust chance based on this specific wine's pricing:
         if (deviation < 0) {
-            // Cheaper than base price - increase chance (up to +50%)
-            priceModifier = 1 + Math.min(Math.abs(deviation), 0.5);
+            // Cheaper than base price - use a more aggressive scaling model
+            // instead of just capping at 0.5 (50% increase)
+            const discountLevel = Math.abs(deviation);
+            
+            if (discountLevel <= 0.1) {
+                // Small discounts: linear increase
+                priceModifier = 1 + discountLevel;
+            } else if (discountLevel <= 0.5) {
+                // Medium discounts (10-50%): up to 2x chance
+                priceModifier = 1.1 + discountLevel * 1.8; 
+            } else if (discountLevel <= 0.9) {
+                // Large discounts (50-90%): up to 4x chance
+                priceModifier = 2 + (discountLevel - 0.5) * 5;
+            } else {
+                // Extreme discounts (90-99%): up to 10x chance
+                priceModifier = 4 + (discountLevel - 0.9) * 60;
+                // Cap at 10x to avoid excessive chances
+                priceModifier = Math.min(priceModifier, 10);
+            }
+            
             console.log(`[Order Generation] Wine ${wine.resource.name} (${wine.vintage}): Lower price (${(deviation * 100).toFixed(1)}%), increasing order chance by ${((priceModifier - 1) * 100).toFixed(1)}%`);
         } else {
             // More expensive than base price - decrease chance (down to -70%)
