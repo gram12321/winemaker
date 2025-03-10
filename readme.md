@@ -1,5 +1,5 @@
 
-# Winery Management Game V 0.25
+# Winery Management Game Version 0.25
 
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 
