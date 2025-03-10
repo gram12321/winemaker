@@ -8,6 +8,24 @@ import { calculateRealPrestige } from './company.js';
 import { loadWineOrders, saveWineOrders, getFarmlands } from './database/adminFunctions.js';
 import {updateAllDisplays } from './displayManager.js';
 import { calculateAgeContribution, calculateLandValueContribution, calculatePrestigeRankingContribution, calculateFragilityBonusContribution } from './farmland.js';
+import { WINE_ORDER_TYPES } from './constants/constants.js';
+
+// Helper function for better console logging
+function logTable(title, data, collapsed = false) {
+    if (collapsed) {
+        console.groupCollapsed(title);
+    } else {
+        console.group(title);
+    }
+    
+    if (Array.isArray(data)) {
+        console.table(data);
+    } else {
+        console.table([data]);
+    }
+    
+    console.groupEnd();
+}
 
 export function removeWineOrder(index) {
     const wineOrders = loadWineOrders();
@@ -141,76 +159,93 @@ export function logWinePriceCalculation(basePrice, quality, wine, farmland) {
     
     // 1. Calculate normalized land value
     const normalizedLandValue = normalizeLandValue(farmland.landvalue);
-    console.log(`[Wine Price] Normalized land value: ${normalizedLandValue.toFixed(3)} (from ${farmland.landvalue}€)`);
     
     // 2. Calculate base price components
     const landValueComponent = normalizedLandValue * 100 / 2; // 50% of base price
     const fieldPrestigeComponent = wine.fieldPrestige * 100 / 2; // 50% of base price
-    console.log(`[Wine Price] Base price calculation:`);
-    console.log(`  - Land value component: €${landValueComponent.toFixed(2)} (${normalizedLandValue.toFixed(3)} * 100 / 2)`);
-    console.log(`  - Field prestige component: €${fieldPrestigeComponent.toFixed(2)} (${wine.fieldPrestige.toFixed(3)} * 100 / 2)`);
-    console.log(`  - Total base price: €${basePrice.toFixed(2)}`);
     
     // 3. Calculate combined quality score and multiplier
     const combinedScore = (qualityValue + balanceValue) / 2;
     const priceMultiplier = calculateExtremeQualityMultiplier(combinedScore);
-    console.log(`[Wine Price] Quality multiplier calculation:`);
-    console.log(`  - Quality: ${qualityValue.toFixed(3)}`);
-    console.log(`  - Balance: ${balanceValue.toFixed(3)}`);
-    console.log(`  - Combined score: ${combinedScore.toFixed(3)}`);
-    console.log(`  - Resulting multiplier: ${priceMultiplier.toFixed(2)}x`);
     
     // 4. Calculate final price
     const finalPrice = basePrice * priceMultiplier;
-    console.log(`[Wine Price] Final price: €${finalPrice.toFixed(2)} (€${basePrice.toFixed(2)} * ${priceMultiplier.toFixed(2)})`);
     
-    // 5. Break down field prestige components to track ultimate sources
-    if (wine.fieldPrestige > 0) {
-        console.log(`[Wine Price] Field prestige breakdown:`);
-        const vineAgeContribution = calculateAgeContribution(farmland.vineAge);
-        console.log(`  - Vine age (${farmland.vineAge} years): ${vineAgeContribution.toFixed(3)} contribution`);
-        
-        const landPrestigeContribution = calculateLandValueContribution(farmland.landvalue);
-        console.log(`  - Land value (${farmland.landvalue}€): ${landPrestigeContribution.toFixed(3)} contribution`);
-        
-        const regionPrestigeContribution = calculatePrestigeRankingContribution(farmland.region, farmland.country);
-        console.log(`  - Region reputation (${farmland.region}, ${farmland.country}): ${regionPrestigeContribution.toFixed(3)} contribution`);
-        
-        const fragilityContribution = calculateFragilityBonusContribution(farmland.plantedResourceName);
-        console.log(`  - Grape type (${farmland.plantedResourceName}): ${fragilityContribution.toFixed(3)} contribution`);
-        
-        const totalContribution = vineAgeContribution + landPrestigeContribution + regionPrestigeContribution + fragilityContribution;
-        console.log(`  - Total field prestige: ${wine.fieldPrestige.toFixed(3)} (from ${totalContribution.toFixed(3)} total contribution)`);
-    }
+    // 5. Calculate field prestige components
+    const vineAgeContribution = calculateAgeContribution(farmland.vineAge);
+    const landPrestigeContribution = calculateLandValueContribution(farmland.landvalue);
+    const regionPrestigeContribution = calculatePrestigeRankingContribution(farmland.region, farmland.country);
+    const fragilityContribution = calculateFragilityBonusContribution(farmland.plantedResourceName);
+    const totalContribution = vineAgeContribution + landPrestigeContribution + regionPrestigeContribution + fragilityContribution;
     
     // 6. Calculate percentage of land value's total influence
     const directLandValueContribution = landValueComponent;
     const indirectLandValueContribution = calculateLandValueContribution(farmland.landvalue) / wine.fieldPrestige * fieldPrestigeComponent;
     const totalLandValueInfluence = directLandValueContribution + indirectLandValueContribution;
     const landValuePercentage = (totalLandValueInfluence / basePrice) * 100;
-    console.log(`[Wine Price] Total land value influence: ${landValuePercentage.toFixed(1)}% of base price`);
     
     // 7. Output percentage contribution to final price
     const qualityEffect = (finalPrice - basePrice) * 0.5; // 50% weight from quality
     const balanceEffect = (finalPrice - basePrice) * 0.5; // 50% weight from balance
     
-    console.log(`[Wine Price] Factor contribution to final price:`);
-    console.log(`  - Land value (direct): €${directLandValueContribution.toFixed(2)} (${(directLandValueContribution/finalPrice*100).toFixed(1)}%)`);
-    console.log(`  - Land value (through prestige): €${indirectLandValueContribution.toFixed(2)} (${(indirectLandValueContribution/finalPrice*100).toFixed(1)}%)`);
-    console.log(`  - Other prestige factors: €${(fieldPrestigeComponent-indirectLandValueContribution).toFixed(2)} (${((fieldPrestigeComponent-indirectLandValueContribution)/finalPrice*100).toFixed(1)}%)`);
-    console.log(`  - Quality effect: €${qualityEffect.toFixed(2)} (${(qualityEffect/finalPrice*100).toFixed(1)}%)`);
-    console.log(`  - Balance effect: €${balanceEffect.toFixed(2)} (${(balanceEffect/finalPrice*100).toFixed(1)}%)`);
+    // Use console.group and console.table for better logging
+    console.group(`[Wine Price] ${wine.resource.name} (${wine.vintage})`);
+    
+    // Basic wine info
+    logTable("Wine Information", {
+        Wine: wine.resource.name,
+        Vintage: wine.vintage,
+        Field: wine.fieldName,
+        Quality: qualityValue.toFixed(3),
+        Balance: balanceValue.toFixed(3),
+        "Field Prestige": wine.fieldPrestige.toFixed(3)
+    });
+    
+    // Base price calculation
+    logTable("Base Price Calculation", {
+        "Land Value (Raw)": `€${farmland.landvalue}`,
+        "Normalized Land Value": normalizedLandValue.toFixed(3),
+        "Land Value Component": `€${landValueComponent.toFixed(2)}`,
+        "Field Prestige Component": `€${fieldPrestigeComponent.toFixed(2)}`,
+        "Total Base Price": `€${basePrice.toFixed(2)}`
+    });
+    
+    // Quality multiplier calculation
+    logTable("Quality Multiplier", {
+        "Quality": qualityValue.toFixed(3),
+        "Balance": balanceValue.toFixed(3),
+        "Combined Score": combinedScore.toFixed(3),
+        "Resulting Multiplier": `${priceMultiplier.toFixed(2)}x`
+    });
+    
+    // Field prestige breakdown
+    if (wine.fieldPrestige > 0) {
+        logTable("Field Prestige Breakdown", [
+            { Factor: "Vine Age", Value: `${farmland.vineAge} years`, Contribution: vineAgeContribution.toFixed(3) },
+            { Factor: "Land Value", Value: `€${farmland.landvalue}`, Contribution: landPrestigeContribution.toFixed(3) },
+            { Factor: "Region", Value: `${farmland.region}, ${farmland.country}`, Contribution: regionPrestigeContribution.toFixed(3) },
+            { Factor: "Grape Type", Value: farmland.plantedResourceName, Contribution: fragilityContribution.toFixed(3) },
+            { Factor: "Total", Value: "", Contribution: totalContribution.toFixed(3) }
+        ]);
+    }
+    
+    // Final price contribution factors
+    logTable("Price Contribution Factors", [
+        { Factor: "Land Value (Direct)", Value: `€${directLandValueContribution.toFixed(2)}`, Percentage: `${(directLandValueContribution/finalPrice*100).toFixed(1)}%` },
+        { Factor: "Land Value (through Prestige)", Value: `€${indirectLandValueContribution.toFixed(2)}`, Percentage: `${(indirectLandValueContribution/finalPrice*100).toFixed(1)}%` },
+        { Factor: "Other Prestige Factors", Value: `€${(fieldPrestigeComponent-indirectLandValueContribution).toFixed(2)}`, Percentage: `${((fieldPrestigeComponent-indirectLandValueContribution)/finalPrice*100).toFixed(1)}%` },
+        { Factor: "Quality Effect", Value: `€${qualityEffect.toFixed(2)}`, Percentage: `${(qualityEffect/finalPrice*100).toFixed(1)}%` },
+        { Factor: "Balance Effect", Value: `€${balanceEffect.toFixed(2)}`, Percentage: `${(balanceEffect/finalPrice*100).toFixed(1)}%` },
+        { Factor: "Final Price", Value: `€${finalPrice.toFixed(2)}`, Percentage: "100.0%" }
+    ]);
+    
+    console.groupEnd();
     
     return finalPrice;
 }
 
 export function calculateOrderAmount(selectedWine, calculatedBasePrice, orderType) {
-    const orderTypes = {
-        "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
-        "Engross Order": { amountMultiplier: 12, priceMultiplier: 0.85 }
-    };
-    
-    const selectedOrderType = orderTypes[orderType];
+    const selectedOrderType = WINE_ORDER_TYPES[orderType];
     
     // Calculate price difference from base price (ratio of custom price to calculated base price)
     const priceDifference = selectedWine.customPrice / calculatedBasePrice;
@@ -289,6 +324,46 @@ export function calculateOrderAmount(selectedWine, calculatedBasePrice, orderTyp
     };
 }
 
+/**
+ * Negotiate and calculate the final price for a wine order
+ * Applies haggling and other price adjustments
+ * @param {Object} selectedWine - The wine being ordered
+ * @param {number} calculatedBasePrice - The calculated base price of the wine
+ * @param {string} orderType - The type of order (Private Order or Engross Order)
+ * @returns {Object} An object containing price details including final price, haggling factor, etc.
+ */
+export function negotiateOrderPrice(selectedWine, calculatedBasePrice, orderType) {
+    const selectedOrderType = WINE_ORDER_TYPES[orderType];
+    
+    // Calculate price difference ratio
+    const priceDifference = selectedWine.customPrice / calculatedBasePrice;
+    
+    // Order price will typically be somewhat lower than the custom price (haggling)
+    const minHagglingFactor = 0.5;
+    const maxHagglingFactor = 1.4;
+    const randomFactor = minHagglingFactor + Math.random() * (maxHagglingFactor - minHagglingFactor);
+    const negotiatedPrice = selectedWine.customPrice * randomFactor;
+    
+    // Apply order type price multiplier
+    const finalPrice = negotiatedPrice * selectedOrderType.priceMultiplier;
+    
+    // Calculate possible final price range
+    const minFinalPrice = selectedWine.customPrice * minHagglingFactor * selectedOrderType.priceMultiplier;
+    const maxFinalPrice = selectedWine.customPrice * maxHagglingFactor * selectedOrderType.priceMultiplier;
+    
+    return {
+        priceDifference,
+        negotiatedPrice,
+        finalPrice,
+        randomFactor, // Haggling factor
+        minHagglingFactor,
+        maxHagglingFactor,
+        minFinalPrice,
+        maxFinalPrice,
+        priceMultiplier: selectedOrderType.priceMultiplier
+    };
+}
+
 // Generate a random wine order based on available inventory and company prestige
 export function generateWineOrder() {
     // Get all bottled wines from inventory that have custom prices set
@@ -302,120 +377,108 @@ export function generateWineOrder() {
         return;
     }
 
-    const orderTypes = {
-        "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
-        "Engross Order": { amountMultiplier: 12, priceMultiplier: 0.85 }
-    };
-
-    // Instead of pure random selection, we'll weight the probability based on price attractiveness
-    const wineChances = [];
-    let totalWeight = 0;
+    const orderTypeKeys = Object.keys(WINE_ORDER_TYPES);
     
-    // Calculate weights for each wine based on price deviation
-    for (const wine of bottledWines) {
-        const basePrice = calculateWinePrice(wine.quality, wine);
-        if (basePrice <= 0) continue;
+    // Get the selected wines that passed the chance check in shouldGenerateWineOrder
+    const selectedWineInfos = shouldGenerateWineOrder.selectedWines || [];
+    
+    if (selectedWineInfos.length === 0) {
+        console.log('[Wine Order] No wines selected for orders');
+        return;
+    }
+    
+    console.log(`[Wine Order] Generating ${selectedWineInfos.length} wine orders`);
+    
+    // Process each selected wine to create an order
+    selectedWineInfos.forEach(wineInfo => {
+        // Find the matching wine in inventory
+        const selectedWine = bottledWines.find(wine => 
+            wine.resource.name === wineInfo.name &&
+            wine.vintage === wineInfo.vintage &&
+            Math.abs(wine.quality - wineInfo.quality) < 0.001 // Float comparison
+        );
         
-        const deviation = (wine.customPrice - basePrice) / basePrice;
-        // Higher weight for wines priced lower than base price
-        let weight = 1.0;
-        
-        if (deviation < 0) {
-            // Lower price = higher chance (up to 2x)
-            weight = 1 + Math.min(Math.abs(deviation) * 2, 1.0);
-        } else {
-            // Higher price = lower chance (down to 0.2x)
-            weight = Math.max(0.2, 1 - Math.min(deviation, 0.8));
+        if (!selectedWine) {
+            console.log(`[Wine Order] Could not find matching wine for ${wineInfo.name} (${wineInfo.vintage})`);
+            return;
         }
         
-        wineChances.push({
-            wine,
-            weight
+        // Select random order type for this wine
+        const selectedOrderTypeKey = orderTypeKeys[Math.floor(Math.random() * orderTypeKeys.length)];
+        
+        // Calculate base price for reference
+        const calculatedBasePrice = calculateWinePrice(selectedWine.quality, selectedWine);
+        
+        // Calculate order amount and log details
+        const amountCalculation = calculateOrderAmount(selectedWine, calculatedBasePrice, selectedOrderTypeKey);
+        
+        // Use the extracted function for price negotiation
+        const priceCalculation = negotiateOrderPrice(selectedWine, calculatedBasePrice, selectedOrderTypeKey);
+        
+        // Use console groups for better organization
+        console.group(`[Wine Order] ${selectedWine.resource.name}, Vintage ${selectedWine.vintage}`);
+        
+        // Basic wine info with pricing 
+        logTable("Wine Information", {
+            Wine: selectedWine.resource.name,
+            Vintage: selectedWine.vintage,
+            Quality: `${(selectedWine.quality * 100).toFixed(1)}%`,
+            "Base Price": `€${calculatedBasePrice.toFixed(2)}`,
+            "Custom Price": `€${selectedWine.customPrice.toFixed(2)}`,
+            "Price Ratio": `${priceCalculation.priceDifference.toFixed(2)}x`
         });
-        totalWeight += weight;
-    }
-    
-    // Select a wine based on weighted probability
-    let randomWeight = Math.random() * totalWeight;
-    let selectedWine = bottledWines[0]; // Default fallback
-    
-    for (const entry of wineChances) {
-        randomWeight -= entry.weight;
-        if (randomWeight <= 0) {
-            selectedWine = entry.wine;
-            break;
+        
+        // Price adjustment explanation
+        if (priceCalculation.priceDifference < 1) {
+            console.log(`Lower price: increasing order amount by ${((amountCalculation.amountAdjustment - 1) * 100).toFixed(1)}%`);
+        } else if (priceCalculation.priceDifference > 1) {
+            console.log(`Higher price: decreasing order amount by ${((1 - amountCalculation.amountAdjustment) * 100).toFixed(1)}%`);
+        } else {
+            console.log(`Price matches base price, no adjustment needed`);
         }
-    }
 
-    const orderTypeKeys = Object.keys(orderTypes);
-    const selectedOrderTypeKey = orderTypeKeys[Math.floor(Math.random() * orderTypeKeys.length)];
-    const selectedOrderType = orderTypes[selectedOrderTypeKey];
+        // Haggling and amount details
+        logTable("Order Calculation", {
+            "Haggling Factor": `${priceCalculation.randomFactor.toFixed(2)}x`,
+            "Negotiated Price": `€${priceCalculation.negotiatedPrice.toFixed(2)}`,
+            "Order Type": selectedOrderTypeKey,
+            "Type Multiplier": `${priceCalculation.priceMultiplier}x`,
+            "Final Price": `€${priceCalculation.finalPrice.toFixed(2)}`,
+            "Amount": amountCalculation.finalAmount
+        }, true); // collapsed
 
-    // Calculate base price for reference
-    const calculatedBasePrice = calculateWinePrice(selectedWine.quality, selectedWine);
+        // Amount calculation details
+        logTable("Amount Calculation Details", {
+            "Base Factor": `${amountCalculation.randomBaseFactor.toFixed(2)} (range: ${amountCalculation.minBaseFactor.toFixed(1)}-${amountCalculation.maxBaseFactor.toFixed(1)})`,
+            "Prestige Effect": `${amountCalculation.prestigeEffect.toFixed(2)} (from prestige ${selectedWine.fieldPrestige.toFixed(2)})`,
+            "Price Adjustment": amountCalculation.amountAdjustment.toFixed(2),
+            "Base Amount": `${amountCalculation.baseAmount} (range: ${amountCalculation.minPossibleBaseAmount}-${amountCalculation.maxPossibleBaseAmount})`,
+            "Final Amount": amountCalculation.finalAmount
+        }, true); // collapsed
+        
+        console.groupEnd();
+        
+        const finalAmount = amountCalculation.finalAmount;
 
-    console.log(`[Wine Order] Selected wine: ${selectedWine.resource.name}, Vintage: ${selectedWine.vintage}, Quality: ${(selectedWine.quality * 100).toFixed(1)}%`);
-    console.log(`[Wine Order] Base price calculation: €${calculatedBasePrice.toFixed(2)}, Custom price set: €${selectedWine.customPrice.toFixed(2)}`);
+        const newOrder = {
+            type: selectedOrderTypeKey,
+            resourceName: selectedWine.resource.name,
+            fieldName: selectedWine.fieldName,
+            vintage: selectedWine.vintage,
+            quality: selectedWine.quality,
+            amount: finalAmount,
+            wineOrderPrice: priceCalculation.finalPrice
+        };
+
+        addWineOrder(newOrder);
+        addConsoleMessage(
+            `Created ${newOrder.type} for ${newOrder.amount} bottles of ` +
+            `${newOrder.resourceName}, Vintage ${newOrder.vintage}, ` +
+            `Quality ${(newOrder.quality * 100).toFixed(0)}%, ` +
+            `Price €${newOrder.wineOrderPrice.toFixed(2)}.`
+        );
+    });
     
-    // Calculate price difference ratio
-    const priceDifference = selectedWine.customPrice / calculatedBasePrice;
-    console.log(`[Wine Order] Price difference ratio: ${priceDifference.toFixed(2)} (custom/base)`);
-
-    // Calculate order amount and log details
-    const amountCalculation = calculateOrderAmount(selectedWine, calculatedBasePrice, selectedOrderTypeKey);
-    
-    // Price adjustment log
-    if (priceDifference < 1) {
-        console.log(`[Wine Order] Lower price: increasing order amount by ${((amountCalculation.amountAdjustment - 1) * 100).toFixed(1)}%`);
-    } else if (priceDifference > 1) {
-        console.log(`[Wine Order] Higher price: decreasing order amount by ${((1 - amountCalculation.amountAdjustment) * 100).toFixed(1)}%`);
-    } else {
-        console.log(`[Wine Order] Price matches base price, no adjustment needed`);
-    }
-
-    // Order price will typically be somewhat lower than the custom price (haggling)
-    const minHagglingFactor = 0.8;
-    const maxHagglingFactor = 1.1;
-    const randomFactor = minHagglingFactor + Math.random() * (maxHagglingFactor - minHagglingFactor);
-    const orderPrice = selectedWine.customPrice * randomFactor;
-    console.log(`[Wine Order] Haggling factor: ${randomFactor.toFixed(2)}, Negotiated price: €${orderPrice.toFixed(2)} (before type adjustment)`);
-    console.log(`[Wine Order] Haggling range: €${(selectedWine.customPrice * minHagglingFactor).toFixed(2)} to €${(selectedWine.customPrice * maxHagglingFactor).toFixed(2)}`);
-
-    // Log amount calculation details
-    console.log(`[Wine Order] Amount calculation:`);
-    console.log(`  - Random base factor: ${amountCalculation.randomBaseFactor.toFixed(2)} (range: ${amountCalculation.minBaseFactor.toFixed(1)}-${amountCalculation.maxBaseFactor.toFixed(1)})`);
-    console.log(`  - Field prestige effect: ${amountCalculation.prestigeEffect.toFixed(2)} (from prestige ${selectedWine.fieldPrestige.toFixed(2)}, range: ${amountCalculation.minPrestigeEffect.toFixed(1)}-${amountCalculation.maxPrestigeEffect.toFixed(1)})`);
-    console.log(`  - Price difference adjustment: ${amountCalculation.amountAdjustment.toFixed(2)}`);
-    console.log(`  - Base amount before type multiplier: ${amountCalculation.baseAmount} (possible range: ${amountCalculation.minPossibleBaseAmount}-${amountCalculation.maxPossibleBaseAmount})`);
-
-    const finalAmount = amountCalculation.finalAmount;
-    const finalPrice = orderPrice * selectedOrderType.priceMultiplier;
-
-    // Calculate possible final price range
-    const minFinalPrice = selectedWine.customPrice * minHagglingFactor * selectedOrderType.priceMultiplier;
-    const maxFinalPrice = selectedWine.customPrice * maxHagglingFactor * selectedOrderType.priceMultiplier;
-
-    console.log(`[Wine Order] Final order: type=${selectedOrderTypeKey} (multipliers: amount=${selectedOrderType.amountMultiplier}, price=${selectedOrderType.priceMultiplier})`);
-    console.log(`[Wine Order] Final amount: ${finalAmount}`);
-    console.log(`[Wine Order] Final price: €${finalPrice.toFixed(2)} (possible range: €${minFinalPrice.toFixed(2)}-€${maxFinalPrice.toFixed(2)})`);
-
-    const newOrder = {
-        type: selectedOrderTypeKey,
-        resourceName: selectedWine.resource.name,
-        fieldName: selectedWine.fieldName,
-        vintage: selectedWine.vintage,
-        quality: selectedWine.quality,
-        amount: finalAmount,
-        wineOrderPrice: finalPrice
-    };
-
-    addWineOrder(newOrder);
-    addConsoleMessage(
-        `Created ${newOrder.type} for ${newOrder.amount} bottles of ` +
-        `${newOrder.resourceName}, Vintage ${newOrder.vintage}, ` +
-        `Quality ${(newOrder.quality * 100).toFixed(0)}%, ` +
-        `Price €${newOrder.wineOrderPrice.toFixed(2)}.`
-    );
     updateAllDisplays();
 }
 
@@ -514,18 +577,22 @@ export function shouldGenerateWineOrder() {
         baseChance = 0.5 + (Math.atan((companyPrestige - 100) / 200) / Math.PI) * (0.99 - 0.5);
     }
 
-    console.log(`[Order Generation] Base chance calculation: ${(baseChance * 100).toFixed(1)}% (based on company prestige ${companyPrestige.toFixed(1)})`);
-    
     // Apply diminishing returns factor based on number of wines
     // This prevents too many orders when player has many wines
     const diminishingFactor = Math.max(0.1, 1 / Math.sqrt(winesWithPrices.length));
-    console.log(`[Order Generation] Diminishing factor: ${diminishingFactor.toFixed(2)} (based on ${winesWithPrices.length} wines available)`);
+
+    console.group(`[Order Generation] Weekly Wine Order Check`);
+    console.log(`Base chance: ${(baseChance * 100).toFixed(1)}% (company prestige: ${companyPrestige.toFixed(1)})`);
+    console.log(`Diminishing factor: ${diminishingFactor.toFixed(2)} (${winesWithPrices.length} wines available)`);
     
-    // Track if any wine gets an order
+    // Track all wines that get orders
     let anyWineGetsOrder = false;
-    let selectedWineInfo = null;
+    shouldGenerateWineOrder.selectedWines = [];
     
-    // Instead of averaging deviation, check each wine individually
+    // Prepare data for table
+    const wineChanceData = [];
+    
+    // Check each wine individually
     for (const wine of winesWithPrices) {
         const basePrice = calculateWinePrice(wine.quality, wine);
         if (basePrice <= 0) continue;
@@ -567,25 +634,47 @@ export function shouldGenerateWineOrder() {
         const randomValue = Math.random();
         const wineGetsOrder = randomValue < wineChance;
         
-        console.log(`[Order Generation] Wine ${wine.resource.name} (${wine.vintage}): Final chance: ${(wineChance * 100).toFixed(1)}%, Random value: ${(randomValue * 100).toFixed(1)}%, Will generate: ${wineGetsOrder}`);
+        // Add to data table
+        wineChanceData.push({
+            "Wine": wine.resource.name,
+            "Vintage": wine.vintage,
+            "Quality": `${(wine.quality * 100).toFixed(0)}%`,
+            "Price Diff": `${(deviation * 100).toFixed(1)}%`,
+            "Price Modifier": `${priceModifier.toFixed(2)}x`,
+            "Final Chance": `${(wineChance * 100).toFixed(1)}%`,
+            "Roll": `${(randomValue * 100).toFixed(1)}%`,
+            "Order": wineGetsOrder ? "✅" : "❌"
+        });
         
-        // If this wine gets an order, we'll return true
-        // We remember the first wine that gets an order
-        if (wineGetsOrder && !anyWineGetsOrder) {
+        // If this wine gets an order, add it to the selected wines list
+        if (wineGetsOrder) {
             anyWineGetsOrder = true;
-            selectedWineInfo = {
+            shouldGenerateWineOrder.selectedWines.push({
                 name: wine.resource.name,
                 vintage: wine.vintage,
-                quality: wine.quality
-            };
+                quality: wine.quality,
+                fieldName: wine.fieldName
+            });
         }
     }
     
-    if (selectedWineInfo) {
-        console.log(`[Order Generation] Order will be generated for ${selectedWineInfo.name} (${selectedWineInfo.vintage})`);
+    // Display the table with all wine chances
+    if (wineChanceData.length > 0) {
+        console.table(wineChanceData);
     } else {
-        console.log(`[Order Generation] No orders will be generated this week`);
+        console.log("No wines with prices found");
     }
+    
+    // Log the results
+    if (shouldGenerateWineOrder.selectedWines.length > 0) {
+        console.log(`${shouldGenerateWineOrder.selectedWines.length} orders will be generated:`, 
+            shouldGenerateWineOrder.selectedWines.map(wine => `${wine.name} (${wine.vintage})`).join(', ')
+        );
+    } else {
+        console.log(`No orders will be generated this week`);
+    }
+    
+    console.groupEnd();
     
     return anyWineGetsOrder;
 }

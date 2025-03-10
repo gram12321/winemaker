@@ -4,6 +4,7 @@ import { inventoryInstance } from '/js/resource.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 import { updateAllDisplays } from '/js/displayManager.js';
+import { WINE_ORDER_TYPES } from '/js/constants/constants.js';
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
@@ -292,8 +293,7 @@ function createSalesOverlayHTML() {
                     <div class="filters d-flex gap-2">
                         <select id="type-filter" class="form-control form-control-sm d-inline-block w-auto">
                             <option value="">All Types</option>
-                            <option value="Private Order">Private Order</option>
-                            <option value="Engross Order">Engross Order</option>
+                            ${Object.keys(WINE_ORDER_TYPES).map(type => `<option value="${type}">${type}</option>`).join('')}
                         </select>
                         <select id="resource-filter" class="form-control form-control-sm d-inline-block w-auto">
                             <option value="">All Wines</option>

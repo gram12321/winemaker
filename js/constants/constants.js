@@ -1,14 +1,20 @@
-// Work Constants
-export const BASE_WORK_UNITS = 50; // work units per standard week
-export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
+// ---- Wine Sales Constants -----
+export const WINE_ORDER_TYPES = {
+    "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
+    "Engross Order": { amountMultiplier: 12, priceMultiplier: 0.85 }
+};
 
-// Farmland Constants 
+// ---- Farmland Constants ----
 export const DEFAULT_FARMLAND_HEALTH = 0.5; // 50% is the default/reset value
 export const ORGANIC_YEARS_REQUIRED = 3; // years needed for organic certification
 
-// Staff wage constants
+// ---- Staff wage constants ----
 export const BASE_WEEKLY_WAGE = 500; // Base weekly wage for lowest skill
 export const SKILL_WAGE_MULTIPLIER = 1000; // Multiplier for skills
+
+// ---- Work Constants ----
+export const BASE_WORK_UNITS = 50; // work units per standard week
+export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
 
 // Define density-based tasks
 export const DENSITY_BASED_TASKS = ['PLANTING', 'UPROOTING', 'HARVESTING'];
