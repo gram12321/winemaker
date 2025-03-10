@@ -227,6 +227,8 @@ function displayFilteredOrders(filteredOrders) {
         sellButton.addEventListener('click', () => {
             const orderIndex = parseInt(sellButton.dataset.originalIndex);
             if (sellOrderWine(orderIndex)) {
+                // Refresh the wine orders display after successful sale
+                displayWineOrders();
                 updateAllDisplays();
             }
         });

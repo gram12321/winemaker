@@ -435,39 +435,60 @@ export function sellOrderWine(orderIndex) {
         item.quality === order.quality
     );
 
-    if (!bottledWine || bottledWine.amount < order.amount) {
-        addConsoleMessage('Insufficient inventory to complete this order.');
+    // If no matching wine or completely out of inventory, reject the order
+    if (!bottledWine || bottledWine.amount <= 0) {
+        addConsoleMessage('No matching inventory available to fulfill this order.');
         return false;
     }
 
-    // Calculate and use the final selling price from the order
-    const totalSellingPrice = order.wineOrderPrice * order.amount;
+    // Calculate how many bottles we can actually sell
+    const sellAmount = Math.min(order.amount, bottledWine.amount);
+    
+    // Calculate the actual selling price based on available inventory
+    const totalSellingPrice = order.wineOrderPrice * sellAmount;
+    
     console.log(`[Wine Sale] Order details:`, {
         wineOrderPrice: order.wineOrderPrice,
-        amount: order.amount,
+        requestedAmount: order.amount,
+        availableAmount: bottledWine.amount,
+        sellingAmount: sellAmount,
         total: totalSellingPrice
     });
 
     if (inventoryInstance.removeResource(
         bottledWine.resource, 
-        order.amount, 
+        sellAmount, 
         'Bottles', 
         bottledWine.vintage, 
         bottledWine.storage
     )) {
+        // Determine if this is a partial or full order
+        const isPartial = sellAmount < order.amount;
+        
         addConsoleMessage(
-            `Sold ${order.amount} bottles of ${order.resourceName}, ` +
+            `Sold ${sellAmount} bottles of ${order.resourceName}, ` +
             `Vintage ${order.vintage}, ` +
             `Quality ${(order.quality * 100).toFixed(0)}% ` +
-            `for €${totalSellingPrice.toFixed(2)}.`
+            `for €${totalSellingPrice.toFixed(2)}` +
+            (isPartial ? ` (partial order - ${sellAmount}/${order.amount} bottles)` : "")
         );
 
         addTransaction('Income', 'Wine Sale', totalSellingPrice);
         setPrestigeHit(getPrestigeHit() + totalSellingPrice / 10000);
         calculateRealPrestige();
 
+        // Remove the order after successful transaction
+        if (!removeWineOrder(orderIndex)) {
+            addConsoleMessage('Error removing wine order.');
+            return false;
+        }
+
+        // Save inventory after successful transaction
         inventoryInstance.save();
+        
+        // Update the wine cellar display
         displayWineCellarInventory();
+        
         return true;
     }
     return false;
