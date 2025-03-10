@@ -101,11 +101,6 @@ function createWinepediaOverlayHTML() {
     `;
 }
 
-/**
- * Simple function to refresh importer relationships in the table
- * Only updates the relationship cells without modifying the table structure
- * or loading importers from storage
- */
 export function refreshImporterRelationships() {
     // Check if the importers table exists and is visible
     const importersTable = document.getElementById('importers-table');
@@ -145,15 +140,8 @@ function formatRelationship(value) {
     const colorClass = getColorClass(normalizedValue);
     
     // Round to one decimal place
-    const formattedValue = value ? value.toFixed(1) : '0.0';
-    
-    // Return with stars based on value
-    let stars = '';
-    if (value >= 100) stars = ' ★★★';
-    else if (value >= 50) stars = ' ★★';
-    else if (value >= 20) stars = ' ★';
-    
-    return `<span class="${colorClass}">${formattedValue}${stars}</span>`;
+    const formattedValue = value ? value.toFixed(1) : '0.0';   
+    return `<span class="${colorClass}">${formattedValue}</span>`;
 }
 
 function createImportersContent() {
