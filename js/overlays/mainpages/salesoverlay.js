@@ -1,5 +1,6 @@
 import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
 import { calculateWinePrice, sellOrderWine } from '/js/sales.js';
+import { loadPendingContracts, fulfillContract, rejectContract } from '/js/contracts.js';
 import { inventoryInstance } from '/js/resource.js';
 import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
@@ -27,6 +28,11 @@ function setupSalesOverlayEventListeners(overlay) {
             overlay.querySelectorAll('.sales-section').forEach(section => {
                 section.style.display = section.id === `${target}-section` ? 'block' : 'none';
             });
+            
+            // If switching to contracts tab, load the contracts
+            if (target === 'contracts') {
+                displayContractsTab();
+            }
         });
     });
 
@@ -319,18 +325,136 @@ function createSalesOverlayHTML() {
 
             <!-- Contracts Section -->
             <section id="contracts-section" class="sales-section overlay-section card mb-4" style="display: none;">
-                <img src="/assets/pic/contract_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Contracts" onerror="this.src='/assets/pic/sales_dalle.webp'">
+                <img src="/assets/pic/sales_dalle.webp" class="card-img-top process-image mx-auto d-block" alt="Wine Contracts">
                 <div class="card-header text-white d-flex justify-content-between align-items-center">
-                    <h3 class="h5 mb-0">Wine Contracts</h3>
+                    <h3 class="h5 mb-0">Importer Contracts</h3>
                 </div>
-                <div class="card-body">
-                    <div class="text-center py-5">
-                        <h4>Coming Soon</h4>
-                        <p class="mb-4">Wine contracts will allow you to secure long-term agreements with importers for stable income.</p>
-                        <p><i class="fas fa-file-contract fa-4x text-muted"></i></p>
-                    </div>
+                <div class="card-body" id="contracts-tab-content">
+                    <!-- Contracts content will be loaded here -->
                 </div>
             </section>
         </div>
     `;
+}
+
+// Function to display the contracts tab content
+export function displayContractsTab() {
+    const contractsTabContent = document.getElementById('contracts-tab-content');
+    if (!contractsTabContent) return;
+    
+    // Clear existing content
+    contractsTabContent.innerHTML = '';
+    
+    // Load pending contracts
+    const pendingContracts = loadPendingContracts();
+    
+    if (pendingContracts.length === 0) {
+        contractsTabContent.innerHTML = `
+            <div class="alert alert-info text-center">
+                <p>No pending contracts available.</p>
+                <p class="small mt-2">Contracts are offered by importers based on your reputation and relationship. Improve your standing by selling quality wines!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Create section for pending contracts
+    const contractsTable = document.createElement('div');
+    contractsTable.className = 'table-responsive';
+    contractsTable.innerHTML = `
+        <table class="table overlay-table">
+            <thead>
+                <tr>
+                    <th>Importer</th>
+                    <th>Wine</th>
+                    <th>Details</th>
+                    <th>Amount</th>
+                    <th>Price/Bottle</th>
+                    <th>Total Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="contracts-table-body">
+                <!-- Contract rows will be inserted here -->
+            </tbody>
+        </table>
+    `;
+    
+    contractsTabContent.appendChild(contractsTable);
+    const tableBody = document.getElementById('contracts-table-body');
+    
+    // Populate the table with contracts
+    pendingContracts.forEach((contract, index) => {
+        const row = document.createElement('tr');
+        
+        // No images - just use text badges instead of potentially missing icons
+        row.innerHTML = `
+            <td>
+                <span class="badge bg-secondary">${contract.importerType}</span><br>
+                <strong>${contract.importerCountry}</strong>
+            </td>
+            <td><strong>${contract.resourceName}</strong></td>
+            <td>
+                Vintage: ${contract.vintage}<br>
+                Quality: ${(contract.quality * 100).toFixed(0)}%<br>
+                Field: ${contract.fieldName || "Unknown"}
+            </td>
+            <td>${contract.amount} bottles</td>
+            <td>€${contract.contractPrice.toFixed(2)}</td>
+            <td>€${contract.totalValue.toFixed(2)}</td>
+            <td>
+                <button class="btn btn-success btn-sm mb-2 w-100 fulfill-contract-btn" data-index="${index}">Fulfill</button>
+                <button class="btn btn-danger btn-sm w-100 reject-contract-btn" data-index="${index}">Reject</button>
+            </td>
+        `;
+        
+        // Add event handlers directly to buttons
+        const fulfillBtn = row.querySelector('.fulfill-contract-btn');
+        const rejectBtn = row.querySelector('.reject-contract-btn');
+        
+        fulfillBtn.addEventListener('click', () => {
+            if (fulfillContract(index)) {
+                displayContractsTab();
+            }
+        });
+        
+        rejectBtn.addEventListener('click', () => {
+            if (rejectContract(index)) {
+                displayContractsTab();
+            }
+        });
+        
+        tableBody.appendChild(row);
+    });
+    
+    // Show maximum contracts info
+    contractsTabContent.insertAdjacentHTML('afterbegin', `
+        <div class="alert alert-secondary mb-3">
+            <strong>Contract Limit:</strong> ${pendingContracts.length}/3 pending contracts
+        </div>
+    `);
+}
+
+// Setup event listeners for contracts tab
+function setupSalesTabs() {
+    const tabs = document.querySelectorAll('.sales-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.dataset.view;
+            
+            // Update active tab
+            document.querySelectorAll('.sales-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            
+            // Show/hide content sections
+            document.querySelectorAll('.sales-section').forEach(section => {
+                section.style.display = section.id === `${target}-section` ? 'block' : 'none';
+            });
+            
+            // If switching to contracts tab, load the contracts
+            if (target === 'contracts') {
+                displayContractsTab();
+            }
+        });
+    });
 }

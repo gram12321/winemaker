@@ -64,6 +64,21 @@ export const PRICE_NEGOTIATION = {
     MAX_HAGGLING_FACTOR: 1.4   // Maximum price multiplier after haggling (140% of set price)
 };
 
+/**
+ * Wine contract generation constants
+ * 
+ * CONTRACT_RELATIONSHIP_THRESHOLD: Minimum relationship needed to get contracts
+ * BASE_CONTRACT_CHANCE: Base chance (5%) for an eligible importer to offer a contract
+ * RELATIONSHIP_MIDPOINT: Relationship value where chance becomes 50%
+ * MAX_CONTRACT_CHANCE: Maximum possible contract chance (80%)
+ */
+export const CONTRACT_GENERATION = {
+    MIN_RELATIONSHIP_THRESHOLD: 0.1,  // Lowered threshold to make contracts more likely to appear
+    BASE_CONTRACT_CHANCE: 0.05,      // 5% base chance
+    RELATIONSHIP_MIDPOINT: 20,       // 50% chance at relationship 20
+    MAX_CONTRACT_CHANCE: 0.8,        // 80% maximum chance
+};
+
 // ---- Farmland Constants ----
 export const DEFAULT_FARMLAND_HEALTH = 0.5; // 50% is the default/reset value
 export const ORGANIC_YEARS_REQUIRED = 3; // years needed for organic certification

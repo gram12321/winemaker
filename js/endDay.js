@@ -5,6 +5,7 @@ import { processRecurringTransactions } from './finance.js';
 import { calculateLandvalue, calculateFarmlandPrestige } from './farmland.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
+import { generateImporterContracts } from './contracts.js';
 import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, updateFarmland, getPrestigeHit, setPrestigeHit, loadTasks, saveTasks } from './database/adminFunctions.js';
 import taskManager from './taskManager.js';
 import { performPlanting } from './overlays/plantingOverlay.js';
@@ -57,6 +58,20 @@ export function incrementWeek() {
 
     if (shouldGenerateWineOrder()) {
         generateWineOrder();
+    }
+    
+    // Check for importer contracts - less frequent than regular orders
+    // Simplified: only one roll in endDay.js, no second roll in contracts.js
+    const contractRoll = Math.random();
+    const contractChance = 0.3; // 30% chance per week
+    console.log(`[Contract Generation] Rolling for contract generation: ${(contractRoll * 100).toFixed(1)}% (needs < ${(contractChance * 100).toFixed(1)}%)`);
+    
+    if (contractRoll < contractChance) {
+        console.log(`[Contract Generation] Roll successful, generating contract...`);
+        const contractsGenerated = generateImporterContracts();
+        console.log(`[Contract Generation] Contract generated: ${contractsGenerated ? "Yes" : "No"}`);
+    } else {
+        console.log(`[Contract Generation] Roll failed, no contract generated this week`);
     }
 
     processRecurringTransactions(week);
