@@ -1,7 +1,7 @@
 // Import all necessary display functions
 import { renderCompanyInfo } from './company.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
-import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
+import { displayWineCellarInventory, displayWineOrders, displayContractsTab } from './overlays/mainpages/salesoverlay.js';
 import { displayStaff } from './staff.js';
 import { updateBuildingCards, updateBuildButtonStates } from './overlays/mainpages/buildingsoverlay.js';
 import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
@@ -16,8 +16,6 @@ import { refreshImporterRelationships } from './overlays/mainpages/winepediaover
 
 // Central function to update all displays
 export function updateAllDisplays() {
-
-    // Import all necessary display functions
     try {
         // Update importer relationships based on current company prestige
         updateAllImporterRelationships();
@@ -41,6 +39,17 @@ export function updateAllDisplays() {
         }
         if (typeof displayWineOrders === 'function' && document.getElementById('wine-orders-table-body')) {
             displayWineOrders();
+        }
+        
+        // Contracts display - check if the tab content exists AND is visible
+        const contractsTabContent = document.getElementById('contracts-tab-content');
+        if (typeof displayContractsTab === 'function') {
+            if (contractsTabContent) {
+                const isVisible = contractsTabContent.closest('.sales-section')?.style.display !== 'none';
+                if (isVisible) {
+                    displayContractsTab();
+                }
+            }
         }
 
         // Staff display

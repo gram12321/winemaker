@@ -341,14 +341,9 @@ function createSalesOverlayHTML() {
 // Function to display the contracts tab content
 export function displayContractsTab() {
     const contractsTabContent = document.getElementById('contracts-tab-content');
-    if (!contractsTabContent) return;
-    
-    // Clear existing content
     contractsTabContent.innerHTML = '';
-    
-    // Load pending contracts
     const pendingContracts = loadPendingContracts();
-    
+
     if (pendingContracts.length === 0) {
         contractsTabContent.innerHTML = `
             <div class="alert alert-info text-center">
@@ -393,8 +388,7 @@ export function displayContractsTab() {
                 <strong>${contract.importerCountry}</strong>
             </td>
             <td>
-                <strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong><br>
-                <small>Example: ${contract.resourceName}, Vintage ${contract.vintage}</small>
+                <strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong>
             </td>
             <td>${contract.amount} bottles</td>
             <td>€${contract.contractPrice.toFixed(2)}</td>

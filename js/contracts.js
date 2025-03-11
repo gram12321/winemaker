@@ -93,27 +93,22 @@ export function generateImporterContracts() {
     // Base price per bottle (from the wine's custom price)
     // Contracts use calculated base price with importer's preferential rate
     const calculatedBasePrice = calculateWinePrice(selectedWine.quality, selectedWine, true);
-    const contractPrice = calculatedBasePrice * selectedImporter.buyPriceMultiplicator;
+    const contractPrice = selectedWine.customPrice * selectedImporter.buyPriceMultiplicator;  // FIXED: Use custom price instead of calculated base price
     
     // Create contract object
     const contract = {
         type: "Contract",
-        resourceName: selectedWine.resource.name, // Example wine only - user will select actual wine
-        fieldName: selectedWine.fieldName,        // Example wine only - user will select actual wine
-        vintage: selectedWine.vintage,            // Example wine only - user will select actual wine
-        quality: selectedWine.quality,            // Example wine only - user will select actual wine
         amount: contractAmount,
         contractPrice: contractPrice,
         totalValue: contractPrice * contractAmount,
         importerCountry: selectedImporter.country,
         importerType: selectedImporter.type,
-        importerId: importers.indexOf(selectedImporter), // Store importer index for reference
-        // Add contract requirements
+        importerId: importers.indexOf(selectedImporter),
         requirements: {
             description: "Quality wine",
-            minQuality: 0.1 // Minimum quality requirement
+            minQuality: 0.1
         },
-        minQuality: 0.1 // Direct access for simple UI
+        minQuality: 0.1
     };
     
     // Save this contract to localStorage
@@ -121,6 +116,9 @@ export function generateImporterContracts() {
     
     console.log(`[Contracts] Contract generated: ${contractAmount} bottles of ${selectedWine.resource.name} at €${contractPrice.toFixed(2)}/bottle (Total: €${contract.totalValue.toFixed(2)})`);
     console.groupEnd();
+    
+    // Update displays after generating contract
+    updateAllDisplays();
     
     return true;
 }
@@ -132,6 +130,23 @@ export function saveNewContract(contract) {
     const currentContracts = loadPendingContracts();
     currentContracts.push(contract);
     localStorage.setItem('pendingContracts', JSON.stringify(currentContracts));
+    
+    // Try to update the display directly if the contracts tab is visible
+    try {
+        const contractsSection = document.getElementById('contracts-section');
+        if (contractsSection && contractsSection.style.display !== 'none') {
+            const contractsTabContent = document.getElementById('contracts-tab-content');
+            if (contractsTabContent) {
+                import('./overlays/mainpages/salesoverlay.js').then(module => {
+                    if (typeof module.displayContractsTab === 'function') {
+                        module.displayContractsTab();
+                    }
+                });
+            }
+        }
+    } catch (err) {
+        console.debug('Error updating contracts tab:', err);
+    }
 }
 
 /**
@@ -139,15 +154,7 @@ export function saveNewContract(contract) {
  */
 export function loadPendingContracts() {
     const savedContracts = localStorage.getItem('pendingContracts');
-    if (savedContracts) {
-        try {
-            return JSON.parse(savedContracts);
-        } catch (error) {
-            console.error("Failed to parse pending contracts from localStorage.", error);
-            return [];
-        }
-    }
-    return [];
+    return savedContracts ? JSON.parse(savedContracts) : [];
 }
 
 /**
@@ -325,6 +332,8 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
     
     // Save inventory after successful transaction
     inventoryInstance.save();
+    
+    // Update all displays after contract fulfillment
     updateAllDisplays();
     
     return true;
@@ -355,5 +364,6 @@ export function rejectContract(contractIndex) {
         `${contract.amount} bottles of ${contract.resourceName}.`
     );
     
+
     return true;
 }
