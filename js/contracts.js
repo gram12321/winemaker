@@ -98,16 +98,22 @@ export function generateImporterContracts() {
     // Create contract object
     const contract = {
         type: "Contract",
-        resourceName: selectedWine.resource.name,
-        fieldName: selectedWine.fieldName,
-        vintage: selectedWine.vintage,
-        quality: selectedWine.quality,
+        resourceName: selectedWine.resource.name, // Example wine only - user will select actual wine
+        fieldName: selectedWine.fieldName,        // Example wine only - user will select actual wine
+        vintage: selectedWine.vintage,            // Example wine only - user will select actual wine
+        quality: selectedWine.quality,            // Example wine only - user will select actual wine
         amount: contractAmount,
         contractPrice: contractPrice,
         totalValue: contractPrice * contractAmount,
         importerCountry: selectedImporter.country,
         importerType: selectedImporter.type,
-        importerId: importers.indexOf(selectedImporter) // Store importer index for reference
+        importerId: importers.indexOf(selectedImporter), // Store importer index for reference
+        // Add contract requirements
+        requirements: {
+            description: "Quality wine",
+            minQuality: 0.1 // Minimum quality requirement
+        },
+        minQuality: 0.1 // Direct access for simple UI
     };
     
     // Save this contract to localStorage
@@ -215,6 +221,113 @@ export function fulfillContract(contractIndex) {
     }
     
     return false;
+}
+
+/**
+ * Accept a contract using specific selected wines
+ * @param {number} contractIndex - The index of the contract in pending contracts
+ * @param {Array} selectedWines - Array of wines to use for contract
+ * @returns {boolean} - Whether the contract was successfully fulfilled
+ */
+export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
+    const pendingContracts = loadPendingContracts();
+    if (contractIndex < 0 || contractIndex >= pendingContracts.length) {
+        addConsoleMessage('Invalid contract index.');
+        return false;
+    }
+    
+    // Get the contract
+    const contract = pendingContracts[contractIndex];
+    
+    // Calculate total amount of selected wines
+    const totalSelectedAmount = selectedWines.reduce((sum, wine) => sum + wine.amount, 0);
+    
+    // Check if the selected amount matches the contract amount
+    if (totalSelectedAmount !== contract.amount) {
+        addConsoleMessage(`The selected amount (${totalSelectedAmount}) doesn't match the contract requirement (${contract.amount}).`);
+        return false;
+    }
+    
+    // Check if each selected wine meets the contract requirements
+    const invalidWines = selectedWines.filter(wine => wine.quality < (contract.minQuality || 0.1));
+    if (invalidWines.length > 0) {
+        addConsoleMessage(`Some selected wines don't meet the minimum quality requirement of ${(contract.minQuality || 0.1) * 100}%.`);
+        return false;
+    }
+    
+    // Remove the wines from inventory
+    let allRemoved = true;
+    let totalAmount = 0;
+    
+    for (const wine of selectedWines) {
+        const bottledWine = inventoryInstance.items.find(item =>
+            item.resource.name === wine.name &&
+            item.state === 'Bottles' &&
+            item.vintage === wine.vintage &&
+            Math.abs(item.quality - wine.quality) < 0.001 &&
+            item.fieldName === wine.fieldName &&
+            (!wine.storage || item.storage === wine.storage)
+        );
+        
+        if (!bottledWine || bottledWine.amount < wine.amount) {
+            addConsoleMessage(`Not enough inventory of ${wine.name} (${wine.vintage}).`);
+            allRemoved = false;
+            break;
+        }
+        
+        const removed = inventoryInstance.removeResource(
+            bottledWine.resource,
+            wine.amount,
+            'Bottles',
+            bottledWine.vintage,
+            bottledWine.storage
+        );
+        
+        if (!removed) {
+            allRemoved = false;
+            break;
+        }
+        
+        totalAmount += wine.amount;
+    }
+    
+    // If any removal failed, abort the operation
+    if (!allRemoved) {
+        addConsoleMessage('Failed to remove some wines from inventory. Contract not fulfilled.');
+        return false;
+    }
+    
+    // Process payment
+    addTransaction('Income', 'Contract Sale', contract.totalValue);
+    
+    // Remove from pending contracts
+    pendingContracts.splice(contractIndex, 1);
+    localStorage.setItem('pendingContracts', JSON.stringify(pendingContracts));
+    
+    // Update relationship with the importer
+    const importers = loadImporters();
+    if (contract.importerId >= 0 && contract.importerId < importers.length) {
+        // Increase relationship by 2 points when a contract is fulfilled
+        importers[contract.importerId].relationship += 2;
+        saveImporters(importers);
+    }
+    
+    // Increase prestige
+    setPrestigeHit(getPrestigeHit() + contract.totalValue / 10000);
+    calculateRealPrestige();
+    
+    // Add console message
+    addConsoleMessage(
+        `Fulfilled contract from ${contract.importerType} (${contract.importerCountry}) for ` +
+        `${totalAmount} bottles at €${contract.contractPrice.toFixed(2)}/bottle. ` +
+        `Received payment: €${contract.totalValue.toFixed(2)}.`
+    );
+    
+    // Save inventory after successful transaction
+    inventoryInstance.save();
+    updateAllDisplays();
+    
+    return true;
 }
 
 /**

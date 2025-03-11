@@ -6,6 +6,7 @@ import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 import { updateAllDisplays } from '/js/displayManager.js';
 import { WINE_ORDER_TYPES } from '/js/constants/constants.js';
+import { showAssignWineOverlay } from '/js/overlays/assignWineOverlay.js';
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
@@ -366,8 +367,7 @@ export function displayContractsTab() {
             <thead>
                 <tr>
                     <th>Importer</th>
-                    <th>Wine</th>
-                    <th>Details</th>
+                    <th>Requirements</th>
                     <th>Amount</th>
                     <th>Price/Bottle</th>
                     <th>Total Value</th>
@@ -387,23 +387,20 @@ export function displayContractsTab() {
     pendingContracts.forEach((contract, index) => {
         const row = document.createElement('tr');
         
-        // No images - just use text badges instead of potentially missing icons
         row.innerHTML = `
             <td>
                 <span class="badge bg-secondary">${contract.importerType}</span><br>
                 <strong>${contract.importerCountry}</strong>
             </td>
-            <td><strong>${contract.resourceName}</strong></td>
             <td>
-                Vintage: ${contract.vintage}<br>
-                Quality: ${(contract.quality * 100).toFixed(0)}%<br>
-                Field: ${contract.fieldName || "Unknown"}
+                <strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong><br>
+                <small>Example: ${contract.resourceName}, Vintage ${contract.vintage}</small>
             </td>
             <td>${contract.amount} bottles</td>
             <td>€${contract.contractPrice.toFixed(2)}</td>
             <td>€${contract.totalValue.toFixed(2)}</td>
             <td>
-                <button class="btn btn-success btn-sm mb-2 w-100 fulfill-contract-btn" data-index="${index}">Fulfill</button>
+                <button class="btn btn-success btn-sm mb-2 w-100 fulfill-contract-btn" data-index="${index}">Select Wine</button>
                 <button class="btn btn-danger btn-sm w-100 reject-contract-btn" data-index="${index}">Reject</button>
             </td>
         `;
@@ -413,9 +410,8 @@ export function displayContractsTab() {
         const rejectBtn = row.querySelector('.reject-contract-btn');
         
         fulfillBtn.addEventListener('click', () => {
-            if (fulfillContract(index)) {
-                displayContractsTab();
-            }
+            // Show the assign wine overlay instead of directly fulfilling the contract
+            showAssignWineOverlay(contract, index);
         });
         
         rejectBtn.addEventListener('click', () => {
