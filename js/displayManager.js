@@ -1,7 +1,8 @@
 // Import all necessary display functions
 import { renderCompanyInfo } from './company.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
-import { displayWineCellarInventory, displayWineOrders, displayContractsTab } from './overlays/mainpages/salesoverlay.js';
+import { displayWineCellarInventory, displayWineOrders } from './overlays/mainpages/salesoverlay.js';
+import { displayContractsTab } from './overlays/contractstab.js';
 import { displayStaff } from './staff.js';
 import { updateBuildingCards, updateBuildButtonStates } from './overlays/mainpages/buildingsoverlay.js';
 import { populateInventoryTables } from './overlays/mainpages/inventoryoverlay.js';
