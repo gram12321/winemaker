@@ -303,15 +303,3 @@
     height: 48px;
     object-fit: contain;
 }
-
-
-/* Added JavaScript for click handling (needs to be included in your main JS file) */
-document.addEventListener('DOMContentLoaded', function() {
-  const grapeCards = document.querySelectorAll('.grape-card');
-  grapeCards.forEach(card => {
-    card.addEventListener('click', function() {
-      // Replace 'wineinfooverlay' with the actual ID or selector of your overlay
-      document.getElementById('wineinfooverlay').style.display = 'block'; 
-    });
-  });
-});
