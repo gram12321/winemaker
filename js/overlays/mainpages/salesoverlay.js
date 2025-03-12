@@ -6,6 +6,7 @@ import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 import { updateAllDisplays } from '/js/displayManager.js';
 import { WINE_ORDER_TYPES } from '/js/constants/constants.js';
 import { displayContractsTab } from '/js/overlays/contractstab.js';
+import { addConsoleMessage } from '/js/console.js';
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
@@ -148,6 +149,7 @@ function setupEventListeners() {
     newTypeFilter.addEventListener('change', refreshDisplay);
     newResourceFilter.addEventListener('change', refreshDisplay);
 
+    // Setup sorting
     document.querySelectorAll('th[data-sort]').forEach(th => {
         th.addEventListener('click', () => {
             const sortKey = th.dataset.sort;
@@ -160,6 +162,22 @@ function setupEventListeners() {
             refreshDisplay();
         });
     });
+
+    // Add event listeners for bulk action buttons - simplified without filtering
+    const sellAllBtn = document.getElementById('sell-all-btn');
+    const refuseAllBtn = document.getElementById('refuse-all-btn');
+
+    if (sellAllBtn) {
+        sellAllBtn.addEventListener('click', () => {
+            sellAllOrders();
+        });
+    }
+
+    if (refuseAllBtn) {
+        refuseAllBtn.addEventListener('click', () => {
+            refuseAllOrders();
+        });
+    }
 }
 
 function refreshDisplay() {
@@ -168,6 +186,15 @@ function refreshDisplay() {
         orders = sortOrders(orders, currentSortKey, currentSortDirection);
     }
     displayFilteredOrders(orders);
+}
+
+// Add new function to get current filtered and sorted orders
+function getCurrentFilteredOrders() {
+    let orders = filterOrders(currentOrders);
+    if (currentSortKey) {
+        orders = sortOrders(orders, currentSortKey, currentSortDirection);
+    }
+    return orders;
 }
 
 export function displayWineOrders() {
@@ -196,6 +223,12 @@ function displayFilteredOrders(filteredOrders) {
             o.wineOrderPrice === order.wineOrderPrice
         )
     );
+
+    // Only show bulk action buttons if we have orders
+    const bulkActionsContainer = document.getElementById('bulk-actions-container');
+    if (bulkActionsContainer) {
+        bulkActionsContainer.style.display = filteredOrders.length > 0 ? 'flex' : 'none';
+    }
 
     filteredOrders.forEach((order, displayIndex) => {
         const row = document.createElement('tr');
@@ -307,20 +340,27 @@ function createSalesOverlayHTML() {
                     </div>
                 </div>
                 <div class="card-body">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Order Type</th>
-                            <th>Wine</th>
-                            <th>Quality</th>
-                            <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
-                            <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price/Bottle ↕</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="wine-orders-table-body">
-                    </tbody>
-                </table>
+                    <!-- Bulk Action Buttons -->
+                    <div id="bulk-actions-container" class="d-flex justify-content-end mb-3" style="display: none;">
+                        <button class="btn btn-success btn-sm me-2" id="sell-all-btn">Sell All</button>
+                        <button class="btn btn-danger btn-sm" id="refuse-all-btn">Refuse All</button>
+                    </div>
+                    
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Order Type</th>
+                                <th>Wine</th>
+                                <th>Quality</th>
+                                <th data-sort="amount" style="cursor: pointer">Amount ↕</th>
+                                <th data-sort="wineOrderPrice" style="cursor: pointer">Offered Price/Bottle ↕</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wine-orders-table-body">
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <!-- Contracts Section -->
@@ -335,4 +375,59 @@ function createSalesOverlayHTML() {
             </section>
         </div>
     `;
+}
+
+/**
+ * Sell all orders - no filtering
+ */
+function sellAllOrders() {
+    const wineOrders = loadWineOrders();
+    if (wineOrders.length === 0) return;
+    
+    let successCount = 0;
+    let failCount = 0;
+    
+    // Process in reverse order to avoid index shifting issues
+    for (let i = wineOrders.length - 1; i >= 0; i--) {
+        const success = sellOrderWine(i);
+        if (success) {
+            successCount++;
+        } else {
+            failCount++;
+        }
+    }
+    
+    // Report results
+    if (successCount > 0 || failCount > 0) {
+        let message = '';
+        if (successCount > 0) {
+            message += `Successfully sold ${successCount} orders. `;
+        }
+        if (failCount > 0) {
+            message += `Failed to sell ${failCount} orders due to insufficient inventory.`;
+        }
+        addConsoleMessage(message);
+    }
+    
+    // Refresh display
+    displayWineOrders();
+    updateAllDisplays();
+}
+
+/**
+ * Refuse all orders - no filtering
+ */
+function refuseAllOrders() {
+    const wineOrders = loadWineOrders();
+    if (wineOrders.length === 0) return;
+    
+    // Simply clear all orders
+    saveWineOrders([]);
+    
+    // Report results
+    addConsoleMessage(`Refused ${wineOrders.length} orders.`);
+    
+    // Refresh display
+    displayWineOrders();
+    updateAllDisplays();
 }
