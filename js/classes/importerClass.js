@@ -1,5 +1,6 @@
 import { loadImporters, saveImporters } from '../database/adminFunctions.js';
 import { calculateRealPrestige } from '../company.js';
+import { generateImporterName } from '../names.js';
 
 export const IMPORTER_TYPES = {
     PRIVATE: 'Private Importer',
@@ -50,6 +51,7 @@ export class Importer {
         this.purchasingPower = purchasingPower;
         this.wineTradition = wineTradition;
         this.type = type;
+        this.name = generateImporterName(type, country);
         this.winePreferences = [];
         this.buyPriceMultiplicator = this.calculateBuyPriceMultiplicator();
         this.buyAmountMultiplicator = this.calculateBuyAmountMultiplicator();

@@ -209,6 +209,7 @@ function createImportersContent() {
 
     const headers = [
         { label: 'Country', key: 'country' },
+        { label: 'Name', key: 'name' },  // Added name column
         { label: 'Type', key: 'type' },
         { label: 'Market Share', key: 'marketShare', format: (value) => `${value.toFixed(1)}%` },
         { label: 'Purchasing Power', key: 'purchasingPower', format: (value) => `${(value * 100).toFixed(0)}%` },
@@ -244,6 +245,7 @@ function createImportersContent() {
         tableHtml += `
             <tr>
                 <td><span class="flag-icon flag-icon-${getCountryCode(importer.country)}"></span> ${importer.country}</td>
+                <td>${importer.name}</td>
                 <td>${importer.type}</td>
                 <td>${importer.marketShare.toFixed(1)}%</td>
                 <td>${(importer.purchasingPower * 100).toFixed(0)}%</td>

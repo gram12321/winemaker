@@ -486,5 +486,95 @@ const lastNamesByCountry = {
   ]
 };
 
+const IMPORTER_NAME_ENDINGS = {
+  "Private Importer": [
+    "Wines", "Wine Trading", "Wine Import", "Fine Wines", "Wine Selection"
+  ],
+  "Restaurant": [
+    "Restaurant", "Bistro", "Trattoria", "Osteria", "Ristorante", "Brasserie", "Gasthaus", "Weinhaus"
+  ],
+  "Wine Shop": [
+    "Wine Merchants", "Wine & Spirits", "Wine Cellar", "Wine Gallery", "Vintage Wines"
+  ],
+  "Chain Store": [
+    "Inc.", "Corporation", "International", "Group", "Holdings", "Distribution", "Retail", "Markets"
+  ]
+};
+
+/**
+ * Generate a name for an importer based on their type and country
+ * @param {string} type - The type of importer
+ * @param {string} country - The importer's country
+ * @returns {string} - Generated name for the importer
+ */
+export function generateImporterName(type, country) {
+  let name = '';
+  const endings = IMPORTER_NAME_ENDINGS[type] || [];
+
+  if (!country || !type || !endings.length) {
+    console.warn('Missing required parameters for importer name generation');
+    return 'Unknown Importer';
+  }
+
+  // Get the appropriate name arrays based on country
+  const maleNames = {
+    "France": frenchMaleNames,
+    "Germany": germanMaleNames,
+    "Italy": italianMaleNames,
+    "Spain": spanishMaleNames,
+    "United States": usMaleNames
+  }[country] || [];
+
+  const femaleNames = {
+    "France": frenchFemaleNames,
+    "Germany": germanFemaleNames,
+    "Italy": italianFemaleNames,
+    "Spain": spanishFemaleNames,
+    "United States": usFemaleNames
+  }[country] || [];
+
+  const countryLastNames = lastNamesByCountry[country] || [];
+
+  // Generate name based on importer type
+  switch(type) {
+    case "Private Importer":
+      // Use personal name format: "FirstName LastName Wines"
+      const useFemaleName = Math.random() < 0.5;
+      const firstName = useFemaleName ? 
+          femaleNames[Math.floor(Math.random() * femaleNames.length)] :
+          maleNames[Math.floor(Math.random() * maleNames.length)];
+      const lastName = countryLastNames[Math.floor(Math.random() * countryLastNames.length)];
+      name = `${firstName} ${lastName}`;
+      break;
+
+    case "Restaurant":
+      // Use possessive format: "LastName's Restaurant"
+      const restaurantLastName = countryLastNames[Math.floor(Math.random() * countryLastNames.length)];
+      name = country === "United States" ? 
+          `${restaurantLastName}'s` :
+          restaurantLastName;
+      break;
+
+    case "Wine Shop":
+      // Use city/location format: "LastName Wine Merchants"
+      const shopLastName = countryLastNames[Math.floor(Math.random() * countryLastNames.length)];
+      name = shopLastName;
+      break;
+
+    case "Chain Store":
+      // Use corporate format: "LastName International"
+      const corporateLastName = countryLastNames[Math.floor(Math.random() * countryLastNames.length)];
+      name = corporateLastName;
+      break;
+
+    default:
+      return 'Unknown Importer';
+  }
+
+  // Add a random ending appropriate for the type
+  const ending = endings[Math.floor(Math.random() * endings.length)];
+  return `${name} ${ending}`;
+}
+
 // Export the altitude ranges for use in other parts of the application 
 export { grapeSuitability, regionAltitudeRanges, regionPrestigeRankings, regionSoilTypes, regionAspectRatings,italianMaleNames, italianFemaleNames, frenchFemaleNames, frenchMaleNames, spanishFemaleNames, spanishMaleNames, usFemaleNames, usMaleNames, germanFemaleNames, germanMaleNames, countryRegionMap, lastNamesByCountry };
