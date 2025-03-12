@@ -4,7 +4,7 @@ import { addTransaction } from './finance.js';
 import { setPrestigeHit, getPrestigeHit } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { calculateRealPrestige } from './company.js';
-import { loadImporters, saveImporters } from './database/adminFunctions.js';
+import { loadImporters, saveImporters, saveCompletedContract } from './database/adminFunctions.js';
 import { updateAllDisplays } from './displayManager.js';
 import { calculateWinePrice } from './sales.js';
 import { initializeImporters, updateAllImporterRelationships } from './classes/importerClass.js';
@@ -306,6 +306,9 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
         addConsoleMessage('Failed to remove some wines from inventory. Contract not fulfilled.');
         return false;
     }
+    
+    // Save the completed contract
+    saveCompletedContract(contract);
     
     // Process payment
     addTransaction('Income', 'Contract Sale', contract.totalValue);

@@ -407,6 +407,20 @@ export function loadImporters() {
     }
 }
 
+export function saveCompletedContract(contract) {
+    const completedContracts = getCompletedContracts();
+    completedContracts.push({
+        ...contract,
+        completedDate: new Date().toISOString()
+    });
+    localStorage.setItem('completedContracts', JSON.stringify(completedContracts));
+}
+
+export function getCompletedContracts() {
+    const contracts = localStorage.getItem('completedContracts');
+    return contracts ? JSON.parse(contracts) : [];
+}
+
 export {
   loadInventory,
   saveInventory

@@ -1,0 +1,19 @@
+.importer-row {
+    cursor: pointer;
+}
+
+.importer-row:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.importer-row.active {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.contract-details {
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+
+

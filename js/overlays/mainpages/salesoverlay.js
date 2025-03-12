@@ -2,7 +2,7 @@ import { formatNumber, formatQualityDisplay, getFlagIcon  } from '/js/utils.js';
 import { calculateWinePrice, sellOrderWine } from '/js/sales.js';
 import { loadPendingContracts, fulfillContract, rejectContract } from '/js/contracts.js';
 import { inventoryInstance } from '/js/resource.js';
-import { loadWineOrders, saveWineOrders } from '/js/database/adminFunctions.js';
+import { loadWineOrders, saveWineOrders, getCompletedContracts } from '/js/database/adminFunctions.js';
 import { showMainViewOverlay } from '/js/overlays/overlayUtils.js';
 import { updateAllDisplays } from '/js/displayManager.js';
 import { WINE_ORDER_TYPES } from '/js/constants/constants.js';
@@ -342,95 +342,170 @@ function createSalesOverlayHTML() {
 export function displayContractsTab() {
     const contractsTabContent = document.getElementById('contracts-tab-content');
     contractsTabContent.innerHTML = '';
-    const pendingContracts = loadPendingContracts();
 
-    if (pendingContracts.length === 0) {
-        contractsTabContent.innerHTML = `
-            <div class="alert alert-info text-center">
-                <p>No pending contracts available.</p>
-                <p class="small mt-2">Contracts are offered by importers based on your reputation and relationship. Improve your standing by selling quality wines!</p>
+    // Create pending contracts section
+    const pendingContractSection = document.createElement('section');
+    pendingContractSection.className = 'overlay-section card mb-4';
+    
+    const pendingContracts = loadPendingContracts();
+    pendingContractSection.innerHTML = `
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0">Pending Contracts</h3>
+            <div class="contract-info">
+                <span class="badge bg-secondary">${pendingContracts.length}/3 Active</span>
             </div>
-        `;
-        return;
-    }
-    
-    // Create section for pending contracts
-    const contractsTable = document.createElement('div');
-    contractsTable.className = 'table-responsive';
-    contractsTable.innerHTML = `
-        <table class="table overlay-table">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Market Share</th>
-                    <th>Relationship</th>
-                    <th>Requirements</th>
-                    <th>Amount</th>
-                    <th>Price/Bottle</th>
-                    <th>Total Value</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="contracts-table-body">
-                <!-- Contract rows will be inserted here -->
-            </tbody>
-        </table>
+        </div>
+        <div class="card-body" id="pending-contracts-body">
+            ${pendingContracts.length > 0 ? createContractsTableHTML(pendingContracts, true) : `
+                <div class="alert alert-info text-center">
+                    <p>No pending contracts available.</p>
+                    <p class="small mt-2">Contracts are offered by importers based on your reputation and relationship.</p>
+                </div>
+            `}
+        </div>
     `;
+
+    // Add pending contracts section to the content
+    contractsTabContent.appendChild(pendingContractSection);
+
+    // Add event listeners after the content is in the DOM
+    if (pendingContracts.length > 0) {
+        // Add fulfill contract button listeners
+        document.querySelectorAll('.fulfill-contract-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index);
+                showAssignWineOverlay(pendingContracts[index], index);
+            });
+        });
+
+        // Add reject contract button listeners
+        document.querySelectorAll('.reject-contract-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const index = parseInt(btn.dataset.index);
+                if (rejectContract(index)) {
+                    displayContractsTab(); // Refresh the display after rejection
+                }
+            });
+        });
+    }
+
+    // Create and add importer history section
+    const historySection = document.createElement('section');
+    historySection.className = 'overlay-section card';
     
-    contractsTabContent.appendChild(contractsTable);
-    const tableBody = document.getElementById('contracts-table-body');
+    const completedContracts = getCompletedContracts();
+    const importers = groupContractsByImporter(completedContracts);
     
-    // Populate the table with contracts
-    pendingContracts.forEach((contract, index) => {
-        // Add debug logging
-        console.log('Contract data:', {
-            name: contract.importerName,
-            country: contract.importerCountry,
-            type: contract.importerType
-        });
+    historySection.innerHTML = `
+        <div class="card-header text-white d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0">Importer History</h3>
+            <div class="contract-info">
+                <span class="badge bg-secondary">${completedContracts.length} Completed</span>
+            </div>
+        </div>
+        <div class="card-body">
+            ${Array.from(importers.values()).length > 0 ? `
+                <div class="table-responsive">
+                    <table class="table overlay-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Market Share</th>
+                                <th>Relationship</th>
+                                <th>Completed Contracts</th>
+                                <th>Total Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Array.from(importers.values()).map(importer => `
+                                <tr class="importer-row" data-importer-id="${importer.id}">
+                                    <td>${getFlagIcon(importer.country)}<strong>${importer.name}</strong></td>
+                                    <td><span class="badge bg-secondary">${importer.type}</span></td>
+                                    <td>${importer.marketShare ? importer.marketShare.toFixed(1) + '%' : 'N/A'}</td>
+                                    <td>${importer.relationship ? importer.relationship.toFixed(1) : 'N/A'}</td>
+                                    <td>${importer.contracts.length}</td>
+                                    <td>€${formatNumber(importer.contracts.reduce((sum, c) => sum + c.totalValue, 0), 2)}</td>
+                                </tr>
+                                <tr class="contract-details-row d-none" data-importer-id="${importer.id}">
+                                    <td colspan="6">
+                                        <div class="contract-details">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Amount</th>
+                                                        <th>Price/Bottle</th>
+                                                        <th>Total Value</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${importer.contracts.map(contract => `
+                                                        <tr>
+                                                            <td>${new Date(contract.completedDate).toLocaleDateString()}</td>
+                                                            <td>${contract.amount} bottles</td>
+                                                            <td>€${contract.contractPrice.toFixed(2)}</td>
+                                                            <td>€${contract.totalValue.toFixed(2)}</td>
+                                                        </tr>
+                                                    `).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            ` : `
+                <div class="alert alert-info text-center">
+                    <p>No completed contracts yet.</p>
+                    <p class="small mt-2">Complete contracts to build relationships with importers.</p>
+                </div>
+            `}
+        </div>
+    `;
+
+    // Add click handlers for expanding/collapsing importer details
+    historySection.addEventListener('click', (e) => {
+        const importerRow = e.target.closest('.importer-row');
+        if (importerRow) {
+            const importerId = importerRow.dataset.importerId;
+            const detailsRow = historySection.querySelector(`.contract-details-row[data-importer-id="${importerId}"]`);
+            detailsRow.classList.toggle('d-none');
+            importerRow.classList.toggle('active');
+        }
+    });
+
+    contractsTabContent.appendChild(pendingContractSection);
+    contractsTabContent.appendChild(historySection);
+}
+
+function groupContractsByImporter(contracts) {
+    const importers = new Map();
+    
+    contracts.forEach(contract => {
+        const importerId = `${contract.importerName}-${contract.importerType}-${contract.importerCountry}`;
+        if (!importers.has(importerId)) {
+            importers.set(importerId, {
+                id: importerId,
+                name: contract.importerName,
+                type: contract.importerType,
+                country: contract.importerCountry,
+                marketShare: contract.marketShare,
+                relationship: contract.relationship,
+                contracts: []
+            });
+        }
+        importers.get(importerId).contracts.push(contract);
         
-        const row = document.createElement('tr');
-        
-        row.innerHTML = `
-            <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
-            <td><span class="badge bg-secondary">${contract.importerType}</span></td>
-            <td>${contract.marketShare ? contract.marketShare.toFixed(1) + '%' : 'N/A'}</td>
-            <td>${contract.relationship ? contract.relationship.toFixed(1) : 'N/A'}</td>
-            <td><strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong></td>
-            <td>${contract.amount} bottles</td>
-            <td>€${contract.contractPrice.toFixed(2)}</td>
-            <td>€${contract.totalValue.toFixed(2)}</td>
-            <td>
-                <button class="btn btn-success btn-sm mb-2 w-100 fulfill-contract-btn" data-index="${index}">Select Wine</button>
-                <button class="btn btn-danger btn-sm w-100 reject-contract-btn" data-index="${index}">Reject</button>
-            </td>
-        `;
-        
-        // Add event handlers directly to buttons
-        const fulfillBtn = row.querySelector('.fulfill-contract-btn');
-        const rejectBtn = row.querySelector('.reject-contract-btn');
-        
-        fulfillBtn.addEventListener('click', () => {
-            // Show the assign wine overlay instead of directly fulfilling the contract
-            showAssignWineOverlay(contract, index);
-        });
-        
-        rejectBtn.addEventListener('click', () => {
-            if (rejectContract(index)) {
-                displayContractsTab();
-            }
-        });
-        
-        tableBody.appendChild(row);
+        // Sort contracts by date (newest first)
+        importers.get(importerId).contracts.sort((a, b) => 
+            new Date(b.completedDate) - new Date(a.completedDate)
+        );
     });
     
-    // Show maximum contracts info
-    contractsTabContent.insertAdjacentHTML('afterbegin', `
-        <div class="alert alert-secondary mb-3">
-            <strong>Contract Limit:</strong> ${pendingContracts.length}/3 pending contracts
-        </div>
-    `);
+    return importers;
 }
 
 // Setup event listeners for contracts tab
@@ -455,4 +530,44 @@ function setupSalesTabs() {
             }
         });
     });
+}
+
+function createContractsTableHTML(contracts, isPending = true) {
+    return `
+        <table class="table overlay-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Market Share</th>
+                    <th>Relationship</th>
+                    <th>Requirements</th>
+                    <th>Amount</th>
+                    <th>Price/Bottle</th>
+                    <th>Total Value</th>
+                    ${isPending ? '<th>Actions</th>' : ''}
+                </tr>
+            </thead>
+            <tbody>
+                ${contracts.map((contract, index) => `
+                    <tr>
+                        <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
+                        <td><span class="badge bg-secondary">${contract.importerType}</span></td>
+                        <td>${contract.marketShare ? contract.marketShare.toFixed(1) + '%' : 'N/A'}</td>
+                        <td>${contract.relationship ? contract.relationship.toFixed(1) : 'N/A'}</td>
+                        <td><strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong></td>
+                        <td>${contract.amount} bottles</td>
+                        <td>€${contract.contractPrice.toFixed(2)}</td>
+                        <td>€${contract.totalValue.toFixed(2)}</td>
+                        ${isPending ? `
+                            <td>
+                                <button class="btn btn-success btn-sm mb-2 w-100 fulfill-contract-btn" data-index="${index}">Select Wine</button>
+                                <button class="btn btn-danger btn-sm w-100 reject-contract-btn" data-index="${index}">Reject</button>
+                            </td>
+                        ` : ''}
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
 }
