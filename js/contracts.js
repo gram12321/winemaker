@@ -152,34 +152,46 @@ export function generateImporterContracts() {
     // Get the current game year for vintage requirements
     const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
     
-    // Determine vintage requirements based on importer type
+    // Determine vintage requirements using exponential distribution for rarity
     let minVintageAge = 0;
     
-    switch(selectedImporter.type) {
-        case "Private Importer":
-            // Private importers often want aged wines (2-5 years)
-            minVintageAge = Math.floor(Math.random() * 4) + 2;
-            break;
-        case "Restaurant":
-            // Restaurants sometimes want aged wines (1-4 years)
-            minVintageAge = Math.floor(Math.random() * 4) + 1;
-            break;
-        case "Wine Shop":
-            // Wine shops occasionally want aged wines (0-3 years)
-            minVintageAge = Math.floor(Math.random() * 4);
-            break;
-        case "Chain Store":
-            // Chain stores rarely want aged wines (0-2 years)
-            minVintageAge = Math.floor(Math.random() * 3);
-            break;
-        default:
-            // Default case (0-3 years)
-            minVintageAge = Math.floor(Math.random() * 4);
-    }
-    
-    // Apply a small random chance to remove vintage requirements
-    if (Math.random() < 0.3) {
-        minVintageAge = 0;
+    // First decide if this contract will have a vintage requirement
+    // 70% chance of having a vintage requirement (down from the previous 90%)
+    if (Math.random() < 0.7) {
+        // Base vintage distribution with exponential falloff for higher values
+        // Formula: -ln(1-x)/λ where x is random between 0-1 and λ controls the shape
+        // Lambda values by importer type (lower = higher average age requirements)
+        let lambda;
+        
+        switch(selectedImporter.type) {
+            case "Private Importer":
+                // Private importers value aged wines the most
+                lambda = 0.15;  // Higher chance of requesting older vintages
+                break;
+            case "Restaurant":
+                lambda = 0.2;   // Good chance of requesting somewhat aged wines
+                break;
+            case "Wine Shop":
+                lambda = 0.25;  // Moderate chance of requesting aged wines
+                break;
+            case "Chain Store":
+                lambda = 0.3;   // Lower chance of requesting aged wines
+                break;
+            default:
+                lambda = 0.25;  // Default lambda value
+        }
+        
+        // Generate vintage age using exponential distribution
+        const randomValue = Math.random();
+        minVintageAge = Math.floor(-Math.log(1 - randomValue) / lambda);
+        
+        // Cap the maximum vintage age at 50 years
+        minVintageAge = Math.min(minVintageAge, 50);
+        
+        // Ensure at least 1 year of aging if we're requesting a vintage
+        minVintageAge = Math.max(minVintageAge, 1);
+        
+        console.log(`[Contracts] Generated vintage age requirement: ${minVintageAge} years (λ=${lambda})`);
     }
     
     // Calculate required vintage year based on age
@@ -330,9 +342,27 @@ function calculateVintagePricePremium(vintageAge) {
     // No vintage requirement means no premium
     if (!vintageAge || vintageAge <= 0) return 0;
     
-    // Base premium per year of aging (increasing with age)
-    // 1 year: €2, 2 years: €5, 3 years: €9, 4 years: €14, 5+ years: €20+
-    return Math.pow(vintageAge, 1.5) + vintageAge;
+    // Enhanced premium calculation for wider vintage range (0-50 years)
+    // Uses progressive scaling:
+    // - 1-5 years: modest premium (€1-10)
+    // - 6-15 years: significant premium (€10-50)
+    // - 16-30 years: substantial premium (€50-200)
+    // - 31-50 years: exceptional premium (€200-1000+)
+    
+    if (vintageAge <= 5) {
+        // Linear increase for young wines (€1-10)
+        return vintageAge * 2;
+    } else if (vintageAge <= 15) {
+        // Growing premium for mature wines (€10-50)
+        return 10 + Math.pow(vintageAge - 5, 1.5) * 2;
+    } else if (vintageAge <= 30) {
+        // Steeper growth for old wines (€50-200)
+        return 50 + Math.pow(vintageAge - 15, 1.7) * 3;
+    } else {
+        // Exponential growth for very old wines (€200-1000+)
+        // This creates exceptional premiums for very rare vintage requirements
+        return 200 + Math.pow(vintageAge - 30, 2.2) * 5;
+    }
 }
 
 /**
