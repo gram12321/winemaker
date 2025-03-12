@@ -283,6 +283,21 @@ function sortImporters(importers, key, direction) {
     });
 }
 
+function getImporterTypeBadgeClass(type) {
+    switch(type) {
+        case 'Private Importer':
+            return 'badge-importer-private';
+        case 'Restaurant':
+            return 'badge-importer-restaurant';
+        case 'Wine Shop':
+            return 'badge-importer-shop';
+        case 'Chain Store':
+            return 'badge-importer-chain';
+        default:
+            return 'bg-secondary';
+    }
+}
+
 function createContractsTableHTML(contracts, isPending = true) {
     return `
         <table class="table overlay-table">
@@ -331,7 +346,7 @@ function createContractsTableHTML(contracts, isPending = true) {
                     return `
                     <tr>
                         <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
-                        <td><span class="badge bg-secondary">${contract.importerType}</span></td>
+                        <td><span class="badge ${getImporterTypeBadgeClass(contract.importerType)}">${contract.importerType}</span></td>
                         <td>${formatNumber(contract.marketShare, 2)}%</td>
                         <td>${relationship.formattedText}</td>
                         <td>${requirementsHTML}</td>
@@ -372,7 +387,7 @@ function createImporterHistoryTableHTML(importers) {
                     return `
                         <tr class="importer-row" data-importer-id="${importer.id}">
                             <td>${getFlagIcon(importer.country)}<strong>${importer.name}</strong></td>
-                            <td><span class="badge bg-secondary">${importer.type}</span></td>
+                            <td><span class="badge ${getImporterTypeBadgeClass(importer.type)}">${importer.type}</span></td>
                             <td>${importer.country}</td>
                             <td>${formatNumber(importer.marketShare, 2)}%</td>
                             <td>${relationship.formattedText}</td>
