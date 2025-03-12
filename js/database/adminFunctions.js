@@ -385,7 +385,7 @@ export function getRecurringTransactions() {
   return JSON.parse(localStorage.getItem('recurringTransactions')) || [];
 }
 
-// ----- IMPORTES ---- 
+// ----- IMPORTERS AND CONTRACTS ----- 
 
 // Save importers to localStorage
 export function saveImporters(importers) {
@@ -407,6 +407,52 @@ export function loadImporters() {
     }
 }
 
+/**
+ * Save pending contracts to localStorage
+ * @param {Array} contracts - Array of contract objects
+ */
+export function savePendingContracts(contracts) {
+    localStorage.setItem('pendingContracts', JSON.stringify(contracts));
+}
+
+/**
+ * Load all pending contracts from localStorage and reattach requirements functions
+ * @param {Function} recreateRequirementFn - Function to recreate requirement objects
+ * @returns {Array} - Array of contract objects with functional requirements
+ */
+export function loadPendingContracts(recreateRequirementFn) {
+    const savedContracts = localStorage.getItem('pendingContracts');
+    if (!savedContracts) return [];
+
+    try {
+        const contracts = JSON.parse(savedContracts);
+        
+        // Only reattach functions if a recreation function is provided
+        if (typeof recreateRequirementFn === 'function') {
+            contracts.forEach(contract => {
+                if (Array.isArray(contract.requirements)) {
+                    // Replace each requirement with a proper requirement object
+                    contract.requirements = contract.requirements.map(req => 
+                        recreateRequirementFn(req.type, req.value, req.params || {})
+                    );
+                } else {
+                    // Initialize requirements array if it doesn't exist
+                    contract.requirements = [];
+                }
+            });
+        }
+        
+        return contracts;
+    } catch (error) {
+        console.error('Error loading pending contracts:', error);
+        return [];
+    }
+}
+
+/**
+ * Save a completed contract to localStorage
+ * @param {Object} contract - The completed contract
+ */
 export function saveCompletedContract(contract) {
     const completedContracts = getCompletedContracts();
     completedContracts.push({
@@ -416,6 +462,10 @@ export function saveCompletedContract(contract) {
     localStorage.setItem('completedContracts', JSON.stringify(completedContracts));
 }
 
+/**
+ * Get all completed contracts from localStorage
+ * @returns {Array} - Array of completed contract objects
+ */
 export function getCompletedContracts() {
     const contracts = localStorage.getItem('completedContracts');
     return contracts ? JSON.parse(contracts) : [];

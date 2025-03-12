@@ -1,14 +1,183 @@
 import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
-import { setPrestigeHit, getPrestigeHit } from './database/adminFunctions.js';
+import { 
+    setPrestigeHit, 
+    getPrestigeHit, 
+    loadImporters, 
+    saveImporters, 
+    saveCompletedContract,
+    savePendingContracts,
+    loadPendingContracts as loadPendingContractsFromStorage
+} from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { calculateRealPrestige } from './company.js';
-import { loadImporters, saveImporters, saveCompletedContract } from './database/adminFunctions.js';
 import { updateAllDisplays } from './displayManager.js';
 import { calculateWinePrice } from './sales.js';
 import { initializeImporters, updateAllImporterRelationships } from './classes/importerClass.js';
 import { CONTRACT_GENERATION } from './constants/constants.js';
+import { getColorClass, getFlagIconHTML, formatNumber } from './utils.js';
+
+// Define requirement types as constants
+const REQUIREMENT_TYPES = {
+    QUALITY: 'quality',
+    VINTAGE: 'vintage',
+    // Future requirement types:
+    // GRAPE_TYPE: 'grapeType',
+    // LAND_VALUE: 'landValue',
+    // ALTITUDE: 'altitude',
+    // SOIL_TYPE: 'soilType',
+    // REGION: 'region',
+    // COUNTRY: 'country',
+};
+
+/**
+ * Creates a requirement object for a contract
+ * @param {string} type - The type of requirement (from REQUIREMENT_TYPES)
+ * @param {*} value - The value for the requirement
+ * @param {Object} params - Additional parameters specific to this requirement type
+ * @returns {Object} - A requirement object
+ */
+function createRequirement(type, value, params = {}) {
+    return {
+        type,
+        value,
+        params,
+        // Each requirement gets its own validation function
+        validate: (wine) => validateRequirement(type, value, wine, params),
+        // Each requirement gets its own price premium calculation
+        getPremium: () => calculateRequirementPremium(type, value, params),
+        // Each requirement gets its own display formatter
+        getDisplayHTML: () => formatRequirementHTML(type, value, params),
+        // Human-readable description of the requirement
+        getDescription: () => getRequirementDescription(type, value, params)
+    };
+}
+
+/**
+ * Validates if a wine meets a specific requirement
+ * @param {string} type - The type of requirement
+ * @param {*} value - The requirement value
+ * @param {Object} wine - The wine to check
+ * @param {Object} params - Additional parameters
+ * @returns {boolean} - True if the wine meets the requirement
+ */
+function validateRequirement(type, value, wine, params) {
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : new Date().getFullYear();
+    
+    switch (type) {
+        case REQUIREMENT_TYPES.QUALITY:
+            return wine.quality >= value;
+            
+        case REQUIREMENT_TYPES.VINTAGE:
+            // If value is a required year, compare directly
+            if (params.isYear) {
+                return wine.vintage <= value;
+            }
+            // If value is an age, compare with current year
+            return wine.vintage <= (gameYear - value);
+            
+        // Add cases for future requirement types here
+
+        default:
+            console.warn(`Unknown requirement type: ${type}`);
+            return true; // Default to true for unknown types
+    }
+}
+
+/**
+ * Calculates the price premium for a specific requirement
+ * @param {string} type - The type of requirement
+ * @param {*} value - The requirement value
+ * @param {Object} params - Additional parameters
+ * @returns {number} - The price premium in euros
+ */
+function calculateRequirementPremium(type, value, params) {
+    switch (type) {
+        case REQUIREMENT_TYPES.QUALITY:
+            // Reuse existing quality premium calculation
+            return calculateQualityPricePremium(value);
+            
+        case REQUIREMENT_TYPES.VINTAGE:
+            // For vintage, the value might be years of aging or a specific year
+            const vintageAge = params.isYear 
+                ? (params.referenceYear || new Date().getFullYear()) - value 
+                : value;
+            return calculateVintagePricePremium(vintageAge);
+            
+        // Add cases for future requirement types here
+            
+        default:
+            console.warn(`Unknown requirement type for premium calculation: ${type}`);
+            return 0;
+    }
+}
+
+/**
+ * Creates HTML representation of a requirement for display
+ * @param {string} type - The type of requirement
+ * @param {*} value - The requirement value
+ * @param {Object} params - Additional parameters
+ * @returns {string} - HTML representation of the requirement
+ */
+function formatRequirementHTML(type, value, params) {
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : new Date().getFullYear();
+    
+    switch (type) {
+        case REQUIREMENT_TYPES.QUALITY:
+            const qualityColorClass = getColorClass(value);
+            return `<strong>Quality <span class="${qualityColorClass}">(min ${formatNumber(value * 100)}%)</span></strong>`;
+            
+        case REQUIREMENT_TYPES.VINTAGE:
+            // If it's a year requirement
+            if (params.isYear) {
+                const age = gameYear - value;
+                const vintageClass = getColorClass(Math.min(age / 5, 0.95));
+                return `<strong>Vintage <span class="${vintageClass}">${value} or older</span></strong>`;
+            }
+            // If it's an age requirement
+            else {
+                const requiredYear = gameYear - value;
+                const vintageClass = getColorClass(Math.min(value / 5, 0.95));
+                return `<strong>Vintage <span class="${vintageClass}">${requiredYear} or older</span> (${value} years)</strong>`;
+            }
+            
+        // Add cases for future requirement types here
+            
+        default:
+            console.warn(`Unknown requirement type for HTML formatting: ${type}`);
+            return `<span class="text-warning">Unknown requirement</span>`;
+    }
+}
+
+/**
+ * Gets a human-readable description of a requirement
+ * @param {string} type - The type of requirement
+ * @param {*} value - The requirement value
+ * @param {Object} params - Additional parameters
+ * @returns {string} - Human-readable description
+ */
+function getRequirementDescription(type, value, params) {
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : new Date().getFullYear();
+    
+    switch (type) {
+        case REQUIREMENT_TYPES.QUALITY:
+            return `Quality ≥ ${(value * 100).toFixed(0)}%`;
+            
+        case REQUIREMENT_TYPES.VINTAGE:
+            if (params.isYear) {
+                return `Vintage ${value} or older`;
+            } else {
+                const requiredYear = gameYear - value;
+                return `Vintage ${requiredYear} or older (${value} years aging)`;
+            }
+            
+        // Add cases for future requirement types here
+            
+        default:
+            return "Unknown requirement";
+    }
+}
 
 /**
  * Generates potential wine contracts from importers based on reputation and relationship
@@ -99,8 +268,10 @@ export function generateImporterContracts() {
         console.table(probabilities);
     }
     
-    // Determine if this contract will have a quality requirement
-    // 80% chance of having a specific quality requirement
+    // Initialize requirements array for this contract
+    const requirements = [];
+    
+    // Determine if this contract will have a quality requirement (80% chance)
     let minQualityRequirement = 0; // Change from 0.1 to 0 to represent no requirement
     let hasQualityRequirement = Math.random() < 0.8;
     
@@ -151,6 +322,9 @@ export function generateImporterContracts() {
             - Importer type (${selectedImporter.type}): Base requirement
             - Unusual order: ${isUnusualOrder ? 'Yes' : 'No'}
             - Random variance: ${(randomVariance * 100).toFixed(1)}%`);
+        
+        // Add quality requirement to the requirements array
+        requirements.push(createRequirement(REQUIREMENT_TYPES.QUALITY, minQualityRequirement));
     } else {
         minQualityRequirement = 0; // Explicitly set to 0 for "no requirement"
         console.log(`[Contracts] No quality requirement for this contract`);
@@ -199,6 +373,12 @@ export function generateImporterContracts() {
         minVintageAge = Math.max(minVintageAge, 1);
         
         console.log(`[Contracts] Generated vintage age requirement: ${minVintageAge} years (λ=${lambda})`);
+        
+        // Add vintage requirement to the requirements array
+        // Reference year is game year for future calculations
+        requirements.push(createRequirement(REQUIREMENT_TYPES.VINTAGE, minVintageAge, {
+            referenceYear: gameYear
+        }));
     }
     
     // Calculate required vintage year based on age
@@ -207,6 +387,14 @@ export function generateImporterContracts() {
     console.log(`[Contracts] Vintage requirement: ${minVintageAge > 0 ? 
         `${minVintageAge} years (${requiredVintageYear} or older)` : 
         'No minimum vintage'}`);
+    
+    // Calculate combined price premium from all requirements
+    let totalPremium = 0;
+    requirements.forEach(req => {
+        const premium = req.getPremium();
+        totalPremium += premium;
+        console.log(`[Contracts] ${req.getDescription()}: €${premium.toFixed(2)} premium`);
+    });
     
     // Calculate contract price using component-based pricing
     const basePriceRange = calculateContractBasePriceRange(selectedImporter);
@@ -219,7 +407,7 @@ export function generateImporterContracts() {
     
     // Contract price now includes vintage premium
     const basePrice = basePriceRange.min + Math.random() * (basePriceRange.max - basePriceRange.min);
-    const contractPrice = (basePrice + qualityPremium + vintagePremium) * selectedImporter.buyPriceMultiplicator;
+    const contractPrice = (basePrice + totalPremium) * selectedImporter.buyPriceMultiplicator;
     
     console.log(`[Contracts] Price calculation:`, {
         baseRange: `€${basePriceRange.min.toFixed(2)} - €${basePriceRange.max.toFixed(2)}`,
@@ -230,7 +418,7 @@ export function generateImporterContracts() {
         finalPrice: `€${contractPrice.toFixed(2)}`
     });
     
-    // Create contract object with new vintage requirements
+    // Create contract object with new requirements system
     const contract = {
         type: "Contract",
         amount: contractAmount,
@@ -242,19 +430,7 @@ export function generateImporterContracts() {
         importerId: importers.indexOf(selectedImporter),
         marketShare: selectedImporter.marketShare,
         relationship: selectedImporter.relationship,
-        minQuality: minQualityRequirement, // Can be 0 for no requirement
-        hasQualityRequirement: hasQualityRequirement, // Add explicit flag
-        minVintageAge: minVintageAge,
-        requiredVintageYear: requiredVintageYear,
-        hasVintageRequirement: minVintageAge > 0, // Add explicit flag
-        requirements: {
-            description: (hasQualityRequirement || minVintageAge > 0) ? "Wine contract" : "Wine contract (no requirements)",
-            minQuality: minQualityRequirement,
-            minVintageAge: minVintageAge,
-            requiredVintageYear: requiredVintageYear,
-            hasQualityRequirement: hasQualityRequirement,
-            hasVintageRequirement: minVintageAge > 0
-        }
+        requirements: requirements
     };
     
     // Save this contract to localStorage
@@ -382,7 +558,7 @@ function calculateVintagePricePremium(vintageAge) {
 export function saveNewContract(contract) {
     const currentContracts = loadPendingContracts();
     currentContracts.push(contract);
-    localStorage.setItem('pendingContracts', JSON.stringify(currentContracts));
+    savePendingContracts(currentContracts);
     
     // Try to update the display directly if the contracts tab is visible
     try {
@@ -406,8 +582,18 @@ export function saveNewContract(contract) {
  * Load all pending contracts from localStorage
  */
 export function loadPendingContracts() {
-    const savedContracts = localStorage.getItem('pendingContracts');
-    return savedContracts ? JSON.parse(savedContracts) : [];
+    return loadPendingContractsFromStorage(createRequirement);
+}
+
+/**
+ * Recreate a requirement object from plain data
+ * @param {string} type - The type of requirement
+ * @param {*} value - The requirement value
+ * @param {Object} params - Additional parameters
+ * @returns {Object} - A new requirement object with methods
+ */
+function recreateRequirement(type, value, params = {}) {
+    return createRequirement(type, value, params);
 }
 
 /**
@@ -452,7 +638,7 @@ export function fulfillContract(contractIndex) {
         
         // Remove from pending contracts
         pendingContracts.splice(contractIndex, 1);
-        localStorage.setItem('pendingContracts', JSON.stringify(pendingContracts));
+        savePendingContracts(pendingContracts);
         
         // Update relationship with the importer
         const importers = loadImporters();
@@ -508,52 +694,19 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
         return false;
     }
     
-    // Only validate quality if the contract has a quality requirement
-    if (contract.hasQualityRequirement && contract.minQuality > 0) {
-        const invalidQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
-        if (invalidQualityWines.length > 0) {
-            addConsoleMessage(`Some selected wines don't meet the minimum quality requirement of ${(contract.minQuality * 100).toFixed(0)}%.`);
-            return false;
-        }
-    }
-    
-    // Only validate vintage if the contract has a vintage requirement
-    if (contract.hasVintageRequirement && contract.requiredVintageYear > 0) {
-        const invalidVintageWines = selectedWines.filter(wine => wine.vintage > contract.requiredVintageYear);
-        if (invalidVintageWines.length > 0) {
-            const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
-            const ageRequired = gameYear - contract.requiredVintageYear;
-            addConsoleMessage(`Some selected wines don't meet the minimum age requirement of ${ageRequired} years (vintage ${contract.requiredVintageYear} or older).`);
-            return false;
-        }
-    }
-    
-    // Validate quality requirements only if there is a minimum quality requirement
-    if (contract.minQuality && contract.minQuality > 0) {
-        const invalidQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
-        if (invalidQualityWines.length > 0) {
-            addConsoleMessage(`Some selected wines don't meet the minimum quality requirement of ${(contract.minQuality * 100).toFixed(0)}%.`);
-            return false;
-        }
-    }
-    
-    // Validate vintage requirements if applicable
-    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
-    
-    // Validate quality requirements
-    const invalidQualityWines = selectedWines.filter(wine => wine.quality < (contract.minQuality || 0.1));
-    if (invalidQualityWines.length > 0) {
-        addConsoleMessage(`Some selected wines don't meet the minimum quality requirement of ${(contract.minQuality || 0.1) * 100}%.`);
-        return false;
-    }
-    
-    // Validate vintage requirements if applicable
-    if (contract.requiredVintageYear && contract.requiredVintageYear > 0) {
-        const invalidVintageWines = selectedWines.filter(wine => wine.vintage > contract.requiredVintageYear);
-        if (invalidVintageWines.length > 0) {
-            const ageRequired = gameYear - contract.requiredVintageYear;
-            addConsoleMessage(`Some selected wines don't meet the minimum age requirement of ${ageRequired} years (vintage ${contract.requiredVintageYear} or older).`);
-            return false;
+    // Validate against all requirements
+    if (contract.requirements && contract.requirements.length > 0) {
+        // For each selected wine, check if it meets all requirements
+        for (const wine of selectedWines) {
+            // Find requirements that this wine doesn't meet
+            const failedRequirements = contract.requirements.filter(req => !req.validate(wine));
+            
+            if (failedRequirements.length > 0) {
+                // Get descriptions of failed requirements for the message
+                const requirementDescriptions = failedRequirements.map(req => req.getDescription()).join(', ');
+                addConsoleMessage(`Some selected wines don't meet the requirements: ${requirementDescriptions}`);
+                return false;
+            }
         }
     }
     
@@ -616,7 +769,7 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
     
     // Remove from pending contracts
     pendingContracts.splice(contractIndex, 1);
-    localStorage.setItem('pendingContracts', JSON.stringify(pendingContracts));
+    savePendingContracts(pendingContracts);
     
     // Update relationship with the importer
     const importers = loadImporters();
@@ -647,6 +800,27 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
 }
 
 /**
+ * Check if a wine meets all requirements of a contract
+ * @param {Object} wine - The wine to check
+ * @param {Object} contract - The contract with requirements
+ * @returns {boolean} - True if wine meets all requirements
+ */
+export function wineMatchesAllRequirements(wine, contract) {
+    // If the contract uses the new requirements system
+    if (Array.isArray(contract.requirements)) {
+        // If there are no requirements, all wines match
+        if (contract.requirements.length === 0) {
+            return true;
+        }
+        
+        // Check each requirement
+        return contract.requirements.every(req => req.validate(wine));
+    }
+    
+    return true;
+}
+
+/**
  * Reject a pending contract
  * @param {number} contractIndex - The index of the contract in pending contracts
  * @returns {boolean} - Whether the contract was successfully rejected
@@ -663,7 +837,7 @@ export function rejectContract(contractIndex) {
     
     // Remove from pending contracts
     pendingContracts.splice(contractIndex, 1);
-    localStorage.setItem('pendingContracts', JSON.stringify(pendingContracts));
+    savePendingContracts(pendingContracts);
     
     // Add console message
     addConsoleMessage(
@@ -674,3 +848,13 @@ export function rejectContract(contractIndex) {
 
     return true;
 }
+
+// Export the constants and utility functions
+export { 
+    REQUIREMENT_TYPES,
+    createRequirement,
+    validateRequirement,
+    calculateRequirementPremium,
+    formatRequirementHTML,
+    getRequirementDescription
+};

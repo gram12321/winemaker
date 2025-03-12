@@ -2,7 +2,7 @@ import { formatNumber, formatQualityDisplay } from '../utils.js';
 import { inventoryInstance } from '../resource.js';
 import { showModalOverlay, hideOverlay } from './overlayUtils.js';
 import { updateAllDisplays } from '../displayManager.js';
-import { fulfillContractWithSelectedWines } from '../contracts.js';
+import { fulfillContractWithSelectedWines, wineMatchesAllRequirements } from '../contracts.js';
 import { calculateWinePrice } from '../sales.js';
 
 /**
@@ -11,11 +11,10 @@ import { calculateWinePrice } from '../sales.js';
  * @param {Number} contractIndex The index of the contract in pending contracts
  */
 export function showAssignWineOverlay(contract, contractIndex) {
-    // Get all bottled wines from inventory
+    // Get all bottled wines from inventory that meet requirements
     const bottledWines = inventoryInstance.items.filter(item => 
         item.state === 'Bottles' && 
-        // Check if wine meets minimum quality requirements
-        matchesContractRequirements(item, contract)
+        wineMatchesAllRequirements(item, contract)
     );
 
     const overlayContent = generateAssignWineHTML(contract, bottledWines);
@@ -26,36 +25,6 @@ export function showAssignWineOverlay(contract, contractIndex) {
     }
     
     return overlay;
-}
-
-/**
- * Check if a wine matches the contract requirements
- * @param {Object} wine The wine to check
- * @param {Object} contract The contract with requirements
- * @returns {boolean} True if wine meets contract requirements
- */
-function matchesContractRequirements(wine, contract) {
-    // If there are no requirements, all wines match
-    if ((!contract.hasQualityRequirement || contract.minQuality <= 0) && 
-        (!contract.hasVintageRequirement || contract.minVintageAge <= 0)) {
-        return true;
-    }
-    
-    // Check quality requirements if applicable
-    if (contract.hasQualityRequirement && contract.minQuality > 0) {
-        if (wine.quality < contract.minQuality) {
-            return false;
-        }
-    }
-    
-    // Check vintage requirements if applicable
-    if (contract.hasVintageRequirement && contract.requiredVintageYear > 0) {
-        if (wine.vintage > contract.requiredVintageYear) {
-            return false;
-        }
-    }
-    
-    return true;
 }
 
 /**
@@ -103,25 +72,17 @@ function generateAssignWineHTML(contract, eligibleWines) {
         }).join('') : 
         `<tr><td colspan="8" class="text-center">No eligible wines found that meet the contract requirements.</td></tr>`;
 
-    // Get current game year for vintage display
-    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
-
     // Create requirements HTML for display
     let requirementsHTML = '<ul>';
     
-    const hasQualityReq = contract.hasQualityRequirement !== false && contract.minQuality > 0;
-    const hasVintageReq = contract.minVintageAge > 0;
-    
-    if (!hasQualityReq && !hasVintageReq) {
+    if (!contract.requirements || contract.requirements.length === 0) {
         requirementsHTML += '<li><em>No specific requirements</em></li>';
     } else {
-        if (hasQualityReq) {
-            requirementsHTML += `<li>Wine quality ≥ ${(contract.minQuality * 100).toFixed(0)}%</li>`;
-        }
-        if (hasVintageReq) {
-            requirementsHTML += `<li>Vintage ${contract.requiredVintageYear} or older (${contract.minVintageAge} years age)</li>`;
-        }
+        contract.requirements.forEach(req => {
+            requirementsHTML += `<li>${req.getDescription()}</li>`;
+        });
     }
+    
     requirementsHTML += '</ul>';
 
     return `
@@ -286,9 +247,6 @@ function updateSelectedAmount(overlay, contract, quantityInputs) {
  * @returns {Object} Validation result
  */
 function validateSelectedWines(selectedWines, contract) {
-    // Get current game year for vintage validation
-    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
-    
     // Total amount check
     const totalSelected = selectedWines.reduce((total, wine) => total + wine.amount, 0);
     if (totalSelected !== contract.amount) {
@@ -298,27 +256,20 @@ function validateSelectedWines(selectedWines, contract) {
         };
     }
     
-    // Quality check - only if contract has quality requirement
-    if (contract.hasQualityRequirement !== false && contract.minQuality > 0) {
-        const minQualityPercentage = (contract.minQuality * 100).toFixed(0);
-        const lowQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
-        
-        if (lowQualityWines.length > 0) {
-            return {
-                valid: false,
-                message: `Some selected wines don't meet the minimum quality requirement of ${minQualityPercentage}%.`
-            };
-        }
-    }
-    
-    // Vintage check - only if contract has vintage requirement
-    if (contract.minVintageAge > 0 && contract.requiredVintageYear > 0) {
-        const invalidVintageWines = selectedWines.filter(wine => wine.vintage > contract.requiredVintageYear);
-        if (invalidVintageWines.length > 0) {
-            return {
-                valid: false,
-                message: `Some selected wines don't meet the minimum age requirement. Need vintage ${contract.requiredVintageYear} or older.`
-            };
+    // Check each requirement for each wine
+    if (contract.requirements && contract.requirements.length > 0) {
+        for (const wine of selectedWines) {
+            // Find requirements this wine doesn't meet
+            const failedRequirements = contract.requirements.filter(req => !req.validate(wine));
+            
+            if (failedRequirements.length > 0) {
+                // Get descriptions of failed requirements for the message
+                const requirementDescriptions = failedRequirements.map(req => req.getDescription()).join(', ');
+                return {
+                    valid: false,
+                    message: `Some selected wines don't meet the requirements: ${requirementDescriptions}`
+                };
+            }
         }
     }
     

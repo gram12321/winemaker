@@ -1,11 +1,15 @@
-import { formatNumber, formatQualityDisplay, getFlagIcon, formatRelationshipDisplay, getColorClass } from '/js/utils.js';
+import { formatNumber, formatQualityDisplay, getFlagIcon, formatRelationshipDisplay } from '/js/utils.js';
 import { loadPendingContracts, rejectContract } from '/js/contracts.js';
 import { getCompletedContracts } from '/js/database/adminFunctions.js';
 import { showAssignWineOverlay } from '/js/overlays/assignWineOverlay.js';
 
-
 export function displayContractsTab() {
     const contractsTabContent = document.getElementById('contracts-tab-content');
+    if (!contractsTabContent) {
+        console.error("Cannot find contracts-tab-content element");
+        return;
+    }
+    
     contractsTabContent.innerHTML = '';
 
     // Create pending contracts section
@@ -93,8 +97,10 @@ function createImporterHistorySection() {
         if (importerRow) {
             const importerId = importerRow.dataset.importerId;
             const detailsRow = historySection.querySelector(`.contract-details-row[data-importer-id="${importerId}"]`);
-            detailsRow.classList.toggle('d-none');
-            importerRow.classList.toggle('active');
+            if (detailsRow) {
+                detailsRow.classList.toggle('d-none');
+                importerRow.classList.toggle('active');
+            }
         }
     });
 
@@ -102,9 +108,6 @@ function createImporterHistorySection() {
 }
 
 function createContractsTableHTML(contracts, isPending = true) {
-    // Get current game year for displaying age requirements
-    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
-    
     return `
         <table class="table overlay-table">
             <thead>
@@ -127,25 +130,26 @@ function createContractsTableHTML(contracts, isPending = true) {
                     // Generate requirements text based on contract requirements
                     let requirementsHTML = '';
                     
-                    // Check if contract has any requirements at all
-                    const hasQualityReq = contract.hasQualityRequirement !== false && contract.minQuality > 0;
-                    const hasVintageReq = contract.minVintageAge > 0;
-                    
-                    if (!hasQualityReq && !hasVintageReq) {
-                        requirementsHTML = `<strong>No specific requirements</strong>`;
+                    if (!contract.requirements || contract.requirements.length === 0) {
+                        requirementsHTML = '<strong>No specific requirements</strong>';
                     } else {
-                        // Quality requirement
-                        if (hasQualityReq) {
-                            const qualityColorClass = getColorClass(contract.minQuality);
-                            requirementsHTML += `<strong>Quality <span class="${qualityColorClass}">(min ${formatNumber(contract.minQuality * 100)}%)</span></strong>`;
-                        }
-                        
-                        // Vintage requirement
-                        if (hasVintageReq) {
-                            const vintageClass = getColorClass(Math.min(contract.minVintageAge / 5, 0.95));
-                            if (hasQualityReq) requirementsHTML += '<br>';
-                            requirementsHTML += `<strong>Vintage <span class="${vintageClass}">${contract.requiredVintageYear} or older</span></strong>`;
-                        }
+                        // Add safety checks for each requirement
+                        requirementsHTML = contract.requirements.map(req => {
+                            // Check if getDisplayHTML exists
+                            if (req && typeof req.getDisplayHTML === 'function') {
+                                return req.getDisplayHTML();
+                            } else if (req && req.type) {
+                                // Fallback display for requirements without methods
+                                if (req.type === 'quality' && req.value) {
+                                    return `<strong>Quality (min ${(req.value * 100).toFixed(0)}%)</strong>`;
+                                } else if (req.type === 'vintage') {
+                                    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+                                    const reqYear = gameYear - req.value;
+                                    return `<strong>Vintage ${reqYear} or older (${req.value} years)</strong>`;
+                                }
+                            }
+                            return '<strong>Unknown requirement</strong>';
+                        }).join('<br>');
                     }
                     
                     return `
