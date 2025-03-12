@@ -1,7 +1,8 @@
-import { formatNumber, formatQualityDisplay, getFlagIcon, formatRelationshipDisplay } from '/js/utils.js';
+import { formatNumber, formatQualityDisplay, getFlagIcon, formatRelationshipDisplay, getColorClass } from '/js/utils.js';
 import { loadPendingContracts, rejectContract } from '/js/contracts.js';
 import { getCompletedContracts } from '/js/database/adminFunctions.js';
 import { showAssignWineOverlay } from '/js/overlays/assignWineOverlay.js';
+
 
 export function displayContractsTab() {
     const contractsTabContent = document.getElementById('contracts-tab-content');
@@ -119,13 +120,17 @@ function createContractsTableHTML(contracts, isPending = true) {
             <tbody>
                 ${contracts.map((contract, index) => {
                     const relationship = formatRelationshipDisplay(contract.relationship);
+                    const qualityRequirement = contract.minQuality || 0.1;
+                    // Use the quality color class to visually indicate requirement difficulty
+                    const qualityColorClass = getColorClass(qualityRequirement);
+                    
                     return `
                     <tr>
                         <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
                         <td><span class="badge bg-secondary">${contract.importerType}</span></td>
                         <td>${formatNumber(contract.marketShare, 1)}%</td>
                         <td>${relationship.formattedText}</td>
-                        <td><strong>Quality wine (min ${formatNumber(contract.minQuality * 100)}%)</strong></td>
+                        <td><strong>Quality wine <span class="${qualityColorClass}">(min ${formatNumber(contract.minQuality * 100)}%)</span></strong></td>
                         <td>${formatNumber(contract.amount)} bottles</td>
                         <td>€${formatNumber(contract.contractPrice, 2)}</td>
                         <td>€${formatNumber(contract.totalValue, 2)}</td>

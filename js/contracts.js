@@ -99,34 +99,75 @@ export function generateImporterContracts() {
         console.table(probabilities);
     }
     
-    // Select a suitable wine for this contract
-    // Filter wines by quality - importers prefer higher quality for contracts
-    const qualityThreshold = 0.7; // Minimum quality threshold (70%)
-    const highQualityWines = winesWithPrices.filter(wine => wine.quality >= qualityThreshold);
+    // Set quality requirements with more randomness
+    // Base quality is now a true random value between 0-1
+    const baseQuality = Math.random();
     
-    // If no high-quality wines available, use any wine with a price
-    const availableWines = highQualityWines.length > 0 ? highQualityWines : winesWithPrices;
-    const selectedWine = availableWines[Math.floor(Math.random() * availableWines.length)];
+    // Determine if this is an "unusual" order (10% chance of ignoring typical type preferences)
+    const isUnusualOrder = Math.random() < 0.10;
     
-    if (!selectedWine) {
-        console.log("[Contracts] No suitable wine found for contract");
-        console.groupEnd();
-        return false;
+    // Full range with high randomness if it's an unusual order
+    let minQualityRequirement;
+    
+    if (isUnusualOrder) {
+        // For unusual orders, use a different distribution that's less tied to importer type
+        // This creates orders that occasionally break the pattern
+        minQualityRequirement = 0.1 + Math.random() * 0.85; // Full range
+        console.log(`[Contracts] Generating unusual quality requirement (outside normal range for ${selectedImporter.type})`);
+    } else {
+        // Normal case: use importer type preferences
+        switch(selectedImporter.type) {
+            case "Private Importer":
+                // Private importers often want high quality (biased 0.5-1.0)
+                minQualityRequirement = 0.5 + (baseQuality * 0.5);
+                break;
+            case "Restaurant":
+                // Restaurants typically want good to excellent quality (0.4-0.9)
+                minQualityRequirement = 0.4 + (baseQuality * 0.5);
+                break;
+            case "Wine Shop":
+                // Wine shops have varied requirements (0.2-0.8)
+                minQualityRequirement = 0.2 + (baseQuality * 0.6);
+                break;
+            case "Chain Store":
+                // Chain stores often accept lower quality (0.1-0.6)
+                minQualityRequirement = 0.1 + (baseQuality * 0.5);
+                break;
+            default:
+                // Default case with full range (0.1-1.0)
+                minQualityRequirement = 0.1 + (baseQuality * 0.9);
+        }
     }
     
-    console.log(`[Contracts] Selected wine: ${selectedWine.resource.name}, Vintage ${selectedWine.vintage}, Quality ${(selectedWine.quality * 100).toFixed(0)}%`);
+    // Apply a larger random variance (-0.1 to +0.1) for more natural variation
+    const randomVariance = (Math.random() * 0.2) - 0.1;
+    minQualityRequirement = Math.max(0.1, Math.min(1.0, minQualityRequirement + randomVariance));
     
-    // Calculate contract amount - larger than regular orders
-    // Based on importer's market share and buyAmountMultiplicator
+    console.log(`[Contracts] Setting minimum quality requirement: ${(minQualityRequirement * 100).toFixed(1)}%`);
+    console.log(`[Contracts] Requirement breakdown:
+        - Importer type (${selectedImporter.type}): Base requirement
+        - Unusual order: ${isUnusualOrder ? 'Yes' : 'No'}
+        - Random variance: ${(randomVariance * 100).toFixed(1)}%`);
+    
+    // Calculate contract price using component-based pricing
+    const basePriceRange = calculateContractBasePriceRange(selectedImporter);
+    const qualityPremium = calculateQualityPricePremium(minQualityRequirement);
+    
+    // Calculate amount - larger than regular orders based on importer's market share
     const baseAmount = Math.max(10, Math.ceil(Math.random() * 20 + 10 * selectedImporter.marketShare / 10));
-    
-    // Apply importer's multipliers
     const contractAmount = Math.max(10, Math.ceil(baseAmount * selectedImporter.buyAmountMultiplicator));
     
-    // Base price per bottle (from the wine's custom price)
-    // Contracts use calculated base price with importer's preferential rate
-    const calculatedBasePrice = calculateWinePrice(selectedWine.quality, selectedWine, true);
-    const contractPrice = selectedWine.customPrice * selectedImporter.buyPriceMultiplicator;  // FIXED: Use custom price instead of calculated base price
+    // Contract price is base price + quality premium, adjusted by importer multiplier
+    const basePrice = basePriceRange.min + Math.random() * (basePriceRange.max - basePriceRange.min);
+    const contractPrice = (basePrice + qualityPremium) * selectedImporter.buyPriceMultiplicator;
+    
+    console.log(`[Contracts] Price calculation:`, {
+        baseRange: `€${basePriceRange.min.toFixed(2)} - €${basePriceRange.max.toFixed(2)}`,
+        basePrice: `€${basePrice.toFixed(2)}`,
+        qualityPremium: `€${qualityPremium.toFixed(2)} (for ${(minQualityRequirement * 100).toFixed(1)}% min quality)`,
+        importerMultiplier: selectedImporter.buyPriceMultiplicator.toFixed(2),
+        finalPrice: `€${contractPrice.toFixed(2)}`
+    });
     
     // Create contract object
     const contract = {
@@ -138,25 +179,100 @@ export function generateImporterContracts() {
         importerType: selectedImporter.type,
         importerName: selectedImporter.name,
         importerId: importers.indexOf(selectedImporter),
-        marketShare: selectedImporter.marketShare,  // Add market share
-        relationship: selectedImporter.relationship, // Add relationship value
+        marketShare: selectedImporter.marketShare,
+        relationship: selectedImporter.relationship,
+        minQuality: minQualityRequirement,
         requirements: {
             description: "Quality wine",
-            minQuality: 0.1
-        },
-        minQuality: 0.1
+            minQuality: minQualityRequirement
+        }
     };
     
     // Save this contract to localStorage
     saveNewContract(contract);
     
-    console.log(`[Contracts] Contract generated: ${contractAmount} bottles of ${selectedWine.resource.name} at €${contractPrice.toFixed(2)}/bottle (Total: €${contract.totalValue.toFixed(2)})`);
+    console.log(`[Contracts] Contract generated: ${contractAmount} bottles at €${contractPrice.toFixed(2)}/bottle (Total: €${contract.totalValue.toFixed(2)})`);
     console.groupEnd();
     
     // Update displays after generating contract
     updateAllDisplays();
     
     return true;
+}
+
+/**
+ * Calculate the base price range for a contract based on importer characteristics
+ * @param {Object} importer - The importer object
+ * @returns {Object} - Min and max base price range
+ */
+function calculateContractBasePriceRange(importer) {
+    // Base price range depends on importer type and market characteristics
+    let min = 5;  // Minimum €5 per bottle
+    let max = 15; // Maximum €15 per bottle base price
+    
+    // Adjust based on importer type
+    switch(importer.type) {
+        case "Private Importer":
+            // Private importers pay more for exclusivity
+            min = 10;
+            max = 25;
+            break;
+        case "Restaurant":
+            // Restaurants pay slightly more than average
+            min = 8;
+            max = 20;
+            break;
+        case "Wine Shop":
+            // Wine shops pay average prices
+            min = 6;
+            max = 18;
+            break;
+        case "Chain Store":
+            // Chain stores negotiate lower prices due to volume
+            min = 4;
+            max = 12;
+            break;
+    }
+    
+    // Adjust for purchasing power (wealthier markets have higher price ranges)
+    min *= (0.8 + importer.purchasingPower * 0.4);
+    max *= (0.8 + importer.purchasingPower * 0.6);
+    
+    // Adjust for wine tradition (traditional markets value wine more)
+    min *= (0.9 + importer.wineTradition * 0.2);
+    max *= (0.9 + importer.wineTradition * 0.3);
+    
+    return { min, max };
+}
+
+/**
+ * Calculate price premium based on quality requirements
+ * @param {number} minQuality - Minimum quality requirement (0-1)
+ * @returns {number} - Price premium in euros per bottle
+ */
+function calculateQualityPricePremium(minQuality) {
+    // No quality requirement means no premium
+    if (!minQuality) return 0;
+    
+    // Quality premium scales exponentially with higher requirements
+    // Low requirements (10-40%): €0-2 premium
+    // Medium requirements (40-70%): €2-15 premium
+    // High requirements (70-90%): €15-50 premium
+    // Very high requirements (90%+): €50-200+ premium
+    
+    if (minQuality <= 0.4) {
+        // Linear increase for low quality requirements
+        return minQuality * 5;
+    } else if (minQuality <= 0.7) {
+        // Steeper increase for medium quality
+        return 2 + (minQuality - 0.4) * 45;
+    } else if (minQuality <= 0.9) {
+        // Even steeper for high quality
+        return 15 + (minQuality - 0.7) * 175;
+    } else {
+        // Exponential for premium quality requirements
+        return 50 + Math.pow((minQuality - 0.9) * 10, 2) * 150;
+    }
 }
 
 /**

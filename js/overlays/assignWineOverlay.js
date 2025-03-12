@@ -193,6 +193,13 @@ function setupAssignWineEventListeners(overlay, contract, contractIndex, eligibl
                 }
             });
             
+            // Validate selected wines
+            const validation = validateSelectedWines(selectedWines, contract);
+            if (!validation.valid) {
+                alert(validation.message);
+                return;
+            }
+            
             // Call contract fulfillment function
             if (fulfillContractWithSelectedWines(contractIndex, selectedWines)) {
                 hideOverlay(overlay);
@@ -229,4 +236,34 @@ function updateSelectedAmount(overlay, contract, quantityInputs) {
     if (fulfillBtn) {
         fulfillBtn.disabled = totalSelected !== contract.amount;
     }
+}
+
+/**
+ * Validate selected wines against contract requirements
+ * @param {Array} selectedWines Array of selected wines
+ * @param {Object} contract The contract object
+ * @returns {Object} Validation result
+ */
+function validateSelectedWines(selectedWines, contract) {
+    // Total amount check
+    const totalSelected = selectedWines.reduce((total, wine) => total + wine.amount, 0);
+    if (totalSelected !== contract.amount) {
+        return {
+            valid: false,
+            message: `Selected amount (${totalSelected}) doesn't match contract requirement (${contract.amount} bottles).`
+        };
+    }
+    
+    // Quality check - make sure all wines meet the minimum quality requirement
+    const minQualityPercentage = (contract.minQuality * 100).toFixed(0);
+    const lowQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
+    
+    if (lowQualityWines.length > 0) {
+        return {
+            valid: false,
+            message: `Some selected wines don't meet the minimum quality requirement of ${minQualityPercentage}%.`
+        };
+    }
+    
+    return { valid: true };
 }

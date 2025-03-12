@@ -122,7 +122,7 @@ export function calculateExtremeQualityMultiplier(value, steepness = 80, midpoin
 // The logistic multiplier creates the possibility of extremely valuable wines
 // when both quality and balance are exceptional (>0.95), while keeping
 // average wines (quality/balance ~0.5-0.7) at reasonable prices
-export function calculateWinePrice(quality, wine, skipLogging = false) {
+export function calculateWinePrice(quality, wine, skipLogging = true) {
     const farmlands = getFarmlands();
     const farmland = farmlands.find(field => field.name === wine.fieldName);
     if (!farmland) return 0;
