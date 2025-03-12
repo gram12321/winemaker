@@ -99,55 +99,62 @@ export function generateImporterContracts() {
         console.table(probabilities);
     }
     
-    // Set quality requirements with more randomness
-    // Base quality is now a true random value between 0-1
-    const baseQuality = Math.random();
+    // Determine if this contract will have a quality requirement
+    // 80% chance of having a specific quality requirement
+    let minQualityRequirement = 0; // Change from 0.1 to 0 to represent no requirement
+    let hasQualityRequirement = Math.random() < 0.8;
     
-    // Determine if this is an "unusual" order (10% chance of ignoring typical type preferences)
-    const isUnusualOrder = Math.random() < 0.10;
-    
-    // Full range with high randomness if it's an unusual order
-    let minQualityRequirement;
-    
-    if (isUnusualOrder) {
-        // For unusual orders, use a different distribution that's less tied to importer type
-        // This creates orders that occasionally break the pattern
-        minQualityRequirement = 0.1 + Math.random() * 0.85; // Full range
-        console.log(`[Contracts] Generating unusual quality requirement (outside normal range for ${selectedImporter.type})`);
-    } else {
-        // Normal case: use importer type preferences
-        switch(selectedImporter.type) {
-            case "Private Importer":
-                // Private importers often want high quality (biased 0.5-1.0)
-                minQualityRequirement = 0.5 + (baseQuality * 0.5);
-                break;
-            case "Restaurant":
-                // Restaurants typically want good to excellent quality (0.4-0.9)
-                minQualityRequirement = 0.4 + (baseQuality * 0.5);
-                break;
-            case "Wine Shop":
-                // Wine shops have varied requirements (0.2-0.8)
-                minQualityRequirement = 0.2 + (baseQuality * 0.6);
-                break;
-            case "Chain Store":
-                // Chain stores often accept lower quality (0.1-0.6)
-                minQualityRequirement = 0.1 + (baseQuality * 0.5);
-                break;
-            default:
-                // Default case with full range (0.1-1.0)
-                minQualityRequirement = 0.1 + (baseQuality * 0.9);
+    if (hasQualityRequirement) {
+        // Set quality requirements with more randomness
+        // Base quality is a random value between 0-1
+        const baseQuality = Math.random();
+        
+        // Determine if this is an "unusual" order (10% chance of ignoring typical type preferences)
+        const isUnusualOrder = Math.random() < 0.10;
+        
+        // Full range with high randomness if it's an unusual order
+        if (isUnusualOrder) {
+            // For unusual orders, use a different distribution that's less tied to importer type
+            minQualityRequirement = 0.1 + Math.random() * 0.85; // Full range
+            console.log(`[Contracts] Generating unusual quality requirement (outside normal range for ${selectedImporter.type})`);
+        } else {
+            // Normal case: use importer type preferences
+            switch(selectedImporter.type) {
+                case "Private Importer":
+                    // Private importers often want high quality (biased 0.5-1.0)
+                    minQualityRequirement = 0.5 + (baseQuality * 0.5);
+                    break;
+                case "Restaurant":
+                    // Restaurants typically want good to excellent quality (0.4-0.9)
+                    minQualityRequirement = 0.4 + (baseQuality * 0.5);
+                    break;
+                case "Wine Shop":
+                    // Wine shops have varied requirements (0.2-0.8)
+                    minQualityRequirement = 0.2 + (baseQuality * 0.6);
+                    break;
+                case "Chain Store":
+                    // Chain stores often accept lower quality (0.1-0.6)
+                    minQualityRequirement = 0.1 + (baseQuality * 0.5);
+                    break;
+                default:
+                    // Default case with full range (0.1-1.0)
+                    minQualityRequirement = 0.1 + (baseQuality * 0.9);
+            }
         }
+        
+        // Apply a larger random variance (-0.1 to +0.1) for more natural variation
+        const randomVariance = (Math.random() * 0.2) - 0.1;
+        minQualityRequirement = Math.max(0.1, Math.min(1.0, minQualityRequirement + randomVariance));
+        
+        console.log(`[Contracts] Setting minimum quality requirement: ${(minQualityRequirement * 100).toFixed(1)}%`);
+        console.log(`[Contracts] Requirement breakdown:
+            - Importer type (${selectedImporter.type}): Base requirement
+            - Unusual order: ${isUnusualOrder ? 'Yes' : 'No'}
+            - Random variance: ${(randomVariance * 100).toFixed(1)}%`);
+    } else {
+        minQualityRequirement = 0; // Explicitly set to 0 for "no requirement"
+        console.log(`[Contracts] No quality requirement for this contract`);
     }
-    
-    // Apply a larger random variance (-0.1 to +0.1) for more natural variation
-    const randomVariance = (Math.random() * 0.2) - 0.1;
-    minQualityRequirement = Math.max(0.1, Math.min(1.0, minQualityRequirement + randomVariance));
-    
-    console.log(`[Contracts] Setting minimum quality requirement: ${(minQualityRequirement * 100).toFixed(1)}%`);
-    console.log(`[Contracts] Requirement breakdown:
-        - Importer type (${selectedImporter.type}): Base requirement
-        - Unusual order: ${isUnusualOrder ? 'Yes' : 'No'}
-        - Random variance: ${(randomVariance * 100).toFixed(1)}%`);
     
     // Get the current game year for vintage requirements
     const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
@@ -235,14 +242,18 @@ export function generateImporterContracts() {
         importerId: importers.indexOf(selectedImporter),
         marketShare: selectedImporter.marketShare,
         relationship: selectedImporter.relationship,
-        minQuality: minQualityRequirement,
+        minQuality: minQualityRequirement, // Can be 0 for no requirement
+        hasQualityRequirement: hasQualityRequirement, // Add explicit flag
         minVintageAge: minVintageAge,
         requiredVintageYear: requiredVintageYear,
+        hasVintageRequirement: minVintageAge > 0, // Add explicit flag
         requirements: {
-            description: "Quality wine",
+            description: (hasQualityRequirement || minVintageAge > 0) ? "Wine contract" : "Wine contract (no requirements)",
             minQuality: minQualityRequirement,
             minVintageAge: minVintageAge,
-            requiredVintageYear: requiredVintageYear
+            requiredVintageYear: requiredVintageYear,
+            hasQualityRequirement: hasQualityRequirement,
+            hasVintageRequirement: minVintageAge > 0
         }
     };
     
@@ -497,7 +508,36 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
         return false;
     }
     
-    // Check if each selected wine meets the contract requirements
+    // Only validate quality if the contract has a quality requirement
+    if (contract.hasQualityRequirement && contract.minQuality > 0) {
+        const invalidQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
+        if (invalidQualityWines.length > 0) {
+            addConsoleMessage(`Some selected wines don't meet the minimum quality requirement of ${(contract.minQuality * 100).toFixed(0)}%.`);
+            return false;
+        }
+    }
+    
+    // Only validate vintage if the contract has a vintage requirement
+    if (contract.hasVintageRequirement && contract.requiredVintageYear > 0) {
+        const invalidVintageWines = selectedWines.filter(wine => wine.vintage > contract.requiredVintageYear);
+        if (invalidVintageWines.length > 0) {
+            const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+            const ageRequired = gameYear - contract.requiredVintageYear;
+            addConsoleMessage(`Some selected wines don't meet the minimum age requirement of ${ageRequired} years (vintage ${contract.requiredVintageYear} or older).`);
+            return false;
+        }
+    }
+    
+    // Validate quality requirements only if there is a minimum quality requirement
+    if (contract.minQuality && contract.minQuality > 0) {
+        const invalidQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
+        if (invalidQualityWines.length > 0) {
+            addConsoleMessage(`Some selected wines don't meet the minimum quality requirement of ${(contract.minQuality * 100).toFixed(0)}%.`);
+            return false;
+        }
+    }
+    
+    // Validate vintage requirements if applicable
     const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
     
     // Validate quality requirements

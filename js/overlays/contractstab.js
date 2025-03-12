@@ -123,14 +123,29 @@ function createContractsTableHTML(contracts, isPending = true) {
             <tbody>
                 ${contracts.map((contract, index) => {
                     const relationship = formatRelationshipDisplay(contract.relationship);
-                    const qualityRequirement = contract.minQuality || 0.1;
-                    const qualityColorClass = getColorClass(qualityRequirement);
                     
-                    // Format vintage requirements with color coding
-                    let vintageRequirement = '';
-                    if (contract.minVintageAge && contract.minVintageAge > 0) {
-                        const vintageClass = getColorClass(Math.min(contract.minVintageAge / 5, 0.95)); // Scale age 0-5+ years to 0-0.95 for color
-                        vintageRequirement = `<br>Vintage <span class="${vintageClass}">${contract.requiredVintageYear} or older</span>`;
+                    // Generate requirements text based on contract requirements
+                    let requirementsHTML = '';
+                    
+                    // Check if contract has any requirements at all
+                    const hasQualityReq = contract.hasQualityRequirement !== false && contract.minQuality > 0;
+                    const hasVintageReq = contract.minVintageAge > 0;
+                    
+                    if (!hasQualityReq && !hasVintageReq) {
+                        requirementsHTML = `<strong>No specific requirements</strong>`;
+                    } else {
+                        // Quality requirement
+                        if (hasQualityReq) {
+                            const qualityColorClass = getColorClass(contract.minQuality);
+                            requirementsHTML += `<strong>Quality <span class="${qualityColorClass}">(min ${formatNumber(contract.minQuality * 100)}%)</span></strong>`;
+                        }
+                        
+                        // Vintage requirement
+                        if (hasVintageReq) {
+                            const vintageClass = getColorClass(Math.min(contract.minVintageAge / 5, 0.95));
+                            if (hasQualityReq) requirementsHTML += '<br>';
+                            requirementsHTML += `<strong>Vintage <span class="${vintageClass}">${contract.requiredVintageYear} or older</span></strong>`;
+                        }
                     }
                     
                     return `
@@ -139,7 +154,7 @@ function createContractsTableHTML(contracts, isPending = true) {
                         <td><span class="badge bg-secondary">${contract.importerType}</span></td>
                         <td>${formatNumber(contract.marketShare, 1)}%</td>
                         <td>${relationship.formattedText}</td>
-                        <td><strong>Quality wine <span class="${qualityColorClass}">(min ${formatNumber(contract.minQuality * 100)}%)</span>${vintageRequirement}</strong></td>
+                        <td>${requirementsHTML}</td>
                         <td>${formatNumber(contract.amount)} bottles</td>
                         <td>€${formatNumber(contract.contractPrice, 2)}</td>
                         <td>€${formatNumber(contract.totalValue, 2)}</td>

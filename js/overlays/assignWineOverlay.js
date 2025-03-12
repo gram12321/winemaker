@@ -35,13 +35,21 @@ export function showAssignWineOverlay(contract, contractIndex) {
  * @returns {boolean} True if wine meets contract requirements
  */
 function matchesContractRequirements(wine, contract) {
-    // Check quality requirements
-    if (wine.quality < (contract.minQuality || 0.1)) {
-        return false;
+    // If there are no requirements, all wines match
+    if ((!contract.hasQualityRequirement || contract.minQuality <= 0) && 
+        (!contract.hasVintageRequirement || contract.minVintageAge <= 0)) {
+        return true;
+    }
+    
+    // Check quality requirements if applicable
+    if (contract.hasQualityRequirement && contract.minQuality > 0) {
+        if (wine.quality < contract.minQuality) {
+            return false;
+        }
     }
     
     // Check vintage requirements if applicable
-    if (contract.requiredVintageYear && contract.requiredVintageYear > 0) {
+    if (contract.hasVintageRequirement && contract.requiredVintageYear > 0) {
         if (wine.vintage > contract.requiredVintageYear) {
             return false;
         }
@@ -98,6 +106,24 @@ function generateAssignWineHTML(contract, eligibleWines) {
     // Get current game year for vintage display
     const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
 
+    // Create requirements HTML for display
+    let requirementsHTML = '<ul>';
+    
+    const hasQualityReq = contract.hasQualityRequirement !== false && contract.minQuality > 0;
+    const hasVintageReq = contract.minVintageAge > 0;
+    
+    if (!hasQualityReq && !hasVintageReq) {
+        requirementsHTML += '<li><em>No specific requirements</em></li>';
+    } else {
+        if (hasQualityReq) {
+            requirementsHTML += `<li>Wine quality ≥ ${(contract.minQuality * 100).toFixed(0)}%</li>`;
+        }
+        if (hasVintageReq) {
+            requirementsHTML += `<li>Vintage ${contract.requiredVintageYear} or older (${contract.minVintageAge} years age)</li>`;
+        }
+    }
+    requirementsHTML += '</ul>';
+
     return `
         <div class="overlay-section-wrapper">
             <section class="overlay-section card">
@@ -112,11 +138,7 @@ function generateAssignWineHTML(contract, eligibleWines) {
                             <div class="col-md-6">
                                 <p><strong>Importer:</strong> ${contract.importerType} (${contract.importerCountry})</p>
                                 <p><strong>Requirements:</strong></p>
-                                <ul>
-                                    <li>Wine quality ≥ ${(contract.minQuality || 0.1) * 100}%</li>
-                                    ${contract.minVintageAge > 0 ? 
-                                      `<li>Vintage ${contract.requiredVintageYear} or older (${contract.minVintageAge} years age)</li>` : ''}
-                                </ul>
+                                ${requirementsHTML}
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Amount:</strong> ${contract.amount} bottles</p>
@@ -276,19 +298,21 @@ function validateSelectedWines(selectedWines, contract) {
         };
     }
     
-    // Quality check - make sure all wines meet the minimum quality requirement
-    const minQualityPercentage = (contract.minQuality * 100).toFixed(0);
-    const lowQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
-    
-    if (lowQualityWines.length > 0) {
-        return {
-            valid: false,
-            message: `Some selected wines don't meet the minimum quality requirement of ${minQualityPercentage}%.`
-        };
+    // Quality check - only if contract has quality requirement
+    if (contract.hasQualityRequirement !== false && contract.minQuality > 0) {
+        const minQualityPercentage = (contract.minQuality * 100).toFixed(0);
+        const lowQualityWines = selectedWines.filter(wine => wine.quality < contract.minQuality);
+        
+        if (lowQualityWines.length > 0) {
+            return {
+                valid: false,
+                message: `Some selected wines don't meet the minimum quality requirement of ${minQualityPercentage}%.`
+            };
+        }
     }
     
-    // Vintage check - make sure all wines meet the minimum vintage requirement (if any)
-    if (contract.requiredVintageYear && contract.requiredVintageYear > 0) {
+    // Vintage check - only if contract has vintage requirement
+    if (contract.minVintageAge > 0 && contract.requiredVintageYear > 0) {
         const invalidVintageWines = selectedWines.filter(wine => wine.vintage > contract.requiredVintageYear);
         if (invalidVintageWines.length > 0) {
             return {
