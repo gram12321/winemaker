@@ -363,6 +363,8 @@ export function displayContractsTab() {
                 <tr>
                     <th>Name</th>
                     <th>Type</th>
+                    <th>Market Share</th>
+                    <th>Relationship</th>
                     <th>Requirements</th>
                     <th>Amount</th>
                     <th>Price/Bottle</th>
@@ -393,6 +395,8 @@ export function displayContractsTab() {
         row.innerHTML = `
             <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
             <td><span class="badge bg-secondary">${contract.importerType}</span></td>
+            <td>${contract.marketShare ? contract.marketShare.toFixed(1) + '%' : 'N/A'}</td>
+            <td>${contract.relationship ? contract.relationship.toFixed(1) : 'N/A'}</td>
             <td><strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong></td>
             <td>${contract.amount} bottles</td>
             <td>€${contract.contractPrice.toFixed(2)}</td>

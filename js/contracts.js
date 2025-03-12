@@ -103,8 +103,10 @@ export function generateImporterContracts() {
         totalValue: contractPrice * contractAmount,
         importerCountry: selectedImporter.country,
         importerType: selectedImporter.type,
-        importerName: selectedImporter.name,  // Add this line to include importer name
+        importerName: selectedImporter.name,
         importerId: importers.indexOf(selectedImporter),
+        marketShare: selectedImporter.marketShare,  // Add market share
+        relationship: selectedImporter.relationship, // Add relationship value
         requirements: {
             description: "Quality wine",
             minQuality: 0.1
