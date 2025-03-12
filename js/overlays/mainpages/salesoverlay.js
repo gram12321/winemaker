@@ -361,7 +361,8 @@ export function displayContractsTab() {
         <table class="table overlay-table">
             <thead>
                 <tr>
-                    <th>Importer</th>
+                    <th>Name</th>
+                    <th>Type</th>
                     <th>Requirements</th>
                     <th>Amount</th>
                     <th>Price/Bottle</th>
@@ -390,14 +391,9 @@ export function displayContractsTab() {
         const row = document.createElement('tr');
         
         row.innerHTML = `
-            <td>
-                ${getFlagIcon(contract.importerCountry)}
-                <span class="badge bg-secondary">${contract.importerType}</span><br>
-                <strong>${contract.importerName}</strong>
-            </td>
-            <td>
-                <strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong>
-            </td>
+            <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
+            <td><span class="badge bg-secondary">${contract.importerType}</span></td>
+            <td><strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong></td>
             <td>${contract.amount} bottles</td>
             <td>€${contract.contractPrice.toFixed(2)}</td>
             <td>€${contract.totalValue.toFixed(2)}</td>
