@@ -78,13 +78,13 @@ export class Importer {
                 break;
         }
 
-        // Adjust based on market share
-        multiplier *= (1 + this.marketShare);
+        // Apply market share (stronger influence: each 1% adds 180% to multiplier)
+        multiplier *= (1 + (this.marketShare * 1.8));
 
-        // Adjust based on purchasing power
+        // Apply purchasing power
         multiplier *= (1 + this.purchasingPower);
 
-        // Adjust based on wine tradition
+        // Apply wine tradition (small influence)
         multiplier *= (1 + (this.wineTradition * 0.2));
 
         return multiplier;

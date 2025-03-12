@@ -380,9 +380,17 @@ export function generateImporterContracts() {
     const qualityPremium = calculateQualityPricePremium(minQualityRequirement);
     const vintagePremium = calculateVintagePricePremium(minVintageAge);
     
-    // Calculate amount - larger than regular orders based on importer's market share
-    const baseAmount = Math.max(10, Math.ceil(Math.random() * 20 + 10 * selectedImporter.marketShare / 10));
+    // Calculate amount - base amount is 60 plus random 0-600
+    const baseAmount = Math.ceil(12 + Math.random() * 60);
+    
+    // Apply importer's multipliers (market share, type, etc.)
     const contractAmount = Math.max(10, Math.ceil(baseAmount * selectedImporter.buyAmountMultiplicator));
+    
+    console.log('[Contracts] Amount calculation:', {
+        baseAmount,
+        typeMultiplier: selectedImporter.buyAmountMultiplicator,
+        finalAmount: contractAmount
+    });
     
     // Contract price now includes vintage premium
     const basePrice = basePriceRange.min + Math.random() * (basePriceRange.max - basePriceRange.min);
