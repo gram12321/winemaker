@@ -1,15 +1,7 @@
 import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
-import { 
-    setPrestigeHit, 
-    getPrestigeHit, 
-    loadImporters, 
-    saveImporters, 
-    saveCompletedContract,
-    savePendingContracts,
-    loadPendingContracts as loadPendingContractsFromStorage
-} from './database/adminFunctions.js';
+import { setPrestigeHit, getPrestigeHit, loadImporters, saveImporters, saveCompletedContract, savePendingContracts, loadPendingContracts as loadPendingContractsFromStorage } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { calculateRealPrestige } from './company.js';
 import { updateAllDisplays } from './displayManager.js';
@@ -32,47 +24,35 @@ const REQUIREMENT_TYPES = {
 };
 
 function createRequirement(type, value, params = {}) {
-    return {
-        type,
-        value,
-        params,
-        // Each requirement gets its own validation function
-        validate: (wine) => validateRequirement(type, value, wine, params),
-        // Each requirement gets its own price premium calculation
-        getPremium: () => calculateRequirementPremium(type, value, params),
-        // Each requirement gets its own display formatter
-        getDisplayHTML: () => formatRequirementHTML(type, value, params),
-        // Human-readable description of the requirement
-        getDescription: () => getRequirementDescription(type, value, params)
+    return { type, value, params, 
+        validate: (wine) => validateRequirement(type, value, wine, params), 
+        getPremium: () => calculateRequirementPremium(type, value, params), 
+        getDisplayHTML: () => formatRequirementHTML(type, value, params), 
+        getDescription: () => getRequirementDescription(type, value, params) 
     };
 }
 
 function validateRequirement(type, value, wine, params) {
-    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : new Date().getFullYear();
+    const { year: gameYear } = getGameState();
     
     switch (type) {
         case REQUIREMENT_TYPES.QUALITY:
             return wine.quality >= value;
             
         case REQUIREMENT_TYPES.VINTAGE:
-            // If value is a required year, compare directly
             if (params.isYear) {
                 return wine.vintage <= value;
             }
-            // If value is an age, compare with current year
             return wine.vintage <= (gameYear - value);
             
-        // Add cases for future requirement types here
-
         default:
-            return true; // Default to true for unknown types
+            return true;
     }
 }
 
 function calculateRequirementPremium(type, value, params) {
     switch (type) {
         case REQUIREMENT_TYPES.QUALITY:
-            // Reuse existing quality premium calculation
             return calculateQualityPricePremium(value);
             
         case REQUIREMENT_TYPES.VINTAGE:
@@ -81,9 +61,7 @@ function calculateRequirementPremium(type, value, params) {
                 ? (params.referenceYear || new Date().getFullYear()) - value 
                 : value;
             return calculateVintagePricePremium(vintageAge);
-            
         // Add cases for future requirement types here
-            
         default:
             return 0;
     }
