@@ -307,7 +307,16 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
         return false;
     }
     
-    // Save the completed contract
+    // Add used wines details to contract before saving
+    contract.usedWines = selectedWines.map(wine => ({
+        name: wine.name,
+        vintage: wine.vintage,
+        fieldName: wine.fieldName,
+        quality: wine.quality,
+        amount: wine.amount
+    }));
+    
+    // Save the completed contract with wine details
     saveCompletedContract(contract);
     
     // Process payment

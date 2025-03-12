@@ -186,6 +186,7 @@ function createContractDetailsRow(importer) {
                         <thead>
                             <tr>
                                 <th>Date</th>
+                                <th>Wines Used</th>
                                 <th>Amount</th>
                                 <th>Price/Bottle</th>
                                 <th>Total Value</th>
@@ -195,6 +196,14 @@ function createContractDetailsRow(importer) {
                             ${importer.contracts.map(contract => `
                                 <tr>
                                     <td>${new Date(contract.completedDate).toLocaleDateString()}</td>
+                                    <td>
+                                        ${contract.usedWines ? 
+                                            contract.usedWines.map(wine => 
+                                                `<div class="mb-1">[${wine.name}, ${wine.vintage}, ${wine.fieldName}] - ${formatQualityDisplay(wine.quality)} (${wine.amount} bottles)</div>`
+                                            ).join('') 
+                                            : '<span class="text-muted">No wine details recorded</span>'
+                                        }
+                                    </td>
                                     <td>${formatNumber(contract.amount)} bottles</td>
                                     <td>€${formatNumber(contract.contractPrice, 2)}</td>
                                     <td>€${formatNumber(contract.totalValue, 2)}</td>
