@@ -179,10 +179,122 @@ function getRequirementDescription(type, value, params) {
     }
 }
 
+// Define requirement configuration schema
+const REQUIREMENT_CONFIG = {
+    [REQUIREMENT_TYPES.QUALITY]: {
+        chance: 0.8,
+        generateValue: (importer) => {
+            const baseValue = Math.random();
+            const isUnusualOrder = Math.random() < 0.10;
+            
+            let value;
+            if (isUnusualOrder) {
+                value = 0.1 + Math.random() * 0.85;
+                console.log(`[Contracts] Generating unusual quality requirement (outside normal range for ${importer.type})`);
+            } else {
+                // Type-specific base values
+                const typeBaseValues = {
+                    "Private Importer": { base: 0.5, range: 0.5 },
+                    "Restaurant": { base: 0.4, range: 0.5 },
+                    "Wine Shop": { base: 0.2, range: 0.6 },
+                    "Chain Store": { base: 0.1, range: 0.5 },
+                    "default": { base: 0.1, range: 0.9 }
+                };
+                
+                const config = typeBaseValues[importer.type] || typeBaseValues["default"];
+                value = config.base + (baseValue * config.range);
+            }
+            
+            // Random variance for natural variation
+            const randomVariance = (Math.random() * 0.2) - 0.1;
+            value = Math.max(0.1, Math.min(1.0, value + randomVariance));
+            
+            console.log(`[Contracts] Setting minimum ${REQUIREMENT_TYPES.QUALITY} requirement: ${(value * 100).toFixed(1)}%`);
+            console.log(`[Contracts] Requirement breakdown:
+                - Importer type (${importer.type}): Base requirement
+                - Unusual order: ${isUnusualOrder ? 'Yes' : 'No'}
+                - Random variance: ${(randomVariance * 100).toFixed(1)}%`);
+                
+            return value;
+        },
+        getParams: () => ({})
+    },
+    [REQUIREMENT_TYPES.VINTAGE]: {
+        chance: 0.7,
+        generateValue: (importer) => {
+            const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+            
+            // Lambda values by importer type (lower = higher average age requirements)
+            const lambdaValues = {
+                "Private Importer": 0.15,  // Higher chance of requesting older vintages
+                "Restaurant": 0.2,         // Good chance of requesting somewhat aged wines
+                "Wine Shop": 0.25,         // Moderate chance of requesting aged wines
+                "Chain Store": 0.3,        // Lower chance of requesting aged wines
+                "default": 0.25            // Default lambda value
+            };
+            
+            const lambda = lambdaValues[importer.type] || lambdaValues["default"];
+            
+            // Generate vintage age using exponential distribution
+            const randomValue = Math.random();
+            let vintageAge = Math.floor(-Math.log(1 - randomValue) / lambda);
+            
+            // Cap the maximum vintage age at 50 years
+            vintageAge = Math.min(vintageAge, 50);
+            
+            // Ensure at least 1 year of aging if we're requesting a vintage
+            vintageAge = Math.max(vintageAge, 1);
+            
+            console.log(`[Contracts] Generated vintage age requirement: ${vintageAge} years (λ=${lambda})`);
+            
+            // Calculate required vintage year based on age
+            const requiredVintageYear = gameYear - vintageAge;
+            console.log(`[Contracts] Vintage requirement: ${vintageAge} years (${requiredVintageYear} or older)`);
+            
+            return vintageAge;
+        },
+        getParams: () => {
+            const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+            return { referenceYear: gameYear };
+        }
+    },
+    // Add new requirement types here with their generation configuration
+    // Example:
+    // [REQUIREMENT_TYPES.GRAPE_TYPE]: {
+    //     chance: 0.3,
+    //     generateValue: (importer) => { ... },
+    //     getParams: () => { ... }
+    // }
+};
+
+/**
+ * Generate requirements for a contract based on importer
+ * @param {Object} importer - The importer object
+ * @returns {Array} - Array of requirement objects
+ */
+function generateRequirements(importer) {
+    const requirements = [];
+    
+    // Generate each type of requirement based on configuration
+    Object.entries(REQUIREMENT_CONFIG).forEach(([type, config]) => {
+        // Check if we should generate this requirement type based on chance
+        if (Math.random() < config.chance) {
+            // Generate value based on importer
+            const value = config.generateValue(importer);
+            // Get additional params
+            const params = config.getParams();
+            // Create and add requirement
+            requirements.push(createRequirement(type, value, params));
+        } else {
+            console.log(`[Contracts] No ${type} requirement for this contract`);
+        }
+    });
+    
+    return requirements;
+}
+
 /**
  * Generates potential wine contracts from importers based on reputation and relationship
- * This creates bulk orders with potentially higher volumes than regular orders
- * Returns true if any contracts were generated, false otherwise
  */
 export function generateImporterContracts() {
     // Get all bottled wines with custom prices
@@ -253,144 +365,22 @@ export function generateImporterContracts() {
     
     console.log(`[Contracts] Selected importer: ${selectedImporter.name} (${selectedImporter.type}, ${selectedImporter.country}) with relationship ${selectedImporter.relationship.toFixed(1)}`);
     
-    // Add debug info about selection probabilities
-    if (eligibleImporters.length > 1) {
-        const probabilities = eligibleImporters.map(importer => ({
-            name: importer.name,
-            type: importer.type,
-            country: importer.country,
-            relationship: importer.relationship.toFixed(1),
-            weight: Math.pow(importer.relationship, 2),
-            probability: `${((Math.pow(importer.relationship, 2) / totalWeight) * 100).toFixed(1)}%`
-        }));
-        
-        console.log("Selection probabilities (weighted by relationship²):");
-        console.table(probabilities);
-    }
-    
-    // Initialize requirements array for this contract
-    const requirements = [];
-    
-    // Determine if this contract will have a quality requirement (80% chance)
-    let minQualityRequirement = 0; // Change from 0.1 to 0 to represent no requirement
-    let hasQualityRequirement = Math.random() < 0.8;
-    
-    if (hasQualityRequirement) {
-        // Set quality requirements with more randomness
-        // Base quality is a random value between 0-1
-        const baseQuality = Math.random();
-        
-        // Determine if this is an "unusual" order (10% chance of ignoring typical type preferences)
-        const isUnusualOrder = Math.random() < 0.10;
-        
-        // Full range with high randomness if it's an unusual order
-        if (isUnusualOrder) {
-            // For unusual orders, use a different distribution that's less tied to importer type
-            minQualityRequirement = 0.1 + Math.random() * 0.85; // Full range
-            console.log(`[Contracts] Generating unusual quality requirement (outside normal range for ${selectedImporter.type})`);
-        } else {
-            // Normal case: use importer type preferences
-            switch(selectedImporter.type) {
-                case "Private Importer":
-                    // Private importers often want high quality (biased 0.5-1.0)
-                    minQualityRequirement = 0.5 + (baseQuality * 0.5);
-                    break;
-                case "Restaurant":
-                    // Restaurants typically want good to excellent quality (0.4-0.9)
-                    minQualityRequirement = 0.4 + (baseQuality * 0.5);
-                    break;
-                case "Wine Shop":
-                    // Wine shops have varied requirements (0.2-0.8)
-                    minQualityRequirement = 0.2 + (baseQuality * 0.6);
-                    break;
-                case "Chain Store":
-                    // Chain stores often accept lower quality (0.1-0.6)
-                    minQualityRequirement = 0.1 + (baseQuality * 0.5);
-                    break;
-                default:
-                    // Default case with full range (0.1-1.0)
-                    minQualityRequirement = 0.1 + (baseQuality * 0.9);
-            }
-        }
-        
-        // Apply a larger random variance (-0.1 to +0.1) for more natural variation
-        const randomVariance = (Math.random() * 0.2) - 0.1;
-        minQualityRequirement = Math.max(0.1, Math.min(1.0, minQualityRequirement + randomVariance));
-        
-        console.log(`[Contracts] Setting minimum quality requirement: ${(minQualityRequirement * 100).toFixed(1)}%`);
-        console.log(`[Contracts] Requirement breakdown:
-            - Importer type (${selectedImporter.type}): Base requirement
-            - Unusual order: ${isUnusualOrder ? 'Yes' : 'No'}
-            - Random variance: ${(randomVariance * 100).toFixed(1)}%`);
-        
-        // Add quality requirement to the requirements array
-        requirements.push(createRequirement(REQUIREMENT_TYPES.QUALITY, minQualityRequirement));
-    } else {
-        minQualityRequirement = 0; // Explicitly set to 0 for "no requirement"
-        console.log(`[Contracts] No quality requirement for this contract`);
-    }
-    
-    // Get the current game year for vintage requirements
-    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
-    
-    // Determine vintage requirements using exponential distribution for rarity
-    let minVintageAge = 0;
-    
-    // First decide if this contract will have a vintage requirement
-    // 70% chance of having a vintage requirement (down from the previous 90%)
-    if (Math.random() < 0.7) {
-        // Base vintage distribution with exponential falloff for higher values
-        // Formula: -ln(1-x)/λ where x is random between 0-1 and λ controls the shape
-        // Lambda values by importer type (lower = higher average age requirements)
-        let lambda;
-        
-        switch(selectedImporter.type) {
-            case "Private Importer":
-                // Private importers value aged wines the most
-                lambda = 0.15;  // Higher chance of requesting older vintages
-                break;
-            case "Restaurant":
-                lambda = 0.2;   // Good chance of requesting somewhat aged wines
-                break;
-            case "Wine Shop":
-                lambda = 0.25;  // Moderate chance of requesting aged wines
-                break;
-            case "Chain Store":
-                lambda = 0.3;   // Lower chance of requesting aged wines
-                break;
-            default:
-                lambda = 0.25;  // Default lambda value
-        }
-        
-        // Generate vintage age using exponential distribution
-        const randomValue = Math.random();
-        minVintageAge = Math.floor(-Math.log(1 - randomValue) / lambda);
-        
-        // Cap the maximum vintage age at 50 years
-        minVintageAge = Math.min(minVintageAge, 50);
-        
-        // Ensure at least 1 year of aging if we're requesting a vintage
-        minVintageAge = Math.max(minVintageAge, 1);
-        
-        console.log(`[Contracts] Generated vintage age requirement: ${minVintageAge} years (λ=${lambda})`);
-        
-        // Add vintage requirement to the requirements array
-        // Reference year is game year for future calculations
-        requirements.push(createRequirement(REQUIREMENT_TYPES.VINTAGE, minVintageAge, {
-            referenceYear: gameYear
-        }));
-    }
-    
-    // Calculate required vintage year based on age
-    const requiredVintageYear = minVintageAge > 0 ? gameYear - minVintageAge : 0;
-    
-    console.log(`[Contracts] Vintage requirement: ${minVintageAge > 0 ? 
-        `${minVintageAge} years (${requiredVintageYear} or older)` : 
-        'No minimum vintage'}`);
+    // Generate requirements based on importer
+    const requirements = generateRequirements(selectedImporter);
     
     // Calculate combined price premium from all requirements
     let totalPremium = 0;
+    let minQualityRequirement = 0;
+    let minVintageAge = 0;
+    
     requirements.forEach(req => {
+        // Store requirement values for later use
+        if (req.type === REQUIREMENT_TYPES.QUALITY) {
+            minQualityRequirement = req.value;
+        } else if (req.type === REQUIREMENT_TYPES.VINTAGE) {
+            minVintageAge = req.value;
+        }
+        
         const premium = req.getPremium();
         totalPremium += premium;
         console.log(`[Contracts] ${req.getDescription()}: €${premium.toFixed(2)} premium`);
