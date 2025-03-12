@@ -77,6 +77,7 @@ export const CONTRACT_GENERATION = {
     BASE_CONTRACT_CHANCE: 0.05,      // 5% base chance
     RELATIONSHIP_MIDPOINT: 20,       // 50% chance at relationship 20
     MAX_CONTRACT_CHANCE: 0.8,        // 80% maximum chance
+    MAX_PENDING_CONTRACTS: 5,        // Maximum number of pending contracts allowed
 };
 
 // ---- Farmland Constants ----

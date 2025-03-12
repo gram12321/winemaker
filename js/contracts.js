@@ -313,9 +313,7 @@ export function generateImporterContracts() {
 
     // Check if we already have the maximum number of contracts
     const currentContracts = loadPendingContracts();
-    const MAX_PENDING_CONTRACTS = 5;
-    
-    if (currentContracts.length >= MAX_PENDING_CONTRACTS) {
+    if (currentContracts.length >= CONTRACT_GENERATION.MAX_PENDING_CONTRACTS) {
         return false;
     }
     

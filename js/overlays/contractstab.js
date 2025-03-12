@@ -2,6 +2,7 @@ import { formatNumber, formatQualityDisplay, getFlagIcon, formatRelationshipDisp
 import { loadPendingContracts, rejectContract } from '/js/contracts.js';
 import { getCompletedContracts } from '/js/database/adminFunctions.js';
 import { showAssignWineOverlay } from '/js/overlays/assignWineOverlay.js';
+import { CONTRACT_GENERATION } from '/js/constants/constants.js';
 
 // Global variables to track current sorting state
 let currentImporterSort = { key: 'totalValue', direction: 'desc' };
@@ -25,7 +26,7 @@ export function displayContractsTab() {
         <div class="card-header text-white d-flex justify-content-between align-items-center">
             <h3 class="h5 mb-0">Pending Contracts</h3>
             <div class="contract-info">
-                <span class="badge bg-secondary">${pendingContracts.length}/3 Active</span>
+                <span class="badge bg-secondary">${pendingContracts.length}/${CONTRACT_GENERATION.MAX_PENDING_CONTRACTS} Active</span>
             </div>
         </div>
         <div class="card-body" id="pending-contracts-body">
@@ -90,7 +91,7 @@ function createImporterHistorySection() {
     
     historySection.innerHTML = `
         <div class="card-header text-white d-flex justify-content-between align-items-center">
-            <h3 class="h5 mb-0">Importer History</h3>
+            <h3 class="h5 mb-0">Importer History <span class="badge bg-secondary ms-2">${completedContracts.length} Total</span></h3>
             <div class="filters d-flex gap-2">
                 <select id="importer-name-filter" class="form-control form-control-sm d-inline-block w-auto">
                     <option value="">All Importers</option>
