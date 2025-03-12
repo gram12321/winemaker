@@ -1,4 +1,4 @@
-import { formatNumber, formatQualityDisplay, getFlagIcon  } from '/js/utils.js';
+import { formatNumber, formatQualityDisplay, getFlagIcon, formatRelationshipDisplay } from '/js/utils.js';
 import { calculateWinePrice, sellOrderWine } from '/js/sales.js';
 import { loadPendingContracts, fulfillContract, rejectContract } from '/js/contracts.js';
 import { inventoryInstance } from '/js/resource.js';
@@ -418,13 +418,15 @@ export function displayContractsTab() {
                             </tr>
                         </thead>
                         <tbody>
-                            ${Array.from(importers.values()).map(importer => `
+                            ${Array.from(importers.values()).map(importer => {
+                                const relationship = formatRelationshipDisplay(importer.relationship);
+                                return `
                                 <tr class="importer-row" data-importer-id="${importer.id}">
                                     <td>${getFlagIcon(importer.country)}<strong>${importer.name}</strong></td>
                                     <td><span class="badge bg-secondary">${importer.type}</span></td>
-                                    <td>${importer.marketShare ? importer.marketShare.toFixed(1) + '%' : 'N/A'}</td>
-                                    <td>${importer.relationship ? importer.relationship.toFixed(1) : 'N/A'}</td>
-                                    <td>${importer.contracts.length}</td>
+                                    <td>${formatNumber(importer.marketShare, 1)}%</td>
+                                    <td>${relationship.formattedText}</td>
+                                    <td>${formatNumber(importer.contracts.length)}</td>
                                     <td>€${formatNumber(importer.contracts.reduce((sum, c) => sum + c.totalValue, 0), 2)}</td>
                                 </tr>
                                 <tr class="contract-details-row d-none" data-importer-id="${importer.id}">
@@ -453,7 +455,7 @@ export function displayContractsTab() {
                                         </div>
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `}).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -549,16 +551,18 @@ function createContractsTableHTML(contracts, isPending = true) {
                 </tr>
             </thead>
             <tbody>
-                ${contracts.map((contract, index) => `
+                ${contracts.map((contract, index) => {
+                    const relationship = formatRelationshipDisplay(contract.relationship);
+                    return `
                     <tr>
                         <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
                         <td><span class="badge bg-secondary">${contract.importerType}</span></td>
-                        <td>${contract.marketShare ? contract.marketShare.toFixed(1) + '%' : 'N/A'}</td>
-                        <td>${contract.relationship ? contract.relationship.toFixed(1) : 'N/A'}</td>
-                        <td><strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong></td>
-                        <td>${contract.amount} bottles</td>
-                        <td>€${contract.contractPrice.toFixed(2)}</td>
-                        <td>€${contract.totalValue.toFixed(2)}</td>
+                        <td>${formatNumber(contract.marketShare, 1)}%</td>
+                        <td>${relationship.formattedText}</td>
+                        <td><strong>Quality wine (min ${formatNumber(contract.minQuality * 100)}%)</strong></td>
+                        <td>${formatNumber(contract.amount)} bottles</td>
+                        <td>€${formatNumber(contract.contractPrice, 2)}</td>
+                        <td>€${formatNumber(contract.totalValue, 2)}</td>
                         ${isPending ? `
                             <td>
                                 <button class="btn btn-success btn-sm mb-2 w-100 fulfill-contract-btn" data-index="${index}">Select Wine</button>
@@ -566,7 +570,7 @@ function createContractsTableHTML(contracts, isPending = true) {
                             </td>
                         ` : ''}
                     </tr>
-                `).join('')}
+                `}).join('')}
             </tbody>
         </table>
     `;
