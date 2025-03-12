@@ -1,7 +1,7 @@
 import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
-import { setPrestigeHit, getPrestigeHit, loadImporters, saveImporters, saveCompletedContract, savePendingContracts, loadPendingContracts as loadPendingContractsFromStorage } from './database/adminFunctions.js';
+import { getGameState ,setPrestigeHit, getPrestigeHit, loadImporters, saveImporters, saveCompletedContract, savePendingContracts, loadPendingContracts as loadPendingContractsFromStorage, getCompletedContracts } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { calculateRealPrestige } from './company.js';
 import { updateAllDisplays } from './displayManager.js';
@@ -509,9 +509,15 @@ export function fulfillContract(contractIndex) {
         // Update relationship with the importer
         const importers = loadImporters();
         if (contract.importerId >= 0 && contract.importerId < importers.length) {
-            // Increase relationship by 2 points when a contract is fulfilled
-            importers[contract.importerId].relationship += 2;
-            saveImporters(importers);
+            // Use the new function to update relationship
+            const relationshipChange = updateImporterRelationship(contract.importerId, contract, true);
+            
+            // Add relationship change to console message if significant
+            if (Math.abs(relationshipChange) >= 0.1) {
+                addConsoleMessage(
+                    `Relationship with ${contract.importerName} improved by ${relationshipChange.toFixed(1)} points.`
+                );
+            }
         }
         
         // Increase prestige
@@ -631,10 +637,19 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
     pendingContracts.splice(contractIndex, 1);
     savePendingContracts(pendingContracts);
     
-    // Update relationship with the importer
-    const importers = loadImporters();
+    // Update relationship with the importer using the new function
+    const importers = loadImporters(); // <-- Fix: Load importers here
     if (contract.importerId >= 0 && contract.importerId < importers.length) {
-        // Increase relationship by 2 points when a contract is fulfilled
+        const relationshipChange = updateImporterRelationship(contract.importerId, contract, true);
+        
+        // Add relationship change to console message if significant
+        if (Math.abs(relationshipChange) >= 0.1) {
+            addConsoleMessage(
+                `Relationship with ${contract.importerName} improved by ${relationshipChange.toFixed(1)} points.`
+            );
+        }
+    } else {
+        // Increase relationship by standard amount for backwards compatibility
         importers[contract.importerId].relationship += 2;
         saveImporters(importers);
     }
@@ -684,6 +699,18 @@ export function rejectContract(contractIndex) {
     // Get the contract for messaging
     const contract = pendingContracts[contractIndex];
     
+    // Update relationship with the importer - negative effect for rejecting
+    if (contract.importerId >= 0) {
+        const relationshipChange = updateImporterRelationship(contract.importerId, contract, false);
+        
+        // Add relationship change to console message if significant
+        if (Math.abs(relationshipChange) >= 0.1) {
+            addConsoleMessage(
+                `Relationship with ${contract.importerName} decreased by ${Math.abs(relationshipChange).toFixed(1)} points.`
+            );
+        }
+    }
+    
     // Remove from pending contracts
     pendingContracts.splice(contractIndex, 1);
     savePendingContracts(pendingContracts);
@@ -697,6 +724,87 @@ export function rejectContract(contractIndex) {
     return true;
 }
 
+/**
+ * Calculate relationship change when accepting or rejecting a contract
+ * @param {Object} contract - The contract being accepted or rejected
+ * @param {boolean} isAccepting - True if accepting, false if rejecting
+ * @param {number} existingContracts - Number of previously completed contracts with this importer
+ * @returns {number} - The relationship change value
+ */
+function calculateRelationshipChange(contract, isAccepting, existingContracts = 0) {
+    // Base relationship value affected by contract value
+    // Logarithmic scaling for contract value (€1,000 = ~1 point, €10,000 = ~2.3 points, €100,000 = ~4.6 points)
+    const valueComponent = Math.log10(Math.max(contract.totalValue, 100)) - 1;
+    
+    // Relationship multiplier based on existing contracts (starts at 1, grows to ~3 with many contracts)
+    // Logarithmic scaling: 1 contract = 1x, 10 contracts = 2x, 100 contracts = 3x
+    const contractMultiplier = 1 + Math.log10(Math.max(existingContracts, 1));
+    
+    // Calculate base change (accepting: positive, rejecting: negative)
+    let baseChange = valueComponent * contractMultiplier;
+    
+    // If rejecting, relationship loss is about 1/3 of what would be gained by accepting
+    if (!isAccepting) {
+        baseChange = -baseChange / 3;
+    }
+    
+    // Apply diminishing returns based on current relationship level
+    // The higher the relationship, the harder it is to gain more
+    const currentRelationship = contract.relationship || 0;
+    
+    // Diminishing returns function: as relationship approaches 100, gains become smaller
+    // At 0 relationship: no reduction
+    // At 50 relationship: ~50% reduction
+    // At 90 relationship: ~90% reduction
+    // At 99 relationship: ~99% reduction
+    const diminishingFactor = 1 - (currentRelationship / 100);
+    
+    // Calculate final relationship change
+    // Rejecting contracts has less diminishing returns than accepting
+    const finalChange = isAccepting ? 
+        baseChange * diminishingFactor : 
+        baseChange * Math.sqrt(diminishingFactor);  // Sqrt makes the diminishing effect less severe for rejections
+    
+    return Math.max(-100, Math.min(100, finalChange));  // Cap at -100/+100 points per contract
+}
+
+/**
+ * Update the relationship with an importer after a contract action
+ * @param {number} importerId - The importer's ID
+ * @param {Object} contract - The contract being accepted or rejected
+ * @param {boolean} isAccepting - True if accepting, false if rejecting
+ */
+function updateImporterRelationship(importerId, contract, isAccepting) {
+    const importers = loadImporters();
+    if (importerId >= 0 && importerId < importers.length) {
+        // Get completed contracts to count previous interactions with this importer
+        const completedContracts = getCompletedContracts();
+        const previousContracts = completedContracts.filter(c => 
+            c.importerId === importerId ||
+            (c.importerName === contract.importerName && 
+             c.importerType === contract.importerType &&
+             c.importerCountry === contract.importerCountry)
+        ).length;
+        
+        // Calculate relationship change
+        const relationshipChange = calculateRelationshipChange(contract, isAccepting, previousContracts);
+        
+        // Apply relationship change
+        importers[importerId].relationship = Math.max(0, Math.min(100, 
+            importers[importerId].relationship + relationshipChange
+        ));
+        
+        // Log relationship change
+        console.log(`[Contracts] ${isAccepting ? 'Accepted' : 'Rejected'} contract from ${contract.importerName}: ${relationshipChange > 0 ? '+' : ''}${relationshipChange.toFixed(1)} relationship points`);
+        
+        // Save updated importer data
+        saveImporters(importers);
+        
+        return relationshipChange;
+    }
+    return 0;
+}
+
 // Export the constants and utility functions
 export { 
     REQUIREMENT_TYPES,
@@ -704,5 +812,7 @@ export {
     validateRequirement,
     calculateRequirementPremium,
     formatRequirementHTML,
-    getRequirementDescription
+    getRequirementDescription,
+    calculateRelationshipChange,   // Export for testing/debugging
+    updateImporterRelationship
 };

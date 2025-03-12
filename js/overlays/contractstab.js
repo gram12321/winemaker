@@ -3,6 +3,10 @@ import { loadPendingContracts, rejectContract } from '/js/contracts.js';
 import { getCompletedContracts } from '/js/database/adminFunctions.js';
 import { showAssignWineOverlay } from '/js/overlays/assignWineOverlay.js';
 
+// Global variables to track current sorting state
+let currentImporterSort = { key: 'totalValue', direction: 'desc' };
+let filteredImporters = [];
+
 export function displayContractsTab() {
     const contractsTabContent = document.getElementById('contracts-tab-content');
     if (!contractsTabContent) {
@@ -45,6 +49,9 @@ export function displayContractsTab() {
     // Create and add importer history section
     const historySection = createImporterHistorySection();
     contractsTabContent.appendChild(historySection);
+    
+    // Initialize sorting and filtering for history section
+    setupImporterHistorySortingAndFiltering();
 }
 
 function setupContractEventListeners(pendingContracts) {
@@ -73,16 +80,44 @@ function createImporterHistorySection() {
     
     const completedContracts = getCompletedContracts();
     const importers = groupContractsByImporter(completedContracts);
+    filteredImporters = Array.from(importers.values());
+    
+    // Apply initial sorting (default by total value descending)
+    filteredImporters = sortImporters(filteredImporters, currentImporterSort.key, currentImporterSort.direction);
+    
+    // Get unique importer names for dropdown
+    const importerNames = [...new Set(filteredImporters.map(imp => imp.name))].sort();
     
     historySection.innerHTML = `
         <div class="card-header text-white d-flex justify-content-between align-items-center">
             <h3 class="h5 mb-0">Importer History</h3>
-            <div class="contract-info">
-                <span class="badge bg-secondary">${completedContracts.length} Completed</span>
+            <div class="filters d-flex gap-2">
+                <select id="importer-name-filter" class="form-control form-control-sm d-inline-block w-auto">
+                    <option value="">All Importers</option>
+                    ${importerNames.map(name => 
+                        `<option value="${name}">${name}</option>`
+                    ).join('')}
+                </select>
+                <select id="importer-type-filter" class="form-control form-control-sm d-inline-block w-auto">
+                    <option value="">All Types</option>
+                    ${[...new Set(filteredImporters.map(imp => imp.type))].map(type => 
+                        `<option value="${type}">${type}</option>`
+                    ).join('')}
+                </select>
+                <select id="importer-country-filter" class="form-control form-control-sm d-inline-block w-auto">
+                    <option value="">All Countries</option>
+                    ${[...new Set(filteredImporters.map(imp => imp.country))].map(country => 
+                        `<option value="${country}">${country}</option>`
+                    ).join('')}
+                </select>
             </div>
         </div>
         <div class="card-body">
-            ${Array.from(importers.values()).length > 0 ? createImporterHistoryTableHTML(importers) : `
+            ${filteredImporters.length > 0 ? `
+                <div class="table-responsive" id="importer-history-table-container">
+                    ${createImporterHistoryTableHTML(filteredImporters)}
+                </div>
+            ` : `
                 <div class="alert alert-info text-center">
                     <p>No completed contracts yet.</p>
                     <p class="small mt-2">Complete contracts to build relationships with importers.</p>
@@ -105,6 +140,146 @@ function createImporterHistorySection() {
     });
 
     return historySection;
+}
+
+function setupImporterHistorySortingAndFiltering() {
+    // Skip if there are no filtered importers
+    if (filteredImporters.length === 0) return;
+    
+    // Setup sorting
+    const sortHeaders = document.querySelectorAll('.importer-sort');
+    sortHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const sortKey = header.dataset.sort;
+            
+            // Toggle direction if clicking the same header
+            if (currentImporterSort.key === sortKey) {
+                currentImporterSort.direction = currentImporterSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentImporterSort.key = sortKey;
+                // Default direction based on column type
+                currentImporterSort.direction = ['totalValue', 'contractsCount', 'marketShare', 'relationship'].includes(sortKey) ? 'desc' : 'asc';
+            }
+            
+            // Update sort indicators
+            sortHeaders.forEach(h => {
+                h.classList.remove('asc', 'desc');
+                if (h.dataset.sort === currentImporterSort.key) {
+                    h.classList.add(currentImporterSort.direction);
+                }
+            });
+            
+            // Apply filters and sorting
+            applyImporterFiltersAndSort();
+        });
+    });
+    
+    // Setup filtering with dropdown for name
+    const nameFilter = document.getElementById('importer-name-filter');
+    const typeFilter = document.getElementById('importer-type-filter');
+    const countryFilter = document.getElementById('importer-country-filter');
+    
+    if (nameFilter) nameFilter.addEventListener('change', applyImporterFiltersAndSort);
+    if (typeFilter) typeFilter.addEventListener('change', applyImporterFiltersAndSort);
+    if (countryFilter) countryFilter.addEventListener('change', applyImporterFiltersAndSort);
+    
+    // Set initial sort indicators
+    const initialSortHeader = document.querySelector(`.importer-sort[data-sort="${currentImporterSort.key}"]`);
+    if (initialSortHeader) {
+        initialSortHeader.classList.add(currentImporterSort.direction);
+    }
+}
+
+function applyImporterFiltersAndSort() {
+    const nameFilter = document.getElementById('importer-name-filter')?.value || '';
+    const typeFilter = document.getElementById('importer-type-filter')?.value || '';
+    const countryFilter = document.getElementById('importer-country-filter')?.value || '';
+    const completedContracts = getCompletedContracts();
+    const importers = groupContractsByImporter(completedContracts);
+    
+    // Apply filters
+    filteredImporters = Array.from(importers.values()).filter(importer => {
+        // Changed to exact match for dropdown selection
+        const nameMatch = !nameFilter || importer.name === nameFilter;
+        const typeMatch = !typeFilter || importer.type === typeFilter;
+        const countryMatch = !countryFilter || importer.country === countryFilter;
+        return nameMatch && typeMatch && countryMatch;
+    });
+    
+    // Apply sorting
+    filteredImporters = sortImporters(filteredImporters, currentImporterSort.key, currentImporterSort.direction);
+    
+    // Update the table
+    const tableContainer = document.getElementById('importer-history-table-container');
+    if (tableContainer) {
+        tableContainer.innerHTML = createImporterHistoryTableHTML(filteredImporters);
+    }
+    
+    // Restore event listeners for expanding rows
+    const historySection = document.querySelector('.overlay-section.card:last-child');
+    if (historySection) {
+        historySection.addEventListener('click', (e) => {
+            const importerRow = e.target.closest('.importer-row');
+            if (importerRow) {
+                const importerId = importerRow.dataset.importerId;
+                const detailsRow = historySection.querySelector(`.contract-details-row[data-importer-id="${importerId}"]`);
+                if (detailsRow) {
+                    detailsRow.classList.toggle('d-none');
+                    importerRow.classList.toggle('active');
+                }
+            }
+        });
+    }
+}
+
+function sortImporters(importers, key, direction) {
+    return [...importers].sort((a, b) => {
+        let aValue, bValue;
+        
+        switch (key) {
+            case 'name':
+                aValue = a.name;
+                bValue = b.name;
+                break;
+            case 'type':
+                aValue = a.type;
+                bValue = b.type;
+                break;
+            case 'country':
+                aValue = a.country;
+                bValue = b.country;
+                break;
+            case 'marketShare':
+                aValue = a.marketShare;
+                bValue = b.marketShare;
+                break;
+            case 'relationship':
+                aValue = a.relationship;
+                bValue = b.relationship;
+                break;
+            case 'contractsCount':
+                aValue = a.contracts.length;
+                bValue = b.contracts.length;
+                break;
+            case 'totalValue':
+                aValue = a.contracts.reduce((sum, c) => sum + c.totalValue, 0);
+                bValue = b.contracts.reduce((sum, c) => sum + c.totalValue, 0);
+                break;
+            default:
+                aValue = a.name;
+                bValue = b.name;
+        }
+        
+        // For string comparison
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+            return direction === 'asc' 
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        }
+        
+        // For numeric comparison
+        return direction === 'asc' ? aValue - bValue : bValue - aValue;
+    });
 }
 
 function createContractsTableHTML(contracts, isPending = true) {
@@ -156,12 +331,12 @@ function createContractsTableHTML(contracts, isPending = true) {
                     <tr>
                         <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
                         <td><span class="badge bg-secondary">${contract.importerType}</span></td>
-                        <td>${formatNumber(contract.marketShare, 1)}%</td>
+                        <td>${formatNumber(contract.marketShare, 2)}%</td>
                         <td>${relationship.formattedText}</td>
                         <td>${requirementsHTML}</td>
                         <td>${formatNumber(contract.amount)} bottles</td>
-                        <td>€${formatNumber(contract.contractPrice, 2)}</td>
-                        <td>€${formatNumber(contract.totalValue, 2)}</td>
+                        <td>€${formatNumber(contract.contractPrice, 0)}</td>
+                        <td>€${formatNumber(contract.totalValue, 0)}</td>
                         ${isPending ? `
                             <td>
                                 <button class="btn btn-success btn-sm mb-2 w-100 fulfill-contract-btn" data-index="${index}">Select Wine</button>
@@ -177,43 +352,44 @@ function createContractsTableHTML(contracts, isPending = true) {
 
 function createImporterHistoryTableHTML(importers) {
     return `
-        <div class="table-responsive">
-            <table class="table overlay-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Market Share</th>
-                        <th>Relationship</th>
-                        <th>Completed Contracts</th>
-                        <th>Total Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${Array.from(importers.values()).map(importer => {
-                        const relationship = formatRelationshipDisplay(importer.relationship);
-                        return `
-                            <tr class="importer-row" data-importer-id="${importer.id}">
-                                <td>${getFlagIcon(importer.country)}<strong>${importer.name}</strong></td>
-                                <td><span class="badge bg-secondary">${importer.type}</span></td>
-                                <td>${formatNumber(importer.marketShare, 1)}%</td>
-                                <td>${relationship.formattedText}</td>
-                                <td>${formatNumber(importer.contracts.length)}</td>
-                                <td>€${formatNumber(importer.contracts.reduce((sum, c) => sum + c.totalValue, 0), 2)}</td>
-                            </tr>
-                            ${createContractDetailsRow(importer)}
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-        </div>
+        <table class="table overlay-table">
+            <thead>
+                <tr>
+                    <th><span class="importer-sort sortable" data-sort="name">Name</span></th>
+                    <th><span class="importer-sort sortable" data-sort="type">Type</span></th>
+                    <th><span class="importer-sort sortable" data-sort="country">Country</span></th>
+                    <th><span class="importer-sort sortable" data-sort="marketShare">Market Share</span></th>
+                    <th><span class="importer-sort sortable" data-sort="relationship">Relationship</span></th>
+                    <th><span class="importer-sort sortable" data-sort="contractsCount">Completed Contracts</span></th>
+                    <th><span class="importer-sort sortable" data-sort="totalValue">Total Value</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                ${importers.map(importer => {
+                    const relationship = formatRelationshipDisplay(importer.relationship);
+                    const totalValue = importer.contracts.reduce((sum, c) => sum + c.totalValue, 0);
+                    return `
+                        <tr class="importer-row" data-importer-id="${importer.id}">
+                            <td>${getFlagIcon(importer.country)}<strong>${importer.name}</strong></td>
+                            <td><span class="badge bg-secondary">${importer.type}</span></td>
+                            <td>${importer.country}</td>
+                            <td>${formatNumber(importer.marketShare, 2)}%</td>
+                            <td>${relationship.formattedText}</td>
+                            <td>${formatNumber(importer.contracts.length)}</td>
+                            <td>€${formatNumber(totalValue, 0)}</td>
+                        </tr>
+                        ${createContractDetailsRow(importer)}
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
     `;
 }
 
 function createContractDetailsRow(importer) {
     return `
         <tr class="contract-details-row d-none" data-importer-id="${importer.id}">
-            <td colspan="6">
+            <td colspan="7">
                 <div class="contract-details">
                     <table class="table table-sm">
                         <thead>
@@ -238,8 +414,8 @@ function createContractDetailsRow(importer) {
                                         }
                                     </td>
                                     <td>${formatNumber(contract.amount)} bottles</td>
-                                    <td>€${formatNumber(contract.contractPrice, 2)}</td>
-                                    <td>€${formatNumber(contract.totalValue, 2)}</td>
+                                    <td>€${formatNumber(contract.contractPrice, 0)}</td>
+                                    <td>€${formatNumber(contract.totalValue, 0)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>

@@ -17,3 +17,16 @@
 
 
 
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filters input, .filters select {
+        width: 100% !important;
+    }
+}
+
+
