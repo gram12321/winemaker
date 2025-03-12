@@ -103,6 +103,7 @@ export function generateImporterContracts() {
         totalValue: contractPrice * contractAmount,
         importerCountry: selectedImporter.country,
         importerType: selectedImporter.type,
+        importerName: selectedImporter.name,  // Add this line to include importer name
         importerId: importers.indexOf(selectedImporter),
         requirements: {
             description: "Quality wine",

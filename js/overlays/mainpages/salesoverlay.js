@@ -1,4 +1,4 @@
-import { formatNumber, formatQualityDisplay  } from '/js/utils.js';
+import { formatNumber, formatQualityDisplay, getFlagIcon  } from '/js/utils.js';
 import { calculateWinePrice, sellOrderWine } from '/js/sales.js';
 import { loadPendingContracts, fulfillContract, rejectContract } from '/js/contracts.js';
 import { inventoryInstance } from '/js/resource.js';
@@ -380,12 +380,20 @@ export function displayContractsTab() {
     
     // Populate the table with contracts
     pendingContracts.forEach((contract, index) => {
+        // Add debug logging
+        console.log('Contract data:', {
+            name: contract.importerName,
+            country: contract.importerCountry,
+            type: contract.importerType
+        });
+        
         const row = document.createElement('tr');
         
         row.innerHTML = `
             <td>
+                ${getFlagIcon(contract.importerCountry)}
                 <span class="badge bg-secondary">${contract.importerType}</span><br>
-                <strong>${contract.importerCountry}</strong>
+                <strong>${contract.importerName}</strong>
             </td>
             <td>
                 <strong>Quality wine (min ${(contract.minQuality || 0.1) * 100}%)</strong>
