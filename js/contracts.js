@@ -267,6 +267,102 @@ const REQUIREMENT_CONFIG = {
     // }
 };
 
+// Define a central configuration for pricing calculations
+const PRICING_CONFIG = {
+    // Base price range calculation configuration
+    basePriceRange: {
+        calculate: (importer) => {
+            // Default base prices
+            let min = 5;  // Minimum €5 per bottle
+            let max = 15; // Maximum €15 per bottle base price
+            
+            // Adjust based on importer type
+            const typeRanges = {
+                "Private Importer": { min: 10, max: 25 },  // Pay more for exclusivity
+                "Restaurant": { min: 8, max: 20 },         // Pay slightly more than average
+                "Wine Shop": { min: 6, max: 18 },          // Pay average prices
+                "Chain Store": { min: 4, max: 12 }         // Negotiate lower prices due to volume
+            };
+            
+            // Apply type-specific ranges if available
+            if (typeRanges[importer.type]) {
+                min = typeRanges[importer.type].min;
+                max = typeRanges[importer.type].max;
+            }
+            
+            // Adjust for purchasing power (wealthier markets have higher price ranges)
+            min *= (0.8 + importer.purchasingPower * 0.4);
+            max *= (0.8 + importer.purchasingPower * 0.6);
+            
+            // Adjust for wine tradition (traditional markets value wine more)
+            min *= (0.9 + importer.wineTradition * 0.2);
+            max *= (0.9 + importer.wineTradition * 0.3);
+            
+            return { min, max };
+        }
+    },
+    
+    // Quality premium calculation configuration
+    qualityPremium: {
+        calculate: (minQuality) => {
+            // No quality requirement means no premium
+            if (!minQuality) return 0;
+            
+            // Quality premium scales exponentially with higher requirements
+            // Low requirements (10-40%): €0-2 premium
+            // Medium requirements (40-70%): €2-15 premium
+            // High requirements (70-90%): €15-50 premium
+            // Very high requirements (90%+): €50-200+ premium
+            
+            if (minQuality <= 0.4) {
+                // Linear increase for low quality requirements
+                return minQuality * 5;
+            } else if (minQuality <= 0.7) {
+                // Steeper increase for medium quality
+                return 2 + (minQuality - 0.4) * 45;
+            } else if (minQuality <= 0.9) {
+                // Even steeper for high quality
+                return 15 + (minQuality - 0.7) * 175;
+            } else {
+                // Exponential for premium quality requirements
+                return 50 + Math.pow((minQuality - 0.9) * 10, 2) * 150;
+            }
+        }
+    },
+    
+    // Vintage premium calculation configuration
+    vintagePremium: {
+        calculate: (vintageAge) => {
+            // No vintage requirement means no premium
+            if (!vintageAge || vintageAge <= 0) return 0;
+            
+            // Enhanced premium calculation for wider vintage range (0-50 years)
+            // Uses progressive scaling:
+            // - 1-5 years: modest premium (€1-10)
+            // - 6-15 years: significant premium (€10-50)
+            // - 16-30 years: substantial premium (€50-200)
+            // - 31-50 years: exceptional premium (€200-1000+)
+            
+            if (vintageAge <= 5) {
+                // Linear increase for young wines (€1-10)
+                return vintageAge * 2;
+            } else if (vintageAge <= 15) {
+                // Growing premium for mature wines (€10-50)
+                return 10 + Math.pow(vintageAge - 5, 1.5) * 2;
+            } else if (vintageAge <= 30) {
+                // Steeper growth for old wines (€50-200)
+                return 50 + Math.pow(vintageAge - 15, 1.7) * 3;
+            } else {
+                // Exponential growth for very old wines (€200-1000+)
+                // This creates exceptional premiums for very rare vintage requirements
+                return 200 + Math.pow(vintageAge - 30, 2.2) * 5;
+            }
+        }
+    }
+    
+    // Add future pricing calculation configurations here as needed
+};
+
 /**
  * Generate requirements for a contract based on importer
  * @param {Object} importer - The importer object
@@ -441,43 +537,7 @@ export function generateImporterContracts() {
  * @returns {Object} - Min and max base price range
  */
 function calculateContractBasePriceRange(importer) {
-    // Base price range depends on importer type and market characteristics
-    let min = 5;  // Minimum €5 per bottle
-    let max = 15; // Maximum €15 per bottle base price
-    
-    // Adjust based on importer type
-    switch(importer.type) {
-        case "Private Importer":
-            // Private importers pay more for exclusivity
-            min = 10;
-            max = 25;
-            break;
-        case "Restaurant":
-            // Restaurants pay slightly more than average
-            min = 8;
-            max = 20;
-            break;
-        case "Wine Shop":
-            // Wine shops pay average prices
-            min = 6;
-            max = 18;
-            break;
-        case "Chain Store":
-            // Chain stores negotiate lower prices due to volume
-            min = 4;
-            max = 12;
-            break;
-    }
-    
-    // Adjust for purchasing power (wealthier markets have higher price ranges)
-    min *= (0.8 + importer.purchasingPower * 0.4);
-    max *= (0.8 + importer.purchasingPower * 0.6);
-    
-    // Adjust for wine tradition (traditional markets value wine more)
-    min *= (0.9 + importer.wineTradition * 0.2);
-    max *= (0.9 + importer.wineTradition * 0.3);
-    
-    return { min, max };
+    return PRICING_CONFIG.basePriceRange.calculate(importer);
 }
 
 /**
@@ -486,28 +546,7 @@ function calculateContractBasePriceRange(importer) {
  * @returns {number} - Price premium in euros per bottle
  */
 function calculateQualityPricePremium(minQuality) {
-    // No quality requirement means no premium
-    if (!minQuality) return 0;
-    
-    // Quality premium scales exponentially with higher requirements
-    // Low requirements (10-40%): €0-2 premium
-    // Medium requirements (40-70%): €2-15 premium
-    // High requirements (70-90%): €15-50 premium
-    // Very high requirements (90%+): €50-200+ premium
-    
-    if (minQuality <= 0.4) {
-        // Linear increase for low quality requirements
-        return minQuality * 5;
-    } else if (minQuality <= 0.7) {
-        // Steeper increase for medium quality
-        return 2 + (minQuality - 0.4) * 45;
-    } else if (minQuality <= 0.9) {
-        // Even steeper for high quality
-        return 15 + (minQuality - 0.7) * 175;
-    } else {
-        // Exponential for premium quality requirements
-        return 50 + Math.pow((minQuality - 0.9) * 10, 2) * 150;
-    }
+    return PRICING_CONFIG.qualityPremium.calculate(minQuality);
 }
 
 /**
@@ -516,30 +555,7 @@ function calculateQualityPricePremium(minQuality) {
  * @returns {number} - Price premium in euros per bottle
  */
 function calculateVintagePricePremium(vintageAge) {
-    // No vintage requirement means no premium
-    if (!vintageAge || vintageAge <= 0) return 0;
-    
-    // Enhanced premium calculation for wider vintage range (0-50 years)
-    // Uses progressive scaling:
-    // - 1-5 years: modest premium (€1-10)
-    // - 6-15 years: significant premium (€10-50)
-    // - 16-30 years: substantial premium (€50-200)
-    // - 31-50 years: exceptional premium (€200-1000+)
-    
-    if (vintageAge <= 5) {
-        // Linear increase for young wines (€1-10)
-        return vintageAge * 2;
-    } else if (vintageAge <= 15) {
-        // Growing premium for mature wines (€10-50)
-        return 10 + Math.pow(vintageAge - 5, 1.5) * 2;
-    } else if (vintageAge <= 30) {
-        // Steeper growth for old wines (€50-200)
-        return 50 + Math.pow(vintageAge - 15, 1.7) * 3;
-    } else {
-        // Exponential growth for very old wines (€200-1000+)
-        // This creates exceptional premiums for very rare vintage requirements
-        return 200 + Math.pow(vintageAge - 30, 2.2) * 5;
-    }
+    return PRICING_CONFIG.vintagePremium.calculate(vintageAge);
 }
 
 /**
