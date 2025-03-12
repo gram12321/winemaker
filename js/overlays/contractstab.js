@@ -343,6 +343,11 @@ function createContractsTableHTML(contracts, isPending = true) {
                         }).join('<br>');
                     }
                     
+                    // If base price is available in the contract, show price difference
+                    const priceDisplay = contract.basePrice ? 
+                        `€${formatNumber(contract.contractPrice, 0)} (${((contract.contractPrice / contract.basePrice - 1) * 100).toFixed(0)}%)` :
+                        `€${formatNumber(contract.contractPrice, 0)}`;
+                    
                     return `
                     <tr>
                         <td>${getFlagIcon(contract.importerCountry)}<strong>${contract.importerName || 'Unknown Importer'}</strong></td>
@@ -351,7 +356,7 @@ function createContractsTableHTML(contracts, isPending = true) {
                         <td>${relationship.formattedText}</td>
                         <td>${requirementsHTML}</td>
                         <td>${formatNumber(contract.amount)} bottles</td>
-                        <td>€${formatNumber(contract.contractPrice, 0)}</td>
+                        <td>${priceDisplay}</td>
                         <td>€${formatNumber(contract.totalValue, 0)}</td>
                         ${isPending ? `
                             <td>
