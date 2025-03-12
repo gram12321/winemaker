@@ -35,8 +35,19 @@ export function showAssignWineOverlay(contract, contractIndex) {
  * @returns {boolean} True if wine meets contract requirements
  */
 function matchesContractRequirements(wine, contract) {
-    // For now, implement simple quality check
-    return wine.quality >= (contract.minQuality || 0.1);
+    // Check quality requirements
+    if (wine.quality < (contract.minQuality || 0.1)) {
+        return false;
+    }
+    
+    // Check vintage requirements if applicable
+    if (contract.requiredVintageYear && contract.requiredVintageYear > 0) {
+        if (wine.vintage > contract.requiredVintageYear) {
+            return false;
+        }
+    }
+    
+    return true;
 }
 
 /**
@@ -84,6 +95,9 @@ function generateAssignWineHTML(contract, eligibleWines) {
         }).join('') : 
         `<tr><td colspan="8" class="text-center">No eligible wines found that meet the contract requirements.</td></tr>`;
 
+    // Get current game year for vintage display
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+
     return `
         <div class="overlay-section-wrapper">
             <section class="overlay-section card">
@@ -97,7 +111,12 @@ function generateAssignWineHTML(contract, eligibleWines) {
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Importer:</strong> ${contract.importerType} (${contract.importerCountry})</p>
-                                <p><strong>Requirement:</strong> Wine quality ≥ ${(contract.minQuality || 0.1) * 100}%</p>
+                                <p><strong>Requirements:</strong></p>
+                                <ul>
+                                    <li>Wine quality ≥ ${(contract.minQuality || 0.1) * 100}%</li>
+                                    ${contract.minVintageAge > 0 ? 
+                                      `<li>Vintage ${contract.requiredVintageYear} or older (${contract.minVintageAge} years age)</li>` : ''}
+                                </ul>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Amount:</strong> ${contract.amount} bottles</p>
@@ -245,6 +264,9 @@ function updateSelectedAmount(overlay, contract, quantityInputs) {
  * @returns {Object} Validation result
  */
 function validateSelectedWines(selectedWines, contract) {
+    // Get current game year for vintage validation
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+    
     // Total amount check
     const totalSelected = selectedWines.reduce((total, wine) => total + wine.amount, 0);
     if (totalSelected !== contract.amount) {
@@ -263,6 +285,17 @@ function validateSelectedWines(selectedWines, contract) {
             valid: false,
             message: `Some selected wines don't meet the minimum quality requirement of ${minQualityPercentage}%.`
         };
+    }
+    
+    // Vintage check - make sure all wines meet the minimum vintage requirement (if any)
+    if (contract.requiredVintageYear && contract.requiredVintageYear > 0) {
+        const invalidVintageWines = selectedWines.filter(wine => wine.vintage > contract.requiredVintageYear);
+        if (invalidVintageWines.length > 0) {
+            return {
+                valid: false,
+                message: `Some selected wines don't meet the minimum age requirement. Need vintage ${contract.requiredVintageYear} or older.`
+            };
+        }
     }
     
     return { valid: true };

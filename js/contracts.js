@@ -27,7 +27,7 @@ export function generateImporterContracts() {
 
     // Check if we already have the maximum number of contracts
     const currentContracts = loadPendingContracts();
-    const MAX_PENDING_CONTRACTS = 3;
+    const MAX_PENDING_CONTRACTS = 5;
     
     if (currentContracts.length >= MAX_PENDING_CONTRACTS) {
         console.log(`[Contracts] Already at maximum pending contracts (${MAX_PENDING_CONTRACTS}). No new contracts will be generated.`);
@@ -149,27 +149,69 @@ export function generateImporterContracts() {
         - Unusual order: ${isUnusualOrder ? 'Yes' : 'No'}
         - Random variance: ${(randomVariance * 100).toFixed(1)}%`);
     
+    // Get the current game year for vintage requirements
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+    
+    // Determine vintage requirements based on importer type
+    let minVintageAge = 0;
+    
+    switch(selectedImporter.type) {
+        case "Private Importer":
+            // Private importers often want aged wines (2-5 years)
+            minVintageAge = Math.floor(Math.random() * 4) + 2;
+            break;
+        case "Restaurant":
+            // Restaurants sometimes want aged wines (1-4 years)
+            minVintageAge = Math.floor(Math.random() * 4) + 1;
+            break;
+        case "Wine Shop":
+            // Wine shops occasionally want aged wines (0-3 years)
+            minVintageAge = Math.floor(Math.random() * 4);
+            break;
+        case "Chain Store":
+            // Chain stores rarely want aged wines (0-2 years)
+            minVintageAge = Math.floor(Math.random() * 3);
+            break;
+        default:
+            // Default case (0-3 years)
+            minVintageAge = Math.floor(Math.random() * 4);
+    }
+    
+    // Apply a small random chance to remove vintage requirements
+    if (Math.random() < 0.3) {
+        minVintageAge = 0;
+    }
+    
+    // Calculate required vintage year based on age
+    const requiredVintageYear = minVintageAge > 0 ? gameYear - minVintageAge : 0;
+    
+    console.log(`[Contracts] Vintage requirement: ${minVintageAge > 0 ? 
+        `${minVintageAge} years (${requiredVintageYear} or older)` : 
+        'No minimum vintage'}`);
+    
     // Calculate contract price using component-based pricing
     const basePriceRange = calculateContractBasePriceRange(selectedImporter);
     const qualityPremium = calculateQualityPricePremium(minQualityRequirement);
+    const vintagePremium = calculateVintagePricePremium(minVintageAge);
     
     // Calculate amount - larger than regular orders based on importer's market share
     const baseAmount = Math.max(10, Math.ceil(Math.random() * 20 + 10 * selectedImporter.marketShare / 10));
     const contractAmount = Math.max(10, Math.ceil(baseAmount * selectedImporter.buyAmountMultiplicator));
     
-    // Contract price is base price + quality premium, adjusted by importer multiplier
+    // Contract price now includes vintage premium
     const basePrice = basePriceRange.min + Math.random() * (basePriceRange.max - basePriceRange.min);
-    const contractPrice = (basePrice + qualityPremium) * selectedImporter.buyPriceMultiplicator;
+    const contractPrice = (basePrice + qualityPremium + vintagePremium) * selectedImporter.buyPriceMultiplicator;
     
     console.log(`[Contracts] Price calculation:`, {
         baseRange: `€${basePriceRange.min.toFixed(2)} - €${basePriceRange.max.toFixed(2)}`,
         basePrice: `€${basePrice.toFixed(2)}`,
         qualityPremium: `€${qualityPremium.toFixed(2)} (for ${(minQualityRequirement * 100).toFixed(1)}% min quality)`,
+        vintagePremium: `€${vintagePremium.toFixed(2)} (for ${minVintageAge} years aging)`,
         importerMultiplier: selectedImporter.buyPriceMultiplicator.toFixed(2),
         finalPrice: `€${contractPrice.toFixed(2)}`
     });
     
-    // Create contract object
+    // Create contract object with new vintage requirements
     const contract = {
         type: "Contract",
         amount: contractAmount,
@@ -182,9 +224,13 @@ export function generateImporterContracts() {
         marketShare: selectedImporter.marketShare,
         relationship: selectedImporter.relationship,
         minQuality: minQualityRequirement,
+        minVintageAge: minVintageAge,
+        requiredVintageYear: requiredVintageYear,
         requirements: {
             description: "Quality wine",
-            minQuality: minQualityRequirement
+            minQuality: minQualityRequirement,
+            minVintageAge: minVintageAge,
+            requiredVintageYear: requiredVintageYear
         }
     };
     
@@ -273,6 +319,20 @@ function calculateQualityPricePremium(minQuality) {
         // Exponential for premium quality requirements
         return 50 + Math.pow((minQuality - 0.9) * 10, 2) * 150;
     }
+}
+
+/**
+ * Calculate price premium based on vintage age requirements
+ * @param {number} vintageAge - Required vintage age in years
+ * @returns {number} - Price premium in euros per bottle
+ */
+function calculateVintagePricePremium(vintageAge) {
+    // No vintage requirement means no premium
+    if (!vintageAge || vintageAge <= 0) return 0;
+    
+    // Base premium per year of aging (increasing with age)
+    // 1 year: €2, 2 years: €5, 3 years: €9, 4 years: €14, 5+ years: €20+
+    return Math.pow(vintageAge, 1.5) + vintageAge;
 }
 
 /**
@@ -408,10 +468,23 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
     }
     
     // Check if each selected wine meets the contract requirements
-    const invalidWines = selectedWines.filter(wine => wine.quality < (contract.minQuality || 0.1));
-    if (invalidWines.length > 0) {
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+    
+    // Validate quality requirements
+    const invalidQualityWines = selectedWines.filter(wine => wine.quality < (contract.minQuality || 0.1));
+    if (invalidQualityWines.length > 0) {
         addConsoleMessage(`Some selected wines don't meet the minimum quality requirement of ${(contract.minQuality || 0.1) * 100}%.`);
         return false;
+    }
+    
+    // Validate vintage requirements if applicable
+    if (contract.requiredVintageYear && contract.requiredVintageYear > 0) {
+        const invalidVintageWines = selectedWines.filter(wine => wine.vintage > contract.requiredVintageYear);
+        if (invalidVintageWines.length > 0) {
+            const ageRequired = gameYear - contract.requiredVintageYear;
+            addConsoleMessage(`Some selected wines don't meet the minimum age requirement of ${ageRequired} years (vintage ${contract.requiredVintageYear} or older).`);
+            return false;
+        }
     }
     
     // Remove the wines from inventory

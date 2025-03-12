@@ -102,6 +102,9 @@ function createImporterHistorySection() {
 }
 
 function createContractsTableHTML(contracts, isPending = true) {
+    // Get current game year for displaying age requirements
+    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+    
     return `
         <table class="table overlay-table">
             <thead>
@@ -121,8 +124,14 @@ function createContractsTableHTML(contracts, isPending = true) {
                 ${contracts.map((contract, index) => {
                     const relationship = formatRelationshipDisplay(contract.relationship);
                     const qualityRequirement = contract.minQuality || 0.1;
-                    // Use the quality color class to visually indicate requirement difficulty
                     const qualityColorClass = getColorClass(qualityRequirement);
+                    
+                    // Format vintage requirements with color coding
+                    let vintageRequirement = '';
+                    if (contract.minVintageAge && contract.minVintageAge > 0) {
+                        const vintageClass = getColorClass(Math.min(contract.minVintageAge / 5, 0.95)); // Scale age 0-5+ years to 0-0.95 for color
+                        vintageRequirement = `<br>Vintage <span class="${vintageClass}">${contract.requiredVintageYear} or older</span>`;
+                    }
                     
                     return `
                     <tr>
@@ -130,7 +139,7 @@ function createContractsTableHTML(contracts, isPending = true) {
                         <td><span class="badge bg-secondary">${contract.importerType}</span></td>
                         <td>${formatNumber(contract.marketShare, 1)}%</td>
                         <td>${relationship.formattedText}</td>
-                        <td><strong>Quality wine <span class="${qualityColorClass}">(min ${formatNumber(contract.minQuality * 100)}%)</span></strong></td>
+                        <td><strong>Quality wine <span class="${qualityColorClass}">(min ${formatNumber(contract.minQuality * 100)}%)</span>${vintageRequirement}</strong></td>
                         <td>${formatNumber(contract.amount)} bottles</td>
                         <td>€${formatNumber(contract.contractPrice, 2)}</td>
                         <td>€${formatNumber(contract.totalValue, 2)}</td>
