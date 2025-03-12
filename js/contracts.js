@@ -62,9 +62,42 @@ export function generateImporterContracts() {
     console.group("[Contract Generation] Generating importer contract");
     console.log(`${eligibleImporters.length} eligible importers with relationship >= ${MIN_RELATIONSHIP_THRESHOLD}`);
     
-    // Select a single random eligible importer
-    const selectedImporter = eligibleImporters[Math.floor(Math.random() * eligibleImporters.length)];
-    console.log(`[Contracts] Selected importer: ${selectedImporter.type} (${selectedImporter.country}) with relationship ${selectedImporter.relationship.toFixed(1)}`);
+    // Weight selection by relationship value using relationship-based weighting
+    const totalWeight = eligibleImporters.reduce((sum, importer) => sum + Math.pow(importer.relationship, 2), 0);
+    let randomValue = Math.random() * totalWeight;
+    let cumulativeWeight = 0;
+    let selectedImporter;
+    
+    // Select an importer using weighted random selection
+    for (const importer of eligibleImporters) {
+        cumulativeWeight += Math.pow(importer.relationship, 2);
+        if (randomValue <= cumulativeWeight) {
+            selectedImporter = importer;
+            break;
+        }
+    }
+    
+    // Fallback to the last importer if the loop somehow didn't select one
+    if (!selectedImporter) {
+        selectedImporter = eligibleImporters[eligibleImporters.length - 1];
+    }
+    
+    console.log(`[Contracts] Selected importer: ${selectedImporter.name} (${selectedImporter.type}, ${selectedImporter.country}) with relationship ${selectedImporter.relationship.toFixed(1)}`);
+    
+    // Add debug info about selection probabilities
+    if (eligibleImporters.length > 1) {
+        const probabilities = eligibleImporters.map(importer => ({
+            name: importer.name,
+            type: importer.type,
+            country: importer.country,
+            relationship: importer.relationship.toFixed(1),
+            weight: Math.pow(importer.relationship, 2),
+            probability: `${((Math.pow(importer.relationship, 2) / totalWeight) * 100).toFixed(1)}%`
+        }));
+        
+        console.log("Selection probabilities (weighted by relationship²):");
+        console.table(probabilities);
+    }
     
     // Select a suitable wine for this contract
     // Filter wines by quality - importers prefer higher quality for contracts

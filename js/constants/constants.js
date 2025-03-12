@@ -73,7 +73,7 @@ export const PRICE_NEGOTIATION = {
  * MAX_CONTRACT_CHANCE: Maximum possible contract chance (80%)
  */
 export const CONTRACT_GENERATION = {
-    MIN_RELATIONSHIP_THRESHOLD: 0.1,  // Lowered threshold to make contracts more likely to appear
+    MIN_RELATIONSHIP_THRESHOLD: 0.01,  // Lowered threshold to make contracts more likely to appear
     BASE_CONTRACT_CHANCE: 0.05,      // 5% base chance
     RELATIONSHIP_MIDPOINT: 20,       // 50% chance at relationship 20
     MAX_CONTRACT_CHANCE: 0.8,        // 80% maximum chance
