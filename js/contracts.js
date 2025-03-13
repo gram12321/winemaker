@@ -624,6 +624,58 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
         return false;
     }
     
+    // Update relationship with the importer using the new function
+    const importers = loadImporters();
+    let relationshipChange = 0;
+    
+    console.log('[DEBUG] Contract Fulfillment Start:', {
+        importerId: contract.importerId,
+        importerName: contract.importerName,
+        currentRelationship: contract.relationship,
+        contractValue: contract.totalValue,
+        existingContracts: getCompletedContracts().length
+    });
+
+    if (contract.importerId >= 0 && contract.importerId < importers.length) {
+        const currentImporter = importers[contract.importerId];
+        console.log('[DEBUG] Current Importer State:', {
+            name: currentImporter.name,
+            currentRelationship: currentImporter.relationship,
+            marketShare: currentImporter.marketShare,
+            type: currentImporter.type
+        });
+
+        // Calculate relationship change before doing anything else
+        relationshipChange = calculateRelationshipChange(contract, true, getCompletedContracts().length);
+        
+        // Calculate new relationship value
+        const oldRelationship = currentImporter.relationship;
+        const newRelationship = Math.max(0, Math.min(100, oldRelationship + relationshipChange));
+        
+        console.log('[DEBUG] Relationship Update Process:', {
+            startingRelationship: oldRelationship,
+            calculatedChange: relationshipChange,
+            newRelationship: newRelationship,
+            diminishingFactor: 1 - (oldRelationship / 100),
+            contractsCompleted: getCompletedContracts().length
+        });
+        
+        // Update both the importer's relationship and the contract's relationship
+        currentImporter.relationship = newRelationship;
+        contract.relationship = newRelationship;
+        contract.relationshipChange = relationshipChange;
+        
+        // Save updated importer data
+        saveImporters(importers);
+        
+        console.log('[DEBUG] Final State:', {
+            importerName: contract.importerName,
+            savedRelationship: currentImporter.relationship,
+            relationshipChange: relationshipChange,
+            contractRelationship: contract.relationship
+        });
+    }
+    
     // Add used wines details to contract before saving
     contract.usedWines = selectedWines.map(wine => ({
         name: wine.name,
@@ -642,23 +694,6 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
     // Remove from pending contracts
     pendingContracts.splice(contractIndex, 1);
     savePendingContracts(pendingContracts);
-    
-    // Update relationship with the importer using the new function
-    const importers = loadImporters(); // <-- Fix: Load importers here
-    if (contract.importerId >= 0 && contract.importerId < importers.length) {
-        const relationshipChange = updateImporterRelationship(contract.importerId, contract, true);
-        
-        // Add relationship change to console message if significant
-        if (Math.abs(relationshipChange) >= 0.1) {
-            addConsoleMessage(
-                `Relationship with ${contract.importerName} improved by ${relationshipChange.toFixed(1)} points.`
-            );
-        }
-    } else {
-        // Increase relationship by standard amount for backwards compatibility
-        importers[contract.importerId].relationship += 2;
-        saveImporters(importers);
-    }
     
     // Increase prestige
     setPrestigeHit(getPrestigeHit() + contract.totalValue / 10000);
@@ -795,15 +830,23 @@ function updateImporterRelationship(importerId, contract, isAccepting) {
         // Calculate relationship change
         const relationshipChange = calculateRelationshipChange(contract, isAccepting, previousContracts);
         
-        // Apply relationship change
-        importers[importerId].relationship = Math.max(0, Math.min(100, 
+        // Calculate new relationship value
+        const newRelationship = Math.max(0, Math.min(100, 
             importers[importerId].relationship + relationshipChange
         ));
         
-        // Log relationship change
-        console.log(`[Contracts] ${isAccepting ? 'Accepted' : 'Rejected'} contract from ${contract.importerName}: ${relationshipChange > 0 ? '+' : ''}${relationshipChange.toFixed(1)} relationship points`);
+        // Update both the importer's relationship and the contract's relationship
+        importers[importerId].relationship = newRelationship;
+        contract.relationship = newRelationship; // Update the contract's relationship to match
         
-        // Save updated importer data
+        console.log('[DEBUG] Importer relationship update:', {
+            importerName: contract.importerName,
+            oldRelationship: importers[importerId].relationship - relationshipChange,
+            change: relationshipChange,
+            newRelationship: newRelationship
+        });
+        
+        // Save the updated importers to localStorage
         saveImporters(importers);
         
         return relationshipChange;

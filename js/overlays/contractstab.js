@@ -407,6 +407,7 @@ function createContractDetailsRow(importer) {
                                 <th>Amount</th>
                                 <th>Price/Bottle</th>
                                 <th>Total Value</th>
+                                <th>Relationship Change</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -424,6 +425,12 @@ function createContractDetailsRow(importer) {
                                     <td>${formatNumber(contract.amount)} bottles</td>
                                     <td>€${formatNumber(contract.contractPrice, 0)}</td>
                                     <td>€${formatNumber(contract.totalValue, 0)}</td>
+                                    <td>${contract.relationshipChange !== undefined ? 
+                                        `<span class="text-${contract.relationshipChange >= 0 ? 'success' : 'danger'}">
+                                            ${contract.relationshipChange > 0 ? '+' : ''}${formatNumber(contract.relationshipChange, 1)}
+                                        </span>` 
+                                        : '<span class="text-warning">Legacy contract</span>'
+                                    }</td>
                                 </tr>
                             `).join('')}
                         </tbody>

@@ -455,10 +455,13 @@ export function loadPendingContracts(recreateRequirementFn) {
  */
 export function saveCompletedContract(contract) {
     const completedContracts = getCompletedContracts();
-    completedContracts.push({
+    const contractToSave = {
         ...contract,
-        completedDate: new Date().toISOString()
-    });
+        completedDate: new Date().toISOString(),
+        // Ensure relationshipChange is included and converted to number
+        relationshipChange: Number(contract.relationshipChange) || 0
+    };
+    completedContracts.push(contractToSave);
     localStorage.setItem('completedContracts', JSON.stringify(completedContracts));
 }
 

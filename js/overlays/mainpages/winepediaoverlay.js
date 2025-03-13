@@ -37,21 +37,7 @@ function setupWinepediaEventListeners(overlay) {
             overlay.querySelectorAll('.winepedia-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
 
-            // Log multiplicators when importers tab is clicked
-            if (target === 'importers') {
-                const importers = initializeImporters();
-                console.group('Importer Multiplicators');
-                importers.forEach(importer => {
-                    console.log(
-                        `${importer.country} - ${importer.type} (Market Share: ${(importer.marketShare || 0).toFixed(1)}%):\n` +
-                        `  Price Multiplicator: ${(importer.buyPriceMultiplicator || 0).toFixed(2)}\n` +
-                        `  Amount Multiplicator: ${(importer.buyAmountMultiplicator || 0).toFixed(2)}`
-                    );
-                });
-                console.groupEnd();
-            }
-
-            // Update active content
+                        // Update active content
             overlay.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
                 if (content.id === target) {

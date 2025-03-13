@@ -56,7 +56,8 @@ function generateAssignWineHTML(contract, eligibleWines) {
                     <td>
                         <div class="input-group input-group-sm">
                             <input type="range" class="form-range wine-quantity" 
-                                   min="0" max="${wine.amount}" value="0" step="1"
+                                   min="0" max="${Math.min(wine.amount, requiredAmount)}" value="0" step="1"
+                                   data-original-max="${Math.min(wine.amount, requiredAmount)}"
                                    data-wine-id="${wine.id || wine.resource.name + '-' + wine.vintage}"
                                    data-wine-name="${wine.resource.name}"
                                    data-wine-vintage="${wine.vintage}"
@@ -167,7 +168,11 @@ function setupAssignWineEventListeners(overlay, contract, contractIndex, eligibl
     // Wine quantity input event listeners
     if (quantityInputs) {
         quantityInputs.forEach(input => {
-            input.addEventListener('input', () => updateSelectedAmount(overlay, contract, quantityInputs));
+            input.addEventListener('input', () => {
+                updateSelectedAmount(overlay, contract, quantityInputs);
+                // Update max values for other inputs
+                updateRangeMaxValues(quantityInputs, contract.amount);
+            });
         });
     }
     
@@ -234,6 +239,30 @@ function updateSelectedAmount(overlay, contract, quantityInputs) {
     if (fulfillBtn) {
         fulfillBtn.disabled = totalSelected !== contract.amount;
     }
+}
+
+// Add this new helper function
+function updateRangeMaxValues(quantityInputs, requiredAmount) {
+    // Calculate total selected
+    let totalSelected = 0;
+    quantityInputs.forEach(input => {
+        totalSelected += parseInt(input.value) || 0;
+    });
+
+    // For each input, set max to either its original max or remaining needed bottles
+    quantityInputs.forEach(input => {
+        const currentValue = parseInt(input.value) || 0;
+        const originalMax = parseInt(input.dataset.originalMax || input.max);
+        if (!input.dataset.originalMax) {
+            input.dataset.originalMax = input.max; // Store original max first time
+        }
+        
+        // Calculate remaining needed excluding current input's value
+        const remainingNeeded = requiredAmount - (totalSelected - currentValue);
+        
+        // Set max to minimum between original max and remaining needed
+        input.max = Math.min(originalMax, remainingNeeded);
+    });
 }
 
 /**
