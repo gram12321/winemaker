@@ -5,10 +5,9 @@ import { getGameState ,setPrestigeHit, getPrestigeHit, loadImporters, saveImport
 import { inventoryInstance } from './resource.js';
 import { calculateRealPrestige } from './company.js';
 import { updateAllDisplays } from './displayManager.js';
-import { calculateWinePrice } from './sales.js';
 import { initializeImporters, updateAllImporterRelationships } from './classes/importerClass.js';
 import { CONTRACT_GENERATION } from './constants/constants.js';
-import { getColorClass, getFlagIconHTML, formatNumber } from './utils.js';
+import { getColorClass, formatNumber } from './utils.js';
 
 // Define requirement types as constants
 const REQUIREMENT_TYPES = {
