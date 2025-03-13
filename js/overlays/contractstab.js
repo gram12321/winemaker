@@ -127,25 +127,28 @@ function createImporterHistorySection() {
         </div>
     `;
 
-    // Add click handlers for expanding/collapsing importer details
-    historySection.addEventListener('click', (e) => {
-        const importerRow = e.target.closest('.importer-row');
-        if (importerRow) {
-            const importerId = importerRow.dataset.importerId;
-            const detailsRow = historySection.querySelector(`.contract-details-row[data-importer-id="${importerId}"]`);
-            if (detailsRow) {
-                detailsRow.classList.toggle('d-none');
-                importerRow.classList.toggle('active');
-            }
-        }
-    });
-
     return historySection;
 }
 
 function setupImporterHistorySortingAndFiltering() {
     // Skip if there are no filtered importers
     if (filteredImporters.length === 0) return;
+    
+    // Add delegate event listener for row clicks to the table container
+    const tableContainer = document.getElementById('importer-history-table-container');
+    if (tableContainer) {
+        tableContainer.addEventListener('click', (e) => {
+            const importerRow = e.target.closest('.importer-row');
+            if (importerRow) {
+                const importerId = importerRow.dataset.importerId;
+                const detailsRow = tableContainer.querySelector(`.contract-details-row[data-importer-id="${importerId}"]`);
+                if (detailsRow) {
+                    detailsRow.classList.toggle('d-none');
+                    importerRow.classList.toggle('active');
+                }
+            }
+        });
+    }
     
     // Setup sorting
     const sortHeaders = document.querySelectorAll('.importer-sort');
@@ -214,22 +217,6 @@ function applyImporterFiltersAndSort() {
     const tableContainer = document.getElementById('importer-history-table-container');
     if (tableContainer) {
         tableContainer.innerHTML = createImporterHistoryTableHTML(filteredImporters);
-    }
-    
-    // Restore event listeners for expanding rows
-    const historySection = document.querySelector('.overlay-section.card:last-child');
-    if (historySection) {
-        historySection.addEventListener('click', (e) => {
-            const importerRow = e.target.closest('.importer-row');
-            if (importerRow) {
-                const importerId = importerRow.dataset.importerId;
-                const detailsRow = historySection.querySelector(`.contract-details-row[data-importer-id="${importerId}"]`);
-                if (detailsRow) {
-                    detailsRow.classList.toggle('d-none');
-                    importerRow.classList.toggle('active');
-                }
-            }
-        });
     }
 }
 
