@@ -13,6 +13,7 @@ import { getColorClass, formatNumber } from './utils.js';
 const REQUIREMENT_TYPES = {
     QUALITY: 'quality',
     VINTAGE: 'vintage',
+    BALANCE: 'balance',    // Add new balance requirement type
     // Future requirement types:
     // GRAPE_TYPE: 'grapeType',
     // LAND_VALUE: 'landValue',
@@ -44,6 +45,9 @@ function validateRequirement(type, value, wine, params) {
             }
             return wine.vintage <= (gameYear - value);
             
+        case REQUIREMENT_TYPES.BALANCE:
+            return wine.balance >= value;
+            
         default:
             return true;
     }
@@ -60,6 +64,10 @@ function calculateRequirementPremium(type, value, params) {
                 ? (params.referenceYear || new Date().getFullYear()) - value 
                 : value;
             return calculateVintagePricePremium(vintageAge);
+            
+        case REQUIREMENT_TYPES.BALANCE:
+            return calculateBalancePricePremium(value);
+            
         // Add cases for future requirement types here
         default:
             return 0;
@@ -88,6 +96,10 @@ function formatRequirementHTML(type, value, params) {
                 return `<strong>Vintage <span class="${vintageClass}">${requiredYear} or older</span> (${value} years)</strong>`;
             }
             
+        case REQUIREMENT_TYPES.BALANCE:
+            const balanceColorClass = getColorClass(value);
+            return `<strong>Balance <span class="${balanceColorClass}">(min ${formatNumber(value * 100)}%)</span></strong>`;
+            
         // Add cases for future requirement types here
             
         default:
@@ -109,6 +121,9 @@ function getRequirementDescription(type, value, params) {
                 const requiredYear = gameYear - value;
                 return `Vintage ${requiredYear} or older (${value} years aging)`;
             }
+            
+        case REQUIREMENT_TYPES.BALANCE:
+            return `Balance ≥ ${(value * 100).toFixed(0)}%`;
             
         // Add cases for future requirement types here
             
@@ -183,6 +198,35 @@ const REQUIREMENT_CONFIG = {
             return { referenceYear: gameYear };
         }
     },
+    [REQUIREMENT_TYPES.BALANCE]: {
+        chance: 0.6,  // Slightly lower chance than quality
+        generateValue: (importer) => {
+            const baseValue = Math.random();
+            const isUnusualOrder = Math.random() < 0.10;
+            
+            let value;
+            if (isUnusualOrder) {
+                value = 0.1 + Math.random() * 0.85;
+            } else {
+                const typeBaseValues = {
+                    "Private Importer": { base: 0.5, range: 0.5 },
+                    "Restaurant": { base: 0.4, range: 0.5 },
+                    "Wine Shop": { base: 0.2, range: 0.6 },
+                    "Chain Store": { base: 0.1, range: 0.5 },
+                    "default": { base: 0.1, range: 0.9 }
+                };
+                
+                const config = typeBaseValues[importer.type] || typeBaseValues["default"];
+                value = config.base + (baseValue * config.range);
+            }
+            
+            const randomVariance = (Math.random() * 0.2) - 0.1;
+            value = Math.max(0.1, Math.min(1.0, value + randomVariance));
+            
+            return value;
+        },
+        getParams: () => ({})
+    }
     // Add new requirement types here with their generation configuration
 };
 
@@ -277,7 +321,7 @@ const PRICING_CONFIG = {
                 return 200 + Math.pow(vintageAge - 30, 2.2) * 5;
             }
         }
-    }
+    },
     
     // Add future pricing calculation configurations here as needed
 };
@@ -420,6 +464,20 @@ function calculateQualityPricePremium(minQuality) {
 
 function calculateVintagePricePremium(vintageAge) {
     return PRICING_CONFIG.vintagePremium.calculate(vintageAge);
+}
+
+function calculateBalancePricePremium(value) {
+    if (!value) return 0;
+    
+    if (value <= 0.4) {
+        return value * 4;  // Slightly lower than quality premium
+    } else if (value <= 0.7) {
+        return 1.6 + (value - 0.4) * 40;
+    } else if (value <= 0.9) {
+        return 13.6 + (value - 0.7) * 150;
+    } else {
+        return 43.6 + Math.pow((value - 0.9) * 10, 2) * 130;
+    }
 }
 
 export function saveNewContract(contract) {

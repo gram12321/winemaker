@@ -89,7 +89,8 @@ export const CONTRACT_GENERATION = {
     // Relationship ratio bonus
     RELATIONSHIP_RATIO: {
         MAX_BONUS: 0.5,  // Up to +50% bonus chance when ratio > 1
-        PENALTY: 0.5     // -50% penalty when ratio < 1
+        PENALTY: 0.5,    // -50% penalty when ratio < 1
+        MAX_REQUIREMENTS: 3  // Maximum number of requirements per contract
     }
 };
 
