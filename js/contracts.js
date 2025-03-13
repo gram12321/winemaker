@@ -611,8 +611,18 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
     if (contract.importerId >= 0 && contract.importerId < importers.length) {
         const currentImporter = importers[contract.importerId];
 
-        // Calculate relationship change before doing anything else
-        relationshipChange = calculateRelationshipChange(contract, true, getCompletedContracts().length);
+        // Get completed contracts only for this specific importer
+        const completedContracts = getCompletedContracts();
+        const previousContractsWithImporter = completedContracts.filter(c => 
+            c.importerId === contract.importerId || (
+                c.importerName === contract.importerName && 
+                c.importerType === contract.importerType &&
+                c.importerCountry === contract.importerCountry
+            )
+        ).length;
+
+        // Calculate relationship change with importer-specific contract count
+        relationshipChange = calculateRelationshipChange(contract, true, previousContractsWithImporter);
         
         // Calculate new relationship value
         const oldRelationship = currentImporter.relationship;
@@ -717,14 +727,29 @@ export function rejectContract(contractIndex) {
 }
 
 
-function calculateRelationshipChange(contract, isAccepting, existingContracts = 0) {
+function calculateRelationshipChange(contract, isAccepting, existingContractsWithImporter = 0) {
+    // Log initial values
+    console.log('[Relationship Change] Initial values:', {
+        contractValue: contract.totalValue,
+        currentRelationship: contract.relationship || 0,
+        existingContracts: existingContractsWithImporter,
+        isAccepting
+    });
+
     // Logarithmic scaling for contract value (€1,000 = ~1 point, €10,000 = ~2.3 points, €100,000 = ~4.6 points)
     const valueComponent = Math.log10(Math.max(contract.totalValue, 100)) - 1;
     
-    // Relationship multiplier based on existing contracts (starts at 1, grows to ~3 with many contracts)
-    // Logarithmic scaling: 1 contract = 1x, 10 contracts = 2x, 100 contracts = 3x
-    const contractMultiplier = 1 + Math.log10(Math.max(existingContracts, 1));
+    // Relationship multiplier now based on contracts with this specific importer
+    // (starts at 1, grows to ~3 with many contracts with this importer)
+    const contractMultiplier = 1 + Math.log10(Math.max(existingContractsWithImporter, 1));
     
+    console.log('[Relationship Change] Base calculations:', {
+        valueComponent,
+        contractMultiplier,
+        baseChangeBeforeMultiplier: valueComponent,
+        baseChangeAfterMultiplier: valueComponent * contractMultiplier
+    });
+
     // Calculate base change (accepting: positive, rejecting: negative)
     let baseChange = valueComponent * contractMultiplier;
     
@@ -733,24 +758,28 @@ function calculateRelationshipChange(contract, isAccepting, existingContracts = 
         baseChange = -baseChange / 3;
     }
     
+    console.log('[Relationship Change] After accept/reject modifier:', {
+        baseChange,
+        isAccepting
+    });
+
     // Apply diminishing returns based on current relationship level
-    // The higher the relationship, the harder it is to gain more
     const currentRelationship = contract.relationship || 0;
-    
-    // Diminishing returns function: as relationship approaches 100, gains become smaller
-    // At 0 relationship: no reduction
-    // At 50 relationship: ~50% reduction
-    // At 90 relationship: ~90% reduction
-    // At 99 relationship: ~99% reduction
     const diminishingFactor = 1 - (currentRelationship / 100);
     
     // Calculate final relationship change
-    // Rejecting contracts has less diminishing returns than accepting
     const finalChange = isAccepting ? 
         baseChange * diminishingFactor : 
-        baseChange * Math.sqrt(diminishingFactor);  // Sqrt makes the diminishing effect less severe for rejections
+        baseChange * Math.sqrt(diminishingFactor);
+
+    console.log('[Relationship Change] Final calculation:', {
+        currentRelationship,
+        diminishingFactor,
+        finalChangeBeforeCap: finalChange,
+        finalChange: Math.max(-100, Math.min(100, finalChange))
+    });
     
-    return Math.max(-100, Math.min(100, finalChange));  // Cap at -100/+100 points per contract
+    return Math.max(-100, Math.min(100, finalChange));
 }
 
 /**
@@ -762,17 +791,11 @@ function calculateRelationshipChange(contract, isAccepting, existingContracts = 
 function updateImporterRelationship(importerId, contract, isAccepting) {
     const importers = loadImporters();
     if (importerId >= 0 && importerId < importers.length) {
-        // Get completed contracts to count previous interactions with this importer
-        const completedContracts = getCompletedContracts();
-        const previousContracts = completedContracts.filter(c => 
-            c.importerId === importerId ||
-            (c.importerName === contract.importerName && 
-             c.importerType === contract.importerType &&
-             c.importerCountry === contract.importerCountry)
-        ).length;
+        // Get number of completed contracts from the existing importer data
+        const previousContractsWithImporter = importers[importerId].contracts?.length || 0;
         
-        // Calculate relationship change
-        const relationshipChange = calculateRelationshipChange(contract, isAccepting, previousContracts);
+        // Calculate relationship change using existing contracts count
+        const relationshipChange = calculateRelationshipChange(contract, isAccepting, previousContractsWithImporter);
         
         // Calculate new relationship value
         const newRelationship = Math.max(0, Math.min(100, 
@@ -781,7 +804,7 @@ function updateImporterRelationship(importerId, contract, isAccepting) {
         
         // Update both the importer's relationship and the contract's relationship
         importers[importerId].relationship = newRelationship;
-        contract.relationship = newRelationship; // Update the contract's relationship to match
+        contract.relationship = newRelationship;
         
         // Save the updated importers to localStorage
         saveImporters(importers);

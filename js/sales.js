@@ -555,10 +555,8 @@ export function sellOrderWine(orderIndex) {
 }
 
 export function shouldGenerateWineOrder() {
-    // Get all bottled wines with custom prices
     const winesWithPrices = inventoryInstance.getItemsByState('Bottles').filter(wine => wine.customPrice > 0);
 
-    // If no wines have prices set, return false - no orders should be generated
     if (winesWithPrices.length === 0) {
         return false;
     }
@@ -567,85 +565,45 @@ export function shouldGenerateWineOrder() {
     const { MIN_BASE_CHANCE, MID_PRESTIGE_CHANCE, MAX_BASE_CHANCE, PRESTIGE_THRESHOLD, MIN_DIMINISHING_FACTOR } = ORDER_GENERATION;
     let baseChance;
 
-    // Calculate base chance based on company prestige
     if (companyPrestige <= PRESTIGE_THRESHOLD) {
-        // Linear scaling from MIN_BASE_CHANCE to MID_PRESTIGE_CHANCE for early game
         baseChance = MIN_BASE_CHANCE + (companyPrestige / PRESTIGE_THRESHOLD) * (MID_PRESTIGE_CHANCE - MIN_BASE_CHANCE);
     } else {
-        // Use arctangent for diminishing returns as prestige grows beyond threshold
         baseChance = MID_PRESTIGE_CHANCE + (Math.atan((companyPrestige - PRESTIGE_THRESHOLD) / 200) / Math.PI) * (MAX_BASE_CHANCE - MID_PRESTIGE_CHANCE);
     }
 
-    // Apply diminishing returns factor based on number of wines
-    // This prevents too many orders when player has many wines
     const diminishingFactor = Math.max(0.1, 1 / Math.sqrt(winesWithPrices.length));
 
-    console.group(`[Order Generation] Weekly Wine Order Check`);
-    console.log(`Base chance: ${(baseChance * 100).toFixed(1)}% (company prestige: ${companyPrestige.toFixed(1)})`);
-    console.log(`Diminishing factor: ${diminishingFactor.toFixed(2)} (${winesWithPrices.length} wines available)`);
-    
-    // Track all wines that get orders
     let anyWineGetsOrder = false;
     shouldGenerateWineOrder.selectedWines = [];
-    
-    // Prepare data for table
-    const wineChanceData = [];
-    
-    // Check each wine individually
+
     for (const wine of winesWithPrices) {
-        const basePrice = calculateWinePrice(wine.quality, wine, true); // Add skipLogging=true here
+        const basePrice = calculateWinePrice(wine.quality, wine, true);
         if (basePrice <= 0) continue;
-        
+
         const deviation = (wine.customPrice - basePrice) / basePrice;
         let priceModifier = 1.0;
-        
-        // Adjust chance based on this specific wine's pricing:
+
         if (deviation < 0) {
-            // Cheaper than base price - use a more aggressive scaling model
-            // instead of just capping at 0.5 (50% increase)
             const discountLevel = Math.abs(deviation);
-            
+
             if (discountLevel <= 0.1) {
-                // Small discounts: linear increase
                 priceModifier = 1 + discountLevel;
             } else if (discountLevel <= 0.5) {
-                // Medium discounts (10-50%): up to 2x chance
-                priceModifier = 1.1 + discountLevel * 1.8; 
+                priceModifier = 1.1 + discountLevel * 1.8;
             } else if (discountLevel <= 0.9) {
-                // Large discounts (50-90%): up to 4x chance
                 priceModifier = 2 + (discountLevel - 0.5) * 5;
             } else {
-                // Extreme discounts (90-99%): up to 10x chance
                 priceModifier = 4 + (discountLevel - 0.9) * 60;
-                // Cap at 10x to avoid excessive chances
                 priceModifier = Math.min(priceModifier, 10);
             }
-            
-            console.log(`[Order Generation] Wine ${wine.resource.name} (${wine.vintage}): Lower price (${(deviation * 100).toFixed(1)}%), increasing order chance by ${((priceModifier - 1) * 100).toFixed(1)}%`);
         } else {
-            // More expensive than base price - decrease chance (down to -70%)
             priceModifier = 1 - Math.min(deviation * 1.4, 0.7);
-            console.log(`[Order Generation] Wine ${wine.resource.name} (${wine.vintage}): Higher price (${(deviation * 100).toFixed(1)}%), decreasing order chance by ${((1 - priceModifier) * 100).toFixed(1)}%`);
         }
-        
-        // Calculate final chance for this specific wine
+
         const wineChance = Math.min(baseChance * priceModifier * diminishingFactor, 0.99);
         const randomValue = Math.random();
         const wineGetsOrder = randomValue < wineChance;
-        
-        // Add to data table
-        wineChanceData.push({
-            "Wine": wine.resource.name,
-            "Vintage": wine.vintage,
-            "Quality": `${(wine.quality * 100).toFixed(0)}%`,
-            "Price Diff": `${(deviation * 100).toFixed(1)}%`,
-            "Price Modifier": `${priceModifier.toFixed(2)}x`,
-            "Final Chance": `${(wineChance * 100).toFixed(1)}%`,
-            "Roll": `${(randomValue * 100).toFixed(1)}%`,
-            "Order": wineGetsOrder ? "✅" : "❌"
-        });
-        
-        // If this wine gets an order, add it to the selected wines list
+
         if (wineGetsOrder) {
             anyWineGetsOrder = true;
             shouldGenerateWineOrder.selectedWines.push({
@@ -656,24 +614,6 @@ export function shouldGenerateWineOrder() {
             });
         }
     }
-    
-    // Display the table with all wine chances
-    if (wineChanceData.length > 0) {
-        console.table(wineChanceData);
-    } else {
-        console.log("No wines with prices found");
-    }
-    
-    // Log the results
-    if (shouldGenerateWineOrder.selectedWines.length > 0) {
-        console.log(`${shouldGenerateWineOrder.selectedWines.length} orders will be generated:`, 
-            shouldGenerateWineOrder.selectedWines.map(wine => `${wine.name} (${wine.vintage})`).join(', ')
-        );
-    } else {
-        console.log(`No orders will be generated this week`);
-    }
-    
-    console.groupEnd();
-    
+
     return anyWineGetsOrder;
 }
