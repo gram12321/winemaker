@@ -7,6 +7,7 @@ import { updateAllDisplays } from '/js/displayManager.js';
 import { WINE_ORDER_TYPES } from '/js/constants/constants.js';
 import { displayContractsTab } from '/js/overlays/contractstab.js';
 import { addConsoleMessage } from '/js/console.js';
+import { showWineInfoOverlay } from '/js/overlays/wineInfoOverlay.js';  // Add this import
 
 // Display the main sales overlay with wine cellar inventory and orders
 export function showSalesOverlay() {
@@ -51,6 +52,15 @@ export function displayWineCellarInventory() {
         const row = document.createElement('tr');
         const displayInfo = wine.getDisplayInfo();
         const sellingPrice = calculateWinePrice(wine.quality, wine);
+
+        // Make row clickable (same as inventory overlay)
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', (e) => {
+            // Don't show wine info if clicking the price input or button
+            if (!e.target.closest('.price-input, .set-price-btn')) {
+                showWineInfoOverlay(wine);
+            }
+        });
 
         row.innerHTML = `
             <td><strong>${displayInfo.name}</strong></td>
