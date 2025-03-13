@@ -728,13 +728,6 @@ export function rejectContract(contractIndex) {
 
 
 function calculateRelationshipChange(contract, isAccepting, existingContractsWithImporter = 0) {
-    // Log initial values
-    console.log('[Relationship Change] Initial values:', {
-        contractValue: contract.totalValue,
-        currentRelationship: contract.relationship || 0,
-        existingContracts: existingContractsWithImporter,
-        isAccepting
-    });
 
     // Logarithmic scaling for contract value (€1,000 = ~1 point, €10,000 = ~2.3 points, €100,000 = ~4.6 points)
     const valueComponent = Math.log10(Math.max(contract.totalValue, 100)) - 1;
@@ -742,13 +735,6 @@ function calculateRelationshipChange(contract, isAccepting, existingContractsWit
     // Relationship multiplier now based on contracts with this specific importer
     // (starts at 1, grows to ~3 with many contracts with this importer)
     const contractMultiplier = 1 + Math.log10(Math.max(existingContractsWithImporter, 1));
-    
-    console.log('[Relationship Change] Base calculations:', {
-        valueComponent,
-        contractMultiplier,
-        baseChangeBeforeMultiplier: valueComponent,
-        baseChangeAfterMultiplier: valueComponent * contractMultiplier
-    });
 
     // Calculate base change (accepting: positive, rejecting: negative)
     let baseChange = valueComponent * contractMultiplier;
@@ -757,11 +743,7 @@ function calculateRelationshipChange(contract, isAccepting, existingContractsWit
     if (!isAccepting) {
         baseChange = -baseChange / 3;
     }
-    
-    console.log('[Relationship Change] After accept/reject modifier:', {
-        baseChange,
-        isAccepting
-    });
+
 
     // Apply diminishing returns based on current relationship level
     const currentRelationship = contract.relationship || 0;
@@ -772,13 +754,7 @@ function calculateRelationshipChange(contract, isAccepting, existingContractsWit
         baseChange * diminishingFactor : 
         baseChange * Math.sqrt(diminishingFactor);
 
-    console.log('[Relationship Change] Final calculation:', {
-        currentRelationship,
-        diminishingFactor,
-        finalChangeBeforeCap: finalChange,
-        finalChange: Math.max(-100, Math.min(100, finalChange))
-    });
-    
+   
     return Math.max(-100, Math.min(100, finalChange));
 }
 
