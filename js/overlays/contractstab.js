@@ -10,10 +10,7 @@ let filteredImporters = [];
 
 export function displayContractsTab() {
     const contractsTabContent = document.getElementById('contracts-tab-content');
-    if (!contractsTabContent) {
-        console.error("Cannot find contracts-tab-content element");
-        return;
-    }
+    if (!contractsTabContent) return;
     
     contractsTabContent.innerHTML = '';
 

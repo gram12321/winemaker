@@ -386,25 +386,8 @@ export function generateImporterContracts() {
     // Apply importer's multipliers (market share, type, etc.)
     const contractAmount = Math.max(10, Math.ceil(baseAmount * selectedImporter.buyAmountMultiplicator));
     
-    console.log('[Contracts] Amount calculation:', {
-        baseAmount,
-        typeMultiplier: selectedImporter.buyAmountMultiplicator,
-        finalAmount: contractAmount
-    });
-    
-    // Contract price now includes vintage premium
     const basePrice = basePriceRange.min + Math.random() * (basePriceRange.max - basePriceRange.min);
     const contractPrice = (basePrice + totalPremium) * selectedImporter.buyPriceMultiplicator;
-    
-    // Keep this specific console.log as requested
-    console.log(`[Contracts] Price calculation:`, {
-        baseRange: `€${basePriceRange.min.toFixed(2)} - €${basePriceRange.max.toFixed(2)}`,
-        basePrice: `€${basePrice.toFixed(2)}`,
-        qualityPremium: `€${qualityPremium.toFixed(2)} (for ${(minQualityRequirement * 100).toFixed(1)}% min quality)`,
-        vintagePremium: `€${vintagePremium.toFixed(2)} (for ${minVintageAge} years aging)`,
-        importerMultiplier: selectedImporter.buyPriceMultiplicator.toFixed(2),
-        finalPrice: `€${contractPrice.toFixed(2)}`
-    });
     
     // Create contract object with new requirements system
     const contract = {
@@ -627,23 +610,9 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
     // Update relationship with the importer using the new function
     const importers = loadImporters();
     let relationshipChange = 0;
-    
-    console.log('[DEBUG] Contract Fulfillment Start:', {
-        importerId: contract.importerId,
-        importerName: contract.importerName,
-        currentRelationship: contract.relationship,
-        contractValue: contract.totalValue,
-        existingContracts: getCompletedContracts().length
-    });
 
     if (contract.importerId >= 0 && contract.importerId < importers.length) {
         const currentImporter = importers[contract.importerId];
-        console.log('[DEBUG] Current Importer State:', {
-            name: currentImporter.name,
-            currentRelationship: currentImporter.relationship,
-            marketShare: currentImporter.marketShare,
-            type: currentImporter.type
-        });
 
         // Calculate relationship change before doing anything else
         relationshipChange = calculateRelationshipChange(contract, true, getCompletedContracts().length);
@@ -652,14 +621,6 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
         const oldRelationship = currentImporter.relationship;
         const newRelationship = Math.max(0, Math.min(100, oldRelationship + relationshipChange));
         
-        console.log('[DEBUG] Relationship Update Process:', {
-            startingRelationship: oldRelationship,
-            calculatedChange: relationshipChange,
-            newRelationship: newRelationship,
-            diminishingFactor: 1 - (oldRelationship / 100),
-            contractsCompleted: getCompletedContracts().length
-        });
-        
         // Update both the importer's relationship and the contract's relationship
         currentImporter.relationship = newRelationship;
         contract.relationship = newRelationship;
@@ -667,13 +628,6 @@ export function fulfillContractWithSelectedWines(contractIndex, selectedWines) {
         
         // Save updated importer data
         saveImporters(importers);
-        
-        console.log('[DEBUG] Final State:', {
-            importerName: contract.importerName,
-            savedRelationship: currentImporter.relationship,
-            relationshipChange: relationshipChange,
-            contractRelationship: contract.relationship
-        });
     }
     
     // Add used wines details to contract before saving
@@ -838,13 +792,6 @@ function updateImporterRelationship(importerId, contract, isAccepting) {
         // Update both the importer's relationship and the contract's relationship
         importers[importerId].relationship = newRelationship;
         contract.relationship = newRelationship; // Update the contract's relationship to match
-        
-        console.log('[DEBUG] Importer relationship update:', {
-            importerName: contract.importerName,
-            oldRelationship: importers[importerId].relationship - relationshipChange,
-            change: relationshipChange,
-            newRelationship: newRelationship
-        });
         
         // Save the updated importers to localStorage
         saveImporters(importers);

@@ -194,7 +194,6 @@ export function initializeImporters() {
     return existingImporters;
 }
 
-
 export function updateAllImporterRelationships() {
     const importers = loadImporters();
     if (!importers) return;
