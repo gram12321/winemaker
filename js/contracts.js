@@ -376,8 +376,6 @@ export function generateImporterContracts() {
     
     // Calculate contract price using component-based pricing
     const basePriceRange = calculateContractBasePriceRange(selectedImporter);
-    const qualityPremium = calculateQualityPricePremium(minQualityRequirement);
-    const vintagePremium = calculateVintagePricePremium(minVintageAge);
     
     // Calculate amount - base amount is 60 plus random 0-600
     const baseAmount = Math.ceil(12 + Math.random() * 60);
@@ -718,15 +716,8 @@ export function rejectContract(contractIndex) {
     return true;
 }
 
-/**
- * Calculate relationship change when accepting or rejecting a contract
- * @param {Object} contract - The contract being accepted or rejected
- * @param {boolean} isAccepting - True if accepting, false if rejecting
- * @param {number} existingContracts - Number of previously completed contracts with this importer
- * @returns {number} - The relationship change value
- */
+
 function calculateRelationshipChange(contract, isAccepting, existingContracts = 0) {
-    // Base relationship value affected by contract value
     // Logarithmic scaling for contract value (€1,000 = ~1 point, €10,000 = ~2.3 points, €100,000 = ~4.6 points)
     const valueComponent = Math.log10(Math.max(contract.totalValue, 100)) - 1;
     
