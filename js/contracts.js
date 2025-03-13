@@ -805,8 +805,29 @@ export {
 export function shouldGenerateContract() {
     const baseRelationshipSum = getBaseImporterRelationshipSum();
     const importers = loadImporters();
-    const currentRelationshipSum = importers?.reduce((sum, imp) => sum + imp.relationship, 0) || 0;
     
+    const currentRelationshipSum = importers?.reduce((sum, imp) => sum + imp.relationship, 0) || 0;
+    const importerCount = importers?.length || 1;
+    
+    // Calculate average relationships instead of total
+    const baseAvgRelationship = baseRelationshipSum / importerCount;
+    const currentAvgRelationship = currentRelationshipSum / importerCount;
+    
+    console.log('[Contract Generation] Relationship calculations:', {
+        baseRelationshipSum,
+        currentRelationshipSum,
+        importerCount,
+        baseAvgRelationship,
+        currentAvgRelationship,
+        difference: currentAvgRelationship - baseAvgRelationship,
+        detailedRelationships: importers?.map(imp => ({
+            name: imp.name,
+            type: imp.type,
+            country: imp.country,
+            relationship: imp.relationship
+        }))
+    });
+
     // Calculate contract chance
     const prestige = calculateRealPrestige();
     const contracts = loadPendingContracts();
@@ -822,8 +843,8 @@ export function shouldGenerateContract() {
         1 / Math.pow(contracts.length + 1, CONTRACT_GENERATION.PENDING_CONTRACT_PENALTY.POWER)
     );
     
-    // Relationship ratio modifier - capped to prevent infinite values
-    const relationshipRatio = Math.min(currentRelationshipSum / baseRelationshipSum, 10); // Cap at 10x
+    // Use average relationships for ratio
+    const relationshipRatio = Math.min(currentAvgRelationship / baseAvgRelationship, 10);
     const relationshipModifier = relationshipRatio >= 1 ? 
         (1 + Math.min((relationshipRatio - 1) * CONTRACT_GENERATION.RELATIONSHIP_RATIO.MAX_BONUS, CONTRACT_GENERATION.RELATIONSHIP_RATIO.MAX_BONUS)) :
         (1 - Math.min((1 - relationshipRatio) * CONTRACT_GENERATION.RELATIONSHIP_RATIO.PENALTY, CONTRACT_GENERATION.RELATIONSHIP_RATIO.PENALTY));
