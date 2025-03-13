@@ -474,6 +474,26 @@ export function getCompletedContracts() {
     return contracts ? JSON.parse(contracts) : [];
 }
 
+
+export function saveBaseImporterRelationshipSum(sum) {
+    console.log('[Base Relationship] Saving to localStorage:', {
+        value: sum,
+        type: typeof sum
+    });
+    localStorage.setItem('baseImporterRelationshipSum', sum.toString());
+}
+
+export function getBaseImporterRelationshipSum() {
+    const stored = localStorage.getItem('baseImporterRelationshipSum');
+    const value = parseFloat(stored) || 1;
+    console.log('[Base Relationship] Retrieved from localStorage:', {
+        stored,
+        parsed: value,
+        usingDefault: !stored
+    });
+    return value;
+}
+
 export {
   loadInventory,
   saveInventory

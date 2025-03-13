@@ -11,6 +11,7 @@ import taskManager from './taskManager.js';
 import { performPlanting } from './overlays/plantingOverlay.js';
 import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
 import { calculateRealPrestige } from './company.js';
+import { shouldGenerateContract } from './contracts.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -60,18 +61,9 @@ export function incrementWeek() {
         generateWineOrder();
     }
     
-    // Check for importer contracts - less frequent than regular orders
-    // Simplified: only one roll in endDay.js, no second roll in contracts.js
-    const contractRoll = Math.random();
-    const contractChance = 0.3; // 30% chance per week
-    console.log(`[Contract Generation] Rolling for contract generation: ${(contractRoll * 100).toFixed(1)}% (needs < ${(contractChance * 100).toFixed(1)}%)`);
-    
-    if (contractRoll < contractChance) {
-        console.log(`[Contract Generation] Roll successful, generating contract...`);
-        const contractsGenerated = generateImporterContracts();
-        console.log(`[Contract Generation] Contract generated: ${contractsGenerated ? "Yes" : "No"}`);
-    } else {
-        console.log(`[Contract Generation] Roll failed, no contract generated this week`);
+    // Simplified contract generation
+    if (shouldGenerateContract()) {
+        generateImporterContracts();
     }
 
     processRecurringTransactions(week);

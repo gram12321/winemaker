@@ -1,4 +1,4 @@
-import { loadImporters, saveImporters } from '../database/adminFunctions.js';
+import { loadImporters, saveImporters, saveBaseImporterRelationshipSum } from '../database/adminFunctions.js';
 import { calculateRealPrestige } from '../company.js';
 import { generateImporterName } from '../names.js';
 
@@ -142,18 +142,19 @@ const COUNTRY_PRESETS = {
 
 // Generate a random set of importers for all countries
 export function generateImporters() {
+    console.log('[Importer Generation] Starting importer generation...');
     const allImporters = [];
     
     Object.entries(COUNTRY_PRESETS).forEach(([country, preset]) => {
         // Generate 1-100 importers per country
         const importerCount = Math.floor(Math.random() * 100) + 1;
+        console.log(`[Importer Generation] Generating ${importerCount} importers for ${country}`);
         
         // Calculate market shares that sum to 100%
         const marketShares = generateBalancedMarketShares(importerCount);
         
         // Create importers for this country
         for (let i = 0; i < importerCount; i++) {
-            // Randomly select an importer type
             const types = Object.values(IMPORTER_TYPES);
             const randomType = types[Math.floor(Math.random() * types.length)];
             
@@ -168,6 +169,23 @@ export function generateImporters() {
         }
     });
     
+    // Calculate and store the initial total relationship sum
+    const initialRelationships = allImporters.map(imp => ({
+        country: imp.country,
+        type: imp.type,
+        relationship: imp.relationship
+    }));
+
+    const initialTotalRelationship = allImporters.reduce((sum, imp) => sum + imp.relationship, 0);
+    
+    console.log('[Importer Generation] Initial relationships:', {
+        totalImporters: allImporters.length,
+        relationships: initialRelationships,
+        totalRelationship: initialTotalRelationship,
+        averageRelationship: initialTotalRelationship / allImporters.length
+    });
+    
+    saveBaseImporterRelationshipSum(initialTotalRelationship);
     return allImporters;
 }
 
@@ -185,12 +203,20 @@ function generateBalancedMarketShares(count) {
 
 // Initialize importers if they don't exist
 export function initializeImporters() {
+    console.log('[Importer Init] Checking for existing importers...');
     const existingImporters = loadImporters();
+    
     if (!existingImporters) {
+        console.log('[Importer Init] No existing importers found, generating new ones...');
         const newImporters = generateImporters();
         saveImporters(newImporters);
         return newImporters;
     }
+    
+    console.log('[Importer Init] Found existing importers:', {
+        count: existingImporters.length,
+        totalRelationship: existingImporters.reduce((sum, imp) => sum + imp.relationship, 0)
+    });
     return existingImporters;
 }
 

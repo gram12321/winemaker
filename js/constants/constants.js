@@ -73,11 +73,24 @@ export const PRICE_NEGOTIATION = {
  * MAX_CONTRACT_CHANCE: Maximum possible contract chance (80%)
  */
 export const CONTRACT_GENERATION = {
-    MIN_RELATIONSHIP_THRESHOLD: 0.01,  // Lowered threshold to make contracts more likely to appear
-    BASE_CONTRACT_CHANCE: 0.05,      // 5% base chance
-    RELATIONSHIP_MIDPOINT: 20,       // 50% chance at relationship 20
-    MAX_CONTRACT_CHANCE: 0.8,        // 80% maximum chance
-    MAX_PENDING_CONTRACTS: 5,        // Maximum number of pending contracts allowed
+    MAX_PENDING_CONTRACTS: 5,
+    MIN_RELATIONSHIP_THRESHOLD: 0.01,
+    // Contract chance configuration
+    BASE_CHANCE: {
+        MIN: 0.05,     // 5% base chance at 0 prestige
+        MAX: 0.30,     // 30% max base chance at high prestige
+        SCALE: 100     // Prestige value where we hit max chance
+    },
+    // Diminishing returns for pending contracts
+    PENDING_CONTRACT_PENALTY: {
+        MIN: 0.1,      // Never reduce chance below 10% of base
+        POWER: 0.5     // Square root for smoother reduction
+    },
+    // Relationship ratio bonus
+    RELATIONSHIP_RATIO: {
+        MAX_BONUS: 0.5,  // Up to +50% bonus chance when ratio > 1
+        PENALTY: 0.5     // -50% penalty when ratio < 1
+    }
 };
 
 // ---- Farmland Constants ----

@@ -1,7 +1,7 @@
 import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
-import { getGameState ,setPrestigeHit, getPrestigeHit, loadImporters, saveImporters, saveCompletedContract, savePendingContracts, loadPendingContracts as loadPendingContractsFromStorage, getCompletedContracts } from './database/adminFunctions.js';
+import { getGameState ,setPrestigeHit, getPrestigeHit, loadImporters, saveImporters, saveCompletedContract, savePendingContracts, loadPendingContracts as loadPendingContractsFromStorage, getCompletedContracts, getBaseImporterRelationshipSum } from './database/adminFunctions.js';
 import { inventoryInstance } from './resource.js';
 import { calculateRealPrestige } from './company.js';
 import { updateAllDisplays } from './displayManager.js';
@@ -801,3 +801,53 @@ export {
     calculateRelationshipChange,   // Export for testing/debugging
     updateImporterRelationship
 };
+
+export function shouldGenerateContract() {
+    const baseRelationshipSum = getBaseImporterRelationshipSum();
+    const importers = loadImporters();
+    const currentRelationshipSum = importers?.reduce((sum, imp) => sum + imp.relationship, 0) || 0;
+    
+    // Calculate contract chance
+    const prestige = calculateRealPrestige();
+    const contracts = loadPendingContracts();
+    
+    // Base chance from prestige
+    const baseChance = CONTRACT_GENERATION.BASE_CHANCE.MIN + 
+        Math.min(prestige / CONTRACT_GENERATION.BASE_CHANCE.SCALE, 1) * 
+        (CONTRACT_GENERATION.BASE_CHANCE.MAX - CONTRACT_GENERATION.BASE_CHANCE.MIN);
+    
+    // Diminishing returns from pending contracts
+    const pendingPenalty = Math.max(
+        CONTRACT_GENERATION.PENDING_CONTRACT_PENALTY.MIN,
+        1 / Math.pow(contracts.length + 1, CONTRACT_GENERATION.PENDING_CONTRACT_PENALTY.POWER)
+    );
+    
+    // Relationship ratio modifier - capped to prevent infinite values
+    const relationshipRatio = Math.min(currentRelationshipSum / baseRelationshipSum, 10); // Cap at 10x
+    const relationshipModifier = relationshipRatio >= 1 ? 
+        (1 + Math.min((relationshipRatio - 1) * CONTRACT_GENERATION.RELATIONSHIP_RATIO.MAX_BONUS, CONTRACT_GENERATION.RELATIONSHIP_RATIO.MAX_BONUS)) :
+        (1 - Math.min((1 - relationshipRatio) * CONTRACT_GENERATION.RELATIONSHIP_RATIO.PENALTY, CONTRACT_GENERATION.RELATIONSHIP_RATIO.PENALTY));
+    
+    // Calculate final chance with a hard cap
+    const finalChance = Math.min(baseChance * pendingPenalty * relationshipModifier, 0.95); // Cap at 95%
+    
+    // Log details
+    console.log('[Contract Generation] Chance calculation:', {
+        prestige,
+        baseChance: baseChance.toFixed(3),
+        pendingContracts: contracts.length,
+        pendingPenalty: pendingPenalty.toFixed(3),
+        relationshipRatio: relationshipRatio.toFixed(3),
+        relationshipModifier: relationshipModifier.toFixed(3),
+        finalChance: finalChance.toFixed(3)
+    });
+    
+    const roll = Math.random();
+    const shouldGenerate = roll < finalChance;
+    
+    if (shouldGenerate) {
+        console.log(`[Contract Generation] Roll successful (${(roll * 100).toFixed(1)}% < ${(finalChance * 100).toFixed(1)}%)`);
+    }
+    
+    return shouldGenerate;
+}
