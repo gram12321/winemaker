@@ -261,29 +261,48 @@ const REQUIREMENT_CONFIG = {
     [REQUIREMENT_TYPES.LANDVALUE]: {
         chance: 0.4,  // 40% chance - less common than quality/vintage
         generateValue: (importer) => {
-            const baseValue = Math.random();
-            const isUnusualOrder = Math.random() < 0.10;
-            
-            // Base ranges based on importer type
+            // Base ranges based on importer type - revised for better distribution
             const typeBaseValues = {
-                "Private Importer": { base: 200000, range: 300000 },  // High-end focus
-                "Restaurant": { base: 100000, range: 200000 },        // Quality focus
-                "Wine Shop": { base: 50000, range: 150000 },          // Mid-range
-                "Chain Store": { base: 20000, range: 80000 },         // Value focus
-                "default": { base: 50000, range: 150000 }
+                // For high-end/luxury importers: targeting 400k-600k range
+                "Private Importer": { base: 500000, spread: 100000 },  // 68% between 400k-600k, 95% between 300k-700k
+                
+                // For quality-focused importers: targeting 200k-400k range
+                "Restaurant": { base: 300000, spread: 100000 },         // 68% between 200k-400k, 95% between 100k-500k
+                
+                // For mid-range importers: targeting 100k-300k range
+                "Wine Shop": { base: 200000, spread: 100000 },          // 68% between 100k-300k, 95% between 10k-400k
+                
+                // For value-focused importers: targeting 50k-150k range
+                "Chain Store": { base: 100000, spread: 50000 },        // 68% between 50k-150k, 95% between 10k-200k
+                
+                // Default fallback values
+                "default": { base: 200000, spread: 50000 }
             };
             
-            const config = typeBaseValues[importer.type] || typeBaseValues["default"];
-            let value = config.base + (baseValue * config.range);
+            // Use normal distribution
+            // Box-Muller transform to generate normally distributed random number
+            const u1 = Math.random();
+            const u2 = Math.random();
+            const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
             
-            if (isUnusualOrder) {
-                // Occasionally generate very high or low requirements
-                value = Math.random() < 0.5 ? 
-                    value * 0.5 : // Lower requirement
-                    value * 2;    // Higher requirement
-            }
+            // Generate value using normal distribution
+            // z has standard normal distribution (mean=0, std=1)
+            // We'll use config.spread as our standard deviation
+            let value = config.base + (z * config.spread);
             
-            return Math.round(value);
+            // Ensure minimum value of 10000
+            value = Math.max(10000, Math.round(value));
+            
+            // Log the generation for debugging
+            console.log('Land Value Requirement:', {
+                importer: importer.type,
+                base: config.base,
+                spread: config.spread,
+                generated: value,
+                zScore: z
+            });
+            
+            return value;
         },
         getParams: () => ({})
     }
