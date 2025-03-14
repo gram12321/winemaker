@@ -57,7 +57,14 @@ function loadInventory() {
 
             // Copy processing information
             if (item.fieldSource) {
-                newItem.fieldSource = item.fieldSource;
+                newItem.fieldSource = {
+                    conventional: item.fieldSource.conventional || 'Traditional',
+                    altitude: item.fieldSource.altitude,
+                    soil: item.fieldSource.soil,
+                    terrain: item.fieldSource.terrain,
+                    aspect: item.fieldSource.aspect,
+                    landvalue: item.fieldSource.landvalue // Ensure landvalue is copied
+                };
             }
             if (item.crushingMethod) {
                 newItem.crushingMethod = item.crushingMethod;
@@ -97,7 +104,8 @@ function saveInventory() {
             altitude: item.fieldSource.altitude,
             soil: item.fieldSource.soil,
             terrain: item.fieldSource.terrain,
-            aspect: item.fieldSource.aspect
+            aspect: item.fieldSource.aspect,
+            landvalue: item.fieldSource.landvalue // Ensure landvalue is saved
         } : null,
         specialFeatures: item.specialFeatures || [],
         // Save wine characteristics
@@ -385,7 +393,7 @@ export function getRecurringTransactions() {
   return JSON.parse(localStorage.getItem('recurringTransactions')) || [];
 }
 
-// ----- IMPORTES ---- 
+// ----- IMPORTERS AND CONTRACTS ----- 
 
 // Save importers to localStorage
 export function saveImporters(importers) {
@@ -405,6 +413,93 @@ export function loadImporters() {
         console.error('Failed to parse importers from localStorage', error);
         return null;
     }
+}
+
+/**
+ * Save pending contracts to localStorage
+ * @param {Array} contracts - Array of contract objects
+ */
+export function savePendingContracts(contracts) {
+    localStorage.setItem('pendingContracts', JSON.stringify(contracts));
+}
+
+/**
+ * Load all pending contracts from localStorage and reattach requirements functions
+ * @param {Function} recreateRequirementFn - Function to recreate requirement objects
+ * @returns {Array} - Array of contract objects with functional requirements
+ */
+export function loadPendingContracts(recreateRequirementFn) {
+    const savedContracts = localStorage.getItem('pendingContracts');
+    if (!savedContracts) return [];
+
+    try {
+        const contracts = JSON.parse(savedContracts);
+        
+        // Only reattach functions if a recreation function is provided
+        if (typeof recreateRequirementFn === 'function') {
+            contracts.forEach(contract => {
+                if (Array.isArray(contract.requirements)) {
+                    // Replace each requirement with a proper requirement object
+                    contract.requirements = contract.requirements.map(req => 
+                        recreateRequirementFn(req.type, req.value, req.params || {})
+                    );
+                } else {
+                    // Initialize requirements array if it doesn't exist
+                    contract.requirements = [];
+                }
+            });
+        }
+        
+        return contracts;
+    } catch (error) {
+        console.error('Error loading pending contracts:', error);
+        return [];
+    }
+}
+
+/**
+ * Save a completed contract to localStorage
+ * @param {Object} contract - The completed contract
+ */
+export function saveCompletedContract(contract) {
+    const completedContracts = getCompletedContracts();
+    const contractToSave = {
+        ...contract,
+        completedDate: new Date().toISOString(),
+        // Ensure relationshipChange is included and converted to number
+        relationshipChange: Number(contract.relationshipChange) || 0
+    };
+    completedContracts.push(contractToSave);
+    localStorage.setItem('completedContracts', JSON.stringify(completedContracts));
+}
+
+/**
+ * Get all completed contracts from localStorage
+ * @returns {Array} - Array of completed contract objects
+ */
+export function getCompletedContracts() {
+    const contracts = localStorage.getItem('completedContracts');
+    return contracts ? JSON.parse(contracts) : [];
+}
+
+
+export function saveBaseImporterRelationshipSum(sum) {
+    console.log('[Base Relationship] Saving to localStorage:', {
+        value: sum,
+        type: typeof sum
+    });
+    localStorage.setItem('baseImporterRelationshipSum', sum.toString());
+}
+
+export function getBaseImporterRelationshipSum() {
+    const stored = localStorage.getItem('baseImporterRelationshipSum');
+    const value = parseFloat(stored) || 1;
+    console.log('[Base Relationship] Retrieved from localStorage:', {
+        stored,
+        parsed: value,
+        usingDefault: !stored
+    });
+    return value;
 }
 
 export {

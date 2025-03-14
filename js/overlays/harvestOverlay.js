@@ -254,7 +254,8 @@ export function performHarvest(farmland, farmlandId, selectedTools, harvestedAmo
         altitude: farmland.altitude,
         soil: farmland.soil,
         terrain: farmland.terrain,
-        aspect: farmland.aspect
+        aspect: farmland.aspect,
+        landvalue: farmland.landvalue  // Add landvalue here
     };
 
     // Get harvested characteristics and ensure all required properties

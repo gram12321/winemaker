@@ -62,6 +62,39 @@ export const skillLevels = {
     1.0: { name: 'Living Legend', modifier: 0.95, costMultiplier: 25 }
 };
 
+export const relationshipLevels = {
+    0: "Complete Stranger",
+    10: "Suspicious Acquaintance",
+    20: "Casual Contact",
+    30: "Business Associate",
+    40: "Regular Customer",
+    50: "Trusted Partner",
+    60: "Wine Confidant",
+    70: "Grape Guru's Choice",
+    80: "Vineyard VIP",
+    90: "Cellar Celebrity",
+    100: "Wine Dynasty Legend"
+};
+
+export function formatRelationshipDisplay(relationshipValue) {
+    // Convert relationship (0-100) to 0-1 scale for color class
+    const normalizedValue = relationshipValue / 100;
+    const colorClass = getColorClass(normalizedValue);
+    
+    // Find the appropriate relationship level
+    const levels = Object.keys(relationshipLevels).map(Number);
+    const level = levels.reduce((prev, curr) => 
+        relationshipValue >= curr ? curr : prev
+    );
+
+    return {
+        value: relationshipValue,
+        displayName: relationshipLevels[level],
+        colorClass,
+        formattedText: `${relationshipLevels[level]} <span class="${colorClass}">(${relationshipValue.toFixed(1)})</span>`
+    };
+}
+
 export function getSkillLevelInfo(level) {
     // Convert level from 1-10 scale to 0.1-1.0 scale if needed
     const normalizedLevel = level > 1 ? level / 10 : level;

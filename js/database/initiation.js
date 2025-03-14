@@ -3,6 +3,7 @@ import { createNewStaff, getDefaultTeams, Staff } from '/js/staff.js';
 import { addTransaction } from '/js/finance.js';
 import { setFarmlandsStore } from '/js/database/adminFunctions.js';
 import { Building } from '/js/classes/buildingClasses.js'; 
+import { initializeImporters } from '/js/classes/importerClass.js';
 
 // Move staff functions here
 export function saveStaff(staffMembers) {
@@ -303,6 +304,13 @@ async function storeCompanyName(companyName, startingCondition = null) {
         new Building('Winery', 1)
       ];
       localStorage.setItem('buildings', JSON.stringify(startingBuildings));
+
+      // Initialize importers after setting up other game state
+      const importers = initializeImporters();
+      console.log('[Game Init] Initialized importers:', {
+          count: importers.length,
+          totalRelationship: importers.reduce((sum, imp) => sum + imp.relationship, 0)
+      });
 
       await saveCompanyInfo(); // Save company info to Firestore
       window.location.href = 'html/game.html'; // Redirect to game.html

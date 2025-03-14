@@ -1,14 +1,110 @@
-// Work Constants
-export const BASE_WORK_UNITS = 50; // work units per standard week
-export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
+// ---- Wine Sales Constants -----
+export const WINE_ORDER_TYPES = {
+    "Private Order": { amountMultiplier: 1, priceMultiplier: 1 },
+    "Engross Order": { amountMultiplier: 12, priceMultiplier: 0.85 }
+};
 
-// Farmland Constants 
+/**
+ * Wine order generation chance constants
+ * 
+ * These control how likely orders are to appear based on company prestige:
+ * - MIN_BASE_CHANCE: Minimum chance for new players (5%)
+ * - MID_PRESTIGE_CHANCE: Chance at 100 prestige (50%)
+ * - MAX_BASE_CHANCE: Maximum possible chance (99%)
+ * - MIN_DIMINISHING_FACTOR: Lowest possible diminishing factor (10%)
+ * 
+ * The prestige thresholds determine where different formulas apply:
+ * - Below PRESTIGE_THRESHOLD: Linear scaling from 5% to 50%
+ * - Above PRESTIGE_THRESHOLD: Arctangent scaling from 50% to 99%
+ */
+export const ORDER_GENERATION = {
+    MIN_BASE_CHANCE: 0.05,     // 5% minimum chance for new players
+    MID_PRESTIGE_CHANCE: 0.5,  // 50% chance at 100 prestige
+    MAX_BASE_CHANCE: 0.99,     // 99% maximum chance
+    PRESTIGE_THRESHOLD: 100,   // Threshold where formula changes
+    MIN_DIMINISHING_FACTOR: 0.1, // Minimum diminishing factor (10%)
+};
+
+/**
+ * Wine order amount calculation constants
+ * 
+ * These factors determine the range of possible order amounts:
+ * - MIN_BASE_FACTOR & MAX_BASE_FACTOR: Define the random range for base order amounts
+ *   (0.1 to 6.0 means very small to medium-sized orders at base level)
+ * 
+ * - MIN_PRESTIGE_EFFECT & MAX_PRESTIGE_EFFECT: Control how field prestige affects order sizes
+ *   (1.0 to 7.0 means field prestige can increase order amounts up to 7x for prestigious fields)
+ * 
+ * Together, these determine the baseline order amount before price adjustments and type multipliers.
+ * At maximum values, a high-prestige wine could receive orders up to 42 bottles (6.0 * 7.0),
+ * before applying discount multipliers and order type effects.
+ */
+export const ORDER_AMOUNT_FACTORS = {
+    MIN_BASE_FACTOR: 0.1,   // Minimum random factor for base order amount
+    MAX_BASE_FACTOR: 6.0,   // Maximum random factor for base order amount
+    MIN_PRESTIGE_EFFECT: 1.0, // Minimum multiplier from field prestige (no boost for 0 prestige)
+    MAX_PRESTIGE_EFFECT: 7.0  // Maximum multiplier from field prestige (7x for prestige = 1.0)
+};
+
+/**
+ * Wine price negotiation constants
+ * 
+ * These factors control the haggling process when customers place orders:
+ * - MIN_HAGGLING_FACTOR: The lowest possible price multiplier after haggling
+ *   (0.5 means customers might offer as little as 50% of your set price)
+ * 
+ * - MAX_HAGGLING_FACTOR: The highest possible price multiplier after haggling
+ *   (1.4 means customers might offer up to 140% of your set price for exceptional wines)
+ * 
+ * The actual haggling factor is randomly selected between these values for each order,
+ * simulating customers who bargain for better deals or occasionally pay premium prices.
+ */
+export const PRICE_NEGOTIATION = {
+    MIN_HAGGLING_FACTOR: 0.5,  // Minimum price multiplier after haggling (50% of set price)
+    MAX_HAGGLING_FACTOR: 1.4   // Maximum price multiplier after haggling (140% of set price)
+};
+
+/**
+ * Wine contract generation constants
+ * 
+ * CONTRACT_RELATIONSHIP_THRESHOLD: Minimum relationship needed to get contracts
+ * BASE_CONTRACT_CHANCE: Base chance (5%) for an eligible importer to offer a contract
+ * RELATIONSHIP_MIDPOINT: Relationship value where chance becomes 50%
+ * MAX_CONTRACT_CHANCE: Maximum possible contract chance (80%)
+ */
+export const CONTRACT_GENERATION = {
+    MAX_PENDING_CONTRACTS: 5,
+    MIN_RELATIONSHIP_THRESHOLD: 0.01,
+    // Contract chance configuration
+    BASE_CHANCE: {
+        MIN: 0.05,     // 5% base chance at 0 prestige
+        MAX: 0.30,     // 30% max base chance at high prestige
+        SCALE: 100     // Prestige value where we hit max chance
+    },
+    // Diminishing returns for pending contracts
+    PENDING_CONTRACT_PENALTY: {
+        MIN: 0.1,      // Never reduce chance below 10% of base
+        POWER: 0.5     // Square root for smoother reduction
+    },
+    // Relationship ratio bonus
+    RELATIONSHIP_RATIO: {
+        MAX_BONUS: 0.5,  // Up to +50% bonus chance when ratio > 1
+        PENALTY: 0.5,    // -50% penalty when ratio < 1
+        MAX_REQUIREMENTS: 3  // Maximum number of requirements per contract
+    }
+};
+
+// ---- Farmland Constants ----
 export const DEFAULT_FARMLAND_HEALTH = 0.5; // 50% is the default/reset value
 export const ORGANIC_YEARS_REQUIRED = 3; // years needed for organic certification
 
-// Staff wage constants
+// ---- Staff wage constants ----
 export const BASE_WEEKLY_WAGE = 500; // Base weekly wage for lowest skill
 export const SKILL_WAGE_MULTIPLIER = 1000; // Multiplier for skills
+
+// ---- Work Constants ----
+export const BASE_WORK_UNITS = 50; // work units per standard week
+export const DEFAULT_VINE_DENSITY = 5000; // default vines per acre
 
 // Define density-based tasks
 export const DENSITY_BASED_TASKS = ['PLANTING', 'UPROOTING', 'HARVESTING'];

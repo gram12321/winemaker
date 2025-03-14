@@ -745,7 +745,9 @@ export function performCrushing(selectedStorages, mustAmount, grapeAmount, deste
         crushingMethod: destemming ? 'Destemming' : 'Standard',
         fieldSource: {
             ...grapeResource.fieldSource,
-            conventional: grapeResource.fieldSource?.conventional || 'Traditional'
+            conventional: grapeResource.fieldSource?.conventional || 'Traditional',
+            // Ensure landvalue is preserved
+            landvalue: grapeResource.fieldSource?.landvalue
         },
 
         country: country,

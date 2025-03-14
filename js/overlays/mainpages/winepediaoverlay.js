@@ -2,7 +2,8 @@ import { showMainViewOverlay } from '../overlayUtils.js';
 import { showResourceInfoOverlay } from '../resourceInfoOverlay.js';
 import tutorialManager from '/js/tutorial.js';
 import { allResources } from '/js/resource.js';
-import { initializeImporters } from '/js/classes/importerClass.js';
+import { initializeImporters, calculateImporterRelationship } from '/js/classes/importerClass.js';
+import { getColorClass } from '/js/utils.js';
 
 export function showWinepediaOverlay() {
     const overlay = showMainViewOverlay(createWinepediaOverlayHTML());
@@ -36,21 +37,7 @@ function setupWinepediaEventListeners(overlay) {
             overlay.querySelectorAll('.winepedia-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
 
-            // Log multiplicators when importers tab is clicked
-            if (target === 'importers') {
-                const importers = initializeImporters();
-                console.group('Importer Multiplicators');
-                importers.forEach(importer => {
-                    console.log(
-                        `${importer.country} - ${importer.type} (Market Share: ${(importer.marketShare || 0).toFixed(1)}%):\n` +
-                        `  Price Multiplicator: ${(importer.buyPriceMultiplicator || 0).toFixed(2)}\n` +
-                        `  Amount Multiplicator: ${(importer.buyAmountMultiplicator || 0).toFixed(2)}`
-                    );
-                });
-                console.groupEnd();
-            }
-
-            // Update active content
+                        // Update active content
             overlay.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
                 if (content.id === target) {
@@ -98,6 +85,49 @@ function createWinepediaOverlayHTML() {
             </div>
         </div>
     `;
+}
+
+export function refreshImporterRelationships() {
+    // Check if the importers table exists and is visible
+    const importersTable = document.getElementById('importers-table');
+    if (!importersTable) return;
+    
+    const importersTab = document.getElementById('importers');
+    if (!importersTab || !importersTab.classList.contains('active')) return;
+    
+    // Get all table rows
+    const rows = importersTable.querySelectorAll('tbody tr');
+    
+    // Update each row's relationship cell directly
+    rows.forEach(row => {
+        // Only process if we have enough cells
+        if (row.cells.length < 6) return;
+        
+        // Get the market share cell (index 2)
+        const marketShareText = row.cells[2].textContent.trim();
+        // Parse the market share (removing the % sign)
+        const marketShare = parseFloat(marketShareText.replace('%', ''));
+        
+        if (!isNaN(marketShare)) {
+            // Calculate new relationship value directly
+            const relationshipValue = calculateImporterRelationship(marketShare);
+            
+            // Update the relationship cell (index 5)
+            const relationshipCell = row.cells[5];
+            relationshipCell.innerHTML = formatRelationship(relationshipValue);
+        }
+    });
+}
+
+// Helper function for relationship display, extracted for reuse
+function formatRelationship(value) {
+    // Normalize relationship to 0-1 range for getColorClass
+    const normalizedValue = value ? Math.min(value / 100, 1) : 0;
+    const colorClass = getColorClass(normalizedValue);
+    
+    // Round to one decimal place
+    const formattedValue = value ? value.toFixed(1) : '0.0';   
+    return `<span class="${colorClass}">${formattedValue}</span>`;
 }
 
 function createImportersContent() {
@@ -165,40 +195,15 @@ function createImportersContent() {
 
     const headers = [
         { label: 'Country', key: 'country' },
+        { label: 'Name', key: 'name' },  // Added name column
+        { label: 'Type', key: 'type' },
         { label: 'Market Share', key: 'marketShare', format: (value) => `${value.toFixed(1)}%` },
         { label: 'Purchasing Power', key: 'purchasingPower', format: (value) => `${(value * 100).toFixed(0)}%` },
-        { label: 'Wine Tradition', key: 'wineTradition', format: (value) => `${(value * 100).toFixed(0)}%` }
+        { label: 'Wine Tradition', key: 'wineTradition', format: (value) => `${(value * 100).toFixed(0)}%` },
+        { label: 'Relationship', key: 'relationship' }
     ];
 
-    const sortData = (data, key) => {
-        return data.sort((a, b) => {
-            const aVal = a[key];
-            const bVal = b[key];
-
-            if (typeof aVal === 'number') {
-                return aVal - bVal;
-            } else {
-                return aVal.localeCompare(bVal);
-            }
-        });
-    };
-
-    let sortedImporters = importers;
-    let sortOrder = 1; // 1 for ascending, -1 for descending
-
-    const rows = sortedImporters.map(importer => ({
-        cells: [
-            {
-                content: `<span class="flag-icon flag-icon-${getCountryCode(importer.country)}"></span> ${importer.country}`,
-                className: 'text-left'
-            },
-            { content: `${importer.marketShare.toFixed(1)}%` },
-            { content: `${(importer.purchasingPower * 100).toFixed(0)}%` },
-            { content: `${(importer.wineTradition * 100).toFixed(0)}%` }
-        ]
-    }));
-
-    return `
+    let tableHtml = `
         <div class="data-table-container">
             <div class="filters d-flex gap-2 mb-3">
                 <select id="country-filter" class="form-control form-control-sm d-inline-block w-auto">
@@ -211,21 +216,38 @@ function createImportersContent() {
             <table class="data-table" id="importers-table">
                 <thead>
                     <tr>
-                        ${headers.map((header, index) => `<th><span class="sortable" data-sort="${header.key}">${header.label}</span></th>`).join('')}
+                        ${headers.map((header) => 
+                            `<th><span class="sortable" data-sort="${header.key}">${header.label}</span></th>`
+                        ).join('')}
                     </tr>
                 </thead>
                 <tbody>
-                    ${rows.map(row => `
-                        <tr>
-                            ${row.cells.map(cell => `
-                                <td class="${cell.className || ''}">${cell.content}</td>
-                            `).join('')}
-                        </tr>
-                    `).join('')}
+    `;
+    
+    // Simple list of importers without grouping
+    importers.forEach(importer => {
+        const relationshipValue = importer.relationship || 0;
+        
+        tableHtml += `
+            <tr>
+                <td><span class="flag-icon flag-icon-${getCountryCode(importer.country)}"></span> ${importer.country}</td>
+                <td>${importer.name}</td>
+                <td>${importer.type}</td>
+                <td>${importer.marketShare.toFixed(1)}%</td>
+                <td>${(importer.purchasingPower * 100).toFixed(0)}%</td>
+                <td>${(importer.wineTradition * 100).toFixed(0)}%</td>
+                <td>${formatRelationship(relationshipValue)}</td>
+            </tr>
+        `;
+    });
+    
+    tableHtml += `
                 </tbody>
             </table>
         </div>
     `;
+    
+    return tableHtml;
 }
 
 function getCountryCode(country) {

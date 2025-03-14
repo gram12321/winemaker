@@ -95,7 +95,8 @@ export function performFermentation(target, progress, params) {
             conventional: 'Traditional',
             altitude: null,
             soil: null,
-            terrain: null
+            terrain: null,
+            landvalue: null  // Add landvalue field even if null
         },
         specialFeatures: mustItem.specialFeatures || [],
         

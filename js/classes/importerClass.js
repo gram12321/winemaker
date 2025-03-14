@@ -1,4 +1,6 @@
-import { loadImporters, saveImporters } from '../database/adminFunctions.js';
+import { loadImporters, saveImporters, saveBaseImporterRelationshipSum } from '../database/adminFunctions.js';
+import { calculateRealPrestige } from '../company.js';
+import { generateImporterName } from '../names.js';
 
 export const IMPORTER_TYPES = {
     PRIVATE: 'Private Importer',
@@ -7,6 +9,41 @@ export const IMPORTER_TYPES = {
     CHAIN_STORE: 'Chain Store'
 };
 
+/**
+ * Calculate importer relationship based on company prestige and market share
+ * Uses a logarithmic scaling for prestige and a power-based scaling for market share
+ * to create the desired relationship values:
+ * - Zero prestige → ~0.1 relationship
+ * - Prestige 100 → ~15 relationship
+ * - Prestige 1000 → ~25 relationship
+ * - 0.1% market share → ~1.16 divisor
+ * - 1% market share → ~1.77 divisor
+ * - 5% market share → ~4.4 divisor
+ * - 10% market share → ~10 divisor
+ */
+export function calculateImporterRelationship(marketShare) {
+    const companyPrestige = calculateRealPrestige();
+    
+    // Very low base relationship
+    const baseRelationship = 0.1;
+    
+    // Prestige contribution with logarithmic scaling (diminishing returns)
+    // This gives ~15 at prestige 100 and ~25 at prestige 1000
+    const prestigeContribution = Math.log(companyPrestige + 1) * 3.3;
+    
+    // Market share impact - more aggressive formula for larger importers
+    // Uses a combination of power functions to match the specified divisor values
+    const marketShareImpact = 1 + 0.7 * Math.pow(marketShare, 0.25) + Math.pow(marketShare, 0.9);
+    
+    // Calculate final relationship
+    // Higher prestige increases relationship
+    // Higher market share decreases relationship
+    const relationship = baseRelationship + (prestigeContribution / marketShareImpact);
+    
+    // Ensure relationship is at least the base value
+    return Math.max(baseRelationship, relationship);
+}
+
 export class Importer {
     constructor(country, marketShare, purchasingPower, wineTradition, type) {
         this.country = country;
@@ -14,9 +51,11 @@ export class Importer {
         this.purchasingPower = purchasingPower;
         this.wineTradition = wineTradition;
         this.type = type;
+        this.name = generateImporterName(type, country);
         this.winePreferences = [];
         this.buyPriceMultiplicator = this.calculateBuyPriceMultiplicator();
         this.buyAmountMultiplicator = this.calculateBuyAmountMultiplicator();
+        this.relationship = this.calculateRelationship(); // Initialize relationship
     }
 
     calculateBuyAmountMultiplicator() {
@@ -39,13 +78,13 @@ export class Importer {
                 break;
         }
 
-        // Adjust based on market share
-        multiplier *= (1 + this.marketShare);
+        // Apply market share (stronger influence: each 1% adds 180% to multiplier)
+        multiplier *= (1 + (this.marketShare * 1.8));
 
-        // Adjust based on purchasing power
+        // Apply purchasing power
         multiplier *= (1 + this.purchasingPower);
 
-        // Adjust based on wine tradition
+        // Apply wine tradition (small influence)
         multiplier *= (1 + (this.wineTradition * 0.2));
 
         return multiplier;
@@ -79,6 +118,17 @@ export class Importer {
 
         return multiplier;
     }
+    
+
+    calculateRelationship() {
+        // Use the shared calculation function
+        return calculateImporterRelationship(this.marketShare);
+    }
+    
+    updateRelationship() {
+        this.relationship = this.calculateRelationship();
+        return this.relationship;
+    }
 }
 
 // Country presets with default purchasingPower and wineTradition values
@@ -92,18 +142,19 @@ const COUNTRY_PRESETS = {
 
 // Generate a random set of importers for all countries
 export function generateImporters() {
+    console.log('[Importer Generation] Starting importer generation...');
     const allImporters = [];
     
     Object.entries(COUNTRY_PRESETS).forEach(([country, preset]) => {
         // Generate 1-100 importers per country
         const importerCount = Math.floor(Math.random() * 100) + 1;
+        console.log(`[Importer Generation] Generating ${importerCount} importers for ${country}`);
         
         // Calculate market shares that sum to 100%
         const marketShares = generateBalancedMarketShares(importerCount);
         
         // Create importers for this country
         for (let i = 0; i < importerCount; i++) {
-            // Randomly select an importer type
             const types = Object.values(IMPORTER_TYPES);
             const randomType = types[Math.floor(Math.random() * types.length)];
             
@@ -118,6 +169,23 @@ export function generateImporters() {
         }
     });
     
+    // Calculate and store the initial total relationship sum
+    const initialRelationships = allImporters.map(imp => ({
+        country: imp.country,
+        type: imp.type,
+        relationship: imp.relationship
+    }));
+
+    const initialTotalRelationship = allImporters.reduce((sum, imp) => sum + imp.relationship, 0);
+    
+    console.log('[Importer Generation] Initial relationships:', {
+        totalImporters: allImporters.length,
+        relationships: initialRelationships,
+        totalRelationship: initialTotalRelationship,
+        averageRelationship: initialTotalRelationship / allImporters.length
+    });
+    
+    saveBaseImporterRelationshipSum(initialTotalRelationship);
     return allImporters;
 }
 
@@ -133,15 +201,37 @@ function generateBalancedMarketShares(count) {
     return randomValues.map(value => (value / sum) * 100);
 }
 
-
-
 // Initialize importers if they don't exist
 export function initializeImporters() {
+    console.log('[Importer Init] Checking for existing importers...');
     const existingImporters = loadImporters();
+    
     if (!existingImporters) {
+        console.log('[Importer Init] No existing importers found, generating new ones...');
         const newImporters = generateImporters();
         saveImporters(newImporters);
         return newImporters;
     }
+    
+    console.log('[Importer Init] Found existing importers:', {
+        count: existingImporters.length,
+        totalRelationship: existingImporters.reduce((sum, imp) => sum + imp.relationship, 0)
+    });
     return existingImporters;
+}
+
+export function updateAllImporterRelationships() {
+    const importers = loadImporters();
+    if (!importers) return;
+    
+    importers.forEach(importer => {
+        if (importer instanceof Importer) {
+            importer.updateRelationship();
+        } else {
+            importer.relationship = calculateImporterRelationship(importer.marketShare);
+        }
+    });
+    
+    saveImporters(importers);
+    return importers;
 }

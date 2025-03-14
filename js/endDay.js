@@ -5,11 +5,13 @@ import { processRecurringTransactions } from './finance.js';
 import { calculateLandvalue, calculateFarmlandPrestige } from './farmland.js';
 import { displayFarmland } from './overlays/mainpages/landoverlay.js';
 import { generateWineOrder, shouldGenerateWineOrder } from './sales.js';
+import { generateImporterContracts } from './contracts.js';
 import { getGameState, updateGameState, getFarmlands, updateAllFarmlands, updateFarmland, getPrestigeHit, setPrestigeHit, loadTasks, saveTasks } from './database/adminFunctions.js';
 import taskManager from './taskManager.js';
 import { performPlanting } from './overlays/plantingOverlay.js';
 import { formatNumber, getFlagIconHTML, getColorClass } from './utils.js';
 import { calculateRealPrestige } from './company.js';
+import { shouldGenerateContract } from './contracts.js';
 
 const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
 
@@ -57,6 +59,11 @@ export function incrementWeek() {
 
     if (shouldGenerateWineOrder()) {
         generateWineOrder();
+    }
+    
+    // Simplified contract generation
+    if (shouldGenerateContract()) {
+        generateImporterContracts();
     }
 
     processRecurringTransactions(week);
