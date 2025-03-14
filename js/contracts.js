@@ -1,4 +1,3 @@
-import { normalizeLandValue } from './names.js';
 import { addConsoleMessage } from './console.js';
 import { addTransaction } from './finance.js';
 import { getGameState ,setPrestigeHit, getPrestigeHit, loadImporters, saveImporters, saveCompletedContract, savePendingContracts, loadPendingContracts as loadPendingContractsFromStorage, getCompletedContracts, getBaseImporterRelationshipSum } from './database/adminFunctions.js';
@@ -17,7 +16,6 @@ const REQUIREMENT_TYPES = {
     LANDVALUE: 'landvalue',    // Add new landvalue requirement type
     // Future requirement types:
     // GRAPE_TYPE: 'grapeType',
-    // LAND_VALUE: 'landValue',
     // ALTITUDE: 'altitude',
     // SOIL_TYPE: 'soilType',
     // REGION: 'region',
@@ -90,7 +88,7 @@ function calculateRequirementPremium(type, value, params) {
             return calculateBalancePricePremium(value);
             
         case REQUIREMENT_TYPES.LANDVALUE:
-            return calculateLandValuePremium(value);
+            return PRICING_CONFIG.landValuePremium.calculate(value);
             
         // Add cases for future requirement types here
         default:
@@ -379,17 +377,25 @@ const PRICING_CONFIG = {
             
             // Enhanced premium calculation for wider vintage range (0-50 years)
             // Uses progressive scaling:
-            // - 1-5 years: modest premium (€1-10)
-            // - 6-15 years: significant premium (€10-50)
+            // - 1-3 years: modest premium (€1-5)
+            // - 4-7 years: moderate premium (€5-15)
+            // - 8-12 years: significant premium (€15-40)
+            // - 13-15 years: high premium (€40-50)
             // - 16-30 years: substantial premium (€50-200)
             // - 31-50 years: exceptional premium (€200-1000+)
             
-            if (vintageAge <= 5) {
-                // Linear increase for young wines (€1-10)
-                return vintageAge * 2;
+            if (vintageAge <= 3) {
+                // Linear increase for very young wines (€1-5)
+                return vintageAge * 1.67;
+            } else if (vintageAge <= 7) {
+                // Moderate premium for young wines (€5-15)
+                return 5 + (vintageAge - 3) * 2.5;
+            } else if (vintageAge <= 12) {
+                // Significant premium for maturing wines (€15-40)
+                return 15 + (vintageAge - 7) * 5;
             } else if (vintageAge <= 15) {
-                // Growing premium for mature wines (€10-50)
-                return 10 + Math.pow(vintageAge - 5, 1.5) * 2;
+                // High premium for mature wines (€40-50)
+                return 40 + (vintageAge - 12) * 3.33;
             } else if (vintageAge <= 30) {
                 // Steeper growth for old wines (€50-200)
                 return 50 + Math.pow(vintageAge - 15, 1.7) * 3;
@@ -400,8 +406,28 @@ const PRICING_CONFIG = {
             }
         }
     },
-    
-    // Add future pricing calculation configurations here as needed
+    // Add land value premium calculation configuration
+    landValuePremium: {
+        calculate: (minLandValue) => {
+            if (!minLandValue) return 0;
+
+            // Use exponential scaling to create meaningful premiums
+            // < €100k: modest premium (€0-10)
+            // €100k-300k: medium premium (€10-30)
+            // €300k-600k: high premium (€30-60)
+            // > €600k: exceptional premium (€60+)
+            
+            if (minLandValue <= 100000) {
+                return (minLandValue / 100000) * 10;
+            } else if (minLandValue <= 300000) {
+                return 10 + ((minLandValue - 100000) / 200000) * 20;
+            } else if (minLandValue <= 600000) {
+                return 30 + ((minLandValue - 300000) / 300000) * 30;
+            } else {
+                return 60 + Math.pow((minLandValue - 600000) / 100000, 0.7) * 10;
+            }
+        }
+    }
 };
 
 function generateRequirements(importer) {
@@ -481,17 +507,7 @@ export function generateImporterContracts() {
     
     // Calculate combined price premium from all requirements
     let totalPremium = 0;
-    let minQualityRequirement = 0;
-    let minVintageAge = 0;
-    
     requirements.forEach(req => {
-        // Store requirement values for later use
-        if (req.type === REQUIREMENT_TYPES.QUALITY) {
-            minQualityRequirement = req.value;
-        } else if (req.type === REQUIREMENT_TYPES.VINTAGE) {
-            minVintageAge = req.value;
-        }
-        
         const premium = req.getPremium();
         totalPremium += premium;
     });
@@ -555,26 +571,6 @@ function calculateBalancePricePremium(value) {
         return 13.6 + (value - 0.7) * 150;
     } else {
         return 43.6 + Math.pow((value - 0.9) * 10, 2) * 130;
-    }
-}
-
-function calculateLandValuePremium(minLandValue) {
-    if (!minLandValue) return 0;
-    
-    // Premium tiers based on land value (per acre):
-    // < €50,000: €0-5 premium
-    // €50,000-200,000: €5-20 premium
-    // €200,000-500,000: €20-50 premium
-    // > €500,000: €50+ premium
-    
-    if (minLandValue <= 50000) {
-        return (minLandValue / 50000) * 5;
-    } else if (minLandValue <= 200000) {
-        return 5 + ((minLandValue - 50000) / 150000) * 15;
-    } else if (minLandValue <= 500000) {
-        return 20 + ((minLandValue - 200000) / 300000) * 30;
-    } else {
-        return 50 + Math.pow((minLandValue - 500000) / 100000, 1.5) * 10;
     }
 }
 
