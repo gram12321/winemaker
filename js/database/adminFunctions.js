@@ -57,7 +57,14 @@ function loadInventory() {
 
             // Copy processing information
             if (item.fieldSource) {
-                newItem.fieldSource = item.fieldSource;
+                newItem.fieldSource = {
+                    conventional: item.fieldSource.conventional || 'Traditional',
+                    altitude: item.fieldSource.altitude,
+                    soil: item.fieldSource.soil,
+                    terrain: item.fieldSource.terrain,
+                    aspect: item.fieldSource.aspect,
+                    landvalue: item.fieldSource.landvalue // Ensure landvalue is copied
+                };
             }
             if (item.crushingMethod) {
                 newItem.crushingMethod = item.crushingMethod;
@@ -97,7 +104,8 @@ function saveInventory() {
             altitude: item.fieldSource.altitude,
             soil: item.fieldSource.soil,
             terrain: item.fieldSource.terrain,
-            aspect: item.fieldSource.aspect
+            aspect: item.fieldSource.aspect,
+            landvalue: item.fieldSource.landvalue // Ensure landvalue is saved
         } : null,
         specialFeatures: item.specialFeatures || [],
         // Save wine characteristics

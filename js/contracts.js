@@ -50,7 +50,24 @@ function validateRequirement(type, value, wine, params) {
             return wine.balance >= value;
             
         case REQUIREMENT_TYPES.LANDVALUE:
-            return wine.fieldSource && wine.fieldSource.landvalue >= value;
+            // Check if wine has fieldSource and valid landvalue
+            if (!wine.fieldSource || typeof wine.fieldSource.landvalue !== 'number') {
+                console.log('Land value validation failed:', {
+                    wine: wine.resource.name,
+                    fieldSource: wine.fieldSource,
+                    requirement: value
+                });
+                return false;
+            }
+            // Compare the normalized land value
+            const normalizedLandValue = wine.fieldSource.landvalue;
+            console.log('Land value comparison:', {
+                wine: wine.resource.name,
+                fieldValue: normalizedLandValue,
+                requirement: value,
+                meets: normalizedLandValue >= value
+            });
+            return normalizedLandValue >= value;
             
         default:
             return true;
@@ -109,7 +126,7 @@ function formatRequirementHTML(type, value, params) {
             
         case REQUIREMENT_TYPES.LANDVALUE:
             const landValueClass = getColorClass(value / 500000); // Normalize to 0-1 range
-            return `<strong>Land Value <span class="${landValueClass}">(min €${formatNumber(value)}/acre)</span></strong>`;
+            return `<strong>Land Value <span class="${landValueClass}">€${formatNumber(value)}/acre</span></strong>`;
             
         // Add cases for future requirement types here
             
@@ -135,6 +152,9 @@ function getRequirementDescription(type, value, params) {
             
         case REQUIREMENT_TYPES.BALANCE:
             return `Balance ≥ ${(value * 100).toFixed(0)}%`;
+            
+        case REQUIREMENT_TYPES.LANDVALUE:
+            return `Field Land Value ≥ €${formatNumber(value)}/acre`;
             
         // Add cases for future requirement types here
             

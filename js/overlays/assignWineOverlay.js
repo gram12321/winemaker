@@ -36,40 +36,72 @@ export function showAssignWineOverlay(contract, contractIndex) {
 function generateAssignWineHTML(contract, eligibleWines) {
     const requiredAmount = contract.amount;
     
-    const wineListHTML = eligibleWines.length > 0 ? 
-        eligibleWines.map(wine => {
-            const basePrice = calculateWinePrice(wine.quality, wine, true);
-            const priceDiff = ((contract.contractPrice / wine.customPrice - 1) * 100).toFixed(0);
-            const priceClass = contract.contractPrice >= wine.customPrice ? 'text-success' : 'text-danger';
-            const priceDisplay = priceDiff > 0 ? `+${priceDiff}%` : `${priceDiff}%`;
-            
-            return `
-                <tr>
-                    <td>${wine.resource.name}, ${wine.vintage}, ${wine.fieldName || 'Unknown'}</td>
-                    <td>${formatQualityDisplay(wine.quality)}</td>
-                    <td>${formatNumber(wine.amount)} bottles</td>
-                    <td>€${wine.customPrice ? wine.customPrice.toFixed(0) : '0.00'}</td>
-                    <td class="${priceClass}">
-                        €${contract.contractPrice.toFixed(0)} 
-                        (${priceDisplay})
-                    </td>
-                    <td>
-                        <div class="input-group input-group-sm">
-                            <input type="range" class="form-range wine-quantity" 
-                                   min="0" max="${Math.min(wine.amount, requiredAmount)}" value="0" step="1"
-                                   data-original-max="${Math.min(wine.amount, requiredAmount)}"
-                                   data-wine-id="${wine.id || wine.resource.name + '-' + wine.vintage}"
-                                   data-wine-name="${wine.resource.name}"
-                                   data-wine-vintage="${wine.vintage}"
-                                   data-wine-quality="${wine.quality}"
-                                   data-wine-field="${wine.fieldName || ''}"
-                                   data-wine-storage="${wine.storage || ''}">
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('') : 
-        `<tr><td colspan="6" class="text-center">No eligible wines found that meet the contract requirements.</td></tr>`;
+    // Get all bottled wines
+    const allBottledWines = inventoryInstance.items.filter(item => item.state === 'Bottles');
+    
+    const wineListHTML = allBottledWines.map(wine => {
+        const isEligible = wineMatchesAllRequirements(wine, contract);
+        const basePrice = calculateWinePrice(wine.quality, wine, true);
+        const priceDiff = ((contract.contractPrice / wine.customPrice - 1) * 100).toFixed(0);
+        const priceClass = contract.contractPrice >= wine.customPrice ? 'text-success' : 'text-danger';
+        const priceDisplay = priceDiff > 0 ? `+${priceDiff}%` : `${priceDiff}%`;
+
+        // Generate simplified requirements validation display
+        const requirementsValidation = contract.requirements.map(req => {
+            const meets = req.validate(wine);
+            // Simplified display text based on requirement type
+            let displayText = '';
+            switch(req.type) {
+                case 'quality':
+                    displayText = `Quality ${(req.value * 100).toFixed(0)}%`;
+                    break;
+                case 'vintage':
+                    const gameYear = localStorage.getItem('year') ? parseInt(localStorage.getItem('year')) : 2023;
+                    const reqYear = gameYear - req.value;
+                    displayText = `Vintage ${reqYear}`;
+                    break;
+                case 'landvalue':
+                    displayText = `Land €${formatNumber(req.value)}`;
+                    break;
+                case 'balance':
+                    displayText = `Balance ${(req.value * 100).toFixed(0)}%`;
+                    break;
+                default:
+                    return '';
+            }
+            return `<div class="${meets ? 'text-success' : 'text-danger'}">
+                ${meets ? displayText : `<s>${displayText}</s>`}
+            </div>`;
+        }).join('');
+        
+        return `
+            <tr class="${!isEligible ? 'text-muted' : ''}">
+                <td>${wine.resource.name}, ${wine.vintage}, ${wine.fieldName || 'Unknown'}</td>
+                <td>${formatQualityDisplay(wine.quality)}</td>
+                <td>${formatNumber(wine.amount)} bottles</td>
+                <td>${requirementsValidation}</td>
+                <td>€${wine.customPrice ? wine.customPrice.toFixed(0) : '0.00'}</td>
+                <td class="${isEligible ? priceClass : ''}">
+                    €${contract.contractPrice.toFixed(0)} 
+                    ${isEligible ? `(${priceDisplay})` : ''}
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="range" class="form-range wine-quantity" 
+                               min="0" max="${Math.min(wine.amount, requiredAmount)}" value="0" step="1"
+                               data-original-max="${Math.min(wine.amount, requiredAmount)}"
+                               data-wine-id="${wine.id || wine.resource.name + '-' + wine.vintage}"
+                               data-wine-name="${wine.resource.name}"
+                               data-wine-vintage="${wine.vintage}"
+                               data-wine-quality="${wine.quality}"
+                               data-wine-field="${wine.fieldName || ''}"
+                               data-wine-storage="${wine.storage || ''}"
+                               ${!isEligible ? 'disabled' : ''}>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 
     // Create requirements HTML for display
     let requirementsHTML = '<ul>';
@@ -124,6 +156,7 @@ function generateAssignWineHTML(contract, eligibleWines) {
                                         <th>Wine</th>
                                         <th>Quality</th>
                                         <th>Available</th>
+                                        <th>Demands</th>
                                         <th>Your Price</th>
                                         <th>Contract Price</th>
                                         <th>Select Amount</th>
