@@ -14,6 +14,7 @@ const REQUIREMENT_TYPES = {
     QUALITY: 'quality',
     VINTAGE: 'vintage',
     BALANCE: 'balance',    // Add new balance requirement type
+    LANDVALUE: 'landvalue',    // Add new landvalue requirement type
     // Future requirement types:
     // GRAPE_TYPE: 'grapeType',
     // LAND_VALUE: 'landValue',
@@ -48,6 +49,9 @@ function validateRequirement(type, value, wine, params) {
         case REQUIREMENT_TYPES.BALANCE:
             return wine.balance >= value;
             
+        case REQUIREMENT_TYPES.LANDVALUE:
+            return wine.fieldSource && wine.fieldSource.landvalue >= value;
+            
         default:
             return true;
     }
@@ -67,6 +71,9 @@ function calculateRequirementPremium(type, value, params) {
             
         case REQUIREMENT_TYPES.BALANCE:
             return calculateBalancePricePremium(value);
+            
+        case REQUIREMENT_TYPES.LANDVALUE:
+            return calculateLandValuePremium(value);
             
         // Add cases for future requirement types here
         default:
@@ -99,6 +106,10 @@ function formatRequirementHTML(type, value, params) {
         case REQUIREMENT_TYPES.BALANCE:
             const balanceColorClass = getColorClass(value);
             return `<strong>Balance <span class="${balanceColorClass}">(min ${formatNumber(value * 100)}%)</span></strong>`;
+            
+        case REQUIREMENT_TYPES.LANDVALUE:
+            const landValueClass = getColorClass(value / 500000); // Normalize to 0-1 range
+            return `<strong>Land Value <span class="${landValueClass}">(min €${formatNumber(value)}/acre)</span></strong>`;
             
         // Add cases for future requirement types here
             
@@ -226,8 +237,36 @@ const REQUIREMENT_CONFIG = {
             return value;
         },
         getParams: () => ({})
+    },
+    [REQUIREMENT_TYPES.LANDVALUE]: {
+        chance: 0.4,  // 40% chance - less common than quality/vintage
+        generateValue: (importer) => {
+            const baseValue = Math.random();
+            const isUnusualOrder = Math.random() < 0.10;
+            
+            // Base ranges based on importer type
+            const typeBaseValues = {
+                "Private Importer": { base: 200000, range: 300000 },  // High-end focus
+                "Restaurant": { base: 100000, range: 200000 },        // Quality focus
+                "Wine Shop": { base: 50000, range: 150000 },          // Mid-range
+                "Chain Store": { base: 20000, range: 80000 },         // Value focus
+                "default": { base: 50000, range: 150000 }
+            };
+            
+            const config = typeBaseValues[importer.type] || typeBaseValues["default"];
+            let value = config.base + (baseValue * config.range);
+            
+            if (isUnusualOrder) {
+                // Occasionally generate very high or low requirements
+                value = Math.random() < 0.5 ? 
+                    value * 0.5 : // Lower requirement
+                    value * 2;    // Higher requirement
+            }
+            
+            return Math.round(value);
+        },
+        getParams: () => ({})
     }
-    // Add new requirement types here with their generation configuration
 };
 
 // Define a central configuration for pricing calculations
@@ -477,6 +516,26 @@ function calculateBalancePricePremium(value) {
         return 13.6 + (value - 0.7) * 150;
     } else {
         return 43.6 + Math.pow((value - 0.9) * 10, 2) * 130;
+    }
+}
+
+function calculateLandValuePremium(minLandValue) {
+    if (!minLandValue) return 0;
+    
+    // Premium tiers based on land value (per acre):
+    // < €50,000: €0-5 premium
+    // €50,000-200,000: €5-20 premium
+    // €200,000-500,000: €20-50 premium
+    // > €500,000: €50+ premium
+    
+    if (minLandValue <= 50000) {
+        return (minLandValue / 50000) * 5;
+    } else if (minLandValue <= 200000) {
+        return 5 + ((minLandValue - 50000) / 150000) * 15;
+    } else if (minLandValue <= 500000) {
+        return 20 + ((minLandValue - 200000) / 300000) * 30;
+    } else {
+        return 50 + Math.pow((minLandValue - 500000) / 100000, 1.5) * 10;
     }
 }
 
