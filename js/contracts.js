@@ -507,6 +507,8 @@ export function generateImporterContracts() {
     
     // Calculate combined price premium from all requirements
     let totalPremium = 0;
+    const requirementMultiplier = Math.pow(1.1, requirements.length); // 1.1 raised to power of number of requirements
+
     requirements.forEach(req => {
         const premium = req.getPremium();
         totalPremium += premium;
@@ -522,7 +524,8 @@ export function generateImporterContracts() {
     const contractAmount = Math.max(10, Math.ceil(baseAmount * selectedImporter.buyAmountMultiplicator));
     
     const basePrice = basePriceRange.min + Math.random() * (basePriceRange.max - basePriceRange.min);
-    const contractPrice = (basePrice + totalPremium) * selectedImporter.buyPriceMultiplicator;
+    // Apply both premium and requirement multiplier to price
+    const contractPrice = (basePrice + totalPremium) * selectedImporter.buyPriceMultiplicator * requirementMultiplier;
     
     // Create contract object with new requirements system
     const contract = {
