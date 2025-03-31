@@ -1,0 +1,15 @@
+## Known Bugs (Jan 2025)
+- When sidebar is toggle collapsed from localStorage mainwindow doesn't get 'collapsed width' but leaves empty space between mainwindow overlay and panel
+- Tooltips in sidebar not showing above mainview
+- Company info tooltip not working in collapsed sidebar
+- Load/save error on crushing tasks (selectedgrape storage issue) 
+- Save/load issues with owned land and staff (Save to firestore, but don't restore from localStorage)
+- Multiple winery tasks allowed on same field/grape/vintage if different quality
+- Building name disappears immediately after construction
+- Task boxes only show building name after page reload
+- Multiple building/maintenance tasks possible on same building
+- No prestige hit for incomplete bookkeeping tasks
+- Plant button not disabled during active clearing task
+- There might be an issue where annualYieldFactor is producing values below 0.5 unintentionally
+- Wine orders not saved to firestore, just to localStorage
+- Need to clean localStorage on login (game closed without clearing)
