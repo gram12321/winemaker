@@ -1,0 +1,45 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# general-ai-rules.mdc
+
+## AI Code Generation Principles for Winery Management Game
+
+### 💡 ALWAYS, IN EVERY RESPONS
+- Read [readme.md](mdc:readme.md) , [AI-BRIEFING.md](mdc:AI-BRIEFING.md) [general-ai-rules-updated.mdc](mdc:.cursor/rules/general-ai-rules-updated.mdc) and [tailwind-ui-guidelines-updated.mdc](mdc:.cursor/rules/tailwind-ui-guidelines-updated.mdc)
+
+### 💡 Project Summary
+- This is a iteration of a old project. The old project is localted im \winemaker_old for references
+- Turn-based single-player simulation game.
+- Built with **React + TypeScript** as a **Single Page Application (SPA)**.
+- No Next.js, no routing. All views are handled via conditional rendering.
+- Uses **Firebase (Firestore + Auth + Functions)** as backend.
+
+---
+
+### ✅ Architecture Rules
+1. Use **Tailwind CSS** for styling. No Bootstrap or custom CSS in this iteration.
+2. Avoid overlays, sidebars, or panels. Use modular full-screen views only. (except a topbar for navigation)
+3. Navigation is handled using a `view` string — **not via routing** or `<Route>` components.
+4. Core logic and state should live in `gameState.ts`. Components should never hold business logic.
+5. Minimize React hooks — avoid `useEffect`, `useReducer`, etc. unless needed for UI behavior.
+6. Firebase reads/writes should be centralized in AdminFunctions and minimal (login, logout, tick checkpoint).
+7. Simulated NPC buyers — no multiplayer, market, or real-time interactions.
+
+---
+
+### 📦 Game Design Conventions
+- Economy is deterministic, driven by formulas.
+- Players never interact directly. There are no real-time mechanics or shared world state.
+- Wine is sold via simulated contracts or importers — not market-based.
+- Data such as players, vineyards, production, prices, etc. are defined with clear TypeScript types.
+
+---
+
+### 🧠 AI Prompting Style
+When asked to generate code:
+- Assume **React + TypeScript + Tailwind**, no routing.
+- Use `gameState.ts` as the data source for all gameplay logic.
+- Prioritize simplicity, clarity, and maintainability.

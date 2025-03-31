@@ -1,0 +1,56 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# tailwind-ui-guidelines.mdc
+
+## UI + Styling Guide for Winery Management Game
+
+### ✨ Core Principles
+- Use **Tailwind CSS** for all styling.
+- Do **not use** Bootstrap, `style.css`, or `variables.css`.
+- Keep UI components lightweight and modular.
+- Layouts are clean and full-screen — no overlays, no panels, no sidebars.
+
+---
+
+### 🖼 Layout Strategy
+- The app is a **Single Page Application (SPA)**.
+- Screen layout is controlled by a `view` variable (e.g. `"vineyard"`, `"production"`, `"finance"`).
+- Use flexbox and grid utilities from Tailwind to manage layout.
+- Components should not stack or layer over each other unless it’s a modal or tooltip.
+
+---
+
+### 🧩 Component Rules
+- Use Tailwind utility classes only — no external CSS.
+- Use semantic HTML (`<button>`, `<section>`, `<article>`, etc.) where appropriate.
+- Keep components small and focused. Each view (`Vineyard`, `Production`, etc.) should be its own component.
+- Prefer clarity over abstraction: avoid overly generic or reusable components unless necessary.
+- Use names for class (Wineyard-section, Farmlandoverview ect)
+
+---
+
+### 💬 Examples
+
+```tsx
+<div className="flex flex-col gap-4 p-4">
+  <h1 className="text-2xl font-bold text-wine">Welcome to Your Winery</h1>
+  <button className="btn btn-primary" onClick={startProduction}>
+    Start Production
+  </button>
+</div>
+```
+
+```ts
+const [view, setView] = useState("mainMenu");
+
+return (
+  <>
+    {view === "mainMenu" && <MainMenu />}
+    {view === "vineyard" && <Vineyard />}
+    {view === "production" && <Production />}
+  </>
+);
+```

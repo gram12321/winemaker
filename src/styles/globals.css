@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --wine: 352 42% 32%;
+    --wine-dark: 352 42% 22%;
+    --wine-light: 352 42% 42%;
+  }
+
+  body {
+    @apply bg-gray-50 font-sans text-gray-900;
+  }
+} 

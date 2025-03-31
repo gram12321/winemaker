@@ -1,8 +1,34 @@
 {
+  "name": "winery-management-game",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "bootstrap": "^5.3.3",
-    "express": "^4.21.2"
-
-
+    "@types/react": "^18.2.51",
+    "@types/react-dom": "^18.2.18",
+    "firebase": "^11.6.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@radix-ui/react-icons": "^1.3.2",
+    "@types/node": "^20.11.24",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "lucide-react": "^0.486.0",
+    "postcss": "^8.4.35",
+    "prettier": "^3.2.5",
+    "tailwind-merge": "^2.2.1",
+    "tailwindcss": "^3.3.3",
+    "vite": "^5.1.4"
   }
 }
