@@ -1,295 +1,208 @@
-
 # Winery Management Game - Architecture Guide (Next Iteration)
 
-## Successful Elements from Previous Version
+## Core Game Systems & Features
 
-### 1. Core Game Systems
+### 1. Wine Production System
+- Wine characteristics (Sweetness, Acidity, Tannins, Body, Spice, Aroma)
+- Quality tracking through production stages
+- Balance calculation system with archetypes
+- Processing influence on characteristics (crushing methods, fermentation)
+- Wine archetypes for style matching
 
-#### Vineyard Management
-- Field system with health tracking (0-1 scale)
-- Planting mechanics with density options (1000-10000 vines/acre)
-- Harvest timing based on ripeness (0.5-1.0 scale)
-- Field prestige calculation incorporating:
-  - Vine age (30%)
-  - Land value (25%)
-  - Region prestige (25%)
-  - Grape fragility (20%)
+### 2. Field Management
+- Dynamic health system (0-1 scale)
+- Field clearing and preparation
+- Planting with grape variety selection
+- Environmental factors (soil, altitude, aspect)
+- Harvest timing and ripeness tracking
 
-#### Wine Production Pipeline
-- Crushing system: Manual → Mechanical → Crusher-Destemmer progression
-- Fermentation options: Plastic → Steel → Concrete → Oak
-- Quality tracking through each production stage
-- Building system with tool management and upgrades
-- Storage capacity management for different wine stages
+### 3. Staff System
+- Skill-based hiring with specializations
+- Work rate calculations based on skills
+- Staff search and recruitment system
+- Wage calculation and payment system
+- Team management and task assignment
 
-#### Staff Management
-- 5-tier skill system: Fresh Off the Vine → Living Legend
-- Specializations: Field, Winery, Administration, Sales, Maintenance
-- Skill impact on work quality (0.04-1.0 scale)
-- Salary system based on skill level and specialization
+### 4. Sales System
+- Wine order generation
+- Dynamic pricing engine
+- Contract system for stable income
+- Customer preferences and archetypes
+- Price negotiation mechanics
 
-#### Financial System
-- Dynamic wine pricing based on multiple factors
-- Building and tool depreciation
-- Staff wage management
-- Resource value calculations
-- Transaction tracking and bookkeeping
+### 5. Game Flow
+- End-day/tick system for game progression
+- Tutorial system with guided learning
+- Console messaging for game events
+- Work calculation system for tasks
+- Building maintenance cycle
 
-### 2. Key Calculations (To Port)
 
-#### Wine Quality Formula
+## Key Interface Components
+
+### 1. Land Management
 ```typescript
-interface QualityFactors {
-  fieldPrestige: number;  // 0-1 scale
-  staffSkill: number;     // 0.04-1.0 scale
-  processQuality: number; // 0-1 scale
-  toolQuality: number;    // 0.9-1.5 scale
+// buyLandOverlay.js
+interface LandPurchaseOptions {
+  country: string;
+  region: string;
+  previewData: {
+    soil: string[];
+    altitude: number;
+    aspect: string;
+    price: number;
+  }
+}
+```
+
+### 2. Field Operations
+```typescript
+// farmlandOverlay.js
+interface FieldOperations {
+  clearing: {
+    cost: number;
+    timeRequired: number;
+  };
+  planting: {
+    grapeVarieties: GrapeVariety[];
+    density: number;
+    cost: number;
+  }
+}
+```
+
+### 3. Staff Management
+```typescript
+// staffOverlay.js
+interface StaffDisplay {
+  skills: SkillSet;
+  specializations: string[];
+  assignments: TaskAssignment[];
+  salary: number;
+}
+```
+
+### 4. Wine Information
+```typescript
+// wineInfoOverlay.js
+interface WineDisplay {
+  characteristics: WineCharacteristics;
+  quality: number;
+  balance: number;
+  archetypalMatch: string;
+  price: number;
+}
+```
+
+## Database Architecture
+
+### 1. Core Data Management
+```typescript
+// database/adminFunctions.js
+interface DataOperations {
+  loadGameState(): GameState;
+  saveGameState(state: GameState): void;
+  loadBuildings(): Building[];
+  loadStaff(): Staff[];
+  // etc.
+}
+```
+
+### 2. Game Initialization
+```typescript
+// database/initiation.js
+interface GameInitialization {
+  initializeNewGame(): void;
+  loadSavedGame(): void;
+  setupRecurringTransactions(): void;
+}
+```
+
+## Key Calculations to Port
+
+### 1. Work Calculation
+```typescript
+interface WorkFactors {
+  baseWork: number;
+  skillModifier: number;
+  toolEfficiency: number;
+  specialization: number;
 }
 
-const calculateWineQuality = (factors: QualityFactors): number => {
-  const baseQuality = (factors.fieldPrestige + factors.staffSkill + factors.processQuality) / 3;
-  return baseQuality * factors.toolQuality;
+const calculateWork = (factors: WorkFactors): number => {
+  return factors.baseWork * 
+         factors.skillModifier * 
+         factors.toolEfficiency * 
+         (1 + factors.specialization);
 };
 ```
 
-#### Yield Calculation System
+### 2. Wine Balance
 ```typescript
-interface YieldFactors {
-  baseYield: number;      // 2400kg/acre
-  density: number;        // 0.2-2.0 scale
-  health: number;         // 0-1 scale
-  annualFactor: number;   // 0.75-1.25 range
-  naturalYield: number;   // Grape variety factor
+interface WineCharacteristics {
+  sweetness: number;
+  acidity: number;
+  tannins: number;
+  body: number;
+  spice: number;
+  aroma: number;
 }
 
-const calculateYield = (factors: YieldFactors): number => {
-  return factors.baseYield * 
-         factors.density * 
-         factors.health * 
-         factors.annualFactor * 
-         factors.naturalYield;
+const calculateBalance = (chars: WineCharacteristics): number => {
+  // Port existing balance calculations
+  // Consider archetype matching
+  return balanceScore;
 };
 ```
 
-#### Staff Work Rate System
-```typescript
-interface WorkRateFactors {
-  baseRate: number;           // Base work units per week
-  skillLevel: number;         // 0.04-1.0 scale
-  specializationBonus: number;// 0-0.4 additional bonus
-  toolEfficiency: number;     // 0.9-1.5 multiplier
-}
-
-const calculateWorkRate = (factors: WorkRateFactors): number => {
-  const skillBonus = factors.skillLevel * 0.4;
-  const specialistBonus = factors.specializationBonus * 0.2;
-  return (factors.baseRate * (1 + skillBonus + specialistBonus)) * factors.toolEfficiency;
-};
-```
-
-#### Wine Price Formula
-```typescript
-interface PriceFactors {
-  landValue: number;      // Base land value
-  fieldPrestige: number;  // 0-1 scale
-  quality: number;        // 0-1 scale
-  balance: number;        // 0-1 scale
-}
-
-const calculateWinePrice = (factors: PriceFactors): number => {
-  const basePrice = (factors.landValue * 0.625) + (factors.fieldPrestige * 0.375);
-  const qualityMultiplier = Math.pow(2, (factors.quality * 0.6 + factors.balance * 0.4) * 10);
-  return basePrice * qualityMultiplier;
-};
-```
-
-## Key Features to Implement
-
-1. **Vineyard Operations**
-- Detailed field management with multiple attributes
-- Dynamic health system affected by maintenance
-- Harvest timing system with ripeness tracking
-- Density-based planting system
-- Field prestige calculation engine
-
-2. **Production System**
-- Multi-stage wine production tracking
-- Tool-based quality modifiers
-- Storage capacity management
-- Production facility upgrades
-- Quality inheritance system between stages
-
-3. **Staff System**
-- Skill progression system
-- Specialization bonuses
-- Work rate calculations
-- Salary management
-- Staff satisfaction tracking (optional)
-
-4. **Economic System**
-- Dynamic wine pricing engine
-- Building economy (maintenance, depreciation)
-- Resource market system
-- Financial reporting tools
-- Investment and upgrade costs
-
-Note: The task system from the previous iteration will not be implemented. Instead, actions will be handled directly through the relevant views and components.
-
-## New Architecture Implementation
+## Implementation Guidelines
 
 ### 1. State Management
 ```typescript
-// gameState.ts
+// Central game state
 interface GameState {
   money: number;
-  fields: Field[];
-  staff: Staff[];
-  buildings: Building[];
+  date: GameDate;
   inventory: Inventory;
-  tasks: Task[];
+  staff: Staff[];
+  fields: Field[];
+  buildings: Building[];
 }
-
-// Single source of truth
-const gameState = createStore<GameState>({...});
 ```
 
 ### 2. View Structure
 ```typescript
-// App.tsx
-const App = () => {
-  const [view, setView] = useState<GameView>('vineyard');
-  
-  return (
-    <main className="min-h-screen bg-slate-100">
-      <Navigation onViewChange={setView} />
-      <ViewContainer currentView={view} />
-    </main>
-  );
-};
-```
-
-### 3. Core Components
-```typescript
 // No overlays - use grid layouts
-const VineyardView = () => (
+const MainView = () => (
   <div className="grid grid-cols-12 gap-4">
-    <FieldList className="col-span-8" />
-    <TaskPanel className="col-span-4" />
+    <GameHeader className="col-span-12" />
+    <MainContent className="col-span-9" />
+    <InfoPanel className="col-span-3" />
   </div>
 );
 ```
 
-### 4. Business Logic
-```typescript
-// Centralize calculations in pure functions
-export const calculateWineQuality = (
-  fieldPrestige: number,
-  staffSkill: number,
-  processQuality: number
-): number => {
-  // Port existing quality calculations
-  return (fieldPrestige + staffSkill + processQuality) / 3;
-};
-```
+### 3. Data Flow
+- Centralized state management
+- Pure calculation functions
+- Event-driven updates
+- Persistent storage via adminFunctions
 
-## Key Features to Implement
+### 4. Migration Notes
+1. Preserve:
+   - Wine characteristic system
+   - Work calculations
+   - Balance formulas
+   - Price calculations
 
-1. **Vineyard Operations**
-- Field management
-- Planting system
-- Harvest mechanics
-- Health tracking
-
-2. **Production System**
-- Must processing
-- Fermentation
-- Aging
-- Quality tracking
-
-3. **Staff System**
-- Skill levels (5 tiers)
-- Specializations
-- Work calculation
-- Team management
-
-4. **Economic System**
-- Wine pricing formula
-- Building costs
-- Staff wages
-- Resource values
-
-## Implementation Guidelines
-
-1. **Component Structure**
-```typescript
-src/
-  components/
-    vineyard/
-      FieldCard.tsx
-      PlantingForm.tsx
-    winery/
-      ProcessingUnit.tsx
-      StorageView.tsx
-    staff/
-      StaffList.tsx
-      HiringPanel.tsx
-```
-
-2. **Game Logic**
-```typescript
-src/
-  logic/
-    calculations/
-      wine.ts
-      yield.ts
-      pricing.ts
-    systems/
-      staff.ts
-      production.ts
-      vineyard.ts
-```
-
-3. **State Management**
-- Use TypeScript interfaces for all game entities
-- Implement pure functions for calculations
-- Maintain single source of truth
-- Use immutable state updates
-
-## Migration Notes
-
-1. **Preserve These Systems**
-- Wine quality calculations
-- Staff skill system
-- Field prestige formula
-- Building upgrade mechanics
-
-2. **Improve These Areas**
-- Unified state management
-- Type safety with TypeScript
-- Component composition
-- Performance optimization
-
-3. **New Architecture Benefits**
-- Better type safety
-- Simpler state management
-- More maintainable codebase
-- Easier testing
-- Better performance
-
-## Testing Strategy
-
-```typescript
-// Example test structure
-describe('Wine Quality Calculation', () => {
-  test('calculates basic wine quality', () => {
-    expect(calculateWineQuality(0.8, 0.7, 0.9)).toBe(0.8);
-  });
-});
-```
+2. Improve:
+   - State management
+   - UI component structure
+   - Type safety
+   - Data persistence
 
 Remember:
-- Write tests for all calculations
 - Use TypeScript for type safety
-- Keep components small and focused
-- Avoid nested component state
-- Use pure functions for game logic
+- Keep components focused
+- Centralize calculations
+- Maintain clear data flow
