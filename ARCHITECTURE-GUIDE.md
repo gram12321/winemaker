@@ -4,16 +4,136 @@
 ## Successful Elements from Previous Version
 
 ### 1. Core Game Systems
-- **Vineyard Management**: The current implementation successfully handles planting, maintenance, and harvesting with precise calculations
-- **Wine Production Pipeline**: The crush → ferment → age workflow proved effective
-- **Staff Management**: The skill-based system with specializations worked well
-- **Financial System**: Formula-based pricing provided good balance
+
+#### Vineyard Management
+- Field system with health tracking (0-1 scale)
+- Planting mechanics with density options (1000-10000 vines/acre)
+- Harvest timing based on ripeness (0.5-1.0 scale)
+- Field prestige calculation incorporating:
+  - Vine age (30%)
+  - Land value (25%)
+  - Region prestige (25%)
+  - Grape fragility (20%)
+
+#### Wine Production Pipeline
+- Crushing system: Manual → Mechanical → Crusher-Destemmer progression
+- Fermentation options: Plastic → Steel → Concrete → Oak
+- Quality tracking through each production stage
+- Building system with tool management and upgrades
+- Storage capacity management for different wine stages
+
+#### Staff Management
+- 5-tier skill system: Fresh Off the Vine → Living Legend
+- Specializations: Field, Winery, Administration, Sales, Maintenance
+- Skill impact on work quality (0.04-1.0 scale)
+- Salary system based on skill level and specialization
+
+#### Financial System
+- Dynamic wine pricing based on multiple factors
+- Building and tool depreciation
+- Staff wage management
+- Resource value calculations
+- Transaction tracking and bookkeeping
 
 ### 2. Key Calculations (To Port)
-- Wine Quality: Based on field prestige, staff skills, and process quality
-- Yield Calculations: Based on density, health, and annual factors
-- Staff Work Rate: Based on skill levels (Fresh Off the Vine to Living Legend)
-- Wine Price Formula: Land value (62.5%) + Quality/Balance multiplier system
+
+#### Wine Quality Formula
+```typescript
+interface QualityFactors {
+  fieldPrestige: number;  // 0-1 scale
+  staffSkill: number;     // 0.04-1.0 scale
+  processQuality: number; // 0-1 scale
+  toolQuality: number;    // 0.9-1.5 scale
+}
+
+const calculateWineQuality = (factors: QualityFactors): number => {
+  const baseQuality = (factors.fieldPrestige + factors.staffSkill + factors.processQuality) / 3;
+  return baseQuality * factors.toolQuality;
+};
+```
+
+#### Yield Calculation System
+```typescript
+interface YieldFactors {
+  baseYield: number;      // 2400kg/acre
+  density: number;        // 0.2-2.0 scale
+  health: number;         // 0-1 scale
+  annualFactor: number;   // 0.75-1.25 range
+  naturalYield: number;   // Grape variety factor
+}
+
+const calculateYield = (factors: YieldFactors): number => {
+  return factors.baseYield * 
+         factors.density * 
+         factors.health * 
+         factors.annualFactor * 
+         factors.naturalYield;
+};
+```
+
+#### Staff Work Rate System
+```typescript
+interface WorkRateFactors {
+  baseRate: number;           // Base work units per week
+  skillLevel: number;         // 0.04-1.0 scale
+  specializationBonus: number;// 0-0.4 additional bonus
+  toolEfficiency: number;     // 0.9-1.5 multiplier
+}
+
+const calculateWorkRate = (factors: WorkRateFactors): number => {
+  const skillBonus = factors.skillLevel * 0.4;
+  const specialistBonus = factors.specializationBonus * 0.2;
+  return (factors.baseRate * (1 + skillBonus + specialistBonus)) * factors.toolEfficiency;
+};
+```
+
+#### Wine Price Formula
+```typescript
+interface PriceFactors {
+  landValue: number;      // Base land value
+  fieldPrestige: number;  // 0-1 scale
+  quality: number;        // 0-1 scale
+  balance: number;        // 0-1 scale
+}
+
+const calculateWinePrice = (factors: PriceFactors): number => {
+  const basePrice = (factors.landValue * 0.625) + (factors.fieldPrestige * 0.375);
+  const qualityMultiplier = Math.pow(2, (factors.quality * 0.6 + factors.balance * 0.4) * 10);
+  return basePrice * qualityMultiplier;
+};
+```
+
+## Key Features to Implement
+
+1. **Vineyard Operations**
+- Detailed field management with multiple attributes
+- Dynamic health system affected by maintenance
+- Harvest timing system with ripeness tracking
+- Density-based planting system
+- Field prestige calculation engine
+
+2. **Production System**
+- Multi-stage wine production tracking
+- Tool-based quality modifiers
+- Storage capacity management
+- Production facility upgrades
+- Quality inheritance system between stages
+
+3. **Staff System**
+- Skill progression system
+- Specialization bonuses
+- Work rate calculations
+- Salary management
+- Staff satisfaction tracking (optional)
+
+4. **Economic System**
+- Dynamic wine pricing engine
+- Building economy (maintenance, depreciation)
+- Resource market system
+- Financial reporting tools
+- Investment and upgrade costs
+
+Note: The task system from the previous iteration will not be implemented. Instead, actions will be handled directly through the relevant views and components.
 
 ## New Architecture Implementation
 
