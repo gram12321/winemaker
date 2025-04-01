@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from './firebase.config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState, initializePlayer } from './gameState';
+import TopBar from './components/TopBar';
 
 // Import future views here
 // import MainMenu from './views/MainMenu';
@@ -158,16 +159,135 @@ function App() {
         </div>
       )}
       
-      {/* Main Menu View */}
-      {view === 'mainMenu' && (
-        <div className="p-4">
-          <h1 className="text-2xl font-bold">Main Menu</h1>
-          <p>Welcome to {getGameState().player?.companyName || 'your winery'}!</p>
-          {/* Main menu components will go here */}
+      {/* Main Content with TopBar */}
+      {view !== 'login' && (
+        <div className="flex flex-col min-h-screen">
+          <TopBar view={view} setView={setView} />
+          
+          <div className="flex-1 p-6">
+            {/* Main Menu View */}
+            {view === 'mainMenu' && (
+              <div className="max-w-7xl mx-auto">
+                <h1 className="text-3xl font-bold mb-6">Welcome to Your Winery</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div 
+                    onClick={() => setView('vineyard')}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <h2 className="text-xl font-semibold text-wine mb-2">Vineyard</h2>
+                    <p className="text-gray-600">Manage your vineyards, plant new grapes, and harvest your crops</p>
+                  </div>
+                  
+                  <div 
+                    onClick={() => setView('production')}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <h2 className="text-xl font-semibold text-wine mb-2">Production</h2>
+                    <p className="text-gray-600">Process grapes, ferment wine, and manage aging and bottling</p>
+                  </div>
+                  
+                  <div 
+                    onClick={() => setView('staff')}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <h2 className="text-xl font-semibold text-wine mb-2">Staff</h2>
+                    <p className="text-gray-600">Hire, train, and manage your winery staff</p>
+                  </div>
+                  
+                  <div 
+                    onClick={() => setView('buildings')}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <h2 className="text-xl font-semibold text-wine mb-2">Buildings</h2>
+                    <p className="text-gray-600">Build and upgrade your winery facilities</p>
+                  </div>
+                  
+                  <div 
+                    onClick={() => setView('sales')}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <h2 className="text-xl font-semibold text-wine mb-2">Sales</h2>
+                    <p className="text-gray-600">Sell your wine to importers and manage contracts</p>
+                  </div>
+                  
+                  <div 
+                    onClick={() => setView('finance')}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <h2 className="text-xl font-semibold text-wine mb-2">Finance</h2>
+                    <p className="text-gray-600">Track income, expenses, and manage your finances</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Other views will be conditionally rendered here */}
+            {view === 'vineyard' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Vineyard Management</h1>
+                {/* Vineyard content will go here */}
+                <p className="text-gray-600">Vineyard view coming soon...</p>
+              </div>
+            )}
+            
+            {view === 'production' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Wine Production</h1>
+                {/* Production content will go here */}
+                <p className="text-gray-600">Production view coming soon...</p>
+              </div>
+            )}
+            
+            {view === 'staff' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Staff Management</h1>
+                {/* Staff content will go here */}
+                <p className="text-gray-600">Staff management view coming soon...</p>
+              </div>
+            )}
+            
+            {view === 'sales' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Wine Sales</h1>
+                {/* Sales content will go here */}
+                <p className="text-gray-600">Sales view coming soon...</p>
+              </div>
+            )}
+            
+            {view === 'finance' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Financial Management</h1>
+                {/* Finance content will go here */}
+                <p className="text-gray-600">Finance view coming soon...</p>
+              </div>
+            )}
+            
+            {view === 'buildings' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Buildings</h1>
+                {/* Buildings content will go here */}
+                <p className="text-gray-600">Buildings view coming soon...</p>
+              </div>
+            )}
+            
+            {view === 'winepedia' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Wine-Pedia</h1>
+                {/* WinePedia content will go here */}
+                <p className="text-gray-600">Wine-Pedia view coming soon...</p>
+              </div>
+            )}
+            
+            {view === 'settings' && (
+              <div>
+                <h1 className="text-2xl font-bold mb-4">Settings</h1>
+                {/* Settings content will go here */}
+                <p className="text-gray-600">Settings view coming soon...</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
-      
-      {/* Other views will be conditionally rendered here */}
     </div>
   );
 }
