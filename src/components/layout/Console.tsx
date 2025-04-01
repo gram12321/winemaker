@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
 import { InfoIcon, AlertTriangleIcon, XCircleIcon } from 'lucide-react';
-import { toast } from "../../hooks/use-toast";
+import { toast } from "../../lib/toast";
 
 type MessageType = 'info' | 'warning' | 'error';
 

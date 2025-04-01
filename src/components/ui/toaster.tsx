@@ -7,7 +7,7 @@ import {
   ToastTitle,
   ToastViewport,
 } from "../../components/ui/toast"
-import { getToasts } from "../../hooks/use-toast"
+import { getToasts } from "../../lib/toast"
 
 export function Toaster() {
   const [toasts, setToasts] = useState(getToasts())

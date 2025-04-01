@@ -7,7 +7,7 @@ This is a new iteration of the 0.25 build
 Look in @readme_old.md for the old readme describing the entire content of the game. 
 
 Changes from 0.25
- - Introduces React, typescript and tailwind
+ - Introduces React, typescript, tailwind and Shadcn UI
  - We are still running SPA but we use react Views instead of overlays. No more Bootstrap
  - Mail layout is now a topbar, not a sidebar, no panel, no permanent console
  - We still have the @console but now we use toast UI and have a permanent message history

@@ -186,4 +186,4 @@ export const dismissToast = (toastId?: string) => {
 // Function to get current toasts
 export const getToasts = () => {
   return memoryState.toasts
-}
+} 
