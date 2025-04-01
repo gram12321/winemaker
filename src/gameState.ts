@@ -1,4 +1,5 @@
 // Basic game state for the Winery Management Game
+import { Vineyard } from './lib/vineyard';
 
 // Player Type
 export interface Player {
@@ -8,23 +9,6 @@ export interface Player {
   prestige: number;
   companyName: string;
   foundedYear: number;
-}
-
-// Farmland/Vineyard Type
-export interface Farmland {
-  id: string;
-  name: string;
-  size: number;
-  quality: number;
-  region: string;
-  altitude: number;
-  aspect: string; // North, South, East, West facing
-  soilType: string;
-  ownedSince: Date;
-  plantedGrape: string | null;
-  plantedDate: Date | null;
-  vineAge: number;
-  health: number;
 }
 
 // Building Type
@@ -68,7 +52,7 @@ export interface WineBatch {
 // Main game state
 let gameState = {
   player: null as Player | null,
-  farmlands: [] as Farmland[],
+  vineyards: [] as Vineyard[],
   buildings: [] as Building[],
   staff: [] as Staff[],
   wineBatches: [] as WineBatch[],

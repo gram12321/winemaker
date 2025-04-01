@@ -14,6 +14,7 @@ import AdminDashboard from './views/AdminDashboard';
 import Winepedia from './views/Winepedia';
 import Profile from './views/Profile';
 import Achievements from './views/Achievements';
+import { VineyardView } from './views';
 
 // Import future views here
 // import MainMenu from './views/MainMenu';
@@ -92,7 +93,7 @@ function App() {
       // Update gameState with loaded data
       updateGameState({
         player: data.player || null,
-        farmlands: data.farmlands || [],
+        vineyards: data.farmlands || [],
         buildings: data.buildings || [],
         staff: data.staff || [],
         wineBatches: data.wineBatches || [],
@@ -122,7 +123,7 @@ function App() {
     const docRef = doc(db, 'companies', name);
     await setDoc(docRef, {
       player,
-      farmlands: [],
+      vineyards: [],
       buildings: [],
       staff: [],
       wineBatches: [],
@@ -248,15 +249,10 @@ function App() {
               </div>
             )}
             
-            {/* Game Views */}
-            {view === 'vineyard' && (
-              <div>
-                <h1 className="text-2xl font-bold mb-4">Vineyard Management</h1>
-                {/* Vineyard content will go here */}
-                <p className="text-gray-600">Vineyard view coming soon...</p>
-              </div>
-            )}
+            {/* Vineyard View */}
+            {view === 'vineyard' && <VineyardView />}
             
+            {/* Game Views */}
             {view === 'production' && (
               <div>
                 <h1 className="text-2xl font-bold mb-4">Wine Production</h1>
