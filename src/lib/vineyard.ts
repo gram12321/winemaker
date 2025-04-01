@@ -1,5 +1,4 @@
 // Vineyard type and utility functions for the Winery Management Game
-// This combines the functionality of farmland and vineyard from the old codebase
 
 // Countries and regions data
 export const countryRegionMap = {
@@ -117,7 +116,7 @@ export type Aspect =
 // Conventional farming methods
 export type FarmingMethod = "Conventional" | "Non-Conventional" | "Ecological";
 
-// Vineyard interface (combining old Farmland and Vineyard)
+// Vineyard interface
 export interface Vineyard {
   id: string;
   name: string;

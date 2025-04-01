@@ -6,6 +6,9 @@ import { checkCompanyExists, createCompany } from './lib/database/companyService
 import { loadGameState } from './lib/database/gameStateService';
 import { StorageKeys, loadFromStorage } from './lib/database/storageService';
 
+// Import game systems
+import { initializeGameTime } from './lib/gameTick';
+
 // Import layout components
 import TopBar from './components/layout/TopBar';
 import { Toaster } from './components/ui/toaster';
@@ -83,6 +86,9 @@ function App() {
       const success = await loadGameState(name);
       
       if (success) {
+        // Initialize game time system
+        initializeGameTime();
+        
         // Show welcome back message
         consoleService.info(`Welcome back to ${name}! Your winery awaits.`);
         setView('mainMenu');
@@ -104,6 +110,9 @@ function App() {
       player,
       currentView: 'mainMenu',
     });
+    
+    // Initialize game time
+    initializeGameTime();
     
     // Use our new service to create the company
     await createCompany(name, player);

@@ -49,6 +49,9 @@ export interface WineBatch {
   storageLocation: string;
 }
 
+// Season type
+export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
+
 // Main game state
 let gameState = {
   player: null as Player | null,
@@ -56,7 +59,8 @@ let gameState = {
   buildings: [] as Building[],
   staff: [] as Staff[],
   wineBatches: [] as WineBatch[],
-  currentDay: 1,
+  week: 1,
+  season: 'Spring' as Season,
   currentYear: 2023,
   currentView: 'login',
 };

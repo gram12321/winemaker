@@ -29,7 +29,8 @@ export const saveGameState = async (): Promise<boolean> => {
       buildings: gameState.buildings,
       staff: gameState.staff,
       wineBatches: gameState.wineBatches,
-      currentDay: gameState.currentDay,
+      week: gameState.week,
+      season: gameState.season,
       currentYear: gameState.currentYear
     });
     
@@ -57,11 +58,12 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
     // Update game state with loaded data
     updateGameState({
       player: data.player || null,
-      vineyards: data.vineyards || data.farmlands || [], // Support for legacy data
+      vineyards: data.vineyards || [],
       buildings: data.buildings || [],
       staff: data.staff || [],
       wineBatches: data.wineBatches || [],
-      currentDay: data.currentDay || 1,
+      week: data.week || 1,
+      season: data.season || 'Spring',
       currentYear: data.currentYear || new Date().getFullYear(),
       currentView: 'mainMenu',
     });

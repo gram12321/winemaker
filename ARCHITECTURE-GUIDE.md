@@ -57,7 +57,6 @@ interface LandPurchaseOptions {
 
 ### 2. Field Operations
 ```typescript
-// farmlandOverlay.js
 interface FieldOperations {
   clearing: {
     cost: number;

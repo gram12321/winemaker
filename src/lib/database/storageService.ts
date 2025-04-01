@@ -60,7 +60,6 @@ export const clearGameStorage = (): void => {
     'year',
     'calculatedPrestige',
     'prestigeHit',
-    'ownedFarmlands',
     'buildings',
     'playerInventory',
     'consoleMessages',
@@ -72,8 +71,6 @@ export const clearGameStorage = (): void => {
     'activeTasks',
     'deletedDefaultTeams',
     'teams',
-    'panelCollapsed',
-    'sidebarCollapsed',
     'importers',
     'upgrades',
     'seenTutorials',
@@ -99,7 +96,8 @@ export const StorageKeys = {
   BUILDINGS: 'buildings',
   STAFF: 'staff',
   WINE_BATCHES: 'wineBatches',
-  CURRENT_DAY: 'currentDay',
+  WEEK: 'week',
+  SEASON: 'season',
   CURRENT_YEAR: 'currentYear',
   CURRENT_VIEW: 'currentView'
 }; 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getGameState, updatePlayerMoney } from '../../gameState';
 import { Console, useConsole } from './Console';
+import { incrementWeek } from '../../lib/gameTick';
 
 import { Button } from "../../components/ui/button";
 import {
@@ -23,7 +24,7 @@ import {
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { cn } from "../../lib/utils";
-import { MessageSquareText } from 'lucide-react';
+import { MessageSquareText, CalendarDays } from 'lucide-react';
 
 interface TopBarProps {
   view: string;
@@ -33,6 +34,21 @@ interface TopBarProps {
 export default function TopBar({ view, setView }: TopBarProps) {
   const gameState = getGameState();
   const console = useConsole();
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Handle week increment
+  const handleIncrementWeek = async () => {
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      await incrementWeek();
+    } catch (error) {
+      console.error("Error incrementing week:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   
   return (
     <div className="w-full bg-wine text-white p-4 shadow-md">
@@ -113,6 +129,25 @@ export default function TopBar({ view, setView }: TopBarProps) {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* Time display */}
+          <div className="flex items-center space-x-2 mr-2">
+            <CalendarDays className="h-4 w-4" />
+            <span className="text-sm font-medium whitespace-nowrap">
+              W{gameState.week} | {gameState.season} | {gameState.currentYear}
+            </span>
+          </div>
+          
+          {/* Increment Week button */}
+          <Button 
+            onClick={handleIncrementWeek}
+            disabled={isProcessing}
+            variant="secondary" 
+            size="sm"
+            className="bg-wine-light hover:bg-wine-dark text-white border-wine-dark text-xs"
+          >
+            {isProcessing ? "Processing..." : "Increment Week"}
+          </Button>
+          
           <Badge variant="outline" className="bg-wine-light text-white border-wine-dark px-3 py-1 flex items-center">
             <span className="mr-1">€</span>
             <span className="font-medium">{gameState.player?.money?.toLocaleString() || 0}</span>
