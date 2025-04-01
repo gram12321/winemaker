@@ -3,6 +3,11 @@ import { db } from './firebase.config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState, initializePlayer } from './gameState';
 import TopBar from './components/TopBar';
+import Settings from './components/Settings';
+import AdminDashboard from './components/AdminDashboard';
+import Winepedia from './components/Winepedia';
+import Profile from './components/Profile';
+import Achievements from './components/Achievements';
 
 // Import future views here
 // import MainMenu from './views/MainMenu';
@@ -221,7 +226,7 @@ function App() {
               </div>
             )}
             
-            {/* Other views will be conditionally rendered here */}
+            {/* Game Views */}
             {view === 'vineyard' && (
               <div>
                 <h1 className="text-2xl font-bold mb-4">Vineyard Management</h1>
@@ -270,21 +275,12 @@ function App() {
               </div>
             )}
             
-            {view === 'winepedia' && (
-              <div>
-                <h1 className="text-2xl font-bold mb-4">Wine-Pedia</h1>
-                {/* WinePedia content will go here */}
-                <p className="text-gray-600">Wine-Pedia view coming soon...</p>
-              </div>
-            )}
-            
-            {view === 'settings' && (
-              <div>
-                <h1 className="text-2xl font-bold mb-4">Settings</h1>
-                {/* Settings content will go here */}
-                <p className="text-gray-600">Settings view coming soon...</p>
-              </div>
-            )}
+            {/* Additional Menu Views */}
+            <Settings view={view} />
+            <AdminDashboard view={view} />
+            <Winepedia view={view} />
+            <Profile view={view} />
+            <Achievements view={view} />
           </div>
         </div>
       )}

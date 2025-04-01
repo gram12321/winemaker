@@ -129,22 +129,27 @@ export default function TopBar({ view, setView }: TopBarProps) {
                 {gameState.player?.companyName || 'My Winery'}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setView('staff')}>
-                Staff Management
+              <DropdownMenuItem onClick={() => setView('profile')}>
+                Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setView('buildings')}>
-                Buildings
+              <DropdownMenuItem onClick={() => setView('settings')}>
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('admin')}>
+                Admin Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView('achievements')}>
+                Achievements
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setView('winepedia')}>
                 Wine-Pedia
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setView('settings')}>
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={() => setView('login')}
+                onClick={() => {
+                  localStorage.removeItem('companyName');
+                  setView('login');
+                }}
                 className="text-red-600 focus:text-red-500"
               >
                 Logout
