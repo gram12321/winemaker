@@ -36,19 +36,6 @@ export interface Staff {
   teamId: string | null;
 }
 
-// Wine Batch Type
-export interface WineBatch {
-  id: string;
-  grapeType: string;
-  harvestDate: Date;
-  quantity: number;
-  quality: number;
-  stage: 'grape' | 'must' | 'fermentation' | 'aging' | 'bottled';
-  ageingStartDate: Date | null;
-  ageingDuration: number | null;
-  storageLocation: string;
-}
-
 // Season type
 export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
 
@@ -58,7 +45,6 @@ let gameState = {
   vineyards: [] as Vineyard[],
   buildings: [] as Building[],
   staff: [] as Staff[],
-  wineBatches: [] as WineBatch[],
   week: 1,
   season: 'Spring' as Season,
   currentYear: 2023,

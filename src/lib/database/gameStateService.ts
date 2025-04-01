@@ -28,7 +28,6 @@ export const saveGameState = async (): Promise<boolean> => {
       vineyards: gameState.vineyards,
       buildings: gameState.buildings,
       staff: gameState.staff,
-      wineBatches: gameState.wineBatches,
       week: gameState.week,
       season: gameState.season,
       currentYear: gameState.currentYear
@@ -61,7 +60,6 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       vineyards: data.vineyards || [],
       buildings: data.buildings || [],
       staff: data.staff || [],
-      wineBatches: data.wineBatches || [],
       week: data.week || 1,
       season: data.season || 'Spring',
       currentYear: data.currentYear || new Date().getFullYear(),
