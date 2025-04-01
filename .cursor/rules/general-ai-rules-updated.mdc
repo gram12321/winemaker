@@ -8,12 +8,13 @@ alwaysApply: true
 ## AI Code Generation Principles for Winery Management Game
 
 ### 💡 ALWAYS, IN EVERY RESPONS
-- Read [readme.md](mdc:readme.md) , [AI-BRIEFING.md](mdc:AI-BRIEFING.md) [general-ai-rules-updated.mdc](mdc:.cursor/rules/general-ai-rules-updated.mdc) and [tailwind-ui-guidelines-updated.mdc](mdc:.cursor/rules/tailwind-ui-guidelines-updated.mdc)
+- Read [readme.md](mdc:docforai/readme.md), [AI-BRIEFING.md](mdc:docforai/AI-BRIEFING.md) [general-ai-rules-updated.mdc](mdc:.cursor/rules/general-ai-rules-updated.mdc) and [tailwind-ui-guidelines-updated.mdc](mdc:.cursor/rules/tailwind-ui-guidelines-updated.mdc) 
  - Dont use npm run build, unless specific told to. The user allready has a dev server running
 
 ### 💡 Project Summary
-- This is a iteration of a old project. The old project is localted im \winemaker_old for references
+- This is a iteration of a old project. The old project is localted im \winemaker_old or [readme_old.md](mdc:docforai/readme_old.md) for references
 - Turn-based single-player simulation game.
+- Ideas and future/planned imporovements in [ideer.txt](mdc:docforai/ideer.txt)
 - Built with **React + TypeScript** as a **Single Page Application (SPA)**.
 - No Next.js, no routing. All views are handled via conditional rendering.
 - Uses **Firebase (Firestore + Auth + Functions)** as backend.

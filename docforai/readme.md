@@ -1,5 +1,27 @@
 # Winery Management Game Version 0.3
 
+## Overview
+
+Winery Management Game is a simulation game built with React and TypeScript that allows players to manage their own winery. The game encompasses multiple aspects including vineyard management, production, finance, and sales.
+
+## Recent Updates
+
+### Centralized Constants and Unified Game Date System
+- Consolidated game constants into `src/lib/constants.ts`, including:
+  - Time system constants (seasons, weeks per season, starting week, starting season, and starting year)
+  - Financial constants (starting money and starting prestige)
+  - Vineyard management constants (base yield, vine density, yield bonuses, organic certification details)
+
+### Vineyard Specific Constants
+- Created `src/lib/vineyardConstants.ts` to manage vineyard-related settings such as:
+  - Grape varieties, aspect directions, and farming methods
+  - Country and region mappings
+  - Soil types and altitude ranges by region
+  - Aspect factors for land value calculation
+
+### Game State and Game Tick Updates
+- Updated `src/gameState.ts` this is were gametime resident 
+
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 This is a new iteration of the 0.25 build
 
