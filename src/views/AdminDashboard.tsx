@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { db } from '../firebase.config';
 import { collection, doc, deleteDoc, getDocs, setDoc } from 'firebase/firestore';
 import { getGameState } from '../gameState';
-import { Button } from './ui/button';
+import { Button } from '../components/ui/button';
 import { 
   Card, 
   CardContent, 
@@ -10,9 +10,9 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from "./ui/card";
-import { Separator } from './ui/separator';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+} from "../components/ui/card";
+import { Separator } from '../components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 
 interface AdminDashboardProps {

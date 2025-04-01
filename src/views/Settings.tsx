@@ -6,12 +6,13 @@ import {
   CardFooter, 
   CardHeader, 
   CardTitle 
-} from "./ui/card";
-import { Switch } from "./ui/switch";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Separator } from "./ui/separator";
+} from "../components/ui/card";
+import { Switch } from "../components/ui/switch";
+import { Label } from "../components/ui/label";
+import { Button } from "../components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Separator } from "../components/ui/separator";
+import { consoleService } from "../components/layout/Console";
 
 interface SettingsProps {
   view: string;
@@ -19,7 +20,7 @@ interface SettingsProps {
 
 export default function Settings({ view }: SettingsProps) {
   const [timeFormat, setTimeFormat] = useState('24');
-  const [showConsole, setShowConsole] = useState(false);
+  const [showConsole, setShowConsole] = useState(true);
   const [landUnit, setLandUnit] = useState('acres');
   const [enableTutorials, setEnableTutorials] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
@@ -28,7 +29,7 @@ export default function Settings({ view }: SettingsProps) {
     // Load saved settings from localStorage
     const savedFormat = localStorage.getItem('timeFormat') || '24';
     const savedUnit = localStorage.getItem('landUnit') || 'acres';
-    const savedShowConsole = localStorage.getItem('showConsole') === 'true';
+    const savedShowConsole = localStorage.getItem('showConsole') !== 'false'; // Default to true
     const savedTutorials = localStorage.getItem('tutorialsEnabled') !== 'false'; // Default to true
 
     setTimeFormat(savedFormat);
@@ -47,6 +48,16 @@ export default function Settings({ view }: SettingsProps) {
     // Show saved message
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
+    
+    // Show a console message
+    consoleService.info('Settings saved successfully');
+  };
+
+  // Test console functionality
+  const testConsole = () => {
+    consoleService.info('This is a test info message');
+    setTimeout(() => consoleService.warning('This is a warning message'), 500);
+    setTimeout(() => consoleService.error('This is an error message'), 1000);
   };
 
   // If this view is not active, don't render anything
@@ -130,7 +141,10 @@ export default function Settings({ view }: SettingsProps) {
         </CardContent>
         <CardFooter className="flex justify-between">
           {isSaved && <p className="text-green-600">Settings saved successfully!</p>}
-          <Button onClick={handleSaveSettings} className="ml-auto">Save Settings</Button>
+          <div className="space-x-2 ml-auto">
+            <Button variant="outline" onClick={testConsole}>Test Console</Button>
+            <Button onClick={handleSaveSettings}>Save Settings</Button>
+          </div>
         </CardFooter>
       </Card>
     </div>

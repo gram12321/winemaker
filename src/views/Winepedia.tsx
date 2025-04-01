@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { 
   Card, 
   CardContent, 
   CardDescription, 
   CardHeader, 
   CardTitle 
-} from "./ui/card";
+} from "../components/ui/card";
 import { 
   Table, 
   TableBody, 
@@ -14,9 +14,9 @@ import {
   TableHead, 
   TableHeader, 
   TableRow 
-} from "./ui/table";
-import { Badge } from "./ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+} from "../components/ui/table";
+import { Badge } from "../components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
 interface WinepediaProps {
   view: string;

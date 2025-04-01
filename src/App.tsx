@@ -2,17 +2,30 @@ import { useState, useEffect } from 'react';
 import { db } from './firebase.config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState, initializePlayer } from './gameState';
-import TopBar from './components/TopBar';
-import Settings from './components/Settings';
-import AdminDashboard from './components/AdminDashboard';
-import Winepedia from './components/Winepedia';
-import Profile from './components/Profile';
-import Achievements from './components/Achievements';
+
+// Import layout components
+import TopBar from './components/layout/TopBar';
+import { Toaster } from './components/ui/toaster';
+import { consoleService } from './components/layout/Console';
+
+// Import view components
+import Settings from './views/Settings';
+import AdminDashboard from './views/AdminDashboard';
+import Winepedia from './views/Winepedia';
+import Profile from './views/Profile';
+import Achievements from './views/Achievements';
 
 // Import future views here
 // import MainMenu from './views/MainMenu';
 // import Vineyard from './views/Vineyard';
 // import Production from './views/Production';
+
+// Add a function to log test messages during development
+const logTestMessage = () => {
+  consoleService.info("This is a test info message");
+  setTimeout(() => consoleService.warning("This is a test warning message"), 1000);
+  setTimeout(() => consoleService.error("This is a test error message"), 2000);
+};
 
 function App() {
   const [view, setView] = useState<string>('login');
@@ -88,6 +101,9 @@ function App() {
         currentView: 'mainMenu',
       });
       
+      // Show welcome back message
+      consoleService.info(`Welcome back to ${name}! Your winery awaits.`);
+      
       setView('mainMenu');
     }
   };
@@ -116,10 +132,16 @@ function App() {
     
     // Save to localStorage
     localStorage.setItem('companyName', name);
+    
+    // Show welcome message for new company
+    consoleService.info(`Welcome to your new winery, ${name}! Let's begin your winemaking journey.`);
   };
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* Toast notifications */}
+      <Toaster />
+      
       {/* Login View */}
       {view === 'login' && (
         <div className="flex min-h-screen items-center justify-center" 

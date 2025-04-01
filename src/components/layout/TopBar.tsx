@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { getGameState, updatePlayerMoney } from '../gameState';
+import { getGameState, updatePlayerMoney } from '../../gameState';
+import { Console, useConsole } from './Console';
 
-import { Button } from "../components/ui/button";
+import { Button } from "../../components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +10,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,10 +19,11 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from "../components/ui/navigation-menu";
-import { Badge } from "../components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
-import { cn } from "../lib/utils";
+} from "../../components/ui/navigation-menu";
+import { Badge } from "../../components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { cn } from "../../lib/utils";
+import { MessageSquareText } from 'lucide-react';
 
 interface TopBarProps {
   view: string;
@@ -30,6 +32,7 @@ interface TopBarProps {
 
 export default function TopBar({ view, setView }: TopBarProps) {
   const gameState = getGameState();
+  const console = useConsole();
   
   return (
     <div className="w-full bg-wine text-white p-4 shadow-md">
@@ -115,6 +118,15 @@ export default function TopBar({ view, setView }: TopBarProps) {
             <span className="font-medium">{gameState.player?.money?.toLocaleString() || 0}</span>
           </Badge>
           
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => console.openHistory()}
+            className="rounded-full h-10 w-10 flex items-center justify-center"
+          >
+            <MessageSquareText className="h-5 w-5" />
+          </Button>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2 p-1 rounded-full h-10 w-10">
@@ -158,6 +170,15 @@ export default function TopBar({ view, setView }: TopBarProps) {
           </DropdownMenu>
         </div>
       </div>
+      
+      {/* Message History Modal - controlled by Console component */}
+      {console.isHistoryOpen && 
+        <Console 
+          showConsole={true} 
+          isOpen={console.isHistoryOpen} 
+          onClose={console.closeHistory} 
+        />
+      }
     </div>
   );
 } 
