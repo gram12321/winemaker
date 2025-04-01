@@ -1,23 +1,83 @@
 import React, { useState } from 'react';
-import { getGameState, updateGameState } from '../gameState';
-import { Vineyard, createVineyard } from '../lib/vineyard';
+import { getGameState } from '../gameState';
+import { Vineyard } from '../lib/vineyard';
+import { addVineyard, plantVineyard, harvestVineyard } from '../lib/database/vineyardService';
+import { consoleService } from '../components/layout/Console';
 
 const VineyardView: React.FC = () => {
   const { vineyards, currentYear } = getGameState();
   const [selectedVineyard, setSelectedVineyard] = useState<Vineyard | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  // Handle adding a new vineyard (simplified for now)
-  const handleAddVineyard = () => {
-    const newId = `vineyard-${Date.now()}`;
-    const newVineyard = createVineyard(newId);
-    
-    const updatedVineyards = [...vineyards, newVineyard];
-    updateGameState({ vineyards: updatedVineyards });
+  // Handle adding a new vineyard using the vineyard service
+  const handleAddVineyard = async () => {
+    setLoading(true);
+    try {
+      const newVineyard = await addVineyard(undefined, true);
+      consoleService.info(`New vineyard "${newVineyard.name}" acquired in ${newVineyard.region}, ${newVineyard.country}.`);
+      setSelectedVineyard(newVineyard);
+    } catch (error) {
+      consoleService.error('Failed to add new vineyard.');
+      console.error('Error adding vineyard:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle selecting a vineyard
   const handleSelectVineyard = (vineyard: Vineyard) => {
     setSelectedVineyard(vineyard);
+  };
+
+  // Handle planting a vineyard
+  const handlePlantVineyard = async () => {
+    if (!selectedVineyard) return;
+    
+    setLoading(true);
+    try {
+      // In a real implementation, we would have a modal/form to select grape type and density
+      // For now, let's use a fixed grape type and density
+      const grape = "Chardonnay";
+      const density = 5000;
+      
+      const updatedVineyard = await plantVineyard(selectedVineyard.id, grape, density, true);
+      
+      if (updatedVineyard) {
+        consoleService.info(`${grape} planted in ${updatedVineyard.name} with a density of ${density} vines per acre.`);
+        setSelectedVineyard(updatedVineyard);
+      } else {
+        consoleService.error('Failed to plant vineyard.');
+      }
+    } catch (error) {
+      consoleService.error('Error planting vineyard.');
+      console.error('Error planting vineyard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle harvesting a vineyard
+  const handleHarvestVineyard = async () => {
+    if (!selectedVineyard) return;
+    
+    setLoading(true);
+    try {
+      // Harvest the full yield (amount = Infinity will harvest everything available)
+      const result = await harvestVineyard(selectedVineyard.id, Infinity, true);
+      
+      if (result) {
+        const { vineyard, harvestedAmount } = result;
+        consoleService.info(`Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}.`);
+        setSelectedVineyard(vineyard);
+      } else {
+        consoleService.error('Failed to harvest vineyard.');
+      }
+    } catch (error) {
+      consoleService.error('Error harvesting vineyard.');
+      console.error('Error harvesting vineyard:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -28,8 +88,9 @@ const VineyardView: React.FC = () => {
           <button 
             onClick={handleAddVineyard}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+            disabled={loading}
           >
-            Add Vineyard
+            {loading ? 'Processing...' : 'Add Vineyard'}
           </button>
         </div>
         
@@ -169,13 +230,21 @@ const VineyardView: React.FC = () => {
 
           <div className="flex space-x-2 mt-6">
             {!selectedVineyard.grape && (
-              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-                Plant Vineyard
+              <button 
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                onClick={handlePlantVineyard}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Plant Vineyard'}
               </button>
             )}
             {selectedVineyard.grape && selectedVineyard.status !== 'Harvested' && (
-              <button className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded">
-                Harvest Grapes
+              <button 
+                className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded"
+                onClick={handleHarvestVineyard}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Harvest Grapes'}
               </button>
             )}
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">

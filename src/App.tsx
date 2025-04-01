@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { db } from './firebase.config';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState, initializePlayer } from './gameState';
+
+// Import database services
+import { checkCompanyExists, createCompany } from './lib/database/companyService';
+import { loadGameState } from './lib/database/gameStateService';
+import { StorageKeys, loadFromStorage } from './lib/database/storageService';
 
 // Import layout components
 import TopBar from './components/layout/TopBar';
@@ -36,7 +39,7 @@ function App() {
 
   useEffect(() => {
     // Check if user is already logged in (company name in localStorage)
-    const savedCompanyName = localStorage.getItem('companyName');
+    const savedCompanyName = loadFromStorage<string | null>(StorageKeys.COMPANY_NAME, null);
     if (savedCompanyName) {
       loadCompanyData(savedCompanyName);
     }
@@ -53,7 +56,7 @@ function App() {
     setError(null);
 
     try {
-      // Check if company exists in Firestore
+      // Check if company exists in Firestore using our new service
       const companyExists = await checkCompanyExists(companyName);
       
       if (companyExists) {
@@ -74,38 +77,21 @@ function App() {
     }
   };
 
-  const checkCompanyExists = async (name: string): Promise<boolean> => {
-    const docRef = doc(db, 'companies', name);
-    const docSnap = await getDoc(docRef);
-    return docSnap.exists();
-  };
-
   const loadCompanyData = async (name: string) => {
-    const docRef = doc(db, 'companies', name);
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const data = docSnap.data();
+    try {
+      // Use our new service to load game state
+      const success = await loadGameState(name);
       
-      // Update localStorage with company data
-      localStorage.setItem('companyName', name);
-      
-      // Update gameState with loaded data
-      updateGameState({
-        player: data.player || null,
-        vineyards: data.farmlands || [],
-        buildings: data.buildings || [],
-        staff: data.staff || [],
-        wineBatches: data.wineBatches || [],
-        currentDay: data.currentDay || 1,
-        currentYear: data.currentYear || 2023,
-        currentView: 'mainMenu',
-      });
-      
-      // Show welcome back message
-      consoleService.info(`Welcome back to ${name}! Your winery awaits.`);
-      
-      setView('mainMenu');
+      if (success) {
+        // Show welcome back message
+        consoleService.info(`Welcome back to ${name}! Your winery awaits.`);
+        setView('mainMenu');
+      } else {
+        setError('Failed to load company data.');
+      }
+    } catch (error) {
+      console.error('Error loading company data:', error);
+      setError('An error occurred while loading company data.');
     }
   };
 
@@ -119,20 +105,8 @@ function App() {
       currentView: 'mainMenu',
     });
     
-    // Save to Firestore
-    const docRef = doc(db, 'companies', name);
-    await setDoc(docRef, {
-      player,
-      vineyards: [],
-      buildings: [],
-      staff: [],
-      wineBatches: [],
-      currentDay: 1,
-      currentYear: 2023,
-    });
-    
-    // Save to localStorage
-    localStorage.setItem('companyName', name);
+    // Use our new service to create the company
+    await createCompany(name, player);
     
     // Show welcome message for new company
     consoleService.info(`Welcome to your new winery, ${name}! Let's begin your winemaking journey.`);

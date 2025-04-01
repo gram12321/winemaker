@@ -1,7 +1,4 @@
 import { useState } from 'react';
-import { db } from '../firebase.config';
-import { collection, doc, deleteDoc, getDocs, setDoc } from 'firebase/firestore';
-import { getGameState } from '../gameState';
 import { Button } from '../components/ui/button';
 import { 
   Card, 
@@ -14,6 +11,9 @@ import {
 import { Separator } from '../components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { clearGameStorage } from '../lib/database/storageService';
+import { deleteAllCompanies } from '../lib/database/companyService';
+import { saveGameState } from '../lib/database/gameStateService';
 
 interface AdminDashboardProps {
   view: string;
@@ -37,31 +37,8 @@ export default function AdminDashboard({ view }: AdminDashboardProps) {
     try {
       setIsLoading(prev => ({ ...prev, clearStorage: true }));
       
-      // Clear all game-related data
-      localStorage.removeItem('companyName');
-      localStorage.removeItem('money');
-      localStorage.removeItem('week');
-      localStorage.removeItem('season');
-      localStorage.removeItem('year');
-      localStorage.removeItem('calculatedPrestige');
-      localStorage.removeItem('prestigeHit');
-      localStorage.removeItem('ownedFarmlands');
-      localStorage.removeItem('buildings');
-      localStorage.removeItem('playerInventory');
-      localStorage.removeItem('consoleMessages');
-      localStorage.removeItem('staffData');
-      localStorage.removeItem('latestStaffId');
-      localStorage.removeItem('wineOrders');
-      localStorage.removeItem('transactions');
-      localStorage.removeItem('recurringTransactions');
-      localStorage.removeItem('activeTasks');
-      localStorage.removeItem('deletedDefaultTeams');
-      localStorage.removeItem('teams');
-      localStorage.removeItem('panelCollapsed');
-      localStorage.removeItem('sidebarCollapsed');
-      localStorage.removeItem('importers');
-      localStorage.removeItem('upgrades');
-      localStorage.removeItem('seenTutorials');
+      // Clear all game-related data using our new service
+      clearGameStorage();
       
       setMessage({ type: 'success', text: 'Local storage cleared successfully.' });
     } catch (error) {
@@ -78,12 +55,8 @@ export default function AdminDashboard({ view }: AdminDashboardProps) {
     try {
       setIsLoading(prev => ({ ...prev, clearFirestore: true }));
       
-      const querySnapshot = await getDocs(collection(db, "companies"));
-      const deletePromises = querySnapshot.docs.map(docSnapshot => {
-        return deleteDoc(docSnapshot.ref);
-      });
-      
-      await Promise.all(deletePromises);
+      // Delete all companies using our new service
+      await deleteAllCompanies();
       
       setMessage({ type: 'success', text: 'Firestore data cleared successfully.' });
     } catch (error) {
@@ -98,26 +71,14 @@ export default function AdminDashboard({ view }: AdminDashboardProps) {
     try {
       setIsLoading(prev => ({ ...prev, saveCompanyInfo: true }));
       
-      const gameState = getGameState();
-      const companyName = gameState.player?.companyName;
+      // Save game state using our new service
+      const success = await saveGameState();
       
-      if (!companyName) {
-        setMessage({ type: 'error', text: 'No company name found to save.' });
-        return;
+      if (success) {
+        setMessage({ type: 'success', text: 'Company info saved successfully.' });
+      } else {
+        setMessage({ type: 'error', text: 'No company found to save.' });
       }
-      
-      const docRef = doc(db, "companies", companyName);
-      await setDoc(docRef, {
-        player: gameState.player,
-        farmlands: gameState.farmlands,
-        buildings: gameState.buildings,
-        staff: gameState.staff,
-        wineBatches: gameState.wineBatches,
-        currentDay: gameState.currentDay,
-        currentYear: gameState.currentYear
-      });
-      
-      setMessage({ type: 'success', text: 'Company info saved successfully.' });
     } catch (error) {
       console.error('Error saving company info:', error);
       setMessage({ type: 'error', text: 'Error saving company info.' });
