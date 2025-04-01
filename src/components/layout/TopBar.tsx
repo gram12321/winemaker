@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getGameState, updatePlayerMoney } from '../../gameState';
-import { Console, useConsole } from './Console';
+import { Console, useConsole, consoleService } from './Console';
 import { incrementWeek } from '../../lib/gameTick';
 
 import { Button } from "../../components/ui/button";
@@ -33,7 +33,7 @@ interface TopBarProps {
 
 export default function TopBar({ view, setView }: TopBarProps) {
   const gameState = getGameState();
-  const console = useConsole();
+  const consoleHook = useConsole();
   const [isProcessing, setIsProcessing] = useState(false);
   
   // Handle week increment
@@ -48,6 +48,21 @@ export default function TopBar({ view, setView }: TopBarProps) {
     } finally {
       setIsProcessing(false);
     }
+  };
+  
+  // Handle logout
+  const handleLogout = () => {
+    // Clear company name from localStorage
+    localStorage.removeItem('companyName');
+    
+    // Clear console message history from localStorage
+    localStorage.removeItem('consoleMessages');
+    
+    // Reset console messages in-memory
+    consoleService.clearMessages();
+    
+    // Navigate to login
+    setView('login');
   };
   
   return (
@@ -156,7 +171,7 @@ export default function TopBar({ view, setView }: TopBarProps) {
           <Button 
             variant="ghost" 
             size="icon"
-            onClick={() => console.openHistory()}
+            onClick={() => consoleHook.openHistory()}
             className="rounded-full h-10 w-10 flex items-center justify-center"
           >
             <MessageSquareText className="h-5 w-5" />
@@ -193,10 +208,7 @@ export default function TopBar({ view, setView }: TopBarProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={() => {
-                  localStorage.removeItem('companyName');
-                  setView('login');
-                }}
+                onClick={handleLogout}
                 className="text-red-600 focus:text-red-500"
               >
                 Logout
@@ -207,11 +219,11 @@ export default function TopBar({ view, setView }: TopBarProps) {
       </div>
       
       {/* Message History Modal - controlled by Console component */}
-      {console.isHistoryOpen && 
+      {consoleHook.isHistoryOpen && 
         <Console 
           showConsole={true} 
-          isOpen={console.isHistoryOpen} 
-          onClose={console.closeHistory} 
+          isOpen={consoleHook.isHistoryOpen} 
+          onClose={consoleHook.closeHistory} 
         />
       }
     </div>

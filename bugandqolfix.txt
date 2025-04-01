@@ -1,0 +1,1 @@
+In topbar:  Set messagehistory to show newest on top. 
