@@ -1,5 +1,13 @@
 // Basic game state for the Winery Management Game
 import { Vineyard } from './lib/vineyard';
+import { 
+  Season, 
+  STARTING_WEEK, 
+  STARTING_SEASON, 
+  STARTING_YEAR, 
+  STARTING_MONEY, 
+  STARTING_PRESTIGE 
+} from './lib/constants';
 
 // Player Type
 export interface Player {
@@ -36,18 +44,15 @@ export interface Staff {
   teamId: string | null;
 }
 
-// Season type
-export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
-
 // Main game state
 let gameState = {
   player: null as Player | null,
   vineyards: [] as Vineyard[],
   buildings: [] as Building[],
   staff: [] as Staff[],
-  week: 1,
-  season: 'Spring' as Season,
-  currentYear: 2023,
+  week: STARTING_WEEK,
+  season: STARTING_SEASON,
+  currentYear: STARTING_YEAR,
   currentView: 'login',
 };
 
@@ -71,8 +76,8 @@ export const initializePlayer = (name: string, companyName: string): Player => {
     id: Date.now().toString(),
     name,
     companyName,
-    money: 100000, // Starting money
-    prestige: 1,
+    money: STARTING_MONEY,
+    prestige: STARTING_PRESTIGE,
     foundedYear: gameState.currentYear,
   };
   

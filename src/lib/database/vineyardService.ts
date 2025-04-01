@@ -6,6 +6,36 @@
 import { getGameState, updateGameState } from '../../gameState';
 import { Vineyard, createVineyard } from '../vineyard';
 import { saveGameState } from './gameStateService';
+import { 
+  GameDate, 
+  BASE_YIELD_PER_ACRE, 
+  BASELINE_VINE_DENSITY,
+  CONVENTIONAL_YIELD_BONUS 
+} from '../constants';
+
+/**
+ * Convert legacy date formats to GameDate format
+ * @param ownedSince Any date format (Date, string, timestamp, etc.)
+ * @returns GameDate format
+ */
+const convertToGameDate = (ownedSince: any): GameDate => {
+  const gameState = getGameState();
+  
+  // Default to current game date if conversion fails
+  const defaultDate: GameDate = {
+    week: gameState.week,
+    season: gameState.season,
+    year: gameState.currentYear
+  };
+  
+  // If it's already a GameDate object
+  if (ownedSince && typeof ownedSince === 'object' && 'week' in ownedSince && 'season' in ownedSince && 'year' in ownedSince) {
+    return ownedSince as GameDate;
+  }
+  
+  // For legacy data, just use current game date
+  return defaultDate;
+};
 
 /**
  * Add a new vineyard to the game state
@@ -59,6 +89,11 @@ export const updateVineyard = async (
     if (vineyardIndex === -1) {
       console.error(`Vineyard with ID ${vineyardId} not found`);
       return null;
+    }
+    
+    // Handle conversion of legacy ownedSince format if present in updates
+    if (updates.ownedSince && typeof updates.ownedSince !== 'object') {
+      updates.ownedSince = convertToGameDate(updates.ownedSince);
     }
     
     // Create updated vineyard
@@ -148,7 +183,7 @@ export const getVineyardById = (vineyardId: string): Vineyard | null => {
 export const plantVineyard = async (
   vineyardId: string,
   grape: string,
-  density: number = 5000,
+  density: number = BASELINE_VINE_DENSITY,
   saveToDb: boolean = false
 ): Promise<Vineyard | null> => {
   try {
@@ -241,15 +276,14 @@ function calculateVineyardYield(vineyard: Vineyard): number {
     return 0;
   }
 
-  const baseYieldPerAcre = 2400; // About 2.4 tons per acre
-  const densityModifier = vineyard.density / 5000; // Baseline at 5000 vines per acre
+  const densityModifier = vineyard.density / BASELINE_VINE_DENSITY;
   const qualityMultiplier = (vineyard.ripeness + vineyard.vineyardHealth) / 2;
-  let expectedYield = baseYieldPerAcre * vineyard.acres * qualityMultiplier * 
+  let expectedYield = BASE_YIELD_PER_ACRE * vineyard.acres * qualityMultiplier * 
                       vineyard.annualYieldFactor * densityModifier;
   
   // Apply bonus multiplier if conventional
   if (vineyard.farmingMethod === 'Conventional') {
-    expectedYield *= 1.1;
+    expectedYield *= CONVENTIONAL_YIELD_BONUS;
   }
 
   return expectedYield;

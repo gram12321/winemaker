@@ -8,10 +8,17 @@ import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
 import { consoleService } from '../components/layout/Console';
 import { saveGameState } from './database/gameStateService';
 import { Vineyard } from './vineyard';
-
-// Constants for game time
-export const SEASONS = ['Spring', 'Summer', 'Fall', 'Winter'];
-export const WEEKS_PER_SEASON = 12;
+import { 
+  Season, 
+  SEASONS, 
+  WEEKS_PER_SEASON,
+  STARTING_WEEK,
+  STARTING_SEASON,
+  STARTING_YEAR,
+  RIPENESS_INCREASE,
+  ORGANIC_CERTIFICATION_YEARS,
+  ORGANIC_HEALTH_IMPROVEMENT
+} from './constants';
 
 /**
  * Initialize game time with default values if not present
@@ -21,12 +28,12 @@ export const initializeGameTime = () => {
   
   if (!gameState.week || !gameState.season) {
     updateGameState({
-      week: 1,
-      season: 'Spring',
-      currentYear: gameState.currentYear || new Date().getFullYear()
+      week: STARTING_WEEK,
+      season: STARTING_SEASON,
+      currentYear: gameState.currentYear || STARTING_YEAR
     });
     
-    consoleService.info(`Game time initialized: Week 1, Spring, ${gameState.currentYear}`);
+    consoleService.info(`Game time initialized: Week ${STARTING_WEEK}, ${STARTING_SEASON}, ${gameState.currentYear}`);
   }
 };
 
@@ -37,7 +44,7 @@ export const initializeGameTime = () => {
  */
 export const incrementWeek = async (autoSave: boolean = true): Promise<ReturnType<typeof getGameState>> => {
   const gameState = getGameState();
-  let { week = 1, season = 'Spring', currentYear = 2023 } = gameState;
+  let { week = STARTING_WEEK, season = STARTING_SEASON, currentYear = STARTING_YEAR } = gameState;
   let currentSeasonIndex = SEASONS.indexOf(season);
   
   // Pre-tick processing
@@ -90,7 +97,7 @@ export const incrementWeek = async (autoSave: boolean = true): Promise<ReturnTyp
  * Handle effects that happen on season change
  * @param newSeason The season that just started
  */
-const onSeasonChange = (newSeason: string) => {
+const onSeasonChange = (newSeason: Season) => {
   consoleService.info(`The season has changed to ${newSeason}!`);
   
   const gameState = getGameState();
@@ -150,13 +157,13 @@ const onNewYear = () => {
       updatedVineyard.organicYears = (vineyard.organicYears || 0) + 1;
       
       // Convert to ecological after 3 years of organic farming
-      if (updatedVineyard.farmingMethod === 'Non-Conventional' && updatedVineyard.organicYears >= 3) {
+      if (updatedVineyard.farmingMethod === 'Non-Conventional' && updatedVineyard.organicYears >= ORGANIC_CERTIFICATION_YEARS) {
         updatedVineyard.farmingMethod = 'Ecological';
         consoleService.success(`${vineyard.name} is now certified Ecological after ${updatedVineyard.organicYears} years of organic farming!`);
       }
       
       // Organic farming improves vineyard health
-      updatedVineyard.vineyardHealth = Math.min(1.0, vineyard.vineyardHealth + 0.05);
+      updatedVineyard.vineyardHealth = Math.min(1.0, vineyard.vineyardHealth + ORGANIC_HEALTH_IMPROVEMENT);
     } else {
       // Reset organic years if conventional
       updatedVineyard.organicYears = 0;
@@ -181,13 +188,7 @@ const processWeekEffects = () => {
   const { week, season } = gameState;
   
   // Update vineyard ripeness based on season
-  let ripenessIncrease = 0;
-  switch (season) {
-    case 'Spring': ripenessIncrease = 0.01; break;
-    case 'Summer': ripenessIncrease = 0.02; break;
-    case 'Fall': ripenessIncrease = 0.05; break;
-    case 'Winter': ripenessIncrease = 0; break;
-  }
+  const ripenessIncrease = RIPENESS_INCREASE[season];
   
   if (ripenessIncrease > 0) {
     updateVineyardRipeness(ripenessIncrease);

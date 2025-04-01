@@ -1,5 +1,22 @@
 // Vineyard type and utility functions for the Winery Management Game
 
+import { 
+  GameDate, 
+  Season,
+  BASE_YIELD_PER_ACRE, 
+  BASELINE_VINE_DENSITY,
+  CONVENTIONAL_YIELD_BONUS 
+} from './constants';
+import { 
+  GrapeVariety, 
+  Aspect, 
+  FarmingMethod,
+  COUNTRY_REGION_MAP,
+  REGION_SOIL_TYPES,
+  REGION_ALTITUDE_RANGES,
+  ASPECT_FACTORS
+} from './vineyardConstants';
+
 // Countries and regions data
 export const countryRegionMap = {
   "France": ["Bordeaux", "Burgundy (Bourgogne)", "Champagne", "Loire Valley", "Rhone Valley", "Jura"],
@@ -116,6 +133,16 @@ export type Aspect =
 // Conventional farming methods
 export type FarmingMethod = "Conventional" | "Non-Conventional" | "Ecological";
 
+// Game date structure to replace real-world dates
+export interface GameDate {
+  week: number;
+  season: Season;
+  year: number;
+}
+
+// Season type
+export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
+
 // Vineyard interface
 export interface Vineyard {
   id: string;
@@ -140,7 +167,7 @@ export interface Vineyard {
   farmingMethod: FarmingMethod;
   organicYears: number;
   remainingYield: number | null;
-  ownedSince: Date;
+  ownedSince: GameDate;
 }
 
 /**
@@ -153,14 +180,13 @@ export function calculateVineyardYield(vineyard: Vineyard): number {
     return 0;
   }
 
-  const baseYieldPerAcre = 2400; // About 2.4 tons per acre
-  const densityModifier = vineyard.density / 5000; // Baseline at 5000 vines per acre
+  const densityModifier = vineyard.density / BASELINE_VINE_DENSITY;
   const qualityMultiplier = (vineyard.ripeness + vineyard.vineyardHealth) / 2;
-  let expectedYield = baseYieldPerAcre * vineyard.acres * qualityMultiplier * vineyard.annualYieldFactor * densityModifier;
+  let expectedYield = BASE_YIELD_PER_ACRE * vineyard.acres * qualityMultiplier * vineyard.annualYieldFactor * densityModifier;
   
   // Apply bonus multiplier if conventional
   if (vineyard.farmingMethod === 'Conventional') {
-    expectedYield *= 1.1;
+    expectedYield *= CONVENTIONAL_YIELD_BONUS;
   }
 
   return expectedYield;
@@ -190,23 +216,17 @@ export function getRemainingYield(vineyard: Vineyard): number {
  */
 export function calculateLandValue(country: string, region: string, altitude: number, aspect: Aspect): number {
   // This is a simplified version of the old calculateAndNormalizePriceFactor function
-  // We would implement the full logic based on the old names.js implementation
   const baseValue = 1000;
   
   // Region prestige factor (would be based on regionPrestigeRankings)
   const prestigeFactor = 1.0;
   
   // Altitude factor
-  const altitudeFactor = normalizeAltitude(altitude, regionAltitudeRanges[country][region]);
+  const altitudeFactor = normalizeAltitude(altitude, REGION_ALTITUDE_RANGES[country][region]);
   
   // Aspect factor
   // Typically south-facing slopes are most valuable, north-facing least valuable
-  let aspectFactor = 0.5;
-  if (aspect === "South") aspectFactor = 1.0;
-  else if (aspect === "Southeast" || aspect === "Southwest") aspectFactor = 0.9;
-  else if (aspect === "East" || aspect === "West") aspectFactor = 0.7;
-  else if (aspect === "Northeast" || aspect === "Northwest") aspectFactor = 0.5;
-  else if (aspect === "North") aspectFactor = 0.3;
+  const aspectFactor = ASPECT_FACTORS[aspect] || 0.5;
   
   return baseValue * prestigeFactor * altitudeFactor * aspectFactor;
 }
@@ -294,8 +314,8 @@ function calculateGrapeSuitabilityContribution(grape: GrapeVariety | null, regio
  * @returns A new Vineyard object
  */
 export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vineyard {
-  const country = options.country || getRandomFromObject(countryRegionMap);
-  const region = options.region || getRandomFromArray(countryRegionMap[country]);
+  const country = options.country || getRandomFromObject(COUNTRY_REGION_MAP);
+  const region = options.region || getRandomFromArray(COUNTRY_REGION_MAP[country]);
   const aspect = options.aspect || getRandomAspect();
   const name = options.name || generateVineyardName(country, aspect);
   const soil = options.soil ? 
@@ -303,6 +323,16 @@ export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vin
     getRandomSoils(country, region);
   const altitude = options.altitude || getRandomAltitude(country, region);
   const acres = options.acres || getRandomAcres();
+  
+  // Get current game state for the game date
+  const { week, season, currentYear } = require('../gameState').getGameState();
+  
+  // Use game date for ownedSince
+  const ownedSince: GameDate = options.ownedSince || {
+    week,
+    season,
+    year: currentYear
+  };
   
   const vineyard: Vineyard = {
     id,
@@ -315,7 +345,7 @@ export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vin
     soil,
     altitude,
     aspect,
-    density: options.density || 5000,
+    density: options.density || BASELINE_VINE_DENSITY,
     vineyardHealth: options.vineyardHealth || 0.5,
     landValue: calculateLandValue(country, region, altitude, aspect),
     status: options.status || 'Ready to be planted',
@@ -327,7 +357,7 @@ export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vin
     farmingMethod: options.farmingMethod || "Non-Conventional",
     organicYears: options.organicYears || 0,
     remainingYield: options.remainingYield === undefined ? null : options.remainingYield,
-    ownedSince: options.ownedSince || new Date()
+    ownedSince
   };
   
   // Calculate prestige after all other properties are set
@@ -362,7 +392,7 @@ function generateVineyardName(country: string, aspect: Aspect): string {
 }
 
 function getRandomSoils(country: string, region: string): string[] {
-  const soils = regionSoilTypes[country][region];
+  const soils = REGION_SOIL_TYPES[country][region];
   const numberOfSoils = Math.floor(Math.random() * 3) + 1; // 1-3 soil types
   const selectedSoils = new Set<string>();
 
@@ -374,7 +404,7 @@ function getRandomSoils(country: string, region: string): string[] {
 }
 
 function getRandomAltitude(country: string, region: string): number {
-  const [min, max] = regionAltitudeRanges[country][region];
+  const [min, max] = REGION_ALTITUDE_RANGES[country][region];
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 

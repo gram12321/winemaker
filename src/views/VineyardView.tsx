@@ -3,6 +3,7 @@ import { getGameState } from '../gameState';
 import { Vineyard } from '../lib/vineyard';
 import { addVineyard, plantVineyard, harvestVineyard } from '../lib/database/vineyardService';
 import { consoleService } from '../components/layout/Console';
+import { GameDate, formatGameDate, BASELINE_VINE_DENSITY } from '../lib/constants';
 
 const VineyardView: React.FC = () => {
   const { vineyards, currentYear } = getGameState();
@@ -38,7 +39,7 @@ const VineyardView: React.FC = () => {
       // In a real implementation, we would have a modal/form to select grape type and density
       // For now, let's use a fixed grape type and density
       const grape = "Chardonnay";
-      const density = 5000;
+      const density = BASELINE_VINE_DENSITY;
       
       const updatedVineyard = await plantVineyard(selectedVineyard.id, grape, density, true);
       
@@ -143,7 +144,7 @@ const VineyardView: React.FC = () => {
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-xl font-bold">{selectedVineyard.name}</h2>
             <div className="text-sm text-gray-500">
-              Owned since {selectedVineyard.ownedSince.toLocaleDateString()}
+              Owned since {formatGameDate(selectedVineyard.ownedSince)}
             </div>
           </div>
 
