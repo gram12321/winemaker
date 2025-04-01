@@ -37,6 +37,7 @@ export const createCompany = async (companyName: string, player: Player): Promis
       vineyards: [],
       buildings: [],
       staff: [],
+      wineBatches: [],
       week: 1,
       season: 'Spring',
       currentYear: new Date().getFullYear(),

@@ -74,7 +74,8 @@ export const clearGameStorage = (): void => {
     'importers',
     'upgrades',
     'seenTutorials',
-    'vineyards'
+    'vineyards',
+    'wineBatches'
   ];
 
   gameKeys.forEach(key => {
@@ -97,5 +98,6 @@ export const StorageKeys = {
   WEEK: 'week',
   SEASON: 'season',
   CURRENT_YEAR: 'currentYear',
-  CURRENT_VIEW: 'currentView'
+  CURRENT_VIEW: 'currentView',
+  WINE_BATCHES: 'wineBatches'
 }; 

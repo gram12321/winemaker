@@ -8,6 +8,8 @@ import {
   STARTING_MONEY, 
   STARTING_PRESTIGE 
 } from './lib/constants';
+import { GameDate } from './lib/constants';
+import { GrapeVariety } from './lib/vineyardConstants';
 
 // Player Type
 export interface Player {
@@ -44,12 +46,35 @@ export interface Staff {
   teamId: string | null;
 }
 
+// Wine Batch Type
+export interface WineBatch {
+  id: string;
+  vineyardId: string;
+  grapeType: GrapeVariety;
+  harvestGameDate: GameDate;
+  quantity: number;
+  quality: number;
+  stage: 'grape' | 'must' | 'fermentation' | 'aging' | 'bottled';
+  ageingStartGameDate: GameDate | null;
+  ageingDuration: number | null; // in weeks
+  storageLocation: string;
+  characteristics?: {
+    sweetness: number;
+    acidity: number;
+    tannins: number;
+    body: number;
+    spice: number;
+    aroma: number;
+  };
+}
+
 // Main game state
 let gameState = {
   player: null as Player | null,
   vineyards: [] as Vineyard[],
   buildings: [] as Building[],
   staff: [] as Staff[],
+  wineBatches: [] as WineBatch[],
   week: STARTING_WEEK,
   season: STARTING_SEASON,
   currentYear: STARTING_YEAR,

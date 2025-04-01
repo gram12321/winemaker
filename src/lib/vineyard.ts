@@ -1,21 +1,8 @@
 // Vineyard type and utility functions for the Winery Management Game
 
-import { 
-  GameDate, 
-  Season,
-  BASE_YIELD_PER_ACRE, 
-  BASELINE_VINE_DENSITY,
-  CONVENTIONAL_YIELD_BONUS 
-} from './constants';
-import { 
-  GrapeVariety, 
-  Aspect, 
-  FarmingMethod,
-  COUNTRY_REGION_MAP,
-  REGION_SOIL_TYPES,
-  REGION_ALTITUDE_RANGES,
-  ASPECT_FACTORS
-} from './vineyardConstants';
+import { GameDate, Season, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from './constants';
+import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS } from './vineyardConstants';
+import { getGameState } from '../gameState';
 
 // Countries and regions data
 export const countryRegionMap = {
@@ -325,7 +312,7 @@ export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vin
   const acres = options.acres || getRandomAcres();
   
   // Get current game state for the game date
-  const { week, season, currentYear } = require('../gameState').getGameState();
+  const { week, season, currentYear } = getGameState();
   
   // Use game date for ownedSince
   const ownedSince: GameDate = options.ownedSince || {
