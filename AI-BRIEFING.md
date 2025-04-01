@@ -52,6 +52,37 @@ Players manage a winery, including vineyard operations, wine production, buildin
 
 ---
 
+### 💾 Database Services Architecture
+
+- **All database operations** must be centralized in `src/lib/database/*` services.
+- **Never** implement database operations directly in components, views, or other files.
+- Service modules include:
+  - `storageService.ts`: For localStorage operations
+  - `companyService.ts`: For company CRUD operations
+  - `gameStateService.ts`: For saving/loading full game state
+  - `vineyardService.ts`: For vineyard-specific operations
+
+```tsx
+// CORRECT: Import and use database services
+import { addVineyard } from '../lib/database/vineyardService';
+
+// In component:
+const handleAddVineyard = async () => {
+  await addVineyard(vineyardData, true); // Second param = save to DB
+};
+
+// INCORRECT: Don't use Firebase directly in components
+// ❌ import { doc, setDoc } from 'firebase/firestore';
+// ❌ const docRef = doc(db, "collection", "id");
+// ❌ await setDoc(docRef, data);
+```
+
+- Use the `saveToDb` boolean parameter (default: false) to control whether changes persist.
+- Services should handle all error states and provide appropriate responses.
+- New entity services should follow the same pattern (e.g., `buildingService.ts`).
+
+---
+
 ### 📈 Economic System
 
 - The economy is **formula-based**, not dynamic or real-time.
@@ -68,7 +99,7 @@ Players manage a winery, including vineyard operations, wine production, buildin
 4. Avoid scattered hooks — central logic only.
 5. Use Tailwind for styling.
 6. No multiplayer, market, or trade logic.
-7. Keep database interactions minimal.
+7. Keep database interactions minimal and **only in database services**.
 8. Simulated NPC wine sales only — no real-time buyer simulation.
 
 ---

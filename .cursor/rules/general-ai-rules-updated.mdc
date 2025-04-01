@@ -26,7 +26,7 @@ alwaysApply: true
 3. Navigation is handled using a `view` string — **not via routing** or `<Route>` components.
 4. Core logic and state should live in `gameState.ts`. Components should never hold business logic.
 5. Minimize React hooks — avoid `useEffect`, `useReducer`, etc. unless needed for UI behavior.
-6. Firebase reads/writes should be centralized in AdminFunctions and minimal (login, logout, tick checkpoint).
+6.  **All database operations must be in `src/lib/database/*` services**, never directly in components or views.
 7. Simulated NPC buyers — no multiplayer, market, or real-time interactions.
 
 ---

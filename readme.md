@@ -1,4 +1,3 @@
-
 # Winery Management Game Version 0.3
 
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
@@ -11,3 +10,15 @@ Changes from 0.25
  - We are still running SPA but we use react Views instead of overlays. No more Bootstrap
  - Mail layout is now a topbar, not a sidebar, no panel, no permanent console
  - We still have the @console but now we use toast UI and have a permanent message history
+ - Centralized database architecture in `src/lib/database/` - all Firebase and localStorage operations must use these services
+
+## Architecture Highlights
+
+### Database Services
+All database operations are centralized in dedicated service modules:
+- `src/lib/database/storageService.ts`: For localStorage operations
+- `src/lib/database/companyService.ts`: For company-related Firebase operations 
+- `src/lib/database/gameStateService.ts`: For saving/loading the full game state
+- `src/lib/database/vineyardService.ts`: For vineyard-specific operations
+
+Do **not** implement database operations directly in components or views! Import the appropriate service instead.

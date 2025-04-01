@@ -28,7 +28,7 @@ alwaysApply: true
 - Use semantic HTML (`<button>`, `<section>`, `<article>`, etc.) where appropriate.
 - Keep components small and focused. Each view (`Vineyard`, `Production`, etc.) should be its own component.
 - Prefer clarity over abstraction: avoid overly generic or reusable components unless necessary.
-- Use names for class (Wineyard-section, Farmlandoverview ect)
+- Use names for class (Wineyard-section, vineoverview ect)
 
 ---
 
