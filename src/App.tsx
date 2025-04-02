@@ -20,19 +20,12 @@ import AdminDashboard from './views/AdminDashboard';
 import Winepedia from './views/Winepedia';
 import Profile from './views/Profile';
 import Achievements from './views/Achievements';
-import { VineyardView } from './views';
+import { VineyardView, InventoryView, BuildingsView } from './views';
 
 // Import future views here
 // import MainMenu from './views/MainMenu';
 // import Vineyard from './views/Vineyard';
 // import Production from './views/Production';
-
-// Add a function to log test messages during development
-const logTestMessage = () => {
-  consoleService.info("This is a test info message");
-  setTimeout(() => consoleService.warning("This is a test warning message"), 1000);
-  setTimeout(() => consoleService.error("This is a test error message"), 2000);
-};
 
 function App() {
   const [view, setView] = useState<string>('login');
@@ -190,6 +183,14 @@ function App() {
                   </div>
                   
                   <div 
+                    onClick={() => setView('inventory')}
+                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <h2 className="text-xl font-semibold text-wine mb-2">Inventory</h2>
+                    <p className="text-gray-600">Manage your harvested grapes, must, and bottled wine</p>
+                  </div>
+                  
+                  <div 
                     onClick={() => setView('production')}
                     className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
                   >
@@ -235,6 +236,12 @@ function App() {
             {/* Vineyard View */}
             {view === 'vineyard' && <VineyardView />}
             
+            {/* Inventory View */}
+            {view === 'inventory' && <InventoryView />}
+            
+            {/* Buildings View */}
+            {view === 'buildings' && <BuildingsView />}
+            
             {/* Game Views */}
             {view === 'production' && (
               <div>
@@ -265,14 +272,6 @@ function App() {
                 <h1 className="text-2xl font-bold mb-4">Financial Management</h1>
                 {/* Finance content will go here */}
                 <p className="text-gray-600">Finance view coming soon...</p>
-              </div>
-            )}
-            
-            {view === 'buildings' && (
-              <div>
-                <h1 className="text-2xl font-bold mb-4">Buildings</h1>
-                {/* Buildings content will go here */}
-                <p className="text-gray-600">Buildings view coming soon...</p>
               </div>
             )}
             

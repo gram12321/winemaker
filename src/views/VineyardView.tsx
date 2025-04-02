@@ -74,12 +74,19 @@ const VineyardView: React.FC = () => {
     
     setLoading(true);
     try {
+      // In a real implementation, we would have a modal to select storage
+      // For now, let's use a default storage location
+      const storageLocation = 'Winery Storage';
+      
       // Harvest the full yield (amount = Infinity will harvest everything available)
-      const result = await harvestVineyard(selectedVineyardId, Infinity, true);
+      const result = await harvestVineyard(selectedVineyardId, Infinity, true, storageLocation);
       
       if (result) {
         const { vineyard, harvestedAmount } = result;
-        consoleService.info(`Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}.`);
+        consoleService.info(
+          `Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}. ` +
+          `The grapes have been stored in ${storageLocation}.`
+        );
       } else {
         consoleService.error('Failed to harvest vineyard.');
       }
