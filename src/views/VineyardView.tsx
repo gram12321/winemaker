@@ -6,6 +6,8 @@ import { consoleService } from '../components/layout/Console';
 import { GameDate, formatGameDate, BASELINE_VINE_DENSITY } from '../lib/core/constants';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import displayManager from '../lib/game/displayManager';
+import { calculateVineyardYield } from '../lib/game/vineyard';
+import StorageSelector from '../components/buildings/StorageSelector';
 
 const VineyardView: React.FC = () => {
   // Use display update hook to subscribe to game state changes
@@ -15,6 +17,7 @@ const VineyardView: React.FC = () => {
   const { vineyards, currentYear } = gameState;
   const [selectedVineyardId, setSelectedVineyardId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectedStorageLocation, setSelectedStorageLocation] = useState<string | null>(null);
 
   // Get the selected vineyard from the current game state using the ID
   // This ensures we always have the latest vineyard data
@@ -72,20 +75,22 @@ const VineyardView: React.FC = () => {
   const handleHarvestVineyard = displayManager.createActionHandler(async () => {
     if (!selectedVineyardId) return;
     
+    // Check if a storage location is selected
+    if (!selectedStorageLocation) {
+      consoleService.error('Please select a storage location for the harvested grapes.');
+      return;
+    }
+    
     setLoading(true);
     try {
-      // In a real implementation, we would have a modal to select storage
-      // For now, let's use a default storage location
-      const storageLocation = 'Winery Storage';
-      
       // Harvest the full yield (amount = Infinity will harvest everything available)
-      const result = await harvestVineyard(selectedVineyardId, Infinity, true, storageLocation);
+      const result = await harvestVineyard(selectedVineyardId, Infinity, true, selectedStorageLocation);
       
       if (result) {
         const { vineyard, harvestedAmount } = result;
-        consoleService.info(
+        consoleService.success(
           `Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}. ` +
-          `The grapes have been stored in ${storageLocation}.`
+          `The grapes have been stored in ${selectedStorageLocation}.`
         );
       } else {
         consoleService.error('Failed to harvest vineyard.');
@@ -225,7 +230,38 @@ const VineyardView: React.FC = () => {
                       ></div>
                     </div>
                   </li>
-                  <li><span className="font-medium">Expected Yield:</span> {selectedVineyard.status === 'Harvested' ? '0 kg (Harvested)' : `${Math.round(selectedVineyard.remainingYield || 0).toLocaleString()} kg`}</li>
+                  <li><span className="font-medium">Expected Yield:</span> {selectedVineyard.status === 'Harvested' ? '0 kg (Harvested)' : `${Math.round(calculateVineyardYield(selectedVineyard)).toLocaleString()} kg`}</li>
+                  
+                  {/* Harvest controls */}
+                  {selectedVineyard.status !== 'Harvested' && selectedVineyard.ripeness > 0.3 && (
+                    <>
+                      <li className="mt-4 pt-4 border-t border-gray-200">
+                        <StorageSelector 
+                          resourceType="grape"
+                          selectedStorage={selectedStorageLocation}
+                          onStorageChange={setSelectedStorageLocation}
+                          requiredCapacity={Math.ceil(calculateVineyardYield(selectedVineyard))}
+                        />
+                      </li>
+                      <li className="mt-4">
+                        <button 
+                          onClick={handleHarvestVineyard}
+                          disabled={loading || !selectedStorageLocation}
+                          className={`w-full py-2 px-4 rounded transition-colors ${
+                            !selectedStorageLocation 
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                              : 'bg-amber-600 hover:bg-amber-700 text-white'
+                          }`}
+                        >
+                          {!selectedStorageLocation 
+                            ? "Select Storage to Harvest" 
+                            : loading 
+                              ? "Harvesting..." 
+                              : "Harvest Vineyard"}
+                        </button>
+                      </li>
+                    </>
+                  )}
                 </ul>
               ) : (
                 <div className="text-amber-600">
@@ -257,11 +293,21 @@ const VineyardView: React.FC = () => {
             </div>
           </div>
 
+          <div className="mt-4">
+            <StorageSelector 
+              resourceType="grape"
+              selectedStorage={selectedStorageLocation}
+              onStorageChange={setSelectedStorageLocation}
+              requiredCapacity={Math.ceil(calculateVineyardYield(selectedVineyard))}
+            />
+          </div>
+
           <div className="flex space-x-2 mt-6">
-            {!selectedVineyard.grape && (
+            {/* Only show plant button for vineyards that aren't planted yet */}
+            {selectedVineyard && !selectedVineyard.grape && (
               <button 
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
                 onClick={handlePlantVineyard}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
                 disabled={loading}
               >
                 {loading ? 'Processing...' : 'Plant Vineyard'}
@@ -269,11 +315,15 @@ const VineyardView: React.FC = () => {
             )}
             {selectedVineyard.grape && selectedVineyard.status !== 'Harvested' && (
               <button 
-                className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded"
-                onClick={handleHarvestVineyard}
-                disabled={loading}
+                onClick={handleHarvestVineyard} 
+                disabled={loading || !selectedVineyard || !selectedVineyard.grape || selectedVineyard.status === 'Harvested' || !selectedStorageLocation}
+                className="w-full my-2"
               >
-                {loading ? 'Processing...' : 'Harvest Grapes'}
+                {!selectedStorageLocation 
+                  ? "Select Storage to Harvest" 
+                  : loading 
+                    ? "Harvesting..." 
+                    : "Harvest Vineyard"}
               </button>
             )}
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
