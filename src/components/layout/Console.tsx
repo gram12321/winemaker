@@ -10,10 +10,10 @@ import {
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { ScrollArea } from "../ui/scroll-area";
-import { InfoIcon, AlertTriangleIcon, XCircleIcon } from 'lucide-react';
+import { InfoIcon, AlertTriangleIcon, XCircleIcon, CheckCircleIcon } from 'lucide-react';
 import { toast } from "@/lib/ui/toast";
 
-type MessageType = 'info' | 'warning' | 'error';
+type MessageType = 'info' | 'warning' | 'error' | 'success';
 
 export interface ConsoleMessage {
   id: string;
@@ -113,6 +113,10 @@ export const consoleService = {
   
   error(text: string) {
     return this.addMessage(text, 'error');
+  },
+  
+  success(text: string) {
+    return this.addMessage(text, 'success');
   }
 };
 
@@ -147,6 +151,8 @@ export function Console({ showConsole = true, onClose, isOpen = false }: Console
         return <AlertTriangleIcon className="h-4 w-4" />;
       case 'error':
         return <XCircleIcon className="h-4 w-4" />;
+      case 'success':
+        return <CheckCircleIcon className="h-4 w-4" />;
       default:
         return <InfoIcon className="h-4 w-4" />;
     }
@@ -189,7 +195,9 @@ export function Console({ showConsole = true, onClose, isOpen = false }: Console
                             ? 'bg-red-50 border-red-200' 
                             : message.type === 'warning'
                               ? 'bg-yellow-50 border-yellow-200'
-                              : 'bg-blue-50 border-blue-200'
+                              : message.type === 'success'
+                                ? 'bg-green-50 border-green-200'
+                                : 'bg-blue-50 border-blue-200'
                         }`}
                       >
                         <div className="mt-0.5">{getIconForType(message.type)}</div>
@@ -255,6 +263,7 @@ export function useConsole() {
     clearMessages: consoleService.clearMessages.bind(consoleService),
     info: consoleService.info.bind(consoleService),
     warning: consoleService.warning.bind(consoleService),
-    error: consoleService.error.bind(consoleService)
+    error: consoleService.error.bind(consoleService),
+    success: consoleService.success.bind(consoleService)
   };
 } 

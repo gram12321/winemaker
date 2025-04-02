@@ -132,7 +132,8 @@ const BuildingsView: React.FC = () => {
               return (
                 <Card 
                   key={buildingType}
-                  className={existingBuilding ? "border-green-500" : "border-gray-300"}
+                  className={`${existingBuilding ? "border-green-500" : "border-gray-300"} ${existingBuilding ? "cursor-pointer hover:shadow-md transition-shadow" : ""}`}
+                  onClick={() => existingBuilding && setSelectedBuilding(buildingType)}
                 >
                   <CardHeader className="pb-2">
                     <div className="flex items-center">
@@ -147,7 +148,7 @@ const BuildingsView: React.FC = () => {
                     </div>
                   </CardHeader>
                   
-                  <CardContent className="pt-0">
+                  <CardContent>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
                         <span>Status:</span>
@@ -187,7 +188,10 @@ const BuildingsView: React.FC = () => {
                   <CardFooter className="flex gap-2">
                     {!existingBuilding ? (
                       <Button 
-                        onClick={() => handleBuild(buildingType)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card click
+                          handleBuild(buildingType);
+                        }}
                         disabled={!canAffordBuild || isBuilding[buildingType]}
                         className="w-full"
                       >
@@ -196,15 +200,10 @@ const BuildingsView: React.FC = () => {
                     ) : (
                       <>
                         <Button 
-                          onClick={() => setSelectedBuilding(buildingType)}
-                          variant="secondary"
-                          className="flex-1"
-                        >
-                          Manage
-                        </Button>
-                        
-                        <Button 
-                          onClick={() => handleUpgrade(buildingType)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent card click
+                            handleUpgrade(buildingType);
+                          }}
                           disabled={!canAffordUpgrade || isUpgrading[buildingType]}
                           className="flex-1"
                         >

@@ -29,7 +29,7 @@ export function formatGameDate(date: GameDate): string {
 }
 
 // Financial Constants
-export const STARTING_MONEY = 100000;
+export const STARTING_MONEY = 10000000;
 export const STARTING_PRESTIGE = 1;
 
 // Vineyard Constants
