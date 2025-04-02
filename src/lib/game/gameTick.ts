@@ -111,24 +111,66 @@ const onSeasonChange = (newSeason: Season) => {
   switch (newSeason) {
     case 'Spring':
       consoleService.info("Spring has arrived. Time to prepare for planting!");
-      // TODO: Handle spring-specific changes
+      // Update planted vineyards from dormancy to growing
+      const updatedSpringVineyards = gameState.vineyards.map(vineyard => {
+        if (vineyard.grape && (vineyard.status === 'Dormancy' || vineyard.status === 'No yield in first season')) {
+          return {
+            ...vineyard,
+            status: 'Growing',
+            ripeness: 0
+          };
+        }
+        return vineyard;
+      });
+      updateGameState({ vineyards: updatedSpringVineyards });
       break;
+
     case 'Summer':
       consoleService.info("Summer heat is affecting your vineyards.");
+      // Update growing vineyards to ripening
+      const updatedSummerVineyards = gameState.vineyards.map(vineyard => {
+        if (vineyard.grape && vineyard.status === 'Growing' && vineyard.vineAge > 0) {
+          return {
+            ...vineyard,
+            status: 'Ripening'
+          };
+        }
+        return vineyard;
+      });
+      updateGameState({ vineyards: updatedSummerVineyards });
       updateVineyardRipeness(0.05);
-      // TODO: Handle summer-specific changes
       break;
+
     case 'Fall':
       consoleService.info("Fall has come. Harvest season approaches!");
+      // Update ripening vineyards to ready for harvest
+      const updatedFallVineyards = gameState.vineyards.map(vineyard => {
+        if (vineyard.grape && vineyard.status === 'Ripening' && vineyard.vineAge > 0) {
+          return {
+            ...vineyard,
+            status: 'Ready for Harvest'
+          };
+        }
+        return vineyard;
+      });
+      updateGameState({ vineyards: updatedFallVineyards });
       updateVineyardRipeness(0.15);
-      // TODO: Handle fall-specific changes
       break;
+
     case 'Winter':
       consoleService.info("Winter has arrived. Vineyards enter dormancy.");
-      // TODO: Cancel any harvest or planting tasks
-      
-      // Reset ripeness for all vineyards
-      updateVineyardRipeness(-1); // Special value to reset to 0
+      // Set all planted vineyards to dormancy and reset ripeness
+      const updatedWinterVineyards = gameState.vineyards.map(vineyard => {
+        if (vineyard.grape) {
+          return {
+            ...vineyard,
+            status: vineyard.vineAge === 0 ? 'No yield in first season' : 'Dormancy',
+            ripeness: 0
+          };
+        }
+        return vineyard;
+      });
+      updateGameState({ vineyards: updatedWinterVineyards });
       break;
   }
 };
@@ -155,6 +197,7 @@ const onNewYear = () => {
       annualYieldFactor: (0.75 + Math.random()),
       annualQualityFactor: Math.random(),
       remainingYield: null, // Reset remaining yield
+      status: vineyard.status === 'No yield in first season' ? 'Growing' : vineyard.status // Update first-year vineyards
     };
     
     // Handle organic farming progression

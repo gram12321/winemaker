@@ -241,7 +241,7 @@ export async function harvestVineyard(
 ): Promise<{ vineyard: Vineyard; harvestedAmount: number } | null> {
   try {
     const vineyard = getVineyard(id);
-    if (!vineyard || !vineyard.grape || vineyard.status === 'Harvested') {
+    if (!vineyard || !vineyard.grape || vineyard.status === 'Harvested' || vineyard.status === 'Dormancy') {
       console.error(`Vineyard with ID ${id} cannot be harvested`);
       return null;
     }
@@ -262,9 +262,9 @@ export async function harvestVineyard(
 
     // Update the vineyard
     const updatedVineyard = await updateVineyard(id, {
-      remainingYield: 0, // Set to 0 instead of calculating remaining yield
-      status: 'Harvested', // Always set to Harvested
-      ripeness: 0 // Reset ripeness
+      remainingYield: 0,
+      status: 'Dormancy', // Set to Dormancy instead of Harvested
+      ripeness: 0
     }, saveToDb);
 
     if (!updatedVineyard) return null;
@@ -274,7 +274,7 @@ export async function harvestVineyard(
       id,
       vineyard.grape as GrapeVariety,
       harvestedAmount,
-      vineyard.annualQualityFactor * vineyard.ripeness, // Quality is based on annual factor and ripeness
+      vineyard.annualQualityFactor * vineyard.ripeness,
       storageLocations,
       saveToDb
     );
