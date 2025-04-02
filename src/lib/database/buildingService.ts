@@ -106,53 +106,54 @@ export const serializeBuilding = (building: Building): SerializedBuilding => {
 
 /**
  * Start building construction
- * @param buildingName Name of the building to construct
+ * @param buildingType The type of building to construct
  */
-export const startBuildingConstruction = async (buildingName: BuildingType): Promise<boolean> => {
+export const startBuildingConstruction = async (
+  buildingType: BuildingType
+): Promise<boolean> => {
   const buildings = loadBuildings();
   const player = getGameState().player;
   
   // Check if building already exists
-  const existingBuilding = buildings.find(b => b.name === buildingName);
-  if (existingBuilding) {
-    consoleService.error(`${buildingName} already exists and cannot be built again.`);
+  if (buildings.some(b => b.name === buildingType)) {
+    consoleService.error(`${buildingType} already exists.`);
+    return false;
+  }
+  
+  // Get building cost
+  const buildingInfo = BUILDINGS.find(b => b.type === buildingType);
+  if (!buildingInfo) {
+    consoleService.error(`Unknown building type: ${buildingType}`);
     return false;
   }
   
   // Check if player has enough money
-  const buildingTemplate = new Building(buildingName);
-  const cost = buildingTemplate.baseCost;
-  
-  if (!player || player.money < cost) {
-    consoleService.error(`Not enough money to build ${buildingName}. Cost: €${cost.toLocaleString()}`);
+  if (!player || player.money < buildingInfo.buildCost) {
+    consoleService.error(`Not enough money to build ${buildingType}. Cost: €${buildingInfo.buildCost.toLocaleString()}`);
     return false;
   }
+  
+  // Create building instance
+  const { Building } = await import('@/lib/game/building');
+  const building = new Building(buildingType, 1, buildingInfo.slots);
+  
+  // Add to buildings list
+  const updatedBuildings = [...buildings, serializeBuilding(building)];
   
   // Deduct money from player
   updateGameState({
     player: {
       ...player,
-      money: player.money - cost
+      money: player.money - buildingInfo.buildCost
     }
   });
   
-  // Add to task queue (will be implemented later)
-  // For now, create the building immediately
-  const newBuilding = new Building(buildingName);
-  
-  // Add to buildings list
-  const updatedBuildings = [
-    ...buildings,
-    serializeBuilding(newBuilding)
-  ];
-  
-  // Save to game state
+  // Save buildings
   await saveBuildings(updatedBuildings);
   
-  // Log message
+  // Log success message
   consoleService.success(
-    `Construction of ${buildingName} has been completed. Cost: €${cost.toLocaleString()}. ` +
-    `Capacity: ${newBuilding.calculateCapacity()} slots.`
+    `Construction of ${buildingType} has been completed. Cost: €${buildingInfo.buildCost.toLocaleString()}. Capacity: ${buildingInfo.slots} slots.`
   );
   
   return true;
@@ -335,4 +336,25 @@ export const sellToolFromBuilding = async (
   );
   
   return true;
+};
+
+/**
+ * Initializes the tool instance counts from all buildings
+ * Should be called during application startup
+ */
+export const initializeToolInstanceCountsFromStorage = async (): Promise<void> => {
+  try {
+    const buildings = loadBuildings();
+    
+    // Convert to Building instances
+    const validatedBuildings = buildings.map(b => deserializeBuilding(b));
+    
+    // Import and initialize tool instance counts
+    const { initializeToolInstanceCounts } = await import('@/lib/game/building');
+    initializeToolInstanceCounts(validatedBuildings);
+    
+    console.log('Tool instance counts initialized from storage');
+  } catch (error) {
+    console.error('Error initializing tool instance counts:', error);
+  }
 }; 

@@ -139,7 +139,7 @@ const StorageSelector: React.FC<StorageSelectorProps> = ({
     // Set default quantity to maximum possible value
     const option = storageOptions.find(opt => opt.id === locationId);
     if (option) {
-      const maxQuantity = Math.min(option.availableCapacity, remainingCapacity);
+      const maxQuantity = Math.min(option.availableCapacity, remainingCapacity || Infinity);
       setCurrentQuantity(Math.ceil(maxQuantity));
     }
   };
@@ -163,7 +163,7 @@ const StorageSelector: React.FC<StorageSelectorProps> = ({
   return (
     <div className="space-y-4">
       <label className="block text-sm font-medium">
-        Storage Locations {requiredCapacity > 0 && `(requires ${requiredCapacity} kg total)`}
+        Storage Locations {requiredCapacity > 0 && `(requires ${Math.ceil(requiredCapacity)} kg total)`}
       </label>
       
       {/* Current allocations */}
@@ -191,54 +191,52 @@ const StorageSelector: React.FC<StorageSelectorProps> = ({
           })}
           
           <div className="text-sm text-gray-600">
-            Total Allocated: {allocatedCapacity} kg
-            {requiredCapacity > 0 && ` (${remainingCapacity} kg remaining)`}
+            Total Allocated: {Math.ceil(allocatedCapacity)} kg
+            {requiredCapacity > 0 && ` (${Math.ceil(remainingCapacity)} kg remaining)`}
           </div>
         </div>
       )}
       
       {/* Add new storage allocation */}
-      {remainingCapacity > 0 && (
-        <div className="flex gap-2">
-          <Select
-            value={currentLocationId}
-            onValueChange={handleStorageSelect}
-            disabled={loading || storageOptions.length === 0}
-          >
-            <SelectTrigger className="flex-grow">
-              <SelectValue placeholder="Select storage location" />
-            </SelectTrigger>
-            
-            <SelectContent>
-              {storageOptions.map(option => (
-                <SelectItem key={option.id} value={option.id}>
-                  {option.buildingName} - {option.label} ({option.availableCapacity} kg available)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div className="flex gap-2">
+        <Select
+          value={currentLocationId}
+          onValueChange={handleStorageSelect}
+          disabled={loading || storageOptions.length === 0}
+        >
+          <SelectTrigger className="flex-grow">
+            <SelectValue placeholder="Select storage location" />
+          </SelectTrigger>
           
-          <Input
-            type="number"
-            min={1}
-            max={Math.min(
-              currentLocationId ? storageOptions.find(opt => opt.id === currentLocationId)?.availableCapacity || 0 : 0,
-              remainingCapacity
-            )}
-            value={currentQuantity || ''}
-            onChange={e => setCurrentQuantity(Math.max(0, parseInt(e.target.value) || 0))}
-            placeholder="Quantity (kg)"
-            className="w-32"
-          />
-          
-          <Button
-            onClick={handleAddStorage}
-            disabled={!currentLocationId || currentQuantity <= 0}
-          >
-            Add
-          </Button>
-        </div>
-      )}
+          <SelectContent>
+            {storageOptions.map(option => (
+              <SelectItem key={option.id} value={option.id}>
+                {option.buildingName} - {option.label} ({Math.ceil(option.availableCapacity)} kg available)
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        <Input
+          type="number"
+          min={1}
+          max={currentLocationId ? Math.min(
+            storageOptions.find(opt => opt.id === currentLocationId)?.availableCapacity || 0,
+            remainingCapacity || Infinity
+          ) : 0}
+          value={currentQuantity || ''}
+          onChange={e => setCurrentQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+          placeholder="Quantity (kg)"
+          className="w-32"
+        />
+        
+        <Button
+          onClick={handleAddStorage}
+          disabled={!currentLocationId || currentQuantity <= 0}
+        >
+          Add
+        </Button>
+      </div>
       
       {storageOptions.length === 0 && !loading && (
         <p className="text-sm text-red-500">

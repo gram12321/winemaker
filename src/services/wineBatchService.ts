@@ -77,6 +77,9 @@ export function areStorageLocationsValid(
   resourceType: string
 ): boolean {
   try {
+    // Check if there are any storage locations
+    if (!storageLocations || storageLocations.length === 0) return false;
+    
     // Check if total quantity is greater than 0
     const totalQuantity = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
     if (totalQuantity <= 0) return false;

@@ -5,6 +5,7 @@ import { getGameState, updateGameState, initializePlayer } from './gameState';
 import { checkCompanyExists, createCompany } from './lib/database/companyService';
 import { loadGameState } from './lib/database/gameStateService';
 import { StorageKeys, loadFromStorage } from './lib/database/storageService';
+import { initializeToolInstanceCountsFromStorage } from './lib/database/buildingService';
 
 // Import game systems
 import { initializeGameTime } from '@/lib/game/gameTick';
@@ -81,6 +82,9 @@ function App() {
       if (success) {
         // Initialize game time system
         initializeGameTime();
+        
+        // Initialize tool instance counts from storage to avoid duplicates
+        await initializeToolInstanceCountsFromStorage();
         
         // Show welcome back message
         consoleService.info(`Welcome back to ${name}! Your winery awaits.`);
