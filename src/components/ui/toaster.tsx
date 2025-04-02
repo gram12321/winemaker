@@ -6,8 +6,8 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "../../components/ui/toast"
-import { getToasts } from "../../lib/toast"
+} from "./toast"
+import { getToasts } from "@/lib/ui/toast"
 
 export function Toaster() {
   const [toasts, setToasts] = useState(getToasts())

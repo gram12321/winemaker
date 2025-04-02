@@ -7,7 +7,7 @@ import { loadGameState } from './lib/database/gameStateService';
 import { StorageKeys, loadFromStorage } from './lib/database/storageService';
 
 // Import game systems
-import { initializeGameTime } from './lib/gameTick';
+import { initializeGameTime } from '@/lib/game/gameTick';
 
 // Import layout components
 import TopBar from './components/layout/TopBar';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { getGameState, updatePlayerMoney } from '../../gameState';
 import { Console, useConsole, consoleService } from './Console';
-import { incrementWeek } from '../../lib/gameTick';
+import { incrementWeek } from '@/lib/game/gameTick';
 
 import { Button } from "../../components/ui/button";
 import {
@@ -23,7 +23,7 @@ import {
 } from "../../components/ui/navigation-menu";
 import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
-import { cn } from "../../lib/utils";
+import { cn } from "@/lib/core/utils/utils";
 import { MessageSquareText, CalendarDays } from 'lucide-react';
 
 interface TopBarProps {

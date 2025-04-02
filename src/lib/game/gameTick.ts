@@ -4,9 +4,9 @@
  * and applies relevant changes to game state
  */
 
-import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
-import { consoleService } from '../components/layout/Console';
-import { saveGameState } from './database/gameStateService';
+import { getGameState, updateGameState, updatePlayerMoney } from '@/gameState';
+import { consoleService } from '@/components/layout/Console';
+import { saveGameState } from '@/lib/database/gameStateService';
 import { Vineyard } from './vineyard';
 import displayManager from './displayManager';
 import { 
@@ -19,7 +19,7 @@ import {
   RIPENESS_INCREASE,
   ORGANIC_CERTIFICATION_YEARS,
   ORGANIC_HEALTH_IMPROVEMENT
-} from './constants';
+} from '@/lib/core/constants';
 
 /**
  * Initialize game time with default values if not present
@@ -164,7 +164,7 @@ const onNewYear = () => {
       // Convert to ecological after 3 years of organic farming
       if (updatedVineyard.farmingMethod === 'Non-Conventional' && updatedVineyard.organicYears >= ORGANIC_CERTIFICATION_YEARS) {
         updatedVineyard.farmingMethod = 'Ecological';
-        consoleService.success(`${vineyard.name} is now certified Ecological after ${updatedVineyard.organicYears} years of organic farming!`);
+        consoleService.info(`${vineyard.name} is now certified Ecological after ${updatedVineyard.organicYears} years of organic farming!`);
       }
       
       // Organic farming improves vineyard health

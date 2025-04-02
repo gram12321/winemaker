@@ -1,8 +1,8 @@
 // Vineyard type and utility functions for the Winery Management Game
 
-import { GameDate, Season, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from './constants';
-import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS } from './vineyardConstants';
-import { getGameState } from '../gameState';
+import { GameDate, Season, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from '@/lib/core/constants';
+import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS } from '@/lib/core/constants';
+import { getGameState } from '@/gameState';
 
 // Countries and regions data
 export const countryRegionMap = {

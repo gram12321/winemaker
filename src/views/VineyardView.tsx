@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { getGameState } from '../gameState';
-import { Vineyard } from '../lib/vineyard';
-import { addVineyard, plantVineyard, harvestVineyard } from '../lib/database/vineyardService';
+import { Vineyard } from '../lib/game/vineyard';
+import { addVineyard, plantVineyard, harvestVineyard } from '../services/vineyardService';
 import { consoleService } from '../components/layout/Console';
-import { GameDate, formatGameDate, BASELINE_VINE_DENSITY } from '../lib/constants';
-import { useDisplayUpdate } from '../lib/displayManager';
-import displayManager from '../lib/displayManager';
+import { GameDate, formatGameDate, BASELINE_VINE_DENSITY } from '../lib/core/constants';
+import { useDisplayUpdate } from '../lib/game/displayManager';
+import displayManager from '../lib/game/displayManager';
 
 const VineyardView: React.FC = () => {
   // Use display update hook to subscribe to game state changes
