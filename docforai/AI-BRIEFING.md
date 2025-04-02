@@ -91,6 +91,39 @@ const handleAddVineyard = async () => {
 
 ---
 
+### 🖥️ Display Management System
+
+- The display management system in `src/lib/displayManager.ts` is a **special exception** to our rule of avoiding React hooks.
+- This system ensures all UI components update when game state changes.
+- Components can subscribe to updates using the `useDisplayUpdate` hook.
+- Action handlers can be wrapped with `displayManager.createActionHandler` to automatically trigger updates.
+
+```tsx
+// In a component that needs to update when game state changes
+import { useDisplayUpdate } from '../lib/displayManager';
+
+const MyComponent = () => {
+  // This hook automatically registers the component for updates
+  useDisplayUpdate();
+  
+  // Component code...
+};
+
+// For action handlers that should trigger updates
+import displayManager from '../lib/displayManager';
+
+const handleAction = displayManager.createActionHandler(() => {
+  // Action code that changes game state
+  updateGameState({ /* changes */ });
+});
+```
+
+- The display manager is a singleton service that manages component subscriptions and updates.
+- It provides methods to register/unregister components and utility functions for wrapping action handlers.
+- This approach is justified because it naturally integrates with React's component lifecycle, provides better performance, and simplifies component code.
+
+---
+
 ### ✅ AI Code Rules Summary
 
 1. **React + TypeScript SPA**, no routing.
@@ -101,6 +134,7 @@ const handleAddVineyard = async () => {
 6. No multiplayer, market, or trade logic.
 7. Keep database interactions minimal and **only in database services**.
 8. Simulated NPC wine sales only — no real-time buyer simulation.
+9. Use the display management system for UI updates (exception to the hooks rule).
 
 ---
 

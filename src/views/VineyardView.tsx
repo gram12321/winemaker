@@ -4,11 +4,23 @@ import { Vineyard } from '../lib/vineyard';
 import { addVineyard, plantVineyard, harvestVineyard } from '../lib/database/vineyardService';
 import { consoleService } from '../components/layout/Console';
 import { GameDate, formatGameDate, BASELINE_VINE_DENSITY } from '../lib/constants';
+import { useDisplayUpdate } from '../lib/displayManager';
+import displayManager from '../lib/displayManager';
 
 const VineyardView: React.FC = () => {
-  const { vineyards, currentYear } = getGameState();
-  const [selectedVineyard, setSelectedVineyard] = useState<Vineyard | null>(null);
+  // Use display update hook to subscribe to game state changes
+  useDisplayUpdate();
+  
+  const gameState = getGameState();
+  const { vineyards, currentYear } = gameState;
+  const [selectedVineyardId, setSelectedVineyardId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+
+  // Get the selected vineyard from the current game state using the ID
+  // This ensures we always have the latest vineyard data
+  const selectedVineyard = selectedVineyardId 
+    ? vineyards.find(v => v.id === selectedVineyardId) || null 
+    : null;
 
   // Handle adding a new vineyard using the vineyard service
   const handleAddVineyard = async () => {
@@ -16,7 +28,7 @@ const VineyardView: React.FC = () => {
     try {
       const newVineyard = await addVineyard(undefined, true);
       consoleService.info(`New vineyard "${newVineyard.name}" acquired in ${newVineyard.region}, ${newVineyard.country}.`);
-      setSelectedVineyard(newVineyard);
+      setSelectedVineyardId(newVineyard.id);
     } catch (error) {
       consoleService.error('Failed to add new vineyard.');
       console.error('Error adding vineyard:', error);
@@ -27,12 +39,12 @@ const VineyardView: React.FC = () => {
 
   // Handle selecting a vineyard
   const handleSelectVineyard = (vineyard: Vineyard) => {
-    setSelectedVineyard(vineyard);
+    setSelectedVineyardId(vineyard.id);
   };
 
-  // Handle planting a vineyard
-  const handlePlantVineyard = async () => {
-    if (!selectedVineyard) return;
+  // Handle planting a vineyard - using the displayManager's action handler
+  const handlePlantVineyard = displayManager.createActionHandler(async () => {
+    if (!selectedVineyardId) return;
     
     setLoading(true);
     try {
@@ -41,11 +53,10 @@ const VineyardView: React.FC = () => {
       const grape = "Chardonnay";
       const density = BASELINE_VINE_DENSITY;
       
-      const updatedVineyard = await plantVineyard(selectedVineyard.id, grape, density, true);
+      const updatedVineyard = await plantVineyard(selectedVineyardId, grape, density, true);
       
       if (updatedVineyard) {
         consoleService.info(`${grape} planted in ${updatedVineyard.name} with a density of ${density} vines per acre.`);
-        setSelectedVineyard(updatedVineyard);
       } else {
         consoleService.error('Failed to plant vineyard.');
       }
@@ -55,21 +66,20 @@ const VineyardView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
-  // Handle harvesting a vineyard
-  const handleHarvestVineyard = async () => {
-    if (!selectedVineyard) return;
+  // Handle harvesting a vineyard - using the displayManager's action handler
+  const handleHarvestVineyard = displayManager.createActionHandler(async () => {
+    if (!selectedVineyardId) return;
     
     setLoading(true);
     try {
       // Harvest the full yield (amount = Infinity will harvest everything available)
-      const result = await harvestVineyard(selectedVineyard.id, Infinity, true);
+      const result = await harvestVineyard(selectedVineyardId, Infinity, true);
       
       if (result) {
         const { vineyard, harvestedAmount } = result;
         consoleService.info(`Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}.`);
-        setSelectedVineyard(vineyard);
       } else {
         consoleService.error('Failed to harvest vineyard.');
       }
@@ -79,7 +89,7 @@ const VineyardView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   return (
     <div className="p-4">
@@ -104,7 +114,7 @@ const VineyardView: React.FC = () => {
             {vineyards.map((vineyard) => (
               <div 
                 key={vineyard.id} 
-                className="bg-white border border-gray-200 rounded-lg shadow hover:shadow-md cursor-pointer"
+                className={`bg-white border ${selectedVineyardId === vineyard.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'} rounded-lg shadow hover:shadow-md cursor-pointer`}
                 onClick={() => handleSelectVineyard(vineyard)}
               >
                 <div className="p-4">
@@ -132,6 +142,17 @@ const VineyardView: React.FC = () => {
                       {vineyard.grape ? `Planted with ${vineyard.grape}` : vineyard.status}
                     </span>
                   </div>
+                  {vineyard.grape && (
+                    <div className="mt-2">
+                      <span className="font-medium">Ripeness:</span>{' '}
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                        <div 
+                          className="bg-amber-500 h-2.5 rounded-full" 
+                          style={{ width: `${vineyard.ripeness * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -252,7 +273,7 @@ const VineyardView: React.FC = () => {
               Manage Vineyard
             </button>
             <button
-              onClick={() => setSelectedVineyard(null)}
+              onClick={() => setSelectedVineyardId(null)}
               className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
             >
               Close Details

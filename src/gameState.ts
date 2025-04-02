@@ -10,6 +10,7 @@ import {
 } from './lib/constants';
 import { GameDate } from './lib/constants';
 import { GrapeVariety } from './lib/vineyardConstants';
+import displayManager from './lib/displayManager';
 
 // Player Type
 export interface Player {
@@ -86,6 +87,8 @@ export const getGameState = () => gameState;
 
 export const updateGameState = (newState: Partial<typeof gameState>) => {
   gameState = { ...gameState, ...newState };
+  // Update all displays when game state changes
+  displayManager.updateAllDisplays();
   return gameState;
 };
 
@@ -93,6 +96,8 @@ export const updatePlayerMoney = (amount: number) => {
   if (!gameState.player) return null;
   
   gameState.player.money += amount;
+  // Update displays when player money changes
+  displayManager.updateAllDisplays();
   return gameState.player.money;
 };
 
@@ -107,6 +112,8 @@ export const initializePlayer = (name: string, companyName: string): Player => {
   };
   
   gameState.player = player;
+  // Update displays when player is initialized
+  displayManager.updateAllDisplays();
   return player;
 };
 

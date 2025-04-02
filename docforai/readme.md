@@ -22,6 +22,13 @@ Winery Management Game is a simulation game built with React and TypeScript that
 ### Game State and Game Tick Updates
 - Updated `src/gameState.ts` this is were gametime resident 
 
+### Display Management System
+- Implemented a React-based display management system in `src/lib/displayManager.ts`
+- This system uses React hooks as an exception to our general rule of avoiding hooks
+- The display manager ensures all UI components update when game state changes
+- Components can subscribe to updates using the `useDisplayUpdate` hook
+- Action handlers can be wrapped with `displayManager.createActionHandler` to automatically trigger updates
+
 A web-based simulation game where players manage their own winery, from vineyard operations to wine production and sales.
 This is a new iteration of the 0.25 build
 
@@ -44,3 +51,41 @@ All database operations are centralized in dedicated service modules:
 - `src/lib/database/vineyardService.ts`: For vineyard-specific operations
 
 Do **not** implement database operations directly in components or views! Import the appropriate service instead.
+
+### Display Management System
+
+The display management system is a special case where we use React hooks despite our general rule of avoiding them. This exception is justified for the following reasons:
+
+1. **Component Lifecycle Integration**: Hooks naturally integrate with React's component lifecycle, automatically handling registration on mount and cleanup on unmount.
+
+2. **Declarative Approach**: The hook-based approach is more declarative, making it clear which components need to update when game state changes.
+
+3. **Performance Optimization**: React's built-in state management through hooks allows for more efficient rendering.
+
+4. **Simplified Component Code**: Components using the hook don't need to implement complex subscription logic themselves.
+
+5. **TypeScript Integration**: The hook approach works seamlessly with TypeScript, providing better type safety.
+
+6. **Consistent with React Patterns**: This approach aligns with React's recommended patterns for side effects and state management.
+
+#### Usage Examples
+
+```tsx
+// In a component that needs to update when game state changes
+import { useDisplayUpdate } from '../lib/displayManager';
+
+const MyComponent = () => {
+  // This hook automatically registers the component for updates
+  useDisplayUpdate();
+  
+  // Component code...
+};
+
+// For action handlers that should trigger updates
+import displayManager from '../lib/displayManager';
+
+const handleAction = displayManager.createActionHandler(() => {
+  // Action code that changes game state
+  updateGameState({ /* changes */ });
+});
+```

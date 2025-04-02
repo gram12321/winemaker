@@ -8,6 +8,7 @@ import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
 import { consoleService } from '../components/layout/Console';
 import { saveGameState } from './database/gameStateService';
 import { Vineyard } from './vineyard';
+import displayManager from './displayManager';
 import { 
   Season, 
   SEASONS, 
@@ -34,6 +35,7 @@ export const initializeGameTime = () => {
     });
     
     consoleService.info(`Game time initialized: Week ${STARTING_WEEK}, ${STARTING_SEASON}, ${gameState.currentYear}`);
+    displayManager.updateAllDisplays();
   }
 };
 
@@ -84,6 +86,9 @@ export const incrementWeek = async (autoSave: boolean = true): Promise<ReturnTyp
   
   // Process financial transactions
   // TODO: Implement recurring transactions
+  
+  // Update all UI components
+  displayManager.updateAllDisplays();
   
   // Auto-save if enabled
   if (autoSave) {
@@ -230,4 +235,7 @@ const updateVineyardRipeness = (amount: number) => {
   updateGameState({
     vineyards: updatedVineyards
   });
+  
+  // Update displays when vineyard ripeness changes
+  displayManager.updateAllDisplays();
 }; 
