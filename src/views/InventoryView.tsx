@@ -51,6 +51,15 @@ const InventoryView: React.FC = () => {
       : `${Math.round(quantity)} kg`;
   };
   
+  // Add this helper function near the other formatting helpers
+  const formatStorageLocations = (storageLocations: { locationId: string; quantity: number }[]) => {
+    if (!storageLocations || storageLocations.length === 0) return 'No storage';
+    
+    return storageLocations.map(loc => 
+      `${loc.locationId} (${Math.ceil(loc.quantity)} kg)`
+    ).join(', ');
+  };
+  
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -121,7 +130,7 @@ const InventoryView: React.FC = () => {
                       className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => setSelectedBatchId(batch.id)}
                     >
-                      <td className="px-4 py-2 whitespace-nowrap">{batch.storageLocation}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{formatStorageLocations(batch.storageLocations)}</td>
                       <td className="px-4 py-2 whitespace-nowrap">{batch.grapeType}</td>
                       <td className="px-4 py-2 whitespace-nowrap">{formatQuantity(batch.quantity, batch.stage)}</td>
                       <td className="px-4 py-2 whitespace-nowrap">
@@ -188,7 +197,7 @@ const InventoryView: React.FC = () => {
                       className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => setSelectedBatchId(batch.id)}
                     >
-                      <td className="px-4 py-2 whitespace-nowrap">{batch.storageLocation}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{formatStorageLocations(batch.storageLocations)}</td>
                       <td className="px-4 py-2 whitespace-nowrap">{batch.grapeType}</td>
                       <td className="px-4 py-2 whitespace-nowrap capitalize">{batch.stage}</td>
                       <td className="px-4 py-2 whitespace-nowrap">{batch.quantity.toFixed(0)} liters</td>
@@ -248,7 +257,7 @@ const InventoryView: React.FC = () => {
                       className="hover:bg-gray-50 cursor-pointer"
                       onClick={() => setSelectedBatchId(batch.id)}
                     >
-                      <td className="px-4 py-2 whitespace-nowrap">{batch.storageLocation}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{formatStorageLocations(batch.storageLocations)}</td>
                       <td className="px-4 py-2 whitespace-nowrap">{batch.grapeType}</td>
                       <td className="px-4 py-2 whitespace-nowrap">{batch.quantity.toFixed(0)} liters</td>
                       <td className="px-4 py-2 whitespace-nowrap">
@@ -385,8 +394,8 @@ const InventoryView: React.FC = () => {
                 <div className="text-gray-600">Harvest Date:</div>
                 <div>{formatGameDate(selectedBatch.harvestGameDate)}</div>
                 
-                <div className="text-gray-600">Storage:</div>
-                <div>{selectedBatch.storageLocation}</div>
+                <div className="text-gray-600">Storage Locations:</div>
+                <div>{formatStorageLocations(selectedBatch.storageLocations)}</div>
                 
                 {selectedBatch.stage === 'aging' && (
                   <>
