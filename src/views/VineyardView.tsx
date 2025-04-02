@@ -46,7 +46,7 @@ const VineyardView: React.FC = () => {
   const handleAddVineyard = async () => {
     setLoading(true);
     try {
-      const newVineyard = await addVineyard(undefined, true);
+      const newVineyard = await addVineyard();
       consoleService.info(`New vineyard "${newVineyard.name}" acquired in ${newVineyard.region}, ${newVineyard.country}.`);
       setSelectedVineyardId(newVineyard.id);
     } catch (error) {
@@ -73,7 +73,7 @@ const VineyardView: React.FC = () => {
       const grape = "Chardonnay";
       const density = BASELINE_VINE_DENSITY;
       
-      const updatedVineyard = await plantVineyard(selectedVineyardId, grape, density, true);
+      const updatedVineyard = await plantVineyard(selectedVineyardId, grape, density);
       
       if (updatedVineyard) {
         consoleService.info(`${grape} planted in ${updatedVineyard.name} with a density of ${density} vines per acre.`);
@@ -104,7 +104,7 @@ const VineyardView: React.FC = () => {
     setLoading(true);
     try {
       // Harvest the full yield (amount = Infinity will harvest everything available)
-      const result = await harvestVineyard(selectedVineyardId, Infinity, true, selectedStorageLocations);
+      const result = await harvestVineyard(selectedVineyardId, Infinity, selectedStorageLocations);
       
       if (result) {
         const { vineyard, harvestedAmount } = result;

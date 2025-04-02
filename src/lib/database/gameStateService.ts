@@ -7,6 +7,7 @@ import { db } from '../../firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState } from '../../gameState';
 import { loadCompany } from './companyService';
+import { clearGameStorage } from './storageService';
 
 /**
  * Save the current game state to Firestore
@@ -72,6 +73,36 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
   } catch (error) {
     console.error('Error loading game state:', error);
     return false;
+  }
+};
+
+/**
+ * Handles game state cleanup on logout
+ * Saves current state to Firebase, clears localStorage, and resets game state
+ */
+export const handleLogout = async (): Promise<void> => {
+  try {
+    // Save current state to Firebase first
+    await saveGameState();
+    
+    // Clear all game-related data from localStorage
+    clearGameStorage();
+    
+    // Reset game state to initial values
+    updateGameState({
+      player: null,
+      vineyards: [],
+      buildings: [],
+      staff: [],
+      wineBatches: [],
+      week: 1,
+      season: 'Spring',
+      currentYear: new Date().getFullYear(),
+      currentView: 'login'
+    });
+  } catch (error) {
+    console.error('Error during logout:', error);
+    throw error;
   }
 };
 

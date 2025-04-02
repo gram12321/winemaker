@@ -33,12 +33,11 @@ export function convertToGameDate(date: Date | GameDate | string | undefined, ga
 }
 
 /**
- * Adds a new vineyard to the game
+ * Adds a new vineyard to the game and saves to Firebase
  * @param vineyardData Partial vineyard data (id will be generated)
- * @param saveToDb Whether to also save to the database
  * @returns The created vineyard
  */
-export async function addVineyard(vineyardData: Partial<Vineyard> = {}, saveToDb: boolean = false): Promise<Vineyard> {
+export async function addVineyard(vineyardData: Partial<Vineyard> = {}): Promise<Vineyard> {
   try {
     // Generate a new UUID if none provided
     const id = vineyardData.id || uuidv4();
@@ -59,10 +58,8 @@ export async function addVineyard(vineyardData: Partial<Vineyard> = {}, saveToDb
       vineyards: [...gameState.vineyards, vineyard]
     });
 
-    // Save to database if requested
-    if (saveToDb) {
-      await saveGameState();
-    }
+    // Save to Firebase
+    await saveGameState();
     
     return vineyard;
   } catch (error) {
@@ -72,13 +69,12 @@ export async function addVineyard(vineyardData: Partial<Vineyard> = {}, saveToDb
 }
 
 /**
- * Updates an existing vineyard
+ * Updates an existing vineyard and saves to Firebase
  * @param id ID of the vineyard to update
  * @param updates Updates to apply to the vineyard
- * @param saveToDb Whether to also save to the database
  * @returns The updated vineyard or null if not found
  */
-export async function updateVineyard(id: string, updates: Partial<Vineyard>, saveToDb: boolean = false): Promise<Vineyard | null> {
+export async function updateVineyard(id: string, updates: Partial<Vineyard>): Promise<Vineyard | null> {
   try {
     let updatedVineyard: Vineyard | null = null;
     
@@ -102,10 +98,8 @@ export async function updateVineyard(id: string, updates: Partial<Vineyard>, sav
       vineyards: updatedVineyards
     });
 
-    // Save to database if requested
-    if (saveToDb) {
-      await saveGameState();
-    }
+    // Save to Firebase
+    await saveGameState();
     
     return updatedVineyard;
   } catch (error) {
@@ -137,10 +131,9 @@ export const getVineyardById = getVineyard;
 /**
  * Removes a vineyard by ID
  * @param id ID of the vineyard to remove
- * @param saveToDb Whether to also save to the database
  * @returns True if the vineyard was removed, false otherwise
  */
-export async function removeVineyard(id: string, saveToDb: boolean = false): Promise<boolean> {
+export async function removeVineyard(id: string): Promise<boolean> {
   try {
     let removed = false;
     const gameState = getGameState();
@@ -157,10 +150,8 @@ export async function removeVineyard(id: string, saveToDb: boolean = false): Pro
       vineyards: updatedVineyards
     });
 
-    // Save to database if requested
-    if (saveToDb) {
-      await saveGameState();
-    }
+    // Save to Firebase
+    await saveGameState();
     
     return removed;
   } catch (error) {
@@ -202,10 +193,9 @@ export function calculateVineyardYield(vineyard: Vineyard): number {
  * @param id ID of the vineyard to plant
  * @param grape Type of grape to plant
  * @param density Density of vines per acre
- * @param saveToDb Whether to also save to the database
  * @returns The updated vineyard or null if not found
  */
-export async function plantVineyard(id: string, grape: GrapeVariety | string, density: number = BASELINE_VINE_DENSITY, saveToDb: boolean = false): Promise<Vineyard | null> {
+export async function plantVineyard(id: string, grape: GrapeVariety | string, density: number = BASELINE_VINE_DENSITY): Promise<Vineyard | null> {
   try {
     const vineyard = getVineyard(id);
     if (!vineyard) return null;
@@ -218,7 +208,7 @@ export async function plantVineyard(id: string, grape: GrapeVariety | string, de
       ripeness: 0,
       vineyardHealth: 100,
       vineAge: 0,
-    }, saveToDb);
+    });
   } catch (error) {
     console.error('Error planting vineyard:', error);
     throw error;
@@ -229,14 +219,12 @@ export async function plantVineyard(id: string, grape: GrapeVariety | string, de
  * Harvests grapes from a vineyard
  * @param id ID of the vineyard to harvest
  * @param amount Amount of grapes to harvest (kg). Use Infinity to harvest all.
- * @param saveToDb Whether to also save to the database
  * @param storageLocations Array of storage locations and their quantities
  * @returns Object containing the updated vineyard and amount harvested, or null if failed
  */
 export async function harvestVineyard(
   id: string, 
   amount: number, 
-  saveToDb: boolean = false,
   storageLocations: { locationId: string; quantity: number }[] = []
 ): Promise<{ vineyard: Vineyard; harvestedAmount: number } | null> {
   try {
@@ -265,7 +253,7 @@ export async function harvestVineyard(
       remainingYield: 0,
       status: 'Dormancy', // Set to Dormancy instead of Harvested
       ripeness: 0
-    }, saveToDb);
+    });
 
     if (!updatedVineyard) return null;
 
@@ -276,7 +264,6 @@ export async function harvestVineyard(
       harvestedAmount,
       vineyard.annualQualityFactor * vineyard.ripeness,
       storageLocations,
-      saveToDb
     );
 
     console.log(`Created wine batch ${wineBatch.id} with ${harvestedAmount} kg of ${vineyard.grape}`);

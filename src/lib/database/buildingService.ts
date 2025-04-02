@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
 import { consoleService } from '@/components/layout/Console';
 import { Building, BuildingType, Tool, initializeToolInstanceCounts } from '@/lib/game/building';
-import { StorageKeys, saveToStorage, loadFromStorage } from './storageService';
 import { saveGameState } from './gameStateService';
 import { CONSTRUCTION_WORK_FACTOR } from '@/lib/core/constants';
 
@@ -24,26 +23,22 @@ export interface SerializedBuilding {
 }
 
 /**
- * Load buildings from storage
+ * Load buildings from game state
  */
 export const loadBuildings = (): SerializedBuilding[] => {
   try {
-    // Try loading from storage first
-    const storedBuildings = loadFromStorage<SerializedBuilding[]>(StorageKeys.BUILDINGS);
-    if (storedBuildings) {
-      // Convert to Building instances to validate structure
-      const validatedBuildings = storedBuildings.map(b => deserializeBuilding(b));
-      
-      // Initialize tool instance counts from loaded buildings
-      initializeToolInstanceCounts(validatedBuildings);
-      
-      // Convert back to serialized form
-      return validatedBuildings.map(b => serializeBuilding(b));
-    }
-    
-    // If not in storage, get from game state
+    // Get from game state
     const gameState = getGameState();
-    return gameState.buildings || [];
+    const buildings = gameState.buildings || [];
+    
+    // Convert to Building instances to validate structure
+    const validatedBuildings = buildings.map(b => deserializeBuilding(b));
+    
+    // Initialize tool instance counts from loaded buildings
+    initializeToolInstanceCounts(validatedBuildings);
+    
+    // Convert back to serialized form
+    return validatedBuildings.map(b => serializeBuilding(b));
   } catch (error) {
     console.error('Error loading buildings:', error);
     return [];
@@ -51,7 +46,7 @@ export const loadBuildings = (): SerializedBuilding[] => {
 };
 
 /**
- * Save buildings to game state
+ * Save buildings to game state and Firebase
  * @param buildings Array of buildings to save
  */
 export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<void> => {
@@ -60,10 +55,7 @@ export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<vo
     buildings
   });
   
-  // Save to persistent storage
-  saveToStorage(StorageKeys.BUILDINGS, buildings);
-  
-  // Save game state to persistent storage
+  // Save game state to Firebase
   await saveGameState();
 };
 
