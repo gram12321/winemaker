@@ -6,7 +6,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
 import { consoleService } from '@/components/layout/Console';
-import { Building, BuildingType, Tool } from '@/lib/game/building';
+import { Building, BuildingType, Tool, initializeToolInstanceCounts } from '@/lib/game/building';
 import { StorageKeys, saveToStorage, loadFromStorage } from './storageService';
 import { saveGameState } from './gameStateService';
 import { CONSTRUCTION_WORK_FACTOR } from '@/lib/core/constants';
@@ -24,10 +24,30 @@ export interface SerializedBuilding {
 }
 
 /**
- * Load buildings from game state
+ * Load buildings from storage
  */
 export const loadBuildings = (): SerializedBuilding[] => {
-  return getGameState().buildings || [];
+  try {
+    // Try loading from storage first
+    const storedBuildings = loadFromStorage<SerializedBuilding[]>(StorageKeys.BUILDINGS);
+    if (storedBuildings) {
+      // Convert to Building instances to validate structure
+      const validatedBuildings = storedBuildings.map(b => deserializeBuilding(b));
+      
+      // Initialize tool instance counts from loaded buildings
+      initializeToolInstanceCounts(validatedBuildings);
+      
+      // Convert back to serialized form
+      return validatedBuildings.map(b => serializeBuilding(b));
+    }
+    
+    // If not in storage, get from game state
+    const gameState = getGameState();
+    return gameState.buildings || [];
+  } catch (error) {
+    console.error('Error loading buildings:', error);
+    return [];
+  }
 };
 
 /**
@@ -35,11 +55,15 @@ export const loadBuildings = (): SerializedBuilding[] => {
  * @param buildings Array of buildings to save
  */
 export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<void> => {
+  // Update game state
   updateGameState({
     buildings
   });
   
   // Save to persistent storage
+  saveToStorage(StorageKeys.BUILDINGS, buildings);
+  
+  // Save game state to persistent storage
   await saveGameState();
 };
 

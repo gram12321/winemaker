@@ -67,6 +67,35 @@ export function isValidStorage(
 }
 
 /**
+ * Check if storage locations are valid for a given resource type and quantities
+ * @param storageLocations Array of storage locations and their quantities
+ * @param resourceType Type of resource to store
+ * @returns Whether all storage locations are valid
+ */
+export function areStorageLocationsValid(
+  storageLocations: { locationId: string; quantity: number }[],
+  resourceType: string
+): boolean {
+  try {
+    // Check if total quantity is greater than 0
+    const totalQuantity = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
+    if (totalQuantity <= 0) return false;
+
+    // Check each storage location
+    for (const { locationId, quantity } of storageLocations) {
+      if (!isValidStorage(locationId, resourceType, quantity)) {
+        return false;
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error validating storage locations:', error);
+    return false;
+  }
+}
+
+/**
  * Add a new wine batch to the game state
  * @param batch The wine batch to add, or partial data to create a new one
  * @param saveToDb Whether to also save to the database
@@ -84,7 +113,7 @@ export async function addWineBatch(
     const stage = batch.stage || 'grape';
     
     // Validate storage if quantity is provided
-    if (batch.quantity && batch.quantity > 0 && batch.storageLocation) {
+    if (batch.quantity && batch.quantity > 0 && batch.storageLocations) {
       // Determine resource type based on stage
       let resourceType = 'grape';
       if (stage === 'must' || stage === 'fermentation') {
@@ -93,9 +122,15 @@ export async function addWineBatch(
         resourceType = 'wine';
       }
       
-      // Check if storage is valid
-      if (!isValidStorage(batch.storageLocation, resourceType, batch.quantity)) {
-        throw new Error(`Invalid storage location ${batch.storageLocation} for ${batch.quantity} kg of ${resourceType}`);
+      // Check if storage locations are valid
+      if (!areStorageLocationsValid(batch.storageLocations, resourceType)) {
+        throw new Error(`Invalid storage locations for ${batch.quantity} kg of ${resourceType}`);
+      }
+
+      // Verify total quantity matches batch quantity
+      const totalStoredQuantity = batch.storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
+      if (totalStoredQuantity < batch.quantity) {
+        throw new Error(`Insufficient storage allocated. Need at least ${Math.ceil(batch.quantity)} kg but only ${Math.ceil(totalStoredQuantity)} kg allocated.`);
       }
     }
     
@@ -114,7 +149,7 @@ export async function addWineBatch(
       stage,
       ageingStartGameDate: batch.ageingStartGameDate || null,
       ageingDuration: batch.ageingDuration || null,
-      storageLocation: batch.storageLocation || '',
+      storageLocations: batch.storageLocations || [],
       characteristics: batch.characteristics || {
         sweetness: 0.5,
         acidity: 0.5,
@@ -242,25 +277,31 @@ export async function removeWineBatch(
  * @param grapeType The type of grape harvested
  * @param quantity The quantity of grapes harvested in kg
  * @param quality The quality of the harvested grapes (0-1)
- * @param storageLocation Where the grapes are stored
+ * @param storageLocations Array of storage locations and their quantities
  * @param saveToDb Whether to also save to the database
  * @returns The newly created wine batch
- * @throws Error if storage location is invalid
+ * @throws Error if storage locations are invalid
  */
 export async function createWineBatchFromHarvest(
   vineyardId: string,
   grapeType: GrapeVariety,
   quantity: number,
   quality: number,
-  storageLocation: string,
+  storageLocations: { locationId: string; quantity: number }[],
   saveToDb: boolean = false
 ): Promise<WineBatch> {
   try {
-    // Validate storage location
-    if (!isValidStorage(storageLocation, 'grape', quantity)) {
-      const error = new Error(`Invalid storage location for harvest: ${storageLocation}`);
+    // Validate storage locations
+    if (!areStorageLocationsValid(storageLocations, 'grape')) {
+      const error = new Error(`Invalid storage locations for harvest`);
       consoleService.error(`Cannot harvest: Invalid or insufficient storage for ${quantity} kg of grapes.`);
       throw error;
+    }
+
+    // Verify total quantity matches harvested quantity
+    const totalStoredQuantity = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
+    if (totalStoredQuantity < quantity) {
+      throw new Error(`Insufficient storage allocated. Need at least ${Math.ceil(quantity)} kg but only ${Math.ceil(totalStoredQuantity)} kg allocated.`);
     }
     
     const gameState = getGameState();
@@ -274,7 +315,7 @@ export async function createWineBatchFromHarvest(
       grapeType,
       quantity,
       quality,
-      storageLocation,
+      storageLocations,
       stage: 'grape',
       harvestGameDate: {
         week: gameState.week,

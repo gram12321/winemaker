@@ -192,6 +192,26 @@ export const TOOLS: Record<string, Omit<Tool, 'id' | 'instanceNumber'>> = {
 const toolInstanceCounts: Record<string, number> = {};
 
 /**
+ * Initialize tool instance counts from existing buildings
+ * @param buildings Array of buildings to scan for existing tools
+ */
+export const initializeToolInstanceCounts = (buildings: Building[]) => {
+  // Reset counts
+  Object.keys(toolInstanceCounts).forEach(key => delete toolInstanceCounts[key]);
+  
+  // Scan all buildings and their tools to find highest instance numbers
+  for (const building of buildings) {
+    for (const slot of building.slots) {
+      for (const tool of slot.tools) {
+        if (!toolInstanceCounts[tool.name] || tool.instanceNumber > toolInstanceCounts[tool.name]) {
+          toolInstanceCounts[tool.name] = tool.instanceNumber;
+        }
+      }
+    }
+  }
+};
+
+/**
  * Create a new tool instance
  * @param toolName Name of the tool to create
  * @returns A new tool instance with unique ID

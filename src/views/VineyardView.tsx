@@ -17,7 +17,7 @@ const VineyardView: React.FC = () => {
   const { vineyards, currentYear } = gameState;
   const [selectedVineyardId, setSelectedVineyardId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [selectedStorageLocation, setSelectedStorageLocation] = useState<string | null>(null);
+  const [selectedStorageLocations, setSelectedStorageLocations] = useState<{ locationId: string; quantity: number }[]>([]);
 
   // Get the selected vineyard from the current game state using the ID
   // This ensures we always have the latest vineyard data
@@ -75,23 +75,32 @@ const VineyardView: React.FC = () => {
   const handleHarvestVineyard = displayManager.createActionHandler(async () => {
     if (!selectedVineyardId) return;
     
-    // Check if a storage location is selected
-    if (!selectedStorageLocation) {
-      consoleService.error('Please select a storage location for the harvested grapes.');
+    // Check if storage locations are selected and total is sufficient
+    const totalStorageQuantity = selectedStorageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
+    const requiredQuantity = selectedVineyard ? Math.ceil(calculateVineyardYield(selectedVineyard)) : 0;
+    
+    if (totalStorageQuantity < requiredQuantity) {
+      consoleService.error(`Please allocate at least ${requiredQuantity} kg of storage space.`);
       return;
     }
     
     setLoading(true);
     try {
       // Harvest the full yield (amount = Infinity will harvest everything available)
-      const result = await harvestVineyard(selectedVineyardId, Infinity, true, selectedStorageLocation);
+      const result = await harvestVineyard(selectedVineyardId, Infinity, true, selectedStorageLocations);
       
       if (result) {
         const { vineyard, harvestedAmount } = result;
-        consoleService.success(
-          `Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}. ` +
-          `The grapes have been stored in ${selectedStorageLocation}.`
-        );
+        const extraStorage = Math.ceil(totalStorageQuantity - harvestedAmount);
+        let message = `Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}. `;
+        message += `The grapes have been stored across ${selectedStorageLocations.length} location(s)`;
+        if (extraStorage > 0) {
+          message += ` with ${extraStorage} kg of extra storage space allocated.`;
+        }
+        consoleService.success(message);
+        
+        // Reset storage locations after successful harvest
+        setSelectedStorageLocations([]);
       } else {
         consoleService.error('Failed to harvest vineyard.');
       }
@@ -238,23 +247,23 @@ const VineyardView: React.FC = () => {
                       <li className="mt-4 pt-4 border-t border-gray-200">
                         <StorageSelector 
                           resourceType="grape"
-                          selectedStorage={selectedStorageLocation}
-                          onStorageChange={setSelectedStorageLocation}
+                          selectedStorageLocations={selectedStorageLocations}
+                          onStorageChange={setSelectedStorageLocations}
                           requiredCapacity={Math.ceil(calculateVineyardYield(selectedVineyard))}
                         />
                       </li>
                       <li className="mt-4">
                         <button 
                           onClick={handleHarvestVineyard}
-                          disabled={loading || !selectedStorageLocation}
+                          disabled={loading || selectedStorageLocations.length === 0}
                           className={`w-full py-2 px-4 rounded transition-colors ${
-                            !selectedStorageLocation 
+                            selectedStorageLocations.length === 0
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                               : 'bg-amber-600 hover:bg-amber-700 text-white'
                           }`}
                         >
-                          {!selectedStorageLocation 
-                            ? "Select Storage to Harvest" 
+                          {selectedStorageLocations.length === 0
+                            ? "Allocate Storage to Harvest" 
                             : loading 
                               ? "Harvesting..." 
                               : "Harvest Vineyard"}
@@ -293,15 +302,6 @@ const VineyardView: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4">
-            <StorageSelector 
-              resourceType="grape"
-              selectedStorage={selectedStorageLocation}
-              onStorageChange={setSelectedStorageLocation}
-              requiredCapacity={Math.ceil(calculateVineyardYield(selectedVineyard))}
-            />
-          </div>
-
           <div className="flex space-x-2 mt-6">
             {/* Only show plant button for vineyards that aren't planted yet */}
             {selectedVineyard && !selectedVineyard.grape && (
@@ -311,19 +311,6 @@ const VineyardView: React.FC = () => {
                 disabled={loading}
               >
                 {loading ? 'Processing...' : 'Plant Vineyard'}
-              </button>
-            )}
-            {selectedVineyard.grape && selectedVineyard.status !== 'Harvested' && (
-              <button 
-                onClick={handleHarvestVineyard} 
-                disabled={loading || !selectedVineyard || !selectedVineyard.grape || selectedVineyard.status === 'Harvested' || !selectedStorageLocation}
-                className="w-full my-2"
-              >
-                {!selectedStorageLocation 
-                  ? "Select Storage to Harvest" 
-                  : loading 
-                    ? "Harvesting..." 
-                    : "Harvest Vineyard"}
               </button>
             )}
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">

@@ -58,7 +58,10 @@ export interface WineBatch {
   stage: 'grape' | 'must' | 'fermentation' | 'aging' | 'bottled';
   ageingStartGameDate: GameDate | null;
   ageingDuration: number | null; // in weeks
-  storageLocation: string;
+  storageLocations: {
+    locationId: string;
+    quantity: number;
+  }[];
   characteristics?: {
     sweetness: number;
     acidity: number;

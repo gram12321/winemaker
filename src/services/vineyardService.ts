@@ -230,14 +230,14 @@ export async function plantVineyard(id: string, grape: GrapeVariety | string, de
  * @param id ID of the vineyard to harvest
  * @param amount Amount of grapes to harvest (kg). Use Infinity to harvest all.
  * @param saveToDb Whether to also save to the database
- * @param storageLocation Where to store the harvested grapes
+ * @param storageLocations Array of storage locations and their quantities
  * @returns Object containing the updated vineyard and amount harvested, or null if failed
  */
 export async function harvestVineyard(
   id: string, 
   amount: number, 
   saveToDb: boolean = false,
-  storageLocation: string = 'Default Storage'
+  storageLocations: { locationId: string; quantity: number }[] = []
 ): Promise<{ vineyard: Vineyard; harvestedAmount: number } | null> {
   try {
     const vineyard = getVineyard(id);
@@ -254,6 +254,12 @@ export async function harvestVineyard(
     // Calculate actual harvest amount
     const harvestedAmount = Math.min(amount, remainingYield);
     
+    // Verify storage locations total is sufficient for harvest
+    const totalStorageQuantity = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
+    if (totalStorageQuantity < harvestedAmount) {
+      throw new Error(`Insufficient storage allocated. Need at least ${Math.ceil(harvestedAmount)} kg but only ${Math.ceil(totalStorageQuantity)} kg allocated.`);
+    }
+
     // Update the vineyard
     const updatedVineyard = await updateVineyard(id, {
       remainingYield: 0, // Set to 0 instead of calculating remaining yield
@@ -269,7 +275,7 @@ export async function harvestVineyard(
       vineyard.grape as GrapeVariety,
       harvestedAmount,
       vineyard.annualQualityFactor * vineyard.ripeness, // Quality is based on annual factor and ripeness
-      storageLocation,
+      storageLocations,
       saveToDb
     );
 
