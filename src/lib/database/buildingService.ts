@@ -4,9 +4,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { getGameState, updateGameState } from '@/gameState';
+import { getGameState, updateGameState, Building as GameStateBuilding } from '@/gameState';
 import { consoleService } from '@/components/layout/Console';
-import { Building, BuildingType, Tool, initializeToolInstanceCounts } from '@/lib/game/building';
+import { Building, Tool, initializeToolInstanceCounts } from '@/lib/game/building';
+import { BuildingType, BUILDING_CONFIG } from '@/lib/core/constants';
 import { saveGameState } from './gameStateService';
 import { CONSTRUCTION_WORK_FACTOR } from '@/lib/core/constants';
 
@@ -29,16 +30,17 @@ export const loadBuildings = (): SerializedBuilding[] => {
   try {
     // Get from game state
     const gameState = getGameState();
-    const buildings = gameState.buildings || [];
+    // Force cast to SerializedBuilding[] since the actual structure may differ
+    const buildings = gameState.buildings as unknown as SerializedBuilding[];
     
-    // Convert to Building instances to validate structure
-    const validatedBuildings = buildings.map(b => deserializeBuilding(b));
+    // Ensure tool instance counts are initialized
+    if (buildings && buildings.length > 0) {
+      // Convert to Building instances temporarily to initialize tool counts
+      const buildingInstances = buildings.map(b => deserializeBuilding(b));
+      initializeToolInstanceCounts(buildingInstances);
+    }
     
-    // Initialize tool instance counts from loaded buildings
-    initializeToolInstanceCounts(validatedBuildings);
-    
-    // Convert back to serialized form
-    return validatedBuildings.map(b => serializeBuilding(b));
+    return buildings;
   } catch (error) {
     console.error('Error loading buildings:', error);
     return [];
@@ -47,16 +49,19 @@ export const loadBuildings = (): SerializedBuilding[] => {
 
 /**
  * Save buildings to game state and Firebase
- * @param buildings Array of buildings to save
  */
 export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<void> => {
-  // Update game state
-  updateGameState({
-    buildings
-  });
-  
-  // Save game state to Firebase
-  await saveGameState();
+  try {
+    // Update game state with the buildings (force cast to match gameState types)
+    updateGameState({
+      buildings: buildings as unknown as GameStateBuilding[]
+    });
+    
+    // Save game state to Firebase
+    await saveGameState();
+  } catch (error) {
+    console.error('Error saving buildings:', error);
+  }
 };
 
 /**
@@ -72,12 +77,16 @@ export const getBuildingByName = (name: BuildingType): SerializedBuilding | unde
  * @param serializedBuilding Serialized building data
  */
 export const deserializeBuilding = (serializedBuilding: SerializedBuilding): Building => {
+  // Create new building instance with name and level
   const building = new Building(
     serializedBuilding.name,
     serializedBuilding.level
   );
   
-  // Replace the auto-generated slots with the stored ones
+  // Store the ID from the serialized building
+  building.id = serializedBuilding.id;
+  
+  // Now that the building is fully initialized, set its slots
   building.slots = serializedBuilding.slots;
   
   return building;
@@ -112,43 +121,49 @@ export const startBuildingConstruction = async (
     return false;
   }
   
-  // Get building cost
-  const buildingInfo = BUILDINGS.find(b => b.type === buildingType);
-  if (!buildingInfo) {
+  // Get building config
+  const buildingConfig = BUILDING_CONFIG[buildingType];
+  if (!buildingConfig) {
     consoleService.error(`Unknown building type: ${buildingType}`);
     return false;
   }
   
   // Check if player has enough money
-  if (!player || player.money < buildingInfo.buildCost) {
-    consoleService.error(`Not enough money to build ${buildingType}. Cost: €${buildingInfo.buildCost.toLocaleString()}`);
+  if (!player || player.money < buildingConfig.baseCost) {
+    consoleService.error(`Not enough money to build ${buildingType}. Cost: €${buildingConfig.baseCost.toLocaleString()}`);
     return false;
   }
   
-  // Create building instance
-  const { Building } = await import('@/lib/game/building');
-  const building = new Building(buildingType, 1, buildingInfo.slots);
-  
-  // Add to buildings list
-  const updatedBuildings = [...buildings, serializeBuilding(building)];
-  
-  // Deduct money from player
-  updateGameState({
-    player: {
-      ...player,
-      money: player.money - buildingInfo.buildCost
-    }
-  });
-  
-  // Save buildings
-  await saveBuildings(updatedBuildings);
-  
-  // Log success message
-  consoleService.success(
-    `Construction of ${buildingType} has been completed. Cost: €${buildingInfo.buildCost.toLocaleString()}. Capacity: ${buildingInfo.slots} slots.`
-  );
-  
-  return true;
+  try {
+    // Create building instance
+    const building = new Building(buildingType, 1);
+    
+    // Add to buildings list
+    const serializedBuilding = serializeBuilding(building);
+    const updatedBuildings = [...buildings, serializedBuilding];
+    
+    // Deduct money from player
+    updateGameState({
+      player: {
+        ...player,
+        money: player.money - buildingConfig.baseCost
+      }
+    });
+    
+    // Save buildings
+    await saveBuildings(updatedBuildings);
+    
+    // Log success message
+    consoleService.success(
+      `Construction of ${buildingType} has been completed. Cost: €${buildingConfig.baseCost.toLocaleString()}. Capacity: ${building.calculateCapacity()} slots.`
+    );
+    
+    return true;
+  } catch (error) {
+    console.error(`Error constructing ${buildingType}:`, error);
+    consoleService.error(`Failed to construct ${buildingType}. ${error}`);
+    return false;
+  }
 };
 
 /**
