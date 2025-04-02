@@ -9,6 +9,23 @@ import displayManager from '../lib/game/displayManager';
 import { calculateVineyardYield } from '../lib/game/vineyard';
 import StorageSelector from '../components/buildings/StorageSelector';
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Growing':
+      return 'text-green-600';
+    case 'Ripening':
+      return 'text-amber-600';
+    case 'Ready for Harvest':
+      return 'text-red-600';
+    case 'Dormancy':
+      return 'text-gray-600';
+    case 'No yield in first season':
+      return 'text-blue-600';
+    default:
+      return 'text-amber-600';
+  }
+};
+
 const VineyardView: React.FC = () => {
   // Use display update hook to subscribe to game state changes
   useDisplayUpdate();
@@ -159,8 +176,17 @@ const VineyardView: React.FC = () => {
                   </div>
                   <div className="mt-2">
                     <span className="font-medium">Status:</span>{' '}
-                    <span className={vineyard.grape ? 'text-green-600' : 'text-amber-600'}>
-                      {vineyard.grape ? `Planted with ${vineyard.grape}` : vineyard.status}
+                    <span className={vineyard.grape ? getStatusColor(vineyard.status) : 'text-amber-600'}>
+                      {vineyard.grape ? (
+                        <>
+                          {vineyard.status}
+                          <span className="text-gray-600 text-sm ml-1">
+                            ({vineyard.grape})
+                          </span>
+                        </>
+                      ) : (
+                        vineyard.status
+                      )}
                     </span>
                   </div>
                   {vineyard.grape && (
@@ -218,6 +244,12 @@ const VineyardView: React.FC = () => {
               <h3 className="text-lg font-semibold mb-2">Vineyard Status</h3>
               {selectedVineyard.grape ? (
                 <ul className="space-y-2">
+                  <li>
+                    <span className="font-medium">Status:</span>{' '}
+                    <span className={getStatusColor(selectedVineyard.status)}>
+                      {selectedVineyard.status}
+                    </span>
+                  </li>
                   <li><span className="font-medium">Planted Grape:</span> {selectedVineyard.grape}</li>
                   <li><span className="font-medium">Vine Age:</span> {selectedVineyard.vineAge} {selectedVineyard.vineAge === 1 ? 'year' : 'years'}</li>
                   <li><span className="font-medium">Planted Density:</span> {selectedVineyard.density.toLocaleString()} vines per acre</li>
