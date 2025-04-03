@@ -1,5 +1,5 @@
 /**
- * Storage Service
+ * Local Storage Database
  * Handles all localStorage operations for the game
  */
 

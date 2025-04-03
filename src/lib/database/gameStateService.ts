@@ -7,7 +7,7 @@ import { db } from '../../firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState } from '../../gameState';
 import { loadCompany } from './companyService';
-import { clearGameStorage } from './storageService';
+import { clearGameStorage } from './localStorageDB';
 
 /**
  * Save the current game state to Firestore

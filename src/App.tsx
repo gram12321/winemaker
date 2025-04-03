@@ -4,7 +4,7 @@ import { getGameState, updateGameState, initializePlayer } from './gameState';
 // Import database services
 import { checkCompanyExists, createCompany } from './lib/database/companyService';
 import { loadGameState } from './lib/database/gameStateService';
-import { StorageKeys, loadFromStorage } from './lib/database/storageService';
+import { StorageKeys, loadFromStorage } from './lib/database/localStorageDB';
 import { initializeToolInstanceCountsFromStorage } from './lib/database/buildingService';
 
 // Import game systems

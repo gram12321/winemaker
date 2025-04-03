@@ -11,7 +11,7 @@ import {
 import { Separator } from '../components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { clearGameStorage } from '../lib/database/storageService';
+import { clearGameStorage } from '../lib/database/localStorageDB';
 import { deleteAllCompanies } from '../lib/database/companyService';
 import { saveGameState } from '../lib/database/gameStateService';
 

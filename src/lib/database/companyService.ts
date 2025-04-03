@@ -6,7 +6,7 @@
 import { db } from '../../firebase.config';
 import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { Player } from '../../gameState';
-import { StorageKeys, saveToStorage } from './storageService';
+import { StorageKeys, saveToStorage } from './localStorageDB';
 
 /**
  * Check if a company exists in Firestore
