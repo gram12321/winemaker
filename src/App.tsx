@@ -22,6 +22,7 @@ import Winepedia from './views/Winepedia';
 import Profile from './views/Profile';
 import Achievements from './views/Achievements';
 import { VineyardView, InventoryView, BuildingsView } from './views';
+import StaffView from './views/StaffView';
 
 // Import future views here
 // import MainMenu from './views/MainMenu';
@@ -30,6 +31,7 @@ import { VineyardView, InventoryView, BuildingsView } from './views';
 
 // Import service functions
 import { handleLogout } from './services/gameStateService';
+import { createStaff, generateRandomSkills, calculateWage } from './services/staffService';
 
 function App() {
   const [view, setView] = useState<string>('login');
@@ -105,9 +107,16 @@ function App() {
     // Initialize new player with company name
     const player = initializePlayer('Owner', name);
     
+    // Create initial starting staff
+    const initialStaff = [
+      createInitialStaff('General Worker', 0.3),
+      createInitialStaff('Vineyard Manager', 0.3, 'field')
+    ];
+    
     // Update gameState
     updateGameState({
       player,
+      staff: initialStaff,
       currentView: 'mainMenu',
     });
     
@@ -120,6 +129,28 @@ function App() {
     // Show welcome message for new company
     consoleService.info(`Welcome to your new winery, ${name}! Let's begin your winemaking journey.`);
   };
+
+  function createInitialStaff(type: string, skillLevel: number, specialization: string | null = null) {
+    // Generate first and last names based on type
+    let firstName, lastName;
+    
+    if (type === 'Vineyard Manager') {
+      firstName = ['Marco', 'Sofia', 'Giovanni', 'Isabella', 'Paolo'][Math.floor(Math.random() * 5)];
+      lastName = ['Rossi', 'Bianchi', 'Romano', 'Esposito', 'Ferrari'][Math.floor(Math.random() * 5)];
+    } else {
+      firstName = ['Thomas', 'Emma', 'Luis', 'Anna', 'James'][Math.floor(Math.random() * 5)];
+      lastName = ['Smith', 'Johnson', 'Garcia', 'Martin', 'Wilson'][Math.floor(Math.random() * 5)];
+    }
+    
+    // Generate skills with appropriate specialization
+    const skills = generateRandomSkills(skillLevel, specialization);
+    
+    // Calculate wage
+    const wage = calculateWage(skills, specialization);
+    
+    // Create and return staff member
+    return createStaff(firstName, lastName, skills, skillLevel, specialization, wage);
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -198,11 +229,11 @@ function App() {
                   </div>
                   
                   <div 
-                    onClick={() => setView('production')}
+                    onClick={() => setView('buildings')}
                     className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
                   >
-                    <h2 className="text-xl font-semibold text-wine mb-2">Production</h2>
-                    <p className="text-gray-600">Process grapes, ferment wine, and manage aging and bottling</p>
+                    <h2 className="text-xl font-semibold text-wine mb-2">Buildings</h2>
+                    <p className="text-gray-600">Manage your winery buildings and facilities</p>
                   </div>
                   
                   <div 
@@ -210,15 +241,7 @@ function App() {
                     className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
                   >
                     <h2 className="text-xl font-semibold text-wine mb-2">Staff</h2>
-                    <p className="text-gray-600">Hire, train, and manage your winery staff</p>
-                  </div>
-                  
-                  <div 
-                    onClick={() => setView('buildings')}
-                    className="bg-white rounded-lg shadow-md p-6 cursor-pointer hover:shadow-lg transition-shadow"
-                  >
-                    <h2 className="text-xl font-semibold text-wine mb-2">Buildings</h2>
-                    <p className="text-gray-600">Build and upgrade your winery facilities</p>
+                    <p className="text-gray-600">Hire and manage your winery staff</p>
                   </div>
                   
                   <div 
@@ -240,32 +263,11 @@ function App() {
               </div>
             )}
             
-            {/* Vineyard View */}
+            {/* View Components */}
             {view === 'vineyard' && <VineyardView />}
-            
-            {/* Inventory View */}
             {view === 'inventory' && <InventoryView />}
-            
-            {/* Buildings View */}
             {view === 'buildings' && <BuildingsView />}
-            
-            {/* Game Views */}
-            {view === 'production' && (
-              <div>
-                <h1 className="text-2xl font-bold mb-4">Wine Production</h1>
-                {/* Production content will go here */}
-                <p className="text-gray-600">Production view coming soon...</p>
-              </div>
-            )}
-            
-            {view === 'staff' && (
-              <div>
-                <h1 className="text-2xl font-bold mb-4">Staff Management</h1>
-                {/* Staff content will go here */}
-                <p className="text-gray-600">Staff management view coming soon...</p>
-              </div>
-            )}
-            
+            {view === 'staff' && <StaffView />}
             {view === 'sales' && (
               <div>
                 <h1 className="text-2xl font-bold mb-4">Wine Sales</h1>
@@ -273,7 +275,6 @@ function App() {
                 <p className="text-gray-600">Sales view coming soon...</p>
               </div>
             )}
-            
             {view === 'finance' && (
               <div>
                 <h1 className="text-2xl font-bold mb-4">Financial Management</h1>

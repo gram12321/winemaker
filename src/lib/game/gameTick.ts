@@ -257,7 +257,18 @@ const updateVineyardRipeness = (amount: number) => {
   
   // Update ripeness for vineyards that are planted and growing
   const updatedVineyards = gameState.vineyards.map(vineyard => {
-    if (vineyard.grape && (vineyard.status === 'Growing' || vineyard.status === 'Ripening' || vineyard.status === 'Ready for Harvest')) {
+    // Check if vineyard has a grape variety planted
+    if (!vineyard.grape) return vineyard;
+
+    // Check if the vineyard is in a state that should ripen
+    const canRipen = 
+      vineyard.status === 'Growing' || 
+      vineyard.status === 'Ripening' || 
+      vineyard.status === 'Ready for Harvest' ||
+      vineyard.status.includes('Harvesting') || // Allow ripening during harvest
+      vineyard.status.includes('Planting'); // Also during planting
+    
+    if (canRipen) {
       const newRipeness = Math.min(1.0, vineyard.ripeness + amount);
       return {
         ...vineyard,

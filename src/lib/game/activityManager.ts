@@ -71,11 +71,37 @@ export const isTargetBusy = (targetId: string): boolean => {
 };
 
 /**
+ * Check if a target already has an active activity
+ * @param targetId ID of the target to check
+ * @param category Optional category to check (if only checking for specific activity types)
+ * @returns true if an active activity exists, false otherwise
+ */
+export function hasActiveActivity(targetId: string, category?: string): boolean {
+  if (!targetId) return false; // Early return if no targetId
+  
+  const gameState = getGameState();
+  return gameState.activities.some(activity => 
+    activity.targetId === targetId && 
+    activity.appliedWork < activity.totalWork && // Not complete if applied work < total work
+    (category ? activity.category === category : true)
+  );
+}
+
+/**
  * Add a new activity
  * @param activity Activity progress object to add
  * @returns The added activity
  */
 export const addActivity = (activity: ActivityProgress): ActivityProgress => {
+  const gameState = getGameState();
+  
+  // Check if target already has an active activity
+  if (activity.targetId && hasActiveActivity(activity.targetId, activity.category || undefined)) {
+    const error = `Cannot start a new ${activity.category || 'work'} activity: target ${activity.targetId} already has an active activity`;
+    consoleService.error(error);
+    throw new Error(error);
+  }
+  
   initializeActivitiesInGameState();
   
   // Ensure the activity has an ID

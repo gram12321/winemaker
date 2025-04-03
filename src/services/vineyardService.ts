@@ -226,9 +226,22 @@ export async function harvestVineyard(
   storageLocations: { locationId: string; quantity: number }[] = []
 ): Promise<{ vineyard: Vineyard; harvestedAmount: number } | null> {
   try {
-    const vineyard = getVineyard(id);
-    if (!vineyard || !vineyard.grape || vineyard.status === 'Harvested' || vineyard.status === 'Dormancy') {
-      console.error(`Vineyard with ID ${id} cannot be harvested`);
+    const gameState = getGameState();
+    const vineyard = gameState.vineyards.find(v => v.id === id);
+    
+    if (!vineyard) {
+      throw new Error(`Vineyard ${id} not found`);
+    }
+    
+    // Check if it's winter - don't allow harvest to start
+    if (gameState.season === 'Winter') {
+      consoleService.error(`Cannot harvest during Winter - vines are dormant`);
+      return null;
+    }
+    
+    // Check if status is dormancy
+    if (vineyard.status === 'Dormancy') {
+      consoleService.error(`Cannot harvest during dormancy period`);
       return null;
     }
 
@@ -263,6 +276,9 @@ export async function harvestVineyard(
     const { addActivity } = await import('@/lib/game/activityManager');
     const { WorkCategory } = await import('@/lib/game/workCalculator');
 
+    // Use a different name for the imported function to avoid redeclaration
+    const { updateActivity: updateActivityFn } = await import('@/lib/game/activityManager');
+
     // Format storage locations for display
     const storageNames = storageLocations.map(loc => {
       // In a real implementation, you would look up the storage location name
@@ -284,59 +300,94 @@ export async function harvestVineyard(
         },
         // Callback when harvesting is complete
         completionCallback: async () => {
+          // Get the current game state to check the season
+          const currentGameState = getGameState();
+          const { season } = currentGameState;
+          
           // Calculate new remaining yield after harvest
           const newRemainingYield = remainingYield - harvestableAmount;
 
+          // Determine the new status based on season and remaining yield
+          let newStatus = 'Dormancy';
+          
+          if (season !== 'Winter' && newRemainingYield > 0) {
+            // If it's not winter and there's still yield, keep it ready for harvest
+            newStatus = 'Ready for Harvest';
+          } else if (season === 'Winter' || newRemainingYield <= 0) {
+            // If it's winter or no yield remains, go to dormancy
+            newStatus = 'Dormancy';
+          }
+          
           // Update the vineyard with new status and remaining yield
           await updateVineyard(id, {
             remainingYield: newRemainingYield,
-            status: newRemainingYield <= 0 ? 'Dormancy' : 'Partially Harvested',
-            // Only reset ripeness if fully harvested
-            ...(newRemainingYield <= 0 ? { ripeness: 0 } : {})
+            status: newStatus,
+            // Only reset ripeness if fully harvested or it's winter
+            ...(newRemainingYield <= 0 || season === 'Winter' ? { ripeness: 0 } : {})
           });
 
           consoleService.success(`Completed harvesting ${Math.round(harvestableAmount).toLocaleString()} kg of ${vineyard.grape} from ${vineyard.name}.`);
         },
         // Progress callback for partial updates
         progressCallback: async (progress) => {
-          if (progress > 0 && progress < 1) {
-            const params = harvestingActivity.params;
-            if (!params) return;
+          try {
+            // Get current game state and vineyard
+            const currentGameState = getGameState();
+            const currentVineyard = currentGameState.vineyards.find(v => v.id === id);
+            
+            // Stop harvesting if it's now winter or vineyard is dormant
+            if (currentGameState.season === 'Winter' || currentVineyard?.status === 'Dormancy') {
+              // Mark activity as complete instead of using isComplete property
+              await updateActivityFn(harvestingActivity.id, { 
+                appliedWork: harvestingActivity.totalWork  // Set applied work to total work to mark as complete
+              });
+              consoleService.info(`Harvesting of ${vineyard.grape} stopped: vineyard is now dormant`);
+              return;
+            }
+            
+            // Only process if we harvested at least 10kg
+            const partialHarvestAmount = (harvestingActivity.params?.totalAmount || 0) * progress * 0.1; // 10% of work = 10% of grapes
+            if (partialHarvestAmount < 10) return;
             
             // Calculate how much was harvested in this update
-            const previousHarvested = params.harvestedSoFar || 0;
-            const totalHarvestable = params.totalAmount;
+            const previousHarvested = harvestingActivity.params?.harvestedSoFar || 0;
+            const totalHarvestable = harvestingActivity.params?.totalAmount || 0;
             const currentProgress = progress;
             const previousProgress = previousHarvested / totalHarvestable;
             
-            // Only create a new batch if there's meaningful progress
-            if (currentProgress > previousProgress) {
-              // Calculate amount harvested in this tick
-              const harvestedThisTick = totalHarvestable * (currentProgress - previousProgress);
+            // Calculate amount harvested in this tick
+            const harvestedThisTick = totalHarvestable * (currentProgress - previousProgress);
+            
+            if (harvestedThisTick > 10) { // Only process if at least 10kg
+              // Get current vineyard ripeness (may have increased during harvest)
+              const currentRipeness = currentVineyard?.ripeness || vineyard.ripeness;
               
-              if (harvestedThisTick > 10) { // Only process if at least 10kg
-                // Create wine batch for this harvest increment
-                const wineBatch = await createWineBatchFromHarvest(
-                  id,
-                  vineyard.grape as GrapeVariety,
-                  harvestedThisTick,
-                  vineyard.annualQualityFactor * vineyard.ripeness,
-                  storageLocations,
-                );
+              // Create wine batch for this harvest increment
+              const wineBatch = await createWineBatchFromHarvest(
+                id,
+                vineyard.grape as GrapeVariety,
+                harvestedThisTick,
+                vineyard.annualQualityFactor * currentRipeness,
+                storageLocations,
+                false, // Don't save to DB yet
+                currentRipeness // Pass current ripeness value
+              );
+              
+              if (wineBatch) {
+                // Update the total harvested so far
+                harvestingActivity.params!.harvestedSoFar = previousHarvested + harvestedThisTick;
                 
-                if (wineBatch) {
-                  // Update the total harvested so far
-                  params.harvestedSoFar = previousHarvested + harvestedThisTick;
-                  
-                  consoleService.info(`Harvested ${Math.round(harvestedThisTick).toLocaleString()} kg of ${vineyard.grape} (${Math.round(progress * 100)}% complete).`);
-                }
+                consoleService.info(`Harvested ${Math.round(harvestedThisTick).toLocaleString()} kg of ${vineyard.grape} (${Math.round(progress * 100)}% complete).`);
               }
             }
             
             // Update vineyard status
             await updateVineyard(id, {
               status: `Harvesting: ${Math.round(progress * 100)}%`,
+              // Don't update ripeness here - let the game tick system handle that
             });
+          } catch (error) {
+            console.error('Error in harvest progress callback:', error);
           }
         }
       }

@@ -10,6 +10,7 @@ import {
   getWineBatch as getWineBatchFromDB, 
   removeWineBatch as removeWineBatchFromDB 
 } from '@/lib/database/wineBatchDB';
+import { Season } from '@/lib/core/constants';
 
 /**
  * Check if a storage location is valid for a given resource type and quantity
@@ -159,8 +160,10 @@ export async function addWineBatch(
         season: gameState.season,
         year: gameState.currentYear
       },
+      harvestDateRange: batch.harvestDateRange,
       quantity: batch.quantity || 0,
       quality: batch.quality || 0,
+      ripeness: batch.ripeness || 0.5,
       stage,
       ageingStartGameDate: batch.ageingStartGameDate || null,
       ageingDuration: batch.ageingDuration || null,
@@ -291,6 +294,7 @@ export async function removeWineBatch(
  * @param quality The quality of the harvested grapes (0-1)
  * @param storageLocations Array of storage locations and their quantities
  * @param saveToDb Whether to also save to the database
+ * @param ripeness The ripeness of the grapes (0-1)
  * @returns The newly created wine batch or null if failed
  */
 export async function createWineBatchFromHarvest(
@@ -299,7 +303,8 @@ export async function createWineBatchFromHarvest(
   quantity: number,
   quality: number,
   storageLocations: { locationId: string; quantity: number }[],
-  saveToDb: boolean = false
+  saveToDb: boolean = false,
+  ripeness: number = 0.5
 ): Promise<WineBatch | null> {
   try {
     // Validate storage locations
@@ -315,32 +320,183 @@ export async function createWineBatchFromHarvest(
     const adjustedQuantity = Math.min(quantity, totalStoredQuantity);
     
     const gameState = getGameState();
+    const currentDate = {
+      week: gameState.week,
+      season: gameState.season,
+      year: gameState.currentYear
+    };
     
     // Create basic characteristics based on grape type and quality
     const characteristics = generateInitialCharacteristics(grapeType, quality);
     
-    // Create new wine batch with adjusted quantity
-    const newBatch = await addWineBatch({
-      vineyardId,
-      grapeType,
-      quantity: adjustedQuantity,
-      quality,
-      storageLocations,
-      stage: 'grape',
-      harvestGameDate: {
-        week: gameState.week,
-        season: gameState.season,
-        year: gameState.currentYear
-      },
-      characteristics
-    }, saveToDb);
+    // Check for existing batches from the same vineyard and grape type in the same storage locations
+    let existingBatchesPerStorage: Record<string, WineBatch[]> = {};
     
-    if (!newBatch) {
-      consoleService.error('Failed to create wine batch from harvest');
-      return null;
+    // Group existing batches by storage location
+    for (const storage of storageLocations) {
+      const locationId = storage.locationId;
+      existingBatchesPerStorage[locationId] = [];
+      
+      // Find existing batches that match our criteria for this storage location
+      for (const batch of gameState.wineBatches) {
+        if (batch.vineyardId === vineyardId && 
+            batch.grapeType === grapeType && 
+            batch.stage === 'grape' &&
+            batch.storageLocations.some(loc => loc.locationId === locationId)) {
+          existingBatchesPerStorage[locationId].push(batch);
+        }
+      }
     }
     
-    return newBatch;
+    // Keep track of which batches were updated
+    const updatedBatchIds = new Set<string>();
+    // Handle each storage location separately
+    for (const storage of storageLocations) {
+      const locationId = storage.locationId;
+      const existingBatches = existingBatchesPerStorage[locationId] || [];
+      
+      // Calculate proportion of total quantity for this storage location
+      const storageQuantity = Math.min(
+        storage.quantity,
+        (adjustedQuantity * storage.quantity) / totalStoredQuantity
+      );
+      
+      if (existingBatches.length > 0) {
+        // Use the first batch as our update target
+        const batchToUpdate = existingBatches[0];
+        
+        // Fix the weighted average calculation when combining batches
+        const totalQuantity = batchToUpdate.quantity + storageQuantity;
+        const existingWeight = batchToUpdate.quantity / totalQuantity;
+        const newWeight = storageQuantity / totalQuantity;
+
+        // Calculate weighted average for quality
+        const weightedQuality = (batchToUpdate.quality * existingWeight) + (quality * newWeight);
+
+        // Calculate weighted average for ripeness
+        const weightedRipeness = (batchToUpdate.ripeness || 0.5) * existingWeight + (ripeness * newWeight);
+        
+        // Update characteristics with weighted averages too
+        const updatedCharacteristics = { ...batchToUpdate.characteristics };
+        if (updatedCharacteristics) {
+          Object.keys(updatedCharacteristics).forEach(key => {
+            const charKey = key as keyof typeof updatedCharacteristics;
+            const newCharValue = characteristics[charKey];
+            const existingCharValue = updatedCharacteristics[charKey] || 0.5;
+            
+            updatedCharacteristics[charKey] = 
+              (existingCharValue * existingWeight + newCharValue * newWeight);
+          });
+        }
+        
+        // Update harvest date - convert to array if it's not already
+        let harvestDates: GameDate[] = [];
+        if (Array.isArray(batchToUpdate.harvestGameDate)) {
+          harvestDates = [...batchToUpdate.harvestGameDate];
+        } else {
+          harvestDates = [batchToUpdate.harvestGameDate];
+        }
+        
+        // Add current date if it's not already included
+        const alreadyHasDate = harvestDates.some(date => 
+          date.week === currentDate.week && 
+          date.season === currentDate.season && 
+          date.year === currentDate.year
+        );
+        
+        if (!alreadyHasDate) {
+          harvestDates.push(currentDate);
+        }
+        
+        // Sort dates chronologically (assuming year, season, week order)
+        harvestDates.sort((a, b) => {
+          if (a.year !== b.year) return a.year - b.year;
+          if (a.season !== b.season) {
+            const seasonOrder: Record<Season, number> = { 
+              'Spring': 0, 
+              'Summer': 1, 
+              'Fall': 2, 
+              'Winter': 3 
+            };
+            return seasonOrder[a.season as Season] - seasonOrder[b.season as Season];
+          }
+          return a.week - b.week;
+        });
+        
+        // Calculate date range for display
+        const harvestDateRange = {
+          first: harvestDates[0],
+          last: harvestDates[harvestDates.length - 1]
+        };
+        
+        // Update storage location quantity
+        const updatedStorageLocations = [...batchToUpdate.storageLocations];
+        const locationIndex = updatedStorageLocations.findIndex(loc => loc.locationId === locationId);
+        
+        if (locationIndex >= 0) {
+          updatedStorageLocations[locationIndex].quantity += storageQuantity;
+        } else {
+          updatedStorageLocations.push({
+            locationId,
+            quantity: storageQuantity
+          });
+        }
+        
+        // Update the batch
+        await updateWineBatch(batchToUpdate.id, {
+          quantity: totalQuantity,
+          quality: weightedQuality,
+          ripeness: weightedRipeness,
+          harvestGameDate: harvestDates,
+          harvestDateRange,
+          characteristics: updatedCharacteristics as WineBatch['characteristics'],
+          storageLocations: updatedStorageLocations
+        }, saveToDb);
+        
+        updatedBatchIds.add(batchToUpdate.id);
+        
+        // Remove other batches if they exist in the same storage (should be consolidated into one)
+        if (existingBatches.length > 1) {
+          for (let i = 1; i < existingBatches.length; i++) {
+            if (!updatedBatchIds.has(existingBatches[i].id)) {
+              await removeWineBatch(existingBatches[i].id, saveToDb);
+            }
+          }
+        }
+      } else {
+        // No existing batch - create a new one for this storage location
+        const newBatch = await addWineBatch({
+          vineyardId,
+          grapeType,
+          quantity: storageQuantity,
+          quality,
+          ripeness,
+          storageLocations: [{
+            locationId: storage.locationId,
+            quantity: storageQuantity
+          }],
+          stage: 'grape',
+          harvestGameDate: [currentDate],
+          harvestDateRange: {
+            first: currentDate,
+            last: currentDate
+          },
+          characteristics
+        } as WineBatch, saveToDb);
+        
+        if (newBatch) {
+          updatedBatchIds.add(newBatch.id);
+        }
+      }
+    }
+    
+    // Get the first updated batch for return value
+    const firstBatchId = Array.from(updatedBatchIds)[0];
+    if (firstBatchId) {
+      return getWineBatch(firstBatchId);
+    }
+    
+    return null;
   } catch (error) {
     console.error('Error creating wine batch from harvest:', error);
     consoleService.error('Failed to create wine batch from harvest');

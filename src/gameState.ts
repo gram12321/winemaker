@@ -46,6 +46,13 @@ export interface Staff {
   wage: number;
   hireDate: Date;
   teamId: string | null;
+  skills?: {
+    field: number;
+    winery: number;
+    administration: number;
+    sales: number;
+    maintenance: number;
+  };
 }
 
 // Wine Batch Type
@@ -53,9 +60,14 @@ export interface WineBatch {
   id: string;
   vineyardId: string;
   grapeType: GrapeVariety;
-  harvestGameDate: GameDate;
+  harvestGameDate: GameDate | GameDate[]; // Now supports multiple dates or a single date
+  harvestDateRange?: { 
+    first: GameDate, 
+    last: GameDate 
+  }; // Optional date range for display purposes
   quantity: number;
   quality: number;
+  ripeness: number; // Adding ripeness as a tracked value
   stage: 'grape' | 'must' | 'fermentation' | 'aging' | 'bottled';
   ageingStartGameDate: GameDate | null;
   ageingDuration: number | null; // in weeks

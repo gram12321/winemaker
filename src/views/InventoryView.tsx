@@ -60,6 +60,21 @@ const InventoryView: React.FC = () => {
     ).join(', ');
   };
   
+  // Add formatHarvestDate helper function at the top with other formatting helpers
+  const formatHarvestDate = (batch: WineBatch) => {
+    if (batch.harvestDateRange) {
+      const { first, last } = batch.harvestDateRange;
+      if (first.year === last.year && first.season === last.season && first.week === last.week) {
+        return formatGameDate(first);
+      }
+      return `${formatGameDate(first)} to ${formatGameDate(last)}`;
+    }
+    if (Array.isArray(batch.harvestGameDate)) {
+      return formatGameDate(batch.harvestGameDate[0]); // Show first date if no range
+    }
+    return formatGameDate(batch.harvestGameDate as GameDate);
+  };
+  
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -120,6 +135,7 @@ const InventoryView: React.FC = () => {
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quality</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harvest Date</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ripeness</th>
                     <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                   </tr>
                 </thead>
@@ -138,7 +154,12 @@ const InventoryView: React.FC = () => {
                           {formatQuality(batch.quality)}
                         </span>
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap">{formatGameDate(batch.harvestGameDate)}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">{formatHarvestDate(batch)}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">
+                        <span className={getQualityClass(batch.ripeness)}>
+                          {formatQuality(batch.ripeness)}
+                        </span>
+                      </td>
                       <td className="px-4 py-2 whitespace-nowrap">
                         <button 
                           className="text-blue-600 hover:text-blue-800 mr-2"
@@ -392,7 +413,12 @@ const InventoryView: React.FC = () => {
                 </div>
                 
                 <div className="text-gray-600">Harvest Date:</div>
-                <div>{formatGameDate(selectedBatch.harvestGameDate)}</div>
+                <div>{formatHarvestDate(selectedBatch)}</div>
+                
+                <div className="text-gray-600">Ripeness:</div>
+                <div className={getQualityClass(selectedBatch.ripeness)}>
+                  {formatQuality(selectedBatch.ripeness)}
+                </div>
                 
                 <div className="text-gray-600">Storage Locations:</div>
                 <div>{formatStorageLocations(selectedBatch.storageLocations)}</div>
