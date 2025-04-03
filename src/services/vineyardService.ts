@@ -241,7 +241,7 @@ export async function harvestVineyard(
     const totalStorageQuantity = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
     
     // Calculate how much we can actually harvest based on storage constraints
-    const harvestedAmount = Math.min(
+    const harvestableAmount = Math.min(
       amount, // Requested amount
       remainingYield, // Available yield
       totalStorageQuantity // Available storage space
@@ -263,6 +263,12 @@ export async function harvestVineyard(
     const { addActivity } = await import('@/lib/game/activityManager');
     const { WorkCategory } = await import('@/lib/game/workCalculator');
 
+    // Format storage locations for display
+    const storageNames = storageLocations.map(loc => {
+      // In a real implementation, you would look up the storage location name
+      return `Storage #${loc.locationId.slice(0, 4)}`;
+    }).join(', ');
+
     // Create and add the harvesting activity
     const harvestingActivity = createActivityProgress(
       WorkCategory.HARVESTING,
@@ -270,28 +276,16 @@ export async function harvestVineyard(
       {
         targetId: id,
         additionalParams: { 
-          harvestedAmount,
+          totalAmount: harvestableAmount,
+          harvestedSoFar: 0,
           storageLocations,
           grape: vineyard.grape,
           quality: vineyard.annualQualityFactor * vineyard.ripeness
         },
         // Callback when harvesting is complete
         completionCallback: async () => {
-          // Create wine batch from the harvested grapes
-          const wineBatch = await createWineBatchFromHarvest(
-            id,
-            vineyard.grape as GrapeVariety,
-            harvestedAmount,
-            vineyard.annualQualityFactor * vineyard.ripeness,
-            storageLocations,
-          );
-
-          if (!wineBatch) {
-            throw new Error('Failed to create wine batch from harvest');
-          }
-
           // Calculate new remaining yield after harvest
-          const newRemainingYield = remainingYield - harvestedAmount;
+          const newRemainingYield = remainingYield - harvestableAmount;
 
           // Update the vineyard with new status and remaining yield
           await updateVineyard(id, {
@@ -301,11 +295,45 @@ export async function harvestVineyard(
             ...(newRemainingYield <= 0 ? { ripeness: 0 } : {})
           });
 
-          consoleService.success(`Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} from ${vineyard.name}.`);
+          consoleService.success(`Completed harvesting ${Math.round(harvestableAmount).toLocaleString()} kg of ${vineyard.grape} from ${vineyard.name}.`);
         },
         // Progress callback for partial updates
         progressCallback: async (progress) => {
           if (progress > 0 && progress < 1) {
+            const params = harvestingActivity.params;
+            if (!params) return;
+            
+            // Calculate how much was harvested in this update
+            const previousHarvested = params.harvestedSoFar || 0;
+            const totalHarvestable = params.totalAmount;
+            const currentProgress = progress;
+            const previousProgress = previousHarvested / totalHarvestable;
+            
+            // Only create a new batch if there's meaningful progress
+            if (currentProgress > previousProgress) {
+              // Calculate amount harvested in this tick
+              const harvestedThisTick = totalHarvestable * (currentProgress - previousProgress);
+              
+              if (harvestedThisTick > 10) { // Only process if at least 10kg
+                // Create wine batch for this harvest increment
+                const wineBatch = await createWineBatchFromHarvest(
+                  id,
+                  vineyard.grape as GrapeVariety,
+                  harvestedThisTick,
+                  vineyard.annualQualityFactor * vineyard.ripeness,
+                  storageLocations,
+                );
+                
+                if (wineBatch) {
+                  // Update the total harvested so far
+                  params.harvestedSoFar = previousHarvested + harvestedThisTick;
+                  
+                  consoleService.info(`Harvested ${Math.round(harvestedThisTick).toLocaleString()} kg of ${vineyard.grape} (${Math.round(progress * 100)}% complete).`);
+                }
+              }
+            }
+            
+            // Update vineyard status
             await updateVineyard(id, {
               status: `Harvesting: ${Math.round(progress * 100)}%`,
             });
@@ -323,10 +351,10 @@ export async function harvestVineyard(
       appliedWork: 0 // Start with 0% progress
     });
 
-    consoleService.info(`Started harvesting ${vineyard.grape} from ${vineyard.name}.`);
+    consoleService.info(`Started harvesting ${vineyard.grape} from ${vineyard.name}. Grapes will be stored in ${storageNames}.`);
     return {
       vineyard,
-      harvestedAmount
+      harvestedAmount: 0 // Initial harvested amount is 0
     };
   } catch (error) {
     console.error('Error harvesting vineyard:', error);
