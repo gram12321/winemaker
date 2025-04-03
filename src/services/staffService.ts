@@ -3,6 +3,14 @@ import { Staff } from '../gameState';
 import { getGameState, updateGameState } from '../gameState';
 import displayManager from '../lib/game/displayManager';
 import { assignStaffToActivity, getActivityById } from '../lib/game/activityManager';
+import {
+  saveStaffToDb,
+  removeStaffFromDb,
+  updateStaffInDb,
+  saveTeamToDb,
+  loadTeamsFromDb,
+  saveStaffAssignmentsToDb
+} from '../lib/database/staffDB';
 
 // Types for staff related functionality
 export interface StaffSkills {
@@ -130,8 +138,7 @@ export function addStaff(staff: Staff, saveToDb = false) {
   updateGameState({ staff: updatedStaff });
   
   if (saveToDb) {
-    // TODO: Implement Firebase saving when database is set up
-    console.log('Staff saved to database');
+    saveStaffToDb(staff);
   }
   
   return staff;
@@ -144,8 +151,7 @@ export function removeStaff(staffId: string, saveToDb = false) {
   updateGameState({ staff: updatedStaff });
   
   if (saveToDb) {
-    // TODO: Implement Firebase saving when database is set up
-    console.log('Staff removed from database');
+    removeStaffFromDb(staffId);
   }
   
   return updatedStaff;
@@ -160,8 +166,7 @@ export function updateStaff(updatedStaff: Staff, saveToDb = false) {
   updateGameState({ staff: updatedStaffList });
   
   if (saveToDb) {
-    // TODO: Implement Firebase saving when database is set up
-    console.log('Staff updated in database');
+    updateStaffInDb(updatedStaff);
   }
   
   return updatedStaff;
@@ -267,16 +272,14 @@ export function saveTeam(team: StaffTeam, saveToDb = false) {
   localStorage.setItem('staffTeams', JSON.stringify(teams));
   
   if (saveToDb) {
-    // TODO: Implement Firebase saving when database is set up
-    console.log('Team saved to database');
+    saveTeamToDb(team);
   }
   
   return team;
 }
 
-export function loadTeams(): StaffTeam[] {
-  const teamsJSON = localStorage.getItem('staffTeams');
-  return teamsJSON ? JSON.parse(teamsJSON) : [];
+export async function loadTeams(): Promise<StaffTeam[]> {
+  return await loadTeamsFromDb();
 }
 
 export function assignStaffToTeam(staffId: string, teamId: string | null) {
@@ -396,7 +399,12 @@ export function getAssignedStaffToActivity(activityId: string): Staff[] {
 }
 
 export function assignStaffToActivityById(activityId: string, staffIds: string[]) {
-  return assignStaffToActivity(activityId, staffIds);
+  const result = assignStaffToActivity(activityId, staffIds);
+  
+  // Save assignment to database
+  saveStaffAssignmentsToDb(activityId, staffIds);
+  
+  return result;
 }
 
 export function getStaffByTeam(teamId: string | null): Staff[] {

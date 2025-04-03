@@ -25,13 +25,17 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ onClose }) => {
   
   // Load teams on component mount
   useEffect(() => {
-    const loadedTeams = staffService.loadTeams();
-    setTeams(loadedTeams);
+    const loadTeamsData = async () => {
+      const loadedTeams = await staffService.loadTeams();
+      setTeams(loadedTeams);
+      
+      // Select first team if available
+      if (loadedTeams.length > 0 && !selectedTeamId) {
+        setSelectedTeamId(loadedTeams[0].id);
+      }
+    };
     
-    // Select first team if available
-    if (loadedTeams.length > 0 && !selectedTeamId) {
-      setSelectedTeamId(loadedTeams[0].id);
-    }
+    loadTeamsData();
   }, []);
   
   const selectedTeam = selectedTeamId 

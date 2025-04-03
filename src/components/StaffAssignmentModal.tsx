@@ -26,15 +26,19 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   
   // Load initial data
   useEffect(() => {
-    // Load current assigned staff
-    const activity = getActivityById(activityId);
-    if (activity?.params?.assignedStaffIds) {
-      setAssignedStaffIds(activity.params.assignedStaffIds as string[]);
-    }
+    const loadInitialData = async () => {
+      // Load current assigned staff
+      const activity = getActivityById(activityId);
+      if (activity?.params?.assignedStaffIds) {
+        setAssignedStaffIds(activity.params.assignedStaffIds as string[]);
+      }
+      
+      // Load teams
+      const loadedTeams = await staffService.loadTeams();
+      setTeams(loadedTeams);
+    };
     
-    // Load teams
-    const loadedTeams = staffService.loadTeams();
-    setTeams(loadedTeams);
+    loadInitialData();
   }, [activityId]);
   
   // Filter staff based on assignments
