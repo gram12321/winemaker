@@ -1,1 +1,2 @@
 In topbar:  Set messagehistory to show newest on top. 
+In Harvest: Average value for winebatch for partial Harvest 
