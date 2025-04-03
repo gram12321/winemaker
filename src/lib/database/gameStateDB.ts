@@ -10,7 +10,7 @@ import { loadCompany } from './companyDB';
 
 /**
  * Save the current game state to Firestore
- * @returns True if saved successfully, false otherwise
+ * @returns Promise resolving to true if saved successfully, false otherwise
  */
 export const saveGameState = async (): Promise<boolean> => {
   try {
@@ -34,6 +34,7 @@ export const saveGameState = async (): Promise<boolean> => {
       currentYear: gameState.currentYear
     });
     
+    console.log(`Game state saved for company ${companyName}`);
     return true;
   } catch (error) {
     console.error('Error saving game state:', error);
@@ -44,7 +45,7 @@ export const saveGameState = async (): Promise<boolean> => {
 /**
  * Load a game state from Firestore
  * @param companyName The company name to load
- * @returns True if loaded successfully, false otherwise
+ * @returns Promise resolving to true if loaded successfully, false otherwise
  */
 export const loadGameState = async (companyName: string): Promise<boolean> => {
   try {
@@ -71,6 +72,7 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       currentView: 'mainMenu',
     });
     
+    console.log(`Game state loaded for company ${companyName}`);
     return true;
   } catch (error) {
     console.error('Error loading game state:', error);

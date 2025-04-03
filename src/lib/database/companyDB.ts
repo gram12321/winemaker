@@ -20,7 +20,7 @@ export const checkCompanyExists = async (companyName: string): Promise<boolean> 
     return docSnap.exists();
   } catch (error) {
     console.error('Error checking if company exists:', error);
-    throw error;
+    return false;
   }
 };
 
@@ -28,8 +28,9 @@ export const checkCompanyExists = async (companyName: string): Promise<boolean> 
  * Create a new company in Firestore
  * @param companyName The name of the company to create
  * @param player The player data
+ * @returns Promise resolving to true if successful, false otherwise
  */
-export const createCompany = async (companyName: string, player: Player): Promise<void> => {
+export const createCompany = async (companyName: string, player: Player): Promise<boolean> => {
   try {
     const docRef = doc(db, 'companies', companyName);
     await setDoc(docRef, {
@@ -45,9 +46,10 @@ export const createCompany = async (companyName: string, player: Player): Promis
     
     // Save to localStorage for quick access
     saveToStorage(StorageKeys.COMPANY_NAME, companyName);
+    return true;
   } catch (error) {
     console.error('Error creating company:', error);
-    throw error;
+    return false;
   }
 };
 
@@ -70,28 +72,31 @@ export const loadCompany = async (companyName: string): Promise<any | null> => {
     return null;
   } catch (error) {
     console.error('Error loading company:', error);
-    throw error;
+    return null;
   }
 };
 
 /**
  * Delete a company from Firestore
  * @param companyName The name of the company to delete
+ * @returns Promise resolving to true if successful, false otherwise
  */
-export const deleteCompany = async (companyName: string): Promise<void> => {
+export const deleteCompany = async (companyName: string): Promise<boolean> => {
   try {
     const docRef = doc(db, 'companies', companyName);
     await deleteDoc(docRef);
+    return true;
   } catch (error) {
     console.error('Error deleting company:', error);
-    throw error;
+    return false;
   }
 };
 
 /**
  * Delete all companies from Firestore
+ * @returns Promise resolving to true if successful, false otherwise
  */
-export const deleteAllCompanies = async (): Promise<void> => {
+export const deleteAllCompanies = async (): Promise<boolean> => {
   try {
     const querySnapshot = await getDocs(collection(db, "companies"));
     const deletePromises = querySnapshot.docs.map(docSnapshot => {
@@ -99,8 +104,9 @@ export const deleteAllCompanies = async (): Promise<void> => {
     });
     
     await Promise.all(deletePromises);
+    return true;
   } catch (error) {
     console.error('Error deleting all companies:', error);
-    throw error;
+    return false;
   }
 }; 

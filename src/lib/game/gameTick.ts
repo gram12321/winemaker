@@ -254,19 +254,13 @@ const updateVineyardRipeness = (amount: number) => {
   const gameState = getGameState();
   
   const updatedVineyards = gameState.vineyards.map(vineyard => {
-    // Skip non-planted vineyards
+    // Skip non-planted vineyards or harvested vineyards
     if (!vineyard.grape || vineyard.status === 'Harvested') {
       return vineyard;
     }
     
-    let newRipeness = 0;
-    if (amount === -1) {
-      // Special case: reset to 0
-      newRipeness = 0;
-    } else {
-      // Normal case: increase by amount
-      newRipeness = Math.min(1.0, vineyard.ripeness + amount);
-    }
+    // New ripeness value depends on amount parameter
+    const newRipeness = amount === -1 ? 0 : Math.min(1.0, vineyard.ripeness + amount);
     
     return {
       ...vineyard,
@@ -274,10 +268,7 @@ const updateVineyardRipeness = (amount: number) => {
     };
   });
   
-  updateGameState({
-    vineyards: updatedVineyards
-  });
-  
-  // Update displays when vineyard ripeness changes
+  // Update game state and refresh UI
+  updateGameState({ vineyards: updatedVineyards });
   displayManager.updateAllDisplays();
 }; 

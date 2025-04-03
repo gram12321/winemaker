@@ -7,13 +7,16 @@
  * Save data to localStorage
  * @param key The key to store the data under
  * @param data The data to store
+ * @returns True if successful, false if error occurred
  */
-export const saveToStorage = <T>(key: string, data: T): void => {
+export const saveToStorage = <T>(key: string, data: T): boolean => {
   try {
     const serialized = JSON.stringify(data);
     localStorage.setItem(key, serialized);
+    return true;
   } catch (error) {
     console.error(`Error saving ${key} to localStorage:`, error);
+    return false;
   }
 };
 
@@ -39,31 +42,38 @@ export const loadFromStorage = <T>(key: string, defaultValue: T): T => {
 /**
  * Remove a specific item from localStorage
  * @param key The key to remove
+ * @returns True if successful, false if error occurred
  */
-export const removeFromStorage = (key: string): void => {
+export const removeFromStorage = (key: string): boolean => {
   try {
     localStorage.removeItem(key);
+    return true;
   } catch (error) {
     console.error(`Error removing ${key} from localStorage:`, error);
+    return false;
   }
 };
 
 /**
  * Clear all game-related data from localStorage
+ * @returns True if successful, false if any errors occurred
  */
-export const clearGameStorage = (): void => {
+export const clearGameStorage = (): boolean => {
   const gameKeys = [
-    'companyName',
+    StorageKeys.COMPANY_NAME,
+    StorageKeys.VINEYARDS,
+    StorageKeys.BUILDINGS,
+    StorageKeys.STAFF,
+    StorageKeys.WEEK,
+    StorageKeys.SEASON,
+    StorageKeys.CURRENT_YEAR,
+    StorageKeys.CURRENT_VIEW,
+    StorageKeys.WINE_BATCHES,
     'money',
-    'week',
-    'season',
-    'year',
     'calculatedPrestige',
     'prestigeHit',
-    'buildings',
     'playerInventory',
     'consoleMessages',
-    'staffData',
     'latestStaffId',
     'wineOrders',
     'transactions',
@@ -73,18 +83,20 @@ export const clearGameStorage = (): void => {
     'teams',
     'importers',
     'upgrades',
-    'seenTutorials',
-    'vineyards',
-    'wineBatches'
+    'seenTutorials'
   ];
 
+  let success = true;
   gameKeys.forEach(key => {
     try {
       localStorage.removeItem(key);
     } catch (error) {
       console.error(`Error removing ${key} from localStorage:`, error);
+      success = false;
     }
   });
+  
+  return success;
 };
 
 /**

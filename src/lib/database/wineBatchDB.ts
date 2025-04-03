@@ -3,7 +3,6 @@
  * Manages storing and retrieving wine batch data
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState, WineBatch } from '@/gameState';
 import { saveGameState } from './gameStateDB';
 
@@ -11,12 +10,12 @@ import { saveGameState } from './gameStateDB';
  * Add a new wine batch to the game state
  * @param batch The wine batch to add
  * @param saveToDb Whether to also save to the database
- * @returns The newly added wine batch
+ * @returns The newly added wine batch or null if failed
  */
 export async function saveWineBatch(
   batch: WineBatch,
   saveToDb: boolean = true
-): Promise<WineBatch> {
+): Promise<WineBatch | null> {
   try {
     const gameState = getGameState();
     
@@ -46,7 +45,7 @@ export async function saveWineBatch(
     return batch;
   } catch (error) {
     console.error('Error saving wine batch:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -61,7 +60,7 @@ export function getWineBatch(id: string): WineBatch | null {
     return gameState.wineBatches.find(batch => batch.id === id) || null;
   } catch (error) {
     console.error('Error getting wine batch:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -83,7 +82,7 @@ export function getAllWineBatches(): WineBatch[] {
  * Remove a wine batch by ID
  * @param id The ID of the wine batch to remove
  * @param saveToDb Whether to also save to the database
- * @returns True if removed, false if not found
+ * @returns True if removed, false if not found or failed
  */
 export async function removeWineBatch(
   id: string,
@@ -110,6 +109,6 @@ export async function removeWineBatch(
     return true;
   } catch (error) {
     console.error('Error removing wine batch:', error);
-    throw error;
+    return false;
   }
 } 

@@ -3,7 +3,6 @@
  * Manages storing and retrieving vineyard data
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
 import { Vineyard } from '@/lib/game/vineyard';
 import { GameDate } from '@/lib/core/constants/gameConstants';
@@ -33,9 +32,9 @@ export function convertToGameDate(date: Date | GameDate | string | undefined, ga
 /**
  * Adds a new vineyard to the game and saves to Firebase
  * @param vineyard Vineyard object to save
- * @returns The saved vineyard
+ * @returns The saved vineyard or null if failed
  */
-export async function saveVineyard(vineyard: Vineyard): Promise<Vineyard> {
+export async function saveVineyard(vineyard: Vineyard): Promise<Vineyard | null> {
   try {
     // Get current game state
     const gameState = getGameState();
@@ -66,7 +65,7 @@ export async function saveVineyard(vineyard: Vineyard): Promise<Vineyard> {
     return vineyard;
   } catch (error) {
     console.error('Error saving vineyard:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -81,7 +80,7 @@ export function getVineyard(id: string): Vineyard | null {
     return gameState.vineyards.find((vineyard: Vineyard) => vineyard.id === id) || null;
   } catch (error) {
     console.error('Error getting vineyard:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -127,6 +126,6 @@ export async function removeVineyard(id: string): Promise<boolean> {
     return removed;
   } catch (error) {
     console.error('Error removing vineyard:', error);
-    throw error;
+    return false;
   }
 } 

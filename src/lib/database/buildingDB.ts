@@ -7,20 +7,21 @@ import { getGameState, updateGameState, Building as GameStateBuilding } from '@/
 import { Building, initializeToolInstanceCounts } from '@/lib/game/building';
 import { saveGameState } from './gameStateDB';
 
-// Store serialized building data
+// Interface for serialized building data for storage
 export interface SerializedBuilding {
   id: string;
   name: string;
   level: number;
   slots: {
     id: string;
-    tools: any[];
+    tools: any[]; // Tool objects with name, capacity, etc.
     currentWeight: number;
   }[];
 }
 
 /**
  * Load buildings from game state
+ * @returns Array of serialized building objects
  */
 export const loadBuildings = (): SerializedBuilding[] => {
   try {
@@ -45,6 +46,8 @@ export const loadBuildings = (): SerializedBuilding[] => {
 
 /**
  * Save buildings to game state and Firebase
+ * @param buildings Array of serialized building objects to save
+ * @returns Promise resolving when save is complete
  */
 export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<void> => {
   try {
@@ -63,6 +66,7 @@ export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<vo
 /**
  * Get a building by name
  * @param name Name of the building to find
+ * @returns The building or undefined if not found
  */
 export const getBuildingByName = (name: string): SerializedBuilding | undefined => {
   return loadBuildings().find(b => b.name === name);
@@ -71,6 +75,7 @@ export const getBuildingByName = (name: string): SerializedBuilding | undefined 
 /**
  * Convert a serialized building to a Building instance
  * @param serializedBuilding Serialized building data
+ * @returns Building instance with all properties initialized
  */
 export const deserializeBuilding = (serializedBuilding: SerializedBuilding): Building => {
   // Create new building instance with name and level
@@ -91,6 +96,7 @@ export const deserializeBuilding = (serializedBuilding: SerializedBuilding): Bui
 /**
  * Convert a Building instance to serialized format
  * @param building Building instance
+ * @returns Serialized building data ready for storage
  */
 export const serializeBuilding = (building: Building): SerializedBuilding => {
   return {
@@ -104,6 +110,7 @@ export const serializeBuilding = (building: Building): SerializedBuilding => {
 /**
  * Initializes the tool instance counts from all buildings
  * Should be called during application startup
+ * @returns Promise resolving when initialization is complete
  */
 export const initializeToolInstanceCountsFromStorage = async (): Promise<void> => {
   try {
@@ -112,8 +119,7 @@ export const initializeToolInstanceCountsFromStorage = async (): Promise<void> =
     // Convert to Building instances
     const validatedBuildings = buildings.map(b => deserializeBuilding(b));
     
-    // Import and initialize tool instance counts
-    const { initializeToolInstanceCounts } = await import('@/lib/game/building');
+    // Initialize tool instance counts
     initializeToolInstanceCounts(validatedBuildings);
     
     console.log('Tool instance counts initialized from storage');

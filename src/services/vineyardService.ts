@@ -18,11 +18,11 @@ import {
 } from '@/lib/database/vineyardDB';
 
 /**
- * Adds a new vineyard to the game and saves to Firebase
- * @param vineyardData Partial vineyard data (id will be generated)
- * @returns The created vineyard
+ * Adds a new vineyard to the game
+ * @param vineyardData Partial vineyard data (id will be generated if not provided)
+ * @returns The created vineyard or null if failed
  */
-export async function addVineyard(vineyardData: Partial<Vineyard> = {}): Promise<Vineyard> {
+export async function addVineyard(vineyardData: Partial<Vineyard> = {}): Promise<Vineyard | null> {
   try {
     // Generate a new UUID if none provided
     const id = vineyardData.id || uuidv4();
@@ -42,12 +42,12 @@ export async function addVineyard(vineyardData: Partial<Vineyard> = {}): Promise
     return await saveVineyard(vineyard);
   } catch (error) {
     console.error('Error adding vineyard:', error);
-    throw error;
+    return null;
   }
 }
 
 /**
- * Updates an existing vineyard and saves to Firebase
+ * Updates an existing vineyard
  * @param id ID of the vineyard to update
  * @param updates Updates to apply to the vineyard
  * @returns The updated vineyard or null if not found
@@ -71,7 +71,7 @@ export async function updateVineyard(id: string, updates: Partial<Vineyard>): Pr
     return await saveVineyard(updatedVineyard);
   } catch (error) {
     console.error('Error updating vineyard:', error);
-    throw error;
+    return null;
   }
 }
 
@@ -121,21 +121,21 @@ export function calculateVineyardYield(vineyard: Vineyard): number {
     expectedYield *= CONVENTIONAL_YIELD_BONUS;
   }
 
-  return expectedYield;
+  return Math.round(expectedYield);
 }
 
 /**
  * Plants a vineyard with a specific grape variety
  * @param id ID of the vineyard to plant
  * @param grape Type of grape to plant
- * @param density Density of vines per acre
+ * @param density Density of vines per acre (defaults to baseline density)
  * @returns The updated vineyard or null if not found
  */
-export async function plantVineyard(id: string, grape: GrapeVariety | string, density: number = BASELINE_VINE_DENSITY): Promise<Vineyard | null> {
+export async function plantVineyard(id: string, grape: GrapeVariety, density: number = BASELINE_VINE_DENSITY): Promise<Vineyard | null> {
   try {
     // Update vineyard with new grape and density
     return await updateVineyard(id, {
-      grape: grape as any,
+      grape,
       density,
       status: 'Planted',
       ripeness: 0,
@@ -144,7 +144,7 @@ export async function plantVineyard(id: string, grape: GrapeVariety | string, de
     });
   } catch (error) {
     console.error('Error planting vineyard:', error);
-    throw error;
+    return null;
   }
 }
 
