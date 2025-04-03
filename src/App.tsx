@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { getGameState, updateGameState, initializePlayer } from './gameState';
 
 // Import database services
-import { checkCompanyExists, createCompany } from './lib/database/companyService';
+import { checkCompanyExists, createCompany } from './lib/database/companyDB';
 import { loadGameState } from './lib/database/gameStateService';
 import { StorageKeys, loadFromStorage } from './lib/database/localStorageDB';
-import { initializeToolInstanceCountsFromStorage } from './lib/database/buildingService';
+import { initializeToolInstanceCountsFromStorage } from './lib/database/buildingDB';
 
 // Import game systems
 import { initializeGameTime } from '@/lib/game/gameTick';

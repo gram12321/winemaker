@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getGameState, WineBatch } from '@/gameState';
 import { GameDate } from '@/lib/core/constants/gameConstants';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
-import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingService';
+import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingDB';
 import { consoleService } from '@/components/layout/Console';
 import { 
   saveWineBatch, 

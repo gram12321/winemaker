@@ -1,5 +1,5 @@
 /**
- * Company Service
+ * Company Database Operations
  * Handles company-related operations with Firebase
  */
 

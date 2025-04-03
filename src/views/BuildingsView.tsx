@@ -8,11 +8,13 @@ import { getGameState } from '@/gameState';
 
 import { consoleService } from '@/components/layout/Console';
 import { 
-  loadBuildings, 
-  startBuildingConstruction,
-  upgradeBuilding,
+  loadBuildings,
   deserializeBuilding
-} from '@/lib/database/buildingService';
+} from '@/lib/database/buildingDB';
+import {
+  startBuildingConstruction,
+  upgradeBuilding
+} from '@/services/buildingService';
 
 import { 
   Card, 

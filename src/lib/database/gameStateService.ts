@@ -6,7 +6,7 @@
 import { db } from '../../firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState } from '../../gameState';
-import { loadCompany } from './companyService';
+import { loadCompany } from './companyDB';
 import { clearGameStorage } from './localStorageDB';
 
 /**

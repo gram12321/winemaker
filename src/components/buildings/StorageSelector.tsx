@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingService';
+import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingDB';
 import { BuildingType } from '@/lib/core/constants';
 
 export interface StorageOption {

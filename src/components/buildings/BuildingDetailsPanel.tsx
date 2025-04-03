@@ -7,11 +7,15 @@ import {
 } from '@/lib/game/building';
 import {
   loadBuildings,
-  getBuildingByName,
+  deserializeBuilding,
+  serializeBuilding,
+  getBuildingByName
+} from '@/lib/database/buildingDB';
+import {
+  upgradeBuilding,
   addToolToBuilding,
-  sellToolFromBuilding,
-  deserializeBuilding
-} from '@/lib/database/buildingService';
+  sellToolFromBuilding
+} from '@/services/buildingService';
 import { getGameState } from '@/gameState';
 import { useDisplayUpdate } from '@/lib/game/displayManager';
 import { consoleService } from '@/components/layout/Console';
