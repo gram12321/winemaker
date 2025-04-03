@@ -16,6 +16,7 @@ import {
   convertToGameDate, 
   getAllVineyards 
 } from '@/lib/database/vineyardDB';
+import { consoleService } from '@/components/layout/Console';
 
 /**
  * Adds a new vineyard to the game
@@ -133,15 +134,66 @@ export function calculateVineyardYield(vineyard: Vineyard): number {
  */
 export async function plantVineyard(id: string, grape: GrapeVariety, density: number = BASELINE_VINE_DENSITY): Promise<Vineyard | null> {
   try {
-    // Update vineyard with new grape and density
-    return await updateVineyard(id, {
-      grape,
-      density,
-      status: 'Planted',
-      ripeness: 0,
-      vineyardHealth: 100,
-      vineAge: 0,
+    const vineyard = getVineyard(id);
+    if (!vineyard) {
+      console.error(`Vineyard with ID ${id} not found`);
+      return null;
+    }
+
+    // Initialize the vineyard for planting
+    await updateVineyard(id, {
+      status: 'Planting in progress',
     });
+
+    // Import the activity manager and work calculator
+    const { createActivityProgress } = await import('@/lib/game/workCalculator');
+    const { addActivity } = await import('@/lib/game/activityManager');
+    const { WorkCategory } = await import('@/lib/game/workCalculator');
+
+    // Create and add the planting activity
+    const plantingActivity = createActivityProgress(
+      WorkCategory.PLANTING,
+      vineyard.acres,
+      {
+        density: density,
+        targetId: id,
+        additionalParams: { grape, density },
+        // Callback when planting is complete
+        completionCallback: async () => {
+          // Update vineyard with new grape and density
+          await updateVineyard(id, {
+            grape,
+            density,
+            status: 'Planted',
+            ripeness: 0,
+            vineyardHealth: 0.8, // Start with 80% health
+            vineAge: 0,
+          });
+          consoleService.success(`${grape} planted in ${vineyard.name} with a density of ${density} vines per acre.`);
+        },
+        // Progress callback for partial updates
+        progressCallback: async (progress) => {
+          // Optional: Update the vineyard status with progress indication
+          if (progress > 0 && progress < 1) {
+            await updateVineyard(id, {
+              status: `Planting: ${Math.round(progress * 100)}%`,
+            });
+          }
+        }
+      }
+    );
+
+    // Add the activity to the game state
+    addActivity(plantingActivity);
+
+    // For now, since we don't have staff, let's initialize with 0% progress
+    const { updateActivity } = await import('@/lib/game/activityManager');
+    updateActivity(plantingActivity.id, {
+      appliedWork: 0 // Start with 0% progress
+    });
+
+    consoleService.info(`Started planting ${grape} in ${vineyard.name}.`);
+    return vineyard;
   } catch (error) {
     console.error('Error planting vineyard:', error);
     return null;

@@ -9,6 +9,7 @@ import { consoleService } from '@/components/layout/Console';
 import { saveGameState } from '@/lib/database/gameStateDB';
 import { Vineyard } from './vineyard';
 import displayManager from './displayManager';
+import { processActivitiesTick } from './activityManager';
 import {   Season, 
   SEASONS, 
   WEEKS_PER_SEASON,
@@ -49,7 +50,8 @@ export const incrementWeek = async (autoSave: boolean = true): Promise<ReturnTyp
   let currentSeasonIndex = SEASONS.indexOf(season);
   
   // Pre-tick processing
-  // TODO: Process ongoing tasks
+  // Process activities using our new activityManager
+  processActivitiesTick();
   
   // Increment the week
   week += 1;
@@ -248,27 +250,25 @@ const processWeekEffects = () => {
 
 /**
  * Update the ripeness of all planted vineyards
- * @param amount The amount to increase ripeness by (or -1 to reset to 0)
+ * @param amount Amount to increase ripeness by
  */
 const updateVineyardRipeness = (amount: number) => {
   const gameState = getGameState();
   
+  // Update ripeness for vineyards that are planted and growing
   const updatedVineyards = gameState.vineyards.map(vineyard => {
-    // Skip non-planted vineyards or harvested vineyards
-    if (!vineyard.grape || vineyard.status === 'Harvested') {
-      return vineyard;
+    if (vineyard.grape && (vineyard.status === 'Growing' || vineyard.status === 'Ripening' || vineyard.status === 'Ready for Harvest')) {
+      const newRipeness = Math.min(1.0, vineyard.ripeness + amount);
+      return {
+        ...vineyard,
+        ripeness: newRipeness
+      };
     }
-    
-    // New ripeness value depends on amount parameter
-    const newRipeness = amount === -1 ? 0 : Math.min(1.0, vineyard.ripeness + amount);
-    
-    return {
-      ...vineyard,
-      ripeness: newRipeness
-    };
+    return vineyard;
   });
   
-  // Update game state and refresh UI
-  updateGameState({ vineyards: updatedVineyards });
-  displayManager.updateAllDisplays();
+  // Update game state with updated vineyards
+  updateGameState({
+    vineyards: updatedVineyards
+  });
 }; 

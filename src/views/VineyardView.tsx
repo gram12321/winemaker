@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { getGameState } from '../gameState';
 import { Vineyard } from '../lib/game/vineyard';
 import { addVineyard, plantVineyard, harvestVineyard } from '../services/vineyardService';
@@ -8,6 +8,9 @@ import { useDisplayUpdate } from '../lib/game/displayManager';
 import displayManager from '../lib/game/displayManager';
 import { calculateVineyardYield } from '../lib/game/vineyard';
 import StorageSelector from '../components/buildings/StorageSelector';
+import { WorkProgress } from '../components/ui/progress';
+import { getActivitiesForTarget, getTargetProgress } from '../lib/game/activityManager';
+import { WorkCategory } from '../lib/game/workCalculator';
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -26,74 +29,86 @@ const getStatusColor = (status: string) => {
   }
 };
 
+// Create a display state for vineyard view
+displayManager.createDisplayState('vineyardView', {
+  selectedVineyardId: null as string | null,
+  loading: false,
+  selectedStorageLocations: [] as { locationId: string; quantity: number }[]
+});
+
 const VineyardView: React.FC = () => {
   // Use display update hook to subscribe to game state changes
   useDisplayUpdate();
   
   const gameState = getGameState();
-  const { vineyards, currentYear } = gameState;
-  const [selectedVineyardId, setSelectedVineyardId] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [selectedStorageLocations, setSelectedStorageLocations] = useState<{ locationId: string; quantity: number }[]>([]);
+  const { vineyards } = gameState;
+  const displayState = displayManager.getDisplayState('vineyardView');
+  const { selectedVineyardId, loading, selectedStorageLocations } = displayState;
 
   // Get the selected vineyard from the current game state using the ID
-  // This ensures we always have the latest vineyard data
   const selectedVineyard = selectedVineyardId 
     ? vineyards.find(v => v.id === selectedVineyardId) || null 
     : null;
 
+  // Get planting progress for the selected vineyard
+  const plantingProgress = selectedVineyardId 
+    ? getTargetProgress(selectedVineyardId, WorkCategory.PLANTING)
+    : { overallProgress: 0, hasActivities: false };
+
   // Handle adding a new vineyard using the vineyard service
-  const handleAddVineyard = async () => {
-    setLoading(true);
+  const handleAddVineyard = displayManager.createActionHandler(async () => {
+    displayManager.updateDisplayState('vineyardView', { loading: true });
     try {
       const newVineyard = await addVineyard();
-      consoleService.info(`New vineyard "${newVineyard.name}" acquired in ${newVineyard.region}, ${newVineyard.country}.`);
-      setSelectedVineyardId(newVineyard.id);
+      if (newVineyard) {
+        consoleService.info(`New vineyard "${newVineyard.name}" acquired in ${newVineyard.region}, ${newVineyard.country}.`);
+        displayManager.updateDisplayState('vineyardView', { selectedVineyardId: newVineyard.id });
+      } else {
+        consoleService.error('Failed to add new vineyard.');
+      }
     } catch (error) {
       consoleService.error('Failed to add new vineyard.');
       console.error('Error adding vineyard:', error);
     } finally {
-      setLoading(false);
+      displayManager.updateDisplayState('vineyardView', { loading: false });
     }
-  };
+  });
 
   // Handle selecting a vineyard
   const handleSelectVineyard = (vineyard: Vineyard) => {
-    setSelectedVineyardId(vineyard.id);
+    displayManager.updateDisplayState('vineyardView', { selectedVineyardId: vineyard.id });
   };
 
-  // Handle planting a vineyard - using the displayManager's action handler
+  // Handle planting a vineyard
   const handlePlantVineyard = displayManager.createActionHandler(async () => {
     if (!selectedVineyardId) return;
     
-    setLoading(true);
+    displayManager.updateDisplayState('vineyardView', { loading: true });
     try {
       // In a real implementation, we would have a modal/form to select grape type and density
       // For now, let's use a fixed grape type and density
       const grape = "Chardonnay";
       const density = BASELINE_VINE_DENSITY;
       
-      const updatedVineyard = await plantVineyard(selectedVineyardId, grape, density);
+      const result = await plantVineyard(selectedVineyardId, grape, density);
       
-      if (updatedVineyard) {
-        consoleService.info(`${grape} planted in ${updatedVineyard.name} with a density of ${density} vines per acre.`);
-      } else {
-        consoleService.error('Failed to plant vineyard.');
+      if (!result) {
+        consoleService.error('Failed to start planting vineyard.');
       }
     } catch (error) {
       consoleService.error('Error planting vineyard.');
       console.error('Error planting vineyard:', error);
     } finally {
-      setLoading(false);
+      displayManager.updateDisplayState('vineyardView', { loading: false });
     }
   });
 
-  // Handle harvesting a vineyard - using the displayManager's action handler
+  // Handle harvesting a vineyard
   const handleHarvestVineyard = displayManager.createActionHandler(async () => {
     if (!selectedVineyardId) return;
     
     // Check if any storage locations are selected
-    const totalStorageQuantity = selectedStorageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
+    const totalStorageQuantity = selectedStorageLocations.reduce((sum: number, loc: { quantity: number }) => sum + loc.quantity, 0);
     if (totalStorageQuantity <= 0) {
       consoleService.error('Please select at least one storage location.');
       return;
@@ -102,7 +117,7 @@ const VineyardView: React.FC = () => {
     const requiredQuantity = selectedVineyard ? Math.ceil(calculateVineyardYield(selectedVineyard)) : 0;
     const isPartialHarvest = totalStorageQuantity < requiredQuantity;
     
-    setLoading(true);
+    displayManager.updateDisplayState('vineyardView', { loading: true });
     try {
       // Harvest only what fits in storage
       const result = await harvestVineyard(selectedVineyardId, totalStorageQuantity, selectedStorageLocations);
@@ -120,7 +135,7 @@ const VineyardView: React.FC = () => {
         consoleService.success(message);
         
         // Reset storage locations after successful harvest
-        setSelectedStorageLocations([]);
+        displayManager.updateDisplayState('vineyardView', { selectedStorageLocations: [] });
       } else {
         consoleService.error('Failed to harvest vineyard.');
       }
@@ -128,9 +143,14 @@ const VineyardView: React.FC = () => {
       consoleService.error('Error harvesting vineyard.');
       console.error('Error harvesting vineyard:', error);
     } finally {
-      setLoading(false);
+      displayManager.updateDisplayState('vineyardView', { loading: false });
     }
   });
+
+  // Handle storage location changes
+  const handleStorageChange = (locations: { locationId: string; quantity: number }[]) => {
+    displayManager.updateDisplayState('vineyardView', { selectedStorageLocations: locations });
+  };
 
   return (
     <div className="p-4">
@@ -168,29 +188,11 @@ const VineyardView: React.FC = () => {
                       <span className="font-medium">Size:</span> {vineyard.acres.toFixed(1)} acres
                     </div>
                     <div>
-                      <span className="font-medium">Altitude:</span> {vineyard.altitude}m
+                      <span className="font-medium">Status:</span>{' '}
+                      <span className={getStatusColor(vineyard.status)}>
+                        {vineyard.status}
+                      </span>
                     </div>
-                    <div>
-                      <span className="font-medium">Aspect:</span> {vineyard.aspect}
-                    </div>
-                    <div>
-                      <span className="font-medium">Prestige:</span> {(vineyard.vineyardPrestige * 100).toFixed(0)}
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <span className="font-medium">Status:</span>{' '}
-                    <span className={vineyard.grape ? getStatusColor(vineyard.status) : 'text-amber-600'}>
-                      {vineyard.grape ? (
-                        <>
-                          {vineyard.status}
-                          <span className="text-gray-600 text-sm ml-1">
-                            ({vineyard.grape})
-                          </span>
-                        </>
-                      ) : (
-                        vineyard.status
-                      )}
-                    </span>
                   </div>
                   {vineyard.grape && (
                     <div className="mt-2">
@@ -283,33 +285,43 @@ const VineyardView: React.FC = () => {
                         <StorageSelector 
                           resourceType="grape"
                           selectedStorageLocations={selectedStorageLocations}
-                          onStorageChange={setSelectedStorageLocations}
+                          onStorageChange={handleStorageChange}
                           requiredCapacity={Math.ceil(calculateVineyardYield(selectedVineyard))}
                         />
                       </li>
                       <li className="mt-4">
                         <button 
                           onClick={handleHarvestVineyard}
+                          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded"
                           disabled={loading || selectedStorageLocations.length === 0}
-                          className={`w-full py-2 px-4 rounded transition-colors ${
-                            selectedStorageLocations.length === 0
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                              : 'bg-amber-600 hover:bg-amber-700 text-white'
-                          }`}
                         >
-                          {selectedStorageLocations.length === 0
-                            ? "Allocate Storage to Harvest" 
-                            : loading 
-                              ? "Harvesting..." 
-                              : "Harvest Vineyard"}
+                          {loading ? 'Processing...' : 'Start Harvest'}
                         </button>
                       </li>
                     </>
                   )}
                 </ul>
               ) : (
-                <div className="text-amber-600">
-                  This vineyard hasn't been planted yet. You need to plant grape varieties to start wine production.
+                <div>
+                  <p className="text-gray-600 mb-4">This vineyard is not planted yet.</p>
+                  <button
+                    onClick={handlePlantVineyard}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                    disabled={loading}
+                  >
+                    {loading ? 'Processing...' : 'Plant Vineyard'}
+                  </button>
+                </div>
+              )}
+              
+              {/* Display planting progress if there's an active planting activity */}
+              {plantingProgress.hasActivities && (
+                <div className="my-4">
+                  <WorkProgress 
+                    value={plantingProgress.overallProgress} 
+                    label="Planting Progress" 
+                    showPercentage={true}
+                  />
                 </div>
               )}
             </div>
@@ -322,38 +334,7 @@ const VineyardView: React.FC = () => {
                 <div className="text-sm text-gray-600">Land Value</div>
                 <div className="text-lg font-semibold">${selectedVineyard.landValue.toLocaleString()}</div>
               </div>
-              <div className="bg-green-50 p-3 rounded">
-                <div className="text-sm text-gray-600">Prestige</div>
-                <div className="text-lg font-semibold">{(selectedVineyard.vineyardPrestige * 100).toFixed(0)}/100</div>
-              </div>
-              <div className="bg-amber-50 p-3 rounded">
-                <div className="text-sm text-gray-600">Annual Yield Factor</div>
-                <div className="text-lg font-semibold">{(selectedVineyard.annualYieldFactor * 100).toFixed(0)}%</div>
-              </div>
-              <div className="bg-purple-50 p-3 rounded">
-                <div className="text-sm text-gray-600">Quality Factor</div>
-                <div className="text-lg font-semibold">{(selectedVineyard.annualQualityFactor * 100).toFixed(0)}%</div>
-              </div>
             </div>
-          </div>
-
-          <div className="flex space-x-2 mt-6">
-            {/* Only show plant button for vineyards that aren't planted yet */}
-            {selectedVineyard && !selectedVineyard.grape && (
-              <button 
-                onClick={handlePlantVineyard}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                disabled={loading}
-              >
-                {loading ? 'Processing...' : 'Plant Vineyard'}
-              </button>
-            )}
-            <button
-              onClick={() => setSelectedVineyardId(null)}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded"
-            >
-              Close Details
-            </button>
           </div>
         </div>
       )}

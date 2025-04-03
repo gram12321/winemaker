@@ -13,8 +13,14 @@ type UseDisplayUpdateResult = {
   unregisterFromUpdates: () => string | null;
 };
 
+// Type for display state storage
+type DisplayState = {
+  [key: string]: any;
+};
+
 class DisplayManager {
   private subscribers: DisplaySubscriber[] = [];
+  private displayStates: DisplayState = {};
   private static instance: DisplayManager;
 
   private constructor() {}
@@ -24,6 +30,41 @@ class DisplayManager {
       DisplayManager.instance = new DisplayManager();
     }
     return DisplayManager.instance;
+  }
+
+  /**
+   * Create a new display state for a component
+   * @param key Unique identifier for the state
+   * @param initialState Initial state object
+   */
+  public createDisplayState(key: string, initialState: any): void {
+    if (this.displayStates[key]) {
+      console.warn(`Display state '${key}' already exists. It will be overwritten.`);
+    }
+    this.displayStates[key] = initialState;
+  }
+
+  /**
+   * Get the current display state for a component
+   * @param key Unique identifier for the state
+   * @returns The current state or null if not found
+   */
+  public getDisplayState(key: string): any {
+    return this.displayStates[key] || null;
+  }
+
+  /**
+   * Update the display state for a component
+   * @param key Unique identifier for the state
+   * @param updates Partial updates to apply to the state
+   */
+  public updateDisplayState(key: string, updates: Partial<any>): void {
+    if (!this.displayStates[key]) {
+      console.warn(`Display state '${key}' does not exist. Creating it now.`);
+      this.displayStates[key] = {};
+    }
+    this.displayStates[key] = { ...this.displayStates[key], ...updates };
+    this.updateAllDisplays();
   }
 
   /**

@@ -11,6 +11,7 @@ import {
 import { GameDate } from '@/lib/core/constants';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 import displayManager from '@/lib/game/displayManager';
+import { ActivityProgress } from '@/lib/game/workCalculator';
 
 // Player Type
 export interface Player {
@@ -79,6 +80,7 @@ let gameState = {
   buildings: [] as Building[],
   staff: [] as Staff[],
   wineBatches: [] as WineBatch[],
+  activities: [] as ActivityProgress[], // Array to store work activities
   week: STARTING_WEEK,
   season: STARTING_SEASON,
   currentYear: STARTING_YEAR,
