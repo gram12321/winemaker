@@ -1,0 +1,115 @@
+/**
+ * Wine Batch Database Operations
+ * Manages storing and retrieving wine batch data
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+import { getGameState, updateGameState, WineBatch } from '@/gameState';
+import { saveGameState } from './gameStateService';
+
+/**
+ * Add a new wine batch to the game state
+ * @param batch The wine batch to add
+ * @param saveToDb Whether to also save to the database
+ * @returns The newly added wine batch
+ */
+export async function saveWineBatch(
+  batch: WineBatch,
+  saveToDb: boolean = true
+): Promise<WineBatch> {
+  try {
+    const gameState = getGameState();
+    
+    // Check if batch already exists and update it, or add as new
+    let batchExists = false;
+    const updatedWineBatches = gameState.wineBatches.map((b: WineBatch) => {
+      if (b.id === batch.id) {
+        batchExists = true;
+        return batch;
+      }
+      return b;
+    });
+    
+    // If batch doesn't exist yet, add it
+    if (!batchExists) {
+      updatedWineBatches.push(batch);
+    }
+    
+    // Update game state
+    updateGameState({ wineBatches: updatedWineBatches });
+    
+    // Save to database if requested
+    if (saveToDb) {
+      await saveGameState();
+    }
+    
+    return batch;
+  } catch (error) {
+    console.error('Error saving wine batch:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get a wine batch by ID
+ * @param id The ID of the wine batch to retrieve
+ * @returns The wine batch or null if not found
+ */
+export function getWineBatch(id: string): WineBatch | null {
+  try {
+    const gameState = getGameState();
+    return gameState.wineBatches.find(batch => batch.id === id) || null;
+  } catch (error) {
+    console.error('Error getting wine batch:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get all wine batches
+ * @returns Array of all wine batches
+ */
+export function getAllWineBatches(): WineBatch[] {
+  try {
+    const gameState = getGameState();
+    return gameState.wineBatches || [];
+  } catch (error) {
+    console.error('Error getting all wine batches:', error);
+    return [];
+  }
+}
+
+/**
+ * Remove a wine batch by ID
+ * @param id The ID of the wine batch to remove
+ * @param saveToDb Whether to also save to the database
+ * @returns True if removed, false if not found
+ */
+export async function removeWineBatch(
+  id: string,
+  saveToDb: boolean = true
+): Promise<boolean> {
+  try {
+    const gameState = getGameState();
+    const batchIndex = gameState.wineBatches.findIndex(batch => batch.id === id);
+    
+    if (batchIndex === -1) {
+      console.error(`Wine batch with ID ${id} not found`);
+      return false;
+    }
+    
+    // Update game state
+    const updatedWineBatches = gameState.wineBatches.filter(batch => batch.id !== id);
+    updateGameState({ wineBatches: updatedWineBatches });
+    
+    // Save to database if requested
+    if (saveToDb) {
+      await saveGameState();
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error removing wine batch:', error);
+    throw error;
+  }
+} 

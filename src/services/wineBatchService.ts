@@ -1,10 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getGameState, updateGameState, WineBatch } from '@/gameState';
+import { getGameState, WineBatch } from '@/gameState';
 import { GameDate } from '@/lib/core/constants/gameConstants';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
-import { saveGameState } from '@/lib/database/gameStateService';
 import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingService';
 import { consoleService } from '@/components/layout/Console';
+import { 
+  saveWineBatch, 
+  getWineBatch as getWineBatchFromDB, 
+  removeWineBatch as removeWineBatchFromDB 
+} from '@/lib/database/wineBatchDB';
 
 /**
  * Check if a storage location is valid for a given resource type and quantity
@@ -163,16 +167,8 @@ export async function addWineBatch(
       }
     };
     
-    // Update game state
-    const updatedWineBatches = [...gameState.wineBatches, newBatch];
-    updateGameState({ wineBatches: updatedWineBatches });
-    
-    // Save to database if requested
-    if (saveToDb) {
-      await saveGameState();
-    }
-    
-    return newBatch;
+    // Save to database
+    return await saveWineBatch(newBatch, saveToDb);
   } catch (error) {
     console.error('Error adding wine batch:', error);
     throw error;
@@ -185,13 +181,7 @@ export async function addWineBatch(
  * @returns The wine batch or null if not found
  */
 export function getWineBatch(id: string): WineBatch | null {
-  try {
-    const gameState = getGameState();
-    return gameState.wineBatches.find(batch => batch.id === id) || null;
-  } catch (error) {
-    console.error('Error getting wine batch:', error);
-    throw error;
-  }
+  return getWineBatchFromDB(id);
 }
 
 /**
@@ -207,32 +197,22 @@ export async function updateWineBatch(
   saveToDb: boolean = false
 ): Promise<WineBatch | null> {
   try {
-    const gameState = getGameState();
-    const batchIndex = gameState.wineBatches.findIndex(batch => batch.id === id);
+    // Get the existing wine batch
+    const batch = getWineBatchFromDB(id);
     
-    if (batchIndex === -1) {
+    if (!batch) {
       console.error(`Wine batch with ID ${id} not found`);
       return null;
     }
     
     // Create updated wine batch
     const updatedBatch = {
-      ...gameState.wineBatches[batchIndex],
+      ...batch,
       ...updates
     };
     
-    // Update game state
-    const updatedWineBatches = [...gameState.wineBatches];
-    updatedWineBatches[batchIndex] = updatedBatch;
-    
-    updateGameState({ wineBatches: updatedWineBatches });
-    
-    // Save to database if requested
-    if (saveToDb) {
-      await saveGameState();
-    }
-    
-    return updatedBatch;
+    // Save to database
+    return await saveWineBatch(updatedBatch, saveToDb);
   } catch (error) {
     console.error('Error updating wine batch:', error);
     throw error;
@@ -249,29 +229,7 @@ export async function removeWineBatch(
   id: string,
   saveToDb: boolean = false
 ): Promise<boolean> {
-  try {
-    const gameState = getGameState();
-    const batchIndex = gameState.wineBatches.findIndex(batch => batch.id === id);
-    
-    if (batchIndex === -1) {
-      console.error(`Wine batch with ID ${id} not found`);
-      return false;
-    }
-    
-    // Update game state
-    const updatedWineBatches = gameState.wineBatches.filter(batch => batch.id !== id);
-    updateGameState({ wineBatches: updatedWineBatches });
-    
-    // Save to database if requested
-    if (saveToDb) {
-      await saveGameState();
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error removing wine batch:', error);
-    throw error;
-  }
+  return await removeWineBatchFromDB(id, saveToDb);
 }
 
 /**
@@ -388,13 +346,13 @@ function generateInitialCharacteristics(grapeType: GrapeVariety, quality: number
     default:
       // Scale all characteristics with quality
       Object.keys(characteristics).forEach(key => {
-        characteristics[key] = 0.3 + (quality * 0.5);
+        characteristics[key as keyof typeof characteristics] = 0.3 + (quality * 0.5);
       });
   }
   
   // Ensure values are in valid range (0-1)
   Object.keys(characteristics).forEach(key => {
-    characteristics[key] = Math.max(0, Math.min(1, characteristics[key]));
+    characteristics[key as keyof typeof characteristics] = Math.max(0, Math.min(1, characteristics[key as keyof typeof characteristics]));
   });
   
   return characteristics;

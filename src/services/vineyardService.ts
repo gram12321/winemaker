@@ -1,36 +1,21 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Vineyard, createVineyard } from '@/lib/game/vineyard';
-import { getGameState, updateGameState } from '@/gameState';
+import { getGameState } from '@/gameState';
 import { GameDate } from '@/lib/core/constants/gameConstants';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
-import { saveGameState } from '@/lib/database/gameStateService';
 import { createWineBatchFromHarvest } from './wineBatchService';
 import { 
   BASE_YIELD_PER_ACRE, 
   BASELINE_VINE_DENSITY,
   CONVENTIONAL_YIELD_BONUS 
 } from '@/lib/core/constants';
-
-/**
- * Convert a date to a GameDate object
- * This function handles legacy date formats and converts them to GameDate
- * @param date Date or GameDate object to convert
- * @param gameState Current game state
- * @returns GameDate object
- */
-export function convertToGameDate(date: Date | GameDate | string | undefined, gameState: any): GameDate {
-  // If it's already a GameDate object with week, season and year
-  if (date && typeof date === 'object' && 'week' in date && 'season' in date && 'year' in date) {
-    return date as GameDate;
-  }
-  
-  // For legacy dates (string, Date or undefined), use current game state
-  return {
-    week: gameState.week,
-    season: gameState.season,
-    year: gameState.currentYear
-  };
-}
+import { 
+  getVineyard, 
+  saveVineyard, 
+  removeVineyard, 
+  convertToGameDate, 
+  getAllVineyards 
+} from '@/lib/database/vineyardDB';
 
 /**
  * Adds a new vineyard to the game and saves to Firebase
@@ -53,15 +38,8 @@ export async function addVineyard(vineyardData: Partial<Vineyard> = {}): Promise
     // Create the vineyard
     const vineyard = createVineyard(id, vineyardData);
     
-    // Update game state with the new vineyard
-    updateGameState({
-      vineyards: [...gameState.vineyards, vineyard]
-    });
-
-    // Save to Firebase
-    await saveGameState();
-    
-    return vineyard;
+    // Save to database
+    return await saveVineyard(vineyard);
   } catch (error) {
     console.error('Error adding vineyard:', error);
     throw error;
@@ -76,7 +54,9 @@ export async function addVineyard(vineyardData: Partial<Vineyard> = {}): Promise
  */
 export async function updateVineyard(id: string, updates: Partial<Vineyard>): Promise<Vineyard | null> {
   try {
-    let updatedVineyard: Vineyard | null = null;
+    // Get the existing vineyard
+    const vineyard = getVineyard(id);
+    if (!vineyard) return null;
     
     // Get game state for potential ownedSince conversion
     const gameState = getGameState();
@@ -86,22 +66,9 @@ export async function updateVineyard(id: string, updates: Partial<Vineyard>): Pr
       updates.ownedSince = convertToGameDate(updates.ownedSince, gameState);
     }
     
-    const updatedVineyards = gameState.vineyards.map((vineyard: Vineyard) => {
-      if (vineyard.id === id) {
-        updatedVineyard = { ...vineyard, ...updates };
-        return updatedVineyard;
-      }
-      return vineyard;
-    });
-    
-    updateGameState({
-      vineyards: updatedVineyards
-    });
-
-    // Save to Firebase
-    await saveGameState();
-    
-    return updatedVineyard;
+    // Update and save the vineyard
+    const updatedVineyard = { ...vineyard, ...updates };
+    return await saveVineyard(updatedVineyard);
   } catch (error) {
     console.error('Error updating vineyard:', error);
     throw error;
@@ -113,57 +80,26 @@ export async function updateVineyard(id: string, updates: Partial<Vineyard>): Pr
  * @param id ID of the vineyard to retrieve
  * @returns The vineyard or null if not found
  */
-export function getVineyard(id: string): Vineyard | null {
-  try {
-    const gameState = getGameState();
-    return gameState.vineyards.find((vineyard: Vineyard) => vineyard.id === id) || null;
-  } catch (error) {
-    console.error('Error getting vineyard:', error);
-    throw error;
-  }
+export function getVineyardById(id: string): Vineyard | null {
+  return getVineyard(id);
 }
 
 /**
- * Alias for getVineyard for compatibility
+ * Gets all vineyards
+ * @returns Array of all vineyards
  */
-export const getVineyardById = getVineyard;
+export function getVineyards(): Vineyard[] {
+  return getAllVineyards();
+}
 
 /**
  * Removes a vineyard by ID
  * @param id ID of the vineyard to remove
  * @returns True if the vineyard was removed, false otherwise
  */
-export async function removeVineyard(id: string): Promise<boolean> {
-  try {
-    let removed = false;
-    const gameState = getGameState();
-    
-    const updatedVineyards = gameState.vineyards.filter((vineyard: Vineyard) => {
-      if (vineyard.id === id) {
-        removed = true;
-        return false;
-      }
-      return true;
-    });
-    
-    updateGameState({
-      vineyards: updatedVineyards
-    });
-
-    // Save to Firebase
-    await saveGameState();
-    
-    return removed;
-  } catch (error) {
-    console.error('Error removing vineyard:', error);
-    throw error;
-  }
+export async function deleteVineyard(id: string): Promise<boolean> {
+  return await removeVineyard(id);
 }
-
-/**
- * Alias for removeVineyard for compatibility
- */
-export const deleteVineyard = removeVineyard;
 
 /**
  * Calculate the yield for a vineyard
@@ -197,9 +133,6 @@ export function calculateVineyardYield(vineyard: Vineyard): number {
  */
 export async function plantVineyard(id: string, grape: GrapeVariety | string, density: number = BASELINE_VINE_DENSITY): Promise<Vineyard | null> {
   try {
-    const vineyard = getVineyard(id);
-    if (!vineyard) return null;
-
     // Update vineyard with new grape and density
     return await updateVineyard(id, {
       grape: grape as any,
