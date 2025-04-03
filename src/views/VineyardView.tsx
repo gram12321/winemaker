@@ -334,6 +334,18 @@ const VineyardView: React.FC = () => {
                 <div className="text-sm text-gray-600">Land Value</div>
                 <div className="text-lg font-semibold">${selectedVineyard.landValue.toLocaleString()}</div>
               </div>
+              <div className="bg-green-50 p-3 rounded">
+                <div className="text-sm text-gray-600">Prestige</div>
+                <div className="text-lg font-semibold">{Math.round(selectedVineyard.vineyardPrestige * 100)}/100</div>
+              </div>
+              <div className="bg-amber-50 p-3 rounded">
+                <div className="text-sm text-gray-600">Annual Yield Factor</div>
+                <div className="text-lg font-semibold">{Math.round(selectedVineyard.annualYieldFactor * 100)}%</div>
+              </div>
+              <div className="bg-purple-50 p-3 rounded">
+                <div className="text-sm text-gray-600">Quality Factor</div>
+                <div className="text-lg font-semibold">{Math.round(selectedVineyard.annualQualityFactor * 100)}%</div>
+              </div>
             </div>
           </div>
         </div>

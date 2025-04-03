@@ -160,12 +160,25 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
         additionalParams: { grape, density },
         // Callback when planting is complete
         completionCallback: async () => {
+          const gameState = getGameState();
+          const { season } = gameState;
+          
+          // Determine initial status based on season
+          let initialStatus = 'Growing';
+          if (season === 'Winter') {
+            initialStatus = 'No yield in first season';
+          } else if (season === 'Summer') {
+            initialStatus = 'Ripening';
+          } else if (season === 'Fall') {
+            initialStatus = 'Ready for Harvest';
+          }
+          
           // Update vineyard with new grape and density
           await updateVineyard(id, {
             grape,
             density,
-            status: 'Planted',
-            ripeness: 0,
+            status: initialStatus,
+            ripeness: season === 'Summer' || season === 'Fall' ? 0.1 : 0, // Start with some ripeness if in growing season
             vineyardHealth: 0.8, // Start with 80% health
             vineAge: 0,
           });
