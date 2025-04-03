@@ -172,20 +172,35 @@ export async function harvestVineyard(
       ? calculateVineyardYield(vineyard)
       : vineyard.remainingYield;
 
-    // Calculate actual harvest amount
-    const harvestedAmount = Math.min(amount, remainingYield);
-    
-    // Verify storage locations total is sufficient for harvest
+    // Calculate total available storage space
     const totalStorageQuantity = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
-    if (totalStorageQuantity < harvestedAmount) {
-      throw new Error(`Insufficient storage allocated. Need at least ${Math.ceil(harvestedAmount)} kg but only ${Math.ceil(totalStorageQuantity)} kg allocated.`);
+    
+    // Calculate how much we can actually harvest based on storage constraints
+    const harvestedAmount = Math.min(
+      amount, // Requested amount
+      remainingYield, // Available yield
+      totalStorageQuantity // Available storage space
+    );
+
+    // If no storage is allocated, we can't harvest
+    if (totalStorageQuantity <= 0) {
+      throw new Error('No storage space allocated for harvest');
     }
 
-    // Update the vineyard
+    // Calculate new remaining yield after harvest
+    const newRemainingYield = remainingYield - harvestedAmount;
+
+    // Determine vineyard status based on remaining yield
+    const newStatus = newRemainingYield <= 0 
+      ? 'Dormancy' 
+      : 'Partially Harvested';
+
+    // Update the vineyard with new status and remaining yield
     const updatedVineyard = await updateVineyard(id, {
-      remainingYield: 0,
-      status: 'Dormancy', // Set to Dormancy instead of Harvested
-      ripeness: 0
+      remainingYield: newRemainingYield,
+      status: newStatus,
+      // Only reset ripeness if fully harvested
+      ...(newRemainingYield <= 0 ? { ripeness: 0 } : {})
     });
 
     if (!updatedVineyard) return null;
@@ -198,6 +213,10 @@ export async function harvestVineyard(
       vineyard.annualQualityFactor * vineyard.ripeness,
       storageLocations,
     );
+
+    if (!wineBatch) {
+      throw new Error('Failed to create wine batch from harvest');
+    }
 
     console.log(`Created wine batch ${wineBatch.id} with ${harvestedAmount} kg of ${vineyard.grape}`);
 

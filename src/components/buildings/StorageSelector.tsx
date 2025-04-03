@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingDB';
 import { BuildingType } from '@/lib/core/constants';
+import { getGameState, WineBatch } from '@/gameState';
 
 export interface StorageOption {
   id: string;
@@ -19,6 +20,8 @@ export interface StorageOption {
   buildingName: string;
   toolName: string;
   instanceNumber: number;
+  currentGrapeType?: string;
+  currentVintage?: number;
 }
 
 export interface StorageAllocation {
@@ -31,18 +34,23 @@ interface StorageSelectorProps {
   selectedStorageLocations: StorageAllocation[];
   onStorageChange: (storageLocations: StorageAllocation[]) => void;
   requiredCapacity?: number;
+  grapeType?: string;  // The type of grape being harvested
+  vintage?: number;     // The vintage year of the harvest
 }
 
 /**
  * StorageSelector component
  * Displays a dropdown of available storage options for a specific resource type
  * Allows splitting quantities across multiple storage locations
+ * Prevents mixing different grape types and vintages in the same storage
  */
 const StorageSelector: React.FC<StorageSelectorProps> = ({
   resourceType,
   selectedStorageLocations,
   onStorageChange,
-  requiredCapacity = 0
+  requiredCapacity = 0,
+  grapeType,
+  vintage
 }) => {
   const [storageOptions, setStorageOptions] = useState<StorageOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +64,8 @@ const StorageSelector: React.FC<StorageSelectorProps> = ({
       
       try {
         const buildings = loadBuildings();
+        const gameState = getGameState();
+        const wineBatches = gameState.wineBatches;
         const options: StorageOption[] = [];
         
         // Process buildings to find viable storage options
@@ -68,22 +78,46 @@ const StorageSelector: React.FC<StorageSelectorProps> = ({
               slot.tools.forEach(tool => {
                 // Check if tool supports the requested resource type
                 if (tool.supportedResources.includes(resourceType) && tool.capacity > 0) {
+                  // Get current contents of the storage
+                  const toolId = `${tool.name}#${tool.instanceNumber}`;
+                  const currentContents = wineBatches.filter((batch: WineBatch) => 
+                    batch.stage === 'grape' &&
+                    batch.storageLocations.some(loc => loc.locationId === toolId)
+                  );
+                  
                   // Calculate available capacity
                   const usedCapacity = selectedStorageLocations
-                    .find(loc => loc.locationId === `${tool.name}#${tool.instanceNumber}`)
+                    .find(loc => loc.locationId === toolId)
                     ?.quantity || 0;
-                  const availableCapacity = tool.capacity - usedCapacity;
+                  const totalUsedCapacity = usedCapacity + currentContents.reduce((sum: number, batch: WineBatch) => {
+                    const locationStorage = batch.storageLocations.find(loc => loc.locationId === toolId);
+                    return sum + (locationStorage?.quantity || 0);
+                  }, 0);
+                  const availableCapacity = tool.capacity - totalUsedCapacity;
                   
-                  // Add to options if there's any capacity left
-                  if (availableCapacity > 0) {
+                  // Get current grape type and vintage if storage is not empty
+                  const currentBatch = currentContents[0];
+                  const currentGrapeType = currentBatch?.grapeType;
+                  const currentVintage = currentBatch?.harvestGameDate.year;
+                  
+                  // Add to options if:
+                  // 1. Storage is empty, OR
+                  // 2. Storage contains same grape type and vintage, OR
+                  // 3. Storage is partially filled but compatible
+                  const isCompatible = !currentGrapeType || 
+                    (currentGrapeType === grapeType && currentVintage === vintage);
+                  
+                  if (availableCapacity > 0 && isCompatible) {
                     options.push({
-                      id: `${tool.name}#${tool.instanceNumber}`,
+                      id: toolId,
                       label: `${tool.name} #${tool.instanceNumber}`,
                       capacity: tool.capacity,
                       availableCapacity,
                       buildingName: building.name,
                       toolName: tool.name,
-                      instanceNumber: tool.instanceNumber
+                      instanceNumber: tool.instanceNumber,
+                      currentGrapeType,
+                      currentVintage
                     });
                   }
                 }
@@ -103,7 +137,7 @@ const StorageSelector: React.FC<StorageSelectorProps> = ({
     };
     
     loadStorageOptions();
-  }, [resourceType, selectedStorageLocations]);
+  }, [resourceType, selectedStorageLocations, grapeType, vintage]);
 
   // Calculate remaining required capacity
   const allocatedCapacity = selectedStorageLocations.reduce((sum, loc) => sum + loc.quantity, 0);

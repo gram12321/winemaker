@@ -308,23 +308,22 @@ export async function createWineBatchFromHarvest(
       return null;
     }
 
-    // Verify total quantity matches harvested quantity
+    // Get total storage space available
     const totalStoredQuantity = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
-    if (totalStoredQuantity < quantity) {
-      consoleService.error(`Insufficient storage allocated. Need at least ${Math.ceil(quantity)} kg but only ${Math.ceil(totalStoredQuantity)} kg allocated.`);
-      return null;
-    }
+    
+    // Adjust quantity to fit available storage if needed
+    const adjustedQuantity = Math.min(quantity, totalStoredQuantity);
     
     const gameState = getGameState();
     
     // Create basic characteristics based on grape type and quality
     const characteristics = generateInitialCharacteristics(grapeType, quality);
     
-    // Create new wine batch
+    // Create new wine batch with adjusted quantity
     const newBatch = await addWineBatch({
       vineyardId,
       grapeType,
-      quantity,
+      quantity: adjustedQuantity,
       quality,
       storageLocations,
       stage: 'grape',

@@ -92,28 +92,31 @@ const VineyardView: React.FC = () => {
   const handleHarvestVineyard = displayManager.createActionHandler(async () => {
     if (!selectedVineyardId) return;
     
-    // Check if storage locations are selected and total is sufficient
+    // Check if any storage locations are selected
     const totalStorageQuantity = selectedStorageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
-    const requiredQuantity = selectedVineyard ? Math.ceil(calculateVineyardYield(selectedVineyard)) : 0;
-    
-    if (totalStorageQuantity < requiredQuantity) {
-      consoleService.error(`Please allocate at least ${requiredQuantity} kg of storage space.`);
+    if (totalStorageQuantity <= 0) {
+      consoleService.error('Please select at least one storage location.');
       return;
     }
     
+    const requiredQuantity = selectedVineyard ? Math.ceil(calculateVineyardYield(selectedVineyard)) : 0;
+    const isPartialHarvest = totalStorageQuantity < requiredQuantity;
+    
     setLoading(true);
     try {
-      // Harvest the full yield (amount = Infinity will harvest everything available)
-      const result = await harvestVineyard(selectedVineyardId, Infinity, selectedStorageLocations);
+      // Harvest only what fits in storage
+      const result = await harvestVineyard(selectedVineyardId, totalStorageQuantity, selectedStorageLocations);
       
       if (result) {
         const { vineyard, harvestedAmount } = result;
-        const extraStorage = Math.ceil(totalStorageQuantity - harvestedAmount);
         let message = `Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} grapes from ${vineyard.name}. `;
-        message += `The grapes have been stored across ${selectedStorageLocations.length} location(s)`;
-        if (extraStorage > 0) {
-          message += ` with ${extraStorage} kg of extra storage space allocated.`;
+        message += `The grapes have been stored across ${selectedStorageLocations.length} location(s).`;
+        
+        if (isPartialHarvest) {
+          const remainingYield = Math.ceil(requiredQuantity - harvestedAmount);
+          message += ` There are still ${remainingYield.toLocaleString()} kg of grapes remaining to be harvested.`;
         }
+        
         consoleService.success(message);
         
         // Reset storage locations after successful harvest
