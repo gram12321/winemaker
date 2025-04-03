@@ -12,6 +12,7 @@ import { GameDate } from '@/lib/core/constants';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 import displayManager from '@/lib/game/displayManager';
 import { ActivityProgress } from '@/lib/game/workCalculator';
+import { GameDate as StaffGameDate, Nationality, StaffSkills } from './services/staffService';
 
 // Player Type
 export interface Player {
@@ -40,19 +41,13 @@ export interface Building {
 export interface Staff {
   id: string;
   name: string;
-  nationality: string;
+  nationality: Nationality;
   skillLevel: number;
   specialization: string | null;
   wage: number;
-  hireDate: Date;
+  hireDate: GameDate;
   teamId: string | null;
-  skills?: {
-    field: number;
-    winery: number;
-    administration: number;
-    sales: number;
-    maintenance: number;
-  };
+  skills: StaffSkills;
 }
 
 // Wine Batch Type

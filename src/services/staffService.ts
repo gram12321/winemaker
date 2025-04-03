@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Staff } from '../gameState';
+import type { Staff as GameStateStaff } from '../gameState';
 import { getGameState, updateGameState } from '../gameState';
 import displayManager from '../lib/game/displayManager';
 import { assignStaffToActivity, getActivityById } from '../lib/game/activityManager';
@@ -22,8 +22,13 @@ import {
   usFemaleNames,
   germanMaleNames,
   germanFemaleNames,
-  lastNamesByCountry
-} from '../core/constants/staffNames';
+  lastNamesByCountry,
+  BASE_WEEKLY_WAGE,
+  SKILL_WAGE_MULTIPLIER,
+  SPECIALIZATION_WAGE_BONUS,
+  SkillLevels,
+  DefaultTeams
+} from '../constants/staff';
 
 // Types for staff related functionality
 export interface StaffSkills {
@@ -80,43 +85,51 @@ export const SpecializedRoles: Record<string, SpecializedRole> = {
   }
 };
 
+export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
+
+export interface GameDate {
+  week: number;
+  season: Season;
+  year: number;
+}
+
 export interface StaffTeam {
   id: string;
   name: string;
   description: string;
-  icon: string;
   memberIds: string[];
-  defaultTaskTypes: string[];
+  icon?: string;
+  preferredTaskTypes: string[];
+  recommendedSpecializations: string[];
+  defaultTaskTypes?: string[];
+}
+
+export type Nationality = 'Italy' | 'Germany' | 'France' | 'Spain' | 'United States';
+
+export interface Staff {
+  id: string;
+  name: string;
+  nationality: Nationality;
+  skillLevel: number;
+  specialization: string | null;
+  wage: number;
+  teamId: string | null;
+  skills: StaffSkills;
+  hireDate: GameDate;
 }
 
 // Constants for staff wages and skill levels
-export const BASE_WEEKLY_WAGE = 500;
-export const SKILL_WAGE_MULTIPLIER = 1000;
-
-export const SkillLevels = {
-  0.1: { name: "Fresh Off the Vine", costMultiplier: 0.5 },
-  0.2: { name: "Amateur Enthusiast", costMultiplier: 0.7 },
-  0.3: { name: "Developing Talent", costMultiplier: 1.0 },
-  0.4: { name: "Competent Professional", costMultiplier: 1.5 },
-  0.5: { name: "Seasoned Expert", costMultiplier: 2.0 },
-  0.6: { name: "Regional Authority", costMultiplier: 3.0 },
-  0.7: { name: "National Virtuoso", costMultiplier: 4.0 },
-  0.8: { name: "Continental Master", costMultiplier: 5.0 },
-  0.9: { name: "International Icon", costMultiplier: 7.0 },
-  1.0: { name: "Living Legend", costMultiplier: 10.0 }
-};
-
 export function getSkillLevelInfo(skillLevel: number) {
-  // Round to nearest 0.1
-  const roundedSkill = Math.round(skillLevel * 10) / 10;
-  const level = SkillLevels[roundedSkill as keyof typeof SkillLevels] || 
-                SkillLevels[0.1];
+  // Find the closest skill level
+  const levels = Object.values(SkillLevels);
+  const closest = levels.reduce((prev, curr) => {
+    return Math.abs(curr.value - skillLevel) < Math.abs(prev.value - skillLevel) ? curr : prev;
+  });
   
   return {
-    level: roundedSkill,
-    name: level.name,
-    costMultiplier: level.costMultiplier,
-    formattedName: `${level.name} (${Math.round(roundedSkill * 100)}%)`
+    label: closest.label,
+    formattedName: closest.formattedName,
+    value: closest.value
   };
 }
 
@@ -125,23 +138,28 @@ export function createStaff(
   firstName: string,
   lastName: string,
   skills: StaffSkills,
-  skillLevel: number = 0.1,
-  specialization: string | null = null,
-  wage: number = 600
-): Staff {
-  const staff: Staff = {
+  skillLevel: number,
+  specialization: string | null,
+  wage: number,
+  nationality: Nationality = 'United States' // Default nationality
+): GameStateStaff {
+  const gameState = getGameState();
+  
+  return {
     id: uuidv4(),
     name: `${firstName} ${lastName}`,
-    nationality: selectRandomNationality(),
+    skills,
     skillLevel,
     specialization,
     wage,
-    hireDate: new Date(),
     teamId: null,
-    skills
+    nationality,
+    hireDate: {
+      week: gameState.week,
+      season: gameState.season,
+      year: gameState.currentYear
+    }
   };
-
-  return staff;
 }
 
 export function addStaff(staff: Staff, saveToDb = false) {
@@ -196,11 +214,9 @@ export function getAllStaff(): Staff[] {
 }
 
 // Utility functions
-function selectRandomNationality(): string {
-  const countries = [
-    'Italy', 'France', 'Spain', 'United States', 'Germany'
-  ];
-  return countries[Math.floor(Math.random() * countries.length)];
+function selectRandomNationality(): Nationality {
+  const nationalities: Nationality[] = ['Italy', 'Germany', 'France', 'Spain', 'United States'];
+  return nationalities[Math.floor(Math.random() * nationalities.length)];
 }
 
 // Function to generate randomized skills
@@ -265,6 +281,8 @@ export function createTeam(
     description,
     icon,
     memberIds: [],
+    preferredTaskTypes: defaultTaskTypes,
+    recommendedSpecializations: [],
     defaultTaskTypes
   };
 }
@@ -314,7 +332,7 @@ export function calculateSearchCost(options: StaffSearchOptions): number {
   const { numberOfCandidates, skillLevel, specializations } = options;
   const baseCost = 2000;
   const skillInfo = getSkillLevelInfo(skillLevel);
-  const skillMultiplier = skillInfo.costMultiplier;
+  const skillMultiplier = skillInfo.value;
   
   // Exponential scaling based on candidates and skill
   const candidateScaling = Math.pow(numberOfCandidates, 1.5);
@@ -341,7 +359,7 @@ export function generateStaffCandidates(options: StaffSearchOptions): Staff[] {
     
     // Get appropriate name lists based on nationality
     let firstNames: string[] = [];
-    const lastNames = lastNamesByCountry[nationality] || lastNamesByCountry['United States'];
+    const lastNames = lastNamesByCountry[nationality];
     
     // 50% chance for male or female name
     const isMale = Math.random() < 0.5;
@@ -387,11 +405,9 @@ export function generateStaffCandidates(options: StaffSearchOptions): Staff[] {
       skills, 
       skillLevel,
       specialization,
-      wage
+      wage,
+      nationality
     );
-    
-    // Set nationality
-    staff.nationality = nationality;
     
     candidates.push(staff);
   }
@@ -502,6 +518,28 @@ export function mapSpecializationToCategory(specialization: string): string {
   return mapping[specialization] || 'general';
 }
 
+export async function initializeDefaultTeams(): Promise<void> {
+  const existingTeams = await loadTeamsFromDb();
+  
+  // Only create default teams if none exist
+  if (existingTeams.length === 0) {
+    for (const [teamKey, teamData] of Object.entries(DefaultTeams)) {
+      const team: StaffTeam = {
+        id: teamData.id,
+        name: teamData.name,
+        description: teamData.description,
+        memberIds: [],
+        preferredTaskTypes: teamData.preferredTaskTypes,
+        recommendedSpecializations: teamData.recommendedSpecializations,
+        defaultTaskTypes: teamData.preferredTaskTypes, // Use preferred tasks as default
+        icon: '🏢' // Default icon
+      };
+      
+      await saveTeamToDb(team);
+    }
+  }
+}
+
 export default {
   createStaff,
   addStaff,
@@ -526,5 +564,6 @@ export default {
   assignTeamToActivity,
   calculateActivityStaffEfficiency,
   mapCategoryToSkill,
-  mapSpecializationToCategory
+  mapSpecializationToCategory,
+  initializeDefaultTeams
 }; 

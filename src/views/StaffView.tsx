@@ -113,7 +113,7 @@ const StaffView: React.FC = () => {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="space-y-2">
                   <p><span className="font-medium">Nationality:</span> {selectedStaff.nationality}</p>
-                  <p><span className="font-medium">Hire Date:</span> {selectedStaff.hireDate.toLocaleDateString()}</p>
+                  <p><span className="font-medium">Hire Date:</span> Week {selectedStaff.hireDate.week}, {selectedStaff.hireDate.season} {selectedStaff.hireDate.year}</p>
                   <p><span className="font-medium">Monthly Wage:</span> ${selectedStaff.wage}</p>
                   <p><span className="font-medium">Specialization:</span> {
                     selectedStaff.specialization 
