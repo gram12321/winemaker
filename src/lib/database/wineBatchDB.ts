@@ -5,7 +5,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState, WineBatch } from '@/gameState';
-import { saveGameState } from './gameStateService';
+import { saveGameState } from './gameStateDB';
 
 /**
  * Add a new wine batch to the game state

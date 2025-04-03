@@ -1,13 +1,12 @@
 /**
- * Game State Service
+ * Game State Database Operations
  * Handles saving and loading the full game state
  */
 
 import { db } from '../../firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
-import { getGameState, updateGameState } from '../../gameState';
+import { getGameState } from '../../gameState';
 import { loadCompany } from './companyDB';
-import { clearGameStorage } from './localStorageDB';
 
 /**
  * Save the current game state to Firestore
@@ -56,6 +55,9 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       return false;
     }
     
+    // Import updateGameState function here to avoid circular dependencies
+    const { updateGameState } = await import('../../gameState');
+    
     // Update game state with loaded data
     updateGameState({
       player: data.player || null,
@@ -74,48 +76,4 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
     console.error('Error loading game state:', error);
     return false;
   }
-};
-
-/**
- * Handles game state cleanup on logout
- * Saves current state to Firebase, clears localStorage, and resets game state
- */
-export const handleLogout = async (): Promise<void> => {
-  try {
-    // Save current state to Firebase first
-    await saveGameState();
-    
-    // Clear all game-related data from localStorage
-    clearGameStorage();
-    
-    // Reset game state to initial values
-    updateGameState({
-      player: null,
-      vineyards: [],
-      buildings: [],
-      staff: [],
-      wineBatches: [],
-      week: 1,
-      season: 'Spring',
-      currentYear: new Date().getFullYear(),
-      currentView: 'login'
-    });
-  } catch (error) {
-    console.error('Error during logout:', error);
-    throw error;
-  }
-};
-
-/**
- * Save the game state periodically (auto-save)
- * @param intervalMinutes Minutes between auto-saves
- * @returns A function to stop the auto-save interval
- */
-export const startAutoSave = (intervalMinutes: number = 5): () => void => {
-  const intervalId = setInterval(async () => {
-    console.log('Auto-saving game state...');
-    await saveGameState();
-  }, intervalMinutes * 60 * 1000);
-  
-  return () => clearInterval(intervalId);
 }; 

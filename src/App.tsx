@@ -3,7 +3,7 @@ import { getGameState, updateGameState, initializePlayer } from './gameState';
 
 // Import database services
 import { checkCompanyExists, createCompany } from './lib/database/companyDB';
-import { loadGameState } from './lib/database/gameStateService';
+import { loadGameState } from './lib/database/gameStateDB';
 import { StorageKeys, loadFromStorage } from './lib/database/localStorageDB';
 import { initializeToolInstanceCountsFromStorage } from './lib/database/buildingDB';
 
@@ -27,6 +27,9 @@ import { VineyardView, InventoryView, BuildingsView } from './views';
 // import MainMenu from './views/MainMenu';
 // import Vineyard from './views/Vineyard';
 // import Production from './views/Production';
+
+// Import service functions
+import { handleLogout } from './services/gameStateService';
 
 function App() {
   const [view, setView] = useState<string>('login');

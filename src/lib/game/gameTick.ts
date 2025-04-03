@@ -6,11 +6,10 @@
 
 import { getGameState, updateGameState, updatePlayerMoney } from '@/gameState';
 import { consoleService } from '@/components/layout/Console';
-import { saveGameState } from '@/lib/database/gameStateService';
+import { saveGameState } from '@/lib/database/gameStateDB';
 import { Vineyard } from './vineyard';
 import displayManager from './displayManager';
-import { 
-  Season, 
+import {   Season, 
   SEASONS, 
   WEEKS_PER_SEASON,
   STARTING_WEEK,

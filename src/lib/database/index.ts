@@ -1,6 +1,6 @@
 // Database services - centralizing all Firebase and localStorage operations
 
-export * from './gameStateService';
+export * from './gameStateDB';
 export * from './localStorageDB';
 export * from './companyDB';
 export * from './buildingDB';

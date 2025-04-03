@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { BuildingType, ToolCategory, TOOL_CATEGORY_NAMES } from '@/lib/core/constants';
-import { 
-  getToolsForBuilding, 
-  createTool,
-  Tool
-} from '@/lib/game/building';
+import { getToolsForBuilding} from '@/lib/game/building';
 import {
   loadBuildings,
   deserializeBuilding,

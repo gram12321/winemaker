@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
 import { Vineyard } from '@/lib/game/vineyard';
 import { GameDate } from '@/lib/core/constants/gameConstants';
-import { saveGameState } from './gameStateService';
+import { saveGameState } from './gameStateDB';
 
 /**
  * Convert a date to a GameDate object

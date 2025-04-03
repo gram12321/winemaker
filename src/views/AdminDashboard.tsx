@@ -13,7 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { clearGameStorage } from '../lib/database/localStorageDB';
 import { deleteAllCompanies } from '../lib/database/companyDB';
-import { saveGameState } from '../lib/database/gameStateService';
+import { saveGameState } from '../lib/database/gameStateDB';
 
 interface AdminDashboardProps {
   view: string;

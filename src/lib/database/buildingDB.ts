@@ -5,7 +5,7 @@
 
 import { getGameState, updateGameState, Building as GameStateBuilding } from '@/gameState';
 import { Building, initializeToolInstanceCounts } from '@/lib/game/building';
-import { saveGameState } from './gameStateService';
+import { saveGameState } from './gameStateDB';
 
 // Store serialized building data
 export interface SerializedBuilding {
