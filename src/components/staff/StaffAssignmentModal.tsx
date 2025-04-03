@@ -1,98 +1,72 @@
-import React, { useState, useEffect } from 'react';
-import { useDisplayUpdate } from '../lib/game/displayManager';
-import { getGameState } from '../gameState';
-import staffService, { getSkillLevelInfo, StaffTeam } from '../services/staffService';
-import { getActivityById } from '../lib/game/activityManager';
+import React from 'react';
+import { getGameState } from '../../gameState';
+import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
+import { getActivityById } from '../../lib/game/activityManager';
 
 interface StaffAssignmentModalProps {
   activityId: string;
   category: string;
   onClose: () => void;
+  initialAssignedStaffIds?: string[];
+  onAssignmentChange: (staffIds: string[]) => void;
 }
 
 const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({ 
   activityId, 
   category,
-  onClose 
+  onClose,
+  initialAssignedStaffIds = [],
+  onAssignmentChange
 }) => {
-  useDisplayUpdate();
   const { staff } = getGameState();
-  
-  // Current assignments
-  const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>([]);
-  const [teams, setTeams] = useState<StaffTeam[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
-  const [showTeamAssignment, setShowTeamAssignment] = useState(false);
-  
-  // Load initial data
-  useEffect(() => {
-    const loadInitialData = async () => {
-      // Load current assigned staff
-      const activity = getActivityById(activityId);
-      if (activity?.params?.assignedStaffIds) {
-        setAssignedStaffIds(activity.params.assignedStaffIds as string[]);
-      }
-      
-      // Load teams
-      const loadedTeams = await staffService.loadTeams();
-      setTeams(loadedTeams);
-    };
-    
-    loadInitialData();
-  }, [activityId]);
+  const teams = staffService.loadTeams();
   
   // Filter staff based on assignments
-  const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
-  const unassignedStaff = staff.filter(s => !assignedStaffIds.includes(s.id));
+  const assignedStaff = staff.filter(s => initialAssignedStaffIds.includes(s.id));
+  const unassignedStaff = staff.filter(s => !initialAssignedStaffIds.includes(s.id));
   
   // Handle staff assignment
   const handleAssignStaff = (staffId: string) => {
-    setAssignedStaffIds(prev => [...prev, staffId]);
+    const newAssignments = [...initialAssignedStaffIds, staffId];
+    onAssignmentChange(newAssignments);
   };
   
   // Handle staff unassignment
   const handleUnassignStaff = (staffId: string) => {
-    setAssignedStaffIds(prev => prev.filter(id => id !== staffId));
+    const newAssignments = initialAssignedStaffIds.filter(id => id !== staffId);
+    onAssignmentChange(newAssignments);
   };
   
   // Save assignments
   const handleSave = () => {
-    staffService.assignStaffToActivityById(activityId, assignedStaffIds);
+    staffService.assignStaffToActivityById(activityId, initialAssignedStaffIds);
     onClose();
   };
   
   // Assign a team
-  const handleAssignTeam = () => {
-    if (!selectedTeamId) {
-      alert('Please select a team');
-      return;
-    }
-    
-    const team = teams.find(t => t.id === selectedTeamId);
+  const handleAssignTeam = (teamId: string) => {
+    const team = teams.find(t => t.id === teamId);
     if (!team) return;
     
-    const teamStaff = staff.filter(s => s.teamId === selectedTeamId);
+    const teamStaff = staff.filter(s => s.teamId === teamId);
     const teamStaffIds = teamStaff.map(s => s.id);
     
     // Add team members to assignments
-    setAssignedStaffIds(prev => {
-      const newAssignments = [...prev];
-      teamStaffIds.forEach(id => {
-        if (!newAssignments.includes(id)) {
-          newAssignments.push(id);
-        }
-      });
-      return newAssignments;
+    const newAssignments = [...initialAssignedStaffIds];
+    teamStaffIds.forEach(id => {
+      if (!newAssignments.includes(id)) {
+        newAssignments.push(id);
+      }
     });
     
-    setShowTeamAssignment(false);
+    onAssignmentChange(newAssignments);
   };
   
   // Calculate efficiency based on current assignments
   const calculateEfficiency = () => {
-    if (assignedStaffIds.length === 0) return 0;
+    if (initialAssignedStaffIds.length === 0) return 0;
     
-    const efficiency = assignedStaffIds.reduce((sum, staffId) => {
+    const efficiency = initialAssignedStaffIds.reduce((sum, staffId) => {
       const member = staff.find(s => s.id === staffId);
       if (!member) return sum;
       
@@ -113,8 +87,8 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     }, 0);
     
     // Calculate the final efficiency with diminishing returns for team size
-    const avgEfficiency = efficiency / assignedStaffIds.length;
-    const teamSizeFactor = Math.min(1, 1 + (Math.log(assignedStaffIds.length) / Math.log(10)));
+    const avgEfficiency = efficiency / initialAssignedStaffIds.length;
+    const teamSizeFactor = Math.min(1, 1 + (Math.log(initialAssignedStaffIds.length) / Math.log(10)));
     
     return Math.min(1, avgEfficiency * teamSizeFactor);
   };
@@ -150,13 +124,18 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         <div>
           <div className="flex justify-between mb-2">
             <h3 className="font-medium">Assigned Staff ({assignedStaff.length})</h3>
-            {!showTeamAssignment && teams.length > 0 && (
-              <button
-                onClick={() => setShowTeamAssignment(true)}
+            {teams.length > 0 && (
+              <select
+                onChange={(e) => handleAssignTeam(e.target.value)}
                 className="text-sm bg-wine text-white px-2 py-1 rounded hover:bg-wine-dark"
               >
-                Assign Team
-              </button>
+                <option value="">Assign Team...</option>
+                {teams.map(team => (
+                  <option key={team.id} value={team.id}>
+                    {team.icon} {team.name} ({staff.filter(s => s.teamId === team.id).length} members)
+                  </option>
+                ))}
+              </select>
             )}
           </div>
           
@@ -183,47 +162,6 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                 </li>
               ))}
             </ul>
-          )}
-          
-          {/* Team Assignment Panel */}
-          {showTeamAssignment && (
-            <div className="mt-4 p-3 border rounded bg-gray-50">
-              <h4 className="font-medium mb-2">Select Team to Assign</h4>
-              {teams.length === 0 ? (
-                <p className="text-sm text-gray-500">No teams available.</p>
-              ) : (
-                <div>
-                  <select
-                    className="w-full p-2 mb-3 border rounded"
-                    value={selectedTeamId || ''}
-                    onChange={(e) => setSelectedTeamId(e.target.value || null)}
-                  >
-                    <option value="">Select a team...</option>
-                    {teams.map(team => (
-                      <option key={team.id} value={team.id}>
-                        {team.icon} {team.name} ({staff.filter(s => s.teamId === team.id).length} members)
-                      </option>
-                    ))}
-                  </select>
-                  
-                  <div className="flex justify-end space-x-2">
-                    <button
-                      onClick={() => setShowTeamAssignment(false)}
-                      className="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleAssignTeam}
-                      className="text-xs bg-wine text-white px-2 py-1 rounded hover:bg-wine-dark"
-                      disabled={!selectedTeamId}
-                    >
-                      Assign Team
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
           )}
         </div>
         

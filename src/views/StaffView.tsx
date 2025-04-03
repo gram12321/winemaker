@@ -1,209 +1,225 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
-import { getGameState } from '../gameState';
-import staffService, { getSkillLevelInfo } from '../services/staffService';
-import StaffSearch from '../components/StaffSearch';
-import TeamManagement from '../components/TeamManagement';
+import staffService, { Staff, StaffTeam, StaffSearchOptions } from '../services/staffService';
+import { StaffSearch, TeamManagement } from '../components/staff';
 
 const StaffView: React.FC = () => {
-  useDisplayUpdate();
-  const { staff } = getGameState();
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
-  const [showSearchMenu, setShowSearchMenu] = useState(false);
-  const [showTeamMenu, setShowTeamMenu] = useState(false);
-  
+  const displayUpdate = useDisplayUpdate();
+
+  // Team management state
+  const [teams, setTeams] = useState<StaffTeam[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+
+  // Staff search state
+  const [searchOptions, setSearchOptions] = useState<StaffSearchOptions>({
+    numberOfCandidates: 3,
+    skillLevel: 0.3,
+    specializations: [],
+  });
+  const [searchResults, setSearchResults] = useState<Staff[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Modal state
+  const [showTeamManagement, setShowTeamManagement] = useState(false);
+  const [showStaffSearch, setShowStaffSearch] = useState(false);
+
+  // Load teams when component mounts
+  useEffect(() => {
+    const loadTeams = async () => {
+      const loadedTeams = await staffService.loadTeams();
+      setTeams(loadedTeams);
+      if (loadedTeams.length > 0 && !selectedTeamId) {
+        setSelectedTeamId(loadedTeams[0].id);
+      }
+    };
+    loadTeams();
+  }, []);
+
   const selectedStaff = selectedStaffId 
-    ? staff.find(s => s.id === selectedStaffId) 
+    ? staffService.getStaffById(selectedStaffId)
     : null;
-  
+
   return (
-    <div className="staff-view p-4">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4">
+      <div className="flex justify-between mb-6">
         <h1 className="text-2xl font-bold text-wine">Staff Management</h1>
         <div className="space-x-2">
-          <button 
-            className="bg-wine text-white px-4 py-2 rounded shadow hover:bg-wine-dark"
-            onClick={() => setShowSearchMenu(true)}
+          <button
+            className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
+            onClick={() => setShowStaffSearch(true)}
           >
             Search Staff
           </button>
-          <button 
-            className="bg-wine text-white px-4 py-2 rounded shadow hover:bg-wine-dark"
-            onClick={() => setShowTeamMenu(true)}
+          <button
+            className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
+            onClick={() => setShowTeamManagement(true)}
           >
             Manage Teams
           </button>
         </div>
       </div>
-      
-      <div className="grid grid-cols-12 gap-4">
-        {/* Staff List - 4 columns */}
-        <div className="col-span-4 bg-white rounded-lg shadow p-4 h-[70vh] overflow-y-auto">
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Staff List */}
+        <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-xl font-semibold mb-4">Your Staff</h2>
-          {staff.length === 0 ? (
-            <p className="text-gray-500">No staff members hired yet.</p>
-          ) : (
-            <ul className="space-y-2">
-              {staff.map(member => (
-                <li 
-                  key={member.id}
-                  className={`p-3 border rounded cursor-pointer hover:bg-gray-50 ${
-                    selectedStaffId === member.id ? 'bg-gray-100 border-wine' : ''
+          <div className="space-y-4">
+            {staffService.getAllStaff().length === 0 ? (
+              <p className="text-gray-500">No staff members hired yet.</p>
+            ) : (
+              staffService.getAllStaff().map(staff => (
+                <div
+                  key={staff.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                    selectedStaffId === staff.id 
+                      ? 'border-wine bg-wine/5' 
+                      : 'border-gray-200 hover:border-wine/50'
                   }`}
-                  onClick={() => setSelectedStaffId(member.id)}
+                  onClick={() => setSelectedStaffId(staff.id)}
                 >
-                  <div className="flex justify-between">
-                    <span className="font-medium">{member.name}</span>
-                    <span className="text-gray-600">${member.wage}/mo</span>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-lg">{staff.name}</h3>
+                      <p className="text-gray-600">{staff.specialization ? staffService.SpecializedRoles[staff.specialization].title : 'General Worker'}</p>
+                    </div>
+                    <span className="text-wine font-medium">${staff.wage}/mo</span>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    {member.specialization ? 
-                      staffService.SpecializedRoles[member.specialization].title : 
-                      'General Worker'}
+                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                    <p><span className="font-medium">Skill Level:</span> {staffService.getSkillLevelInfo(staff.skillLevel).formattedName}</p>
+                    <p><span className="font-medium">Nationality:</span> {staff.nationality}</p>
                   </div>
-                  <div className="text-sm text-gray-500">
-                    Skill: {getSkillLevelInfo(member.skillLevel).formattedName}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
-        
-        {/* Staff Details - 8 columns */}
-        <div className="col-span-8 bg-white rounded-lg shadow p-4 h-[70vh] overflow-y-auto">
+
+        {/* Staff Details or Instructions */}
+        <div className="bg-white rounded-lg shadow p-4">
           {selectedStaff ? (
             <div>
-              <h2 className="text-xl font-semibold mb-4">{selectedStaff.name}</h2>
-              
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                  <h3 className="text-lg font-medium mb-2">General Information</h3>
-                  <p><span className="font-medium">Nationality:</span> {selectedStaff.nationality}</p>
-                  <p><span className="font-medium">Hired:</span> {selectedStaff.hireDate.toLocaleDateString()}</p>
-                  <p><span className="font-medium">Wage:</span> ${selectedStaff.wage}/month</p>
-                  <p>
-                    <span className="font-medium">Skill Level:</span> {getSkillLevelInfo(selectedStaff.skillLevel).formattedName}
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-medium mb-2">Role</h3>
-                  <p>
-                    <span className="font-medium">Specialization:</span> {
-                      selectedStaff.specialization ? 
-                      staffService.SpecializedRoles[selectedStaff.specialization].title : 
-                      'None'
-                    }
-                  </p>
-                  {selectedStaff.specialization && (
-                    <p className="text-sm text-gray-600">
-                      {staffService.SpecializedRoles[selectedStaff.specialization].description}
-                    </p>
-                  )}
-                  <p>
-                    <span className="font-medium">Team:</span> {
-                      selectedStaff.teamId ? 
-                      '(Team name placeholder)' : 
-                      'Not assigned to a team'
-                    }
-                  </p>
-                </div>
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-xl font-semibold">{selectedStaff.name}</h2>
+                <button
+                  className="text-gray-400 hover:text-gray-600"
+                  onClick={() => setSelectedStaffId(null)}
+                >
+                  ✕
+                </button>
               </div>
               
-              {/* Skill visualization */}
-              <div>
-                <h3 className="text-lg font-medium mb-3">Skills</h3>
-                {selectedStaff.skills ? (
-                  <div className="space-y-3">
-                    <SkillBar name="Field Work" value={selectedStaff.skills.field} />
-                    <SkillBar name="Winery Work" value={selectedStaff.skills.winery} />
-                    <SkillBar name="Administration" value={selectedStaff.skills.administration} />
-                    <SkillBar name="Sales" value={selectedStaff.skills.sales} />
-                    <SkillBar name="Maintenance" value={selectedStaff.skills.maintenance} />
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <SkillBar name="Field Work" value={selectedStaff.skillLevel} />
-                    <SkillBar name="Winery Work" value={selectedStaff.skillLevel} />
-                    <SkillBar name="Administration" value={selectedStaff.skillLevel} />
-                    <SkillBar name="Sales" value={selectedStaff.skillLevel} />
-                    <SkillBar name="Maintenance" value={selectedStaff.skillLevel} />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Note: Detailed skills not available. Using general skill level.
-                    </p>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="space-y-2">
+                  <p><span className="font-medium">Nationality:</span> {selectedStaff.nationality}</p>
+                  <p><span className="font-medium">Hire Date:</span> {selectedStaff.hireDate.toLocaleDateString()}</p>
+                  <p><span className="font-medium">Monthly Wage:</span> ${selectedStaff.wage}</p>
+                  <p><span className="font-medium">Specialization:</span> {
+                    selectedStaff.specialization 
+                      ? staffService.SpecializedRoles[selectedStaff.specialization].title 
+                      : 'None'
+                  }</p>
+                </div>
+                
+                {selectedStaff.skills && (
+                  <div className="flex flex-col justify-center">
+                    <div className="text-xs grid grid-cols-5 gap-1">
+                      <div className="text-center">
+                        <div className="font-medium mb-1">Field</div>
+                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                          <div 
+                            className="bg-wine rounded-full w-4 absolute bottom-0" 
+                            style={{ height: `${selectedStaff.skills.field * 100}%` }}
+                          ></div>
+                        </div>
+                        <div className="mt-1">{Math.round(selectedStaff.skills.field * 100)}%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium mb-1">Winery</div>
+                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                          <div 
+                            className="bg-wine rounded-full w-4 absolute bottom-0" 
+                            style={{ height: `${selectedStaff.skills.winery * 100}%` }}
+                          ></div>
+                        </div>
+                        <div className="mt-1">{Math.round(selectedStaff.skills.winery * 100)}%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium mb-1">Admin</div>
+                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                          <div 
+                            className="bg-wine rounded-full w-4 absolute bottom-0" 
+                            style={{ height: `${selectedStaff.skills.administration * 100}%` }}
+                          ></div>
+                        </div>
+                        <div className="mt-1">{Math.round(selectedStaff.skills.administration * 100)}%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium mb-1">Sales</div>
+                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                          <div 
+                            className="bg-wine rounded-full w-4 absolute bottom-0" 
+                            style={{ height: `${selectedStaff.skills.sales * 100}%` }}
+                          ></div>
+                        </div>
+                        <div className="mt-1">{Math.round(selectedStaff.skills.sales * 100)}%</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-medium mb-1">Maint</div>
+                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                          <div 
+                            className="bg-wine rounded-full w-4 absolute bottom-0" 
+                            style={{ height: `${selectedStaff.skills.maintenance * 100}%` }}
+                          ></div>
+                        </div>
+                        <div className="mt-1">{Math.round(selectedStaff.skills.maintenance * 100)}%</div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
-              
-              <div className="mt-6 flex space-x-2">
-                <button 
-                  className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
-                  onClick={() => {
-                    // Fire the staff member
-                    if (confirm(`Are you sure you want to fire ${selectedStaff.name}?`)) {
-                      staffService.removeStaff(selectedStaff.id, true);
-                      setSelectedStaffId(null);
-                    }
-                  }}
-                >
-                  Fire Staff
-                </button>
-                <button 
-                  className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
-                  onClick={() => {
-                    // Assign to team logic here
-                    alert('Team assignment feature coming soon!');
-                  }}
-                >
-                  Assign to Team
-                </button>
-              </div>
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              Select a staff member to view details
+            <div className="text-center text-gray-500 py-12">
+              <p>Select a staff member to view details</p>
             </div>
           )}
         </div>
       </div>
-      
-      {/* Staff search modal */}
-      {showSearchMenu && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full">
-            <StaffSearch onClose={() => setShowSearchMenu(false)} />
-          </div>
-        </div>
-      )}
-      
-      {/* Team management modal */}
-      {showTeamMenu && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-4xl w-full">
-            <TeamManagement onClose={() => setShowTeamMenu(false)} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
-// Helper component for skill bars
-const SkillBar: React.FC<{ name: string; value: number }> = ({ name, value }) => {
-  const percentage = Math.round(value * 100);
-  return (
-    <div>
-      <div className="flex justify-between mb-1">
-        <span className="text-sm font-medium">{name}</span>
-        <span className="text-sm font-medium">{percentage}%</span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div 
-          className="bg-wine h-2.5 rounded-full" 
-          style={{ width: `${percentage}%` }}
-        ></div>
-      </div>
+      {/* Modals */}
+      {showTeamManagement && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl">
+            <TeamManagement
+              onClose={() => setShowTeamManagement(false)}
+              teams={teams}
+              onTeamUpdate={setTeams}
+              selectedTeamId={selectedTeamId}
+              onTeamSelect={setSelectedTeamId}
+              isCreatingTeam={isCreatingTeam}
+              onCreatingTeamChange={setIsCreatingTeam}
+            />
+          </div>
+        </div>
+      )}
+      
+      {showStaffSearch && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl">
+            <StaffSearch
+              onClose={() => setShowStaffSearch(false)}
+              searchOptions={searchOptions}
+              onSearchOptionsChange={setSearchOptions}
+              searchResults={searchResults}
+              onSearchResultsChange={setSearchResults}
+              isSearching={isSearching}
+              onSearchingChange={setIsSearching}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

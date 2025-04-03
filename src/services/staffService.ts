@@ -11,6 +11,19 @@ import {
   loadTeamsFromDb,
   saveStaffAssignmentsToDb
 } from '../lib/database/staffDB';
+import {
+  italianMaleNames,
+  italianFemaleNames,
+  frenchMaleNames,
+  frenchFemaleNames,
+  spanishMaleNames,
+  spanishFemaleNames,
+  usMaleNames,
+  usFemaleNames,
+  germanMaleNames,
+  germanFemaleNames,
+  lastNamesByCountry
+} from '../core/constants/staffNames';
 
 // Types for staff related functionality
 export interface StaffSkills {
@@ -323,9 +336,38 @@ export function generateStaffCandidates(options: StaffSearchOptions): Staff[] {
   const candidates: Staff[] = [];
   
   for (let i = 0; i < numberOfCandidates; i++) {
-    // Generate random first and last names
-    const firstName = generateRandomName();
-    const lastName = generateRandomLastName();
+    // Select random nationality
+    const nationality = selectRandomNationality();
+    
+    // Get appropriate name lists based on nationality
+    let firstNames: string[] = [];
+    const lastNames = lastNamesByCountry[nationality] || lastNamesByCountry['United States'];
+    
+    // 50% chance for male or female name
+    const isMale = Math.random() < 0.5;
+    switch(nationality) {
+      case 'Italy':
+        firstNames = isMale ? italianMaleNames : italianFemaleNames;
+        break;
+      case 'France':
+        firstNames = isMale ? frenchMaleNames : frenchFemaleNames;
+        break;
+      case 'Spain':
+        firstNames = isMale ? spanishMaleNames : spanishFemaleNames;
+        break;
+      case 'United States':
+        firstNames = isMale ? usMaleNames : usFemaleNames;
+        break;
+      case 'Germany':
+        firstNames = isMale ? germanMaleNames : germanFemaleNames;
+        break;
+      default:
+        firstNames = isMale ? usMaleNames : usFemaleNames;
+    }
+    
+    // Select random names from appropriate lists
+    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
     
     // Pick a specialization from provided ones, or null if none
     const specialization = specializations.length > 0 
@@ -348,41 +390,13 @@ export function generateStaffCandidates(options: StaffSearchOptions): Staff[] {
       wage
     );
     
+    // Set nationality
+    staff.nationality = nationality;
+    
     candidates.push(staff);
   }
   
   return candidates;
-}
-
-// Temporary name generation function
-function generateRandomName(): string {
-  const names = [
-    "James", "John", "Robert", "Michael", "William",
-    "David", "Richard", "Joseph", "Thomas", "Charles",
-    "Mary", "Patricia", "Jennifer", "Linda", "Elizabeth",
-    "Barbara", "Susan", "Jessica", "Sarah", "Karen",
-    "Paolo", "Marco", "Giuseppe", "Giovanni", "Antonio",
-    "Maria", "Anna", "Francesca", "Sofia", "Giulia",
-    "Jean", "Pierre", "Michel", "Louis", "François",
-    "Marie", "Sophie", "Camille", "Julie", "Emma"
-  ];
-  
-  return names[Math.floor(Math.random() * names.length)];
-}
-
-function generateRandomLastName(): string {
-  const lastNames = [
-    "Smith", "Johnson", "Williams", "Jones", "Brown",
-    "Davis", "Miller", "Wilson", "Moore", "Taylor",
-    "Rossi", "Russo", "Ferrari", "Esposito", "Bianchi",
-    "Romano", "Colombo", "Ricci", "Marino", "Greco",
-    "Martin", "Bernard", "Dubois", "Thomas", "Robert",
-    "Richard", "Petit", "Durand", "Leroy", "Moreau",
-    "García", "Fernández", "González", "Rodríguez", "López",
-    "Martínez", "Sánchez", "Pérez", "Gómez", "Martín"
-  ];
-  
-  return lastNames[Math.floor(Math.random() * lastNames.length)];
 }
 
 // Assignment management
