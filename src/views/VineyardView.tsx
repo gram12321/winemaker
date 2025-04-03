@@ -50,9 +50,19 @@ const VineyardView: React.FC = () => {
     ? vineyards.find(v => v.id === selectedVineyardId) || null 
     : null;
 
-  // Get planting progress for the selected vineyard
-  const plantingProgress = selectedVineyardId 
-    ? getTargetProgress(selectedVineyardId, WorkCategory.PLANTING)
+  // Get activities for the selected vineyard
+  const vineyardActivities = selectedVineyardId 
+    ? getActivitiesForTarget(selectedVineyardId)
+    : [];
+
+  // Get planting progress only if there's an active planting activity
+  const plantingProgress = vineyardActivities.some(a => a.category === WorkCategory.PLANTING)
+    ? getTargetProgress(selectedVineyardId!, WorkCategory.PLANTING)
+    : { overallProgress: 0, hasActivities: false };
+
+  // Get harvesting progress only if there's an active harvesting activity
+  const harvestingProgress = vineyardActivities.some(a => a.category === WorkCategory.HARVESTING)
+    ? getTargetProgress(selectedVineyardId!, WorkCategory.HARVESTING)
     : { overallProgress: 0, hasActivities: false };
 
   // Handle adding a new vineyard using the vineyard service
@@ -320,6 +330,17 @@ const VineyardView: React.FC = () => {
                   <WorkProgress 
                     value={plantingProgress.overallProgress} 
                     label="Planting Progress" 
+                    showPercentage={true}
+                  />
+                </div>
+              )}
+              
+              {/* Display harvesting progress if there's an active harvesting activity */}
+              {harvestingProgress.hasActivities && (
+                <div className="my-4">
+                  <WorkProgress 
+                    value={harvestingProgress.overallProgress} 
+                    label="Harvesting Progress" 
                     showPercentage={true}
                   />
                 </div>

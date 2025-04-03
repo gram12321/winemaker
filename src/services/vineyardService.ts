@@ -252,41 +252,80 @@ export async function harvestVineyard(
       throw new Error('No storage space allocated for harvest');
     }
 
-    // Calculate new remaining yield after harvest
-    const newRemainingYield = remainingYield - harvestedAmount;
-
-    // Determine vineyard status based on remaining yield
-    const newStatus = newRemainingYield <= 0 
-      ? 'Dormancy' 
-      : 'Partially Harvested';
-
-    // Update the vineyard with new status and remaining yield
-    const updatedVineyard = await updateVineyard(id, {
-      remainingYield: newRemainingYield,
-      status: newStatus,
-      // Only reset ripeness if fully harvested
-      ...(newRemainingYield <= 0 ? { ripeness: 0 } : {})
+    // Initialize the vineyard for harvesting
+    await updateVineyard(id, {
+      status: 'Harvesting in progress',
+      remainingYield // Set the initial remaining yield
     });
 
-    if (!updatedVineyard) return null;
+    // Import the activity manager and work calculator
+    const { createActivityProgress } = await import('@/lib/game/workCalculator');
+    const { addActivity } = await import('@/lib/game/activityManager');
+    const { WorkCategory } = await import('@/lib/game/workCalculator');
 
-    // Create a wine batch from the harvested grapes
-    const wineBatch = await createWineBatchFromHarvest(
-      id,
-      vineyard.grape as GrapeVariety,
-      harvestedAmount,
-      vineyard.annualQualityFactor * vineyard.ripeness,
-      storageLocations,
+    // Create and add the harvesting activity
+    const harvestingActivity = createActivityProgress(
+      WorkCategory.HARVESTING,
+      vineyard.acres, // Base work on vineyard size
+      {
+        targetId: id,
+        additionalParams: { 
+          harvestedAmount,
+          storageLocations,
+          grape: vineyard.grape,
+          quality: vineyard.annualQualityFactor * vineyard.ripeness
+        },
+        // Callback when harvesting is complete
+        completionCallback: async () => {
+          // Create wine batch from the harvested grapes
+          const wineBatch = await createWineBatchFromHarvest(
+            id,
+            vineyard.grape as GrapeVariety,
+            harvestedAmount,
+            vineyard.annualQualityFactor * vineyard.ripeness,
+            storageLocations,
+          );
+
+          if (!wineBatch) {
+            throw new Error('Failed to create wine batch from harvest');
+          }
+
+          // Calculate new remaining yield after harvest
+          const newRemainingYield = remainingYield - harvestedAmount;
+
+          // Update the vineyard with new status and remaining yield
+          await updateVineyard(id, {
+            remainingYield: newRemainingYield,
+            status: newRemainingYield <= 0 ? 'Dormancy' : 'Partially Harvested',
+            // Only reset ripeness if fully harvested
+            ...(newRemainingYield <= 0 ? { ripeness: 0 } : {})
+          });
+
+          consoleService.success(`Harvested ${Math.round(harvestedAmount).toLocaleString()} kg of ${vineyard.grape} from ${vineyard.name}.`);
+        },
+        // Progress callback for partial updates
+        progressCallback: async (progress) => {
+          if (progress > 0 && progress < 1) {
+            await updateVineyard(id, {
+              status: `Harvesting: ${Math.round(progress * 100)}%`,
+            });
+          }
+        }
+      }
     );
 
-    if (!wineBatch) {
-      throw new Error('Failed to create wine batch from harvest');
-    }
+    // Add the activity to the game state
+    addActivity(harvestingActivity);
 
-    console.log(`Created wine batch ${wineBatch.id} with ${harvestedAmount} kg of ${vineyard.grape}`);
+    // For now, since we don't have staff, initialize with 0% progress
+    const { updateActivity } = await import('@/lib/game/activityManager');
+    updateActivity(harvestingActivity.id, {
+      appliedWork: 0 // Start with 0% progress
+    });
 
+    consoleService.info(`Started harvesting ${vineyard.grape} from ${vineyard.name}.`);
     return {
-      vineyard: updatedVineyard,
+      vineyard,
       harvestedAmount
     };
   } catch (error) {
