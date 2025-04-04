@@ -44,6 +44,7 @@ Players manage a winery, including vineyard operations, wine production, buildin
 - Use **Firebase Auth** for login.
 - Use **Firestore** to load/save player state (on login, logout, or tick).
 - Use **Firebase Functions** for:
+- Firebase do NOT support undefined values. They need to be omitted or null
   - Tick progression
   - Price calculations (e.g., land, wine, sales)
   - Simulated wine sales to NPC importers

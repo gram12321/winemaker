@@ -27,6 +27,7 @@ export const handleLogout = async (): Promise<boolean> => {
       buildings: [],
       staff: [],
       wineBatches: [],
+      activities: [],
       week: 1,
       season: 'Spring',
       currentYear: new Date().getFullYear(),

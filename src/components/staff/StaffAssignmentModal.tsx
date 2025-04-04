@@ -36,52 +36,6 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   const { staff, vineyards } = getGameState();
   const activity = getActivityById(activityId);
   
-  // Enhanced activity logging to understand work calculation
-  useEffect(() => {
-    if (activity) {
-      console.log('Activity details:', {
-        id: activity.id,
-        category: activity.category,
-        totalWork: activity.totalWork,
-        appliedWork: activity.appliedWork,
-        params: activity.params
-      });
-      
-      // For planting activities, log relevant details
-      if (activity.category === 'planting' && activity.params) {
-        // Get the vineyard directly
-        let acres = 0;
-        let vineyardName = '';
-        
-        if (activity.targetId) {
-          const vineyard = vineyards.find(v => v.id === activity.targetId);
-          if (vineyard) {
-            acres = vineyard.acres;
-            vineyardName = vineyard.name;
-            
-            console.log('Found vineyard:', {
-              id: vineyard.id,
-              name: vineyard.name,
-              acres: vineyard.acres
-            });
-          }
-        }
-        
-        const density = activity.params.density || 0;
-        
-        console.log('Planting details:', {
-          vineyardName,
-          acres,
-          vineDensity: density,
-          targetId: activity.targetId,
-          estimatedWork: acres > 0 
-            ? `${acres} acres × ${density} vines/acre = ${activity.totalWork} units` 
-            : `Unable to determine acres for vineyard ${vineyardName}`
-        });
-      }
-    }
-  }, [activity, vineyards]);
-  
   // Filter staff based on assignments
   const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
   const unassignedStaff = staff.filter(s => !assignedStaffIds.includes(s.id));
@@ -162,16 +116,6 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       ? (activity.appliedWork / totalWork) * 100
       : 0;
     
-    // Log calculation details for debugging
-    console.log('Work progress calculation:', {
-      workPerWeek,
-      totalWork,
-      appliedWork: Math.round(activity.appliedWork),
-      remainingWork,
-      weeksToComplete,
-      progressPercentage
-    });
-    
     return {
       workPerWeek: Math.round(workPerWeek),
       totalWork,
@@ -194,17 +138,8 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       ? workProgress.weeksToComplete
       : 0;
     
-    console.log('Segment calculation:', {
-      numberOfWeeks,
-      segmentsToCreate: numberOfWeeks,
-      totalSegmentsWidth: 100 - workProgress.progressPercentage
-    });
-    
     // Total width available for all segments
     const totalSegmentsWidth = 100 - workProgress.progressPercentage;
-    
-    // Each segment width - exactly one per week
-    const segmentWidth = numberOfWeeks > 0 ? totalSegmentsWidth / numberOfWeeks : 0;
     
     // To avoid floating point issues with many segments, we'll create a container div 
     // and use CSS grid to ensure equal sizing

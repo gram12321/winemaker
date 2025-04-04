@@ -23,16 +23,68 @@ export const saveGameState = async (): Promise<boolean> => {
     }
     
     const docRef = doc(db, "companies", companyName);
-    await setDoc(docRef, {
+    
+    // Create a clean copy of the game state without functions and undefined values
+    const cleanGameState = {
       player: gameState.player,
-      vineyards: gameState.vineyards,
+      vineyards: gameState.vineyards.map(vineyard => {
+        // Create a clean copy with only the properties defined in the Vineyard interface
+        const cleanVineyard = {
+          id: vineyard.id,
+          name: vineyard.name,
+          country: vineyard.country,
+          region: vineyard.region,
+          acres: vineyard.acres,
+          grape: vineyard.grape,
+          vineAge: vineyard.vineAge,
+          soil: vineyard.soil,
+          altitude: vineyard.altitude,
+          aspect: vineyard.aspect,
+          density: vineyard.density,
+          vineyardHealth: vineyard.vineyardHealth,
+          landValue: vineyard.landValue,
+          status: vineyard.status,
+          ripeness: vineyard.ripeness,
+          vineyardPrestige: vineyard.vineyardPrestige,
+          canBeCleared: vineyard.canBeCleared,
+          annualYieldFactor: vineyard.annualYieldFactor,
+          annualQualityFactor: vineyard.annualQualityFactor,
+          farmingMethod: vineyard.farmingMethod,
+          organicYears: vineyard.organicYears,
+          remainingYield: vineyard.remainingYield,
+          ownedSince: vineyard.ownedSince
+        };
+        return cleanVineyard;
+      }),
       buildings: gameState.buildings,
       staff: gameState.staff,
       wineBatches: gameState.wineBatches,
+      activities: gameState.activities.map(activity => {
+        const cleanActivity = {
+          id: activity.id,
+          category: activity.category,
+          totalWork: activity.totalWork,
+          appliedWork: activity.appliedWork,
+          targetId: activity.targetId || null,
+          params: activity.params ? { ...activity.params } : null
+        };
+
+        // Remove function properties from params if they exist
+        if (cleanActivity.params) {
+          delete cleanActivity.params.completionCallback;
+          delete cleanActivity.params.progressCallback;
+          delete cleanActivity.params.onComplete;
+          delete cleanActivity.params.onProgress;
+        }
+
+        return cleanActivity;
+      }),
       week: gameState.week,
       season: gameState.season,
       currentYear: gameState.currentYear
-    });
+    };
+    
+    await setDoc(docRef, cleanGameState);
     
     return true;
   } catch (error) {
@@ -65,6 +117,7 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       buildings: data.buildings || [],
       staff: data.staff || [],
       wineBatches: data.wineBatches || [],
+      activities: data.activities || [],
       week: data.week || 1,
       season: data.season || 'Spring',
       currentYear: data.currentYear || new Date().getFullYear(),
