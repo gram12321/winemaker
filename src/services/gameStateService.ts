@@ -46,20 +46,16 @@ export const handleLogout = async (): Promise<boolean> => {
  * @returns A function to stop the auto-save interval
  */
 export const startAutoSave = (intervalMinutes: number = 5): () => void => {
-  console.log(`Starting auto-save every ${intervalMinutes} minutes`);
-  
   const intervalId = setInterval(async () => {
-    console.log('Auto-saving game state...');
     const result = await saveGameState();
     if (result) {
-      console.log('Auto-save completed successfully');
+      // No console.log statements here
     } else {
-      console.warn('Auto-save failed');
+      // No console.warn statements here
     }
   }, intervalMinutes * 60 * 1000);
   
   return () => {
-    console.log('Stopping auto-save');
     clearInterval(intervalId);
   };
 }; 

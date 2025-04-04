@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import staffService, { Staff, StaffTeam, StaffSearchOptions } from '../services/staffService';
 import { StaffSearch, TeamManagement } from '../components/staff';
+import { getActivitiesForTarget, getAllActivities } from '../lib/game/activityManager';
 
 const StaffView: React.FC = () => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
@@ -22,30 +23,78 @@ const StaffView: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
 
   // Modal state
-  const [showTeamManagement, setShowTeamManagement] = useState(false);
   const [showStaffSearch, setShowStaffSearch] = useState(false);
 
   // Manual team loading function
   const loadTeamsData = async () => {
-    console.log('Loading teams manually');
     const loadedTeams = await staffService.loadTeams();
-    console.log('Loaded teams:', loadedTeams.length > 0 ? loadedTeams.map(t => t.name) : 'None');
     setTeams(loadedTeams);
     if (loadedTeams.length > 0 && !selectedTeamId) {
       setSelectedTeamId(loadedTeams[0].id);
     }
   };
 
-  // Initialize default teams and then load them
-  const initAndLoadTeams = async () => {
-    console.log('Initializing and loading teams');
-    await staffService.initializeDefaultTeams();
-    await loadTeamsData();
+  // Reset teams function - clears all teams and recreates default ones
+  const resetTeams = async () => {
+    // Clear from localStorage
+    localStorage.removeItem('staffTeams');
+    
+    try {
+      // Clear teams from Firebase
+      const db = await import('../firebase.config').then(module => module.db);
+      const { collection, getDocs, deleteDoc, doc } = await import('firebase/firestore');
+      
+      // Delete all existing teams from Firebase
+      const TEAMS_COLLECTION = 'staffTeams';
+      const teamsSnapshot = await getDocs(collection(db, TEAMS_COLLECTION));
+      
+      // Delete each team document
+      const deletePromises = teamsSnapshot.docs.map(docSnapshot => 
+        deleteDoc(doc(db, TEAMS_COLLECTION, docSnapshot.id))
+      );
+      
+      await Promise.all(deletePromises);
+      
+      // Remove team assignments from all staff
+      const allStaff = staffService.getAllStaff();
+      for (const staff of allStaff) {
+        if (staff.teamId) {
+          staffService.assignStaffToTeam(staff.id, null);
+        }
+      }
+      
+      // Create default teams
+      await staffService.initializeDefaultTeams();
+      
+      // Reload teams
+      await loadTeamsData();
+    } catch (error) {
+      console.error('Error resetting teams:', error);
+    }
   };
+
+  // Load teams when component mounts
+  useEffect(() => {
+    loadTeamsData();
+  }, []);
 
   const selectedStaff = selectedStaffId 
     ? staffService.getStaffById(selectedStaffId)
     : null;
+
+  // Get the team for a staff member
+  const getStaffTeam = (staffId: string) => {
+    const team = teams.find(team => team.memberIds?.includes(staffId));
+    return team || null;
+  };
+
+  // Get activities/tasks for a staff member
+  const getStaffActivities = (staffId: string) => {
+    const allActivities = getAllActivities();
+    return allActivities.filter(activity => 
+      activity.params?.assignedStaffIds?.includes(staffId)
+    );
+  };
 
   return (
     <div className="p-4">
@@ -59,202 +108,415 @@ const StaffView: React.FC = () => {
             Search Staff
           </button>
           <button
-            className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
-            onClick={() => setShowTeamManagement(true)}
-          >
-            Manage Teams
-          </button>
-          <button
-            className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
-            onClick={initAndLoadTeams}
-          >
-            Initialize Teams
-          </button>
-          <button
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            onClick={async () => {
-              console.log('Resetting teams - clearing localStorage and Firebase');
-              
-              // Clear from localStorage
-              localStorage.removeItem('staffTeams');
-              
-              try {
-                // Clear teams from Firebase
-                const db = await import('../firebase.config').then(module => module.db);
-                const { collection, getDocs, deleteDoc, doc } = await import('firebase/firestore');
-                
-                // Delete all existing teams from Firebase
-                const TEAMS_COLLECTION = 'staffTeams';
-                const teamsSnapshot = await getDocs(collection(db, TEAMS_COLLECTION));
-                
-                console.log(`Deleting ${teamsSnapshot.docs.length} teams from Firebase`);
-                
-                // Delete each team document
-                const deletePromises = teamsSnapshot.docs.map(docSnapshot => 
-                  deleteDoc(doc(db, TEAMS_COLLECTION, docSnapshot.id))
-                );
-                
-                await Promise.all(deletePromises);
-                console.log('All teams deleted from Firebase');
-              } catch (error) {
-                console.error('Error deleting teams from Firebase:', error);
-              }
-              
-              // Wait a bit to ensure everything is cleared
-              setTimeout(() => {
-                initAndLoadTeams();
-              }, 300);
-            }}
+            onClick={resetTeams}
           >
             Reset Teams
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Staff List */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-xl font-semibold mb-4">Your Staff</h2>
-          <div className="space-y-4">
-            {staffService.getAllStaff().length === 0 ? (
-              <p className="text-gray-500">No staff members hired yet.</p>
-            ) : (
-              staffService.getAllStaff().map(staff => (
-                <div
-                  key={staff.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                    selectedStaffId === staff.id 
-                      ? 'border-wine bg-wine/5' 
-                      : 'border-gray-200 hover:border-wine/50'
-                  }`}
-                  onClick={() => setSelectedStaffId(staff.id)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-bold text-lg">{staff.name}</h3>
-                      <p className="text-gray-600">{staff.specialization ? staffService.SpecializedRoles[staff.specialization].title : 'General Worker'}</p>
+      {/* New layout: 2 columns for staff sections, full width for team management */}
+      <div className="grid grid-cols-1 gap-6">
+        {/* Staff sections in 2 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Staff List Section */}
+          <div className="bg-white rounded-lg shadow p-4 your-staff-section">
+            <h2 className="text-xl font-semibold mb-4">Your Staff</h2>
+            <div className="space-y-4">
+              {staffService.getAllStaff().length === 0 ? (
+                <p className="text-gray-500">No staff members hired yet.</p>
+              ) : (
+                staffService.getAllStaff().map(staff => {
+                  const staffTeam = getStaffTeam(staff.id);
+                  return (
+                    <div
+                      key={staff.id}
+                      className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                        selectedStaffId === staff.id 
+                          ? 'border-wine bg-wine/5' 
+                          : 'border-gray-200 hover:border-wine/50'
+                      }`}
+                      onClick={() => setSelectedStaffId(staff.id)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-bold text-lg">{staff.name}</h3>
+                          <p className="text-gray-600">{staff.specialization ? staffService.SpecializedRoles[staff.specialization].title : 'General Worker'}</p>
+                        </div>
+                        <span className="text-wine font-medium">${staff.wage}/mo</span>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                        <p><span className="font-medium">Skill Level:</span> {staffService.getSkillLevelInfo(staff.skillLevel).formattedName}</p>
+                        <p><span className="font-medium">Nationality:</span> {staff.nationality}</p>
+                        <p className="col-span-2"><span className="font-medium">Team:</span> {staffTeam ? staffTeam.name : 'Not assigned to any team'}</p>
+                      </div>
                     </div>
-                    <span className="text-wine font-medium">${staff.wage}/mo</span>
-                  </div>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                    <p><span className="font-medium">Skill Level:</span> {staffService.getSkillLevelInfo(staff.skillLevel).formattedName}</p>
-                    <p><span className="font-medium">Nationality:</span> {staff.nationality}</p>
-                  </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Staff Details Section */}
+          <div className="bg-white rounded-lg shadow p-4 staff-data-section">
+            {selectedStaff ? (
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <h2 className="text-xl font-semibold">{selectedStaff.name}</h2>
+                  <button
+                    className="text-gray-400 hover:text-gray-600"
+                    onClick={() => setSelectedStaffId(null)}
+                  >
+                    ✕
+                  </button>
                 </div>
-              ))
+                
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-2">
+                    <p><span className="font-medium">Nationality:</span> {selectedStaff.nationality}</p>
+                    <p><span className="font-medium">Hire Date:</span> Week {selectedStaff.hireDate.week}, {selectedStaff.hireDate.season} {selectedStaff.hireDate.year}</p>
+                    <p><span className="font-medium">Monthly Wage:</span> ${selectedStaff.wage}</p>
+                    <p><span className="font-medium">Specialization:</span> {
+                      selectedStaff.specialization 
+                        ? staffService.SpecializedRoles[selectedStaff.specialization].title 
+                        : 'None'
+                    }</p>
+                    
+                    {/* Show Team Assignment */}
+                    <p><span className="font-medium">Team:</span> {getStaffTeam(selectedStaff.id)?.name || 'Not assigned to any team'}</p>
+                  </div>
+                  
+                  {selectedStaff.skills && (
+                    <div className="flex flex-col justify-center">
+                      <div className="text-xs grid grid-cols-5 gap-1">
+                        <div className="text-center">
+                          <div className="font-medium mb-1">Field</div>
+                          <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                            <div 
+                              className="bg-wine rounded-full w-4 absolute bottom-0" 
+                              style={{ height: `${selectedStaff.skills.field * 100}%` }}
+                            ></div>
+                          </div>
+                          <div className="mt-1">{Math.round(selectedStaff.skills.field * 100)}%</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium mb-1">Winery</div>
+                          <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                            <div 
+                              className="bg-wine rounded-full w-4 absolute bottom-0" 
+                              style={{ height: `${selectedStaff.skills.winery * 100}%` }}
+                            ></div>
+                          </div>
+                          <div className="mt-1">{Math.round(selectedStaff.skills.winery * 100)}%</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium mb-1">Admin</div>
+                          <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                            <div 
+                              className="bg-wine rounded-full w-4 absolute bottom-0" 
+                              style={{ height: `${selectedStaff.skills.administration * 100}%` }}
+                            ></div>
+                          </div>
+                          <div className="mt-1">{Math.round(selectedStaff.skills.administration * 100)}%</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium mb-1">Sales</div>
+                          <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                            <div 
+                              className="bg-wine rounded-full w-4 absolute bottom-0" 
+                              style={{ height: `${selectedStaff.skills.sales * 100}%` }}
+                            ></div>
+                          </div>
+                          <div className="mt-1">{Math.round(selectedStaff.skills.sales * 100)}%</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-medium mb-1">Maint</div>
+                          <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
+                            <div 
+                              className="bg-wine rounded-full w-4 absolute bottom-0" 
+                              style={{ height: `${selectedStaff.skills.maintenance * 100}%` }}
+                            ></div>
+                          </div>
+                          <div className="mt-1">{Math.round(selectedStaff.skills.maintenance * 100)}%</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Current Tasks Section */}
+                <div className="mt-6">
+                  <h3 className="font-semibold text-lg mb-2">Current Assignments</h3>
+                  {getStaffActivities(selectedStaff.id).length > 0 ? (
+                    <div className="space-y-2">
+                      {getStaffActivities(selectedStaff.id).map(activity => (
+                        <div key={activity.id} className="p-3 border rounded">
+                          <div className="font-medium">{activity.category}</div>
+                          <div className="text-sm text-gray-600">
+                            Progress: {Math.round((activity.appliedWork / activity.totalWork) * 100)}%
+                          </div>
+                          <div className="mt-1 h-2 bg-gray-200 rounded-full">
+                            <div 
+                              className="h-2 bg-wine rounded-full" 
+                              style={{ width: `${(activity.appliedWork / activity.totalWork) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No active tasks assigned</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center text-gray-500 py-12">
+                <p>Select a staff member to view details</p>
+              </div>
             )}
           </div>
         </div>
-
-        {/* Staff Details or Instructions */}
-        <div className="bg-white rounded-lg shadow p-4">
-          {selectedStaff ? (
+        
+        {/* Team Management Section - Full Width */}
+        <div className="bg-white rounded-lg shadow p-4 team-management-section">
+          <h2 className="text-xl font-semibold mb-4">Team Management</h2>
+          
+          <div className="mb-4 flex justify-between items-center">
             <div>
-              <div className="flex justify-between items-start mb-4">
-                <h2 className="text-xl font-semibold">{selectedStaff.name}</h2>
-                <button
-                  className="text-gray-400 hover:text-gray-600"
-                  onClick={() => setSelectedStaffId(null)}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="space-y-2">
-                  <p><span className="font-medium">Nationality:</span> {selectedStaff.nationality}</p>
-                  <p><span className="font-medium">Hire Date:</span> Week {selectedStaff.hireDate.week}, {selectedStaff.hireDate.season} {selectedStaff.hireDate.year}</p>
-                  <p><span className="font-medium">Monthly Wage:</span> ${selectedStaff.wage}</p>
-                  <p><span className="font-medium">Specialization:</span> {
-                    selectedStaff.specialization 
-                      ? staffService.SpecializedRoles[selectedStaff.specialization].title 
-                      : 'None'
-                  }</p>
+              {teams.length === 0 ? (
+                <p className="text-gray-500">No teams created yet.</p>
+              ) : (
+                <div className="text-sm text-gray-600">{teams.length} teams available</div>
+              )}
+            </div>
+            <button
+              className="bg-wine text-white px-3 py-1 rounded text-sm hover:bg-wine-dark"
+              onClick={() => setIsCreatingTeam(true)}
+            >
+              New Team
+            </button>
+          </div>
+          
+          {isCreatingTeam ? (
+            <div className="p-4 border rounded mb-4">
+              <h3 className="text-lg font-semibold mb-3">Create New Team</h3>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const teamName = formData.get('teamName') as string;
+                  const description = formData.get('description') as string;
+                  if (teamName.trim()) {
+                    const newTeam = staffService.createTeam(teamName.trim(), description || '', '📊', []);
+                    setTeams([...teams, newTeam]);
+                    setSelectedTeamId(newTeam.id);
+                    setIsCreatingTeam(false);
+                    staffService.saveTeam(newTeam, true);
+                  }
+                }}
+              >
+                <div className="mb-3">
+                  <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-1">
+                    Team Name
+                  </label>
+                  <input
+                    type="text"
+                    id="teamName"
+                    name="teamName"
+                    className="w-full rounded-md border border-gray-300 p-2 focus:border-wine focus:ring-wine"
+                    required
+                  />
                 </div>
-                
-                {selectedStaff.skills && (
-                  <div className="flex flex-col justify-center">
-                    <div className="text-xs grid grid-cols-5 gap-1">
-                      <div className="text-center">
-                        <div className="font-medium mb-1">Field</div>
-                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
-                          <div 
-                            className="bg-wine rounded-full w-4 absolute bottom-0" 
-                            style={{ height: `${selectedStaff.skills.field * 100}%` }}
-                          ></div>
-                        </div>
-                        <div className="mt-1">{Math.round(selectedStaff.skills.field * 100)}%</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-medium mb-1">Winery</div>
-                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
-                          <div 
-                            className="bg-wine rounded-full w-4 absolute bottom-0" 
-                            style={{ height: `${selectedStaff.skills.winery * 100}%` }}
-                          ></div>
-                        </div>
-                        <div className="mt-1">{Math.round(selectedStaff.skills.winery * 100)}%</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-medium mb-1">Admin</div>
-                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
-                          <div 
-                            className="bg-wine rounded-full w-4 absolute bottom-0" 
-                            style={{ height: `${selectedStaff.skills.administration * 100}%` }}
-                          ></div>
-                        </div>
-                        <div className="mt-1">{Math.round(selectedStaff.skills.administration * 100)}%</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-medium mb-1">Sales</div>
-                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
-                          <div 
-                            className="bg-wine rounded-full w-4 absolute bottom-0" 
-                            style={{ height: `${selectedStaff.skills.sales * 100}%` }}
-                          ></div>
-                        </div>
-                        <div className="mt-1">{Math.round(selectedStaff.skills.sales * 100)}%</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-medium mb-1">Maint</div>
-                        <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
-                          <div 
-                            className="bg-wine rounded-full w-4 absolute bottom-0" 
-                            style={{ height: `${selectedStaff.skills.maintenance * 100}%` }}
-                          ></div>
-                        </div>
-                        <div className="mt-1">{Math.round(selectedStaff.skills.maintenance * 100)}%</div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+                <div className="mb-3">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <input
+                    type="text"
+                    id="description"
+                    name="description"
+                    className="w-full rounded-md border border-gray-300 p-2 focus:border-wine focus:ring-wine"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
+                    onClick={() => setIsCreatingTeam(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-wine text-white px-3 py-1 rounded hover:bg-wine-dark"
+                  >
+                    Create Team
+                  </button>
+                </div>
+              </form>
             </div>
           ) : (
-            <div className="text-center text-gray-500 py-12">
-              <p>Select a staff member to view details</p>
-            </div>
+            <>
+              {/* Team Selection */}
+              <div className="mb-4">
+                <div className="flex flex-wrap gap-2">
+                  {teams.map(team => (
+                    <button
+                      key={team.id}
+                      className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                        selectedTeamId === team.id 
+                          ? 'bg-wine text-white' 
+                          : 'bg-gray-200 hover:bg-gray-300'
+                      }`}
+                      onClick={() => setSelectedTeamId(team.id)}
+                    >
+                      {team.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+          
+              {/* Selected Team Details */}
+              {selectedTeamId ? (
+                <div>
+                  {(() => {
+                    const team = teams.find(t => t.id === selectedTeamId);
+                    if (!team) return null;
+                    
+                    return (
+                      <>
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-semibold text-lg">{team.name}</h3>
+                            {team.description && (
+                              <p className="text-sm text-gray-600">{team.description}</p>
+                            )}
+                          </div>
+                          <button
+                            className="text-red-500 hover:text-red-700 text-sm"
+                            onClick={() => {
+                              if (window.confirm(`Are you sure you want to delete the team "${team.name}"?`)) {
+                                const updatedTeams = teams.filter(t => t.id !== team.id);
+                                setTeams(updatedTeams);
+                                if (updatedTeams.length > 0) {
+                                  setSelectedTeamId(updatedTeams[0].id);
+                                } else {
+                                  setSelectedTeamId(null);
+                                }
+                              }
+                            }}
+                          >
+                            Delete Team
+                          </button>
+                        </div>
+                        
+                        <div className="mb-4">
+                          <h4 className="font-medium text-sm mb-2">Team Members</h4>
+                          {team.memberIds && team.memberIds.length > 0 ? (
+                            <div className="space-y-2">
+                              {team.memberIds.map(memberId => {
+                                const member = staffService.getStaffById(memberId);
+                                if (!member) return null;
+                                
+                                return (
+                                  <div key={member.id} className="flex justify-between items-center p-2 border rounded-lg">
+                                    <div>
+                                      <div className="font-medium">{member.name}</div>
+                                      <div className="text-xs text-gray-500">
+                                        {member.specialization ? 
+                                          staffService.SpecializedRoles[member.specialization].title : 
+                                          'General Worker'
+                                        }
+                                      </div>
+                                    </div>
+                                    <button
+                                      className="text-red-500 hover:text-red-700 text-sm"
+                                      onClick={() => {
+                                        staffService.assignStaffToTeam(member.id, null);
+                                        const updatedTeams = teams.map(t => {
+                                          if (t.id === team.id) {
+                                            return {
+                                              ...t,
+                                              memberIds: t.memberIds?.filter(id => id !== member.id) || []
+                                            };
+                                          }
+                                          return t;
+                                        });
+                                        setTeams(updatedTeams);
+                                      }}
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No members in this team</p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium text-sm mb-2">Available Staff</h4>
+                          {staffService.getAllStaff().filter(staff => !getStaffTeam(staff.id)).length > 0 ? (
+                            <div className="space-y-2 max-h-60 overflow-y-auto">
+                              {staffService.getAllStaff()
+                                .filter(staff => !getStaffTeam(staff.id))
+                                .map(staff => (
+                                  <div key={staff.id} className="flex justify-between items-center p-2 border rounded-lg">
+                                    <div>
+                                      <div className="font-medium">{staff.name}</div>
+                                      <div className="text-xs text-gray-500">
+                                        {staff.specialization ? 
+                                          staffService.SpecializedRoles[staff.specialization].title : 
+                                          'General Worker'
+                                        }
+                                      </div>
+                                    </div>
+                                    <button
+                                      className="text-wine hover:text-wine-dark text-sm"
+                                      onClick={() => {
+                                        staffService.assignStaffToTeam(staff.id, team.id);
+                                        const updatedTeams = teams.map(t => {
+                                          if (t.id === team.id) {
+                                            return {
+                                              ...t,
+                                              memberIds: [...(t.memberIds || []), staff.id]
+                                            };
+                                          }
+                                          return t;
+                                        });
+                                        setTeams(updatedTeams);
+                                      }}
+                                    >
+                                      Add to Team
+                                    </button>
+                                  </div>
+                                ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500">No available staff</p>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  {teams.length > 0 ? 
+                    'Select a team to view details' : 
+                    'Create a team to get started'
+                  }
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
 
       {/* Modals */}
-      {showTeamManagement && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl">
-            <TeamManagement
-              onClose={() => setShowTeamManagement(false)}
-              teams={teams}
-              onTeamUpdate={setTeams}
-              selectedTeamId={selectedTeamId}
-              onTeamSelect={setSelectedTeamId}
-              isCreatingTeam={isCreatingTeam}
-              onCreatingTeamChange={setIsCreatingTeam}
-            />
-          </div>
-        </div>
-      )}
-      
       {showStaffSearch && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl">

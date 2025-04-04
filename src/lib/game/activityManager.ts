@@ -14,6 +14,7 @@ import {
 } from './workCalculator';
 import { consoleService } from '@/components/layout/Console';
 import displayManager from './displayManager';
+import { Staff } from '@/gameState';
 
 // Store activities in gameState
 const initializeActivitiesInGameState = () => {
@@ -222,40 +223,130 @@ export const processActivitiesTick = (): void => {
   const updatedActivities: ActivityProgress[] = [];
   const completedActivities: string[] = [];
   
+  // Count the tasks per staff member (to match old system's workforce division)
+  const staffTaskCount = new Map<string, number>();
+  
+  // First pass: count how many activities each staff is assigned to
   activities.forEach(activity => {
-    // Temporary: Add some work each tick until staff system is implemented
-    const workPerTick = activity.totalWork * 0.1; // 10% progress per tick
-    const updatedActivity = {
-      ...activity,
-      appliedWork: Math.min(activity.totalWork, (activity.appliedWork || 0) + workPerTick)
-    };
-
-    // Check if activity is complete
-    if (updatedActivity.appliedWork >= updatedActivity.totalWork) {
-      completedActivities.push(activity.id);
-      // Call completion callback if it exists
-      if (activity.completionCallback) {
-        activity.completionCallback();
+    const assignedStaffIds = activity.params?.assignedStaffIds || [];
+    assignedStaffIds.forEach((staffId: string) => {
+      staffTaskCount.set(staffId, (staffTaskCount.get(staffId) || 0) + 1);
+    });
+  });
+  
+  activities.forEach(activity => {
+    // Get assigned staff for this activity
+    const assignedStaffIds = activity.params?.assignedStaffIds || [];
+    const assignedStaff = assignedStaffIds.map((id: string) => {
+      const staff = gameState.staff.find(s => s.id === id);
+      if (staff) {
+        // Add the task count property to match old system
+        return {
+          ...staff,
+          taskCount: staffTaskCount.get(id) || 1
+        };
+      }
+      return null;
+    }).filter(Boolean) as (Staff & { taskCount: number })[];
+    
+    // Get assigned tools for this activity
+    const assignedToolIds = activity.params?.assignedToolIds || [];
+    
+    // Only apply work if staff is assigned (exact match to old system)
+    if (assignedStaff.length > 0) {
+      // Calculate work for each staff member based on relevant skill and task count
+      let appliedWork = 0;
+      
+      assignedStaff.forEach(staff => {
+        // Get relevant skill based on activity category
+        let relevantSkill = 0;
+        switch (activity.category) {
+          case WorkCategory.PLANTING:
+          case WorkCategory.HARVESTING:
+          case WorkCategory.CLEARING:
+          case WorkCategory.UPROOTING:
+            relevantSkill = staff.skills?.field || 0;
+            break;
+          case WorkCategory.CRUSHING:
+          case WorkCategory.FERMENTATION:
+            relevantSkill = staff.skills?.winery || 0;
+            break;
+          case WorkCategory.BUILDING:
+          case WorkCategory.UPGRADING:
+          case WorkCategory.MAINTENANCE:
+            relevantSkill = staff.skills?.maintenance || 0;
+            break;
+          case WorkCategory.STAFF_SEARCH:
+          case WorkCategory.ADMINISTRATION:
+            relevantSkill = staff.skills?.administration || 0;
+            break;
+          default:
+            // Use highest skill as fallback
+            relevantSkill = Math.max(
+              staff.skills?.field || 0,
+              staff.skills?.winery || 0,
+              staff.skills?.maintenance || 0,
+              staff.skills?.administration || 0,
+              staff.skills?.sales || 0
+            );
+        }
+        
+        // Workforce division by task count (exactly like old system)
+        const workforce = staff.workforce || 50; // Default to 50 like old system
+        appliedWork += (workforce / staff.taskCount) * relevantSkill;
+      });
+      
+      // Apply tool bonus exactly like old system - multiplicative 
+      if (assignedToolIds.length > 0) {
+        appliedWork *= calculateToolSpeedBonus(assignedToolIds, activity.category);
+      }
+      
+      // Apply work to the activity
+      const updatedActivity = {
+        ...activity,
+        appliedWork: Math.min(activity.totalWork, activity.appliedWork + appliedWork)
+      };
+      
+      updatedActivities.push(updatedActivity);
+      
+      // Check if activity is complete
+      if (updatedActivity.appliedWork >= updatedActivity.totalWork) {
+        completedActivities.push(activity.id);
+        
+        // Call completion callback if provided
+        if (updatedActivity.completionCallback) {
+          updatedActivity.completionCallback();
+        }
+      } else if (updatedActivity.progressCallback) {
+        // Call progress callback if provided
+        const progress = updatedActivity.appliedWork / updatedActivity.totalWork;
+        updatedActivity.progressCallback(progress);
       }
     } else {
-      updatedActivities.push(updatedActivity);
-      // Call progress callback if it exists
-      if (activity.progressCallback) {
-        const progress = updatedActivity.appliedWork / updatedActivity.totalWork;
-        activity.progressCallback(progress);
-      }
+      // No staff assigned, no work applied (keep activity unchanged)
+      updatedActivities.push(activity);
     }
   });
-
-  // Remove completed activities and update the rest
-  completedActivities.forEach(id => removeActivity(id));
-  if (updatedActivities.length > 0) {
-    updateGameState({
-      activities: updatedActivities
+  
+  // Update game state with updated activities
+  updateGameState({
+    activities: updatedActivities.filter(activity => 
+      !completedActivities.includes(activity.id)
+    )
+  });
+  
+  // Log completions
+  if (completedActivities.length > 0) {
+    completedActivities.forEach(id => {
+      const activity = activities.find(a => a.id === id);
+      if (activity) {
+        consoleService.info(`Completed ${activity.category} activity`);
+      }
     });
-    displayManager.updateAllDisplays();
   }
-};
+  
+  displayManager.updateAllDisplays();
+}
 
 /**
  * Calculate progress percentage for an activity

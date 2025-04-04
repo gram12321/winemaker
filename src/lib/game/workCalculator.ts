@@ -124,57 +124,106 @@ export function calculateStaffWorkContribution(
 ): number {
   if (!staff.length) return 0;
   
-  // Get all ongoing activities to calculate how staff time is divided
-  const gameState = getGameState();
-  const ongoingActivities: Record<string, string[]> = {};
+  // Calculate staff tasks to simulate taskCount from old system
+  // In a real implementation, you'd check how many activities each staff is assigned to
+  const staffTaskCount = 1; // Default to 1 task per staff member
   
-  // Count activities each staff member is assigned to
-  staff.forEach(staffMember => {
-    if (!ongoingActivities[staffMember.id]) {
-      ongoingActivities[staffMember.id] = [];
-    }
-    // In a real implementation, you'd query actual activities
-    // For now, we'll assume each staff is only working on this activity
-    ongoingActivities[staffMember.id].push(category);
-  });
-  
-  // Calculate total work contribution
+  // Calculate total work contribution following old system's approach
   return staff.reduce((total, staffMember) => {
     // Get the relevant skill for this category
     let relevantSkill = 0;
     
-    // In a real implementation, match skill to category
-    // This is a placeholder implementation
-    switch(category) {
-      case WorkCategory.PLANTING:
-      case WorkCategory.HARVESTING:
-      case WorkCategory.CLEARING:
-      case WorkCategory.UPROOTING:
-        relevantSkill = staffMember.skillLevel * 0.2; // Field skill
-        break;
-      case WorkCategory.CRUSHING:
-      case WorkCategory.FERMENTATION:
-        relevantSkill = staffMember.skillLevel * 0.2; // Winery skill
-        break;
-      case WorkCategory.BUILDING:
-      case WorkCategory.UPGRADING:
-      case WorkCategory.MAINTENANCE:
-        relevantSkill = staffMember.skillLevel * 0.2; // Maintenance skill
-        break;
-      case WorkCategory.STAFF_SEARCH:
-      case WorkCategory.ADMINISTRATION:
-        relevantSkill = staffMember.skillLevel * 0.2; // Administration skill
-        break;
-      default:
-        relevantSkill = staffMember.skillLevel * 0.1; // Default skill
+    // Match skill to category based on staff's skillset
+    if (staffMember.skills) {
+      switch(category) {
+        case WorkCategory.PLANTING:
+        case WorkCategory.HARVESTING:
+        case WorkCategory.CLEARING:
+        case WorkCategory.UPROOTING:
+          relevantSkill = staffMember.skills.field; // Field skill
+          break;
+        case WorkCategory.CRUSHING:
+        case WorkCategory.FERMENTATION:
+          relevantSkill = staffMember.skills.winery; // Winery skill
+          break;
+        case WorkCategory.BUILDING:
+        case WorkCategory.UPGRADING:
+        case WorkCategory.MAINTENANCE:
+          relevantSkill = staffMember.skills.maintenance; // Maintenance skill
+          break;
+        case WorkCategory.STAFF_SEARCH:
+        case WorkCategory.ADMINISTRATION:
+          relevantSkill = staffMember.skills.administration; // Administration skill
+          break;
+        default:
+          // Use the highest available skill as fallback
+          relevantSkill = Math.max(
+            staffMember.skills.field,
+            staffMember.skills.winery,
+            staffMember.skills.administration,
+            staffMember.skills.sales,
+            staffMember.skills.maintenance
+          );
+      }
+    } else {
+      // Fallback to general skill level if detailed skills not available
+      relevantSkill = staffMember.skillLevel || 0.5;
     }
     
-    // Account for staff working on multiple activities
-    const activityCount = ongoingActivities[staffMember.id].length || 1;
-    const workContribution = (BASE_WORK_UNITS * relevantSkill) / activityCount;
+    // Match the old system's workforce calculation
+    const workforce = staffMember.workforce || 50; // Default workforce is 50 in old system
     
-    return total + workContribution;
+    // Direct port of the old system's formula: (workforce / taskCount) * relevantSkill
+    let staffContribution = (workforce / staffTaskCount) * relevantSkill;
+    
+    // Apply specialization bonus if applicable (multiplicative, not additive like before)
+    if (staffMember.specialization) {
+      const specialized = isSpecializationRelevant(staffMember.specialization, category);
+      if (specialized) {
+        // Apply a 30% bonus multiplicatively as in the old system
+        staffContribution *= 1.3;
+      }
+    }
+    
+    return total + staffContribution;
   }, 0);
+}
+
+/**
+ * Check if a specialization is relevant for a category
+ * @param specialization Staff specialization
+ * @param category Activity category
+ * @returns True if specialization is relevant for the category
+ */
+function isSpecializationRelevant(specialization: string, category: WorkCategory): boolean {
+  // Map specializations to relevant categories
+  const specializationCategoryMap: Record<string, WorkCategory[]> = {
+    'field': [
+      WorkCategory.PLANTING,
+      WorkCategory.HARVESTING,
+      WorkCategory.CLEARING,
+      WorkCategory.UPROOTING
+    ],
+    'winery': [
+      WorkCategory.CRUSHING,
+      WorkCategory.FERMENTATION
+    ],
+    'maintenance': [
+      WorkCategory.BUILDING,
+      WorkCategory.UPGRADING,
+      WorkCategory.MAINTENANCE
+    ],
+    'administration': [
+      WorkCategory.STAFF_SEARCH,
+      WorkCategory.ADMINISTRATION
+    ],
+    'sales': [] // No direct activities yet
+  };
+  
+  // Check if the specialization applies to this category
+  const relevantCategories = specializationCategoryMap[specialization] || [];
+  
+  return relevantCategories.includes(category);
 }
 
 /**
@@ -190,11 +239,11 @@ export function calculateToolSpeedBonus(
   if (!toolIds.length) return 1.0;
   
   // In a real implementation, you'd retrieve tools from the game state
-  // and calculate their combined effect
-  // This is a placeholder implementation
+  // This should match the old system's implementation where tool bonuses are multiplicative
   
-  // Simple example: each tool provides a 20% bonus
-  return 1.0 + (toolIds.length * 0.2);
+  // For now, implement a simple version with fixed speed bonuses
+  // Each tool gives a 20% bonus, applied multiplicatively
+  return toolIds.reduce((bonus, _) => bonus * 1.2, 1.0);
 }
 
 /**

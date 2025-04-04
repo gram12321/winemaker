@@ -116,6 +116,7 @@ export interface Staff {
   teamId: string | null;
   skills: StaffSkills;
   hireDate: GameDate;
+  workforce: number;
 }
 
 // Constants for staff wages and skill levels
@@ -133,32 +134,64 @@ export function getSkillLevelInfo(skillLevel: number) {
   };
 }
 
+// Helper function to get the current game date from gameState
+function getCurrentGameDate() {
+  const gameState = getGameState();
+  return {
+    week: gameState.week,
+    season: gameState.season,
+    year: gameState.currentYear
+  };
+}
+
 // Staff creation and management functions
 export function createStaff(
-  firstName: string,
-  lastName: string,
-  skills: StaffSkills,
-  skillLevel: number,
-  specialization: string | null,
-  wage: number,
-  nationality: Nationality = 'United States' // Default nationality
-): GameStateStaff {
-  const gameState = getGameState();
+  firstName: string, 
+  lastName: string, 
+  skillLevel: number = 0.1, 
+  specialization: string = '', 
+  nationality: string = 'United States',
+  skills?: StaffSkills
+): Staff {
+  const id = uuidv4();
+  const calculatedSkills = skills || generateRandomSkills(skillLevel, specialization);
+  
+  // Calculate wage based on skills and specialization - match old system's formula
+  const avgSkill = (
+    calculatedSkills.field +
+    calculatedSkills.winery +
+    calculatedSkills.administration +
+    calculatedSkills.sales +
+    calculatedSkills.maintenance
+  ) / 5;
+
+  // Add bonus for specialized roles (30% per specialization) - match old system
+  const specializationBonus = specialization ? Math.pow(1.3, 1) : 1;
+  
+  // Use constants that match the old system
+  const BASE_WEEKLY_WAGE = 500; // Same as old system
+  const SKILL_WAGE_MULTIPLIER = 1000; // Same as old system
+  
+  // Calculate monthly wage exactly like old system:
+  // Base (500/week) + Skill bonus (up to 1000/week extra) * specialization bonus
+  const weeklyWage = (BASE_WEEKLY_WAGE + (avgSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
+  
+  // Convert to monthly (multiply by 52/12) - exact match to old system
+  const monthlyWage = Math.round(weeklyWage * 52/12);
   
   return {
-    id: uuidv4(),
+    id,
+    firstName,
+    lastName,
     name: `${firstName} ${lastName}`,
-    skills,
-    skillLevel,
-    specialization,
-    wage,
-    teamId: null,
     nationality,
-    hireDate: {
-      week: gameState.week,
-      season: gameState.season,
-      year: gameState.currentYear
-    }
+    skillLevel,
+    specialization: specialization || null,
+    skills: calculatedSkills,
+    wage: monthlyWage || BASE_WEEKLY_WAGE * 52/12, // Fallback to base wage if calculation fails
+    workforce: 50, // Default workforce value from old system
+    hireDate: getCurrentGameDate(),
+    teamId: null
   };
 }
 
@@ -220,32 +253,30 @@ function selectRandomNationality(): Nationality {
 }
 
 // Function to generate randomized skills
-export function generateRandomSkills(skillModifier = 0.5, specialization: string | null = null): StaffSkills {
-  // Generate base skill values
-  const skills: StaffSkills = {
-    field: randomizeSkill(skillModifier),
-    winery: randomizeSkill(skillModifier),
-    administration: randomizeSkill(skillModifier),
-    sales: randomizeSkill(skillModifier),
-    maintenance: randomizeSkill(skillModifier)
+export function generateRandomSkills(skillModifier: number = 0.5, specialization: string = ''): StaffSkills {
+  // Exactly match old system's skill randomization
+  const getSkillValue = (forSpecialization: boolean): number => {
+    // Calculate base skill value first - exactly like old system
+    const baseValue = (Math.random() * 0.6) + (skillModifier * 0.4);
+    
+    // For specialized roles, add a percentage-based bonus that scales with skill
+    if (forSpecialization) {
+      const remainingPotential = 1.0 - baseValue;
+      const bonusPercentage = 0.2 + (skillModifier * 0.2); // 20-40%
+      const bonus = remainingPotential * bonusPercentage;
+      return Math.min(1.0, baseValue + bonus);
+    }
+    
+    return baseValue;
   };
   
-  // Apply bonus for specialization
-  if (specialization && specialization in SpecializedRoles) {
-    const role = SpecializedRoles[specialization];
-    const skillKey = role.skillBonus;
-    const currentValue = skills[skillKey];
-    const remainingPotential = 1.0 - currentValue;
-    const bonus = remainingPotential * role.bonusAmount;
-    skills[skillKey] = Math.min(1.0, currentValue + bonus);
-  }
-  
-  return skills;
-}
-
-function randomizeSkill(skillModifier = 0.5): number {
-  const baseValue = (Math.random() * 0.6) + (skillModifier * 0.4);
-  return Math.min(1.0, baseValue);
+  return {
+    field: getSkillValue(specialization === 'field'),
+    winery: getSkillValue(specialization === 'winery'),
+    administration: getSkillValue(specialization === 'administration'),
+    sales: getSkillValue(specialization === 'sales'),
+    maintenance: getSkillValue(specialization === 'maintenance')
+  };
 }
 
 // Calculate wage based on skills and specialization
@@ -349,63 +380,44 @@ export function calculateSearchCost(options: StaffSearchOptions): number {
   return Math.round(baseCost * totalMultiplier);
 }
 
-export function generateStaffCandidates(options: StaffSearchOptions): Staff[] {
-  const { numberOfCandidates, skillLevel, specializations } = options;
+// Function to generate randomized staff candidates
+export function generateStaffCandidates(options: StaffSearchOptions | number, skillLevel?: number, specialization?: string): Staff[] {
+  let count: number;
+  let minSkillLevel: number;
+  let specs: string[];
+
+  // Handle either StaffSearchOptions object or separate arguments
+  if (typeof options === 'object') {
+    count = options.numberOfCandidates;
+    minSkillLevel = options.skillLevel;
+    specs = options.specializations;
+  } else {
+    count = options;
+    minSkillLevel = skillLevel || 0.1;
+    specs = specialization ? [specialization] : [];
+  }
+
   const candidates: Staff[] = [];
   
-  for (let i = 0; i < numberOfCandidates; i++) {
-    // Select random nationality
+  for (let i = 0; i < count; i++) {
+    // Randomly select nationality
     const nationality = selectRandomNationality();
     
-    // Get appropriate name lists based on nationality
-    let firstNames: string[] = [];
-    const lastNames = lastNamesByCountry[nationality];
+    // Choose a random specialization from the requested ones, if any
+    const chosenSpecialization = specs.length > 0 
+      ? specs[Math.floor(Math.random() * specs.length)]
+      : '';
     
-    // 50% chance for male or female name
-    const isMale = Math.random() < 0.5;
-    switch(nationality) {
-      case 'Italy':
-        firstNames = isMale ? italianMaleNames : italianFemaleNames;
-        break;
-      case 'France':
-        firstNames = isMale ? frenchMaleNames : frenchFemaleNames;
-        break;
-      case 'Spain':
-        firstNames = isMale ? spanishMaleNames : spanishFemaleNames;
-        break;
-      case 'United States':
-        firstNames = isMale ? usMaleNames : usFemaleNames;
-        break;
-      case 'Germany':
-        firstNames = isMale ? germanMaleNames : germanFemaleNames;
-        break;
-      default:
-        firstNames = isMale ? usMaleNames : usFemaleNames;
-    }
+    // Get random names based on nationality
+    const firstName = getRandomFirstName(nationality);
+    const lastName = getRandomLastName(nationality);
     
-    // Select random names from appropriate lists
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    
-    // Pick a specialization from provided ones, or null if none
-    const specialization = specializations.length > 0 
-      ? specializations[Math.floor(Math.random() * specializations.length)]
-      : null;
-    
-    // Generate skills with a boost for the specialization
-    const skills = generateRandomSkills(skillLevel, specialization);
-    
-    // Calculate appropriate wage
-    const wage = calculateWage(skills, specialization);
-    
-    // Create staff record
+    // Create staff with randomized skills based on required min skill level
     const staff = createStaff(
-      firstName, 
-      lastName, 
-      skills, 
-      skillLevel,
-      specialization,
-      wage,
+      firstName,
+      lastName,
+      minSkillLevel,
+      chosenSpecialization,
       nationality
     );
     
@@ -413,6 +425,43 @@ export function generateStaffCandidates(options: StaffSearchOptions): Staff[] {
   }
   
   return candidates;
+}
+
+// Helper function to get random first name based on nationality
+function getRandomFirstName(nationality: Nationality): string {
+  // Random gender selection (50/50)
+  const isMale = Math.random() > 0.5;
+  
+  // Select name list based on nationality and gender
+  let nameList: string[];
+  
+  switch (nationality) {
+    case 'Italy':
+      nameList = isMale ? italianMaleNames : italianFemaleNames;
+      break;
+    case 'France':
+      nameList = isMale ? frenchMaleNames : frenchFemaleNames;
+      break;
+    case 'Spain':
+      nameList = isMale ? spanishMaleNames : spanishFemaleNames;
+      break;
+    case 'Germany':
+      nameList = isMale ? germanMaleNames : germanFemaleNames;
+      break;
+    case 'United States':
+    default:
+      nameList = isMale ? usMaleNames : usFemaleNames;
+      break;
+  }
+  
+  // Return random name from the selected list
+  return nameList[Math.floor(Math.random() * nameList.length)];
+}
+
+// Helper function to get random last name based on nationality
+function getRandomLastName(nationality: Nationality): string {
+  const lastNames = lastNamesByCountry[nationality] || lastNamesByCountry['United States'];
+  return lastNames[Math.floor(Math.random() * lastNames.length)];
 }
 
 // Assignment management
@@ -519,22 +568,16 @@ export function mapSpecializationToCategory(specialization: string): string {
 }
 
 export async function initializeDefaultTeams(): Promise<void> {
-  console.log('InitializeDefaultTeams called');
-  
   // Extra check to make sure localStorage is clear
   const localStorageTeams = localStorage.getItem('staffTeams');
   if (localStorageTeams) {
-    console.log('Found teams in localStorage, clearing before initializing');
     localStorage.removeItem('staffTeams');
   }
   
   const existingTeams = await loadTeamsFromDb();
-  console.log('Existing teams loaded:', existingTeams.length > 0 ? existingTeams.map(t => t.name) : 'None');
   
   // Only create default teams if none exist
   if (existingTeams.length === 0) {
-    console.log('No existing teams found, creating default teams');
-    
     // Create teams using the DefaultTeams defined in constants/staff.ts
     const teamList = [
       {
@@ -585,16 +628,8 @@ export async function initializeDefaultTeams(): Promise<void> {
     ];
     
     for (const team of teamList) {
-      console.log(`Creating team: ${team.name}`);
-      try {
-        await saveTeamToDb(team);
-        console.log(`Team saved: ${team.name}`);
-      } catch (error) {
-        console.error(`Error saving team ${team.name}:`, error);
-      }
+      await saveTeamToDb(team);
     }
-  } else {
-    console.log('Teams already exist, skipping default team creation');
   }
 }
 

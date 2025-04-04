@@ -121,8 +121,6 @@ export const initializeToolInstanceCountsFromStorage = async (): Promise<void> =
     
     // Initialize tool instance counts
     initializeToolInstanceCounts(validatedBuildings);
-    
-    console.log('Tool instance counts initialized from storage');
   } catch (error) {
     console.error('Error initializing tool instance counts:', error);
   }

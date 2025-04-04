@@ -116,14 +116,27 @@ export default function TopBar({ view, setView }: TopBarProps) {
               
               <NavigationMenuItem>
                 <button
-                  onClick={() => setView('production')}
+                  onClick={() => setView('staff')}
                   className={cn(
                     navigationMenuTriggerStyle(),
                     "bg-transparent hover:bg-wine-dark focus:bg-wine-dark",
-                    view === 'production' ? "bg-wine-dark" : ""
+                    view === 'staff' ? "bg-wine-dark" : ""
                   )}
                 >
-                  Production
+                  Staff
+                </button>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <button
+                  onClick={() => setView('buildings')}
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "bg-transparent hover:bg-wine-dark focus:bg-wine-dark",
+                    view === 'buildings' ? "bg-wine-dark" : ""
+                  )}
+                >
+                  Buildings
                 </button>
               </NavigationMenuItem>
               

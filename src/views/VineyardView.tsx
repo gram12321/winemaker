@@ -1,16 +1,31 @@
 import React from 'react';
-import { getGameState } from '../gameState';
-import { Vineyard } from '../lib/game/vineyard';
-import { addVineyard, plantVineyard, harvestVineyard } from '../services/vineyardService';
-import { consoleService } from '../components/layout/Console';
-import { GameDate, formatGameDate, BASELINE_VINE_DENSITY } from '../lib/core/constants';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import displayManager from '../lib/game/displayManager';
-import { calculateVineyardYield } from '../lib/game/vineyard';
-import StorageSelector from '../components/buildings/StorageSelector';
+import { getGameState } from '../gameState';
+import { Vineyard } from '../lib/game/vineyard';
+import { consoleService } from '../components/layout/Console';
+import { 
+  getVineyards, 
+  addVineyard, 
+  plantVineyard, 
+  harvestVineyard,
+  calculateVineyardYield
+} from '../services/vineyardService';
 import { WorkProgress } from '../components/ui/progress';
-import { getActivitiesForTarget, getTargetProgress } from '../lib/game/activityManager';
+import { getActivitiesForTarget, getTargetProgress, getActivityById } from '../lib/game/activityManager';
 import { WorkCategory } from '../lib/game/workCalculator';
+import StorageSelector from '../components/buildings/StorageSelector';
+import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
+import { BASELINE_VINE_DENSITY, formatGameDate } from '../lib/core/constants/gameConstants';
+
+// Display state type definition
+interface VineyardViewDisplayState {
+  selectedVineyardId: string | null;
+  loading: boolean;
+  selectedStorageLocations: { locationId: string; quantity: number }[];
+  showStaffAssignment?: boolean;
+  currentActivityId?: string | null;
+}
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -33,17 +48,36 @@ const getStatusColor = (status: string) => {
 displayManager.createDisplayState('vineyardView', {
   selectedVineyardId: null as string | null,
   loading: false,
-  selectedStorageLocations: [] as { locationId: string; quantity: number }[]
+  selectedStorageLocations: [] as { locationId: string; quantity: number }[],
+  showStaffAssignment: false,
+  currentActivityId: null
 });
 
 const VineyardView: React.FC = () => {
-  // Use display update hook to subscribe to game state changes
   useDisplayUpdate();
   
+  // Initialize display state if needed
+  if (!displayManager.getDisplayState('vineyardView')) {
+    displayManager.createDisplayState('vineyardView', {
+      selectedVineyardId: null,
+      loading: false,
+      selectedStorageLocations: [],
+      showStaffAssignment: false,
+      currentActivityId: null
+    } as VineyardViewDisplayState);
+  }
+  
   const gameState = getGameState();
-  const { vineyards } = gameState;
-  const displayState = displayManager.getDisplayState('vineyardView');
-  const { selectedVineyardId, loading, selectedStorageLocations } = displayState;
+  const displayState = displayManager.getDisplayState('vineyardView') as VineyardViewDisplayState;
+  const vineyards = getVineyards();
+  
+  const { 
+    selectedVineyardId, 
+    loading, 
+    selectedStorageLocations,
+    showStaffAssignment,
+    currentActivityId
+  } = displayState;
 
   // Get the selected vineyard from the current game state using the ID
   const selectedVineyard = selectedVineyardId 
@@ -160,6 +194,32 @@ const VineyardView: React.FC = () => {
   // Handle storage location changes
   const handleStorageChange = (locations: { locationId: string; quantity: number }[]) => {
     displayManager.updateDisplayState('vineyardView', { selectedStorageLocations: locations });
+  };
+
+  // Handle staff assignment
+  const handleAssignStaff = (activityCategory: WorkCategory) => {
+    // Find the first activity of the specified category for the selected vineyard
+    const activity = vineyardActivities.find(a => a.category === activityCategory);
+    if (activity) {
+      displayManager.updateDisplayState('vineyardView', { 
+        showStaffAssignment: true,
+        currentActivityId: activity.id 
+      });
+    }
+  };
+
+  // Handle staff assignment modal close
+  const handleStaffModalClose = () => {
+    displayManager.updateDisplayState('vineyardView', { 
+      showStaffAssignment: false,
+      currentActivityId: null
+    });
+  };
+
+  // Handle staff assignment change
+  const handleStaffAssignmentChange = (staffIds: string[]) => {
+    // This will be called when staff assignments change in the modal
+    // No need to do anything here as the modal handles saving the assignments
   };
 
   return (
@@ -327,6 +387,15 @@ const VineyardView: React.FC = () => {
               {/* Display planting progress if there's an active planting activity */}
               {plantingProgress.hasActivities && (
                 <div className="my-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Planting Progress</h4>
+                    <button
+                      onClick={() => handleAssignStaff(WorkCategory.PLANTING)}
+                      className="text-sm bg-wine text-white px-3 py-1 rounded hover:bg-wine-dark"
+                    >
+                      Assign Staff
+                    </button>
+                  </div>
                   <WorkProgress 
                     value={plantingProgress.overallProgress} 
                     label="Planting Progress" 
@@ -338,6 +407,15 @@ const VineyardView: React.FC = () => {
               {/* Display harvesting progress if there's an active harvesting activity */}
               {harvestingProgress.hasActivities && (
                 <div className="my-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Harvesting Progress</h4>
+                    <button
+                      onClick={() => handleAssignStaff(WorkCategory.HARVESTING)}
+                      className="text-sm bg-wine text-white px-3 py-1 rounded hover:bg-wine-dark"
+                    >
+                      Assign Staff
+                    </button>
+                  </div>
                   <WorkProgress 
                     value={harvestingProgress.overallProgress} 
                     label="Harvesting Progress" 
@@ -368,6 +446,21 @@ const VineyardView: React.FC = () => {
                 <div className="text-lg font-semibold">{Math.round(selectedVineyard.annualQualityFactor * 100)}%</div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Staff assignment modal */}
+      {showStaffAssignment && currentActivityId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl">
+            <StaffAssignmentModal
+              activityId={currentActivityId}
+              category={getActivityById(currentActivityId)?.category || ''}
+              onClose={handleStaffModalClose}
+              initialAssignedStaffIds={getActivityById(currentActivityId)?.params?.assignedStaffIds || []}
+              onAssignmentChange={handleStaffAssignmentChange}
+            />
           </div>
         </div>
       )}

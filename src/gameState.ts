@@ -40,14 +40,22 @@ export interface Building {
 // Staff Member Type
 export interface Staff {
   id: string;
+  firstName: string;
+  lastName: string;
   name: string;
-  nationality: Nationality;
+  nationality: string;
   skillLevel: number;
-  specialization: string | null;
+  specialization?: string;
+  workforce: number; // Default is 50, represents work capacity per week
   wage: number;
-  hireDate: GameDate;
-  teamId: string | null;
-  skills: StaffSkills;
+  skills: {
+    field: number;
+    winery: number;
+    administration: number;
+    sales: number;
+    maintenance: number;
+  };
+  experience?: number;
 }
 
 // Wine Batch Type

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
@@ -18,33 +18,51 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   initialAssignedStaffIds = [],
   onAssignmentChange
 }) => {
+  // Use state to track assignments locally
+  const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>(initialAssignedStaffIds);
+  const [teams, setTeams] = useState<StaffTeam[]>([]);
+  
+  // Load teams on mount
+  useEffect(() => {
+    const loadTeams = async () => {
+      const loadedTeams = await staffService.loadTeams();
+      setTeams(loadedTeams);
+    };
+    
+    loadTeams();
+  }, []);
+  
   const { staff } = getGameState();
-  const teams = staffService.loadTeams();
   
   // Filter staff based on assignments
-  const assignedStaff = staff.filter(s => initialAssignedStaffIds.includes(s.id));
-  const unassignedStaff = staff.filter(s => !initialAssignedStaffIds.includes(s.id));
+  const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
+  const unassignedStaff = staff.filter(s => !assignedStaffIds.includes(s.id));
   
   // Handle staff assignment
   const handleAssignStaff = (staffId: string) => {
-    const newAssignments = [...initialAssignedStaffIds, staffId];
+    const newAssignments = [...assignedStaffIds, staffId];
+    setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments);
   };
   
   // Handle staff unassignment
   const handleUnassignStaff = (staffId: string) => {
-    const newAssignments = initialAssignedStaffIds.filter(id => id !== staffId);
+    const newAssignments = assignedStaffIds.filter(id => id !== staffId);
+    setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments);
   };
   
   // Save assignments
   const handleSave = () => {
-    staffService.assignStaffToActivityById(activityId, initialAssignedStaffIds);
+    // Apply the changes
+    staffService.assignStaffToActivityById(activityId, assignedStaffIds);
     onClose();
   };
   
   // Assign a team
   const handleAssignTeam = (teamId: string) => {
+    if (!teamId) return; // Skip empty selections
+    
     const team = teams.find(t => t.id === teamId);
     if (!team) return;
     
@@ -52,21 +70,22 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     const teamStaffIds = teamStaff.map(s => s.id);
     
     // Add team members to assignments
-    const newAssignments = [...initialAssignedStaffIds];
+    const newAssignments = [...assignedStaffIds];
     teamStaffIds.forEach(id => {
       if (!newAssignments.includes(id)) {
         newAssignments.push(id);
       }
     });
     
+    setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments);
   };
   
   // Calculate efficiency based on current assignments
   const calculateEfficiency = () => {
-    if (initialAssignedStaffIds.length === 0) return 0;
+    if (assignedStaffIds.length === 0) return 0;
     
-    const efficiency = initialAssignedStaffIds.reduce((sum, staffId) => {
+    const efficiency = assignedStaffIds.reduce((sum, staffId) => {
       const member = staff.find(s => s.id === staffId);
       if (!member) return sum;
       
@@ -87,8 +106,8 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     }, 0);
     
     // Calculate the final efficiency with diminishing returns for team size
-    const avgEfficiency = efficiency / initialAssignedStaffIds.length;
-    const teamSizeFactor = Math.min(1, 1 + (Math.log(initialAssignedStaffIds.length) / Math.log(10)));
+    const avgEfficiency = efficiency / assignedStaffIds.length;
+    const teamSizeFactor = Math.min(1, 1 + (Math.log(assignedStaffIds.length) / Math.log(10)));
     
     return Math.min(1, avgEfficiency * teamSizeFactor);
   };
@@ -150,7 +169,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                     <div className="text-xs text-gray-500">
                       {member.specialization ? 
                         staffService.SpecializedRoles[member.specialization].title : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).name}
+                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
                     </div>
                   </div>
                   <button
@@ -179,7 +198,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                     <div className="text-xs text-gray-500">
                       {member.specialization ? 
                         staffService.SpecializedRoles[member.specialization].title : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).name}
+                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
                     </div>
                   </div>
                   <button

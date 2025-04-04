@@ -34,7 +34,6 @@ export const saveGameState = async (): Promise<boolean> => {
       currentYear: gameState.currentYear
     });
     
-    console.log(`Game state saved for company ${companyName}`);
     return true;
   } catch (error) {
     console.error('Error saving game state:', error);
@@ -72,7 +71,6 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       currentView: 'mainMenu',
     });
     
-    console.log(`Game state loaded for company ${companyName}`);
     return true;
   } catch (error) {
     console.error('Error loading game state:', error);
