@@ -4,6 +4,7 @@ import staffService, {
   getSkillLevelInfo, 
   SpecializedRoles,
   calculateSearchCost,
+  calculatePerCandidateCost,
   calculateWage,
   generateStaffCandidates,
   Staff as ServiceStaff
@@ -31,6 +32,7 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
 }) => {
   const { player } = getGameState();
   const searchCost = calculateSearchCost(searchOptions);
+  const perCandidateCost = calculatePerCandidateCost(searchOptions);
   
   const handleSearch = async () => {
     if (!player) return;
@@ -125,6 +127,7 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
             searchOptions={searchOptions}
             currentSkillInfo={currentSkillInfo}
             searchCost={searchCost}
+            perCandidateCost={perCandidateCost}
             player={player}
             onClose={onClose}
             onSearch={handleSearch}
@@ -162,6 +165,7 @@ interface SearchFormProps {
   searchOptions: StaffSearchOptions;
   currentSkillInfo: any;
   searchCost: number;
+  perCandidateCost: number;
   player: any;
   onClose: () => void;
   onSearch: () => void;
@@ -174,6 +178,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   searchOptions,
   currentSkillInfo,
   searchCost,
+  perCandidateCost,
   player,
   onClose,
   onSearch,
@@ -199,11 +204,28 @@ const SearchForm: React.FC<SearchFormProps> = ({
             value={searchOptions.numberOfCandidates}
             onChange={onCandidatesChange}
           >
-            <option value={1}>1 Candidate</option>
-            <option value={3}>3 Candidates</option>
-            <option value={5}>5 Candidates</option>
-            <option value={8}>8 Candidates</option>
+            {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+              <option key={num} value={num}>{num} candidates</option>
+            ))}
           </select>
+        </div>
+
+        {/* Cost Information */}
+        <div className="mt-6 space-y-2">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Cost per candidate:</span>
+            <span className="font-medium">€{perCandidateCost.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Total search cost:</span>
+            <span className="font-medium">€{searchCost.toLocaleString()}</span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Your funds:</span>
+            <span className={`font-medium ${player?.money < searchCost ? 'text-red-600' : 'text-green-600'}`}>
+              €{player?.money.toLocaleString() || 0}
+            </span>
+          </div>
         </div>
         
         {/* Skill Level Slider */}
@@ -333,9 +355,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               <p className="text-sm"><span className="font-medium">Nationality:</span> {candidate.nationality}</p>
               <p className="text-sm">
                 <span className="font-medium">Specialization:</span> {
-                  candidate.specialization ? 
-                  SpecializedRoles[candidate.specialization].title : 
-                  'None'
+                  candidate.specializations?.length > 0 
+                    ? candidate.specializations.map(spec => SpecializedRoles[spec].title).join(', ')
+                    : 'General Worker'
                 }
               </p>
               <p className="text-sm">

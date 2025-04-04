@@ -359,6 +359,11 @@ export function calculateSearchCost(options: StaffSearchOptions): number {
   return Math.round(baseCost * totalMultiplier);
 }
 
+export function calculatePerCandidateCost(options: StaffSearchOptions): number {
+  const totalCost = calculateSearchCost(options);
+  return Math.round(totalCost / options.numberOfCandidates);
+}
+
 // Function to generate randomized staff candidates
 export function generateStaffCandidates(options: StaffSearchOptions | number, skillLevel?: number, specializations?: string[]): Staff[] {
   let count: number;
@@ -623,6 +628,7 @@ export default {
   loadTeams,
   assignStaffToTeam,
   calculateSearchCost,
+  calculatePerCandidateCost,
   generateStaffCandidates,
   SpecializedRoles,
   SkillLevels,
