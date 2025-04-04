@@ -9,7 +9,7 @@ export const STAFF_ROLES = {
 
 // Wage Constants
 export const BASE_WEEKLY_WAGE = 500;
-export const SKILL_WAGE_MULTIPLIER = 1.5;
+export const SKILL_WAGE_MULTIPLIER = 1000;
 export const SPECIALIZATION_WAGE_BONUS = 0.2;
 
 // Skill Levels
