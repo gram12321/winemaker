@@ -519,24 +519,82 @@ export function mapSpecializationToCategory(specialization: string): string {
 }
 
 export async function initializeDefaultTeams(): Promise<void> {
+  console.log('InitializeDefaultTeams called');
+  
+  // Extra check to make sure localStorage is clear
+  const localStorageTeams = localStorage.getItem('staffTeams');
+  if (localStorageTeams) {
+    console.log('Found teams in localStorage, clearing before initializing');
+    localStorage.removeItem('staffTeams');
+  }
+  
   const existingTeams = await loadTeamsFromDb();
+  console.log('Existing teams loaded:', existingTeams.length > 0 ? existingTeams.map(t => t.name) : 'None');
   
   // Only create default teams if none exist
   if (existingTeams.length === 0) {
-    for (const [teamKey, teamData] of Object.entries(DefaultTeams)) {
-      const team: StaffTeam = {
-        id: teamData.id,
-        name: teamData.name,
-        description: teamData.description,
+    console.log('No existing teams found, creating default teams');
+    
+    // Create teams using the DefaultTeams defined in constants/staff.ts
+    const teamList = [
+      {
+        id: DefaultTeams.VINEYARD_TEAM.id,
+        name: DefaultTeams.VINEYARD_TEAM.name,
+        description: DefaultTeams.VINEYARD_TEAM.description,
         memberIds: [],
-        preferredTaskTypes: teamData.preferredTaskTypes,
-        recommendedSpecializations: teamData.recommendedSpecializations,
-        defaultTaskTypes: teamData.preferredTaskTypes, // Use preferred tasks as default
-        icon: '🏢' // Default icon
-      };
-      
-      await saveTeamToDb(team);
+        preferredTaskTypes: DefaultTeams.VINEYARD_TEAM.preferredTaskTypes,
+        recommendedSpecializations: DefaultTeams.VINEYARD_TEAM.recommendedSpecializations,
+        icon: '🍇' // Grape icon for vineyard team
+      },
+      {
+        id: DefaultTeams.WINERY_TEAM.id,
+        name: DefaultTeams.WINERY_TEAM.name,
+        description: DefaultTeams.WINERY_TEAM.description,
+        memberIds: [],
+        preferredTaskTypes: DefaultTeams.WINERY_TEAM.preferredTaskTypes,
+        recommendedSpecializations: DefaultTeams.WINERY_TEAM.recommendedSpecializations,
+        icon: '🍷' // Wine icon for winery team
+      },
+      {
+        id: DefaultTeams.MAINTENANCE_TEAM.id,
+        name: DefaultTeams.MAINTENANCE_TEAM.name,
+        description: DefaultTeams.MAINTENANCE_TEAM.description,
+        memberIds: [],
+        preferredTaskTypes: DefaultTeams.MAINTENANCE_TEAM.preferredTaskTypes,
+        recommendedSpecializations: DefaultTeams.MAINTENANCE_TEAM.recommendedSpecializations,
+        icon: '🔧' // Wrench icon for maintenance team
+      },
+      {
+        id: DefaultTeams.SALES_TEAM.id,
+        name: DefaultTeams.SALES_TEAM.name,
+        description: DefaultTeams.SALES_TEAM.description,
+        memberIds: [],
+        preferredTaskTypes: DefaultTeams.SALES_TEAM.preferredTaskTypes,
+        recommendedSpecializations: DefaultTeams.SALES_TEAM.recommendedSpecializations,
+        icon: '💼' // Briefcase icon for sales team
+      },
+      {
+        id: DefaultTeams.ADMIN_TEAM.id,
+        name: DefaultTeams.ADMIN_TEAM.name,
+        description: DefaultTeams.ADMIN_TEAM.description,
+        memberIds: [],
+        preferredTaskTypes: DefaultTeams.ADMIN_TEAM.preferredTaskTypes,
+        recommendedSpecializations: DefaultTeams.ADMIN_TEAM.recommendedSpecializations,
+        icon: '📊' // Chart icon for admin team
+      }
+    ];
+    
+    for (const team of teamList) {
+      console.log(`Creating team: ${team.name}`);
+      try {
+        await saveTeamToDb(team);
+        console.log(`Team saved: ${team.name}`);
+      } catch (error) {
+        console.error(`Error saving team ${team.name}:`, error);
+      }
     }
+  } else {
+    console.log('Teams already exist, skipping default team creation');
   }
 }
 

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import './styles/globals.css';
 import { getGameState, updateGameState, initializePlayer } from './gameState';
 
 // Import database services
@@ -32,6 +33,7 @@ import StaffView from './views/StaffView';
 // Import service functions
 import { handleLogout } from './services/gameStateService';
 import { createStaff, generateRandomSkills, calculateWage } from './services/staffService';
+import staffService, { StaffTeam } from './services/staffService';
 
 function App() {
   const [view, setView] = useState<string>('login');

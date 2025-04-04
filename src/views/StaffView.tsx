@@ -25,17 +25,23 @@ const StaffView: React.FC = () => {
   const [showTeamManagement, setShowTeamManagement] = useState(false);
   const [showStaffSearch, setShowStaffSearch] = useState(false);
 
-  // Load teams when component mounts
-  useEffect(() => {
-    const loadTeams = async () => {
-      const loadedTeams = await staffService.loadTeams();
-      setTeams(loadedTeams);
-      if (loadedTeams.length > 0 && !selectedTeamId) {
-        setSelectedTeamId(loadedTeams[0].id);
-      }
-    };
-    loadTeams();
-  }, []);
+  // Manual team loading function
+  const loadTeamsData = async () => {
+    console.log('Loading teams manually');
+    const loadedTeams = await staffService.loadTeams();
+    console.log('Loaded teams:', loadedTeams.length > 0 ? loadedTeams.map(t => t.name) : 'None');
+    setTeams(loadedTeams);
+    if (loadedTeams.length > 0 && !selectedTeamId) {
+      setSelectedTeamId(loadedTeams[0].id);
+    }
+  };
+
+  // Initialize default teams and then load them
+  const initAndLoadTeams = async () => {
+    console.log('Initializing and loading teams');
+    await staffService.initializeDefaultTeams();
+    await loadTeamsData();
+  };
 
   const selectedStaff = selectedStaffId 
     ? staffService.getStaffById(selectedStaffId)
@@ -57,6 +63,50 @@ const StaffView: React.FC = () => {
             onClick={() => setShowTeamManagement(true)}
           >
             Manage Teams
+          </button>
+          <button
+            className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
+            onClick={initAndLoadTeams}
+          >
+            Initialize Teams
+          </button>
+          <button
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            onClick={async () => {
+              console.log('Resetting teams - clearing localStorage and Firebase');
+              
+              // Clear from localStorage
+              localStorage.removeItem('staffTeams');
+              
+              try {
+                // Clear teams from Firebase
+                const db = await import('../firebase.config').then(module => module.db);
+                const { collection, getDocs, deleteDoc, doc } = await import('firebase/firestore');
+                
+                // Delete all existing teams from Firebase
+                const TEAMS_COLLECTION = 'staffTeams';
+                const teamsSnapshot = await getDocs(collection(db, TEAMS_COLLECTION));
+                
+                console.log(`Deleting ${teamsSnapshot.docs.length} teams from Firebase`);
+                
+                // Delete each team document
+                const deletePromises = teamsSnapshot.docs.map(docSnapshot => 
+                  deleteDoc(doc(db, TEAMS_COLLECTION, docSnapshot.id))
+                );
+                
+                await Promise.all(deletePromises);
+                console.log('All teams deleted from Firebase');
+              } catch (error) {
+                console.error('Error deleting teams from Firebase:', error);
+              }
+              
+              // Wait a bit to ensure everything is cleared
+              setTimeout(() => {
+                initAndLoadTeams();
+              }, 300);
+            }}
+          >
+            Reset Teams
           </button>
         </div>
       </div>
