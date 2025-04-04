@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
+import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -32,7 +33,54 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     loadTeams();
   }, []);
   
-  const { staff } = getGameState();
+  const { staff, vineyards } = getGameState();
+  const activity = getActivityById(activityId);
+  
+  // Enhanced activity logging to understand work calculation
+  useEffect(() => {
+    if (activity) {
+      console.log('Activity details:', {
+        id: activity.id,
+        category: activity.category,
+        totalWork: activity.totalWork,
+        appliedWork: activity.appliedWork,
+        params: activity.params
+      });
+      
+      // For planting activities, log relevant details
+      if (activity.category === 'planting' && activity.params) {
+        // Get the vineyard directly
+        let acres = 0;
+        let vineyardName = '';
+        
+        if (activity.targetId) {
+          const vineyard = vineyards.find(v => v.id === activity.targetId);
+          if (vineyard) {
+            acres = vineyard.acres;
+            vineyardName = vineyard.name;
+            
+            console.log('Found vineyard:', {
+              id: vineyard.id,
+              name: vineyard.name,
+              acres: vineyard.acres
+            });
+          }
+        }
+        
+        const density = activity.params.density || 0;
+        
+        console.log('Planting details:', {
+          vineyardName,
+          acres,
+          vineDensity: density,
+          targetId: activity.targetId,
+          estimatedWork: acres > 0 
+            ? `${acres} acres × ${density} vines/acre = ${activity.totalWork} units` 
+            : `Unable to determine acres for vineyard ${vineyardName}`
+        });
+      }
+    }
+  }, [activity, vineyards]);
   
   // Filter staff based on assignments
   const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
@@ -66,7 +114,8 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     const team = teams.find(t => t.id === teamId);
     if (!team) return;
     
-    const teamStaff = staff.filter(s => s.teamId === teamId);
+    // Fix TypeScript error by using type assertion
+    const teamStaff = staff.filter(s => (s as any).teamId === teamId);
     const teamStaffIds = teamStaff.map(s => s.id);
     
     // Add team members to assignments
@@ -81,60 +130,159 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     onAssignmentChange(newAssignments);
   };
   
-  // Calculate efficiency based on current assignments
-  const calculateEfficiency = () => {
-    if (assignedStaffIds.length === 0) return 0;
+  // Calculate work contribution and progress
+  const calculateWorkProgress = () => {
+    if (!activity || assignedStaffIds.length === 0) {
+      return {
+        workPerWeek: 0,
+        totalWork: activity?.totalWork || 100,
+        appliedWork: activity?.appliedWork || 0,
+        weeksToComplete: 'N/A',
+        progressPercentage: 0
+      };
+    }
     
-    const efficiency = assignedStaffIds.reduce((sum, staffId) => {
-      const member = staff.find(s => s.id === staffId);
-      if (!member) return sum;
-      
-      // Determine relevant skill based on category
-      const skillKey = staffService.mapCategoryToSkill ? 
-        staffService.mapCategoryToSkill(category) : 
-        'field';
-      
-      // Use detailed skill if available, otherwise use general level
-      const skillLevel = member.skills ? 
-        member.skills[skillKey] : 
-        member.skillLevel;
-      
-      // Add specialization bonus if applicable
-      const specializationBonus = member.specialization === skillKey ? 0.2 : 0;
-      
-      return sum + skillLevel + specializationBonus;
-    }, 0);
+    // Calculate work contribution per week based on assigned staff
+    const workPerWeek = calculateStaffWorkContribution(
+      assignedStaff, 
+      category as WorkCategory
+    );
     
-    // Calculate the final efficiency with diminishing returns for team size
-    const avgEfficiency = efficiency / assignedStaffIds.length;
-    const teamSizeFactor = Math.min(1, 1 + (Math.log(assignedStaffIds.length) / Math.log(10)));
+    // Get total work from the activity
+    const totalWork = Math.round(activity.totalWork);
     
-    return Math.min(1, avgEfficiency * teamSizeFactor);
+    // Calculate estimated weeks to complete - no artificial cap
+    const remainingWork = totalWork - Math.round(activity.appliedWork);
+    const weeksToComplete = workPerWeek > 0 
+      ? Math.ceil(remainingWork / workPerWeek)
+      : 'N/A';
+    
+    // Calculate progress percentage
+    const progressPercentage = totalWork > 0 
+      ? (activity.appliedWork / totalWork) * 100
+      : 0;
+    
+    // Log calculation details for debugging
+    console.log('Work progress calculation:', {
+      workPerWeek,
+      totalWork,
+      appliedWork: Math.round(activity.appliedWork),
+      remainingWork,
+      weeksToComplete,
+      progressPercentage
+    });
+    
+    return {
+      workPerWeek: Math.round(workPerWeek),
+      totalWork,
+      appliedWork: Math.round(activity.appliedWork),
+      weeksToComplete,
+      progressPercentage
+    };
   };
   
-  const efficiency = calculateEfficiency();
-  const efficiencyPercentage = Math.round(efficiency * 100);
+  const workProgress = calculateWorkProgress();
+  
+  // Create segments for the progress bar - exactly one segment per week
+  const createProgressSegments = () => {
+    if (workProgress.workPerWeek <= 0 || workProgress.weeksToComplete === 'N/A') {
+      return null;
+    }
+    
+    // Get number of weeks
+    const numberOfWeeks = typeof workProgress.weeksToComplete === 'number' 
+      ? workProgress.weeksToComplete
+      : 0;
+    
+    console.log('Segment calculation:', {
+      numberOfWeeks,
+      segmentsToCreate: numberOfWeeks,
+      totalSegmentsWidth: 100 - workProgress.progressPercentage
+    });
+    
+    // Total width available for all segments
+    const totalSegmentsWidth = 100 - workProgress.progressPercentage;
+    
+    // Each segment width - exactly one per week
+    const segmentWidth = numberOfWeeks > 0 ? totalSegmentsWidth / numberOfWeeks : 0;
+    
+    // To avoid floating point issues with many segments, we'll create a container div 
+    // and use CSS grid to ensure equal sizing
+    return (
+      <div 
+        className="h-full absolute grid"
+        style={{ 
+          width: `${totalSegmentsWidth}%`, 
+          left: `${workProgress.progressPercentage}%`,
+          gridTemplateColumns: `repeat(${numberOfWeeks}, 1fr)`
+        }}
+      >
+        {Array.from({ length: numberOfWeeks }).map((_, i) => {
+          const weekWork = Math.min(
+            workProgress.workPerWeek, 
+            workProgress.totalWork - workProgress.appliedWork - (i * workProgress.workPerWeek)
+          );
+          
+          if (weekWork <= 0) return null;
+          
+          return (
+            <div 
+              key={i}
+              className="h-full bg-wine-light opacity-60 border-r border-gray-100"
+              title={`Week ${i + 1}: ${Math.round(weekWork)} units`}
+            />
+          );
+        })}
+      </div>
+    );
+  };
   
   return (
     <div className="w-full max-h-[80vh] overflow-y-auto p-4">
       <h2 className="text-xl font-semibold mb-4">Assign Staff to Activity</h2>
       
-      {/* Efficiency display */}
+      {/* Work Progress Preview */}
       <div className="bg-gray-50 p-4 rounded mb-6">
-        <h3 className="text-lg font-medium mb-2">Work Efficiency</h3>
-        <div className="flex items-center gap-4">
-          <div className="grow">
-            <div className="h-4 bg-gray-200 rounded-full">
+        <h3 className="text-lg font-medium mb-3">Work Progress Preview</h3>
+        
+        <div className="grid grid-cols-3 gap-4 mb-3 text-sm">
+          <div>
+            <span className="font-medium">Work per Week:</span> {workProgress.workPerWeek} units
+          </div>
+          <div>
+            <span className="font-medium">Work Progress:</span> {workProgress.appliedWork}/{workProgress.totalWork} units
+          </div>
+          <div>
+            <span className="font-medium">Weeks to Complete:</span> {workProgress.weeksToComplete}
+          </div>
+        </div>
+        
+        {/* Current progress bar */}
+        {workProgress.appliedWork > 0 && (
+          <div className="mb-2">
+            <div className="h-3 bg-gray-200 rounded-full relative">
               <div 
-                className="h-4 bg-wine rounded-full" 
-                style={{ width: `${efficiencyPercentage}%` }}
-              ></div>
+                className="h-3 bg-wine rounded-full absolute"
+                style={{ width: `${workProgress.progressPercentage}%` }}
+              />
             </div>
           </div>
-          <div className="text-lg font-medium">{efficiencyPercentage}%</div>
+        )}
+        
+        {/* Segmented progress bar for future weeks */}
+        <div className="h-8 bg-gray-200 rounded-full relative">
+          {/* Current progress */}
+          <div 
+            className="h-full bg-wine rounded-l-full absolute"
+            style={{ width: `${workProgress.progressPercentage}%` }}
+          />
+          
+          {/* Weekly segments - exactly one segment per week */}
+          {createProgressSegments()}
         </div>
-        <p className="text-sm text-gray-600 mt-2">
-          Staff efficiency affects how quickly work is completed. Higher skilled staff and specialists in {category} work more efficiently.
+        
+        <p className="text-xs text-gray-600 mt-2">
+          The progress bar shows one segment for each week of estimated work.
         </p>
       </div>
       
@@ -151,7 +299,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                 <option value="">Assign Team...</option>
                 {teams.map(team => (
                   <option key={team.id} value={team.id}>
-                    {team.icon} {team.name} ({staff.filter(s => s.teamId === team.id).length} members)
+                    {team.icon} {team.name} ({staff.filter(s => (s as any).teamId === team.id).length} members)
                   </option>
                 ))}
               </select>
