@@ -142,7 +142,11 @@ const StaffView: React.FC = () => {
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-bold text-lg">{staff.name}</h3>
-                          <p className="text-gray-600">{staff.specialization ? staffService.SpecializedRoles[staff.specialization].title : 'General Worker'}</p>
+                          <p className="text-gray-600">
+                            {staff.specializations?.length > 0 
+                              ? staff.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') 
+                              : 'General Worker'}
+                          </p>
                         </div>
                         <span className="text-wine font-medium">${staff.wage}/mo</span>
                       </div>
@@ -177,9 +181,9 @@ const StaffView: React.FC = () => {
                     <p><span className="font-medium">Nationality:</span> {selectedStaff.nationality}</p>
                     <p><span className="font-medium">Hire Date:</span> Week {selectedStaff.hireDate.week}, {selectedStaff.hireDate.season} {selectedStaff.hireDate.year}</p>
                     <p><span className="font-medium">Monthly Wage:</span> ${selectedStaff.wage}</p>
-                    <p><span className="font-medium">Specialization:</span> {
-                      selectedStaff.specialization 
-                        ? staffService.SpecializedRoles[selectedStaff.specialization].title 
+                    <p><span className="font-medium">Specializations:</span> {
+                      selectedStaff.specializations?.length > 0
+                        ? selectedStaff.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ')
                         : 'None'
                     }</p>
                     
@@ -424,10 +428,9 @@ const StaffView: React.FC = () => {
                                     <div>
                                       <div className="font-medium">{member.name}</div>
                                       <div className="text-xs text-gray-500">
-                                        {member.specialization ? 
-                                          staffService.SpecializedRoles[member.specialization].title : 
-                                          'General Worker'
-                                        }
+                                        {member.specializations?.length > 0 
+                                          ? member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') 
+                                          : 'General Worker'}
                                       </div>
                                     </div>
                                     <button
@@ -468,10 +471,9 @@ const StaffView: React.FC = () => {
                                     <div>
                                       <div className="font-medium">{staff.name}</div>
                                       <div className="text-xs text-gray-500">
-                                        {staff.specialization ? 
-                                          staffService.SpecializedRoles[staff.specialization].title : 
-                                          'General Worker'
-                                        }
+                                        {staff.specializations?.length > 0 
+                                          ? staff.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') 
+                                          : 'General Worker'}
                                       </div>
                                     </div>
                                     <button

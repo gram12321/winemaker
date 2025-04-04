@@ -185,7 +185,9 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                           <div>
                             <div className="font-medium">{staff.name}</div>
                             <div className="text-sm text-gray-500">
-                              {staff.specialization || 'General Worker'}
+                              {staff.specializations?.length > 0 
+                                ? staff.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ')
+                                : 'General Worker'}
                             </div>
                           </div>
                           <button
@@ -215,7 +217,9 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
                         <div>
                           <div className="font-medium">{staff.name}</div>
                           <div className="text-sm text-gray-500">
-                            {staff.specialization || 'General Worker'}
+                            {staff.specializations?.length > 0 
+                              ? staff.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ')
+                              : 'General Worker'}
                           </div>
                         </div>
                         <button

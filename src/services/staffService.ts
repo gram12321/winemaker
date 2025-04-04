@@ -111,7 +111,7 @@ export interface Staff {
   name: string;
   nationality: Nationality;
   skillLevel: number;
-  specialization: string | null;
+  specializations: string[];
   wage: number;
   teamId: string | null;
   skills: StaffSkills;
@@ -149,47 +149,25 @@ export function createStaff(
   firstName: string, 
   lastName: string, 
   skillLevel: number = 0.1, 
-  specialization: string = '', 
+  specializations: string[] = [], 
   nationality: string = 'United States',
   skills?: StaffSkills
 ): Staff {
   const id = uuidv4();
-  const calculatedSkills = skills || generateRandomSkills(skillLevel, specialization);
+  const calculatedSkills = skills || generateRandomSkills(skillLevel, specializations);
   
-  // Calculate wage based on skills and specialization - match old system's formula
-  const avgSkill = (
-    calculatedSkills.field +
-    calculatedSkills.winery +
-    calculatedSkills.administration +
-    calculatedSkills.sales +
-    calculatedSkills.maintenance
-  ) / 5;
-
-  // Add bonus for specialized roles (30% per specialization) - match old system
-  const specializationBonus = specialization ? Math.pow(1.3, 1) : 1;
-  
-  // Use constants that match the old system
-  const BASE_WEEKLY_WAGE = 500; // Same as old system
-  const SKILL_WAGE_MULTIPLIER = 1000; // Same as old system
-  
-  // Calculate monthly wage exactly like old system:
-  // Base (500/week) + Skill bonus (up to 1000/week extra) * specialization bonus
-  const weeklyWage = (BASE_WEEKLY_WAGE + (avgSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
-  
-  // Convert to monthly (multiply by 52/12) - exact match to old system
-  const monthlyWage = Math.round(weeklyWage * 52/12);
+  // Calculate wage with all specializations
+  const monthlyWage = calculateWage(calculatedSkills, specializations);
   
   return {
     id,
-    firstName,
-    lastName,
     name: `${firstName} ${lastName}`,
     nationality,
     skillLevel,
-    specialization: specialization || null,
+    specializations: specializations.length > 0 ? specializations : ['Wine Enthusiast'],
     skills: calculatedSkills,
-    wage: monthlyWage || BASE_WEEKLY_WAGE * 52/12, // Fallback to base wage if calculation fails
-    workforce: 50, // Default workforce value from old system
+    wage: monthlyWage,
+    workforce: 50,
     hireDate: getCurrentGameDate(),
     teamId: null
   };
@@ -253,14 +231,14 @@ function selectRandomNationality(): Nationality {
 }
 
 // Function to generate randomized skills
-export function generateRandomSkills(skillModifier: number = 0.5, specialization: string = ''): StaffSkills {
+export function generateRandomSkills(skillModifier: number = 0.5, specializations: string[] = []): StaffSkills {
   // Exactly match old system's skill randomization
-  const getSkillValue = (forSpecialization: boolean): number => {
+  const getSkillValue = (isSpecialized: boolean): number => {
     // Calculate base skill value first - exactly like old system
     const baseValue = (Math.random() * 0.6) + (skillModifier * 0.4);
     
     // For specialized roles, add a percentage-based bonus that scales with skill
-    if (forSpecialization) {
+    if (isSpecialized) {
       const remainingPotential = 1.0 - baseValue;
       const bonusPercentage = 0.2 + (skillModifier * 0.2); // 20-40%
       const bonus = remainingPotential * bonusPercentage;
@@ -271,16 +249,16 @@ export function generateRandomSkills(skillModifier: number = 0.5, specialization
   };
   
   return {
-    field: getSkillValue(specialization === 'field'),
-    winery: getSkillValue(specialization === 'winery'),
-    administration: getSkillValue(specialization === 'administration'),
-    sales: getSkillValue(specialization === 'sales'),
-    maintenance: getSkillValue(specialization === 'maintenance')
+    field: getSkillValue(specializations.includes('field')),
+    winery: getSkillValue(specializations.includes('winery')),
+    administration: getSkillValue(specializations.includes('administration')),
+    sales: getSkillValue(specializations.includes('sales')),
+    maintenance: getSkillValue(specializations.includes('maintenance'))
   };
 }
 
-// Calculate wage based on skills and specialization
-export function calculateWage(skills: StaffSkills, specialization: string | null = null): number {
+// Calculate wage based on skills and specializations
+export function calculateWage(skills: StaffSkills, specializations: string[] = []): number {
   const avgSkill = (
     skills.field +
     skills.winery +
@@ -289,8 +267,9 @@ export function calculateWage(skills: StaffSkills, specialization: string | null
     skills.maintenance
   ) / 5;
   
-  // Add bonus for specialized roles (30% bonus)
-  const specializationBonus = specialization ? 1.3 : 1;
+  // Add bonus for specialized roles (30% per specialization, multiplicative)
+  const specializationBonus = specializations.length > 0 ? 
+    Math.pow(1.3, specializations.length) : 1;
   
   // Calculate monthly wage
   const weeklyWage = (BASE_WEEKLY_WAGE + (avgSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
@@ -381,7 +360,7 @@ export function calculateSearchCost(options: StaffSearchOptions): number {
 }
 
 // Function to generate randomized staff candidates
-export function generateStaffCandidates(options: StaffSearchOptions | number, skillLevel?: number, specialization?: string): Staff[] {
+export function generateStaffCandidates(options: StaffSearchOptions | number, skillLevel?: number, specializations?: string[]): Staff[] {
   let count: number;
   let minSkillLevel: number;
   let specs: string[];
@@ -394,7 +373,7 @@ export function generateStaffCandidates(options: StaffSearchOptions | number, sk
   } else {
     count = options;
     minSkillLevel = skillLevel || 0.1;
-    specs = specialization ? [specialization] : [];
+    specs = specializations || [];
   }
 
   const candidates: Staff[] = [];
@@ -403,21 +382,17 @@ export function generateStaffCandidates(options: StaffSearchOptions | number, sk
     // Randomly select nationality
     const nationality = selectRandomNationality();
     
-    // Choose a random specialization from the requested ones, if any
-    const chosenSpecialization = specs.length > 0 
-      ? specs[Math.floor(Math.random() * specs.length)]
-      : '';
-    
     // Get random names based on nationality
     const firstName = getRandomFirstName(nationality);
     const lastName = getRandomLastName(nationality);
     
     // Create staff with randomized skills based on required min skill level
+    // Now passing the full array of specializations
     const staff = createStaff(
       firstName,
       lastName,
       minSkillLevel,
-      chosenSpecialization,
+      specs,
       nationality
     );
     
@@ -516,7 +491,7 @@ export function calculateActivityStaffEfficiency(activityId: string, category: s
     
     // Add specialization bonus if applicable
     const specializationBonus = 
-      staff.specialization && mapSpecializationToCategory(staff.specialization) === category
+      staff.specializations.includes(category)
         ? 0.2 // 20% bonus for specialization
         : 0;
     
