@@ -6,16 +6,16 @@ import staffService, {
   calculateSearchCost,
   calculateWage,
   generateStaffCandidates,
-  StaffSkills
+  Staff as ServiceStaff
 } from '../../services/staffService';
-import { updatePlayerMoney, getGameState, Staff } from '../../gameState';
+import { updatePlayerMoney, getGameState } from '../../gameState';
 
 interface StaffSearchProps {
   onClose: () => void;
   searchOptions: StaffSearchOptions;
   onSearchOptionsChange: (options: StaffSearchOptions) => void;
-  searchResults: Staff[];
-  onSearchResultsChange: (results: Staff[]) => void;
+  searchResults: ServiceStaff[];
+  onSearchResultsChange: (results: ServiceStaff[]) => void;
   isSearching: boolean;
   onSearchingChange: (isSearching: boolean) => void;
 }
@@ -58,7 +58,7 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
     }
   };
   
-  const handleHire = async (staff: Staff) => {
+  const handleHire = async (staff: ServiceStaff) => {
     if (!player) return;
     
     // Check if player has enough money for first month's wage
@@ -80,17 +80,17 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
     onSearchResultsChange(searchResults.filter(s => s.id !== staff.id));
   };
   
-  const handleSkillChange = (value: number) => {
+  const handleSkillChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onSearchOptionsChange({
       ...searchOptions,
-      skillLevel: value,
+      skillLevel: parseFloat(event.target.value)
     });
   };
   
-  const handleCandidatesChange = (value: number) => {
+  const handleCandidatesChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onSearchOptionsChange({
       ...searchOptions,
-      numberOfCandidates: value,
+      numberOfCandidates: parseInt(event.target.value, 10)
     });
   };
   
@@ -235,64 +235,61 @@ const SearchForm: React.FC<SearchFormProps> = ({
         </div>
       </div>
       
+      {/* Specializations */}
       <div>
         <h3 className="text-lg font-medium mb-3">Specializations</h3>
-        <p className="text-sm text-gray-600 mb-3">
+        <p className="text-sm text-gray-600 mb-4">
           Select specialized roles to search for specific expertise. Each specialization increases search cost.
         </p>
         
-        <div className="space-y-2">
-          {Object.values(SpecializedRoles).map(role => (
-            <div key={role.id} className="flex items-center">
-              <input
-                type="checkbox"
-                id={`spec-${role.id}`}
-                checked={searchOptions.specializations.includes(role.id)}
-                onChange={() => onSpecializationToggle(role.id)}
-                className="mr-2"
-              />
-              <label htmlFor={`spec-${role.id}`} className="text-sm">
-                <span className="font-medium">{role.title}</span> - {role.description}
-              </label>
-            </div>
-          ))}
-        </div>
+        {Object.values(SpecializedRoles).map(role => (
+          <div key={role.id} className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              id={role.id}
+              checked={searchOptions.specializations.includes(role.id)}
+              onChange={() => onSpecializationToggle(role.id)}
+              className="mr-2"
+            />
+            <label htmlFor={role.id} className="text-sm">
+              {role.title} - {role.description}
+            </label>
+          </div>
+        ))}
       </div>
     </div>
     
-    {/* Search Cost Summary */}
-    <div className="bg-gray-50 p-4 rounded mb-6">
-      <h3 className="text-lg font-medium mb-2">Search Costs</h3>
-      <p className="mb-2">
-        <span className="font-medium">Search Fee:</span> ${searchCost.toLocaleString()}
-      </p>
-      <p className="text-sm text-gray-600 mb-3">
-        This is a one-time fee paid to the recruitment agency.
-      </p>
-      
-      <p className="mb-2">
-        <span className="font-medium">Expected Monthly Wage Range:</span> $
-        {Math.round(calculateWage({ field: 0, winery: 0, administration: 0, sales: 0, maintenance: 0 }, null) * searchOptions.skillLevel).toLocaleString()} 
-        - $
-        {Math.round(calculateWage({ field: 1, winery: 1, administration: 1, sales: 1, maintenance: 1 }, searchOptions.specializations[0] ?? null) * searchOptions.skillLevel * 1.5).toLocaleString()}
-      </p>
-      <p className="text-sm text-gray-600">
-        Monthly wages will vary based on actual skills and specializations.
-      </p>
+    {/* Search Costs */}
+    <div className="border-t pt-6 mb-6">
+      <h3 className="text-lg font-medium mb-3">Search Costs</h3>
+      <div className="bg-gray-50 p-4 rounded">
+        <p className="mb-2">
+          <span className="font-medium">Search Fee:</span> ${searchCost.toLocaleString()}
+        </p>
+        <p className="text-sm text-gray-600">
+          This is a one-time fee paid to the recruitment agency.
+        </p>
+      </div>
+      <div className="mt-4 bg-gray-50 p-4 rounded">
+        <p className="mb-2">
+          <span className="font-medium">Expected Monthly Wage Range:</span> $650- $978
+        </p>
+        <p className="text-sm text-gray-600">
+          Monthly wages will vary based on actual skills and specializations.
+        </p>
+      </div>
     </div>
     
     {/* Action Buttons */}
-    <div className="flex justify-between">
+    <div className="flex justify-end gap-4">
       <button
-        className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+        className="px-4 py-2 border rounded hover:bg-gray-50"
         onClick={onClose}
       >
         Cancel
       </button>
       <button
-        className={`bg-wine text-white px-4 py-2 rounded ${
-          (!player || player.money < searchCost) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-wine-dark'
-        }`}
+        className="px-4 py-2 bg-wine text-white rounded hover:bg-wine-dark disabled:opacity-50"
         onClick={onSearch}
         disabled={!player || player.money < searchCost}
       >
@@ -303,11 +300,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
 );
 
 interface SearchResultsProps {
-  searchResults: Staff[];
+  searchResults: ServiceStaff[];
   player: any;
   onClose: () => void;
   onBack: () => void;
-  onHire: (staff: Staff) => void;
+  onHire: (staff: ServiceStaff) => void;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({
