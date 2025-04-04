@@ -32,7 +32,7 @@ import StaffView from './views/StaffView';
 
 // Import service functions
 import { handleLogout } from './services/gameStateService';
-import { createStaff, generateRandomSkills, calculateWage } from './services/staffService';
+import { createStaff, generateRandomSkills, calculateWage, type Nationality } from './services/staffService';
 import staffService, { StaffTeam } from './services/staffService';
 
 function App() {
@@ -135,23 +135,24 @@ function App() {
   function createInitialStaff(type: string, skillLevel: number, specialization: string | null = null) {
     // Generate first and last names based on type
     let firstName, lastName;
+    let nationality: Nationality;
     
     if (type === 'Vineyard Manager') {
       firstName = ['Marco', 'Sofia', 'Giovanni', 'Isabella', 'Paolo'][Math.floor(Math.random() * 5)];
       lastName = ['Rossi', 'Bianchi', 'Romano', 'Esposito', 'Ferrari'][Math.floor(Math.random() * 5)];
+      nationality = 'Italy';
     } else {
       firstName = ['Thomas', 'Emma', 'Luis', 'Anna', 'James'][Math.floor(Math.random() * 5)];
       lastName = ['Smith', 'Johnson', 'Garcia', 'Martin', 'Wilson'][Math.floor(Math.random() * 5)];
+      nationality = 'United States';
     }
     
     // Generate skills with appropriate specialization
-    const skills = generateRandomSkills(skillLevel, specialization);
-    
-    // Calculate wage
-    const wage = calculateWage(skills, specialization);
+    const specializations = specialization ? [specialization] : [];
+    const skills = generateRandomSkills(skillLevel, specializations);
     
     // Create and return staff member
-    return createStaff(firstName, lastName, skills, skillLevel, specialization, wage);
+    return createStaff(firstName, lastName, skillLevel, specializations, nationality);
   }
 
   return (

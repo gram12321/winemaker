@@ -150,7 +150,7 @@ export function createStaff(
   lastName: string, 
   skillLevel: number = 0.1, 
   specializations: string[] = [], 
-  nationality: string = 'United States',
+  nationality: Nationality = 'United States',
   skills?: StaffSkills
 ): Staff {
   const id = uuidv4();
@@ -164,7 +164,7 @@ export function createStaff(
     name: `${firstName} ${lastName}`,
     nationality,
     skillLevel,
-    specializations: specializations.length > 0 ? specializations : ['Wine Enthusiast'],
+    specializations: specializations,
     skills: calculatedSkills,
     wage: monthlyWage,
     workforce: 50,

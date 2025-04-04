@@ -429,7 +429,9 @@ const StaffView: React.FC = () => {
                                       <div className="font-medium">{member.name}</div>
                                       <div className="text-xs text-gray-500">
                                         {member.specializations?.length > 0 
-                                          ? member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') 
+                                          ? member.specializations.map(spec => 
+                                              staffService.SpecializedRoles[spec]?.title || spec
+                                            ).join(', ') 
                                           : 'General Worker'}
                                       </div>
                                     </div>
@@ -472,7 +474,9 @@ const StaffView: React.FC = () => {
                                       <div className="font-medium">{staff.name}</div>
                                       <div className="text-xs text-gray-500">
                                         {staff.specializations?.length > 0 
-                                          ? staff.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') 
+                                          ? staff.specializations.map(spec => 
+                                              staffService.SpecializedRoles[spec]?.title || spec
+                                            ).join(', ') 
                                           : 'General Worker'}
                                       </div>
                                     </div>
