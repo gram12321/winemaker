@@ -8,7 +8,6 @@ import staffService, {
   Staff as ServiceStaff
 } from '../../services/staffService';
 import { getGameState } from '../../gameState';
-import { getActivityById } from '../../lib/game/activityManager';
 import displayManager from '../../lib/game/displayManager';
 
 interface StaffSearchProps {
@@ -43,22 +42,17 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
   const { player } = getGameState();
   const searchCost = calculateSearchCost(searchOptions);
   const perCandidateCost = calculatePerCandidateCost(searchOptions);
-  const displayState = displayManager.getDisplayState('staffSearch');
   
   const handleSearch = async () => {
     if (!player) {
-      console.log('[StaffSearch] Cannot start search: no player found');
       return;
     }
     
     try {
-      console.log('[StaffSearch] Starting staff search with options:', searchOptions);
       // Start the search activity
       const activityId = staffService.startStaffSearch(searchOptions);
-      console.log('[StaffSearch] Search activity started with ID:', activityId);
       onSearchingChange(true);
       onStartSearch(activityId); // Pass the activity ID back to parent
-      console.log('[StaffSearch] Closing search modal');
       onClose(); // Close the modal immediately
     } catch (error) {
       console.error('[StaffSearch] Error starting staff search:', error);
@@ -68,15 +62,12 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
   
   const handleHire = async (staff: ServiceStaff) => {
     if (!player) {
-      console.log('[StaffSearch] Cannot hire: no player found');
       return;
     }
     
     try {
-      console.log('[StaffSearch] Starting hiring process for staff:', staff.id);
       // Start the hiring activity
       const activityId = staffService.startHiringProcess(staff);
-      console.log('[StaffSearch] Hiring activity started with ID:', activityId);
       
       // If onStartHiring prop is provided, call it with the activity ID and staff
       if (onStartHiring) {
@@ -85,7 +76,6 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
         // Otherwise handle it the old way
         // Remove the hired candidate from results
         onSearchResultsChange(searchResults.filter(s => s.id !== staff.id));
-        console.log('[StaffSearch] Closing modal after starting hire process');
         onClose(); // Close after starting hire process
       }
     } catch (error) {

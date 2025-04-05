@@ -121,7 +121,7 @@ export interface Staff {
   workforce: number;
 }
 
-// Constants for staff wages and skill levels
+// Staff level utility functions
 export function getSkillLevelInfo(skillLevel: number) {
   // Find the closest skill level
   const levels = Object.values(SkillLevels);
@@ -394,7 +394,6 @@ export function generateStaffCandidates(options: StaffSearchOptions | number, sk
     const lastName = getRandomLastName(nationality);
     
     // Create staff with randomized skills based on required min skill level
-    // Now passing the full array of specializations
     const staff = createStaff(
       firstName,
       lastName,
@@ -623,18 +622,15 @@ export const STAFF_ACTIVITY_CATEGORIES = {
 
 // Function to start a staff search activity
 export function startStaffSearch(options: StaffSearchOptions): string {
-  console.log('[StaffService] Starting staff search with options:', options);
   const searchCost = calculateSearchCost(options);
   const gameState = getGameState();
   
   if (!gameState.player || gameState.player.money < searchCost) {
-    console.log('[StaffService] Insufficient funds for search. Required:', searchCost, 'Available:', gameState.player?.money);
     throw new Error('Insufficient funds for staff search');
   }
   
   // Deduct search cost
   updatePlayerMoney(-searchCost);
-  console.log('[StaffService] Deducted search cost:', searchCost);
   
   // Create the activity - completion callback will be added by the component
   const activity = addActivity({
@@ -648,7 +644,6 @@ export function startStaffSearch(options: StaffSearchOptions): string {
     }
   });
 
-  console.log('[StaffService] Created search activity:', activity.id);
   toast({
     title: 'Staff Search Started',
     description: `Started search for ${options.numberOfCandidates} candidates`
@@ -658,17 +653,14 @@ export function startStaffSearch(options: StaffSearchOptions): string {
 
 // Function to start hiring process
 export function startHiringProcess(staff: Staff): string {
-  console.log('[StaffService] Starting hiring process for staff:', staff.name);
   const gameState = getGameState();
   
   if (!gameState.player || gameState.player.money < staff.wage) {
-    console.log('[StaffService] Insufficient funds for first month wage. Required:', staff.wage, 'Available:', gameState.player?.money);
     throw new Error('Insufficient funds for first month\'s wage');
   }
   
   // Validate staff data
   if (!staff || !staff.id || !staff.name) {
-    console.error('[StaffService] Invalid staff data:', staff);
     throw new Error('Invalid staff data for hiring process');
   }
   
@@ -685,8 +677,6 @@ export function startHiringProcess(staff: Staff): string {
     }
   });
 
-  console.log('[StaffService] Created hiring activity:', activity.id, 'for staff:', staff.name);
-  
   toast({
     title: 'Hiring Process Started',
     description: `Started hiring process for ${staff.name}`
@@ -696,35 +686,23 @@ export function startHiringProcess(staff: Staff): string {
 
 // Function to complete hiring process
 export function completeHiringProcess(activityId: string): Staff | null {
-  console.log('[StaffService] Attempting to complete hiring process for activity:', activityId);
-  
   const activity = getActivityById(activityId);
   if (!activity || !activity.params) {
-    console.log('[StaffService] Cannot complete hiring: activity not found or has no params');
     return null;
   }
-  
-  // When called from the completion callback, we should trust that the activity is complete
-  // Even if appliedWork hasn't been updated yet in our current view of the activity
-  console.log('[StaffService] Activity found with progress:', Math.round((activity.appliedWork / activity.totalWork) * 100) + '%');
   
   // Check if the staff to hire is in the activity params
   const staffToHire = activity.params.staffToHire as Staff;
   if (!staffToHire || !staffToHire.id) {
-    console.log('[StaffService] Cannot complete hiring: staff data not found in activity params', activity.params);
     removeActivity(activityId);
     return null;
   }
   
-  console.log('[StaffService] Found staff to hire:', staffToHire.name);
-  
   // Deduct first month's wage
   updatePlayerMoney(-staffToHire.wage);
-  console.log('[StaffService] Deducted first month wage:', staffToHire.wage);
   
   // Add staff to company
   const addedStaff = addStaff(staffToHire, true);
-  console.log('[StaffService] Added staff to company:', addedStaff.id);
   
   // Clean up
   removeActivity(activityId);

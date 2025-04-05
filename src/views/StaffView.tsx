@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import staffService, { Staff, StaffTeam, StaffSearchOptions } from '../services/staffService';
-import { StaffSearch, TeamManagement } from '../components/staff';
+import { StaffSearch } from '../components/staff';
 import { getActivitiesForTarget, getAllActivities, getActivityById, updateActivity } from '../lib/game/activityManager';
-import { WorkProgress } from '../components/ui/progress';
 import displayManager from '../lib/game/displayManager';
 import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';
@@ -16,7 +15,7 @@ displayManager.createDisplayState('staffActivities', {
 
 const StaffView: React.FC = () => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
-  const displayUpdate = useDisplayUpdate();
+  useDisplayUpdate();
   const displayState = displayManager.getDisplayState('staffActivities');
 
   // Team management state
@@ -35,29 +34,21 @@ const StaffView: React.FC = () => {
 
   // Modal state
   const [showStaffSearch, setShowStaffSearch] = useState(false);
-
-  // Add state for staff assignment modal
   const [showStaffAssignment, setShowStaffAssignment] = useState(false);
-
-  // Add state for hiring staff assignment modal
   const [showHiringStaffAssignment, setShowHiringStaffAssignment] = useState(false);
 
   // Handle start of staff search
   const handleStartSearch = displayManager.createActionHandler((activityId: string) => {
-    console.log('[StaffView] Starting staff search with activityId:', activityId);
-    
     // Get the activity and set up a completion callback
     const activity = getActivityById(activityId);
     if (activity) {
       // Add completion callback to the activity
       updateActivity(activityId, {
         completionCallback: () => {
-          console.log('[StaffView] Search activity completed');
           const searchOptions = activity.params?.searchOptions;
           if (searchOptions) {
             // Generate candidates on completion
             const results = staffService.generateStaffCandidates(searchOptions);
-            console.log('[StaffView] Generated candidates:', results.length);
             setSearchResults(results);
             setIsSearching(false);
             setShowStaffSearch(true); // Show the modal with results
@@ -71,25 +62,20 @@ const StaffView: React.FC = () => {
     
     // Update display state and close the modal
     displayManager.updateDisplayState('staffActivities', { searchActivityId: activityId });
-    console.log('[StaffView] Updated display state, closing search modal');
     setShowStaffSearch(false); // Close the search modal
   });
 
-  // Update the StaffSearch component to handle hiring activity
+  // Handle hiring activity
   const handleStartHiring = displayManager.createActionHandler((activityId: string, staffToHire: Staff) => {
-    console.log('[StaffView] Starting hiring process for staff:', staffToHire.name);
-    
     // Get the activity and set up a completion callback
     const activity = getActivityById(activityId);
     if (activity) {
       // Add completion callback to the activity
       updateActivity(activityId, {
         completionCallback: () => {
-          console.log('[StaffView] Hiring activity completed');
           // Call the completeHiringProcess function to finalize hiring
           const hiredStaff = staffService.completeHiringProcess(activityId);
           if (hiredStaff) {
-            console.log('[StaffView] Staff hired successfully:', hiredStaff.name);
             // Update search results to remove the hired staff
             setSearchResults(prevResults => prevResults.filter(s => s.id !== hiredStaff.id));
             
@@ -99,7 +85,6 @@ const StaffView: React.FC = () => {
             // Select the newly hired staff to show details
             setSelectedStaffId(hiredStaff.id);
           } else {
-            console.error('[StaffView] Failed to complete hiring process');
             toast({
               title: 'Hiring Failed',
               description: 'There was an issue completing the hiring process',
@@ -115,96 +100,57 @@ const StaffView: React.FC = () => {
     
     // Update display state and close modal
     displayManager.updateDisplayState('staffActivities', { hiringActivityId: activityId });
-    console.log('[StaffView] Updated display state for hiring, closing modal');
     setShowStaffSearch(false); // Close the search results modal
   });
 
   // Get progress percentage for search activity
   const getSearchProgress = () => {
-    if (!displayState.searchActivityId) {
-      console.log('[StaffView] No active search activity');
-      return 0;
-    }
+    if (!displayState.searchActivityId) return 0;
+    
     const activity = getActivityById(displayState.searchActivityId);
-    if (!activity) {
-      console.log('[StaffView] Activity not found for id:', displayState.searchActivityId);
-      return 0;
-    }
-    const progress = Math.round((activity.appliedWork / activity.totalWork) * 100);
-    console.log('[StaffView] Progress calculation:', {
-      activityId: activity.id,
-      appliedWork: activity.appliedWork,
-      totalWork: activity.totalWork,
-      progress: progress + '%'
-    });
-    return progress;
+    if (!activity) return 0;
+    
+    return Math.round((activity.appliedWork / activity.totalWork) * 100);
   };
 
   // Get progress percentage for hiring activity
   const getHiringProgress = () => {
-    if (!displayState.hiringActivityId) {
-      console.log('[StaffView] No active hiring activity');
-      return 0;
-    }
+    if (!displayState.hiringActivityId) return 0;
+    
     const activity = getActivityById(displayState.hiringActivityId);
-    if (!activity) {
-      console.log('[StaffView] Hiring activity not found for id:', displayState.hiringActivityId);
-      return 0;
-    }
-    const progress = Math.round((activity.appliedWork / activity.totalWork) * 100);
-    console.log('[StaffView] Hiring progress calculation:', {
-      activityId: activity.id,
-      appliedWork: activity.appliedWork,
-      totalWork: activity.totalWork,
-      progress: progress + '%'
-    });
-    return progress;
+    if (!activity) return 0;
+    
+    return Math.round((activity.appliedWork / activity.totalWork) * 100);
   };
 
   // Handle staff assignment to search activity
   const handleAssignStaff = () => {
-    if (!displayState.searchActivityId) {
-      console.log('[StaffView] Cannot assign staff: no active search activity');
-      return;
-    }
+    if (!displayState.searchActivityId) return;
+    
     const activity = getActivityById(displayState.searchActivityId);
-    if (!activity) {
-      console.log('[StaffView] Cannot assign staff: activity not found');
-      return;
-    }
-    console.log('[StaffView] Opening staff assignment modal for activity:', activity.id);
+    if (!activity) return;
+    
     setShowStaffAssignment(true);
   };
 
   // Handle staff assignment to hiring activity
   const handleAssignStaffToHiring = () => {
-    if (!displayState.hiringActivityId) {
-      console.log('[StaffView] Cannot assign staff: no active hiring activity');
-      return;
-    }
+    if (!displayState.hiringActivityId) return;
+    
     const activity = getActivityById(displayState.hiringActivityId);
-    if (!activity) {
-      console.log('[StaffView] Cannot assign staff: hiring activity not found');
-      return;
-    }
-    console.log('[StaffView] Opening staff assignment modal for hiring activity:', activity.id);
+    if (!activity) return;
+    
     setShowHiringStaffAssignment(true);
   };
 
   // Handle staff assignment completion
   const handleStaffAssigned = (staffIds: string[]) => {
-    console.log('[StaffView] Staff selection changed:', {
-      staffIds,
-      searchActivityId: displayState.searchActivityId
-    });
+    // For tracking changes in selected staff
   };
 
   // Handle staff assignment for hiring completion
   const handleHiringStaffAssigned = (staffIds: string[]) => {
-    console.log('[StaffView] Staff selection changed for hiring:', {
-      staffIds,
-      hiringActivityId: displayState.hiringActivityId
-    });
+    // For tracking changes in selected staff for hiring
   };
 
   // Manual team loading function
