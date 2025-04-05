@@ -20,6 +20,7 @@ interface StaffSearchProps {
   isSearching: boolean;
   onSearchingChange: (isSearching: boolean) => void;
   onStartSearch: (activityId: string) => void;
+  onStartHiring?: (activityId: string, staffToHire: ServiceStaff) => void;
 }
 
 // Create display state for staff search
@@ -37,6 +38,7 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
   isSearching,
   onSearchingChange,
   onStartSearch,
+  onStartHiring,
 }) => {
   const { player } = getGameState();
   const searchCost = calculateSearchCost(searchOptions);
@@ -44,32 +46,50 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
   const displayState = displayManager.getDisplayState('staffSearch');
   
   const handleSearch = async () => {
-    if (!player) return;
+    if (!player) {
+      console.log('[StaffSearch] Cannot start search: no player found');
+      return;
+    }
     
     try {
+      console.log('[StaffSearch] Starting staff search with options:', searchOptions);
       // Start the search activity
       const activityId = staffService.startStaffSearch(searchOptions);
+      console.log('[StaffSearch] Search activity started with ID:', activityId);
       onSearchingChange(true);
       onStartSearch(activityId); // Pass the activity ID back to parent
+      console.log('[StaffSearch] Closing search modal');
       onClose(); // Close the modal immediately
     } catch (error) {
-      console.error('Error starting staff search:', error);
+      console.error('[StaffSearch] Error starting staff search:', error);
       onSearchingChange(false);
     }
   };
   
   const handleHire = async (staff: ServiceStaff) => {
-    if (!player) return;
+    if (!player) {
+      console.log('[StaffSearch] Cannot hire: no player found');
+      return;
+    }
     
     try {
+      console.log('[StaffSearch] Starting hiring process for staff:', staff.id);
       // Start the hiring activity
       const activityId = staffService.startHiringProcess(staff);
+      console.log('[StaffSearch] Hiring activity started with ID:', activityId);
       
-      // Remove the hired candidate from results
-      onSearchResultsChange(searchResults.filter(s => s.id !== staff.id));
-      onClose(); // Close after starting hire process
+      // If onStartHiring prop is provided, call it with the activity ID and staff
+      if (onStartHiring) {
+        onStartHiring(activityId, staff);
+      } else {
+        // Otherwise handle it the old way
+        // Remove the hired candidate from results
+        onSearchResultsChange(searchResults.filter(s => s.id !== staff.id));
+        console.log('[StaffSearch] Closing modal after starting hire process');
+        onClose(); // Close after starting hire process
+      }
     } catch (error) {
-      console.error('Error starting hiring process:', error);
+      console.error('[StaffSearch] Error starting hiring process:', error);
     }
   };
   
@@ -377,26 +397,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                     </div>
                     <div className="mt-1">{Math.round(candidate.skills.administration * 100)}%</div>
                   </div>
-                  <div className="text-center">
-                    <div className="font-medium mb-1">Sales</div>
-                    <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
-                      <div 
-                        className="bg-wine rounded-full w-4 absolute bottom-0" 
-                        style={{ height: `${candidate.skills.sales * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="mt-1">{Math.round(candidate.skills.sales * 100)}%</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-medium mb-1">Maint</div>
-                    <div className="bg-gray-200 rounded-full h-16 w-4 mx-auto relative">
-                      <div 
-                        className="bg-wine rounded-full w-4 absolute bottom-0" 
-                        style={{ height: `${candidate.skills.maintenance * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="mt-1">{Math.round(candidate.skills.maintenance * 100)}%</div>
-                  </div>
                 </div>
               </div>
             )}
@@ -404,28 +404,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           
           <div className="flex justify-end">
             <button
-              className={`bg-wine text-white px-4 py-2 rounded ${
-                (!player || player.money < candidate.wage) ? 'opacity-50 cursor-not-allowed' : 'hover:bg-wine-dark'
-              }`}
+              className="px-4 py-2 bg-wine text-white rounded hover:bg-wine-dark"
               onClick={() => onHire(candidate)}
-              disabled={!player || player.money < candidate.wage}
             >
-              Hire (${candidate.wage}/mo)
+              Hire
             </button>
           </div>
         </div>
       ))}
     </div>
-    
-    <div className="mt-6">
-      <button
-        className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
-        onClick={onBack}
-      >
-        Back to Search Options
-      </button>
-    </div>
   </>
 );
 
-export default StaffSearch; 
+export default StaffSearch;

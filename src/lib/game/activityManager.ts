@@ -218,8 +218,11 @@ export const assignToolsToActivity = (activityId: string, toolIds: string[]): Ac
  * Apply work based on assigned staff and tools
  */
 export const processActivitiesTick = (): void => {
+  console.log('[ActivityManager] Processing activities tick');
   const gameState = getGameState();
   const activities = getAllActivities();
+  console.log('[ActivityManager] Total activities:', activities.length);
+  
   const updatedActivities: ActivityProgress[] = [];
   const completedActivities: string[] = [];
   
@@ -235,6 +238,12 @@ export const processActivitiesTick = (): void => {
   });
   
   activities.forEach(activity => {
+    console.log('[ActivityManager] Processing activity:', {
+      id: activity.id,
+      category: activity.category,
+      progress: `${Math.round((activity.appliedWork / activity.totalWork) * 100)}%`
+    });
+    
     // Get assigned staff for this activity
     const assignedStaffIds = activity.params?.assignedStaffIds || [];
     const assignedStaff = assignedStaffIds.map((id: string) => {
@@ -248,6 +257,12 @@ export const processActivitiesTick = (): void => {
       }
       return null;
     }).filter(Boolean) as (Staff & { taskCount: number })[];
+    
+    console.log('[ActivityManager] Assigned staff:', assignedStaff.map(s => ({
+      id: s.id,
+      name: s.name,
+      taskCount: s.taskCount
+    })));
     
     // Get assigned tools for this activity
     const assignedToolIds = activity.params?.assignedToolIds || [];
@@ -293,12 +308,28 @@ export const processActivitiesTick = (): void => {
         
         // Workforce division by task count (exactly like old system)
         const workforce = staff.workforce || 50; // Default to 50 like old system
-        appliedWork += (workforce / staff.taskCount) * relevantSkill;
+        const staffWork = (workforce / staff.taskCount) * relevantSkill;
+        appliedWork += staffWork;
+        
+        console.log('[ActivityManager] Staff work contribution:', {
+          staffId: staff.id,
+          name: staff.name,
+          relevantSkill,
+          workforce,
+          taskCount: staff.taskCount,
+          workContribution: staffWork
+        });
       });
       
       // Apply tool bonus exactly like old system - multiplicative 
       if (assignedToolIds.length > 0) {
-        appliedWork *= calculateToolSpeedBonus(assignedToolIds, activity.category);
+        const toolBonus = calculateToolSpeedBonus(assignedToolIds, activity.category);
+        appliedWork *= toolBonus;
+        console.log('[ActivityManager] Applied tool bonus:', {
+          toolIds: assignedToolIds,
+          bonus: toolBonus,
+          finalWork: appliedWork
+        });
       }
       
       // Apply work to the activity
@@ -307,10 +338,19 @@ export const processActivitiesTick = (): void => {
         appliedWork: Math.min(activity.totalWork, activity.appliedWork + appliedWork)
       };
       
+      console.log('[ActivityManager] Updated activity progress:', {
+        id: activity.id,
+        previousWork: activity.appliedWork,
+        appliedWork,
+        newTotal: updatedActivity.appliedWork,
+        progress: `${Math.round((updatedActivity.appliedWork / updatedActivity.totalWork) * 100)}%`
+      });
+      
       updatedActivities.push(updatedActivity);
       
       // Check if activity is complete
       if (updatedActivity.appliedWork >= updatedActivity.totalWork) {
+        console.log('[ActivityManager] Activity completed:', activity.id);
         completedActivities.push(activity.id);
         
         // Call completion callback if provided
@@ -323,16 +363,24 @@ export const processActivitiesTick = (): void => {
         updatedActivity.progressCallback(progress);
       }
     } else {
+      console.log('[ActivityManager] No staff assigned to activity:', activity.id);
       // No staff assigned, no work applied (keep activity unchanged)
       updatedActivities.push(activity);
     }
   });
   
   // Update game state with updated activities
+  const remainingActivities = updatedActivities.filter(activity => 
+    !completedActivities.includes(activity.id)
+  );
+  console.log('[ActivityManager] Updating game state:', {
+    totalActivities: activities.length,
+    completed: completedActivities.length,
+    remaining: remainingActivities.length
+  });
+  
   updateGameState({
-    activities: updatedActivities.filter(activity => 
-      !completedActivities.includes(activity.id)
-    )
+    activities: remainingActivities
   });
   
   // Log completions

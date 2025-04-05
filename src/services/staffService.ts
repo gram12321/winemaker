@@ -623,17 +623,20 @@ export const STAFF_ACTIVITY_CATEGORIES = {
 
 // Function to start a staff search activity
 export function startStaffSearch(options: StaffSearchOptions): string {
+  console.log('[StaffService] Starting staff search with options:', options);
   const searchCost = calculateSearchCost(options);
   const gameState = getGameState();
   
   if (!gameState.player || gameState.player.money < searchCost) {
+    console.log('[StaffService] Insufficient funds for search. Required:', searchCost, 'Available:', gameState.player?.money);
     throw new Error('Insufficient funds for staff search');
   }
   
   // Deduct search cost
   updatePlayerMoney(-searchCost);
+  console.log('[StaffService] Deducted search cost:', searchCost);
   
-  // Create the activity
+  // Create the activity - completion callback will be added by the component
   const activity = addActivity({
     id: uuidv4(),
     category: STAFF_ACTIVITY_CATEGORIES.STAFF_SEARCH,
@@ -645,6 +648,7 @@ export function startStaffSearch(options: StaffSearchOptions): string {
     }
   });
 
+  console.log('[StaffService] Created search activity:', activity.id);
   toast({
     title: 'Staff Search Started',
     description: `Started search for ${options.numberOfCandidates} candidates`
@@ -652,27 +656,20 @@ export function startStaffSearch(options: StaffSearchOptions): string {
   return activity.id;
 }
 
-// Function to check if search is complete and get candidates
-export function getStaffSearchResults(activityId: string): Staff[] | null {
-  const activity = getActivityById(activityId);
-  if (!activity || !activity.params) return null;
-  
-  if (activity.appliedWork >= activity.totalWork) {
-    // Search is complete, generate candidates
-    const candidates = generateStaffCandidates(activity.params.searchOptions);
-    removeActivity(activityId);
-    return candidates;
-  }
-  
-  return null;
-}
-
 // Function to start hiring process
 export function startHiringProcess(staff: Staff): string {
+  console.log('[StaffService] Starting hiring process for staff:', staff.name);
   const gameState = getGameState();
   
   if (!gameState.player || gameState.player.money < staff.wage) {
+    console.log('[StaffService] Insufficient funds for first month wage. Required:', staff.wage, 'Available:', gameState.player?.money);
     throw new Error('Insufficient funds for first month\'s wage');
+  }
+  
+  // Validate staff data
+  if (!staff || !staff.id || !staff.name) {
+    console.error('[StaffService] Invalid staff data:', staff);
+    throw new Error('Invalid staff data for hiring process');
   }
   
   // Create the hiring activity
@@ -682,10 +679,14 @@ export function startHiringProcess(staff: Staff): string {
     totalWork: 50, // Hiring takes less time than searching
     appliedWork: 0,
     params: {
-      staffToHire: staff
+      staffToHire: {
+        ...staff  // Make a copy to ensure we have all properties
+      }
     }
   });
 
+  console.log('[StaffService] Created hiring activity:', activity.id, 'for staff:', staff.name);
+  
   toast({
     title: 'Hiring Process Started',
     description: `Started hiring process for ${staff.name}`
@@ -695,27 +696,46 @@ export function startHiringProcess(staff: Staff): string {
 
 // Function to complete hiring process
 export function completeHiringProcess(activityId: string): Staff | null {
-  const activity = getActivityById(activityId);
-  if (!activity || !activity.params) return null;
+  console.log('[StaffService] Attempting to complete hiring process for activity:', activityId);
   
-  if (activity.appliedWork >= activity.totalWork) {
-    const staff = activity.params.staffToHire;
-    
-    // Deduct first month's wage
-    updatePlayerMoney(-staff.wage);
-    
-    // Add staff to company
-    addStaff(staff, true);
-    
-    removeActivity(activityId);
-    toast({
-      title: 'Staff Hired',
-      description: `${staff.name} has joined your company`
-    });
-    return staff;
+  const activity = getActivityById(activityId);
+  if (!activity || !activity.params) {
+    console.log('[StaffService] Cannot complete hiring: activity not found or has no params');
+    return null;
   }
   
-  return null;
+  // When called from the completion callback, we should trust that the activity is complete
+  // Even if appliedWork hasn't been updated yet in our current view of the activity
+  console.log('[StaffService] Activity found with progress:', Math.round((activity.appliedWork / activity.totalWork) * 100) + '%');
+  
+  // Check if the staff to hire is in the activity params
+  const staffToHire = activity.params.staffToHire as Staff;
+  if (!staffToHire || !staffToHire.id) {
+    console.log('[StaffService] Cannot complete hiring: staff data not found in activity params', activity.params);
+    removeActivity(activityId);
+    return null;
+  }
+  
+  console.log('[StaffService] Found staff to hire:', staffToHire.name);
+  
+  // Deduct first month's wage
+  updatePlayerMoney(-staffToHire.wage);
+  console.log('[StaffService] Deducted first month wage:', staffToHire.wage);
+  
+  // Add staff to company
+  const addedStaff = addStaff(staffToHire, true);
+  console.log('[StaffService] Added staff to company:', addedStaff.id);
+  
+  // Clean up
+  removeActivity(activityId);
+  
+  // Notify the user
+  toast({
+    title: 'Staff Hired',
+    description: `${staffToHire.name} has joined your company`
+  });
+  
+  return addedStaff;
 }
 
 export default {
@@ -746,7 +766,6 @@ export default {
   mapSpecializationToCategory,
   initializeDefaultTeams,
   startStaffSearch,
-  getStaffSearchResults,
   startHiringProcess,
   completeHiringProcess
 }; 
