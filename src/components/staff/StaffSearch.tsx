@@ -5,11 +5,11 @@ import staffService, {
   SpecializedRoles,
   calculateSearchCost,
   calculatePerCandidateCost,
-  calculateWage,
-  generateStaffCandidates,
   Staff as ServiceStaff
 } from '../../services/staffService';
-import { updatePlayerMoney, getGameState } from '../../gameState';
+import { getGameState } from '../../gameState';
+import { getActivityById } from '../../lib/game/activityManager';
+import displayManager from '../../lib/game/displayManager';
 
 interface StaffSearchProps {
   onClose: () => void;
@@ -19,7 +19,14 @@ interface StaffSearchProps {
   onSearchResultsChange: (results: ServiceStaff[]) => void;
   isSearching: boolean;
   onSearchingChange: (isSearching: boolean) => void;
+  onStartSearch: (activityId: string) => void;
 }
+
+// Create display state for staff search
+displayManager.createDisplayState('staffSearch', {
+  searchActivityId: null as string | null,
+  hiringActivityId: null as string | null
+});
 
 const StaffSearch: React.FC<StaffSearchProps> = ({
   onClose,
@@ -29,33 +36,24 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
   onSearchResultsChange,
   isSearching,
   onSearchingChange,
+  onStartSearch,
 }) => {
   const { player } = getGameState();
   const searchCost = calculateSearchCost(searchOptions);
   const perCandidateCost = calculatePerCandidateCost(searchOptions);
+  const displayState = displayManager.getDisplayState('staffSearch');
   
   const handleSearch = async () => {
     if (!player) return;
     
-    // Check if player has enough money
-    if (player.money < searchCost) {
-      alert('You do not have enough money for this search.');
-      return;
-    }
-    
-    // Deduct the search cost
-    updatePlayerMoney(-searchCost);
-    
-    // Set searching state
-    onSearchingChange(true);
-    
     try {
-      // Call generateStaffCandidates with the searchOptions object
-      const candidates = await generateStaffCandidates(searchOptions);
-      onSearchResultsChange(candidates);
+      // Start the search activity
+      const activityId = staffService.startStaffSearch(searchOptions);
+      onSearchingChange(true);
+      onStartSearch(activityId); // Pass the activity ID back to parent
+      onClose(); // Close the modal immediately
     } catch (error) {
-      console.error('Error generating staff candidates:', error);
-    } finally {
+      console.error('Error starting staff search:', error);
       onSearchingChange(false);
     }
   };
@@ -63,23 +61,16 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
   const handleHire = async (staff: ServiceStaff) => {
     if (!player) return;
     
-    // Check if player has enough money for first month's wage
-    if (player.money < staff.wage) {
-      alert('You do not have enough money to pay the first month\'s wage.');
-      return;
+    try {
+      // Start the hiring activity
+      const activityId = staffService.startHiringProcess(staff);
+      
+      // Remove the hired candidate from results
+      onSearchResultsChange(searchResults.filter(s => s.id !== staff.id));
+      onClose(); // Close after starting hire process
+    } catch (error) {
+      console.error('Error starting hiring process:', error);
     }
-    
-    // Hire the staff member
-    await staffService.addStaff(staff, true);
-    
-    // Deduct the first month's wage
-    updatePlayerMoney(-staff.wage);
-    
-    // Close the search modal
-    onClose();
-    
-    // Update search results
-    onSearchResultsChange(searchResults.filter(s => s.id !== staff.id));
   };
   
   const handleSkillChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,18 +134,6 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
             onBack={() => onSearchResultsChange([])}
             onHire={handleHire}
           />
-        )}
-        
-        {/* Loading state during search */}
-        {isSearching && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-              <div className="mb-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-wine mx-auto"></div>
-              </div>
-              <p className="text-lg">Searching for candidates...</p>
-            </div>
-          </div>
         )}
       </div>
     </div>

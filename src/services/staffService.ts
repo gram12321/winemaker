@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Staff as GameStateStaff } from '../gameState';
-import { getGameState, updateGameState } from '../gameState';
+import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
 import displayManager from '../lib/game/displayManager';
-import { assignStaffToActivity, getActivityById } from '../lib/game/activityManager';
+import { assignStaffToActivity, getActivityById, addActivity, removeActivity } from '../lib/game/activityManager';
+import { WorkCategory, ActivityProgress } from '../lib/game/workCalculator';
 import {
   saveStaffToDb,
   removeStaffFromDb,
@@ -29,6 +30,7 @@ import {
   SkillLevels,
   DefaultTeams
 } from '../constants/staff';
+import { toast } from '../lib/ui/toast';
 
 // Types for staff related functionality
 export interface StaffSkills {
@@ -613,6 +615,109 @@ export async function initializeDefaultTeams(): Promise<void> {
   }
 }
 
+// Activity categories
+export const STAFF_ACTIVITY_CATEGORIES = {
+  STAFF_SEARCH: WorkCategory.STAFF_SEARCH,
+  STAFF_HIRING: WorkCategory.ADMINISTRATION
+} as const;
+
+// Function to start a staff search activity
+export function startStaffSearch(options: StaffSearchOptions): string {
+  const searchCost = calculateSearchCost(options);
+  const gameState = getGameState();
+  
+  if (!gameState.player || gameState.player.money < searchCost) {
+    throw new Error('Insufficient funds for staff search');
+  }
+  
+  // Deduct search cost
+  updatePlayerMoney(-searchCost);
+  
+  // Create the activity
+  const activity = addActivity({
+    id: uuidv4(),
+    category: STAFF_ACTIVITY_CATEGORIES.STAFF_SEARCH,
+    totalWork: 100, // Base work units
+    appliedWork: 0,
+    params: {
+      searchOptions: options,
+      candidates: [] as Staff[]
+    }
+  });
+
+  toast({
+    title: 'Staff Search Started',
+    description: `Started search for ${options.numberOfCandidates} candidates`
+  });
+  return activity.id;
+}
+
+// Function to check if search is complete and get candidates
+export function getStaffSearchResults(activityId: string): Staff[] | null {
+  const activity = getActivityById(activityId);
+  if (!activity || !activity.params) return null;
+  
+  if (activity.appliedWork >= activity.totalWork) {
+    // Search is complete, generate candidates
+    const candidates = generateStaffCandidates(activity.params.searchOptions);
+    removeActivity(activityId);
+    return candidates;
+  }
+  
+  return null;
+}
+
+// Function to start hiring process
+export function startHiringProcess(staff: Staff): string {
+  const gameState = getGameState();
+  
+  if (!gameState.player || gameState.player.money < staff.wage) {
+    throw new Error('Insufficient funds for first month\'s wage');
+  }
+  
+  // Create the hiring activity
+  const activity = addActivity({
+    id: uuidv4(),
+    category: STAFF_ACTIVITY_CATEGORIES.STAFF_HIRING,
+    totalWork: 50, // Hiring takes less time than searching
+    appliedWork: 0,
+    params: {
+      staffToHire: staff
+    }
+  });
+
+  toast({
+    title: 'Hiring Process Started',
+    description: `Started hiring process for ${staff.name}`
+  });
+  return activity.id;
+}
+
+// Function to complete hiring process
+export function completeHiringProcess(activityId: string): Staff | null {
+  const activity = getActivityById(activityId);
+  if (!activity || !activity.params) return null;
+  
+  if (activity.appliedWork >= activity.totalWork) {
+    const staff = activity.params.staffToHire;
+    
+    // Deduct first month's wage
+    updatePlayerMoney(-staff.wage);
+    
+    // Add staff to company
+    addStaff(staff, true);
+    
+    removeActivity(activityId);
+    toast({
+      title: 'Staff Hired',
+      description: `${staff.name} has joined your company`
+    });
+    return staff;
+  }
+  
+  return null;
+}
+
 export default {
   createStaff,
   addStaff,
@@ -639,5 +744,9 @@ export default {
   calculateActivityStaffEfficiency,
   mapCategoryToSkill,
   mapSpecializationToCategory,
-  initializeDefaultTeams
+  initializeDefaultTeams,
+  startStaffSearch,
+  getStaffSearchResults,
+  startHiringProcess,
+  completeHiringProcess
 }; 

@@ -22,7 +22,6 @@ Players manage a winery, including vineyard operations, wine production, buildin
 ```tsx
 // Example view switching
 {view === "vineyard" && <Vineyard />}
-{view === "production" && <WineProduction />}
 {view === "finance" && <FinanceScreen />}
 ```
 

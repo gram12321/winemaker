@@ -126,7 +126,7 @@ function App() {
     initializeGameTime();
     
     // Use our new service to create the company
-    await createCompany(name, player);
+    await createCompany(name, player, initialStaff);
     
     // Show welcome message for new company
     consoleService.info(`Welcome to your new winery, ${name}! Let's begin your winemaking journey.`);

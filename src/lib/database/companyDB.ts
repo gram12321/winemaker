@@ -28,16 +28,17 @@ export const checkCompanyExists = async (companyName: string): Promise<boolean> 
  * Create a new company in Firestore
  * @param companyName The name of the company to create
  * @param player The player data
+ * @param initialStaff The initial staff array
  * @returns Promise resolving to true if successful, false otherwise
  */
-export const createCompany = async (companyName: string, player: Player): Promise<boolean> => {
+export const createCompany = async (companyName: string, player: Player, initialStaff: any[] = []): Promise<boolean> => {
   try {
     const docRef = doc(db, 'companies', companyName);
     await setDoc(docRef, {
       player,
       vineyards: [],
       buildings: [],
-      staff: [],
+      staff: initialStaff,
       wineBatches: [],
       week: 1,
       season: 'Spring',
