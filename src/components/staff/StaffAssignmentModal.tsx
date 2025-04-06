@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
-import { getNationalityFlag } from '../../lib/core/utils/formatUtils';
+import { getNationalityFlag, formatCurrency, getFallbackFlag } from '../../lib/core/utils/formatUtils'; // Import utility functions
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -30,20 +29,16 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       const loadedTeams = await staffService.loadTeams();
       setTeams(loadedTeams);
     };
-
     loadTeams();
   }, []);
 
   const { staff } = getGameState();
   const activity = getActivityById(activityId);
 
-  const handleAssignStaff = (staffId: string, checked: boolean) => {
-    let newAssignments: string[];
-    if (checked) {
-      newAssignments = [...assignedStaffIds, staffId];
-    } else {
-      newAssignments = assignedStaffIds.filter(id => id !== staffId);
-    }
+  const handleStaffSelection = (staffId: string, checked: boolean) => {
+    const newAssignments = checked 
+      ? [...assignedStaffIds, staffId]
+      : assignedStaffIds.filter(id => id !== staffId);
     setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments, false);
   };
@@ -55,24 +50,9 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     onAssignmentChange(newAssignments, false);
   };
 
-  const handleAssignTeam = (teamId: string) => {
-    if (!teamId) return;
-
-    const team = teams.find(t => t.id === teamId);
-    if (!team) return;
-
-    const teamStaff = staff.filter(s => (s as any).teamId === teamId);
-    const teamStaffIds = teamStaff.map(s => s.id);
-
-    const newAssignments = [...assignedStaffIds];
-    teamStaffIds.forEach(id => {
-      if (!newAssignments.includes(id)) {
-        newAssignments.push(id);
-      }
-    });
-
-    setAssignedStaffIds(newAssignments);
-    onAssignmentChange(newAssignments);
+  const handleSave = () => {
+    staffService.assignStaffToActivityById(activityId, assignedStaffIds);
+    onAssignmentChange(assignedStaffIds, true);
   };
 
   const calculateWorkProgress = () => {
@@ -111,86 +91,48 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     };
   };
 
-  const workProgress = calculateWorkProgress();
-
-  const createProgressSegments = () => {
-    if (workProgress.workPerWeek <= 0 || workProgress.weeksToComplete === 'N/A') {
-      return null;
-    }
-
-    const numberOfWeeks = typeof workProgress.weeksToComplete === 'number' 
-      ? workProgress.weeksToComplete
-      : 0;
-
-    const totalSegmentsWidth = 100 - workProgress.progressPercentage;
+  const renderSkillBars = (staffMember: any) => {
+    const skills = {
+      field: { color: '#ffcc00', label: 'F' },
+      winery: { color: '#2179ff', label: 'W' },
+      administration: { color: '#6c757d', label: 'A' },
+      sales: { color: '#28a745', label: 'S' },
+      maintenance: { color: '#d9534f', label: 'M' }
+    };
 
     return (
-      <div 
-        className="h-full absolute grid"
-        style={{ 
-          width: `${totalSegmentsWidth}%`, 
-          left: `${workProgress.progressPercentage}%`,
-          gridTemplateColumns: `repeat(${numberOfWeeks}, 1fr)`
-        }}
-      >
-        {Array.from({ length: numberOfWeeks }).map((_, i) => {
-          const weekWork = Math.min(
-            workProgress.workPerWeek, 
-            workProgress.totalWork - workProgress.appliedWork - (i * workProgress.workPerWeek)
-          );
-
-          if (weekWork <= 0) return null;
-
-          return (
-            <div 
-              key={i}
-              className="h-full bg-wine-light opacity-60 border-r border-gray-100"
-              title={`Week ${i + 1}: ${Math.round(weekWork)} units`}
-            />
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderSkillBars = (member: any) => {
-    const skills = ['field', 'winery', 'administration', 'sales', 'maintenance'];
-    const letters = ['F', 'W', 'A', 'S', 'M'];
-    
-    return (
-      <div className="flex gap-1">
-        {skills.map((skill, index) => {
-          const skillLevel = member.skills[skill];
-          let backgroundColor;
-          if (skillLevel > 0.7) {
-            backgroundColor = '#16a34a';
-          } else if (skillLevel > 0.4) {
-            backgroundColor = '#eab308';
-          } else {
-            backgroundColor = '#dc2626';
-          }
-          return (
-            <span
-              key={skill}
-              className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-white rounded"
-              style={{ backgroundColor }}
-              title={`${skill.charAt(0).toUpperCase() + skill.slice(1)}: ${Math.round(skillLevel * 100)}%`}
+      <div className="flex gap-1 h-5">
+        {Object.entries(skills).map(([skill, { color, label }]) => (
+          <div 
+            key={skill}
+            className="relative flex-1 bg-gray-200 rounded"
+            title={`${skill.charAt(0).toUpperCase() + skill.slice(1)} Skill: ${staffMember.skills?.[skill] || 0}`}
+          >
+            <div
+              className="absolute inset-0 flex items-center justify-center text-xs text-white font-bold"
+              style={{
+                width: `${(staffMember.skills?.[skill] || 0) * 100}%`,
+                backgroundColor: color,
+                minWidth: '20px'
+              }}
             >
-              {letters[index]}
-            </span>
-          );
-        })}
+              {label}
+            </div>
+          </div>
+        ))}
       </div>
     );
   };
+
+  const workProgress = calculateWorkProgress();
 
   return (
     <div className="w-full max-h-[80vh] overflow-y-auto p-4">
       <h2 className="text-xl font-semibold mb-4">Assign Staff to Activity</h2>
 
+      {/* Work Progress Preview */}
       <div className="bg-gray-50 p-4 rounded mb-6">
         <h3 className="text-lg font-medium mb-3">Work Progress Preview</h3>
-
         <div className="grid grid-cols-3 gap-4 mb-3 text-sm">
           <div>
             <span className="font-medium">Work per Week:</span> {workProgress.workPerWeek} units
@@ -203,80 +145,65 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           </div>
         </div>
 
-        <div className="h-8 bg-gray-200 rounded-full relative">
+        <div className="h-4 bg-gray-200 rounded-full relative">
           <div 
-            className="h-full bg-wine rounded-l-full absolute"
+            className="h-full bg-wine rounded-l-full"
             style={{ width: `${workProgress.progressPercentage}%` }}
           />
-          {createProgressSegments()}
         </div>
-
-        <p className="text-xs text-gray-600 mt-2">
-          The progress bar shows one segment for each week of estimated work.
-        </p>
       </div>
 
+      {/* Staff Table */}
       <div className="mb-6">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-2">
           <h3 className="font-medium">Available Staff</h3>
-          {teams.length > 0 && (
-            <select
-              onChange={(e) => handleAssignTeam(e.target.value)}
-              className="text-sm bg-wine text-white px-2 py-1 rounded hover:bg-wine-dark"
-            >
-              <option value="">Assign Team...</option>
-              {teams.map(team => (
-                <option key={team.id} value={team.id}>
-                  {team.icon} {team.name} ({staff.filter(s => (s as any).teamId === team.id).length} members)
-                </option>
-              ))}
-            </select>
-          )}
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={selectAll}
+              onChange={(e) => handleSelectAll(e.target.checked)}
+              className="mr-2"
+            />
+            Select All
+          </label>
         </div>
 
-        <div className="bg-white rounded-lg shadow">
-          <table className="min-w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-left">Nationality</th>
-                <th className="px-4 py-2 text-left">Skills</th>
-                <th className="px-4 py-2 text-right">Wage</th>
-                <th className="px-4 py-2 text-center">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="text-left p-2">Name</th>
+              <th className="text-left p-2">Nationality</th>
+              <th className="text-left p-2">Skills</th>
+              <th className="text-right p-2">Wage</th>
+              <th className="text-center p-2">Select</th>
+            </tr>
+          </thead>
+          <tbody>
+            {staff.map(member => (
+              <tr key={member.id} className="border-t">
+                <td className="p-2">{member.name}</td>
+                <td className="p-2">
+                  <div className="flex items-center gap-2">
+                    <span 
+                      className={`${getNationalityFlag(member.nationality)} w-4 h-4`}
+                      title={member.nationality}
+                    />
+                    {member.nationality}
+                  </div>
+                </td>
+                <td className="p-2">{renderSkillBars(member)}</td>
+                <td className="p-2 text-right">{formatCurrency(member.wage)}</td>
+                <td className="p-2 text-center">
                   <input
                     type="checkbox"
-                    checked={selectAll}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="rounded border-gray-300"
+                    checked={assignedStaffIds.includes(member.id)}
+                    onChange={(e) => handleStaffSelection(member.id, e.target.checked)}
                   />
-                </th>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {staff.map(member => (
-                <tr key={member.id} className="border-t border-gray-100">
-                  <td className="px-4 py-2">{member.name}</td>
-                  <td className="px-4 py-2">
-                    <span className={`flag-icon ${getNationalityFlag(member.nationality)}`}></span>
-                    {" "}{member.nationality}
-                  </td>
-                  <td className="px-4 py-2">
-                    {renderSkillBars(member)}
-                  </td>
-                  <td className="px-4 py-2 text-right">€{member.wage.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-center">
-                    <input
-                      type="checkbox"
-                      checked={assignedStaffIds.includes(member.id)}
-                      onChange={(e) => handleAssignStaff(member.id, e.target.checked)}
-                      className="rounded border-gray-300"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <div className="flex justify-end space-x-3">
@@ -287,10 +214,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           Cancel
         </button>
         <button
-          onClick={() => {
-            staffService.assignStaffToActivityById(activityId, assignedStaffIds);
-            onAssignmentChange(assignedStaffIds, true);
-          }}
+          onClick={handleSave}
           className="px-4 py-2 bg-wine text-white rounded hover:bg-wine-dark"
         >
           Save Assignments
