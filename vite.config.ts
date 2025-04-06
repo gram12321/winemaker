@@ -45,14 +45,15 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0',
+    host: true,
+    port: 5173,
+    strictPort: true,
     hmr: {
       clientPort: 443,
       host: '0.0.0.0'
     },
     cors: true,
-    strictPort: true,
-    allowedHosts: 'all'
+    allowedHosts: ['42ce5070-689d-4888-819c-f4977b080723-00-2hphhf3482rf3.riker.replit.dev', '.replit.dev']
   },
   // Force ignore our old project - fix the wildcard pattern
   optimizeDeps: {
