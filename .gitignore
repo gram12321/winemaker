@@ -29,6 +29,3 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
-
-# Ignore old project files
-winemaker_old/ 
