@@ -14,10 +14,19 @@ export const formatPercentage = (value: number): string => {
   return `${(value * 100).toFixed(1)}%`;
 };
 
+const countryToFlagCode: Record<string, string> = {
+  "Italy": "it",
+  "France": "fr",
+  "Spain": "es",
+  "US": "us",
+  "Germany": "de",
+};
+
 export const getNationalityFlag = (nationality: string): string => {
-  return `/assets/icon/flags/icon_${nationality.toLowerCase()}.webp`;
+  const countryCode = countryToFlagCode[nationality] || 'eu';
+  return `flag-icon flag-icon-${countryCode}`;
 };
 
 export const getFallbackFlag = (): string => {
-  return `/assets/icon/flags/icon_default.webp`;
+  return 'flag-icon flag-icon-eu';
 };

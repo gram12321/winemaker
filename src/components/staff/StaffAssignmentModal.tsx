@@ -184,13 +184,9 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                 <td className="p-2">{member.name}</td>
                 <td className="p-2">
                   <div className="flex items-center gap-2">
-                    <img 
-                      src={getNationalityFlag(member.nationality)}
-                      alt={member.nationality}
-                      className="w-4 h-4"
-                      onError={(e) => {
-                        e.currentTarget.src = getFallbackFlag();
-                      }}
+                    <span 
+                      className={`${getNationalityFlag(member.nationality)} w-4 h-4`}
+                      title={member.nationality}
                     />
                     {member.nationality}
                   </div>
