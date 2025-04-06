@@ -49,7 +49,11 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
       protocol: 'wss',
-    }
+    },
+    allowedHosts: [
+      '42ce5070-689d-4888-819c-f4977b080723-00-2hphhf3482rf3.riker.replit.dev',
+      '.replit.dev'
+    ]
   },
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
