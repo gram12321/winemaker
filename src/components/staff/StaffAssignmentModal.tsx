@@ -3,6 +3,7 @@ import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
+import { getNationalityFlag, formatCurrency, getFallbackFlag } from '../../lib/core/utils'; // Import utility functions
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -182,16 +183,20 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
               <tr key={member.id} className="border-t">
                 <td className="p-2">{member.name}</td>
                 <td className="p-2">
-                  <img 
-                    src={`/assets/icon/icon_${member.nationality.toLowerCase()}.webp`}
-                    alt={member.nationality}
-                    className="inline-block w-4 h-4 mr-1"
-                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                  />
-                  {member.nationality}
+                  <div className="flex items-center gap-2">
+                    <img 
+                      src={getNationalityFlag(member.nationality)}
+                      alt={member.nationality}
+                      className="w-4 h-4"
+                      onError={(e) => {
+                        e.currentTarget.src = getFallbackFlag();
+                      }}
+                    />
+                    {member.nationality}
+                  </div>
                 </td>
                 <td className="p-2">{renderSkillBars(member)}</td>
-                <td className="p-2 text-right">€{member.wage}</td>
+                <td className="p-2 text-right">{formatCurrency(member.wage)}</td>
                 <td className="p-2 text-center">
                   <input
                     type="checkbox"
