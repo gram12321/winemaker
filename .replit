@@ -1,0 +1,13 @@
+modules = ["nodejs-20"]
+
+[workflows]
+runButton = "dev"
+
+[[workflows.workflow]]
+name = "dev"
+author = 34895096
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
