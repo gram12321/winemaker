@@ -172,8 +172,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
               className="h-5 flex items-center justify-center text-xs font-medium text-white"
               style={{ 
                 backgroundColor: skill.color,
-                width: `${Math.round(skillLevel * 100)}%`,
-                minWidth: '20px'
+                width: `${Math.round(skillLevel * 100)}%`
               }}
               title={`${skill.key.charAt(0).toUpperCase() + skill.key.slice(1)}: ${Math.round(skillLevel * 100)}%`}
             >
