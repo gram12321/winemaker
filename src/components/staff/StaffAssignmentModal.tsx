@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
+import { getNationalityFlag } from '../../lib/core/utils/formatUtils';
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -21,7 +23,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
 }) => {
   const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>(initialAssignedStaffIds);
   const [teams, setTeams] = useState<StaffTeam[]>([]);
-  const [selectAll, setSelectAll] = useState(false); // Added state for select all
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     const loadTeams = async () => {
@@ -32,27 +34,25 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     loadTeams();
   }, []);
 
-  const { staff, vineyards } = getGameState();
+  const { staff } = getGameState();
   const activity = getActivityById(activityId);
 
-  const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
-  const unassignedStaff = staff.filter(s => !assignedStaffIds.includes(s.id));
-
-  const handleAssignStaff = (staffId: string) => {
-    const newAssignments = [...assignedStaffIds, staffId];
+  const handleAssignStaff = (staffId: string, checked: boolean) => {
+    let newAssignments: string[];
+    if (checked) {
+      newAssignments = [...assignedStaffIds, staffId];
+    } else {
+      newAssignments = assignedStaffIds.filter(id => id !== staffId);
+    }
     setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments, false);
   };
 
-  const handleUnassignStaff = (staffId: string) => {
-    const newAssignments = assignedStaffIds.filter(id => id !== staffId);
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+    const newAssignments = checked ? staff.map(s => s.id) : [];
     setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments, false);
-  };
-
-  const handleSave = () => {
-    staffService.assignStaffToActivityById(activityId, assignedStaffIds);
-    onAssignmentChange(assignedStaffIds, true);
   };
 
   const handleAssignTeam = (teamId: string) => {
@@ -86,6 +86,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       };
     }
 
+    const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
     const workPerWeek = calculateStaffWorkContribution(
       assignedStaff, 
       category as WorkCategory
@@ -152,15 +153,24 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     );
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    setSelectAll(checked);
-    setAssignedStaffIds(checked ? staff.map(s => s.id) : []);
-    onAssignmentChange(checked ? staff.map(s => s.id) : [], false);
-  };
-
-  const getNationalityFlag = (nationality: string) => {
-    // Add your nationality flag logic here.  This is a placeholder.
-    return ''; // Replace with actual flag class
+  const renderSkillBars = (member: any) => {
+    return (
+      <div className="flex gap-1">
+        {member.specializations?.map((spec: string) => {
+          const role = staffService.SpecializedRoles[spec];
+          if (!role) return null;
+          return (
+            <span
+              key={spec}
+              className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-wine text-white rounded"
+              title={role.title}
+            >
+              {role.skillBonus}
+            </span>
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -182,23 +192,11 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           </div>
         </div>
 
-        {workProgress.appliedWork > 0 && (
-          <div className="mb-2">
-            <div className="h-3 bg-gray-200 rounded-full relative">
-              <div 
-                className="h-3 bg-wine rounded-full absolute"
-                style={{ width: `${workProgress.progressPercentage}%` }}
-              />
-            </div>
-          </div>
-        )}
-
         <div className="h-8 bg-gray-200 rounded-full relative">
           <div 
             className="h-full bg-wine rounded-l-full absolute"
             style={{ width: `${workProgress.progressPercentage}%` }}
           />
-
           {createProgressSegments()}
         </div>
 
@@ -207,81 +205,66 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <div className="flex justify-between mb-2">
-            <h3 className="font-medium">Assigned Staff ({assignedStaff.length})</h3>
-            {teams.length > 0 && (
-              <select
-                onChange={(e) => handleAssignTeam(e.target.value)}
-                className="text-sm bg-wine text-white px-2 py-1 rounded hover:bg-wine-dark"
-              >
-                <option value="">Assign Team...</option>
-                {teams.map(team => (
-                  <option key={team.id} value={team.id}>
-                    {team.icon} {team.name} ({staff.filter(s => (s as any).teamId === team.id).length} members)
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {assignedStaff.length === 0 ? (
-            <p className="text-sm text-gray-500">No staff assigned yet.</p>
-          ) : (
-            <ul className="space-y-2 max-h-60 overflow-y-auto">
-              {assignedStaff.map(member => (
-                <li key={member.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <div>
-                    <div className="font-medium">
-                      {member.name} <span className={getNationalityFlag(member.nationality)}></span>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {member.specializations?.length > 0 ? 
-                        member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleUnassignStaff(member.id)}
-                    className="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300"
-                  >
-                    Remove
-                  </button>
-                </li>
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-medium">Available Staff</h3>
+          {teams.length > 0 && (
+            <select
+              onChange={(e) => handleAssignTeam(e.target.value)}
+              className="text-sm bg-wine text-white px-2 py-1 rounded hover:bg-wine-dark"
+            >
+              <option value="">Assign Team...</option>
+              {teams.map(team => (
+                <option key={team.id} value={team.id}>
+                  {team.icon} {team.name} ({staff.filter(s => (s as any).teamId === team.id).length} members)
+                </option>
               ))}
-            </ul>
+            </select>
           )}
         </div>
 
-        <div>
-          <h3 className="font-medium mb-2">Available Staff ({unassignedStaff.length})</h3>
-          {unassignedStaff.length === 0 ? (
-            <p className="text-sm text-gray-500">No staff available.</p>
-          ) : (
-            <ul className="space-y-2 max-h-60 overflow-y-auto">
-              {unassignedStaff.map(member => (
-                <li key={member.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <div>
-                    <div className="font-medium">
-                      {member.name} <span className={getNationalityFlag(member.nationality)}></span>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {member.specializations?.length > 0 ? 
-                        member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleAssignStaff(member.id)}
-                    className="text-xs bg-wine text-white px-2 py-1 rounded hover:bg-wine-dark"
-                  >
-                    Assign
-                  </button>
-                </li>
+        <div className="bg-white rounded-lg shadow">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-gray-50">
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Nationality</th>
+                <th className="px-4 py-2 text-left">Skills</th>
+                <th className="px-4 py-2 text-right">Wage</th>
+                <th className="px-4 py-2 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="rounded border-gray-300"
+                  />
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {staff.map(member => (
+                <tr key={member.id} className="border-t border-gray-100">
+                  <td className="px-4 py-2">{member.name}</td>
+                  <td className="px-4 py-2">
+                    <span className={`flag-icon ${getNationalityFlag(member.nationality)}`}></span>
+                    {" "}{member.nationality}
+                  </td>
+                  <td className="px-4 py-2">
+                    {renderSkillBars(member)}
+                  </td>
+                  <td className="px-4 py-2 text-right">€{member.wage.toLocaleString()}</td>
+                  <td className="px-4 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={assignedStaffIds.includes(member.id)}
+                      onChange={(e) => handleAssignStaff(member.id, e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                  </td>
+                </tr>
               ))}
-            </ul>
-          )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -293,7 +276,10 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           Cancel
         </button>
         <button
-          onClick={handleSave}
+          onClick={() => {
+            staffService.assignStaffToActivityById(activityId, assignedStaffIds);
+            onAssignmentChange(assignedStaffIds, true);
+          }}
           className="px-4 py-2 bg-wine text-white rounded hover:bg-wine-dark"
         >
           Save Assignments
