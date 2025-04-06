@@ -154,29 +154,26 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   };
 
   const renderSkillBars = (member: any) => {
-    const skills = ['field', 'winery', 'administration', 'sales', 'maintenance'];
-    const letters = ['F', 'W', 'A', 'S', 'M'];
+    const skills = [
+      { key: 'field', letter: 'F', color: '#4ade80' },
+      { key: 'winery', letter: 'W', color: '#60a5fa' },
+      { key: 'administration', letter: 'A', color: '#a78bfa' },
+      { key: 'sales', letter: 'S', color: '#34d399' },
+      { key: 'maintenance', letter: 'M', color: '#f43f5e' }
+    ];
     
     return (
       <div className="flex gap-1">
-        {skills.map((skill, index) => {
-          const skillLevel = member.skills[skill];
-          let backgroundColor;
-          if (skillLevel > 0.7) {
-            backgroundColor = '#16a34a';
-          } else if (skillLevel > 0.4) {
-            backgroundColor = '#eab308';
-          } else {
-            backgroundColor = '#dc2626';
-          }
+        {skills.map((skill) => {
+          const skillLevel = member.skills[skill.key];
           return (
             <span
-              key={skill}
-              className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-white rounded"
-              style={{ backgroundColor }}
-              title={`${skill.charAt(0).toUpperCase() + skill.slice(1)}: ${Math.round(skillLevel * 100)}%`}
+              key={skill.key}
+              className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium text-white"
+              style={{ backgroundColor: skill.color }}
+              title={`${skill.key.charAt(0).toUpperCase() + skill.key.slice(1)}: ${Math.round(skillLevel * 100)}%`}
             >
-              {letters[index]}
+              {skill.letter}
             </span>
           );
         })}
