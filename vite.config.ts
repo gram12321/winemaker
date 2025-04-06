@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -32,7 +33,17 @@ export default defineConfig({
     port: 5000,
     hmr: {
       clientPort: 443,
-      protocol: 'wss',
+      protocol: 'wss'
+    },
+    // Allow all hosts for Replit dynamic subdomains
+    cors: true,
+    strictPort: true,
+    proxy: {
+      '/.replit.dev': {
+        target: '0.0.0.0',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/.replit.dev/, '')
+      }
     }
   },
   optimizeDeps: {
