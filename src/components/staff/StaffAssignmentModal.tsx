@@ -163,18 +163,22 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     ];
     
     return (
-      <div className="flex gap-1">
+      <div className="flex gap-1 w-48">
         {skills.map((skill) => {
           const skillLevel = member.skills[skill.key];
           return (
-            <span
+            <div 
               key={skill.key}
-              className="inline-flex items-center px-1.5 py-0.5 text-xs font-medium text-white"
-              style={{ backgroundColor: skill.color }}
+              className="h-5 flex items-center justify-center text-xs font-medium text-white"
+              style={{ 
+                backgroundColor: skill.color,
+                width: `${Math.round(skillLevel * 100)}%`,
+                minWidth: '20px'
+              }}
               title={`${skill.key.charAt(0).toUpperCase() + skill.key.slice(1)}: ${Math.round(skillLevel * 100)}%`}
             >
               {skill.letter}
-            </span>
+            </div>
           );
         })}
       </div>
