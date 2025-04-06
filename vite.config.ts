@@ -1,22 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import fs from 'fs';
 
-// Special method to exclude entire directory trees
 const excludeWinemakerOld = () => {
   return {
     name: 'exclude-winemaker-old',
-    configureServer(server) {
-      server.middlewares.use((req, res, next) => {
-        if (req.url && req.url.includes('winemaker_old')) {
-          res.statusCode = 404;
-          res.end();
-          return;
-        }
-        next();
-      });
-    },
     resolveId(id) {
       if (id.includes('winemaker_old')) {
         return { id: 'virtual:empty-module', external: true };
@@ -32,24 +20,19 @@ const excludeWinemakerOld = () => {
   };
 };
 
-// Configuration
 export default defineConfig({
-  plugins: [
-    react(),
-    excludeWinemakerOld(),
-  ],
+  plugins: [react(), excludeWinemakerOld()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
   },
   server: {
-    host: true,
+    host: '0.0.0.0',
     port: 5000,
-    strictPort: true,
     hmr: {
-      port: 443,
-      clientPort: 443
+      clientPort: 443,
+      protocol: 'wss',
     }
   },
   optimizeDeps: {
@@ -59,5 +42,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-  },
+  }
 });
