@@ -46,11 +46,12 @@ export default defineConfig({
     port: 5173,
     hmr: {
       clientPort: 443,
-      host: 'localhost'
+      host: '0.0.0.0',
+      protocol: 'wss'
     },
     cors: true,
     strictPort: true,
-    allowedHosts: ['.replit.dev']
+    allowedHosts: ['*', '.replit.dev']
   },
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
