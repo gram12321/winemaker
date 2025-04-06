@@ -155,11 +155,11 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
 
   const renderSkillBars = (member: any) => {
     const skills = [
-      { key: 'field', letter: 'F', color: '#4ade80' },
-      { key: 'winery', letter: 'W', color: '#60a5fa' },
-      { key: 'administration', letter: 'A', color: '#a78bfa' },
-      { key: 'sales', letter: 'S', color: '#34d399' },
-      { key: 'maintenance', letter: 'M', color: '#f43f5e' }
+      { key: 'field', letter: 'F', color: '#ffcc00' },
+      { key: 'winery', letter: 'W', color: '#2179ff' },
+      { key: 'administration', letter: 'A', color: '#6c757d' },
+      { key: 'sales', letter: 'S', color: '#28a745' },
+      { key: 'maintenance', letter: 'M', color: '#d9534f' }
     ];
     
     return (
