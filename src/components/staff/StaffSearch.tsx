@@ -9,6 +9,7 @@ import staffService, {
 } from '../../services/staffService';
 import { getGameState } from '../../gameState';
 import displayManager from '../../lib/game/displayManager';
+import { WorkCategory } from '../../lib/game/workCalculator';
 
 interface StaffSearchProps {
   onClose: () => void;
@@ -49,11 +50,11 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
     }
     
     try {
-      // Start the search activity
-      const activityId = staffService.startStaffSearch(searchOptions);
+      // We now start the activity via the hook in the parent component
+      // Generate an ID to pass back
+      const activityId = crypto.randomUUID();
       onSearchingChange(true);
-      onStartSearch(activityId); // Pass the activity ID back to parent
-      onClose(); // Close the modal immediately
+      onStartSearch(activityId); // This will trigger the parent to use the hook to start the activity
     } catch (error) {
       console.error('[StaffSearch] Error starting staff search:', error);
       onSearchingChange(false);
@@ -66,8 +67,8 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
     }
     
     try {
-      // Start the hiring activity
-      const activityId = staffService.startHiringProcess(staff);
+      // Generate an ID for the hiring activity
+      const activityId = crypto.randomUUID();
       
       // If onStartHiring prop is provided, call it with the activity ID and staff
       if (onStartHiring) {

@@ -35,25 +35,33 @@ export const DENSITY_BASED_TASKS = [
 ];
 
 // Base processing rates for different tasks
-export const TASK_RATES: Record<WorkCategory, number> = {
-  [WorkCategory.PLANTING]: 0.2,      // Acres per week
-  [WorkCategory.HARVESTING]: 0.5,    // Acres per week
-  [WorkCategory.CRUSHING]: 500,      // Kg per week
-  [WorkCategory.FERMENTATION]: 1000, // Liters per week
-  [WorkCategory.CLEARING]: 0.3,      // Acres per week
-  [WorkCategory.UPROOTING]: 0.3,     // Acres per week
-  [WorkCategory.BUILDING]: 0.25,     // Progress per week (relative)
-  [WorkCategory.UPGRADING]: 0.5,     // Progress per week (relative)
-  [WorkCategory.MAINTENANCE]: 0.2,   // Progress per week (relative)
-  [WorkCategory.STAFF_SEARCH]: 1,    // Candidates per week
-  [WorkCategory.ADMINISTRATION]: 1,  // Progress per week
+export const TASK_RATES: Record<string, number> = {
+  [WorkCategory.PLANTING]: 0.7,      // 0.7 acres/week
+  [WorkCategory.HARVESTING]: 4.4,    // 4.4 acres/week
+  [WorkCategory.CRUSHING]: 2.5,      // 2.5 tons/week
+  [WorkCategory.FERMENTATION]: 5.0,  // 5 kiloliters/week
+  [WorkCategory.CLEARING]: 0.5,      // 0.5 acres/week
+  [WorkCategory.UPROOTING]: 0.56,    // 0.56 acres/week
+  [WorkCategory.BUILDING]: 100000,   // €100,000 worth per week
+  [WorkCategory.UPGRADING]: 100000,  // €100,000 worth per week
+  [WorkCategory.MAINTENANCE]: 500000, // €500,000 worth per week
+  [WorkCategory.STAFF_SEARCH]: 5.0,  // 5 candidates/week
+  [WorkCategory.ADMINISTRATION]: 1.0  // 1 administrative task/week
 };
 
 // Initial setup work for tasks that require setup before starting
-export const INITIAL_WORK: Partial<Record<WorkCategory, number>> = {
-  [WorkCategory.BUILDING]: BASE_WORK_UNITS * 1,
-  [WorkCategory.UPGRADING]: BASE_WORK_UNITS * 0.5,
-  [WorkCategory.PLANTING]: BASE_WORK_UNITS * 0.3
+export const INITIAL_WORK: Record<string, number> = {
+  [WorkCategory.PLANTING]: 10,
+  [WorkCategory.HARVESTING]: 5,
+  [WorkCategory.CRUSHING]: 10,
+  [WorkCategory.FERMENTATION]: 25,
+  [WorkCategory.CLEARING]: 5,
+  [WorkCategory.UPROOTING]: 10,
+  [WorkCategory.BUILDING]: 200,
+  [WorkCategory.UPGRADING]: 150,
+  [WorkCategory.MAINTENANCE]: 10,
+  [WorkCategory.STAFF_SEARCH]: 25,
+  [WorkCategory.ADMINISTRATION]: 5
 };
 
 // Activity progress interface
@@ -177,9 +185,12 @@ export function calculateStaffWorkContribution(
     let staffContribution = (workforce / staffTaskCount) * relevantSkill;
     
     // Apply specialization bonus if applicable (multiplicative, not additive like before)
-    if (staffMember.specialization) {
-      const specialized = isSpecializationRelevant(staffMember.specialization, category);
-      if (specialized) {
+    if (staffMember.specializations && staffMember.specializations.length > 0) {
+      const hasRelevantSpecialization = staffMember.specializations.some(spec => 
+        isSpecializationRelevant(spec, category)
+      );
+      
+      if (hasRelevantSpecialization) {
         // Apply a 30% bonus multiplicatively as in the old system
         staffContribution *= 1.3;
       }

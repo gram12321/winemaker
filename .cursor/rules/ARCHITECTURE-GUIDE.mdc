@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 # Winery Management Game - Architecture Guide (Next Iteration)
 
 ## Core Game Systems & Features

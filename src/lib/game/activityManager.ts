@@ -8,11 +8,13 @@ import { getGameState, updateGameState } from '@/gameState';
 import { 
   ActivityProgress, 
   WorkCategory, 
-  calculateToolSpeedBonus
+  calculateToolSpeedBonus,
+  calculateTotalWork
 } from './workCalculator';
 import { consoleService } from '@/components/layout/Console';
 import displayManager from './displayManager';
 import { Staff } from '@/gameState';
+import { toast } from '../ui/toast';
 
 // Store activities in gameState
 const initializeActivitiesInGameState = () => {
@@ -22,6 +24,309 @@ const initializeActivitiesInGameState = () => {
       activities: [] as ActivityProgress[]
     });
   }
+};
+
+// Type definitions for activity management
+export interface ActivityOptions {
+  category: WorkCategory;
+  amount: number;
+  title: string;
+  targetId?: string;
+  density?: number;
+  taskMultipliers?: Record<string, number>;
+  workModifiers?: number[];
+  cost?: number;
+  additionalParams?: Record<string, any>;
+}
+
+// Map of completion callbacks by activity ID
+const completionCallbacks: Record<string, () => void> = {};
+const progressCallbacks: Record<string, (progress: number) => void> = {};
+
+/**
+ * Estimate work for a given activity
+ * @param options Activity options
+ * @returns Estimated work units
+ */
+export const estimateActivityWork = (options: Partial<ActivityOptions>): number => {
+  if (!options.category || !options.amount) return 0;
+  
+  return calculateTotalWork(options.amount, {
+    category: options.category,
+    density: options.density,
+    taskMultipliers: options.taskMultipliers,
+    workModifiers: options.workModifiers
+  });
+};
+
+/**
+ * Start a new activity and link it to a display state
+ * @param displayStateKey The display state key to update
+ * @param options Activity options
+ * @returns Activity ID if successful, null if failed
+ */
+export const startActivityWithDisplayState = (
+  displayStateKey: string, 
+  options: ActivityOptions
+): string | null => {
+  // Ensure display state exists
+  if (!displayManager.getDisplayState(displayStateKey)) {
+    displayManager.createDisplayState(displayStateKey, {
+      activityId: null as string | null
+    });
+  }
+  
+  const displayState = displayManager.getDisplayState(displayStateKey);
+  
+  // Check if there's already an activity in progress
+  if (displayState.activityId) {
+    console.warn(`[ActivityManager] Activity already in progress with ID ${displayState.activityId}`);
+    return displayState.activityId;
+  }
+  
+  try {
+    const { 
+      category, 
+      amount, 
+      title,
+      targetId, 
+      density, 
+      taskMultipliers, 
+      workModifiers, 
+      cost, 
+      additionalParams 
+    } = options;
+
+    // Calculate total work required
+    const totalWork = calculateTotalWork(amount, {
+      category,
+      density,
+      taskMultipliers,
+      workModifiers
+    });
+    console.log(`[ActivityManager] Calculated work for ${category}: ${totalWork} units (amount: ${amount})`);
+
+    // Create activity ID
+    const activityId = uuidv4();
+
+    // Create the activity
+    const activity: ActivityProgress = {
+      id: activityId,
+      category,
+      totalWork,
+      appliedWork: 0,
+      targetId,
+      params: {
+        ...additionalParams,
+        title
+      }
+    };
+
+    // Add the activity
+    addActivity(activity);
+
+    // Update display state
+    displayManager.updateDisplayState(displayStateKey, { activityId });
+
+    // Show toast notification
+    toast({
+      title: `${title} Started`,
+      description: `Started ${category} activity`
+    });
+
+    return activityId;
+  } catch (error) {
+    console.error('[ActivityManager] Error starting activity:', error);
+    
+    // Show error toast
+    toast({
+      title: 'Error',
+      description: 'Failed to start activity. Please try again.',
+      variant: 'destructive',
+    });
+    
+    return null;
+  }
+};
+
+/**
+ * Assign staff to an activity with display state tracking
+ * @param displayStateKey The display state key
+ * @param staffIds Staff IDs to assign
+ * @returns true if successful, false otherwise
+ */
+export const assignStaffWithDisplayState = (
+  displayStateKey: string,
+  staffIds: string[]
+): boolean => {
+  const displayState = displayManager.getDisplayState(displayStateKey);
+  const activityId = displayState?.activityId;
+  
+  if (!activityId) {
+    console.warn('[ActivityManager] Cannot assign staff: No active activity');
+    return false;
+  }
+  
+  try {
+    const activity = getActivityById(activityId);
+    if (!activity) {
+      console.warn('[ActivityManager] Cannot assign staff: Activity not found');
+      return false;
+    }
+    
+    // Assign staff to the activity
+    assignStaffToActivity(activityId, staffIds);
+    
+    console.log(`[ActivityManager] Assigned ${staffIds.length} staff to activity ${activityId}`);
+    
+    toast({
+      title: 'Staff Assigned',
+      description: `Assigned ${staffIds.length} staff to the activity`
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('[ActivityManager] Error assigning staff:', error);
+    
+    toast({
+      title: 'Error',
+      description: 'Failed to assign staff. Please try again.',
+      variant: 'destructive',
+    });
+    
+    return false;
+  }
+};
+
+/**
+ * Set a completion callback for an activity
+ * @param activityId Activity ID
+ * @param callback Function to call when activity completes
+ */
+export const setActivityCompletionCallback = (
+  activityId: string,
+  callback: () => void
+): void => {
+  completionCallbacks[activityId] = callback;
+  
+  // If the activity exists, update it
+  const activity = getActivityById(activityId);
+  if (activity) {
+    updateActivity(activityId, {
+      completionCallback: callback
+    });
+  }
+};
+
+/**
+ * Set a progress callback for an activity
+ * @param activityId Activity ID
+ * @param callback Function to call when activity progress changes
+ */
+export const setActivityProgressCallback = (
+  activityId: string,
+  callback: (progress: number) => void
+): void => {
+  progressCallbacks[activityId] = callback;
+  
+  // If the activity exists, update it
+  const activity = getActivityById(activityId);
+  if (activity) {
+    updateActivity(activityId, {
+      progressCallback: callback
+    });
+  }
+};
+
+/**
+ * Cancel an activity and clear its display state
+ * @param displayStateKey The display state key
+ * @returns true if successful, false otherwise
+ */
+export const cancelActivityWithDisplayState = (
+  displayStateKey: string
+): boolean => {
+  const displayState = displayManager.getDisplayState(displayStateKey);
+  const activityId = displayState?.activityId;
+  
+  if (!activityId) {
+    return false;
+  }
+  
+  try {
+    // Remove the activity
+    removeActivity(activityId);
+    
+    // Reset state
+    displayManager.updateDisplayState(displayStateKey, { activityId: null });
+    
+    console.log(`[ActivityManager] Cancelled activity ${activityId}`);
+    
+    toast({
+      title: 'Activity Cancelled',
+      description: 'The activity has been cancelled.'
+    });
+    
+    // Clear callbacks
+    delete completionCallbacks[activityId];
+    delete progressCallbacks[activityId];
+    
+    return true;
+  } catch (error) {
+    console.error('[ActivityManager] Error cancelling activity:', error);
+    return false;
+  }
+};
+
+/**
+ * Get activity progress information from display state
+ * @param displayStateKey The display state key
+ * @returns Activity progress information
+ */
+export const getActivityProgressFromDisplayState = (
+  displayStateKey: string
+): {
+  activityId: string | null;
+  progress: number;
+  isInProgress: boolean;
+  appliedWork: number;
+  totalWork: number;
+} => {
+  const displayState = displayManager.getDisplayState(displayStateKey);
+  const activityId = displayState?.activityId;
+  
+  if (!activityId) {
+    return {
+      activityId: null,
+      progress: 0,
+      isInProgress: false,
+      appliedWork: 0,
+      totalWork: 0
+    };
+  }
+  
+  const activity = getActivityById(activityId);
+  if (!activity) {
+    // Activity not found, it might have been completed and removed
+    displayManager.updateDisplayState(displayStateKey, { activityId: null });
+    return {
+      activityId: null,
+      progress: 0,
+      isInProgress: false,
+      appliedWork: 0,
+      totalWork: 0
+    };
+  }
+  
+  const progress = (activity.appliedWork / activity.totalWork) * 100;
+  
+  return {
+    activityId,
+    progress,
+    isInProgress: true,
+    appliedWork: activity.appliedWork,
+    totalWork: activity.totalWork
+  };
 };
 
 /**
@@ -212,6 +517,26 @@ export const assignToolsToActivity = (activityId: string, toolIds: string[]): Ac
 };
 
 /**
+ * Get work details for an activity
+ * @param activityId Activity ID
+ * @returns Object with applied and total work, or null if activity not found
+ */
+export const getActivityWorkDetails = (activityId: string): { 
+  appliedWork: number; 
+  totalWork: number;
+  title?: string;
+} | null => {
+  const activity = getActivityById(activityId);
+  if (!activity) return null;
+  
+  return {
+    appliedWork: activity.appliedWork,
+    totalWork: activity.totalWork,
+    title: activity.params?.title
+  };
+};
+
+/**
  * Process all activities for one game tick
  * Apply work based on assigned staff and tools
  */
@@ -315,13 +640,45 @@ export const processActivitiesTick = (): void => {
         completedActivities.push(activity.id);
         
         // Call completion callback if provided
-        if (updatedActivity.completionCallback) {
-          updatedActivity.completionCallback();
+        if (typeof updatedActivity.completionCallback === 'function') {
+          try {
+            updatedActivity.completionCallback();
+          } catch (error) {
+            console.error(`Error in completion callback for activity ${activity.id}:`, error);
+          }
         }
-      } else if (updatedActivity.progressCallback) {
-        // Call progress callback if provided
+        
+        // Also check our global callback store
+        if (completionCallbacks[activity.id]) {
+          try {
+            completionCallbacks[activity.id]();
+            // Remove the callback after execution
+            delete completionCallbacks[activity.id];
+          } catch (error) {
+            console.error(`Error in stored completion callback for activity ${activity.id}:`, error);
+          }
+        }
+      } else {
+        // Activity not complete, call progress callback
         const progress = updatedActivity.appliedWork / updatedActivity.totalWork;
-        updatedActivity.progressCallback(progress);
+        
+        // Call the callback on the activity if available
+        if (typeof updatedActivity.progressCallback === 'function') {
+          try {
+            updatedActivity.progressCallback(progress);
+          } catch (error) {
+            console.error(`Error in progress callback for activity ${activity.id}:`, error);
+          }
+        }
+        
+        // Call our stored progress callback
+        if (progressCallbacks[activity.id]) {
+          try {
+            progressCallbacks[activity.id](progress);
+          } catch (error) {
+            console.error(`Error in stored progress callback for activity ${activity.id}:`, error);
+          }
+        }
       }
     } else {
       // No staff assigned, no work applied (keep activity unchanged)
@@ -349,7 +706,7 @@ export const processActivitiesTick = (): void => {
   }
   
   displayManager.updateAllDisplays();
-}
+};
 
 /**
  * Calculate progress percentage for an activity

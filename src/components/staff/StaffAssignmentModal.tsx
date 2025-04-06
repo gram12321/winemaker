@@ -9,7 +9,7 @@ interface StaffAssignmentModalProps {
   category: string;
   onClose: () => void;
   initialAssignedStaffIds?: string[];
-  onAssignmentChange: (staffIds: string[]) => void;
+  onAssignmentChange: (staffIds: string[], finalSave?: boolean) => void;
 }
 
 const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({ 
@@ -44,21 +44,21 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   const handleAssignStaff = (staffId: string) => {
     const newAssignments = [...assignedStaffIds, staffId];
     setAssignedStaffIds(newAssignments);
-    onAssignmentChange(newAssignments);
+    onAssignmentChange(newAssignments, false);
   };
   
   // Handle staff unassignment
   const handleUnassignStaff = (staffId: string) => {
     const newAssignments = assignedStaffIds.filter(id => id !== staffId);
     setAssignedStaffIds(newAssignments);
-    onAssignmentChange(newAssignments);
+    onAssignmentChange(newAssignments, false);
   };
   
   // Save assignments
   const handleSave = () => {
     // Apply the changes
     staffService.assignStaffToActivityById(activityId, assignedStaffIds);
-    onClose();
+    onAssignmentChange(assignedStaffIds, true);
   };
   
   // Assign a team

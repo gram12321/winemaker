@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 # AI-BRIEFING.md
 
 ## Winery Management Game – Architecture & Code Generation Guide
@@ -121,6 +126,66 @@ const handleAction = displayManager.createActionHandler(() => {
 - The display manager is a singleton service that manages component subscriptions and updates.
 - It provides methods to register/unregister components and utility functions for wrapping action handlers.
 - This approach is justified because it naturally integrates with React's component lifecycle, provides better performance, and simplifies component code.
+
+---
+
+### 🔄 Activity and Work Calculation System
+
+#### Work Categories and Tasks
+
+- The game uses specific **WorkCategory** enum values for different tasks:
+  - `PLANTING`, `HARVESTING`, `CRUSHING`, `FERMENTATION`, etc.
+  - These categories are defined in `workCalculator.ts`
+  - Do NOT create generic categories like "FIELD_WORK" or "WINERY_WORK"
+
+- Each task category has specific **processing rates**:
+  - Example: `STAFF_SEARCH` can process 5 candidates/week
+  - Processing rates are defined in `TASK_RATES` in `workCalculator.ts`
+
+- Tasks may have **initial setup work**:
+  - Example: `STAFF_SEARCH` requires 25 units of initial work
+  - Initial work values are defined in `INITIAL_WORK` in `workCalculator.ts`
+
+#### Work Calculation Logic
+
+- Work is calculated based on **realistic amounts** a worker can perform per week:
+  - `BASE_WORK_UNITS` (50) represents a standard worker's weekly output
+  - Formula: `(amount ÷ rate × BASE_WORK_UNITS) + initialWork`
+
+- When adding a new task type:
+  1. Add it to the `WorkCategory` enum
+  2. Define its processing rate in `TASK_RATES`
+  3. Define any initial work in `INITIAL_WORK` if needed
+
+```typescript
+// Example work calculation for hiring 3 staff candidates
+const workUnits = calculateTotalWork(3, {
+  category: WorkCategory.STAFF_SEARCH
+});
+// 3 candidates ÷ 5 candidates/week × 50 base units + 25 initial = 55 work units
+```
+
+#### Activity System
+
+- Activities track work progress over time:
+  - Each activity has a category, total work, and applied work
+  - Staff can be assigned to activities to contribute work
+  - Activities complete when applied work reaches total work
+
+- When implementing new activities:
+  1. Use existing specific work categories
+  2. Use `calculateTotalWork()` for work calculations
+  3. Connect to the activity manager system
+
+- The staff skill system determines how efficiently staff contribute to activities:
+  - Staff have skills in different areas (field, winery, etc.)
+  - Skills map to work categories via `mapCategoryToSkill()`
+
+#### Integration with UI
+
+- Use `ActivityProgressBar` to display activity progress
+- Use `ActivityOptionsModal` for configuring activities
+- Use `useActivity` hook to manage activity state and lifecycle
 
 ---
 

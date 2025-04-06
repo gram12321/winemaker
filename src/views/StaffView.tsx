@@ -2,22 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import staffService, { Staff, StaffTeam, StaffSearchOptions } from '../services/staffService';
 import { StaffSearch } from '../components/staff';
-import { getActivitiesForTarget, getAllActivities, getActivityById, updateActivity } from '../lib/game/activityManager';
+import { 
+  getActivitiesForTarget, 
+  getAllActivities, 
+  startActivityWithDisplayState,
+  assignStaffWithDisplayState,
+  setActivityCompletionCallback,
+  getActivityProgressFromDisplayState,
+  cancelActivityWithDisplayState
+} from '../lib/game/activityManager';
 import displayManager from '../lib/game/displayManager';
 import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';
+import { ActivityProgressBar } from '../components/activities';
+import { WorkCategory } from '../lib/game/workCalculator';
 
 // Create display state for staff activities
-displayManager.createDisplayState('staffActivities', {
-  searchActivityId: null as string | null,
-  hiringActivityId: null as string | null
+displayManager.createDisplayState('staffSearchActivity', {
+  activityId: null as string | null
+});
+
+displayManager.createDisplayState('staffHiringActivity', {
+  activityId: null as string | null
 });
 
 const StaffView: React.FC = () => {
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   useDisplayUpdate();
-  const displayState = displayManager.getDisplayState('staffActivities');
-
+  
   // Team management state
   const [teams, setTeams] = useState<StaffTeam[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
@@ -36,121 +48,111 @@ const StaffView: React.FC = () => {
   const [showStaffSearch, setShowStaffSearch] = useState(false);
   const [showStaffAssignment, setShowStaffAssignment] = useState(false);
   const [showHiringStaffAssignment, setShowHiringStaffAssignment] = useState(false);
+  
+  // Get activity progress info
+  const searchActivityProgress = getActivityProgressFromDisplayState('staffSearchActivity');
+  const hiringActivityProgress = getActivityProgressFromDisplayState('staffHiringActivity');
 
   // Handle start of staff search
-  const handleStartSearch = displayManager.createActionHandler((activityId: string) => {
-    // Get the activity and set up a completion callback
-    const activity = getActivityById(activityId);
-    if (activity) {
-      // Add completion callback to the activity
-      updateActivity(activityId, {
-        completionCallback: () => {
-          const searchOptions = activity.params?.searchOptions;
-          if (searchOptions) {
-            // Generate candidates on completion
-            const results = staffService.generateStaffCandidates(searchOptions);
-            setSearchResults(results);
-            setIsSearching(false);
-            setShowStaffSearch(true); // Show the modal with results
-          }
+  const handleStartSearch = () => {
+    console.log('[StaffView] Starting staff search');
+    
+    // Start the search activity
+    const activityId = startActivityWithDisplayState('staffSearchActivity', {
+      category: WorkCategory.STAFF_SEARCH,
+      amount: searchOptions.numberOfCandidates,
+      title: 'Staff Search',
+      additionalParams: {
+        searchOptions: searchOptions
+      }
+    });
+    
+    if (activityId) {
+      // Set up completion callback
+      setActivityCompletionCallback(activityId, () => {
+        console.log('[StaffView] Staff search completed');
+        
+        // Get the activity to retrieve search options
+        const activity = getAllActivities().find(a => a.id === activityId);
           
-          // Clear the activity ID from display state
-          displayManager.updateDisplayState('staffActivities', { searchActivityId: null });
+        if (activity && activity.params?.searchOptions) {
+          const results = staffService.generateStaffCandidates(activity.params.searchOptions);
+          setSearchResults(results);
+          setIsSearching(false);
+          setShowStaffSearch(true); // Show the modal with results
         }
       });
+      
+      // Close the search modal
+      setShowStaffSearch(false);
+      setIsSearching(true);
     }
-    
-    // Update display state and close the modal
-    displayManager.updateDisplayState('staffActivities', { searchActivityId: activityId });
-    setShowStaffSearch(false); // Close the search modal
-  });
-
-  // Handle hiring activity
-  const handleStartHiring = displayManager.createActionHandler((activityId: string, staffToHire: Staff) => {
-    // Get the activity and set up a completion callback
-    const activity = getActivityById(activityId);
-    if (activity) {
-      // Add completion callback to the activity
-      updateActivity(activityId, {
-        completionCallback: () => {
-          // Call the completeHiringProcess function to finalize hiring
-          const hiredStaff = staffService.completeHiringProcess(activityId);
-          if (hiredStaff) {
-            // Update search results to remove the hired staff
-            setSearchResults(prevResults => prevResults.filter(s => s.id !== hiredStaff.id));
-            
-            // Force staff list to update
-            displayManager.updateAllDisplays();
-            
-            // Select the newly hired staff to show details
-            setSelectedStaffId(hiredStaff.id);
-          } else {
-            toast({
-              title: 'Hiring Failed',
-              description: 'There was an issue completing the hiring process',
-              variant: 'destructive'
-            });
-          }
-          
-          // Clear the hiring activity ID from display state
-          displayManager.updateDisplayState('staffActivities', { hiringActivityId: null });
-        }
-      });
-    }
-    
-    // Update display state and close modal
-    displayManager.updateDisplayState('staffActivities', { hiringActivityId: activityId });
-    setShowStaffSearch(false); // Close the search results modal
-  });
-
-  // Get progress percentage for search activity
-  const getSearchProgress = () => {
-    if (!displayState.searchActivityId) return 0;
-    
-    const activity = getActivityById(displayState.searchActivityId);
-    if (!activity) return 0;
-    
-    return Math.round((activity.appliedWork / activity.totalWork) * 100);
   };
 
-  // Get progress percentage for hiring activity
-  const getHiringProgress = () => {
-    if (!displayState.hiringActivityId) return 0;
+  // Handle hiring activity
+  const handleStartHiring = (staffToHire: Staff) => {
+    console.log('[StaffView] Starting hiring process for staff:', staffToHire.id);
     
-    const activity = getActivityById(displayState.hiringActivityId);
-    if (!activity) return 0;
+    // Start the hiring activity
+    const activityId = startActivityWithDisplayState('staffHiringActivity', {
+      category: WorkCategory.ADMINISTRATION,
+      amount: 1,
+      title: `Hiring ${staffToHire.name}`,
+      additionalParams: {
+        staffToHire: staffToHire
+      }
+    });
     
-    return Math.round((activity.appliedWork / activity.totalWork) * 100);
+    if (activityId) {
+      // Set up completion callback
+      setActivityCompletionCallback(activityId, () => {
+        console.log('[StaffView] Hiring completed for activity:', activityId);
+        
+        // Call the completeHiringProcess function to finalize hiring
+        const hiredStaff = staffService.completeHiringProcess(activityId);
+        if (hiredStaff) {
+          console.log('[StaffView] Successfully hired staff:', hiredStaff.id);
+          
+          // Update search results to remove the hired staff
+          setSearchResults(prevResults => prevResults.filter(s => s.id !== hiredStaff.id));
+          
+          // Force staff list to update
+          displayManager.updateAllDisplays();
+          
+          // Select the newly hired staff to show details
+          setSelectedStaffId(hiredStaff.id);
+        }
+      });
+      
+      // Close the staff search modal
+      setShowStaffSearch(false);
+    }
   };
 
   // Handle staff assignment to search activity
-  const handleAssignStaff = () => {
-    if (!displayState.searchActivityId) return;
-    
-    const activity = getActivityById(displayState.searchActivityId);
-    if (!activity) return;
-    
+  const handleAssignStaffToSearch = () => {
     setShowStaffAssignment(true);
   };
 
   // Handle staff assignment to hiring activity
   const handleAssignStaffToHiring = () => {
-    if (!displayState.hiringActivityId) return;
-    
-    const activity = getActivityById(displayState.hiringActivityId);
-    if (!activity) return;
-    
     setShowHiringStaffAssignment(true);
   };
 
-  // Handle staff assignment completion
-  const handleStaffAssigned = (staffIds: string[]) => {
-    // For tracking changes in selected staff
+  // Handle staff assignment completion for search
+  const handleStaffAssigned = (staffIds: string[], finalSave = false) => {
+    assignStaffWithDisplayState('staffSearchActivity', staffIds);
+    if (finalSave) {
+      setShowStaffAssignment(false);
+    }
   };
 
   // Handle staff assignment for hiring completion
-  const handleHiringStaffAssigned = (staffIds: string[]) => {
-    // For tracking changes in selected staff for hiring
+  const handleHiringStaffAssigned = (staffIds: string[], finalSave = false) => {
+    assignStaffWithDisplayState('staffHiringActivity', staffIds);
+    if (finalSave) {
+      setShowHiringStaffAssignment(false);
+    }
   };
 
   // Manual team loading function
@@ -224,6 +226,11 @@ const StaffView: React.FC = () => {
     );
   };
 
+  // Create an adapter function to match the expected interface for onStartHiring
+  const adaptedStartHiring = (activityId: string, staffToHire: Staff) => {
+    handleStartHiring(staffToHire);
+  };
+
   return (
     <div className="p-4">
       <div className="flex justify-between mb-6">
@@ -245,60 +252,34 @@ const StaffView: React.FC = () => {
       </div>
 
       {/* Progress bars for staff activities */}
-      {displayState.searchActivityId && (
+      {searchActivityProgress.isInProgress && (
         <div className="mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="mb-2">Staff Search Progress</div>
-            <div className="flex items-center justify-between">
-              <div className="flex-grow mr-4">
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm text-gray-600">Staff Search Progress</span>
-                  <span className="text-sm text-gray-600">{getSearchProgress()}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-wine rounded-full h-2 transition-all duration-300" 
-                    style={{ width: `${getSearchProgress()}%` }}
-                  />
-                </div>
-              </div>
-              <button
-                className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
-                onClick={handleAssignStaff}
-              >
-                Assign Staff
-              </button>
-            </div>
-          </div>
+          <ActivityProgressBar
+            activityId={searchActivityProgress.activityId || ''}
+            title="Staff Search"
+            category={WorkCategory.STAFF_SEARCH}
+            progress={searchActivityProgress.progress}
+            appliedWork={searchActivityProgress.appliedWork}
+            totalWork={searchActivityProgress.totalWork}
+            onAssignStaff={handleAssignStaffToSearch}
+            className=""
+          />
         </div>
       )}
 
       {/* Hiring Progress Bar */}
-      {displayState.hiringActivityId && (
+      {hiringActivityProgress.isInProgress && (
         <div className="mb-6">
-          <div className="bg-white rounded-lg shadow p-4">
-            <div className="mb-2">Hiring Process Progress</div>
-            <div className="flex items-center justify-between">
-              <div className="flex-grow mr-4">
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm text-gray-600">Hiring Progress</span>
-                  <span className="text-sm text-gray-600">{getHiringProgress()}%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-wine rounded-full h-2 transition-all duration-300" 
-                    style={{ width: `${getHiringProgress()}%` }}
-                  />
-                </div>
-              </div>
-              <button
-                className="bg-wine text-white px-4 py-2 rounded hover:bg-wine-dark"
-                onClick={handleAssignStaffToHiring}
-              >
-                Assign Staff
-              </button>
-            </div>
-          </div>
+          <ActivityProgressBar
+            activityId={hiringActivityProgress.activityId || ''}
+            title="Hiring Process"
+            category={WorkCategory.ADMINISTRATION}
+            progress={hiringActivityProgress.progress}
+            appliedWork={hiringActivityProgress.appliedWork}
+            totalWork={hiringActivityProgress.totalWork}
+            onAssignStaff={handleAssignStaffToHiring}
+            className=""
+          />
         </div>
       )}
 
@@ -721,18 +702,18 @@ const StaffView: React.FC = () => {
               isSearching={isSearching}
               onSearchingChange={setIsSearching}
               onStartSearch={handleStartSearch}
-              onStartHiring={handleStartHiring}
+              onStartHiring={adaptedStartHiring}
             />
           </div>
         </div>
       )}
 
       {/* Staff Assignment Modal */}
-      {showStaffAssignment && displayState.searchActivityId && (
+      {showStaffAssignment && searchActivityProgress.activityId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <StaffAssignmentModal
-              activityId={displayState.searchActivityId}
+              activityId={searchActivityProgress.activityId}
               category="ADMINISTRATION"
               onClose={() => setShowStaffAssignment(false)}
               initialAssignedStaffIds={[]}
@@ -743,11 +724,11 @@ const StaffView: React.FC = () => {
       )}
 
       {/* Staff Assignment Modal for Hiring */}
-      {showHiringStaffAssignment && displayState.hiringActivityId && (
+      {showHiringStaffAssignment && hiringActivityProgress.activityId && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <StaffAssignmentModal
-              activityId={displayState.hiringActivityId}
+              activityId={hiringActivityProgress.activityId}
               category="ADMINISTRATION"
               onClose={() => setShowHiringStaffAssignment(false)}
               initialAssignedStaffIds={[]}

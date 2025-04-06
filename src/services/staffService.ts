@@ -684,35 +684,59 @@ export function startHiringProcess(staff: Staff): string {
   return activity.id;
 }
 
-// Function to complete hiring process
+/**
+ * Completes the hiring process for a staff member
+ * @param activityId ID of the hiring activity
+ * @returns The hired staff object or null if hiring failed
+ */
 export function completeHiringProcess(activityId: string): Staff | null {
+  console.log(`[StaffService] Completing hiring process for activity ${activityId}`);
+  
+  // Get all necessary data from the activity before any operations
   const activity = getActivityById(activityId);
-  if (!activity || !activity.params) {
+  if (!activity) {
+    console.log(`[StaffService] Activity ${activityId} already completed`);
     return null;
   }
   
-  // Check if the staff to hire is in the activity params
-  const staffToHire = activity.params.staffToHire as Staff;
-  if (!staffToHire || !staffToHire.id) {
-    removeActivity(activityId);
+  // Get the staff to hire from activity params
+  const staffToHire = activity.params?.staffToHire as Staff;
+  if (!staffToHire) {
+    console.error('[StaffService] Staff to hire not found in activity params');
     return null;
   }
+  
+  const { player } = getGameState();
   
   // Deduct first month's wage
+  if (!player || player.money < staffToHire.wage) {
+    console.error(`[StaffService] Not enough money to hire staff. Required: ${staffToHire.wage}, Available: ${player?.money || 0}`);
+    toast({
+      title: 'Hiring Failed',
+      description: `You need ${staffToHire.wage - (player?.money || 0)} more to hire ${staffToHire.name}.`,
+      variant: 'destructive'
+    });
+    return null;
+  }
+  
+  console.log(`[StaffService] Deducting ${staffToHire.wage} for first month's wage`);
   updatePlayerMoney(-staffToHire.wage);
   
-  // Add staff to company
-  const addedStaff = addStaff(staffToHire, true);
+  // Add the staff to your company
+  console.log(`[StaffService] Adding ${staffToHire.name} to company`);
+  const addedStaff = addStaff(staffToHire);
   
-  // Clean up
+  // Clean up - remove the activity
+  console.log(`[StaffService] Removing activity ${activityId}`);
   removeActivity(activityId);
   
-  // Notify the user
+  // Notify user
   toast({
     title: 'Staff Hired',
-    description: `${staffToHire.name} has joined your company`
+    description: `${staffToHire.name} has joined your winery!`,
   });
   
+  // Return the added staff
   return addedStaff;
 }
 

@@ -40,6 +40,18 @@ alwaysApply: true
 
 ---
 
+### 📚 Code Understanding Guidelines
+1. **Read Full Files**: Always read the entire file you're modifying to understand all related functions and variables.
+2. **Look for Existing Patterns**: Before creating new functions, check if similar ones already exist.
+3. **Enum Handling**: Always use existing enum values (WorkCategory, etc.) rather than creating new ones.
+4. **Check Related Files**: When modifying one file, also examine related files that might be affected.
+5. **Understand Domain Logic**: Each game system (work calculation, activities) has specific domain logic.
+6. **Use Correct Categories**: Use specific work categories (PLANTING, HARVESTING) not generic ones.
+7. **Check Constants**: Always review constant files and existing values before creating new ones.
+8. **Cross-Reference**: If modifying a feature, check both old and new implementations to maintain consistency.
+
+---
+
 ### 🧠 AI Prompting Style
 When asked to generate code:
 - Assume **React + TypeScript + Tailwind**, no routing.
