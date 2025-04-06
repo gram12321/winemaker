@@ -55,8 +55,6 @@ const StaffView: React.FC = () => {
 
   // Handle start of staff search
   const handleStartSearch = () => {
-    console.log('[StaffView] Starting staff search');
-    
     // Start the search activity
     const activityId = startActivityWithDisplayState('staffSearchActivity', {
       category: WorkCategory.STAFF_SEARCH,
@@ -70,8 +68,6 @@ const StaffView: React.FC = () => {
     if (activityId) {
       // Set up completion callback
       setActivityCompletionCallback(activityId, () => {
-        console.log('[StaffView] Staff search completed');
-        
         // Get the activity to retrieve search options
         const activity = getAllActivities().find(a => a.id === activityId);
           
@@ -80,6 +76,11 @@ const StaffView: React.FC = () => {
           setSearchResults(results);
           setIsSearching(false);
           setShowStaffSearch(true); // Show the modal with results
+          
+          toast({
+            title: 'Staff Search Completed',
+            description: `Found ${results.length} candidates matching your criteria.`
+          });
         }
       });
       
@@ -91,8 +92,6 @@ const StaffView: React.FC = () => {
 
   // Handle hiring activity
   const handleStartHiring = (staffToHire: Staff) => {
-    console.log('[StaffView] Starting hiring process for staff:', staffToHire.id);
-    
     // Start the hiring activity
     const activityId = startActivityWithDisplayState('staffHiringActivity', {
       category: WorkCategory.ADMINISTRATION,
@@ -106,13 +105,9 @@ const StaffView: React.FC = () => {
     if (activityId) {
       // Set up completion callback
       setActivityCompletionCallback(activityId, () => {
-        console.log('[StaffView] Hiring completed for activity:', activityId);
-        
         // Call the completeHiringProcess function to finalize hiring
         const hiredStaff = staffService.completeHiringProcess(activityId);
         if (hiredStaff) {
-          console.log('[StaffView] Successfully hired staff:', hiredStaff.id);
-          
           // Update search results to remove the hired staff
           setSearchResults(prevResults => prevResults.filter(s => s.id !== hiredStaff.id));
           
@@ -142,6 +137,19 @@ const StaffView: React.FC = () => {
   // Handle staff assignment completion for search
   const handleStaffAssigned = (staffIds: string[], finalSave = false) => {
     assignStaffWithDisplayState('staffSearchActivity', staffIds);
+    
+    if (staffIds.length > 0) {
+      const assignedStaff = staffService.getStaffById(staffIds[0]);
+      const assignmentMessage = staffIds.length === 1
+        ? `${assignedStaff?.name || 'Staff member'} assigned to staff search`
+        : `${staffIds.length} staff members assigned to staff search`;
+        
+      toast({
+        title: 'Staff Assigned',
+        description: assignmentMessage
+      });
+    }
+    
     if (finalSave) {
       setShowStaffAssignment(false);
     }
@@ -150,6 +158,19 @@ const StaffView: React.FC = () => {
   // Handle staff assignment for hiring completion
   const handleHiringStaffAssigned = (staffIds: string[], finalSave = false) => {
     assignStaffWithDisplayState('staffHiringActivity', staffIds);
+    
+    if (staffIds.length > 0) {
+      const assignedStaff = staffService.getStaffById(staffIds[0]);
+      const assignmentMessage = staffIds.length === 1
+        ? `${assignedStaff?.name || 'Staff member'} assigned to hiring process`
+        : `${staffIds.length} staff members assigned to hiring process`;
+        
+      toast({
+        title: 'Staff Assigned',
+        description: assignmentMessage
+      });
+    }
+    
     if (finalSave) {
       setShowHiringStaffAssignment(false);
     }

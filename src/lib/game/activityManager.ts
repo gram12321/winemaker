@@ -104,7 +104,6 @@ export const startActivityWithDisplayState = (
       taskMultipliers,
       workModifiers
     });
-    console.log(`[ActivityManager] Calculated work for ${category}: ${totalWork} units (amount: ${amount})`);
 
     // Create activity ID
     const activityId = uuidv4();
@@ -131,7 +130,7 @@ export const startActivityWithDisplayState = (
     // Show toast notification
     toast({
       title: `${title} Started`,
-      description: `Started ${category} activity`
+      description: `Started ${category} activity with ${totalWork} work units required`
     });
 
     return activityId;
@@ -150,9 +149,9 @@ export const startActivityWithDisplayState = (
 };
 
 /**
- * Assign staff to an activity with display state tracking
- * @param displayStateKey The display state key
- * @param staffIds Staff IDs to assign
+ * Assign staff to an activity and update display state
+ * @param displayStateKey The display state key 
+ * @param staffIds IDs of staff to assign
  * @returns true if successful, false otherwise
  */
 export const assignStaffWithDisplayState = (
@@ -163,35 +162,36 @@ export const assignStaffWithDisplayState = (
   const activityId = displayState?.activityId;
   
   if (!activityId) {
-    console.warn('[ActivityManager] Cannot assign staff: No active activity');
     return false;
   }
   
   try {
-    const activity = getActivityById(activityId);
-    if (!activity) {
-      console.warn('[ActivityManager] Cannot assign staff: Activity not found');
-      return false;
-    }
+    // Get staff information for better toast messages
+    const assignedStaffCount = staffIds.length;
     
-    // Assign staff to the activity
+    // Assign staff
     assignStaffToActivity(activityId, staffIds);
     
-    console.log(`[ActivityManager] Assigned ${staffIds.length} staff to activity ${activityId}`);
-    
-    toast({
-      title: 'Staff Assigned',
-      description: `Assigned ${staffIds.length} staff to the activity`
-    });
+    // Success toast
+    if (assignedStaffCount > 0) {
+      // Get the activity to show better information
+      const activity = getActivityById(activityId);
+      const activityTitle = activity?.params?.title || 'activity';
+      
+      toast({
+        title: 'Staff Assigned',
+        description: `${assignedStaffCount} staff ${assignedStaffCount === 1 ? 'member' : 'members'} assigned to ${activityTitle}`
+      });
+    }
     
     return true;
   } catch (error) {
     console.error('[ActivityManager] Error assigning staff:', error);
     
     toast({
-      title: 'Error',
-      description: 'Failed to assign staff. Please try again.',
-      variant: 'destructive',
+      title: 'Assignment Failed',
+      description: 'Failed to assign staff to activity',
+      variant: 'destructive'
     });
     
     return false;

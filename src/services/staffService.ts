@@ -690,19 +690,20 @@ export function startHiringProcess(staff: Staff): string {
  * @returns The hired staff object or null if hiring failed
  */
 export function completeHiringProcess(activityId: string): Staff | null {
-  console.log(`[StaffService] Completing hiring process for activity ${activityId}`);
-  
   // Get all necessary data from the activity before any operations
   const activity = getActivityById(activityId);
   if (!activity) {
-    console.log(`[StaffService] Activity ${activityId} already completed`);
     return null;
   }
   
   // Get the staff to hire from activity params
   const staffToHire = activity.params?.staffToHire as Staff;
   if (!staffToHire) {
-    console.error('[StaffService] Staff to hire not found in activity params');
+    toast({
+      title: 'Hiring Failed',
+      description: 'Staff information not found',
+      variant: 'destructive'
+    });
     return null;
   }
   
@@ -710,7 +711,6 @@ export function completeHiringProcess(activityId: string): Staff | null {
   
   // Deduct first month's wage
   if (!player || player.money < staffToHire.wage) {
-    console.error(`[StaffService] Not enough money to hire staff. Required: ${staffToHire.wage}, Available: ${player?.money || 0}`);
     toast({
       title: 'Hiring Failed',
       description: `You need ${staffToHire.wage - (player?.money || 0)} more to hire ${staffToHire.name}.`,
@@ -719,21 +719,24 @@ export function completeHiringProcess(activityId: string): Staff | null {
     return null;
   }
   
-  console.log(`[StaffService] Deducting ${staffToHire.wage} for first month's wage`);
+  // Deduct wage from account
   updatePlayerMoney(-staffToHire.wage);
   
   // Add the staff to your company
-  console.log(`[StaffService] Adding ${staffToHire.name} to company`);
   const addedStaff = addStaff(staffToHire);
   
   // Clean up - remove the activity
-  console.log(`[StaffService] Removing activity ${activityId}`);
   removeActivity(activityId);
+  
+  // Get specialization titles for the toast
+  const specializationTitles = staffToHire.specializations?.map(
+    spec => SpecializedRoles[spec]?.title || spec
+  ).join(', ') || 'General Worker';
   
   // Notify user
   toast({
     title: 'Staff Hired',
-    description: `${staffToHire.name} has joined your winery!`,
+    description: `${staffToHire.name} has joined your winery! Their specialty is ${specializationTitles}. First month's wage of ${staffToHire.wage} has been withdrawn from your account.`,
   });
   
   // Return the added staff
