@@ -1,4 +1,3 @@
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -47,9 +46,11 @@ export default defineConfig({
     port: 5173,
     hmr: {
       clientPort: 443,
-      port: 5173,
       host: '0.0.0.0'
-    }
+    },
+    cors: true,
+    strictPort: true,
+    allowedHosts: ['.replit.dev']
   },
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
