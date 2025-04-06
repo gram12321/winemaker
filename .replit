@@ -1,13 +1,4 @@
 modules = ["nodejs-20"]
-
-[[ports]]
-localPort = 443
-externalPort = 3000
-
-[[ports]]
-localPort = 5000
-externalPort = 5000
-
 [[ports]]
 localPort = 5173
 externalPort = 5173
@@ -15,19 +6,3 @@ externalPort = 5173
 [[ports]]
 localPort = 5174
 externalPort = 80
-
-[workflows]
-runButton = "Run"
-
-[[workflows.workflow]]
-name = "Run"
-mode = "sequential"
-author = 34895096
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm install"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "NODE_ENV=development VITE_HOST=true PORT=5000 npm run dev"

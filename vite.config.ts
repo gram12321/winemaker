@@ -1,11 +1,22 @@
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
 
+// Special method to exclude entire directory trees
 const excludeWinemakerOld = () => {
   return {
     name: 'exclude-winemaker-old',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (req.url && req.url.includes('winemaker_old')) {
+          res.statusCode = 404;
+          res.end();
+          return;
+        }
+        next();
+      });
+    },
     resolveId(id) {
       if (id.includes('winemaker_old')) {
         return { id: 'virtual:empty-module', external: true };
@@ -21,8 +32,12 @@ const excludeWinemakerOld = () => {
   };
 };
 
+// Configuration
 export default defineConfig({
-  plugins: [react(), excludeWinemakerOld()],
+  plugins: [
+    react(),
+    excludeWinemakerOld(),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -30,21 +45,15 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5000,
+    port: 5173,
     hmr: {
       clientPort: 443,
-      protocol: 'wss'
+      protocol: 'wss',
     },
-    // Allow all hosts for Replit dynamic subdomains
-    cors: true,
-    strictPort: true,
-    proxy: {
-      '/.replit.dev': {
-        target: '0.0.0.0',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/.replit.dev/, '')
-      }
-    }
+    allowedHosts: [
+      '42ce5070-689d-4888-819c-f4977b080723-00-2hphhf3482rf3.riker.replit.dev',
+      '.replit.dev'
+    ]
   },
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
@@ -53,5 +62,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-  }
+  },
 });
