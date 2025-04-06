@@ -1,0 +1,124 @@
+
+client:536 WebSocket connection to 'wss://0.0.0.0/?token=1vz2AU088g6P' failed: 
+setupWebSocket @ client:536Understand this errorAI
+client:560 [vite] server connection lost. Polling for restart...
+0.0.0.0/:1 
+            
+            
+           Failed to load resource: net::ERR_ADDRESS_INVALIDUnderstand this errorAI
+staffService.ts:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)Understand this errorAI
+0.0.0.0/:1 
+            
+            
+           Failed to load resource: net::ERR_ADDRESS_INVALIDUnderstand this errorAI
+:5173/favicon.ico:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 (Not Found)Understand this errorAI
+0.0.0.0/:1 
+            
+            
+           Failed to load resource: net::ERR_ADDRESS_INVALIDUnderstand this errorAI
+0.0.0.0/:1 
+            
+            
+           Failed to load resource: net::ERR_ADDRESS_INVALIDUnderstand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
+client:736 
+            
+            
+           GET https://0.0.0.0/ net::ERR_ADDRESS_INVALID
+ping @ client:736
+waitForSuccessfulPing @ client:755Understand this errorAI
