@@ -145,11 +145,17 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           </div>
         </div>
 
-        <div className="h-4 bg-gray-200 rounded-full relative">
+        <div className="h-4 bg-gray-200 rounded-full overflow-hidden relative">
           <div 
-            className="h-full bg-wine rounded-l-full"
-            style={{ width: `${workProgress.progressPercentage}%` }}
+            className="h-full bg-wine transition-all duration-300"
+            style={{ 
+              width: `${Math.min(100, Math.max(0, workProgress.progressPercentage))}%`,
+              borderRadius: workProgress.progressPercentage < 100 ? '0.5rem 0 0 0.5rem' : '0.5rem'
+            }}
           />
+          <div className="absolute inset-0 flex items-center justify-center text-xs font-medium">
+            {Math.round(workProgress.progressPercentage)}%
+          </div>
         </div>
       </div>
 
