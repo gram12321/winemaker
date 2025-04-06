@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
+import { WorkProgress } from '../ui/progress';
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
 import { getNationalityFlag, formatCurrency, getFallbackFlag } from '../../lib/core/utils/formatUtils'; // Import utility functions
@@ -145,12 +146,10 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           </div>
         </div>
 
-        <div className="h-4 bg-gray-200 rounded-full relative">
-          <div 
-            className="h-full bg-wine rounded-l-full"
-            style={{ width: `${workProgress.progressPercentage}%` }}
-          />
-        </div>
+        <WorkProgress
+          value={workProgress.progressPercentage}
+          showPercentage={true}
+        />
       </div>
 
       {/* Staff Table */}
