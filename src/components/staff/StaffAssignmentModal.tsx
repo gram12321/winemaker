@@ -233,11 +233,13 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
               {assignedStaff.map(member => (
                 <li key={member.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <div>
-                    <div className="font-medium">{member.name}</div>
+                    <div className="font-medium">
+                      {member.name} <span className={getNationalityFlag(member.nationality)}></span>
+                    </div>
                     <div className="text-xs text-gray-500">
                       {member.specializations?.length > 0 ? 
                         member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName} - {member.nationality}
+                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
                     </div>
                   </div>
                   <button
@@ -261,11 +263,13 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
               {unassignedStaff.map(member => (
                 <li key={member.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                   <div>
-                    <div className="font-medium">{member.name}</div>
+                    <div className="font-medium">
+                      {member.name} <span className={getNationalityFlag(member.nationality)}></span>
+                    </div>
                     <div className="text-xs text-gray-500">
                       {member.specializations?.length > 0 ? 
                         member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName} - {member.nationality}
+                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
                     </div>
                   </div>
                   <button
