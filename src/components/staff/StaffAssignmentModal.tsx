@@ -161,15 +161,6 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-medium">Available Staff</h3>
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={selectAll}
-              onChange={(e) => handleSelectAll(e.target.checked)}
-              className="mr-2"
-            />
-            Select All
-          </label>
         </div>
 
         <table className="w-full">
@@ -179,7 +170,13 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
               <th className="text-left p-2">Nationality</th>
               <th className="text-left p-2">Skills</th>
               <th className="text-right p-2">Wage</th>
-              <th className="text-center p-2">Select</th>
+              <th className="text-center p-2">
+                <input
+                  type="checkbox"
+                  checked={selectAll}
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                />
+              </th>
             </tr>
           </thead>
           <tbody>
