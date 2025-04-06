@@ -43,13 +43,20 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  // Force ignore our old project - fix the wildcard pattern
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    hmr: {
+      clientPort: 443,
+      protocol: 'wss',
+    }
+  },
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
     exclude: ['winemaker_old'],
   },
   build: {
     outDir: 'dist',
-    emptyOutDir: true, 
+    emptyOutDir: true,
   },
 });
