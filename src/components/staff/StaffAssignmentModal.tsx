@@ -237,7 +237,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                     <div className="text-xs text-gray-500">
                       {member.specializations?.length > 0 ? 
                         member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
+                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName} - {member.nationality}
                     </div>
                   </div>
                   <button
@@ -265,7 +265,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                     <div className="text-xs text-gray-500">
                       {member.specializations?.length > 0 ? 
                         member.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ') : 
-                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName}
+                        'General Worker'} - {getSkillLevelInfo(member.skillLevel).formattedName} - {member.nationality}
                     </div>
                   </div>
                   <button
