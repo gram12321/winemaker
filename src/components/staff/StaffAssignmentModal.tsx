@@ -154,18 +154,24 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   };
 
   const renderSkillBars = (member: any) => {
+    const skills = ['field', 'winery', 'administration', 'sales', 'maintenance'];
+    const letters = ['F', 'W', 'A', 'S', 'M'];
+    
     return (
       <div className="flex gap-1">
-        {member.specializations?.map((spec: string) => {
-          const role = staffService.SpecializedRoles[spec];
-          if (!role) return null;
+        {skills.map((skill, index) => {
+          const skillLevel = member.skills[skill];
+          const backgroundColor = skillLevel > 0.7 ? '#22c55e' : 
+                                skillLevel > 0.4 ? '#facc15' : 
+                                '#ef4444';
           return (
             <span
-              key={spec}
-              className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-wine text-white rounded"
-              title={role.title}
+              key={skill}
+              className="inline-flex items-center px-2 py-0.5 text-xs font-medium text-white rounded"
+              style={{ backgroundColor }}
+              title={`${skill.charAt(0).toUpperCase() + skill.slice(1)}: ${Math.round(skillLevel * 100)}%`}
             >
-              {role.skillBonus}
+              {letters[index]}
             </span>
           );
         })}
