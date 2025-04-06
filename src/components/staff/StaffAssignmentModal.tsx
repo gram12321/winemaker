@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
@@ -22,59 +21,60 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
 }) => {
   const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>(initialAssignedStaffIds);
   const [teams, setTeams] = useState<StaffTeam[]>([]);
-  
+  const [selectAll, setSelectAll] = useState(false); // Added state for select all
+
   useEffect(() => {
     const loadTeams = async () => {
       const loadedTeams = await staffService.loadTeams();
       setTeams(loadedTeams);
     };
-    
+
     loadTeams();
   }, []);
-  
+
   const { staff, vineyards } = getGameState();
   const activity = getActivityById(activityId);
-  
+
   const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
   const unassignedStaff = staff.filter(s => !assignedStaffIds.includes(s.id));
-  
+
   const handleAssignStaff = (staffId: string) => {
     const newAssignments = [...assignedStaffIds, staffId];
     setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments, false);
   };
-  
+
   const handleUnassignStaff = (staffId: string) => {
     const newAssignments = assignedStaffIds.filter(id => id !== staffId);
     setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments, false);
   };
-  
+
   const handleSave = () => {
     staffService.assignStaffToActivityById(activityId, assignedStaffIds);
     onAssignmentChange(assignedStaffIds, true);
   };
-  
+
   const handleAssignTeam = (teamId: string) => {
     if (!teamId) return;
-    
+
     const team = teams.find(t => t.id === teamId);
     if (!team) return;
-    
+
     const teamStaff = staff.filter(s => (s as any).teamId === teamId);
     const teamStaffIds = teamStaff.map(s => s.id);
-    
+
     const newAssignments = [...assignedStaffIds];
     teamStaffIds.forEach(id => {
       if (!newAssignments.includes(id)) {
         newAssignments.push(id);
       }
     });
-    
+
     setAssignedStaffIds(newAssignments);
     onAssignmentChange(newAssignments);
   };
-  
+
   const calculateWorkProgress = () => {
     if (!activity || assignedStaffIds.length === 0) {
       return {
@@ -85,22 +85,22 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         progressPercentage: 0
       };
     }
-    
+
     const workPerWeek = calculateStaffWorkContribution(
       assignedStaff, 
       category as WorkCategory
     );
-    
+
     const totalWork = Math.round(activity.totalWork);
     const remainingWork = totalWork - Math.round(activity.appliedWork);
     const weeksToComplete = workPerWeek > 0 
       ? Math.ceil(remainingWork / workPerWeek)
       : 'N/A';
-    
+
     const progressPercentage = totalWork > 0 
       ? (activity.appliedWork / totalWork) * 100
       : 0;
-    
+
     return {
       workPerWeek: Math.round(workPerWeek),
       totalWork,
@@ -109,20 +109,20 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       progressPercentage
     };
   };
-  
+
   const workProgress = calculateWorkProgress();
-  
+
   const createProgressSegments = () => {
     if (workProgress.workPerWeek <= 0 || workProgress.weeksToComplete === 'N/A') {
       return null;
     }
-    
+
     const numberOfWeeks = typeof workProgress.weeksToComplete === 'number' 
       ? workProgress.weeksToComplete
       : 0;
-    
+
     const totalSegmentsWidth = 100 - workProgress.progressPercentage;
-    
+
     return (
       <div 
         className="h-full absolute grid"
@@ -137,9 +137,9 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
             workProgress.workPerWeek, 
             workProgress.totalWork - workProgress.appliedWork - (i * workProgress.workPerWeek)
           );
-          
+
           if (weekWork <= 0) return null;
-          
+
           return (
             <div 
               key={i}
@@ -151,14 +151,25 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       </div>
     );
   };
-  
+
+  const handleSelectAll = (checked: boolean) => {
+    setSelectAll(checked);
+    setAssignedStaffIds(checked ? staff.map(s => s.id) : []);
+    onAssignmentChange(checked ? staff.map(s => s.id) : [], false);
+  };
+
+  const getNationalityFlag = (nationality: string) => {
+    // Add your nationality flag logic here.  This is a placeholder.
+    return ''; // Replace with actual flag class
+  };
+
   return (
     <div className="w-full max-h-[80vh] overflow-y-auto p-4">
       <h2 className="text-xl font-semibold mb-4">Assign Staff to Activity</h2>
-      
+
       <div className="bg-gray-50 p-4 rounded mb-6">
         <h3 className="text-lg font-medium mb-3">Work Progress Preview</h3>
-        
+
         <div className="grid grid-cols-3 gap-4 mb-3 text-sm">
           <div>
             <span className="font-medium">Work per Week:</span> {workProgress.workPerWeek} units
@@ -170,7 +181,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
             <span className="font-medium">Weeks to Complete:</span> {workProgress.weeksToComplete}
           </div>
         </div>
-        
+
         {workProgress.appliedWork > 0 && (
           <div className="mb-2">
             <div className="h-3 bg-gray-200 rounded-full relative">
@@ -181,21 +192,21 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
             </div>
           </div>
         )}
-        
+
         <div className="h-8 bg-gray-200 rounded-full relative">
           <div 
             className="h-full bg-wine rounded-l-full absolute"
             style={{ width: `${workProgress.progressPercentage}%` }}
           />
-          
+
           {createProgressSegments()}
         </div>
-        
+
         <p className="text-xs text-gray-600 mt-2">
           The progress bar shows one segment for each week of estimated work.
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
           <div className="flex justify-between mb-2">
@@ -214,7 +225,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
               </select>
             )}
           </div>
-          
+
           {assignedStaff.length === 0 ? (
             <p className="text-sm text-gray-500">No staff assigned yet.</p>
           ) : (
@@ -240,7 +251,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
             </ul>
           )}
         </div>
-        
+
         <div>
           <h3 className="font-medium mb-2">Available Staff ({unassignedStaff.length})</h3>
           {unassignedStaff.length === 0 ? (
@@ -269,7 +280,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           )}
         </div>
       </div>
-      
+
       <div className="flex justify-end space-x-3">
         <button
           onClick={onClose}
