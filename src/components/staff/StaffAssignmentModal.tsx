@@ -161,9 +161,14 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       <div className="flex gap-1">
         {skills.map((skill, index) => {
           const skillLevel = member.skills[skill];
-          const backgroundColor = skillLevel > 0.7 ? '#22c55e' : 
-                                skillLevel > 0.4 ? '#facc15' : 
-                                '#ef4444';
+          let backgroundColor;
+          if (skillLevel > 0.7) {
+            backgroundColor = '#16a34a';
+          } else if (skillLevel > 0.4) {
+            backgroundColor = '#eab308';
+          } else {
+            backgroundColor = '#dc2626';
+          }
           return (
             <span
               key={skill}
