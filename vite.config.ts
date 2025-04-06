@@ -1,7 +1,7 @@
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs';
 
 // Special method to exclude entire directory trees
 const excludeWinemakerOld = () => {
@@ -32,6 +32,7 @@ const excludeWinemakerOld = () => {
   };
 };
 
+// Configuration
 export default defineConfig({
   plugins: [
     react(),
@@ -42,16 +43,13 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    hmr: {
-      clientPort: 443,
-      host: '*.replit.dev'
-    }
-  },
+  // Force ignore our old project - fix the wildcard pattern
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
     exclude: ['winemaker_old'],
-  }
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true, 
+  },
 });

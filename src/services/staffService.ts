@@ -29,7 +29,7 @@ import {
   SPECIALIZATION_WAGE_BONUS,
   SkillLevels,
   DefaultTeams
-} from "../lib/core/constants/staffConstants";
+} from '../constants/staff';
 import { toast } from '../lib/ui/toast';
 
 // Types for staff related functionality
@@ -128,7 +128,7 @@ export function getSkillLevelInfo(skillLevel: number) {
   const closest = levels.reduce((prev, curr) => {
     return Math.abs(curr.value - skillLevel) < Math.abs(prev.value - skillLevel) ? curr : prev;
   });
-
+  
   return {
     label: closest.label,
     formattedName: closest.formattedName,
@@ -157,10 +157,10 @@ export function createStaff(
 ): Staff {
   const id = uuidv4();
   const calculatedSkills = skills || generateRandomSkills(skillLevel, specializations);
-
+  
   // Calculate wage with all specializations
   const monthlyWage = calculateWage(calculatedSkills, specializations);
-
+  
   return {
     id,
     name: `${firstName} ${lastName}`,
@@ -178,26 +178,26 @@ export function createStaff(
 export function addStaff(staff: Staff, saveToDb = false) {
   const gameState = getGameState();
   const updatedStaff = [...gameState.staff, staff];
-
+  
   updateGameState({ staff: updatedStaff });
-
+  
   if (saveToDb) {
     saveStaffToDb(staff);
   }
-
+  
   return staff;
 }
 
 export function removeStaff(staffId: string, saveToDb = false) {
   const gameState = getGameState();
   const updatedStaff = gameState.staff.filter(s => s.id !== staffId);
-
+  
   updateGameState({ staff: updatedStaff });
-
+  
   if (saveToDb) {
     removeStaffFromDb(staffId);
   }
-
+  
   return updatedStaff;
 }
 
@@ -206,13 +206,13 @@ export function updateStaff(updatedStaff: Staff, saveToDb = false) {
   const updatedStaffList = gameState.staff.map(s => 
     s.id === updatedStaff.id ? updatedStaff : s
   );
-
+  
   updateGameState({ staff: updatedStaffList });
-
+  
   if (saveToDb) {
     updateStaffInDb(updatedStaff);
   }
-
+  
   return updatedStaff;
 }
 
@@ -238,7 +238,7 @@ export function generateRandomSkills(skillModifier: number = 0.5, specialization
   const getSkillValue = (isSpecialized: boolean): number => {
     // Calculate base skill value first - exactly like old system
     const baseValue = (Math.random() * 0.6) + (skillModifier * 0.4);
-
+    
     // For specialized roles, add a percentage-based bonus that scales with skill
     if (isSpecialized) {
       const remainingPotential = 1.0 - baseValue;
@@ -246,10 +246,10 @@ export function generateRandomSkills(skillModifier: number = 0.5, specialization
       const bonus = remainingPotential * bonusPercentage;
       return Math.min(1.0, baseValue + bonus);
     }
-
+    
     return baseValue;
   };
-
+  
   return {
     field: getSkillValue(specializations.includes('field')),
     winery: getSkillValue(specializations.includes('winery')),
@@ -268,14 +268,14 @@ export function calculateWage(skills: StaffSkills, specializations: string[] = [
     skills.sales +
     skills.maintenance
   ) / 5;
-
+  
   // Add bonus for specialized roles (30% per specialization, multiplicative)
   const specializationBonus = specializations.length > 0 ? 
     Math.pow(1.3, specializations.length) : 1;
-
+  
   // Calculate monthly wage
   const weeklyWage = (BASE_WEEKLY_WAGE + (avgSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
-
+  
   // Convert to monthly (multiply by 52/12)
   return Math.round(weeklyWage * 52/12);
 }
@@ -303,7 +303,7 @@ export function saveTeam(team: StaffTeam, saveToDb = false) {
   // For now, just store in localStorage
   const teamsJSON = localStorage.getItem('staffTeams');
   const teams: StaffTeam[] = teamsJSON ? JSON.parse(teamsJSON) : [];
-
+  
   // Update or add the team
   const existingIndex = teams.findIndex(t => t.id === team.id);
   if (existingIndex >= 0) {
@@ -311,13 +311,13 @@ export function saveTeam(team: StaffTeam, saveToDb = false) {
   } else {
     teams.push(team);
   }
-
+  
   localStorage.setItem('staffTeams', JSON.stringify(teams));
-
+  
   if (saveToDb) {
     saveTeamToDb(team);
   }
-
+  
   return team;
 }
 
@@ -328,7 +328,7 @@ export async function loadTeams(): Promise<StaffTeam[]> {
 export function assignStaffToTeam(staffId: string, teamId: string | null) {
   const staff = getStaffById(staffId);
   if (!staff) return null;
-
+  
   const updatedStaff = { ...staff, teamId };
   return updateStaff(updatedStaff);
 }
@@ -345,19 +345,19 @@ export function calculateSearchCost(options: StaffSearchOptions): number {
   const baseCost = 2000;
   const skillInfo = getSkillLevelInfo(skillLevel);
   const skillMultiplier = skillInfo.value;
-
+  
   // Exponential scaling based on candidates and skill
   const candidateScaling = Math.pow(numberOfCandidates, 1.5);
   const skillScaling = Math.pow(skillMultiplier, 1.8);
-
+  
   // Linear scaling for specialized roles (2x per role)
   const specializationMultiplier = specializations.length > 0 
     ? Math.pow(2, specializations.length) 
     : 1;
-
+  
   // Combine all scalings
   const totalMultiplier = (candidateScaling * skillScaling * specializationMultiplier);
-
+  
   return Math.round(baseCost * totalMultiplier);
 }
 
@@ -384,15 +384,15 @@ export function generateStaffCandidates(options: StaffSearchOptions | number, sk
   }
 
   const candidates: Staff[] = [];
-
+  
   for (let i = 0; i < count; i++) {
     // Randomly select nationality
     const nationality = selectRandomNationality();
-
+    
     // Get random names based on nationality
     const firstName = getRandomFirstName(nationality);
     const lastName = getRandomLastName(nationality);
-
+    
     // Create staff with randomized skills based on required min skill level
     const staff = createStaff(
       firstName,
@@ -401,10 +401,10 @@ export function generateStaffCandidates(options: StaffSearchOptions | number, sk
       specs,
       nationality
     );
-
+    
     candidates.push(staff);
   }
-
+  
   return candidates;
 }
 
@@ -412,10 +412,10 @@ export function generateStaffCandidates(options: StaffSearchOptions | number, sk
 function getRandomFirstName(nationality: Nationality): string {
   // Random gender selection (50/50)
   const isMale = Math.random() > 0.5;
-
+  
   // Select name list based on nationality and gender
   let nameList: string[];
-
+  
   switch (nationality) {
     case 'Italy':
       nameList = isMale ? italianMaleNames : italianFemaleNames;
@@ -434,7 +434,7 @@ function getRandomFirstName(nationality: Nationality): string {
       nameList = isMale ? usMaleNames : usFemaleNames;
       break;
   }
-
+  
   // Return random name from the selected list
   return nameList[Math.floor(Math.random() * nameList.length)];
 }
@@ -451,32 +451,32 @@ export function getAssignedStaffToActivity(activityId: string): Staff[] {
   if (!activity || !activity.params || !activity.params.assignedStaffIds) {
     return [];
   }
-
+  
   const staffIds = activity.params.assignedStaffIds as string[];
   const gameState = getGameState();
-
+  
   return gameState.staff.filter(staff => staffIds.includes(staff.id));
 }
 
 export function assignStaffToActivityById(activityId: string, staffIds: string[]) {
   const result = assignStaffToActivity(activityId, staffIds);
-
+  
   // Save assignment to database
   saveStaffAssignmentsToDb(activityId, staffIds);
-
+  
   return result;
 }
 
 export function getStaffByTeam(teamId: string | null): Staff[] {
   const gameState = getGameState();
-
+  
   return gameState.staff.filter(staff => staff.teamId === teamId);
 }
 
 export function assignTeamToActivity(activityId: string, teamId: string) {
   const teamStaff = getStaffByTeam(teamId);
   const staffIds = teamStaff.map(staff => staff.id);
-
+  
   return assignStaffToActivityById(activityId, staffIds);
 }
 
@@ -485,30 +485,30 @@ export function calculateActivityStaffEfficiency(activityId: string, category: s
   if (assignedStaff.length === 0) {
     return 0;
   }
-
+  
   // Get the appropriate skill from each staff member based on the category
   const skills = assignedStaff.map(staff => {
     if (!staff.skills) {
       return staff.skillLevel;
     }
-
+    
     // Map category to skill key
     const skillKey = mapCategoryToSkill(category);
-
+    
     // Add specialization bonus if applicable
     const specializationBonus = 
       staff.specializations.includes(category)
         ? 0.2 // 20% bonus for specialization
         : 0;
-
+    
     return staff.skills[skillKey] + specializationBonus;
   });
-
+  
   // Calculate average skill level adjusted for team size
   // We use a diminishing returns approach for larger teams
   const baseEfficiency = skills.reduce((sum, skill) => sum + skill, 0) / skills.length;
   const teamSizeFactor = Math.min(1, 1 + (Math.log(assignedStaff.length) / Math.log(10)));
-
+  
   return baseEfficiency * teamSizeFactor;
 }
 
@@ -532,7 +532,7 @@ export function mapCategoryToSkill(category: string): keyof StaffSkills {
     'construction': 'maintenance',
     'general': 'field' // default
   };
-
+  
   return mapping[category.toLowerCase()] || 'field';
 }
 
@@ -544,7 +544,7 @@ export function mapSpecializationToCategory(specialization: string): string {
     'sales': 'marketing',
     'maintenance': 'repair'
   };
-
+  
   return mapping[specialization] || 'general';
 }
 
@@ -554,9 +554,9 @@ export async function initializeDefaultTeams(): Promise<void> {
   if (localStorageTeams) {
     localStorage.removeItem('staffTeams');
   }
-
+  
   const existingTeams = await loadTeamsFromDb();
-
+  
   // Only create default teams if none exist
   if (existingTeams.length === 0) {
     // Create teams using the DefaultTeams defined in constants/staff.ts
@@ -607,7 +607,7 @@ export async function initializeDefaultTeams(): Promise<void> {
         icon: '📊' // Chart icon for admin team
       }
     ];
-
+    
     for (const team of teamList) {
       await saveTeamToDb(team);
     }
@@ -624,14 +624,14 @@ export const STAFF_ACTIVITY_CATEGORIES = {
 export function startStaffSearch(options: StaffSearchOptions): string {
   const searchCost = calculateSearchCost(options);
   const gameState = getGameState();
-
+  
   if (!gameState.player || gameState.player.money < searchCost) {
     throw new Error('Insufficient funds for staff search');
   }
-
+  
   // Deduct search cost
   updatePlayerMoney(-searchCost);
-
+  
   // Create the activity - completion callback will be added by the component
   const activity = addActivity({
     id: uuidv4(),
@@ -654,16 +654,16 @@ export function startStaffSearch(options: StaffSearchOptions): string {
 // Function to start hiring process
 export function startHiringProcess(staff: Staff): string {
   const gameState = getGameState();
-
+  
   if (!gameState.player || gameState.player.money < staff.wage) {
     throw new Error('Insufficient funds for first month\'s wage');
   }
-
+  
   // Validate staff data
   if (!staff || !staff.id || !staff.name) {
     throw new Error('Invalid staff data for hiring process');
   }
-
+  
   // Create the hiring activity
   const activity = addActivity({
     id: uuidv4(),
@@ -695,7 +695,7 @@ export function completeHiringProcess(activityId: string): Staff | null {
   if (!activity) {
     return null;
   }
-
+  
   // Get the staff to hire from activity params
   const staffToHire = activity.params?.staffToHire as Staff;
   if (!staffToHire) {
@@ -706,9 +706,9 @@ export function completeHiringProcess(activityId: string): Staff | null {
     });
     return null;
   }
-
+  
   const { player } = getGameState();
-
+  
   // Deduct first month's wage
   if (!player || player.money < staffToHire.wage) {
     toast({
@@ -718,27 +718,27 @@ export function completeHiringProcess(activityId: string): Staff | null {
     });
     return null;
   }
-
+  
   // Deduct wage from account
   updatePlayerMoney(-staffToHire.wage);
-
+  
   // Add the staff to your company
   const addedStaff = addStaff(staffToHire);
-
+  
   // Clean up - remove the activity
   removeActivity(activityId);
-
+  
   // Get specialization titles for the toast
   const specializationTitles = staffToHire.specializations?.map(
     spec => SpecializedRoles[spec]?.title || spec
   ).join(', ') || 'General Worker';
-
+  
   // Notify user
   toast({
     title: 'Staff Hired',
     description: `${staffToHire.name} has joined your winery! Their specialty is ${specializationTitles}. First month's wage of ${staffToHire.wage} has been withdrawn from your account.`,
   });
-
+  
   // Return the added staff
   return addedStaff;
 }
@@ -773,4 +773,4 @@ export default {
   startStaffSearch,
   startHiringProcess,
   completeHiringProcess
-};
+}; 
