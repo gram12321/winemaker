@@ -46,12 +46,8 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    hmr: {
-      clientPort: 443,
-      host: '.preview.replit.app',
-      protocol: 'wss',
-    },
-    allowedHosts: ['.replit.dev', '.replit.app']
+    hmr: true,
+    host: true
   },
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
