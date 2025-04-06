@@ -45,9 +45,9 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5173,
     hmr: true,
-    host: true,
     cors: true,
-    strictPort: true
+    strictPort: true,
+    allowedHosts: 'all'
   },
   optimizeDeps: {
     entries: ['src/**/*.ts', 'src/**/*.tsx', 'index.html'],
