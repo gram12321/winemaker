@@ -19,7 +19,6 @@ const countryToFlagCode: Record<string, string> = {
   "France": "fr",
   "Spain": "es",
   "US": "us",
-  "United States": "us",
   "Germany": "de",
 };
 
