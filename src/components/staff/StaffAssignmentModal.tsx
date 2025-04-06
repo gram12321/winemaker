@@ -147,9 +147,14 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         </div>
 
         <WorkProgress
-          value={workProgress.progressPercentage}
-          showPercentage={true}
-        />
+          value={workProgress.weeksToComplete === 'N/A' ? 0 : (100 - ((Number(workProgress.weeksToComplete) / 10) * 100))}
+          showPercentage={false}
+          className="bg-gray-200 h-2"
+        >
+          <div className="text-xs text-center mt-1">
+            {workProgress.weeksToComplete === 'N/A' ? 'Select staff to start' : `${workProgress.weeksToComplete} weeks to complete`}
+          </div>
+        </WorkProgress>
       </div>
 
       {/* Staff Table */}
