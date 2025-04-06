@@ -49,7 +49,10 @@ export default defineConfig({
     hmr: {
       clientPort: 443,
       host: '0.0.0.0'
-    }
+    },
+    cors: true,
+    strictPort: true,
+    allowedHosts: 'all'
   },
   // Force ignore our old project - fix the wildcard pattern
   optimizeDeps: {
