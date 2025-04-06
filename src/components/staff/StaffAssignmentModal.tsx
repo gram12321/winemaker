@@ -3,7 +3,7 @@ import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
-import { getNationalityFlag, formatCurrency, getFallbackFlag } from '../../lib/core/utils'; // Import utility functions
+import { getNationalityFlag, formatCurrency, getFallbackFlag } from '../../lib/core/utils/formatUtils'; // Import utility functions
 
 interface StaffAssignmentModalProps {
   activityId: string;
