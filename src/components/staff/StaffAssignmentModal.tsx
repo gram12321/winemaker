@@ -24,7 +24,6 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>(initialAssignedStaffIds);
   const [teams, setTeams] = useState<StaffTeam[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-  const { staff } = getGameState();
 
   useEffect(() => {
     const loadTeams = async () => {
