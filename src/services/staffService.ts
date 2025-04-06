@@ -29,7 +29,7 @@ import {
   SPECIALIZATION_WAGE_BONUS,
   SkillLevels,
   DefaultTeams
-} from "../lib/core/constants/staff";
+} from "../lib/core/constants/staffConstants";
 import { toast } from '../lib/ui/toast';
 
 // Types for staff related functionality
