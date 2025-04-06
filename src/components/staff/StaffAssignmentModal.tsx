@@ -24,6 +24,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>(initialAssignedStaffIds);
   const [teams, setTeams] = useState<StaffTeam[]>([]);
   const [selectAll, setSelectAll] = useState(false);
+  const { staff } = getGameState();
 
   useEffect(() => {
     const loadTeams = async () => {
@@ -181,7 +182,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
           </thead>
           <tbody>
             {staff.map(member => (
-              <tr key={member.id} className="border-t">
+              <tr key={member.id} className="border-t hover:bg-gray-50">
                 <td className="p-2">{member.name}</td>
                 <td className="p-2">
                   <div className="flex items-center gap-2">
@@ -193,12 +194,13 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                   </div>
                 </td>
                 <td className="p-2">{renderSkillBars(member)}</td>
-                <td className="p-2 text-right">{formatCurrency(member.wage)}</td>
+                <td className="p-2 text-right font-medium">{formatCurrency(member.wage)}</td>
                 <td className="p-2 text-center">
                   <input
                     type="checkbox"
                     checked={assignedStaffIds.includes(member.id)}
                     onChange={(e) => handleStaffSelection(member.id, e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-wine focus:ring-wine"
                   />
                 </td>
               </tr>
