@@ -1,0 +1,253 @@
+/* Shared process layout styles */
+.crushing-process,
+.fermentation-process {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0.5rem;
+    padding: 0.25rem;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Shared stage styles */
+.crushing-stage,
+.fermentation-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.2);
+    min-height: 240px;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.crushing-stage.center-stage,
+.fermentation-stage.center-stage {
+    width: 250px;
+    min-height: 275px;
+}
+
+/* Shared image styles */
+.crushing-input-image,
+.crushing-output-image,
+.fermentation-input-image,
+.fermentation-output-image {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.crushing-machine-image,
+.fermentation-machine-image {
+    width: 100%;
+    max-width: 150px;
+    margin: 0 auto;
+    display: block;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+/* Shared arrow styles */
+.crushing-arrow,
+.fermentation-arrow {
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        #000000 20%,
+        #000000 80%,
+        transparent 100%
+    );
+    background-size: 80px 3px;
+    animation: flowEffect 2s linear infinite;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Shared arrow positioning */
+.crushing-arrow.left-arrow,
+.fermentation-arrow.left-arrow {
+    right: -20px;
+}
+
+.crushing-arrow.right-arrow,
+.fermentation-arrow.right-arrow {
+    left: -20px;
+}
+
+/* Shared arrow decorators */
+.crushing-arrow::after,
+.fermentation-arrow::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    width: 12px;
+    height: 12px;
+    border-top: 3px solid #000000;
+    border-right: 3px solid #000000;
+    right: -2px;
+    transform: rotate(45deg);
+}
+
+/* Shared hover effects */
+.crushing-stage:hover ~ .crushing-stage .crushing-arrow,
+.crushing-stage:hover .crushing-arrow,
+.fermentation-stage:hover ~ .fermentation-stage .fermentation-arrow,
+.fermentation-stage:hover .fermentation-arrow {
+    background: linear-gradient(90deg, 
+        transparent 0%,
+        #000000 20%,
+        #000000 80%,
+        transparent 100%
+    );
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+}
+
+/* Shared data display styles */
+.crushing-data,
+.fermentation-data {
+    font-size: 0.9em;
+    color: var(--color-text);
+}
+
+.crushing-data-item,
+.fermentation-data-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.crushing-data-label,
+.fermentation-data-label {
+    color: var(--color-accent);
+}
+
+/* Shared method selection styles */
+.crushing-methods-section,
+.fermentation-methods-section {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: nowrap;
+    padding: 0.25rem;
+}
+
+/* Animation keyframes */
+@keyframes flowEffect {
+    0% { background-position: -60px 0; }
+    100% { background-position: 60px 0; }
+}
+
+
+/* Method selector styling */
+.method-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: nowrap;
+    padding: 0.25rem;
+}
+
+.method-item {
+    flex: 0 0 auto;
+    min-width: 100px;
+    max-width: 120px;
+    padding: 0.5rem;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.method-item.selected {
+    border-color: var(--color-accent);
+    background: linear-gradient(
+        rgba(var(--color-accent-rgb), 0.15),
+        rgba(40, 167, 69, 0.2)
+    );
+    box-shadow: 
+        0 0 10px rgba(var(--color-accent-rgb), 0.2),
+        inset 0 0 15px rgba(40, 167, 69, 0.1);
+    transform: translateY(-2px);
+}
+
+.method-item.selected .method-name {
+    color: var(--color-accent);
+    text-shadow: 0 0 5px rgba(40, 167, 69, 0.2);
+}
+
+.method-item:not(.disabled):hover {
+    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.method-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(128, 128, 128, 0.1);
+    border-color: #666;
+}
+
+.method-item input[type="radio"] {
+    display: none;
+}
+
+.method-item-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.method-item img {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 0.25rem;
+    transition: transform 0.2s ease;
+}
+
+.method-item:not(.disabled):hover img {
+    transform: scale(1.1);
+}
+
+.method-item .method-name {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.method-stats {
+    font-size: 0.75em;
+    color: #888;
+    margin-top: 0.25rem;
+}
+
+.method-item.selected .method-stats {
+    color: var(--color-accent);
+}
+
+/* Skip option styling */
+.skip-option {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.25rem;
+    border-top: 1px solid #ddd;
+    text-align: center;
+}

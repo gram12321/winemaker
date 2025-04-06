@@ -1,0 +1,305 @@
+/* 5. Data Overlays */
+.overlay-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin: 0 auto;
+  max-width: 1200px;
+  overflow: hidden; /* Ensure inner elements don't break border radius */
+}
+/* box around image and header */
+.imgbox {
+  background-color: #fff;
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+  padding: 25px;  /* Add padding around the entire grid */
+}
+
+/* Info Section Styles */
+.info-section {
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  background-color: var(--color-background);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  text-align: center;
+
+}
+
+/* Nested info sections should have lighter borders */
+.info-section .info-section {
+  border: 1px solid var(--color-accent);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px 0;
+}
+
+.data-table {
+  width: fit-content;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 15px auto;
+  font-size: 0.9em;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.data-table th,
+.info-section .data-table th {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--panel-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  background-color: var(--color-primary);
+}
+
+.data-table td,
+.info-section .data-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+/* Make sure all table cells have borders */
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--color-accent);
+  border-right: 1px solid var(--color-accent);
+}
+
+.data-table th:last-child,
+.data-table td:last-child {
+  border-right: none;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Consistent alternating rows and hover effects */
+.data-table tr:nth-child(even),
+.info-section .data-table tr:nth-child(even) {
+  background-color: rgba(197, 165, 114, 0.05);
+}
+
+.data-table tr:hover,
+.info-section .data-table tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+  cursor: default;
+}
+
+.info-section {
+  border: 2px solid var(--color-accent);
+  border-radius: 12px;
+  background-color: var(--color-background);
+  margin-bottom: 15px;
+  padding: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.data-table {
+  width: fit-content;
+  table-layout: auto;
+  border-collapse: collapse;
+  margin: 15px auto;
+  font-size: 0.9em;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-accent);
+  box-shadow: var(--shadow-sm);
+  min-width: 200px;
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.data-table th {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--panel-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  background-color: var(--color-primary);
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--color-accent);
+  text-align: left;
+  color: var(--color-text);
+  font-weight: normal;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
+}
+
+/* Alternating rows and hover effects */
+.data-table tr:nth-child(even) {
+  background-color: rgba(197, 165, 114, 0.05);
+}
+
+.data-table tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+  cursor: default;
+}
+
+/* specific staffoverlay tweaks */
+.staff-overlay .overlay-card {
+  padding-bottom: 25px;  /* Add padding at bottom of staff overlay */
+}
+
+/* specific hirestaff tweaks */
+.hire-staff-overlay .overlay-card {
+  max-width: 1200px;
+  overflow-y: auto;   /* Remove scroll from card */
+  padding: 0;
+}
+
+.hire-staff-overlay .info-grid {
+  overflow-y: none;     /* Move scroll to grid */
+}
+
+/* Specific for ressourceinfovoverlay */
+.characteristic-icon {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* Specific for fieldoverlay */
+.upgrade-icon, .specialfeatures-icon {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+  margin-right: 8px;
+  border-radius: var(--radius-md);
+}
+
+/* Characteristic Bar Styles */
+.characteristic-bar-container {
+    width: 200px;
+    position: relative;
+    margin: 5px 0;
+}
+
+.characteristic-bar {
+    height: 8px;
+    position: relative;
+    background: #eee;
+    border-radius: 4px;
+}
+
+.bar-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #ddd;
+    border-radius: 4px;
+}
+
+.balanced-range {
+    position: absolute;
+    height: 100%;
+    background: #3d2e2e;
+    opacity: 0.3;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.adjusted-range {
+    position: absolute;
+    height: 100%;
+    opacity: 0.3;
+    z-index: 2;
+}
+
+.adjusted-range-outer {
+    background: #157306;  /* Light green */
+
+}
+
+.adjusted-range-center {
+    background: #0B4C04;  /* Deep green */
+    border-radius: 0;  /* No border radius for center section */
+}
+
+.value-marker {
+    position: absolute;
+    width: 4px;
+    height: 16px;
+    background: #333;
+    top: -4px;
+    transform: translateX(-50%);
+    z-index: 3;
+}
+
+.bar-labels {
+    position: relative;
+    height: 20px;
+}
+
+.value-label {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 0.8em;
+    top: 2px;
+}
+
+
+
+/* Overlay Table Styles */
+.overlay-table.data-table,
+.wine-info-table.data-table,
+.resource-info-table.data-table,
+.farmland-info-table.data-table {
+    margin: 15px auto;
+    width: 100%;
+    padding: 10px;
+}
+
+.grape-varieties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.grape-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--color-accent);
+    border-radius: 8px;
+    padding: 15px;
+    cursor: pointer; /* Added cursor: pointer */
+}
+
+.grape-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-accent);
+}
+
+.grape-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}

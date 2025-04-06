@@ -1,0 +1,58 @@
+/* Console */
+#console-bar {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: var(--panel-width);
+  height: var(--console-height);
+  width: var(--console-width);
+  transition: all var(--transition-speed) ease;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  /* Hide horizontal scroll to maintain layout integrity */
+  background-color: #888;
+  /* Use the lighter grey from original styles */
+  color: #000;
+  /* Dark text color for better contrast */
+  border: 1px solid #333;
+  /* Subtle border from original styles */
+  border-top: 2px solid #dee2e6;
+  /* Top border for distinction */
+  border-radius: 4px;
+  /* Rounded corners */
+  padding: 10px;
+  /* Padding inside the console area */
+  z-index: 1001;
+  /* Ensure it stays on top of other elements */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  /* Subtle shadow for depth */
+  box-sizing: border-box;
+  /* Include padding and border in element's total width/height */
+  font-family: monospace;
+  /* Monospace font for console feel */
+  white-space: pre-wrap;
+  /* Preserve whitespace and wrapping */
+  width: auto;
+  /* Ensure the width fits the content */
+  font-size: 10px;
+  /* Ensure consistent font-size */
+  min-width: 630px;
+  /* Minimum width */
+}
+
+/* Collapsed states */
+body.sidebar-collapsed #console-bar {
+  left: var(--sidebar-collapsed-width);
+  width: var(--console-width-sidebar-collapsed);
+}
+
+body.panel-collapsed #console-bar {
+  right: var(--panel-collapsed-width);
+  width: var(--console-width-panel-collapsed);
+}
+
+body.sidebar-collapsed.panel-collapsed #console-bar {
+  left: var(--sidebar-collapsed-width);
+  right: var(--panel-collapsed-width);
+  width: var(--console-width-both-collapsed);
+}

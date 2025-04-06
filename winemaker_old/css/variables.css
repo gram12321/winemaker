@@ -1,0 +1,66 @@
+:root {
+  /* Primary Colors */
+  --color-primary: #722F37;      /* Deep burgundy for wine theme */
+  --color-secondary: #7C8363;    /* Sage green for vineyard */
+  --color-background: #FAF9F7;   /* Warm white */
+  --color-text: #2D2D2D;         /* Deep gray */
+  --color-accent: #C5A572;       /* Gold for prestige */
+
+  /* Task Colors - Maintained from original but refined */
+  --task-field: var(--color-secondary);
+  --task-winery: var(--color-primary);
+  --task-admin: #23143E;
+  --task-sales: #491809;
+
+  /* Status Colors */
+  --color-success: #4A5D3F;      /* Earthy green */
+  --color-warning: #CF9F5D;      /* Warm amber */
+  --color-error: #8B2E2E;        /* Dark red */
+  --color-positive: #28a745;     /* Success/positive changes */
+  --color-negative: #dc3545;     /* Error/negative changes */
+
+  /* UI Element Colors */
+  --panel-bg: #343A40;           /* Dark background for panels */
+  --panel-text: #FFFFFF;         /* Light text for dark backgrounds */
+  --border-color: #94BDE5;       /* Maintained from original */
+
+  /* Layout */
+  --sidebar-width: 250px;
+  --sidebar-collapsed-width: 60px;
+  --panel-width: var(--sidebar-width);
+  --panel-collapsed-width: var(--sidebar-collapsed-width);
+  --console-height: 100px;
+  --console-width: calc(100% - (var(--sidebar-width) + var(--panel-width)));
+  --console-width-sidebar-collapsed: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-width)));
+  --console-width-panel-collapsed: calc(100% - (var(--sidebar-width) + var(--panel-collapsed-width)));
+  --console-width-both-collapsed: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
+  --transition-speed: 0.3s;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+
+  /* Scrollbar Colors */
+  --scrollbar-track: #FAF9F7;
+  --scrollbar-thumb: #722F37;
+  --scrollbar-thumb-hover: #491809;
+
+  /* Checkbox Colors */
+  --checkbox-border: #C5A572;
+  --checkbox-bg: #722F37;
+  --checkbox-checked: #C5A572;
+  --checkbox-hover: #8B4513;
+}

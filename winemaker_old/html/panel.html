@@ -1,0 +1,26 @@
+<!-- panel.html -->
+<div id="panel-wrapper" class="bg-dark text-white">
+  <button class="toggle-panel" title="Toggle Panel">
+    <span>▶</span>
+  </button>
+  <div class="panel p-3">
+    <h5 class="text-uppercase">Task Panel</h5>
+    <hr class="bg-secondary">
+    <div id="task-list" class="d-flex flex-column">
+
+      <!-- New tasks will be dynamically added here -->
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  const togglePanelButton = document.querySelector('.toggle-panel');
+  const panelWrapper = document.getElementById('panel-wrapper');
+
+  togglePanelButton.addEventListener('click', () => {
+    panelWrapper.classList.toggle('collapsed');
+    togglePanelButton.querySelector('span').textContent = panelWrapper.classList.contains('collapsed') ? '◀' : '▶';
+  });
+</script>

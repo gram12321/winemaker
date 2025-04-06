@@ -1,0 +1,160 @@
+.finance-container {
+  padding: 2rem;
+  background-color: var(--color-background);
+}
+
+.finance-section {
+  background: linear-gradient(145deg, var(--color-background), rgba(255, 255, 255, 0.9));
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-accent);
+}
+
+.finance-section h2 {
+  color: var(--color-primary);
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 0.5rem;
+}
+
+.cash-flow-section {
+  background-color: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-accent);
+}
+
+.cash-flow-table {
+  max-height: 400px;
+  overflow-y: auto;
+  border-radius: var(--radius-md);
+}
+
+.cash-flow-table thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  z-index: 1;
+  font-size: 0.9rem;
+  padding: 1rem;
+}
+
+.cash-flow-table td {
+  font-size: 0.85rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.transaction-row {
+  transition: background-color 0.2s;
+}
+
+.transaction-row:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+}
+
+.transaction-income {
+  color: var(--color-success);
+  font-weight: 500;
+}
+
+.transaction-expense {
+  color: var(--color-error);
+  font-weight: 500;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, var(--color-background) 0%, rgba(255, 255, 255, 0.9) 100%);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-accent);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-label {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+  color: var(--color-text);
+}
+
+.balance-positive {
+  color: var(--color-success);
+}
+
+.balance-negative {
+  color: var(--color-error);
+}
+
+.stat-details {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(var(--color-accent-rgb), 0.2);
+  font-size: 0.9em;
+}
+
+.stat-details div {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(var(--color-accent-rgb), 0.1);
+}
+
+.stat-details div:last-child {
+  border-bottom: none;
+}
+
+.stat-details div span:last-child {
+  font-weight: 500;
+}
+
+.stat-details div span:last-child.transaction-income {
+  color: var(--color-success);
+}
+
+.stat-details div span:last-child.transaction-expense {
+  color: var(--color-error);
+}
+
+.fa-chevron-down {
+  transition: transform 0.3s ease;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+}
+
+.collapsed .fa-chevron-down {
+  transform: rotate(-90deg);
+}
+
+/* Animation for collapse */
+.collapse {
+  transition: height 0.35s ease;
+}
+
+.collapse:not(.show) {
+  display: none;
+}
+
+.collapsing {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.35s ease;
+}

@@ -1,0 +1,457 @@
+/* Overlay Styles */
+#buildingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 3000; /* Increased to be well above console (2000) */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 25px;
+}
+
+#buildingOverlay .overlay-content {
+  margin: 0 auto;
+  margin-bottom: 25px;
+  max-height: 90vh;
+  width: calc(100% - 40px);
+  max-width: calc(100vw - 540px);
+  overflow-y: auto;
+}
+
+/* Layout Grid */
+.building-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .building-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Building Card Styles */
+.building-card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  position: relative;
+  color: var(--color-text);
+  text-align: left;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.building-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  background-color: var(--hover-bg);
+}
+
+.building-card .icon {
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-size: cover;
+  border-radius: 4px;
+}
+
+.building-card .details {
+  margin-left: 80px;
+  padding: 5px;
+}
+
+.unbuilt-card {
+  opacity: 0.6;
+  pointer-events: none;
+  background-color: var(--panel-bg);
+  color: var(--panel-text);
+}
+
+/* Card Styles */
+.card {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+  background-color: var(--color-primary) !important;
+  color: var(--panel-text);
+  padding: 1rem;
+  border-top-left-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-md);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.card-header h3 {
+  color: var(--panel-text);
+  margin: 0;
+  font-weight: 500;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Tool Grid and Columns */
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.tool-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.tool-column-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--color-primary);
+  color: var(--panel-text);
+  border-radius: var(--radius-sm);
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.tool-column-header .expand-icon {
+  transition: transform 0.3s ease;
+}
+
+.tool-column.collapsed .expand-icon {
+  transform: rotate(-90deg);
+}
+
+.tool-column-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Tool Container and Stats */
+.tool-container {
+  text-align: left;
+  border: 2px solid var(--color-primary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s;
+  margin-bottom: var(--spacing-sm);
+}
+
+.tool-container:hover {
+  transform: translateY(-2px);
+}
+
+.tool-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+
+.collapsible-content {
+  transition: all 0.3s ease;
+  max-height: 1000px;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.tool-column.collapsed .collapsible-content {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Tool Stats */
+.tool-stats {
+  color: #aaa;
+  font-size: 0.85rem;
+  padding: 8px 0;
+}
+
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.tool-stats > div:last-child {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-accent);
+}
+
+
+
+.tool-tasktype-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+/* Button Styles */
+.overlay-section-btn,
+.add-tool-button {
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  margin: var(--spacing-xs);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--color-accent);
+  color: var(--panel-text);
+}
+
+.overlay-section-btn:hover:not(:disabled),
+.add-tool-button:hover:not(:disabled) {
+  background-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.overlay-section-btn:disabled,
+.add-tool-button:disabled {
+  background-color: var(--color-accent) !important;
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--panel-text) !important;
+  border: 1px solid rgba(114, 47, 55, 0.3) !important;
+}
+
+
+/* Capacity Grid */
+.capacity-grid {
+  padding: 15px;
+  background: rgba(114, 47, 55, 0.05);
+  border-radius: var(--radius-md);
+}
+
+.capacity-header {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.capacity-grid-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.capacity-cell,
+.tool-container {
+  border-radius: var(--radius-md);
+  transition: transform 0.2s ease;
+}
+
+.capacity-cell:hover,
+.tool-container:hover {
+  transform: scale(1.05);
+}
+
+.capacity-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  margin: var(--spacing-xs);
+  background-color: var(--color-background);
+  width: 70px;
+  height: 70px;
+  position: relative;
+}
+
+.cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+/* Tool Info and Tooltips */
+.tool-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tool-info img {
+  width: 35px !important;
+  height: 35px !important;
+}
+
+.tool-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-background);
+  border: 1px solid var(--color-primary);
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  white-space: nowrap;
+  z-index: 3100; /* Ensure tooltips stay above the building overlay */
+  color: var(--color-text);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.tool-info:hover .tool-tooltip {
+  display: block;
+}
+
+.tool-name {
+  color: var(--color-text);
+  font-size: 0.75em;
+  text-align: center;
+  margin-top: 4px;
+  opacity: 0.8;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2em;
+  max-height: 1.2em;
+}
+
+.empty-slot {
+  color: var(--color-text);
+  opacity: 0.5;
+  font-size: 0.8em;
+  text-align: center;
+}
+
+.tool-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--color-accent);
+  color: var(--panel-text);
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.75em;
+  font-weight: bold;
+}
+
+.tool-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Increased from 200px */
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.tool-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px; /* Increased padding */
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.1);
+    min-height: 40px;
+    flex-wrap: wrap;
+    font-size: 0.7em !important; 
+
+}
+
+/* Make the badge more compact with higher specificity */
+.tool-item .tool-count-badge {
+    font-size: 0.7em !important; 
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--panel-text);
+    display: inline-flex;
+    align-items: center;
+    height: fit-content;
+    min-width: fit-content;
+    white-space: nowrap;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* Compact speed bonus display */
+.tool-bonus {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    font-size: 0.8em;
+    padding: 2px 4px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.tool-bonus img {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
+}
+
+/* Tool item styles for assign staff overlay */
+.tool-item.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 4px;
+}
+
+.tool-item.disabled input {
+    cursor: not-allowed;
+}
+.work-preview {
+    background: rgba(0, 0, 0, 0.05);
+    padding: 15px;
+    border-radius: var(--radius-md);
+    margin-top: 10px;
+}
+
+.work-stats {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.work-stats div {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-sm);
+}

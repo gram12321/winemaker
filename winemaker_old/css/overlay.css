@@ -1,0 +1,277 @@
+/* 1. Mainview Overlays (Main Pages) */
+.mainview-overlay {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: var(--panel-width);
+  width: calc(100% - (var(--sidebar-width) + var(--panel-width)));
+  height: calc(100vh - var(--console-height));
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: none;
+  z-index: 1000;
+  transition: all var(--transition-speed) ease;
+  background: var(--color-background);
+}
+
+.mainview-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  padding: 30px;
+  min-height: 100%;
+}
+
+/* Collapsed states for mainview */
+body.sidebar-collapsed .mainview-overlay {
+  left: var(--sidebar-collapsed-width);
+  width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-width)));
+}
+
+body.panel-collapsed .mainview-overlay {
+  right: var(--panel-collapsed-width);
+  width: calc(100% - (var (--sidebar-width) + var(--panel-collapsed-width)));
+}
+
+body.sidebar-collapsed.panel-collapsed .mainview-overlay {
+  width: calc(100% - (var(--sidebar-collapsed-width) + var(--panel-collapsed-width)));
+}
+
+/* 2. Standard Overlays (Task Overlays) */
+.overlay {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1500;
+}
+
+.overlay-divider {
+  border-top: 2px solid var(--color-accent);
+  margin: 20px 0;
+}
+
+.standard-overlay .overlay-content {
+  max-width: 80vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.overlay-section .card-header h3,
+.overlay-section .card-header h2 {
+  color: var(--panel-text);
+  margin: 0;
+}
+
+.overlay-section .card-header h2 {
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section-wrapper {
+  padding: 25px;
+  background: var(--color-background);
+  margin-bottom: 20px;
+}
+
+.overlay.active {
+  display: flex;
+}
+
+.overlay-content {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  width: auto;
+  max-width: 800px;
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-accent);
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 0 auto;
+}
+
+/* 3. Modal Overlays */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 2000;
+  overflow-y: auto;  /* This ensures the container itself is scrollable */
+  padding: 2rem 0;   /* Add some padding top and bottom */
+  display: flex;     /* Add flex display */
+  align-items: flex-start;  /* Change from center to flex-start */
+  justify-content: center;
+}
+
+.modal-overlay .overlay-content {
+  position: relative;
+  max-width: 800px;
+  width: 90%;
+  margin: 2rem auto;
+  background: var(--color-background);
+  padding: 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+  min-width: min-content;
+}
+
+.modal-overlay .overlay-section {
+  max-height: calc(100vh - 4rem);  /* Account for padding */
+  overflow-y: auto;  /* Make the section content scrollable */
+  margin: 0;        /* Remove margin since we have padding on container */
+}
+
+/* 4. Common Table Styles */
+.overlay-table,
+.overlay-content .table,
+.mainview-overlay-content .table {
+  margin: 0 auto;
+  width: auto;
+  background-color: var(--color-background);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.overlay-table th,
+.overlay-content .table th,
+.mainview-overlay-content .table th {
+  background-color: rgba(197, 165, 114, 0.2);
+  color: var(--color-text);
+  padding: 12px;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-table td,
+.overlay-content .table td,
+.mainview-overlay-content .table td {
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+  vertical-align: middle;
+}
+
+.overlay-table tbody tr:hover,
+.overlay-content .table tbody tr:hover,
+.mainview-overlay-content .table tbody tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+}
+
+.table-responsive {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Section Styling */
+.overlay-section {
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.overlay-section .card-header {
+  background-color: var(--color-primary);
+  color: var(--panel-text);
+  padding: 1rem;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Keep gradient only for multi-section overlays */
+.overlay-section:not(:only-child) .card-header {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+}
+
+/* Overlay Container Styles */
+.overlay-container {
+  background-color: var(--color-background);
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+}
+
+/* Section-specific Header Styles */
+#vineyard-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Section-specific Header Gradients */
+#grapes-section .card-header {
+  background: linear-gradient(135deg, var(--color-accent), #8B4513);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+#must-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+#wine-section .card-header {
+  background: linear-gradient(135deg, #491809, #23143E);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section .table tbody tr:hover {
+  background-color: rgba(197, 165, 114, 0.1);
+}
+
+.overlay-section .badge,
+.inventory-section .badge,
+.overlay-section .badge-light {
+  background-color: var(--color-accent);
+  color: var(--panel-text);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin-left: 1rem;
+}
+
+#orders-section .card-header {
+  background: linear-gradient(135deg, #8B4513, #491809);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-section .table,
+.overlay-table {
+  margin: 0;
+  background-color: transparent;
+}
+
+.overlay-section .table th,
+.overlay-table th {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.overlay-table td,
+.overlay-section .table td {
+  padding: 12px;
+  border-color: rgba(197, 165, 114, 0.2);
+  background: transparent;
+}
+
+/* Skill Bar Implementation - For some reason has to stay in overlay.css*/ 
+.skill-bar-container { display: flex; gap: 5px; }
+.skill-bar { height: 20px; flex-grow: 1; border-radius: 3px; margin-top: 3px; color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+.skill-bar.field-skill-bar { background-color: var(--skill-field); }
+.skill-bar.winery-skill-bar { background-color: var(--skill-winery); }
+.skill-bar.admin-skill-bar { background-color: var(--skill-admin); }
+.skill-bar.sales-skill-bar { background-color: var(--skill-sales); }
+.skill-bar.maintenance-skill-bar { background-color: var(--skill-maintenance); }
+.skills-column { min-width: 150px; }
+
