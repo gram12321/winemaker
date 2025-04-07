@@ -8,12 +8,16 @@ import { toast } from '../../lib/ui/toast';
 
 interface StaffAssignmentModalProps {
   activityId: string;
-  category: string;
+  category: string | WorkCategory;
   onClose: () => void;
   initialAssignedStaffIds?: string[];
   onAssignmentChange: (staffIds: string[], finalSave?: boolean) => void;
 }
 
+/**
+ * Staff Assignment Modal Component
+ * Allows assigning staff members to any kind of activity
+ */
 const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({ 
   activityId, 
   category,
@@ -39,15 +43,26 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   });
   
   const [teams, setTeams] = useState<StaffTeam[]>([]);
+  const [activityName, setActivityName] = useState<string>('');
 
   useEffect(() => {
+    // Load teams
     const loadTeams = async () => {
       const loadedTeams = await staffService.loadTeams();
       setTeams(loadedTeams);
     };
 
     loadTeams();
-  }, []);
+    
+    // Set a human-readable name for the activity category
+    if (activity) {
+      let readableName = activity.params?.title || 
+                        `${String(category).charAt(0).toUpperCase()}${String(category).slice(1)} Activity`;
+      setActivityName(readableName);
+    } else {
+      setActivityName('Activity');
+    }
+  }, [activity, category]);
 
   const handleAssignStaff = (staffId: string, checked: boolean) => {
     let newAssignments: string[];
@@ -87,6 +102,26 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     onAssignmentChange(newAssignments);
   };
 
+  // Determine the most relevant skill for this activity category
+  const getRelevantSkillForCategory = (categoryName: string | WorkCategory): string => {
+    // Default mapping of categories to primary skills
+    const categoryToSkill: Record<string, string> = {
+      [WorkCategory.PLANTING]: 'field',
+      [WorkCategory.HARVESTING]: 'field',
+      [WorkCategory.CLEARING]: 'field',
+      [WorkCategory.UPROOTING]: 'field',
+      [WorkCategory.CRUSHING]: 'winery',
+      [WorkCategory.FERMENTATION]: 'winery',
+      [WorkCategory.ADMINISTRATION]: 'administration',
+      [WorkCategory.STAFF_SEARCH]: 'administration',
+      [WorkCategory.BUILDING]: 'maintenance',
+      [WorkCategory.UPGRADING]: 'maintenance',
+      [WorkCategory.MAINTENANCE]: 'maintenance',
+    };
+    
+    return categoryToSkill[categoryName] || 'field'; // Default to field skill
+  };
+
   const calculateWorkProgress = () => {
     if (!activity || assignedStaffIds.length === 0) {
       return {
@@ -94,14 +129,20 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         totalWork: activity?.totalWork || 100,
         appliedWork: activity?.appliedWork || 0,
         weeksToComplete: 'N/A',
-        progressPercentage: 0
+        progressPercentage: 0,
+        relevantSkill: getRelevantSkillForCategory(category)
       };
     }
 
     const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
+    
+    // Convert the category to WorkCategory type for calculation
+    const workCategoryValue = category as WorkCategory;
+    
+    // Calculate staff work contribution
     const workPerWeek = calculateStaffWorkContribution(
       assignedStaff, 
-      category as WorkCategory
+      workCategoryValue
     );
 
     const totalWork = Math.round(activity.totalWork);
@@ -119,7 +160,8 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       totalWork,
       appliedWork: Math.round(activity.appliedWork),
       weeksToComplete,
-      progressPercentage
+      progressPercentage,
+      relevantSkill: getRelevantSkillForCategory(category)
     };
   };
 
@@ -174,19 +216,24 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       { key: 'maintenance', letter: 'M', color: '#d9534f' }
     ];
     
+    // Highlight the most relevant skill for this activity
+    const relevantSkill = workProgress.relevantSkill;
+    
     return (
       <div className="flex gap-1 w-48">
         {skills.map((skill) => {
           const skillLevel = member.skills[skill.key];
+          const isRelevant = skill.key === relevantSkill;
+          
           return (
             <div 
               key={skill.key}
-              className="h-5 flex items-center justify-center text-xs font-medium text-white"
+              className={`h-5 flex items-center justify-center text-xs font-medium text-white ${isRelevant ? 'ring-2 ring-yellow-300' : ''}`}
               style={{ 
                 backgroundColor: skill.color,
                 width: `${Math.round(skillLevel * 100)}%`
               }}
-              title={`${skill.key.charAt(0).toUpperCase() + skill.key.slice(1)}: ${Math.round(skillLevel * 100)}%`}
+              title={`${skill.key.charAt(0).toUpperCase() + skill.key.slice(1)}: ${Math.round(skillLevel * 100)}%${isRelevant ? ' (Relevant for this activity)' : ''}`}
             >
               {skill.letter}
             </div>
@@ -198,7 +245,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
 
   return (
     <div className="w-full max-h-[80vh] overflow-y-auto p-4">
-      <h2 className="text-xl font-semibold mb-4">Assign Staff to Activity</h2>
+      <h2 className="text-xl font-semibold mb-4">Assign Staff to {activityName}</h2>
 
       <div className="bg-gray-50 p-4 rounded mb-6">
         <h3 className="text-lg font-medium mb-3">Work Progress Preview</h3>
@@ -224,7 +271,10 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         </div>
 
         <p className="text-xs text-gray-600 mt-2">
-          The progress bar shows one segment for each week of estimated work.
+          The progress bar shows one segment for each week of estimated work. 
+          <span className="font-medium ml-1">
+            Primary skill for this activity: {workProgress.relevantSkill.charAt(0).toUpperCase() + workProgress.relevantSkill.slice(1)}
+          </span>
         </p>
       </div>
 
@@ -317,11 +367,23 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
             const result = staffService.assignStaffToActivityById(activityId, assignedStaffIds);
             
             if (result) {
+              toast({
+                title: 'Success',
+                description: `${assignedStaffIds.length} staff ${assignedStaffIds.length === 1 ? 'member' : 'members'} assigned to ${activityName}.`,
+                variant: 'default'
+              });
+              
               // Only call the callback if successful
               onAssignmentChange(assignedStaffIds, true);
               
               // Close the modal after successful assignment
               onClose();
+            } else {
+              toast({
+                title: 'Error',
+                description: 'Failed to assign staff members.',
+                variant: 'destructive'
+              });
             }
           }}
           className="px-4 py-2 bg-wine text-white rounded hover:bg-wine-dark"

@@ -25,7 +25,7 @@ export interface ActivityWorkEstimate {
 interface ActivityOptionsModalProps {
   title: string;
   subtitle?: string;
-  category: WorkCategory;
+  category: WorkCategory | string;
   fields: ActivityOptionField[];
   workEstimate: ActivityWorkEstimate;
   onClose: () => void;
@@ -36,6 +36,11 @@ interface ActivityOptionsModalProps {
   disabledMessage?: string;
 }
 
+/**
+ * Activity Options Modal Component
+ * Displays options for starting or configuring an activity
+ * Generic enough to work with any activity category
+ */
 export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
   title,
   subtitle,
@@ -67,7 +72,45 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(options);
+    
+    // Make sure options are formatted correctly before submission
+    const formattedOptions = formatOptionsForSubmission(options);
+    
+    // Add the category as a field in the options for reference
+    formattedOptions.category = category;
+    
+    onSubmit(formattedOptions);
+  };
+  
+  // Format options for submission, ensuring proper types and removing invalid/empty values
+  const formatOptionsForSubmission = (rawOptions: Record<string, any>): Record<string, any> => {
+    const formatted: Record<string, any> = {};
+    
+    // Process each field based on its type and requirements
+    fields.forEach(field => {
+      const value = rawOptions[field.id];
+      
+      // Skip undefined or null values
+      if (value === undefined || value === null) return;
+      
+      // Handle different field types
+      switch (field.type) {
+        case 'number':
+        case 'range':
+          // Ensure numbers are properly parsed
+          formatted[field.id] = parseFloat(value);
+          break;
+        case 'checkbox':
+          // Ensure booleans are proper booleans
+          formatted[field.id] = Boolean(value);
+          break;
+        default:
+          // For text and select, just use the value directly
+          formatted[field.id] = value;
+      }
+    });
+    
+    return formatted;
   };
   
   const isSubmitDisabled = canSubmit ? !canSubmit(options) : false;

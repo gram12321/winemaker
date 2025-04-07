@@ -54,51 +54,63 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   console.log(`[ActivityProgressBar] Progress percentage: ${formattedProgress}%`);
   
   // Get icon based on category
-  const getIconForCategory = (category: WorkCategory) => {
-    switch (category) {
-      case WorkCategory.PLANTING:
-      case WorkCategory.HARVESTING:
-      case WorkCategory.CLEARING:
-      case WorkCategory.UPROOTING:
-        return '🌿';
-      case WorkCategory.CRUSHING:
-      case WorkCategory.FERMENTATION:
-        return '🍷';
-      case WorkCategory.ADMINISTRATION:
-        return '📋';
-      case WorkCategory.STAFF_SEARCH:
-        return '🔍';
-      case WorkCategory.BUILDING:
-      case WorkCategory.UPGRADING:
-      case WorkCategory.MAINTENANCE:
-        return '🔧';
-      default:
-        return '📊';
-    }
+  const getIconForCategory = (category: WorkCategory | string): string => {
+    // Define category-to-icon mapping
+    const categoryIcons: Record<string, string> = {
+      // Field/Vineyard activities
+      [WorkCategory.PLANTING]: '🌿',
+      [WorkCategory.HARVESTING]: '🌿',
+      [WorkCategory.CLEARING]: '🌿',
+      [WorkCategory.UPROOTING]: '🌿',
+      
+      // Winery activities
+      [WorkCategory.CRUSHING]: '🍷',
+      [WorkCategory.FERMENTATION]: '🍷',
+      
+      // Administrative activities
+      [WorkCategory.ADMINISTRATION]: '📋',
+      [WorkCategory.STAFF_SEARCH]: '🔍',
+      
+      // Building/maintenance activities
+      [WorkCategory.BUILDING]: '🔧',
+      [WorkCategory.UPGRADING]: '🔧',
+      [WorkCategory.MAINTENANCE]: '🔧',
+    };
+    
+    // Add any custom category mappings here
+    
+    // Return the appropriate icon or a default one
+    return categoryIcons[category] || '📊';
   };
   
   // Get color based on category
-  const getColorForCategory = (category: WorkCategory) => {
-    switch (category) {
-      case WorkCategory.PLANTING:
-      case WorkCategory.HARVESTING:
-      case WorkCategory.CLEARING:
-      case WorkCategory.UPROOTING:
-        return 'bg-green-600';
-      case WorkCategory.CRUSHING:
-      case WorkCategory.FERMENTATION:
-        return 'bg-wine';
-      case WorkCategory.ADMINISTRATION:
-        return 'bg-blue-600';
-      case WorkCategory.STAFF_SEARCH:
-        return 'bg-purple-600';
-      case WorkCategory.BUILDING:
-      case WorkCategory.UPGRADING:
-      case WorkCategory.MAINTENANCE:
-        return 'bg-gray-600';
-      default:
-        return 'bg-wine';
-    }
+  const getColorForCategory = (category: WorkCategory | string): string => {
+    // Define category-to-color mapping using color classes
+    const categoryColors: Record<string, string> = {
+      // Field/Vineyard activities - green theme
+      [WorkCategory.PLANTING]: 'bg-green-600',
+      [WorkCategory.HARVESTING]: 'bg-green-600',
+      [WorkCategory.CLEARING]: 'bg-green-600',
+      [WorkCategory.UPROOTING]: 'bg-green-600',
+      
+      // Winery activities - wine/purple theme
+      [WorkCategory.CRUSHING]: 'bg-wine',
+      [WorkCategory.FERMENTATION]: 'bg-wine',
+      
+      // Administrative activities - blue theme
+      [WorkCategory.ADMINISTRATION]: 'bg-blue-600',
+      [WorkCategory.STAFF_SEARCH]: 'bg-purple-600',
+      
+      // Building/maintenance activities - gray theme
+      [WorkCategory.BUILDING]: 'bg-gray-600',
+      [WorkCategory.UPGRADING]: 'bg-gray-600',
+      [WorkCategory.MAINTENANCE]: 'bg-gray-600',
+    };
+    
+    // Add any custom category mappings here
+    
+    // Return the appropriate color or a default one
+    return categoryColors[category] || 'bg-wine';
   };
   
   const color = getColorForCategory(category);

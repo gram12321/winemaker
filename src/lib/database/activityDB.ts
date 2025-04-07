@@ -99,31 +99,51 @@ export async function initializeActivitySystem(): Promise<void> {
     const activities = await loadAllActivitiesFromDb();
     console.log('[ActivityDB] Loaded activities:', activities);
     
-    const plantingActivities = activities.filter(a => a.category === 'planting' && a.targetId);
+    // Filter activities with targetId for entity-bound activities
+    const targetedActivities = activities.filter(a => a.targetId);
     
     if (activities.length > 0) {
       const gameState = getGameState();
       
-      // First, get all vineyards with planting status to sync progress values
+      // Try to import services dynamically to avoid circular dependencies
+      let services: Record<string, any> = {};
       try {
-        const { getVineyards, getVineyardById } = await import('../../services/vineyardService');
-        const vineyards = getVineyards();
+        // Import vineyard service for handling vineyard-related activities
+        const vineyardService = await import('../../services/vineyardService');
+        services.vineyard = vineyardService;
         
-        // Update activity progress based on vineyard status
-        for (const activity of plantingActivities) {
-          if (activity.targetId) {
-            const vineyard = getVineyardById(activity.targetId);
-            if (vineyard && vineyard.status && vineyard.status.includes('Planting:')) {
+        // Add more service imports here as needed for other entity types
+        // Example: const buildingService = await import('../../services/buildingService');
+        //          services.building = buildingService;
+      } catch (error) {
+        console.error('[ActivityDB] Error importing services:', error);
+      }
+      
+      // Set up callbacks for activities with targets
+      for (const activity of targetedActivities) {
+        console.log(`[ActivityDB] Restoring activity: ${activity.id} of type ${activity.category} for target ${activity.targetId}`);
+        
+        // Register appropriate callback based on activity category and target type
+        if (activity.targetId && services.vineyard) {
+          const { updateVineyard, getVineyardById } = services.vineyard;
+          const vineyard = getVineyardById(activity.targetId);
+          
+          if (vineyard) {
+            // Restore existing work values if they exist in the target entity's status
+            const statusRegex = new RegExp(`${activity.category}: (\\d+)\\/(\\d+)`);
+            const percentRegex = new RegExp(`${activity.category}: (\\d+)%`);
+            
+            if (vineyard.status) {
               // Extract work values from status
-              const workMatch = vineyard.status.match(/Planting: (\d+)\/(\d+)/);
+              const workMatch = vineyard.status.match(statusRegex);
               
               if (workMatch) {
                 const appliedWork = parseInt(workMatch[1]);
                 const totalWork = parseInt(workMatch[2]);
                 
-                console.log(`[ActivityDB] Found existing progress in vineyard ${activity.targetId}: ${appliedWork}/${totalWork}`);
+                console.log(`[ActivityDB] Found existing progress in entity ${activity.targetId}: ${appliedWork}/${totalWork}`);
                 
-                // Update activity with the values from vineyard status (don't override totalWork if it's already set)
+                // Update activity with the values from entity status (don't override totalWork if it's already set)
                 activity.appliedWork = appliedWork;
                 if (totalWork > 0 && activity.totalWork === 0) {
                   activity.totalWork = totalWork;
@@ -131,8 +151,8 @@ export async function initializeActivitySystem(): Promise<void> {
                 
                 console.log(`[ActivityDB] Updated activity ${activity.id} with progress: ${activity.appliedWork}/${activity.totalWork}`);
               } else {
-                // Fallback to old percentage format
-                const percentMatch = vineyard.status.match(/Planting: (\d+)%/);
+                // Fallback to percentage format
+                const percentMatch = vineyard.status.match(percentRegex);
                 if (percentMatch) {
                   const percent = parseInt(percentMatch[1]);
                   activity.appliedWork = Math.round(activity.totalWork * (percent / 100));
@@ -140,57 +160,31 @@ export async function initializeActivitySystem(): Promise<void> {
                 }
               }
             }
-          }
-        }
-      } catch (error) {
-        console.error('[ActivityDB] Error synchronizing activity progress with vineyard status:', error);
-      }
-      
-      // Now set up callbacks for activities
-      for (const activity of activities) {
-        if (activity.category === 'planting' && activity.targetId) {
-          console.log(`[ActivityDB] Restoring planting activity: ${activity.id} for target ${activity.targetId}, progress: ${activity.appliedWork}/${activity.totalWork}`);
-          
-          // Import vineyardService dynamically to avoid circular dependencies
-          const { updateVineyard, getVineyardById } = await import('../../services/vineyardService');
-          
-          // Re-register the progress callback for planting activities
-          activity.progressCallback = async (progress: number) => {
-            if (activity.targetId) {
+
+            // Re-register the progress callback for activities
+            activity.progressCallback = async (progress: number) => {
               // Calculate the new appliedWork value based on progress
               const newAppliedWork = Math.round(activity.totalWork * progress);
               activity.appliedWork = newAppliedWork;
               
-              // Update vineyard with raw work values
-              console.log(`[ActivityDB] Updating vineyard ${activity.targetId} with progress: ${activity.appliedWork}/${activity.totalWork}`);
+              // Update target entity with raw work values
+              console.log(`[ActivityDB] Updating target ${activity.targetId} with progress for ${activity.category}: ${activity.appliedWork}/${activity.totalWork}`);
               await updateVineyard(activity.targetId, {
-                status: `Planting: ${activity.appliedWork}/${activity.totalWork}`,
+                status: `${activity.category}: ${activity.appliedWork}/${activity.totalWork}`,
               });
-            }
-          };
+            };
+          }
           
-          // Don't call the progress callback immediately to avoid overwriting 
-          // the vineyard status that might have a different progress value
+          // Add handlers for other entity types here
+          // else if (activity.targetId && services.building) { ... }
         }
       }
       
-      // Update game state with the fixed activities
+      // Update game state with the restored activities
       updateGameState({
         ...gameState,
         activities: activities
       });
-      
-      // Final update for vineyard status if needed - but don't overwrite existing progress
-      if (plantingActivities.length > 0) {
-        try {
-          console.log(`[ActivityDB] Found ${plantingActivities.length} planting activities to restore vineyard status`);
-          
-          // Don't update vineyard status here, as we've already extracted the correct values
-          // from the vineyards and updated the activities instead
-        } catch (error) {
-          console.error('[ActivityDB] Error updating vineyard status after loading activities:', error);
-        }
-      }
       
       console.log(`[ActivityDB] Restored ${activities.length} activities with callbacks`);
     } else {
