@@ -32,10 +32,9 @@ export const initializeGameTime = () => {
 
 /**
  * Increment the week and handle season/year changes
- * @param autoSave Whether to automatically save game state after incrementing
  * @returns The updated game state
  */
-export const incrementWeek = async (autoSave: boolean = true): Promise<ReturnType<typeof getGameState>> => {
+export const incrementWeek = async (): Promise<ReturnType<typeof getGameState>> => {
   const gameState = getGameState();
   let { week = STARTING_WEEK, season = STARTING_SEASON, currentYear = STARTING_YEAR } = gameState;
   let currentSeasonIndex = SEASONS.indexOf(season);
@@ -82,10 +81,8 @@ export const incrementWeek = async (autoSave: boolean = true): Promise<ReturnTyp
   // Update all UI components
   displayManager.updateAllDisplays();
   
-  // Auto-save if enabled
-  if (autoSave) {
-    await saveGameState();
-  }
+  // Save the game state after each tick
+  await saveGameState();
   
   return getGameState();
 };
