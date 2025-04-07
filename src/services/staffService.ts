@@ -423,22 +423,53 @@ function getRandomLastName(nationality: Nationality): string {
 
 // Assignment management
 export function getAssignedStaffToActivity(activityId: string): Staff[] {
+  // First verify activity exists
   const activity = getActivityById(activityId);
-  if (!activity || !activity.params || !activity.params.assignedStaffIds) {
+  if (!activity) {
+    console.warn(`[StaffService] Trying to get staff for non-existent activity: ${activityId}`);
     return [];
   }
   
-  const staffIds = activity.params.assignedStaffIds as string[];
-  const gameState = getGameState();
+  // Get staff IDs from activity params
+  const staffIds = activity.params?.assignedStaffIds || [];
+  if (!Array.isArray(staffIds) || staffIds.length === 0) {
+    return [];
+  }
   
+  // Get staff from game state
+  const gameState = getGameState();
   return gameState.staff.filter(staff => staffIds.includes(staff.id));
 }
 
 export function assignStaffToActivityById(activityId: string, staffIds: string[]) {
+  // First ensure the activity exists
+  const activity = getActivityById(activityId);
+  if (!activity) {
+    console.error(`[StaffService] Cannot assign staff to non-existent activity: ${activityId}`);
+    return null;
+  }
+  
+  // Call the activity manager function to update the activity in memory
   const result = assignStaffToActivity(activityId, staffIds);
   
-  // Save assignment to database
-  saveStaffAssignmentsToDb(activityId, staffIds);
+  // Only save to database if the activity update was successful
+  if (result) {
+    // Save assignment to database with explicit activity ID
+    saveStaffAssignmentsToDb(activityId, staffIds);
+    
+    // Provide feedback
+    toast({
+      title: 'Staff Assigned',
+      description: `Assigned ${staffIds.length} staff to activity.`
+    });
+  } else {
+    console.error(`[StaffService] Failed to assign staff to activity: ${activityId}`);
+    toast({
+      title: 'Assignment Failed',
+      description: 'Could not assign staff to the activity.',
+      variant: 'destructive'
+    });
+  }
   
   return result;
 }
@@ -457,6 +488,7 @@ export function assignTeamToActivity(activityId: string, teamId: string) {
 }
 
 export function calculateActivityStaffEfficiency(activityId: string, category: string): number {
+  // First get the assigned staff specifically for this activity
   const assignedStaff = getAssignedStaffToActivity(activityId);
   if (assignedStaff.length === 0) {
     return 0;

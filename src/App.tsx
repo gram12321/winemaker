@@ -7,6 +7,7 @@ import { checkCompanyExists, createCompany } from './lib/database/companyDB';
 import { loadGameState } from './lib/database/gameStateDB';
 import { StorageKeys, loadFromStorage } from './lib/database/localStorageDB';
 import { initializeToolInstanceCountsFromStorage } from './lib/database/buildingDB';
+import { initializeActivitySystem } from './lib/database/activityDB';
 
 // Import game systems
 import { initializeGameTime } from '@/lib/game/gameTick';
@@ -93,6 +94,9 @@ function App() {
         // Initialize tool instance counts from storage to avoid duplicates
         await initializeToolInstanceCountsFromStorage();
         
+        // Initialize activity system to ensure persistence
+        await initializeActivitySystem();
+        
         // Show welcome back message
         consoleService.info(`Welcome back to ${name}! Your winery awaits.`);
         setView('mainMenu');
@@ -124,6 +128,9 @@ function App() {
     
     // Initialize game time
     initializeGameTime();
+    
+    // Initialize activity system
+    await initializeActivitySystem();
     
     // Use our new service to create the company
     await createCompany(name, player, initialStaff);

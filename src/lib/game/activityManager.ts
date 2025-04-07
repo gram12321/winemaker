@@ -15,6 +15,7 @@ import { consoleService } from '@/components/layout/Console';
 import displayManager from './displayManager';
 import { Staff } from '@/gameState';
 import { toast } from '../ui/toast';
+import { saveActivityToDb, removeActivityFromDb, updateActivityInDb } from '../database/activityDB';
 
 // Store activities in gameState
 const initializeActivitiesInGameState = () => {
@@ -42,6 +43,9 @@ export interface ActivityOptions {
 // Map of completion callbacks by activity ID
 const completionCallbacks: Record<string, () => void> = {};
 const progressCallbacks: Record<string, (progress: number) => void> = {};
+
+// Add the Activity type for clarity
+export type Activity = ActivityProgress;
 
 /**
  * Estimate work for a given activity
@@ -392,11 +396,13 @@ export function hasActiveActivity(targetId: string, category?: string): boolean 
 }
 
 /**
- * Add a new activity
- * @param activity Activity progress object to add
+ * Add a new activity to the game state and saves to Firebase
+ * @param activity Activity to add
  * @returns The added activity
  */
 export const addActivity = (activity: ActivityProgress): ActivityProgress => {
+  initializeActivitiesInGameState();
+  
   const gameState = getGameState();
   
   // Check if target already has an active activity
@@ -406,8 +412,6 @@ export const addActivity = (activity: ActivityProgress): ActivityProgress => {
     throw new Error(error);
   }
   
-  initializeActivitiesInGameState();
-  
   // Ensure the activity has an ID
   const activityWithId = {
     ...activity,
@@ -416,8 +420,12 @@ export const addActivity = (activity: ActivityProgress): ActivityProgress => {
   
   // Add to game state
   const currentActivities = getAllActivities();
-  updateGameState({
-    activities: [...currentActivities, activityWithId]
+  const updatedActivities = [...currentActivities, activityWithId];
+  updateGameState({ activities: updatedActivities });
+  
+  // Save to Firebase in the background
+  saveActivityToDb(activityWithId).catch(error => {
+    console.error('[ActivityManager] Error saving activity to database:', error);
   });
   
   consoleService.info(`Started ${activityWithId.category} activity`);
@@ -427,55 +435,63 @@ export const addActivity = (activity: ActivityProgress): ActivityProgress => {
 };
 
 /**
- * Update an activity
- * @param id Activity ID
- * @param updates Partial activity object with updates
+ * Update an activity in the game state and Firebase
+ * @param id Activity ID to update
+ * @param updates Partial activity updates
  * @returns The updated activity or undefined if not found
  */
 export const updateActivity = (id: string, updates: Partial<ActivityProgress>): ActivityProgress | undefined => {
-  const currentActivities = getAllActivities();
-  const activityIndex = currentActivities.findIndex(activity => activity.id === id);
+  const gameState = getGameState();
+  let updatedActivity: ActivityProgress | undefined;
   
-  if (activityIndex === -1) return undefined;
-  
-  const updatedActivity = {
-    ...currentActivities[activityIndex],
-    ...updates
-  };
-  
-  const updatedActivities = [...currentActivities];
-  updatedActivities[activityIndex] = updatedActivity;
-  
-  updateGameState({
-    activities: updatedActivities
+  // Update in game state
+  const activities = gameState.activities.map(activity => {
+    if (activity.id === id) {
+      updatedActivity = { ...activity, ...updates };
+      return updatedActivity;
+    }
+    return activity;
   });
   
-  displayManager.updateAllDisplays();
+  if (updatedActivity) {
+    updateGameState({ activities });
+    
+    // Save to Firebase in the background
+    updateActivityInDb(updatedActivity).catch(error => {
+      console.error('[ActivityManager] Error updating activity in database:', error);
+    });
+  }
   
   return updatedActivity;
 };
 
 /**
- * Remove an activity
- * @param id Activity ID
- * @returns True if the activity was removed, false otherwise
+ * Remove an activity from the game state and Firebase
+ * @param id Activity ID to remove
+ * @returns true if successful, false otherwise
  */
 export const removeActivity = (id: string): boolean => {
-  const currentActivities = getAllActivities();
-  const updatedActivities = currentActivities.filter(activity => activity.id !== id);
+  const gameState = getGameState();
+  const activityExists = gameState.activities.some(activity => activity.id === id);
   
-  if (updatedActivities.length === currentActivities.length) {
-    return false;
+  if (activityExists) {
+    // Remove from game state
+    const activities = gameState.activities.filter(activity => activity.id !== id);
+    updateGameState({ activities });
+    
+    // Remove from Firebase in the background
+    removeActivityFromDb(id).catch(error => {
+      console.error('[ActivityManager] Error removing activity from database:', error);
+    });
+    
+    // Clean up callbacks
+    delete completionCallbacks[id];
+    delete progressCallbacks[id];
+    
+    return true;
   }
   
-  updateGameState({
-    activities: updatedActivities
-  });
-  
-  consoleService.info(`Completed activity`);
-  displayManager.updateAllDisplays();
-  
-  return true;
+  return false;
 };
 
 /**

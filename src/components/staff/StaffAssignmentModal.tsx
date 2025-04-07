@@ -4,6 +4,7 @@ import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staff
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
 import { getNationalityFlag } from '../../lib/core/utils/formatUtils';
+import { toast } from '../../lib/ui/toast';
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -299,8 +300,29 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         </button>
         <button
           onClick={() => {
-            staffService.assignStaffToActivityById(activityId, assignedStaffIds);
-            onAssignmentChange(assignedStaffIds, true);
+            // Get current activity to verify it exists before saving
+            const currentActivity = getActivityById(activityId);
+            if (!currentActivity) {
+              console.error(`Cannot save staff assignments - activity ${activityId} not found`);
+              toast({
+                title: 'Error',
+                description: 'The activity no longer exists.',
+                variant: 'destructive'
+              });
+              onClose();
+              return;
+            }
+            
+            // Save the assignments using the staffService
+            const result = staffService.assignStaffToActivityById(activityId, assignedStaffIds);
+            
+            if (result) {
+              // Only call the callback if successful
+              onAssignmentChange(assignedStaffIds, true);
+              
+              // Close the modal after successful assignment
+              onClose();
+            }
           }}
           className="px-4 py-2 bg-wine text-white rounded hover:bg-wine-dark"
         >
