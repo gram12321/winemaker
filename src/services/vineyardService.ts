@@ -186,10 +186,18 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
         },
         // Progress callback for partial updates
         progressCallback: async (progress) => {
-          // Optional: Update the vineyard status with progress indication
+          // Calculate the applied work amount
+          const totalWork = plantingActivity.totalWork;
+          const appliedWork = Math.round(totalWork * progress);
+          
+          // Update the activity's appliedWork field
+          plantingActivity.appliedWork = appliedWork;
+          
+          // Update the vineyard status with raw work values
           if (progress > 0 && progress < 1) {
+            console.log(`[VineyardService] Updating activity ${plantingActivity.id} progress: ${appliedWork}/${totalWork} (${Math.round(progress * 100)}%)`);
             await updateVineyard(id, {
-              status: `Planting: ${Math.round(progress * 100)}%`,
+              status: `Planting: ${appliedWork}/${totalWork}`,
             });
           }
         }
@@ -381,9 +389,18 @@ export async function harvestVineyard(
               }
             }
             
-            // Update vineyard status
+            // Calculate the applied work amount for status
+            const appliedWork = Math.round(harvestingActivity.totalWork * progress);
+            const totalWork = harvestingActivity.totalWork;
+            
+            // Update the activity's appliedWork field
+            harvestingActivity.appliedWork = appliedWork;
+
+            console.log(`[VineyardService] Updating activity ${harvestingActivity.id} progress: ${appliedWork}/${totalWork} (${Math.round(progress * 100)}%)`);
+
+            // Update vineyard status with raw work values
             await updateVineyard(id, {
-              status: `Harvesting: ${Math.round(progress * 100)}%`,
+              status: `Harvesting: ${appliedWork}/${totalWork}`,
               // Don't update ripeness here - let the game tick system handle that
             });
           } catch (error) {

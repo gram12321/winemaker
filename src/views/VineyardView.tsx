@@ -11,12 +11,12 @@ import {
   harvestVineyard,
   calculateVineyardYield
 } from '../services/vineyardService';
-import { WorkProgress } from '../components/ui/progress';
 import { getActivitiesForTarget, getTargetProgress, getActivityById } from '../lib/game/activityManager';
 import { WorkCategory } from '../lib/game/workCalculator';
 import StorageSelector from '../components/buildings/StorageSelector';
 import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { BASELINE_VINE_DENSITY, formatGameDate } from '../lib/core/constants/gameConstants';
+import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
 
 // Display state type definition
 interface VineyardViewDisplayState {
@@ -25,6 +25,7 @@ interface VineyardViewDisplayState {
   selectedStorageLocations: { locationId: string; quantity: number }[];
   showStaffAssignment?: boolean;
   currentActivityId?: string | null;
+  vineyardActivities: any[];
 }
 
 const getStatusColor = (status: string) => {
@@ -50,22 +51,18 @@ displayManager.createDisplayState('vineyardView', {
   loading: false,
   selectedStorageLocations: [] as { locationId: string; quantity: number }[],
   showStaffAssignment: false,
-  currentActivityId: null
+  currentActivityId: null,
+  vineyardActivities: []
 });
+
+// Helper function to get vineyard activities
+function getVineyardActivities(vineyardId: string | null): any[] {
+  if (!vineyardId) return [];
+  return getActivitiesForTarget(vineyardId);
+}
 
 const VineyardView: React.FC = () => {
   useDisplayUpdate();
-  
-  // Initialize display state if needed
-  if (!displayManager.getDisplayState('vineyardView')) {
-    displayManager.createDisplayState('vineyardView', {
-      selectedVineyardId: null,
-      loading: false,
-      selectedStorageLocations: [],
-      showStaffAssignment: false,
-      currentActivityId: null
-    } as VineyardViewDisplayState);
-  }
   
   const gameState = getGameState();
   const displayState = displayManager.getDisplayState('vineyardView') as VineyardViewDisplayState;
@@ -76,7 +73,8 @@ const VineyardView: React.FC = () => {
     loading, 
     selectedStorageLocations,
     showStaffAssignment,
-    currentActivityId
+    currentActivityId,
+    vineyardActivities
   } = displayState;
 
   // Get the selected vineyard from the current game state using the ID
@@ -84,20 +82,102 @@ const VineyardView: React.FC = () => {
     ? vineyards.find(v => v.id === selectedVineyardId) || null 
     : null;
 
-  // Get activities for the selected vineyard
-  const vineyardActivities = selectedVineyardId 
-    ? getActivitiesForTarget(selectedVineyardId)
-    : [];
-
   // Get planting progress only if there's an active planting activity
   const plantingProgress = vineyardActivities.some(a => a.category === WorkCategory.PLANTING)
     ? getTargetProgress(selectedVineyardId!, WorkCategory.PLANTING)
     : { overallProgress: 0, hasActivities: false };
 
+  // Get the planting work values from the vineyard status or directly from the activity
+  const getPlantingWorkValues = () => {
+    // Check if we have a direct activity first
+    const plantingActivity = vineyardActivities.find(a => a.category === WorkCategory.PLANTING);
+    
+    if (plantingActivity) {
+      return {
+        appliedWork: plantingActivity.appliedWork,
+        totalWork: plantingActivity.totalWork,
+        activityId: plantingActivity.id
+      };
+    }
+    
+    // If no activity, try to extract from status
+    if (selectedVineyard && selectedVineyard.status && selectedVineyard.status.includes('Planting:')) {
+      // Extract work values from status
+      const workMatch = selectedVineyard.status.match(/Planting: (\d+)\/(\d+)/);
+      
+      if (workMatch) {
+        const appliedWork = parseInt(workMatch[1]);
+        const totalWork = parseInt(workMatch[2]);
+        
+        console.log(`[VineyardView] Extracted Planting work values from status: ${appliedWork}/${totalWork}`);
+        return { appliedWork, totalWork, activityId: '' };
+      }
+      
+      // Fallback to old percentage format
+      const percentMatch = selectedVineyard.status.match(/Planting: (\d+)%/);
+      if (percentMatch) {
+        const percent = parseInt(percentMatch[1]);
+        console.log(`[VineyardView] Found old Planting percentage format in status: ${percent}%`);
+        return { appliedWork: percent, totalWork: 100, activityId: '' };
+      }
+    }
+    
+    // Default values
+    return { appliedWork: 0, totalWork: 100, activityId: '' };
+  };
+
+  // Get the work values
+  const plantingWorkValues = getPlantingWorkValues();
+
   // Get harvesting progress only if there's an active harvesting activity
   const harvestingProgress = vineyardActivities.some(a => a.category === WorkCategory.HARVESTING)
     ? getTargetProgress(selectedVineyardId!, WorkCategory.HARVESTING)
     : { overallProgress: 0, hasActivities: false };
+
+  // Get the harvesting work values from the activity or the vineyard status
+  const getHarvestingWorkValues = () => {
+    // Check if we have a direct activity first
+    const harvestingActivity = vineyardActivities.find(a => a.category === WorkCategory.HARVESTING);
+    
+    if (harvestingActivity) {
+      return {
+        appliedWork: harvestingActivity.appliedWork,
+        totalWork: harvestingActivity.totalWork,
+        activityId: harvestingActivity.id
+      };
+    }
+    
+    // If no activity, try to extract from status
+    if (selectedVineyard && selectedVineyard.status && selectedVineyard.status.includes('Harvesting:')) {
+      // Extract work values from status
+      const workMatch = selectedVineyard.status.match(/Harvesting: (\d+)\/(\d+)/);
+      
+      if (workMatch) {
+        const appliedWork = parseInt(workMatch[1]);
+        const totalWork = parseInt(workMatch[2]);
+        
+        console.log(`[VineyardView] Extracted Harvesting work values from status: ${appliedWork}/${totalWork}`);
+        return { appliedWork, totalWork, activityId: '' };
+      }
+      
+      // Fallback to old percentage format
+      const percentMatch = selectedVineyard.status.match(/Harvesting: (\d+)%/);
+      if (percentMatch) {
+        const percent = parseInt(percentMatch[1]);
+        console.log(`[VineyardView] Found old Harvesting percentage format in status: ${percent}%`);
+        return { appliedWork: percent, totalWork: 100, activityId: '' };
+      }
+    }
+    
+    // Default values
+    return { appliedWork: 0, totalWork: 100, activityId: '' };
+  };
+
+  // Get the work values
+  const harvestingWorkValues = getHarvestingWorkValues();
+
+  console.log(`[VineyardView] Using planting work values: ${plantingWorkValues.appliedWork}/${plantingWorkValues.totalWork}`);
+  console.log(`[VineyardView] Using harvesting work values: ${harvestingWorkValues.appliedWork}/${harvestingWorkValues.totalWork}`);
 
   // Handle adding a new vineyard using the vineyard service
   const handleAddVineyard = displayManager.createActionHandler(async () => {
@@ -120,7 +200,15 @@ const VineyardView: React.FC = () => {
 
   // Handle selecting a vineyard
   const handleSelectVineyard = (vineyard: Vineyard) => {
-    displayManager.updateDisplayState('vineyardView', { selectedVineyardId: vineyard.id });
+    // Get the activities for this vineyard
+    const activities = getVineyardActivities(vineyard.id);
+    console.log(`[VineyardView] Found ${activities.length} activities for vineyard ${vineyard.id}`);
+    
+    // Update display state with both the selected vineyard and its activities
+    displayManager.updateDisplayState('vineyardView', { 
+      selectedVineyardId: vineyard.id,
+      vineyardActivities: activities
+    });
   };
 
   // Handle planting a vineyard
@@ -387,19 +475,15 @@ const VineyardView: React.FC = () => {
               {/* Display planting progress if there's an active planting activity */}
               {plantingProgress.hasActivities && (
                 <div className="my-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">Planting Progress</h4>
-                    <button
-                      onClick={() => handleAssignStaff(WorkCategory.PLANTING)}
-                      className="text-sm bg-wine text-white px-3 py-1 rounded hover:bg-wine-dark"
-                    >
-                      Assign Staff
-                    </button>
-                  </div>
-                  <WorkProgress 
-                    value={plantingProgress.overallProgress} 
-                    label="Planting Progress" 
-                    showPercentage={true}
+                  <ActivityProgressBar
+                    activityId={plantingWorkValues.activityId || vineyardActivities.find(a => a.category === WorkCategory.PLANTING)?.id || ''}
+                    title="Planting Progress"
+                    category={WorkCategory.PLANTING}
+                    progress={plantingProgress.overallProgress} 
+                    appliedWork={plantingWorkValues.appliedWork}
+                    totalWork={plantingWorkValues.totalWork}
+                    onAssignStaff={() => handleAssignStaff(WorkCategory.PLANTING)}
+                    className=""
                   />
                 </div>
               )}
@@ -407,19 +491,15 @@ const VineyardView: React.FC = () => {
               {/* Display harvesting progress if there's an active harvesting activity */}
               {harvestingProgress.hasActivities && (
                 <div className="my-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">Harvesting Progress</h4>
-                    <button
-                      onClick={() => handleAssignStaff(WorkCategory.HARVESTING)}
-                      className="text-sm bg-wine text-white px-3 py-1 rounded hover:bg-wine-dark"
-                    >
-                      Assign Staff
-                    </button>
-                  </div>
-                  <WorkProgress 
-                    value={harvestingProgress.overallProgress} 
-                    label="Harvesting Progress" 
-                    showPercentage={true}
+                  <ActivityProgressBar
+                    activityId={harvestingWorkValues.activityId || vineyardActivities.find(a => a.category === WorkCategory.HARVESTING)?.id || ''}
+                    title="Harvesting Progress"
+                    category={WorkCategory.HARVESTING}
+                    progress={harvestingProgress.overallProgress}
+                    appliedWork={harvestingWorkValues.appliedWork}
+                    totalWork={harvestingWorkValues.totalWork}
+                    onAssignStaff={() => handleAssignStaff(WorkCategory.HARVESTING)}
+                    className=""
                   />
                 </div>
               )}

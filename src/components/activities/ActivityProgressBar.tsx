@@ -1,5 +1,7 @@
 import React from 'react';
 import { WorkCategory } from '@/lib/game/workCalculator';
+import { getActivityById } from '@/lib/game/activityManager';
+import { useDisplayUpdate } from '@/lib/game/displayManager';
 
 // Interface for the activity progress bar props
 interface ActivityProgressBarProps {
@@ -27,8 +29,29 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   onAssignStaff,
   className = '',
 }) => {
+  // Use the display update hook - this is an authorized exception to the no-hooks rule
+  useDisplayUpdate();
+  
+  // Get the latest activity data directly
+  const activity = getActivityById(activityId);
+  
+  // Use the latest activity data if available, otherwise use the props
+  const actualAppliedWork = activity?.appliedWork ?? appliedWork;
+  const actualTotalWork = activity?.totalWork ?? totalWork;
+  
+  // Calculate progress as a percentage, handling edge cases
+  const calculateProgress = (): number => {
+    if (actualTotalWork <= 0) return 0;
+    return Math.min(100, (actualAppliedWork / actualTotalWork) * 100);
+  };
+  
   // Format progress as a percentage
-  const formattedProgress = Math.min(100, Math.round(progress));
+  const formattedProgress = Math.min(100, Math.round(calculateProgress()));
+  
+  // Log the progress values for debugging
+  console.log(`[ActivityProgressBar] Rendering activity ${activityId}: ${title}`);
+  console.log(`[ActivityProgressBar] Raw work values: ${actualAppliedWork}/${actualTotalWork}`);
+  console.log(`[ActivityProgressBar] Progress percentage: ${formattedProgress}%`);
   
   // Get icon based on category
   const getIconForCategory = (category: WorkCategory) => {
@@ -102,7 +125,7 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
       
       <div className="flex justify-between items-center">
         <div className="text-xs text-gray-600">
-          {Math.round(appliedWork)} / {Math.round(totalWork)} work points
+          {Math.round(actualAppliedWork)} / {Math.round(actualTotalWork)} work points
         </div>
         
         {onAssignStaff && (

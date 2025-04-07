@@ -61,7 +61,9 @@ const Progress = React.forwardRef<
     lg: "text-base",
   };
 
-  const displayValue = Math.round(value || 0);
+  // Ensure the value is within 0-100 range
+  const normalizedValue = Math.max(0, Math.min(100, value || 0));
+  const displayValue = Math.round(normalizedValue);
   
   return (
     <ProgressPrimitive.Root
@@ -137,12 +139,15 @@ export const WorkProgress: React.FC<{
     return 'success';
   };
 
+  // Ensure we have a valid value to display (between 0-100)
+  const normalizedValue = Math.max(0, Math.min(100, value || 0));
+
   return (
     <div className={cn("w-full space-y-1", className)}>
       {label && (
         <div className="flex justify-between text-sm">
           <span>{label}</span>
-          {showPercentage && <span>{Math.round(value)}%</span>}
+          {showPercentage && <span>{Math.round(normalizedValue)}%</span>}
         </div>
       )}
       {indeterminate ? (
@@ -151,8 +156,8 @@ export const WorkProgress: React.FC<{
         </div>
       ) : (
         <Progress 
-          value={value} 
-          variant={getColorVariant(value)}
+          value={normalizedValue} 
+          variant={getColorVariant(normalizedValue)}
           showPercentage={showPercentage && !label}
           size="md"
         />
