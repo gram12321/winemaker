@@ -4,32 +4,8 @@ import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
 import displayManager from '../lib/game/displayManager';
 import { assignStaffToActivity, getActivityById, addActivity, removeActivity } from '../lib/game/activityManager';
 import { WorkCategory, ActivityProgress } from '../lib/game/workCalculator';
-import {
-  saveStaffToDb,
-  removeStaffFromDb,
-  updateStaffInDb,
-  saveTeamToDb,
-  loadTeamsFromDb,
-  saveStaffAssignmentsToDb
-} from '../lib/database/staffDB';
-import {
-  italianMaleNames,
-  italianFemaleNames,
-  frenchMaleNames,
-  frenchFemaleNames,
-  spanishMaleNames,
-  spanishFemaleNames,
-  usMaleNames,
-  usFemaleNames,
-  germanMaleNames,
-  germanFemaleNames,
-  lastNamesByCountry,
-  BASE_WEEKLY_WAGE,
-  SKILL_WAGE_MULTIPLIER,
-  SPECIALIZATION_WAGE_BONUS,
-  SkillLevels,
-  DefaultTeams
-} from '../constants/staff';
+import { saveStaffToDb, removeStaffFromDb, updateStaffInDb, saveTeamToDb, loadTeamsFromDb, saveStaffAssignmentsToDb } from '../lib/database/staffDB';
+import { STAFF_ROLES, BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER, SPECIALIZATION_WAGE_BONUS, SkillLevels, DefaultTeams, italianMaleNames, italianFemaleNames, frenchMaleNames, frenchFemaleNames, spanishMaleNames, spanishFemaleNames, usMaleNames, usFemaleNames, germanMaleNames, germanFemaleNames, lastNamesByCountry } from '../lib/core/constants/staffConstants';
 import { toast } from '../lib/ui/toast';
 
 // Types for staff related functionality
