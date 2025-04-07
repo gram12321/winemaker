@@ -8,16 +8,10 @@ import { loadGameState } from './lib/database/gameStateDB';
 import { StorageKeys, loadFromStorage } from './lib/database/localStorageDB';
 import { initializeToolInstanceCountsFromStorage } from './lib/database/buildingDB';
 import { initializeActivitySystem } from './lib/database/activityDB';
-
-// Import game systems
 import { initializeGameTime } from '@/lib/game/gameTick';
-
-// Import layout components
 import TopBar from './components/layout/TopBar';
 import { Toaster } from './components/ui/toaster';
 import { consoleService } from './components/layout/Console';
-
-// Import view components
 import Settings from './views/Settings';
 import AdminDashboard from './views/AdminDashboard';
 import Winepedia from './views/Winepedia';
@@ -25,16 +19,7 @@ import Profile from './views/Profile';
 import Achievements from './views/Achievements';
 import { VineyardView, InventoryView, BuildingsView } from './views';
 import StaffView from './views/StaffView';
-
-// Import future views here
-// import MainMenu from './views/MainMenu';
-// import Vineyard from './views/Vineyard';
-// import Production from './views/Production';
-
-// Import service functions
-import { handleLogout } from './services/gameStateService';
-import { createStaff, generateRandomSkills, calculateWage, type Nationality } from './services/staffService';
-import staffService, { StaffTeam } from './services/staffService';
+import { createStaff, type Nationality } from './services/staffService';
 
 function App() {
   const [view, setView] = useState<string>('login');
@@ -156,7 +141,6 @@ function App() {
     
     // Generate skills with appropriate specialization
     const specializations = specialization ? [specialization] : [];
-    const skills = generateRandomSkills(skillLevel, specializations);
     
     // Create and return staff member
     return createStaff(firstName, lastName, skillLevel, specializations, nationality);

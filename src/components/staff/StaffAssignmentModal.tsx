@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getGameState } from '../../gameState';
-import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
+import { getGameState, Staff } from '../../gameState';
+import staffService, { StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
 import { getNationalityFlag } from '../../lib/core/utils/formatUtils';
@@ -88,7 +88,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     const team = teams.find(t => t.id === teamId);
     if (!team) return;
 
-    const teamStaff = staff.filter(s => (s as any).teamId === teamId);
+    const teamStaff = staff.filter(s => s.teamId === teamId);
     const teamStaffIds = teamStaff.map(s => s.id);
 
     const newAssignments = [...assignedStaffIds];
@@ -99,7 +99,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     });
 
     setAssignedStaffIds(newAssignments);
-    onAssignmentChange(newAssignments);
+    onAssignmentChange(newAssignments, false);
   };
 
   // Determine the most relevant skill for this activity category
@@ -119,10 +119,19 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       [WorkCategory.MAINTENANCE]: 'maintenance',
     };
     
-    return categoryToSkill[categoryName] || 'field'; // Default to field skill
+    return categoryToSkill[categoryName as string] || 'field'; // Default to field skill
   };
 
-  const calculateWorkProgress = () => {
+  interface WorkProgressInfo {
+    workPerWeek: number;
+    totalWork: number;
+    appliedWork: number;
+    weeksToComplete: number | string;
+    progressPercentage: number;
+    relevantSkill: string;
+  }
+
+  const calculateWorkProgress = (): WorkProgressInfo => {
     if (!activity || assignedStaffIds.length === 0) {
       return {
         workPerWeek: 0,
@@ -207,8 +216,14 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
     );
   };
 
-  const renderSkillBars = (member: any) => {
-    const skills = [
+  interface SkillBarInfo {
+    key: keyof Staff['skills'];
+    letter: string;
+    color: string;
+  }
+
+  const renderSkillBars = (member: Staff) => {
+    const skills: SkillBarInfo[] = [
       { key: 'field', letter: 'F', color: '#ffcc00' },
       { key: 'winery', letter: 'W', color: '#2179ff' },
       { key: 'administration', letter: 'A', color: '#6c757d' },
@@ -289,7 +304,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
               <option value="">Assign Team...</option>
               {teams.map(team => (
                 <option key={team.id} value={team.id}>
-                  {team.icon} {team.name} ({staff.filter(s => (s as any).teamId === team.id).length} members)
+                  {team.icon} {team.name} ({staff.filter(s => s.teamId === team.id).length} members)
                 </option>
               ))}
             </select>

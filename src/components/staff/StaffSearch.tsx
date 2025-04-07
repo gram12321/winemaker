@@ -5,9 +5,10 @@ import staffService, {
   SpecializedRoles,
   calculateSearchCost,
   calculatePerCandidateCost,
-  Staff as ServiceStaff
+  Staff as ServiceStaff,
+  SpecializedRole
 } from '../../services/staffService';
-import { getGameState } from '../../gameState';
+import { getGameState, Player } from '../../gameState';
 import displayManager from '../../lib/game/displayManager';
 import { WorkCategory } from '../../lib/game/workCalculator';
 
@@ -151,12 +152,18 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
   );
 };
 
+interface SkillLevelInfo {
+  label: string;
+  formattedName: string;
+  value: number;
+}
+
 interface SearchFormProps {
   searchOptions: StaffSearchOptions;
-  currentSkillInfo: any;
+  currentSkillInfo: SkillLevelInfo;
   searchCost: number;
   perCandidateCost: number;
-  player: any;
+  player: Player | null;
   onClose: () => void;
   onSearch: () => void;
   onSkillChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -212,7 +219,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
           </div>
           <div className="flex justify-between items-center text-sm">
             <span className="text-gray-600">Your funds:</span>
-            <span className={`font-medium ${player?.money < searchCost ? 'text-red-600' : 'text-green-600'}`}>
+            <span className={`font-medium ${(player && player.money < searchCost) ? 'text-red-600' : 'text-green-600'}`}>
               €{player?.money.toLocaleString() || 0}
             </span>
           </div>
@@ -313,7 +320,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
 interface SearchResultsProps {
   searchResults: ServiceStaff[];
-  player: any;
+  player: Player | null;
   onClose: () => void;
   onBack: () => void;
   onHire: (staff: ServiceStaff) => void;
@@ -346,7 +353,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               <p className="text-sm">
                 <span className="font-medium">Specialization:</span> {
                   candidate.specializations?.length > 0 
-                    ? candidate.specializations.map(spec => SpecializedRoles[spec].title).join(', ')
+                    ? candidate.specializations.map(spec => 
+                        spec in SpecializedRoles 
+                          ? SpecializedRoles[spec as keyof typeof SpecializedRoles].title 
+                          : spec
+                      ).join(', ')
                     : 'General Worker'
                 }
               </p>

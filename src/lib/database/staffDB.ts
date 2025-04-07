@@ -54,7 +54,9 @@ export const removeStaffFromDb = async (staffId: string): Promise<boolean> => {
 export const updateStaffInDb = async (staff: Staff): Promise<boolean> => {
   try {
     const staffRef = doc(db, STAFF_COLLECTION, staff.id);
-    await updateDoc(staffRef, { ...staff });
+    // Convert undefined values to null for Firebase compatibility
+    const sanitizedStaff = JSON.parse(JSON.stringify(staff));
+    await updateDoc(staffRef, sanitizedStaff);
     return true;
   } catch (error) {
     console.error('Error updating staff in database:', error);
@@ -67,9 +69,12 @@ export const updateStaffInDb = async (staff: Staff): Promise<boolean> => {
  */
 export const saveTeamToDb = async (team: StaffTeam): Promise<boolean> => {
   try {
+    // Convert undefined values to null for Firebase compatibility
+    const sanitizedTeam = JSON.parse(JSON.stringify(team));
+    
     // Save to Firebase
     const teamRef = doc(db, TEAMS_COLLECTION, team.id);
-    await setDoc(teamRef, team);
+    await setDoc(teamRef, sanitizedTeam);
     
     // Save to localStorage for quick access
     const teamsJSON = localStorage.getItem('staffTeams');
