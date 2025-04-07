@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { getGameState } from '../gameState';
+import React, { useState, useEffect } from 'react';
+import { getGameState, WineBatch } from '../gameState';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import { consoleService } from '../components/layout/Console';
-import { formatGameDate } from '../lib/core/constants';
+import { formatGameDate, GameDate } from '../lib/core/constants';
 
 const InventoryView: React.FC = () => {
   useDisplayUpdate();
@@ -69,10 +69,15 @@ const InventoryView: React.FC = () => {
       }
       return `${formatGameDate(first)} to ${formatGameDate(last)}`;
     }
+    
+    // Safe extraction of date for display
     if (Array.isArray(batch.harvestGameDate)) {
-      return formatGameDate(batch.harvestGameDate[0]); // Show first date if no range
+      // If it's an array, take the first date
+      return batch.harvestGameDate.length > 0 ? formatGameDate(batch.harvestGameDate[0]) : 'Unknown';
     }
-    return formatGameDate(batch.harvestGameDate as GameDate);
+    
+    // If it's a single date
+    return formatGameDate(batch.harvestGameDate);
   };
   
   return (
@@ -346,7 +351,12 @@ const InventoryView: React.FC = () => {
                           {formatQuality(batch.quality)}
                         </span>
                       </td>
-                      <td className="px-4 py-2 whitespace-nowrap">{batch.harvestGameDate.year}</td>
+                      <td className="px-4 py-2 whitespace-nowrap">
+                        {/* Safe extraction of vintage year */}
+                        {Array.isArray(batch.harvestGameDate) 
+                          ? batch.harvestGameDate[0]?.year 
+                          : batch.harvestGameDate.year}
+                      </td>
                       <td className="px-4 py-2 whitespace-nowrap">
                         <button 
                           className="text-green-600 hover:text-green-800 mr-2"

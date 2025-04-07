@@ -1,6 +1,7 @@
 import React from 'react';
-import { WorkCategory } from '../../lib/game/workCalculator';
+import { WorkCategory } from '@/lib/game/workCalculator';
 
+// Interface for the activity progress bar props
 interface ActivityProgressBarProps {
   activityId: string;
   title: string;
@@ -12,6 +13,10 @@ interface ActivityProgressBarProps {
   className?: string;
 }
 
+/**
+ * Activity Progress Bar Component
+ * Displays progress of an activity with customized styling based on category
+ */
 export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   activityId,
   title,
@@ -28,18 +33,22 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   // Get icon based on category
   const getIconForCategory = (category: WorkCategory) => {
     switch (category) {
-      case WorkCategory.FIELD_WORK:
+      case WorkCategory.PLANTING:
+      case WorkCategory.HARVESTING:
+      case WorkCategory.CLEARING:
+      case WorkCategory.UPROOTING:
         return '🌿';
-      case WorkCategory.WINERY_WORK:
+      case WorkCategory.CRUSHING:
+      case WorkCategory.FERMENTATION:
         return '🍷';
       case WorkCategory.ADMINISTRATION:
         return '📋';
-      case WorkCategory.SALES:
-        return '💰';
-      case WorkCategory.MAINTENANCE:
-        return '🔧';
       case WorkCategory.STAFF_SEARCH:
         return '🔍';
+      case WorkCategory.BUILDING:
+      case WorkCategory.UPGRADING:
+      case WorkCategory.MAINTENANCE:
+        return '🔧';
       default:
         return '📊';
     }
@@ -48,18 +57,22 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   // Get color based on category
   const getColorForCategory = (category: WorkCategory) => {
     switch (category) {
-      case WorkCategory.FIELD_WORK:
+      case WorkCategory.PLANTING:
+      case WorkCategory.HARVESTING:
+      case WorkCategory.CLEARING:
+      case WorkCategory.UPROOTING:
         return 'bg-green-600';
-      case WorkCategory.WINERY_WORK:
+      case WorkCategory.CRUSHING:
+      case WorkCategory.FERMENTATION:
         return 'bg-wine';
       case WorkCategory.ADMINISTRATION:
         return 'bg-blue-600';
-      case WorkCategory.SALES:
-        return 'bg-yellow-600';
-      case WorkCategory.MAINTENANCE:
-        return 'bg-gray-600';
       case WorkCategory.STAFF_SEARCH:
         return 'bg-purple-600';
+      case WorkCategory.BUILDING:
+      case WorkCategory.UPGRADING:
+      case WorkCategory.MAINTENANCE:
+        return 'bg-gray-600';
       default:
         return 'bg-wine';
     }

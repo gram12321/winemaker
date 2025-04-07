@@ -21,7 +21,12 @@ const TeamManagement: React.FC<TeamManagementProps> = ({
   onCreatingTeamChange,
 }) => {
   const handleCreateTeam = (name: string) => {
-    const newTeam = staffService.createTeam(name);
+    const newTeam = staffService.createTeam(
+      name,
+      `Team for ${name}`, // Default description
+      '👥', // Default icon
+      [] // Default task types
+    );
     onTeamUpdate([...teams, newTeam]);
     onTeamSelect(newTeam.id);
     onCreatingTeamChange(false);

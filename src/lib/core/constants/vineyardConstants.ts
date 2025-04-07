@@ -3,7 +3,7 @@
  * Data for vineyard locations, soil types, altitudes, etc.
  */
 
-import { Season } from './constants';
+import { Season } from './gameConstants';
 
 // Grape varieties
 export type GrapeVariety = 

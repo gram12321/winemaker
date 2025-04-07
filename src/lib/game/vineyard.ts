@@ -5,130 +5,13 @@ import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TY
 import { getGameState } from '@/gameState';
 
 // Countries and regions data
-export const countryRegionMap = {
-  "France": ["Bordeaux", "Burgundy (Bourgogne)", "Champagne", "Loire Valley", "Rhone Valley", "Jura"],
-  "Germany": ["Ahr", "Mosel", "Pfalz", "Rheingau", "Rheinhessen"],
-  "Italy": ["Piedmont", "Puglia", "Sicily", "Tuscany", "Veneto"],
-  "Spain": ["Jumilla", "La Mancha", "Ribera del Duero", "Rioja", "Sherry (Jerez)"],
-  "United States": ["Central Coast (California)", "Finger Lakes (New York)", "Napa Valley (California)", "Sonoma County (California)", "Willamette Valley (Oregon)"],
-};
+export const countryRegionMap = COUNTRY_REGION_MAP;
 
 // Soil types by region
-export const regionSoilTypes = {
-  "France": {
-    "Bordeaux": ["Clay", "Gravel", "Limestone", "Sand"],
-    "Burgundy (Bourgogne)": ["Clay-Limestone", "Limestone", "Marl"],
-    "Champagne": ["Chalk", "Clay", "Limestone"],
-    "Loire Valley": ["Clay", "Flint", "Limestone", "Sand", "Schist"],
-    "Rhone Valley": ["Clay", "Granite", "Limestone", "Sand"],
-    "Jura": ["Clay", "Limestone", "Marl"],
-  },
-  "Germany": {
-    "Ahr": ["Devonian Slate", "Greywacke", "Loess", "Volcanic Soil"],
-    "Mosel": ["Blue Devonian Slate", "Red Devonian Slate"],
-    "Pfalz": ["Basalt", "Limestone", "Loess", "Sandstone"],
-    "Rheingau": ["Loess", "Phyllite", "Quartzite", "Slate"],
-    "Rheinhessen": ["Clay", "Limestone", "Loess", "Quartz"],
-  },
-  "Italy": {
-    "Piedmont": ["Clay", "Limestone", "Marl", "Sand"],
-    "Puglia": ["Clay", "Limestone", "Red Earth", "Sand"],
-    "Sicily": ["Clay", "Limestone", "Sand", "Volcanic Soil"],
-    "Tuscany": ["Clay", "Galestro", "Limestone", "Sandstone"],
-    "Veneto": ["Alluvial", "Clay", "Limestone", "Volcanic Soil"],
-  },
-  "Spain": {
-    "Jumilla": ["Clay", "Limestone", "Sand"],
-    "La Mancha": ["Clay", "Clay-Limestone", "Sand"],
-    "Ribera del Duero": ["Alluvial", "Clay", "Limestone"],
-    "Rioja": ["Alluvial", "Clay", "Clay-Limestone", "Ferrous Clay"],
-    "Sherry (Jerez)": ["Albariza", "Barros", "Arenas"],
-  },
-  "United States": {
-    "Central Coast (California)": ["Clay", "Loam", "Sand", "Shale"],
-    "Finger Lakes (New York)": ["Clay", "Gravel", "Limestone", "Shale"],
-    "Napa Valley (California)": ["Alluvial", "Clay", "Loam", "Volcanic"],
-    "Sonoma County (California)": ["Clay", "Loam", "Sand", "Volcanic"],
-    "Willamette Valley (Oregon)": ["Basalt", "Clay", "Marine Sediment", "Volcanic"],
-  },
-};
+export const regionSoilTypes = REGION_SOIL_TYPES;
 
 // Altitude ranges by region
-export const regionAltitudeRanges = {
-  "France": {
-    "Bordeaux": [0, 100],
-    "Burgundy (Bourgogne)": [200, 500],
-    "Champagne": [100, 300],
-    "Loire Valley": [50, 200],
-    "Rhone Valley": [100, 400],
-    "Jura": [250, 400],
-  },
-  "Germany": {
-    "Ahr": [100, 300],
-    "Mosel": [100, 350],
-    "Pfalz": [100, 300],
-    "Rheingau": [80, 250],
-    "Rheinhessen": [80, 250],
-  },
-  "Italy": {
-    "Piedmont": [150, 600],
-    "Puglia": [0, 200],
-    "Sicily": [50, 900],
-    "Tuscany": [150, 600],
-    "Veneto": [50, 400],
-  },
-  "Spain": {
-    "Jumilla": [400, 800],
-    "La Mancha": [600, 800],
-    "Ribera del Duero": [700, 900],
-    "Rioja": [300, 700],
-    "Sherry (Jerez)": [0, 100],
-  },
-  "United States": {
-    "Central Coast (California)": [0, 500],
-    "Finger Lakes (New York)": [100, 300],
-    "Napa Valley (California)": [0, 600],
-    "Sonoma County (California)": [0, 500],
-    "Willamette Valley (Oregon)": [50, 300],
-  },
-};
-
-// Grape varieties
-export type GrapeVariety = 
-  | "Barbera" 
-  | "Chardonnay" 
-  | "Pinot Noir" 
-  | "Primitivo" 
-  | "Sauvignon Blanc"
-  | "Cabernet Sauvignon"
-  | "Merlot"
-  | "Syrah"
-  | "Riesling"
-  | "Tempranillo";
-
-// Aspect directions
-export type Aspect = 
-  | "North" 
-  | "Northeast" 
-  | "East" 
-  | "Southeast" 
-  | "South" 
-  | "Southwest" 
-  | "West" 
-  | "Northwest";
-
-// Conventional farming methods
-export type FarmingMethod = "Conventional" | "Non-Conventional" | "Ecological";
-
-// Game date structure to replace real-world dates
-export interface GameDate {
-  week: number;
-  season: Season;
-  year: number;
-}
-
-// Season type
-export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
+export const regionAltitudeRanges = REGION_ALTITUDE_RANGES;
 
 // Vineyard interface
 export interface Vineyard {
@@ -208,8 +91,10 @@ export function calculateLandValue(country: string, region: string, altitude: nu
   // Region prestige factor (would be based on regionPrestigeRankings)
   const prestigeFactor = 1.0;
   
-  // Altitude factor
-  const altitudeFactor = normalizeAltitude(altitude, REGION_ALTITUDE_RANGES[country][region]);
+  // Altitude factor - use type assertion to handle indexing
+  const countryData = REGION_ALTITUDE_RANGES[country as keyof typeof REGION_ALTITUDE_RANGES];
+  const altitudeRange: [number, number] = countryData ? (countryData[region as keyof typeof countryData] as [number, number] || [0, 100]) : [0, 100];
+  const altitudeFactor = normalizeAltitude(altitude, altitudeRange);
   
   // Aspect factor
   // Typically south-facing slopes are most valuable, north-facing least valuable
@@ -302,12 +187,19 @@ function calculateGrapeSuitabilityContribution(grape: GrapeVariety | null, regio
  */
 export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vineyard {
   const country = options.country || getRandomFromObject(COUNTRY_REGION_MAP);
-  const region = options.region || getRandomFromArray(COUNTRY_REGION_MAP[country]);
+  
+  // Handle country data with type assertion
+  const countryRegions = COUNTRY_REGION_MAP[country as keyof typeof COUNTRY_REGION_MAP];
+  const region = options.region || (countryRegions ? getRandomFromArray(countryRegions) : "");
+  
   const aspect = options.aspect || getRandomAspect();
   const name = options.name || generateVineyardName(country, aspect);
+  
+  // Get soil data
   const soil = options.soil ? 
     (Array.isArray(options.soil) ? options.soil : [options.soil]) : 
     getRandomSoils(country, region);
+  
   const altitude = options.altitude || getRandomAltitude(country, region);
   const acres = options.acres || getRandomAcres();
   
@@ -379,7 +271,10 @@ function generateVineyardName(country: string, aspect: Aspect): string {
 }
 
 function getRandomSoils(country: string, region: string): string[] {
-  const soils = REGION_SOIL_TYPES[country][region];
+  // Handle country data with type assertion
+  const countryData = REGION_SOIL_TYPES[country as keyof typeof REGION_SOIL_TYPES];
+  const soils = countryData ? countryData[region as keyof typeof countryData] || [] : [];
+  
   const numberOfSoils = Math.floor(Math.random() * 3) + 1; // 1-3 soil types
   const selectedSoils = new Set<string>();
 
@@ -391,7 +286,11 @@ function getRandomSoils(country: string, region: string): string[] {
 }
 
 function getRandomAltitude(country: string, region: string): number {
-  const [min, max] = REGION_ALTITUDE_RANGES[country][region];
+  // Handle country data with type assertion
+  const countryData = REGION_ALTITUDE_RANGES[country as keyof typeof REGION_ALTITUDE_RANGES];
+  const altitudeRange: [number, number] = countryData ? (countryData[region as keyof typeof countryData] as [number, number] || [0, 100]) : [0, 100];
+  const [min, max] = altitudeRange;
+  
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 

@@ -98,7 +98,18 @@ const StorageSelector: React.FC<StorageSelectorProps> = ({
                   // Get current grape type and vintage if storage is not empty
                   const currentBatch = currentContents[0];
                   const currentGrapeType = currentBatch?.grapeType;
-                  const currentVintage = currentBatch?.harvestGameDate.year;
+                  
+                  // Safe extraction of vintage year from harvest date which could be a single date or array
+                  let currentVintage: number | undefined;
+                  if (currentBatch?.harvestGameDate) {
+                    if (Array.isArray(currentBatch.harvestGameDate)) {
+                      // If it's an array, take the year from the first date
+                      currentVintage = currentBatch.harvestGameDate[0]?.year;
+                    } else {
+                      // If it's a single date, access the year directly
+                      currentVintage = currentBatch.harvestGameDate.year;
+                    }
+                  }
                   
                   // Add to options if:
                   // 1. Storage is empty, OR
