@@ -1,17 +1,6 @@
-// Vineyard type and utility functions for the Winery Management Game
-
-import { GameDate, Season, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from '@/lib/core/constants';
+import { GameDate, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from '@/lib/core/constants';
 import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS } from '@/lib/core/constants';
 import { getGameState } from '@/gameState';
-
-// Countries and regions data
-export const countryRegionMap = COUNTRY_REGION_MAP;
-
-// Soil types by region
-export const regionSoilTypes = REGION_SOIL_TYPES;
-
-// Altitude ranges by region
-export const regionAltitudeRanges = REGION_ALTITUDE_RANGES;
 
 // Vineyard interface
 export interface Vineyard {
@@ -40,11 +29,6 @@ export interface Vineyard {
   ownedSince: GameDate;
 }
 
-/**
- * Calculates the expected yield for a vineyard
- * @param vineyard The vineyard to calculate yield for
- * @returns The expected yield in kg
- */
 export function calculateVineyardYield(vineyard: Vineyard): number {
   if (!vineyard.grape || vineyard.annualYieldFactor === 0 || vineyard.status === 'Harvested') {
     return 0;
@@ -62,11 +46,6 @@ export function calculateVineyardYield(vineyard: Vineyard): number {
   return expectedYield;
 }
 
-/**
- * Gets the remaining yield for a vineyard
- * @param vineyard The vineyard to calculate remaining yield for
- * @returns The remaining yield in kg
- */
 export function getRemainingYield(vineyard: Vineyard): number {
   // If harvest hasn't started yet, return full yield
   if (vineyard.remainingYield === null) {
@@ -103,12 +82,6 @@ export function calculateLandValue(country: string, region: string, altitude: nu
   return baseValue * prestigeFactor * altitudeFactor * aspectFactor;
 }
 
-/**
- * Normalizes an altitude value based on the min and max of a region
- * @param altitude The altitude to normalize
- * @param range The min and max altitude for the region
- * @returns A value between 0.1 and 1.0
- */
 export function normalizeAltitude(altitude: number, range: [number, number]): number {
   const [min, max] = range;
   if (altitude < min) return 0.1;
@@ -116,11 +89,6 @@ export function normalizeAltitude(altitude: number, range: [number, number]): nu
   return 0.1 + 0.9 * ((altitude - min) / (max - min));
 }
 
-/**
- * Calculates the prestige of a vineyard
- * @param vineyard The vineyard to calculate prestige for
- * @returns The prestige value between 0 and 1
- */
 export function calculateVineyardPrestige(vineyard: Vineyard): number {
   // Age contribution (30%)
   const ageContribution = calculateAgeContribution(vineyard.vineAge);
@@ -179,12 +147,6 @@ function calculateGrapeSuitabilityContribution(grape: GrapeVariety | null, regio
   return 0.8 * 0.20;
 }
 
-/**
- * Creates a new vineyard with given or random parameters
- * @param id Unique identifier for the vineyard
- * @param options Optional parameters for the vineyard
- * @returns A new Vineyard object
- */
 export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vineyard {
   const country = options.country || getRandomFromObject(COUNTRY_REGION_MAP);
   
@@ -206,7 +168,7 @@ export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vin
   // Get current game state for the game date
   const { week, season, currentYear } = getGameState();
   
-  // Use game date for ownedSince
+
   const ownedSince: GameDate = options.ownedSince || {
     week,
     season,
@@ -258,8 +220,7 @@ function getRandomFromArray<T>(array: T[]): T {
 
 function getRandomAspect(): Aspect {
   const aspects: Aspect[] = [
-    "North", "Northeast", "East", "Southeast", 
-    "South", "Southwest", "West", "Northwest"
+    "North", "Northeast", "East", "Southeast", "South", "Southwest", "West", "Northwest"
   ];
   return getRandomFromArray(aspects);
 }

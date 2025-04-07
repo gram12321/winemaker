@@ -1,20 +1,8 @@
-/**
- * Vineyard Database Operations
- * Manages storing and retrieving vineyard data
- */
-
 import { getGameState, updateGameState } from '@/gameState';
 import { Vineyard } from '@/lib/game/vineyard';
 import { GameDate } from '@/lib/core/constants/gameConstants';
 import { saveGameState } from './gameStateDB';
 
-/**
- * Convert a date to a GameDate object
- * This function handles legacy date formats and converts them to GameDate
- * @param date Date or GameDate object to convert
- * @param gameState Current game state
- * @returns GameDate object
- */
 export function convertToGameDate(date: Date | GameDate | string | undefined, gameState: any): GameDate {
   // If it's already a GameDate object with week, season and year
   if (date && typeof date === 'object' && 'week' in date && 'season' in date && 'year' in date) {

@@ -1,5 +1,5 @@
 import React from 'react';
-import staffService, { Staff, StaffTeam } from '../../services/staffService';
+import staffService, { StaffTeam } from '../../services/staffService';
 
 interface TeamManagementProps {
   onClose: () => void;

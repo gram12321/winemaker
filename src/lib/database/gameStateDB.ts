@@ -1,8 +1,3 @@
-/**
- * Game State Database Operations
- * Handles saving and loading the full game state
- */
-
 import { db } from '../../firebase.config';
 import { doc, setDoc } from 'firebase/firestore';
 import { getGameState } from '../../gameState';

@@ -1,9 +1,3 @@
-/**
- * Work Calculator
- * Handles calculation of work required for various activities in the winery
- */
-
-import { getGameState } from '@/gameState';
 import { Staff } from '@/gameState';
 
 // Work activity categories
@@ -22,10 +16,10 @@ export enum WorkCategory {
 }
 
 // Base work units represent a standard amount of work per week
-export const BASE_WORK_UNITS = 100;
+export const BASE_WORK_UNITS = 50;
 
 // Default vine density used for density-based calculations
-export const DEFAULT_VINE_DENSITY = 3000;
+export const DEFAULT_VINE_DENSITY = 5000;
 
 // Tasks that are affected by planting density
 export const DENSITY_BASED_TASKS = [

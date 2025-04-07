@@ -1,9 +1,4 @@
 /**
- * Local Storage Database
- * Handles all localStorage operations for the game
- */
-
-/**
  * Save data to localStorage
  * @param key The key to store the data under
  * @param data The data to store

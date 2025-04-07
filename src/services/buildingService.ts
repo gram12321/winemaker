@@ -1,25 +1,9 @@
-/**
- * Building Service
- * Handles building-related business logic
- */
-
-import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
 import { consoleService } from '@/components/layout/Console';
 import { Building } from '@/lib/game/building';
 import { BuildingType, BUILDING_CONFIG } from '@/lib/core/constants';
-import { 
-  loadBuildings, 
-  saveBuildings, 
-  deserializeBuilding, 
-  serializeBuilding, 
-  SerializedBuilding 
-} from '@/lib/database/buildingDB';
+import { loadBuildings, saveBuildings, deserializeBuilding, serializeBuilding } from '@/lib/database/buildingDB';
 
-/**
- * Start building construction
- * @param buildingType The type of building to construct
- */
 export const startBuildingConstruction = async (
   buildingType: BuildingType
 ): Promise<boolean> => {

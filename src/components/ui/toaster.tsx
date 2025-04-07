@@ -1,12 +1,5 @@
 import { useEffect, useState } from "react"
-import {
-  Toast,
-  ToastClose,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from "./toast"
+import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from "./toast"
 import { getToasts } from "@/lib/ui/toast"
 
 export function Toaster() {

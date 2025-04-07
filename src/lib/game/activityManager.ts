@@ -5,22 +5,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
-import { 
-  ActivityProgress, 
-  WorkCategory, 
-  calculateToolSpeedBonus,
-  calculateTotalWork
-} from './workCalculator';
+import {  ActivityProgress, WorkCategory, calculateToolSpeedBonus, calculateTotalWork } from './workCalculator';
 import { consoleService } from '@/components/layout/Console';
 import displayManager from './displayManager';
 import { Staff } from '@/gameState';
 import { toast } from '../ui/toast';
-import { 
-  saveActivityToDb, 
-  removeActivityFromDb, 
-  updateActivityInDb, 
-  Activity as DbActivity 
-} from '../database/activityDB';
+import { saveActivityToDb,  removeActivityFromDb,  updateActivityInDb } from '../database/activityDB';
 
 // Store activities in gameState
 const initializeActivitiesInGameState = () => {

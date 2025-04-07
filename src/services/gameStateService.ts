@@ -1,17 +1,7 @@
-/**
- * Game State Service
- * Handles business logic related to game state management
- */
-
 import { updateGameState } from '@/gameState';
 import { saveGameState } from '@/lib/database/gameStateDB';
 import { clearGameStorage } from '@/lib/database/localStorageDB';
 
-/**
- * Handles game state cleanup on logout
- * Saves current state to Firebase, clears localStorage, and resets game state
- * @returns Promise resolving to true if logout handled successfully, false otherwise
- */
 export const handleLogout = async (): Promise<boolean> => {
   try {
     // Save current state to Firebase first

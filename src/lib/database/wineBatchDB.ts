@@ -1,17 +1,6 @@
-/**
- * Wine Batch Database Operations
- * Manages storing and retrieving wine batch data
- */
-
 import { getGameState, updateGameState, WineBatch } from '@/gameState';
 import { saveGameState } from './gameStateDB';
 
-/**
- * Add a new wine batch to the game state
- * @param batch The wine batch to add
- * @param saveToDb Whether to also save to the database
- * @returns The newly added wine batch or null if failed
- */
 export async function saveWineBatch(
   batch: WineBatch,
   saveToDb: boolean = true

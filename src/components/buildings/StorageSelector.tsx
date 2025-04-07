@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingDB';
-import { BuildingType } from '@/lib/core/constants';
 import { getGameState, WineBatch } from '@/gameState';
 
 export interface StorageOption {

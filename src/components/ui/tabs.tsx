@@ -3,7 +3,6 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 import { cn } from "@/lib/core/utils/utils"
 
 const Tabs = TabsPrimitive.Root
-
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>

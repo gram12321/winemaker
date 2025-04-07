@@ -1,16 +1,7 @@
 import React from 'react';
-import staffService, { 
-  StaffSearchOptions, 
-  getSkillLevelInfo, 
-  SpecializedRoles,
-  calculateSearchCost,
-  calculatePerCandidateCost,
-  Staff as ServiceStaff,
-  SpecializedRole
-} from '../../services/staffService';
+import staffService, { StaffSearchOptions, getSkillLevelInfo, SpecializedRoles, calculateSearchCost, calculatePerCandidateCost, Staff as ServiceStaff } from '../../services/staffService';
 import { getGameState, Player } from '../../gameState';
 import displayManager from '../../lib/game/displayManager';
-import { WorkCategory } from '../../lib/game/workCalculator';
 
 interface StaffSearchProps {
   onClose: () => void;

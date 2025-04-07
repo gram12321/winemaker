@@ -1,37 +1,15 @@
 import React, { useState } from 'react';
 import { BuildingType, ToolCategory, TOOL_CATEGORY_NAMES } from '@/lib/core/constants';
 import { getToolsForBuilding} from '@/lib/game/building';
-import {
-  loadBuildings,
-  deserializeBuilding,
-  serializeBuilding,
-  getBuildingByName
-} from '@/lib/database/buildingDB';
-import {
-  upgradeBuilding,
-  addToolToBuilding,
-  sellToolFromBuilding
-} from '@/services/buildingService';
+import { deserializeBuilding, getBuildingByName } from '@/lib/database/buildingDB';
+import { addToolToBuilding, sellToolFromBuilding } from '@/services/buildingService';
 import { getGameState } from '@/gameState';
 import { useDisplayUpdate } from '@/lib/game/displayManager';
 import { consoleService } from '@/components/layout/Console';
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 
 interface BuildingDetailsPanelProps {

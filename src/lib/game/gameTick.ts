@@ -10,16 +10,7 @@ import { saveGameState } from '@/lib/database/gameStateDB';
 import { Vineyard } from './vineyard';
 import displayManager from './displayManager';
 import { processActivitiesTick } from './activityManager';
-import {   Season, 
-  SEASONS, 
-  WEEKS_PER_SEASON,
-  STARTING_WEEK,
-  STARTING_SEASON,
-  STARTING_YEAR,
-  RIPENESS_INCREASE,
-  ORGANIC_CERTIFICATION_YEARS,
-  ORGANIC_HEALTH_IMPROVEMENT
-} from '@/lib/core/constants';
+import { Season, SEASONS, WEEKS_PER_SEASON, STARTING_WEEK, STARTING_SEASON, STARTING_YEAR, RIPENESS_INCREASE, ORGANIC_CERTIFICATION_YEARS, ORGANIC_HEALTH_IMPROVEMENT } from '@/lib/core/constants';
 
 /**
  * Initialize game time with default values if not present
