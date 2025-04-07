@@ -1,8 +1,3 @@
-/**
- * Company Database Operations
- * Handles company-related operations with Firebase
- */
-
 import { db } from '../../firebase.config';
 import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { Player } from '../../gameState';
@@ -10,8 +5,6 @@ import { StorageKeys, saveToStorage } from './localStorageDB';
 
 /**
  * Check if a company exists in Firestore
- * @param companyName The name of the company to check
- * @returns True if the company exists, false otherwise
  */
 export const checkCompanyExists = async (companyName: string): Promise<boolean> => {
   try {
@@ -26,10 +19,6 @@ export const checkCompanyExists = async (companyName: string): Promise<boolean> 
 
 /**
  * Create a new company in Firestore
- * @param companyName The name of the company to create
- * @param player The player data
- * @param initialStaff The initial staff array
- * @returns Promise resolving to true if successful, false otherwise
  */
 export const createCompany = async (companyName: string, player: Player, initialStaff: any[] = []): Promise<boolean> => {
   try {
@@ -54,11 +43,6 @@ export const createCompany = async (companyName: string, player: Player, initial
   }
 };
 
-/**
- * Load company data from Firestore
- * @param companyName The name of the company to load
- * @returns The company data or null if not found
- */
 export const loadCompany = async (companyName: string): Promise<any | null> => {
   try {
     const docRef = doc(db, 'companies', companyName);
@@ -79,8 +63,6 @@ export const loadCompany = async (companyName: string): Promise<any | null> => {
 
 /**
  * Delete a company from Firestore
- * @param companyName The name of the company to delete
- * @returns Promise resolving to true if successful, false otherwise
  */
 export const deleteCompany = async (companyName: string): Promise<boolean> => {
   try {

@@ -1,8 +1,3 @@
-/**
- * Building Database Operations
- * Handles storing and retrieving building data
- */
-
 import { getGameState, updateGameState, Building as GameStateBuilding } from '@/gameState';
 import { Building, initializeToolInstanceCounts } from '@/lib/game/building';
 import { saveGameState } from './gameStateDB';
@@ -19,10 +14,6 @@ export interface SerializedBuilding {
   }[];
 }
 
-/**
- * Load buildings from game state
- * @returns Array of serialized building objects
- */
 export const loadBuildings = (): SerializedBuilding[] => {
   try {
     // Get from game state
@@ -44,11 +35,6 @@ export const loadBuildings = (): SerializedBuilding[] => {
   }
 };
 
-/**
- * Save buildings to game state and Firebase
- * @param buildings Array of serialized building objects to save
- * @returns Promise resolving when save is complete
- */
 export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<void> => {
   try {
     // Update game state with the buildings (force cast to match gameState types)
@@ -63,20 +49,10 @@ export const saveBuildings = async (buildings: SerializedBuilding[]): Promise<vo
   }
 };
 
-/**
- * Get a building by name
- * @param name Name of the building to find
- * @returns The building or undefined if not found
- */
 export const getBuildingByName = (name: string): SerializedBuilding | undefined => {
   return loadBuildings().find(b => b.name === name);
 };
 
-/**
- * Convert a serialized building to a Building instance
- * @param serializedBuilding Serialized building data
- * @returns Building instance with all properties initialized
- */
 export const deserializeBuilding = (serializedBuilding: SerializedBuilding): Building => {
   // Create new building instance with name and level
   const building = new Building(
@@ -93,11 +69,6 @@ export const deserializeBuilding = (serializedBuilding: SerializedBuilding): Bui
   return building;
 };
 
-/**
- * Convert a Building instance to serialized format
- * @param building Building instance
- * @returns Serialized building data ready for storage
- */
 export const serializeBuilding = (building: Building): SerializedBuilding => {
   return {
     id: building.id,
@@ -107,11 +78,6 @@ export const serializeBuilding = (building: Building): SerializedBuilding => {
   };
 };
 
-/**
- * Initializes the tool instance counts from all buildings
- * Should be called during application startup
- * @returns Promise resolving when initialization is complete
- */
 export const initializeToolInstanceCountsFromStorage = async (): Promise<void> => {
   try {
     const buildings = loadBuildings();

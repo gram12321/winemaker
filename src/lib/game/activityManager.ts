@@ -15,7 +15,12 @@ import { consoleService } from '@/components/layout/Console';
 import displayManager from './displayManager';
 import { Staff } from '@/gameState';
 import { toast } from '../ui/toast';
-import { saveActivityToDb, removeActivityFromDb, updateActivityInDb } from '../database/activityDB';
+import { 
+  saveActivityToDb, 
+  removeActivityFromDb, 
+  updateActivityInDb, 
+  Activity as DbActivity 
+} from '../database/activityDB';
 
 // Store activities in gameState
 const initializeActivitiesInGameState = () => {
@@ -423,10 +428,18 @@ export const addActivity = (activity: ActivityProgress): ActivityProgress => {
   const updatedActivities = [...currentActivities, activityWithId];
   updateGameState({ activities: updatedActivities });
   
-  // Save to Firebase in the background
-  saveActivityToDb(activityWithId).catch(error => {
-    console.error('[ActivityManager] Error saving activity to database:', error);
-  });
+  // Save to Firebase in the background - add userId for database compatibility
+  const { player } = getGameState();
+  if (player?.id) {
+    saveActivityToDb({
+      ...activityWithId,
+      userId: player.id
+    }).catch(error => {
+      console.error('[ActivityManager] Error saving activity to database:', error);
+    });
+  } else {
+    console.warn('[ActivityManager] Cannot save activity to database: no player ID found');
+  }
   
   consoleService.info(`Started ${activityWithId.category} activity`);
   displayManager.updateAllDisplays();
@@ -456,10 +469,18 @@ export const updateActivity = (id: string, updates: Partial<ActivityProgress>): 
   if (updatedActivity) {
     updateGameState({ activities });
     
-    // Save to Firebase in the background
-    updateActivityInDb(updatedActivity).catch(error => {
-      console.error('[ActivityManager] Error updating activity in database:', error);
-    });
+    // Save to Firebase in the background - add userId for database compatibility
+    const { player } = getGameState();
+    if (player?.id) {
+      updateActivityInDb({
+        ...updatedActivity,
+        userId: player.id
+      }).catch(error => {
+        console.error('[ActivityManager] Error updating activity in database:', error);
+      });
+    } else {
+      console.warn('[ActivityManager] Cannot update activity in database: no player ID found');
+    }
   }
   
   return updatedActivity;
