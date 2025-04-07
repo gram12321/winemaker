@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getGameState } from '../../gameState';
 import staffService, { getSkillLevelInfo, StaffTeam } from '../../services/staffService';
@@ -21,9 +20,24 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   initialAssignedStaffIds = [],
   onAssignmentChange
 }) => {
-  const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>(initialAssignedStaffIds);
+  const { staff } = getGameState();
+  
+  // Get currently assigned staff from the activity
+  const activity = getActivityById(activityId);
+  const currentlyAssignedStaff = activity?.params?.assignedStaffIds || [];
+  
+  const [assignedStaffIds, setAssignedStaffIds] = useState<string[]>(() => {
+    // Initialize with either the prop value or currently assigned staff
+    const initialIds = initialAssignedStaffIds.length > 0 ? initialAssignedStaffIds : currentlyAssignedStaff;
+    return initialIds;
+  });
+  
+  const [selectAll, setSelectAll] = useState(() => {
+    const isAllSelected = assignedStaffIds.length === staff.length;
+    return isAllSelected;
+  });
+  
   const [teams, setTeams] = useState<StaffTeam[]>([]);
-  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     const loadTeams = async () => {
@@ -33,9 +47,6 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
 
     loadTeams();
   }, []);
-
-  const { staff } = getGameState();
-  const activity = getActivityById(activityId);
 
   const handleAssignStaff = (staffId: string, checked: boolean) => {
     let newAssignments: string[];
