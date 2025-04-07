@@ -9,6 +9,7 @@ import { Badge } from "../../components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { cn } from "@/lib/core/utils/utils";
 import { MessageSquareText, CalendarDays } from 'lucide-react';
+import { handleLogout } from '@/lib/database/gameStateDB';
 
 interface TopBarProps {
   view: string;
@@ -34,18 +35,15 @@ export default function TopBar({ view, setView }: TopBarProps) {
     }
   };
   
-  // Handle logout
-  const handleLogout = () => {
-    // Clear company name from localStorage
-    localStorage.removeItem('companyName');
+  // Handle UI aspects of logout
+  const onLogout = async () => {
+    // Call database function to handle state/storage
+    await handleLogout();
     
-    // Clear console message history from localStorage
-    localStorage.removeItem('consoleMessages');
-    
-    // Reset console messages in-memory
+    // Reset console messages in UI
     consoleService.clearMessages();
     
-    // Navigate to login
+    // Navigate to login view
     setView('login');
   };
   
@@ -218,7 +216,7 @@ export default function TopBar({ view, setView }: TopBarProps) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                onClick={handleLogout}
+                onClick={onLogout}
                 className="text-red-600 focus:text-red-500"
               >
                 Logout

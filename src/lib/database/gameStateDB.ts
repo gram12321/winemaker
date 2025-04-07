@@ -15,6 +15,8 @@ export const handleLogout = async (): Promise<boolean> => {
     
     // Clear all game-related data from localStorage
     clearGameStorage();
+    localStorage.removeItem('companyName');
+    localStorage.removeItem('consoleMessages');
     
     // Reset game state to initial values
     updateGameState({

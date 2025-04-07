@@ -1,13 +1,6 @@
 // Basic game state for the Winery Management Game
 import { Vineyard } from '@/lib/game/vineyard';
-import { 
-  Season, 
-  STARTING_WEEK, 
-  STARTING_SEASON, 
-  STARTING_YEAR, 
-  STARTING_MONEY, 
-  STARTING_PRESTIGE 
-} from '@/lib/core/constants';
+import { STARTING_WEEK, STARTING_SEASON, STARTING_YEAR, STARTING_MONEY, STARTING_PRESTIGE } from '@/lib/core/constants';
 import { GameDate } from '@/lib/core/constants';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 import displayManager from '@/lib/game/displayManager';

@@ -3,20 +3,6 @@ import { Vineyard } from '@/lib/game/vineyard';
 import { GameDate } from '@/lib/core/constants/gameConstants';
 import { saveGameState } from './gameStateDB';
 
-export function convertToGameDate(date: Date | GameDate | string | undefined, gameState: any): GameDate {
-  // If it's already a GameDate object with week, season and year
-  if (date && typeof date === 'object' && 'week' in date && 'season' in date && 'year' in date) {
-    return date as GameDate;
-  }
-  
-  // For legacy dates (string, Date or undefined), use current game state
-  return {
-    week: gameState.week,
-    season: gameState.season,
-    year: gameState.currentYear
-  };
-}
-
 /**
  * Adds a new vineyard to the game and saves to Firebase
  * @param vineyard Vineyard object to save
@@ -57,34 +43,16 @@ export async function saveVineyard(vineyard: Vineyard): Promise<Vineyard | null>
   }
 }
 
-/**
- * Gets a vineyard by ID
- * @param id ID of the vineyard to retrieve
- * @returns The vineyard or null if not found
- */
+
 export function getVineyard(id: string): Vineyard | null {
-  try {
     const gameState = getGameState();
     return gameState.vineyards.find((vineyard: Vineyard) => vineyard.id === id) || null;
-  } catch (error) {
-    console.error('Error getting vineyard:', error);
-    return null;
-  }
 }
-
-/**
- * Gets all vineyards
- * @returns Array of all vineyards
- */
 export function getAllVineyards(): Vineyard[] {
-  try {
     const gameState = getGameState();
     return gameState.vineyards || [];
-  } catch (error) {
-    console.error('Error getting all vineyards:', error);
-    return [];
-  }
 }
+
 
 /**
  * Removes a vineyard by ID

@@ -1,11 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { Staff as GameStateStaff } from '../gameState';
 import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
-import displayManager from '../lib/game/displayManager';
 import { assignStaffToActivity, getActivityById, addActivity, removeActivity } from '../lib/game/activityManager';
-import { WorkCategory, ActivityProgress } from '../lib/game/workCalculator';
+import { WorkCategory } from '../lib/game/workCalculator';
 import { saveStaffToDb, removeStaffFromDb, updateStaffInDb, saveTeamToDb, loadTeamsFromDb, saveStaffAssignmentsToDb } from '../lib/database/staffDB';
-import { STAFF_ROLES, BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER, SPECIALIZATION_WAGE_BONUS, SkillLevels, DefaultTeams, italianMaleNames, italianFemaleNames, frenchMaleNames, frenchFemaleNames, spanishMaleNames, spanishFemaleNames, usMaleNames, usFemaleNames, germanMaleNames, germanFemaleNames, lastNamesByCountry } from '../lib/core/constants/staffConstants';
+import { BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER, SkillLevels, DefaultTeams, italianMaleNames, italianFemaleNames, frenchMaleNames, frenchFemaleNames, spanishMaleNames, spanishFemaleNames, usMaleNames, usFemaleNames, germanMaleNames, germanFemaleNames, lastNamesByCountry } from '../lib/core/constants/staffConstants';
 import { toast } from '../lib/ui/toast';
 
 // Types for staff related functionality
@@ -751,34 +749,4 @@ export function completeHiringProcess(activityId: string): Staff | null {
   return addedStaff;
 }
 
-export default {
-  createStaff,
-  addStaff,
-  removeStaff,
-  updateStaff,
-  getStaffById,
-  getAllStaff,
-  generateRandomSkills,
-  calculateWage,
-  getSkillLevelInfo,
-  createTeam,
-  saveTeam,
-  loadTeams,
-  assignStaffToTeam,
-  calculateSearchCost,
-  calculatePerCandidateCost,
-  generateStaffCandidates,
-  SpecializedRoles,
-  SkillLevels,
-  getAssignedStaffToActivity,
-  assignStaffToActivityById,
-  getStaffByTeam,
-  assignTeamToActivity,
-  calculateActivityStaffEfficiency,
-  mapCategoryToSkill,
-  mapSpecializationToCategory,
-  initializeDefaultTeams,
-  startStaffSearch,
-  startHiringProcess,
-  completeHiringProcess
-}; 
+export default { createStaff, addStaff, removeStaff, updateStaff, getStaffById, getAllStaff, generateRandomSkills, calculateWage, getSkillLevelInfo, createTeam, saveTeam, loadTeams, assignStaffToTeam, calculateSearchCost, calculatePerCandidateCost, generateStaffCandidates, SpecializedRoles, SkillLevels, getAssignedStaffToActivity, assignStaffToActivityById, getStaffByTeam, assignTeamToActivity, calculateActivityStaffEfficiency, mapCategoryToSkill, mapSpecializationToCategory, initializeDefaultTeams, startStaffSearch, startHiringProcess, completeHiringProcess };
