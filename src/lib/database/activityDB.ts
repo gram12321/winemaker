@@ -1,9 +1,9 @@
-import { doc, setDoc, collection, getDoc, deleteDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
+import { doc, setDoc, collection, getDoc, deleteDoc, updateDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import { getGameState, updateGameState } from '../../gameState';
 import { WorkCategory } from '../game/workCalculator';
 
-// Define Activity type inline since the model doesn't exist
+// Define Activity type
 export interface Activity {
   id: string;
   category: WorkCategory;
@@ -13,67 +13,7 @@ export interface Activity {
   params?: Record<string, any>;
 }
 
-// Define activities collection name
 const ACTIVITIES_COLLECTION = 'activities';
-
-export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
-  try {
-    const activitiesRef = collection(db, ACTIVITIES_COLLECTION);
-    const querySnapshot = await getDocs(activitiesRef);
-    
-    const activities: Activity[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      // Ensure category is properly typed as WorkCategory
-      activities.push({
-        ...data,
-        category: data.category as WorkCategory
-      } as Activity);
-    });
-    
-    return activities;
-  } catch (error) {
-    console.error('[ActivityDB] Error loading activities:', error);
-    return [];
-  }
-}
-
-export async function initializeActivitySystem(): Promise<void> {
-  console.log('[ActivityDB] Initializing activity system');
-  try {
-    // Load all activities from the database
-    const activities = await loadAllActivitiesFromDb();
-    
-    if (activities.length > 0) {
-      console.log(`[ActivityDB] Loaded ${activities.length} activities from database`);
-      
-      // Get current game state
-      const gameState = getGameState();
-      
-      // Update game state with loaded activities
-      updateGameState({
-        ...gameState,
-        activities: activities
-      });
-      
-      console.log('[ActivityDB] Activities restored to game state');
-    } else {
-      console.log('[ActivityDB] No persisted activities found');
-      // Initialize with empty activities array if none found
-      updateGameState({
-        activities: []
-      });
-    }
-    
-    console.log('[ActivityDB] Activity system initialized successfully');
-  } catch (error) {
-    console.error('[ActivityDB] Error initializing activity system:', error);
-    // Initialize with empty activities array on error
-    updateGameState({
-      activities: []
-    });
-  }
-}
 
 // Helper function to sanitize activity data for Firebase
 function sanitizeActivityForDb(activity: Activity) {
@@ -120,6 +60,50 @@ function sanitizeActivityForDb(activity: Activity) {
   }
 
   return sanitized;
+}
+
+export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
+  try {
+    const activitiesRef = collection(db, ACTIVITIES_COLLECTION);
+    const querySnapshot = await getDocs(activitiesRef);
+    
+    const activities: Activity[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      activities.push({
+        ...data,
+        category: data.category as WorkCategory
+      } as Activity);
+    });
+    
+    return activities;
+  } catch (error) {
+    console.error('[ActivityDB] Error loading activities:', error);
+    return [];
+  }
+}
+
+export async function initializeActivitySystem(): Promise<void> {
+  try {
+    const activities = await loadAllActivitiesFromDb();
+    
+    if (activities.length > 0) {
+      const gameState = getGameState();
+      updateGameState({
+        ...gameState,
+        activities: activities
+      });
+    } else {
+      updateGameState({
+        activities: []
+      });
+    }
+  } catch (error) {
+    console.error('[ActivityDB] Error initializing activity system:', error);
+    updateGameState({
+      activities: []
+    });
+  }
 }
 
 export async function saveActivityToDb(activity: Activity): Promise<boolean> {
@@ -173,11 +157,4 @@ export async function removeActivityFromDb(activityId: string): Promise<boolean>
   }
 }
 
-export default {
-  initializeActivitySystem,
-  saveActivityToDb,
-  updateActivityInDb,
-  loadActivityFromDb,
-  loadAllActivitiesFromDb,
-  removeActivityFromDb
-};
+export default { initializeActivitySystem, saveActivityToDb, updateActivityInDb, loadActivityFromDb, loadAllActivitiesFromDb, removeActivityFromDb };
