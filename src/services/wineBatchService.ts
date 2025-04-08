@@ -9,25 +9,40 @@ import { getWineBatchFromDB, removeWineBatchFromDB } from '@/lib/database/wineBa
 import { Season } from '@/lib/core/constants';
 
 /**
- * Check if a storage location is valid for a given resource type and quantity
- * @param storageLocation Storage location ID (format: "ToolName#InstanceNumber")
- * @param resourceType Type of resource to store
- * @param quantity Quantity to store
- * @returns Whether the storage location is valid
+ * Validates storage locations for a wine batch
+ * @param storageLocations Array of storage locations and quantities
+ * @param resourceType Type of resource to store (grape, must, wine)
+ * @param totalQuantity The total quantity that needs to be stored
+ * @returns True if the storage is valid, false otherwise
  */
-export function isValidStorage(
-  storageLocation: string,
+export function validateStorage(
+  storageLocations: { locationId: string; quantity: number }[],
   resourceType: string,
-  quantity: number
+  totalQuantity: number
 ): boolean {
-  // Empty storage location is invalid
-  if (!storageLocation || storageLocation === 'Default Storage') {
+  // Basic validation
+  if (!storageLocations || storageLocations.length === 0 || totalQuantity <= 0) {
     return false;
   }
   
-  try {
-    // Parse the storage location to get tool name and instance number
-    const [toolName, instanceStr] = storageLocation.split('#');
+  // Check total capacity
+  const totalAllocated = storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
+  if (totalAllocated < totalQuantity) {
+    return false;
+  }
+  
+  // Load buildings once for efficiency
+  const buildings = loadBuildings();
+  
+  // Check each storage location
+  for (const location of storageLocations) {
+    // Skip empty locations
+    if (!location.locationId || location.locationId === 'Default Storage' || location.quantity <= 0) {
+      return false;
+    }
+    
+    // Parse storage ID
+    const [toolName, instanceStr] = location.locationId.split('#');
     if (!toolName || !instanceStr) {
       return false;
     }
@@ -37,149 +52,35 @@ export function isValidStorage(
       return false;
     }
     
-    // Check all buildings for the storage tool
-    const buildings = loadBuildings();
+    // Find the tool in buildings
+    let toolFound = false;
     
     for (const building of buildings) {
       const buildingInstance = deserializeBuilding(building);
       
-      // Check all slots and tools
       for (const slot of buildingInstance.slots) {
         for (const tool of slot.tools) {
-          // Check if this is the requested tool
           if (tool.name === toolName && tool.instanceNumber === instanceNumber) {
-            // Check if the tool supports the resource type
-            if (!tool.supportedResources.includes(resourceType)) {
+            // Check if tool supports resource type and has enough capacity
+            if (!tool.supportedResources.includes(resourceType) || tool.capacity < location.quantity) {
               return false;
             }
             
-            // Check if the tool has enough capacity
-            return tool.capacity >= quantity;
+            toolFound = true;
+            break;
           }
         }
+        if (toolFound) break;
       }
+      if (toolFound) break;
     }
     
-    return false;
-  } catch (error) {
-    console.error('Error validating storage:', error);
-    return false;
-  }
-}
-
-/**
- * Checks if an array of storage locations is valid
- * @param storageLocations Array of storage locations and quantities
- * @param resourceType Type of resource to store
- * @returns True if all storage locations are valid and total quantity is positive
- */
-export function areStorageLocationsValid(
-  storageLocations: { locationId: string; quantity: number }[],
-  resourceType: string
-): boolean {
-  try {
-    // Empty storage locations array is invalid
-    if (!storageLocations || storageLocations.length === 0) {
+    if (!toolFound) {
       return false;
     }
-    
-    // Calculate total quantity
-    const totalQuantity = storageLocations.reduce((sum, location) => sum + location.quantity, 0);
-    
-    // Total quantity must be positive
-    if (totalQuantity <= 0) {
-      return false;
-    }
-    
-    // Check each storage location
-    for (const location of storageLocations) {
-      if (!isValidStorage(location.locationId, resourceType, location.quantity)) {
-        return false;
-      }
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error validating storage locations:', error);
-    return false;
   }
-}
-
-/**
- * Add a new wine batch to the game state
- * @param batch The wine batch to add, or partial data to create a new one
- * @param saveToDb Whether to also save to the database
- * @returns The newly created wine batch or null if failed
- */
-export async function addWineBatch(
-  batch: Partial<WineBatch>,
-  saveToDb: boolean = false
-): Promise<WineBatch | null> {
-  try {
-    const gameState = getGameState();
-    const id = batch.id || uuidv4();
-    
-    // Default to 'grape' stage if not specified
-    const stage = batch.stage || 'grape';
-    
-    // Validate storage if quantity is provided
-    if (batch.quantity && batch.quantity > 0 && batch.storageLocations) {
-      // Determine resource type based on stage
-      let resourceType = 'grape';
-      if (stage === 'must' || stage === 'fermentation') {
-        resourceType = 'must';
-      } else if (stage === 'aging' || stage === 'bottled') {
-        resourceType = 'wine';
-      }
-      
-      // Check if storage locations are valid
-      if (!areStorageLocationsValid(batch.storageLocations, resourceType)) {
-        console.error(`Invalid storage locations for ${batch.quantity} kg of ${resourceType}`);
-        return null;
-      }
-
-      // Verify total quantity matches batch quantity
-      const totalStoredQuantity = batch.storageLocations.reduce((sum, loc) => sum + loc.quantity, 0);
-      if (totalStoredQuantity < batch.quantity) {
-        console.error(`Insufficient storage allocated. Need at least ${Math.ceil(batch.quantity)} kg but only ${Math.ceil(totalStoredQuantity)} kg allocated.`);
-        return null;
-      }
-    }
-    
-    // Create a new wine batch with the given data and defaults
-    const newBatch: WineBatch = {
-      id,
-      vineyardId: batch.vineyardId || '',
-      grapeType: batch.grapeType || 'Chardonnay',
-      harvestGameDate: batch.harvestGameDate || {
-        week: gameState.week,
-        season: gameState.season,
-        year: gameState.currentYear
-      },
-      harvestDateRange: batch.harvestDateRange,
-      quantity: batch.quantity || 0,
-      quality: batch.quality || 0,
-      ripeness: batch.ripeness || 0.5,
-      stage,
-      ageingStartGameDate: batch.ageingStartGameDate || null,
-      ageingDuration: batch.ageingDuration || null,
-      storageLocations: batch.storageLocations || [],
-      characteristics: batch.characteristics || {
-        sweetness: 0.5,
-        acidity: 0.5,
-        tannins: 0.5,
-        body: 0.5,
-        spice: 0.5,
-        aroma: 0.5
-      }
-    };
-    
-    // Save to database
-    return await saveWineBatch(newBatch, saveToDb);
-  } catch (error) {
-    console.error('Error adding wine batch:', error);
-    return null;
-  }
+  
+  return true;
 }
 
 /**
@@ -283,7 +184,7 @@ export async function removeWineBatch(
 }
 
 /**
- * Creates a new wine batch from a harvested vineyard
+ * Creates a new wine batch from a harvest or updates an existing one
  * @param vineyardId The ID of the harvested vineyard
  * @param grapeType The type of grape harvested
  * @param quantity The quantity of grapes harvested in kg
@@ -293,7 +194,7 @@ export async function removeWineBatch(
  * @param ripeness The ripeness of the grapes (0-1)
  * @returns The newly created wine batch or null if failed
  */
-export async function createWineBatchFromHarvest(
+export async function addWineBatch(
   vineyardId: string,
   grapeType: GrapeVariety,
   quantity: number,
@@ -304,7 +205,7 @@ export async function createWineBatchFromHarvest(
 ): Promise<WineBatch | null> {
   try {
     // Validate storage locations
-    if (!areStorageLocationsValid(storageLocations, 'grape')) {
+    if (!validateStorage(storageLocations, 'grape', quantity)) {
       consoleService.error(`Cannot harvest: Invalid or insufficient storage for ${quantity} kg of grapes.`);
       return null;
     }
@@ -461,7 +362,9 @@ export async function createWineBatchFromHarvest(
         }
       } else {
         // No existing batch - create a new one for this storage location
-        const newBatch = await addWineBatch({
+        const id = uuidv4();
+        const newBatch: WineBatch = {
+          id,
           vineyardId,
           grapeType,
           quantity: storageQuantity,
@@ -477,11 +380,16 @@ export async function createWineBatchFromHarvest(
             first: currentDate,
             last: currentDate
           },
-          characteristics
-        } as WineBatch, saveToDb);
+          characteristics,
+          ageingStartGameDate: null,
+          ageingDuration: null
+        };
         
-        if (newBatch) {
-          updatedBatchIds.add(newBatch.id);
+        // Save the new batch
+        const savedBatch = await saveWineBatch(newBatch, saveToDb);
+        
+        if (savedBatch) {
+          updatedBatchIds.add(savedBatch.id);
         }
       }
     }

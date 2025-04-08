@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Vineyard, createVineyard } from '@/lib/game/vineyard';
 import { getGameState } from '@/gameState';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
-import { createWineBatchFromHarvest } from './wineBatchService';
+import { addWineBatch } from './wineBatchService';
 import { BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from '@/lib/core/constants';
 import { getVineyard, saveVineyard, removeVineyard, getAllVineyards } from '@/lib/database/vineyardDB';
 import { consoleService } from '@/components/layout/Console';
@@ -303,7 +303,7 @@ export async function harvestVineyard(
               const currentRipeness = currentVineyard?.ripeness || vineyard.ripeness;
               
               // Create wine batch for this harvest increment
-              const wineBatch = await createWineBatchFromHarvest(
+              const wineBatch = await addWineBatch(
                 id,
                 vineyard.grape as GrapeVariety,
                 harvestedThisTick,
