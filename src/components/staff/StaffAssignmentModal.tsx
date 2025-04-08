@@ -3,9 +3,9 @@ import { getGameState, Staff } from '../../gameState';
 import staffService, { StaffTeam } from '../../services/staffService';
 import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
-import { getNationalityFlag } from '../../lib/core/utils/formatUtils';
-import { toast } from '../../lib/ui/toast';
 import { formatNumber } from '@/lib/core/utils/utils';
+import { toast } from '../../lib/ui/toast';
+import { getCountryCodeForFlag } from '../../lib/core/utils/formatUtils';
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -335,7 +335,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                 <tr key={member.id} className="border-t border-gray-100">
                   <td className="px-4 py-2">{member.name}</td>
                   <td className="px-4 py-2">
-                    <span className={`fi ${getNationalityFlag(member.nationality)} mr-1`}></span>
+                    <span className={`fi ${getCountryCodeForFlag(member.nationality)} mr-1`}></span>
                     {" "}{member.nationality}
                   </td>
                   <td className="px-4 py-2">

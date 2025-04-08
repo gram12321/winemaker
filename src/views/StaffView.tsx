@@ -10,7 +10,8 @@ import { ActivityProgressBar } from '../components/activities';
 import { WorkCategory } from '../lib/game/workCalculator';
 // Import utils for formatting and flags
 import { formatNumber, getSkillLevelInfo } from '@/lib/core/utils/utils'; 
-import { getNationalityFlag } from '@/lib/core/utils/formatUtils';
+// Import the new flag function
+import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
 
 // Create display state for staff activities
 displayManager.createDisplayState('staffSearchActivity', {
@@ -340,7 +341,7 @@ const StaffView: React.FC = () => {
                           <span className={skillInfo.colorClass}>{skillInfo.name}</span>
                         </p>
                         <p><span className="font-medium">Nationality:</span> 
-                          <span className={`fi ${getNationalityFlag(staff.nationality)} mr-1`}></span>
+                          <span className={`fi ${getCountryCodeForFlag(staff.nationality)} mr-1`}></span>
                           {staff.nationality}
                         </p>
                         <p className="col-span-2"><span className="font-medium">Team:</span> {staffTeam ? staffTeam.name : 'Not assigned to any team'}</p>
@@ -369,7 +370,7 @@ const StaffView: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="space-y-2">
                     <p><span className="font-medium">Nationality:</span> 
-                      <span className={`fi ${getNationalityFlag(selectedStaff.nationality)} mr-1`}></span>
+                      <span className={`fi ${getCountryCodeForFlag(selectedStaff.nationality)} mr-1`}></span>
                       {selectedStaff.nationality}
                     </p>
                     <p><span className="font-medium">Hire Date:</span> Week {selectedStaff.hireDate.week}, {selectedStaff.hireDate.season} {selectedStaff.hireDate.year}</p>

@@ -13,25 +13,24 @@ export const formatPercentage = (value: number): string => {
   return `${(value * 100).toFixed(1)}%`;
 };
 
-const countryToFlagCode: Record<string, string> = {
-  "Italy": "it",
-  "France": "fr",
-  "Spain": "es",
-  "US": "us",
-  "United States": "us",
-  "Germany": "de",
-};
+/**
+ * Returns the two-letter country code for a given country name.
+ * Used for flag icon CSS classes.
+ * @param countryName The full name of the country (e.g., "United States", "France").
+ * @returns The two-letter country code (e.g., "us", "fr") or an empty string if not found.
+ */
+export function getCountryCodeForFlag(countryName: string | undefined | null): string {
+  if (!countryName) return ''; // Handle undefined or null input
 
-export const getNationalityFlag = (nationality: string): string => {
-  const countryCode = countryToFlagCode[nationality] || 'eu';
-  return countryCode;
-};
+  const countryToCodeMap: Record<string, string> = {
+    "Italy": "it",
+    "France": "fr",
+    "Spain": "es",
+    "US": "us", // Handle abbreviation
+    "United States": "us",
+    "Germany": "de",
+    // Add other countries used in your game here
+  };
 
-export function getFlagIconClass(countryName: string): string {
-  const countryCode = countryToFlagCode[countryName];
-  return countryCode || '';
+  return countryToCodeMap[countryName] || ''; // Return code or empty string
 }
-
-export const getFallbackFlag = (): string => {
-  return 'eu';
-};

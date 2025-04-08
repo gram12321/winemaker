@@ -15,7 +15,7 @@ import { ActivityProgressBar } from '../components/activities/ActivityProgressBa
 import PlantVineyardOptionsModal from '../components/vineyards/PlantVineyardOptionsModal';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 import { getColorClass, formatNumber } from '@/lib/core/utils/utils';
-import { getFlagIconClass } from '@/lib/core/utils/formatUtils';
+import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
 
 // Display state type definition
 interface VineyardViewDisplayState {
@@ -360,7 +360,7 @@ const VineyardView: React.FC = () => {
                 <div className="p-4">
                   <h3 className="text-lg font-semibold">{vineyard.name}</h3>
                   <div className="text-sm text-gray-600 mt-1">
-                    <span className={`fi ${getFlagIconClass(vineyard.country)} mr-2`}></span>
+                    <span className={`fi ${getCountryCodeForFlag(vineyard.country)} mr-2`}></span>
                     {vineyard.region}, {vineyard.country}
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
@@ -407,7 +407,7 @@ const VineyardView: React.FC = () => {
               <ul className="space-y-2">
                 <li>
                   <span className="font-medium">Region:</span>
-                  <span className={`fi ${getFlagIconClass(selectedVineyard.country)} ml-2 mr-1`}></span>
+                  <span className={`fi ${getCountryCodeForFlag(selectedVineyard.country)} ml-2 mr-1`}></span>
                   {selectedVineyard.region}, {selectedVineyard.country}
                 </li>
                 <li><span className="font-medium">Size:</span> {selectedVineyard.acres.toFixed(1)} acres</li>
