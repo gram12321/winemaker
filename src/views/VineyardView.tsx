@@ -11,6 +11,8 @@ import StorageSelector from '../components/buildings/StorageSelector';
 import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { BASELINE_VINE_DENSITY, formatGameDate } from '../lib/core/constants/gameConstants';
 import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
+import PlantVineyardOptionsModal from '../components/vineyards/PlantVineyardOptionsModal';
+import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 
 // Display state type definition
 interface VineyardViewDisplayState {
@@ -20,6 +22,7 @@ interface VineyardViewDisplayState {
   showStaffAssignment?: boolean;
   currentActivityId?: string | null;
   vineyardActivities: any[];
+  showPlantingModal: boolean;
 }
 
 const getStatusColor = (status: string) => {
@@ -46,7 +49,8 @@ displayManager.createDisplayState('vineyardView', {
   selectedStorageLocations: [] as { locationId: string; quantity: number }[],
   showStaffAssignment: false,
   currentActivityId: null,
-  vineyardActivities: []
+  vineyardActivities: [],
+  showPlantingModal: false,
 });
 
 // Helper function to get vineyard activities
@@ -68,7 +72,8 @@ const VineyardView: React.FC = () => {
     selectedStorageLocations,
     showStaffAssignment,
     currentActivityId,
-    vineyardActivities
+    vineyardActivities,
+    showPlantingModal,
   } = displayState;
 
   // Get the selected vineyard from the current game state using the ID
@@ -211,27 +216,40 @@ const VineyardView: React.FC = () => {
     });
   };
 
-  // Handle planting a vineyard
-  const handlePlantVineyard = displayManager.createActionHandler(async () => {
+  // Open the modal instead of directly calling the service
+  const handleOpenPlantingModal = displayManager.createActionHandler(() => {
     if (!selectedVineyardId) return;
-    
+    displayManager.updateDisplayState('vineyardView', { showPlantingModal: true });
+  });
+
+  // Close the modal
+  const handleClosePlantingModal = () => {
+    displayManager.updateDisplayState('vineyardView', { showPlantingModal: false });
+  };
+
+  // Handle submission from the planting modal
+  const handlePlantVineyardSubmit = displayManager.createActionHandler(async (options: { grape: GrapeVariety; density: number }) => {
+    if (!selectedVineyardId) return;
+
+    handleClosePlantingModal(); // Close modal first
     displayManager.updateDisplayState('vineyardView', { loading: true });
     try {
-      // In a real implementation, we would have a modal/form to select grape type and density
-      // For now, let's use a fixed grape type and density
-      const grape = "Chardonnay";
-      const density = BASELINE_VINE_DENSITY;
-      
-      const result = await plantVineyard(selectedVineyardId, grape, density);
-      
+      const result = await plantVineyard(selectedVineyardId, options.grape, options.density);
+
       if (!result) {
         consoleService.error('Failed to start planting vineyard.');
       }
+      // Success message is handled within plantVineyard service now
     } catch (error) {
       consoleService.error('Error planting vineyard.');
       console.error('Error planting vineyard:', error);
     } finally {
       displayManager.updateDisplayState('vineyardView', { loading: false });
+      // Re-fetch activities for the vineyard after starting planting
+      const activities = getVineyardActivities(selectedVineyardId);
+       displayManager.updateDisplayState('vineyardView', {
+         vineyardActivities: activities
+       });
     }
   });
 
@@ -451,9 +469,9 @@ const VineyardView: React.FC = () => {
                         <button 
                           onClick={handleHarvestVineyard}
                           className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded"
-                          disabled={loading || selectedStorageLocations.length === 0}
+                          disabled={loading || selectedStorageLocations.length === 0 || harvestingProgress.hasActivities}
                         >
-                          {loading ? 'Processing...' : 'Start Harvest'}
+                          {loading ? 'Processing...' : (harvestingProgress.hasActivities ? 'Harvesting...' : 'Start Harvest')}
                         </button>
                       </li>
                     </>
@@ -463,11 +481,11 @@ const VineyardView: React.FC = () => {
                 <div>
                   <p className="text-gray-600 mb-4">This vineyard is not planted yet.</p>
                   <button
-                    onClick={handlePlantVineyard}
+                    onClick={handleOpenPlantingModal}
                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                    disabled={loading}
+                    disabled={loading || plantingProgress.hasActivities}
                   >
-                    {loading ? 'Processing...' : 'Plant Vineyard'}
+                    {loading ? 'Processing...' : (plantingProgress.hasActivities ? 'Planting...' : 'Plant Vineyard')}
                   </button>
                 </div>
               )}
@@ -527,6 +545,17 @@ const VineyardView: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* --- Planting Modal --- */}
+      {showPlantingModal && selectedVineyard && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+           <PlantVineyardOptionsModal
+             vineyard={selectedVineyard}
+             onClose={handleClosePlantingModal}
+             onSubmit={handlePlantVineyardSubmit}
+           />
         </div>
       )}
 
