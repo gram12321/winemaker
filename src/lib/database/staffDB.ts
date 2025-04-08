@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import { Staff } from '../../gameState';
 import { StaffTeam } from '../../services/staffService';
@@ -154,6 +154,66 @@ export const clearStaffLocalStorage = (): void => {
   localStorage.removeItem('staffTeams');
 };
 
+/**
+ * Delete all staff from Firestore
+ * @returns Promise resolving to true if successful, false otherwise
+ */
+export const deleteAllStaff = async (): Promise<boolean> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, STAFF_COLLECTION));
+    const deletePromises = querySnapshot.docs.map(docSnapshot => {
+      return deleteDoc(docSnapshot.ref);
+    });
+    
+    await Promise.all(deletePromises);
+    console.log(`Deleted ${deletePromises.length} staff records from Firestore`);
+    return true;
+  } catch (error) {
+    console.error('Error deleting all staff:', error);
+    return false;
+  }
+};
+
+/**
+ * Delete all staff teams from Firestore
+ * @returns Promise resolving to true if successful, false otherwise
+ */
+export const deleteAllTeams = async (): Promise<boolean> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, TEAMS_COLLECTION));
+    const deletePromises = querySnapshot.docs.map(docSnapshot => {
+      return deleteDoc(docSnapshot.ref);
+    });
+    
+    await Promise.all(deletePromises);
+    console.log(`Deleted ${deletePromises.length} team records from Firestore`);
+    return true;
+  } catch (error) {
+    console.error('Error deleting all teams:', error);
+    return false;
+  }
+};
+
+/**
+ * Delete all staff assignments from Firestore
+ * @returns Promise resolving to true if successful, false otherwise
+ */
+export const deleteAllStaffAssignments = async (): Promise<boolean> => {
+  try {
+    const querySnapshot = await getDocs(collection(db, STAFF_ASSIGNMENTS_COLLECTION));
+    const deletePromises = querySnapshot.docs.map(docSnapshot => {
+      return deleteDoc(docSnapshot.ref);
+    });
+    
+    await Promise.all(deletePromises);
+    console.log(`Deleted ${deletePromises.length} staff assignment records from Firestore`);
+    return true;
+  } catch (error) {
+    console.error('Error deleting all staff assignments:', error);
+    return false;
+  }
+};
+
 export default {
   saveStaffToDb,
   loadAllStaffFromDb,
@@ -163,5 +223,8 @@ export default {
   loadTeamsFromDb,
   saveStaffAssignmentsToDb,
   loadStaffAssignmentsFromDb,
-  clearStaffLocalStorage
+  clearStaffLocalStorage,
+  deleteAllStaff,
+  deleteAllTeams,
+  deleteAllStaffAssignments
 }; 

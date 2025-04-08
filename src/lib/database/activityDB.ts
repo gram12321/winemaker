@@ -298,4 +298,25 @@ export async function removeActivityFromDb(activityId: string): Promise<boolean>
   }
 }
 
-export default { initializeActivitySystem, saveActivityToDb, updateActivityInDb, loadActivityFromDb, loadAllActivitiesFromDb, removeActivityFromDb };
+/**
+ * Delete all activities from Firestore for all users
+ * Admin function that bypasses user checks
+ * @returns Promise resolving to true if successful, false otherwise
+ */
+export async function deleteAllActivitiesFromDb(): Promise<boolean> {
+  try {
+    const querySnapshot = await getDocs(collection(db, ACTIVITIES_COLLECTION));
+    const deletePromises = querySnapshot.docs.map(docSnapshot => {
+      return deleteDoc(docSnapshot.ref);
+    });
+    
+    await Promise.all(deletePromises);
+    console.log(`[ActivityDB] Deleted ${deletePromises.length} activities from Firestore`);
+    return true;
+  } catch (error) {
+    console.error('[ActivityDB] Error deleting all activities:', error);
+    return false;
+  }
+}
+
+export default { initializeActivitySystem, saveActivityToDb, updateActivityInDb, loadActivityFromDb, loadAllActivitiesFromDb, removeActivityFromDb, deleteAllActivitiesFromDb };

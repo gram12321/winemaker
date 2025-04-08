@@ -7,6 +7,8 @@ import { AlertCircle } from 'lucide-react';
 import { clearGameStorage } from '../lib/database/localStorageDB';
 import { deleteAllCompanies } from '../lib/database/companyDB';
 import { saveGameState } from '../lib/database/gameStateDB';
+import { deleteAllActivitiesFromDb } from '../lib/database/activityDB';
+import { deleteAllStaff, deleteAllTeams, deleteAllStaffAssignments } from '../lib/database/staffDB';
 
 interface AdminDashboardProps {
   view: string;
@@ -43,15 +45,31 @@ export default function AdminDashboard({ view }: AdminDashboardProps) {
   };
 
   const clearFirestore = async () => {
-    if (!confirm('Are you sure you want to delete all companies from Firestore?')) return;
+    if (!confirm('Are you sure you want to delete all data from Firestore? This will remove ALL companies, activities, staff, and related data.')) return;
     
     try {
       setIsLoading(prev => ({ ...prev, clearFirestore: true }));
       
-      // Delete all companies using our new service
-      await deleteAllCompanies();
+      // Delete all data from different collections
+      const results = await Promise.all([
+        deleteAllCompanies(),
+        deleteAllActivitiesFromDb(),
+        deleteAllStaff(),
+        deleteAllTeams(),
+        deleteAllStaffAssignments()
+      ]);
       
-      setMessage({ type: 'success', text: 'Firestore data cleared successfully.' });
+      // Check if all operations were successful
+      const allSuccessful = results.every(result => result === true);
+      
+      if (allSuccessful) {
+        setMessage({ type: 'success', text: 'All Firestore data cleared successfully.' });
+      } else {
+        setMessage({ 
+          type: 'error', 
+          text: 'Some Firestore collections could not be cleared. Check console for details.' 
+        });
+      }
     } catch (error) {
       console.error('Error clearing Firestore:', error);
       setMessage({ type: 'error', text: 'Error clearing Firestore data.' });
