@@ -1,6 +1,6 @@
 import { Staff } from '@/gameState';
 import { REGION_ALTITUDE_RANGES } from '@/lib/core/constants/vineyardConstants';
-import { allResources } from '@/lib/game/resource';
+import { allResources } from './resource';
 
 // Work activity categories
 export enum WorkCategory {

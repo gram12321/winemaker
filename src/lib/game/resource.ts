@@ -1,9 +1,8 @@
 // src/lib/game/resource.ts
-// Removed unused import
+// Remove unused imports
 // import { getColorClass } from '@/lib/core/utils/formatUtils';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
-import { GameDate } from '@/lib/core/constants/gameConstants';
-import { WineBatch } from '@/gameState'; // Assuming WineBatch is defined here or imported
+
 
 // Define the structure for wine characteristics
 interface WineCharacteristics {
