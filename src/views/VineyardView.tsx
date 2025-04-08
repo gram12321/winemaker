@@ -170,8 +170,14 @@ const VineyardView: React.FC = () => {
   // Get the work values
   const harvestingWorkValues = getHarvestingWorkValues();
 
-  console.log(`[VineyardView] Using planting work values: ${plantingWorkValues.appliedWork}/${plantingWorkValues.totalWork}`);
-  console.log(`[VineyardView] Using harvesting work values: ${harvestingWorkValues.appliedWork}/${harvestingWorkValues.totalWork}`);
+  // Only log if there are actual activities
+  if (plantingProgress.hasActivities) {
+    console.log(`[VineyardView] Using planting work values: ${plantingWorkValues.appliedWork}/${plantingWorkValues.totalWork}`);
+  }
+  
+  if (harvestingProgress.hasActivities) {
+    console.log(`[VineyardView] Using harvesting work values: ${harvestingWorkValues.appliedWork}/${harvestingWorkValues.totalWork}`);
+  }
 
   // Handle adding a new vineyard using the vineyard service
   const handleAddVineyard = displayManager.createActionHandler(async () => {
