@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { getGameState, WineBatch } from '../gameState';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import { consoleService } from '../components/layout/Console';
-import { formatGameDate, GameDate } from '../lib/core/constants';
+import { formatGameDate } from '../lib/core/constants';
 
 const InventoryView: React.FC = () => {
   useDisplayUpdate();

@@ -2,15 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import staffService, { Staff, StaffTeam, StaffSearchOptions } from '../services/staffService';
 import { StaffSearch } from '../components/staff';
-import { 
-  getActivitiesForTarget, 
-  getAllActivities, 
-  startActivityWithDisplayState,
-  assignStaffWithDisplayState,
-  setActivityCompletionCallback,
-  getActivityProgressFromDisplayState,
-  cancelActivityWithDisplayState
-} from '../lib/game/activityManager';
+import { getAllActivities, startActivityWithDisplayState, assignStaffWithDisplayState, setActivityCompletionCallback, getActivityProgressFromDisplayState, cancelActivityWithDisplayState } from '../lib/game/activityManager';
 import displayManager from '../lib/game/displayManager';
 import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';

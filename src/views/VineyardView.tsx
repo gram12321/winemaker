@@ -4,13 +4,7 @@ import displayManager from '../lib/game/displayManager';
 import { getGameState } from '../gameState';
 import { Vineyard } from '../lib/game/vineyard';
 import { consoleService } from '../components/layout/Console';
-import { 
-  getVineyards, 
-  addVineyard, 
-  plantVineyard, 
-  harvestVineyard,
-  calculateVineyardYield
-} from '../services/vineyardService';
+import { getVineyards, addVineyard, plantVineyard, harvestVineyard, calculateVineyardYield } from '../services/vineyardService';
 import { getActivitiesForTarget, getTargetProgress, getActivityById } from '../lib/game/activityManager';
 import { WorkCategory } from '../lib/game/workCalculator';
 import StorageSelector from '../components/buildings/StorageSelector';

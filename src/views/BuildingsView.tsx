@@ -1,31 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  BuildingType, 
-  BUILDING_CONFIG 
-} from '@/lib/core/constants';
+import React, { useState } from 'react';
+import { BuildingType, BUILDING_CONFIG } from '@/lib/core/constants';
 import { useDisplayUpdate } from '@/lib/game/displayManager';
 import { getGameState } from '@/gameState';
-
 import { consoleService } from '@/components/layout/Console';
-import { 
-  loadBuildings,
-  deserializeBuilding
-} from '@/lib/database/buildingDB';
-import {
-  startBuildingConstruction,
-  upgradeBuilding
-} from '@/services/buildingService';
-
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle
-} from '@/components/ui/card';
+import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingDB';
+import { startBuildingConstruction, upgradeBuilding } from '@/services/buildingService';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BuildingDetailsPanel from '@/components/buildings/BuildingDetailsPanel';
 
 /**
