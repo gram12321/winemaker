@@ -97,7 +97,6 @@ export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
 export async function initializeActivitySystem(): Promise<void> {
   try {
     const activities = await loadAllActivitiesFromDb();
-    console.log('[ActivityDB] Loaded activities:', activities);
     
     // Filter activities with targetId for entity-bound activities
     const targetedActivities = activities.filter(a => a.targetId);
@@ -121,8 +120,7 @@ export async function initializeActivitySystem(): Promise<void> {
       
       // Set up callbacks for activities with targets
       for (const activity of targetedActivities) {
-        console.log(`[ActivityDB] Restoring activity: ${activity.id} of type ${activity.category} for target ${activity.targetId}`);
-        
+
         // Register appropriate callback based on activity category and target type
         if (activity.targetId && services.vineyard) {
           const { updateVineyard, getVineyardById } = services.vineyard;
@@ -140,17 +138,13 @@ export async function initializeActivitySystem(): Promise<void> {
               if (workMatch) {
                 const appliedWork = parseInt(workMatch[1]);
                 const totalWork = parseInt(workMatch[2]);
-                
-                console.log(`[ActivityDB] Found existing progress in entity ${activity.targetId}: ${appliedWork}/${totalWork}`);
-                
+               
                 // Update activity with the values from entity status (don't override totalWork if it's already set)
                 activity.appliedWork = appliedWork;
                 if (totalWork > 0 && activity.totalWork === 0) {
                   activity.totalWork = totalWork;
                 }
-                
-                console.log(`[ActivityDB] Updated activity ${activity.id} with progress: ${activity.appliedWork}/${activity.totalWork}`);
-              } else {
+             } else {
                 // Fallback to percentage format
                 const percentMatch = vineyard.status.match(percentRegex);
                 if (percentMatch) {
@@ -185,8 +179,7 @@ export async function initializeActivitySystem(): Promise<void> {
         ...gameState,
         activities: activities
       });
-      
-      console.log(`[ActivityDB] Restored ${activities.length} activities with callbacks`);
+
     } else {
       updateGameState({
         activities: []
