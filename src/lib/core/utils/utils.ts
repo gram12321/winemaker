@@ -7,12 +7,23 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Returns a CSS class based on a value (0-1) for color coding.
- * Requires corresponding CSS classes (e.g., .color-class-0 to .color-class-9)
+ * Returns a Tailwind CSS text color class based on a value (0-1).
  */
 export function getColorClass(value: number): string {
   const level = Math.max(0, Math.min(9, Math.floor(value * 10)));
-  return `color-class-${level}`;
+  const colorMap: Record<number, string> = {
+    0: 'text-red-600',
+    1: 'text-red-500',
+    2: 'text-orange-500',
+    3: 'text-amber-500',
+    4: 'text-yellow-500',
+    5: 'text-lime-500',
+    6: 'text-lime-600',
+    7: 'text-green-600',
+    8: 'text-green-700',
+    9: 'text-green-800',
+  };
+  return colorMap[level] || 'text-gray-500'; // Default to gray if level is unexpected
 }
 
 /**
