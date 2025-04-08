@@ -43,7 +43,7 @@ export async function saveWineBatch(
  * @param id The ID of the wine batch to retrieve
  * @returns The wine batch or null if not found
  */
-export function getWineBatch(id: string): WineBatch | null {
+export function getWineBatchFromDB(id: string): WineBatch | null {
   try {
     const gameState = getGameState();
     return gameState.wineBatches.find(batch => batch.id === id) || null;
@@ -73,7 +73,7 @@ export function getAllWineBatches(): WineBatch[] {
  * @param saveToDb Whether to also save to the database
  * @returns True if removed, false if not found or failed
  */
-export async function removeWineBatch(
+export async function removeWineBatchFromDB(
   id: string,
   saveToDb: boolean = true
 ): Promise<boolean> {

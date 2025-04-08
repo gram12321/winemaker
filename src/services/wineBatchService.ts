@@ -5,11 +5,7 @@ import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 import { loadBuildings, deserializeBuilding } from '@/lib/database/buildingDB';
 import { consoleService } from '@/components/layout/Console';
 import { saveGameState } from '@/lib/database/gameStateDB';
-import { 
-  saveWineBatch as saveWineBatchToDB, 
-  getWineBatch as getWineBatchFromDB, 
-  removeWineBatch as removeWineBatchFromDB 
-} from '@/lib/database/wineBatchDB';
+import { getWineBatchFromDB, removeWineBatchFromDB } from '@/lib/database/wineBatchDB';
 import { Season } from '@/lib/core/constants';
 
 /**
