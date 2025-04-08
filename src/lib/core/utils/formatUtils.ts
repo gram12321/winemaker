@@ -1,4 +1,3 @@
-
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -25,9 +24,14 @@ const countryToFlagCode: Record<string, string> = {
 
 export const getNationalityFlag = (nationality: string): string => {
   const countryCode = countryToFlagCode[nationality] || 'eu';
-  return `flag-icon flag-icon-${countryCode}`;
+  return countryCode;
 };
 
+export function getFlagIconClass(countryName: string): string {
+  const countryCode = countryToFlagCode[countryName];
+  return countryCode || '';
+}
+
 export const getFallbackFlag = (): string => {
-  return 'flag-icon flag-icon-eu';
+  return 'eu';
 };

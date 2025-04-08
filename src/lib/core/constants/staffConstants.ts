@@ -12,15 +12,22 @@ export const BASE_WEEKLY_WAGE = 500;
 export const SKILL_WAGE_MULTIPLIER = 1000;
 export const SPECIALIZATION_WAGE_BONUS = 0.2;
 
-// Skill Levels
+// Skill Levels - Updated to match old structure more closely
 export const SkillLevels = {
-  NOVICE: { value: 0.1, label: 'Novice', formattedName: 'Fresh Off the Vine' },
-  APPRENTICE: { value: 0.3, label: 'Apprentice', formattedName: 'Growing Experience' },
-  INTERMEDIATE: { value: 0.5, label: 'Intermediate', formattedName: 'Seasoned Worker' },
-  ADVANCED: { value: 0.7, label: 'Advanced', formattedName: 'Master of the Craft' },
-  EXPERT: { value: 0.9, label: 'Expert', formattedName: 'Wine Sage' },
-  LEGENDARY: { value: 1.0, label: 'Legendary', formattedName: 'Living Legend' }
+  0.1: { name: 'Fresh Off the Vine', modifier: 0.2, costMultiplier: 1 },
+  0.2: { name: 'Cork Puller', modifier: 0.3, costMultiplier: 1.5 },
+  0.3: { name: 'Cellar Hand', modifier: 0.4, costMultiplier: 2 },
+  0.4: { name: 'Vine Whisperer', modifier: 0.5, costMultiplier: 3 },
+  0.5: { name: 'Grape Sage', modifier: 0.6, costMultiplier: 4 },
+  0.6: { name: 'Vintage Virtuoso', modifier: 0.7, costMultiplier: 6 },
+  0.7: { name: 'Wine Wizard', modifier: 0.8, costMultiplier: 8 },
+  0.8: { name: 'Terroir Master', modifier: 0.85, costMultiplier: 12 },
+  0.9: { name: 'Vineyard Virtuoso', modifier: 0.9, costMultiplier: 16 },
+  1.0: { name: 'Living Legend', modifier: 0.95, costMultiplier: 25 }
 };
+
+// We might need to adjust the getSkillLevelInfo function in staffService.ts
+// or create a new one in utils.ts based on this structure.
 
 // Specialized Roles
 export const SpecializedRoles = {

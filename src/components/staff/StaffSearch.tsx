@@ -1,5 +1,6 @@
 import React from 'react';
-import staffService, { StaffSearchOptions, getSkillLevelInfo, SpecializedRoles, calculateSearchCost, calculatePerCandidateCost, Staff as ServiceStaff } from '../../services/staffService';
+import { StaffSearchOptions, SpecializedRoles, calculateSearchCost, calculatePerCandidateCost, Staff as ServiceStaff } from '../../services/staffService';
+import { getSkillLevelInfo } from '../../lib/core/utils/utils';
 import { getGameState, Player } from '../../gameState';
 import displayManager from '../../lib/game/displayManager';
 
@@ -144,9 +145,11 @@ const StaffSearch: React.FC<StaffSearchProps> = ({
 };
 
 interface SkillLevelInfo {
-  label: string;
-  formattedName: string;
-  value: number;
+  name: string;
+  modifier: number;
+  costMultiplier: number;
+  levelKey: number;
+  colorClass: string;
 }
 
 interface SearchFormProps {
@@ -223,7 +226,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
               Minimum Skill Level
             </label>
             <span className="text-sm font-medium">
-              {currentSkillInfo.formattedName}
+              {currentSkillInfo.name}
             </span>
           </div>
           <input
@@ -353,7 +356,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
                 }
               </p>
               <p className="text-sm">
-                <span className="font-medium">Skill Level:</span> {getSkillLevelInfo(candidate.skillLevel).formattedName}
+                <span className="font-medium">Skill Level:</span> {getSkillLevelInfo(candidate.skillLevel).name}
               </p>
             </div>
             

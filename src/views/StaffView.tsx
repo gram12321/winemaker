@@ -8,6 +8,9 @@ import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';
 import { ActivityProgressBar } from '../components/activities';
 import { WorkCategory } from '../lib/game/workCalculator';
+// Import utils for formatting and flags
+import { formatNumber, getSkillLevelInfo } from '@/lib/core/utils/utils'; 
+import { getNationalityFlag } from '@/lib/core/utils/formatUtils';
 
 // Create display state for staff activities
 displayManager.createDisplayState('staffSearchActivity', {
@@ -309,6 +312,8 @@ const StaffView: React.FC = () => {
               ) : (
                 staffService.getAllStaff().map(staff => {
                   const staffTeam = getStaffTeam(staff.id);
+                  // Get skill level info including color
+                  const skillInfo = getSkillLevelInfo(staff.skillLevel);
                   return (
                     <div
                       key={staff.id}
@@ -328,11 +333,16 @@ const StaffView: React.FC = () => {
                               : 'General Worker'}
                           </p>
                         </div>
-                        <span className="text-wine font-medium">${staff.wage}/mo</span>
+                        <span className="text-wine font-medium">€{formatNumber(staff.wage)}/mo</span>
                       </div>
                       <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                        <p><span className="font-medium">Skill Level:</span> {staffService.getSkillLevelInfo(staff.skillLevel).formattedName}</p>
-                        <p><span className="font-medium">Nationality:</span> {staff.nationality}</p>
+                        <p><span className="font-medium">Skill Level:</span> 
+                          <span className={skillInfo.colorClass}>{skillInfo.name}</span>
+                        </p>
+                        <p><span className="font-medium">Nationality:</span> 
+                          <span className={`fi ${getNationalityFlag(staff.nationality)} mr-1`}></span>
+                          {staff.nationality}
+                        </p>
                         <p className="col-span-2"><span className="font-medium">Team:</span> {staffTeam ? staffTeam.name : 'Not assigned to any team'}</p>
                       </div>
                     </div>
@@ -358,9 +368,12 @@ const StaffView: React.FC = () => {
                 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="space-y-2">
-                    <p><span className="font-medium">Nationality:</span> {selectedStaff.nationality}</p>
+                    <p><span className="font-medium">Nationality:</span> 
+                      <span className={`fi ${getNationalityFlag(selectedStaff.nationality)} mr-1`}></span>
+                      {selectedStaff.nationality}
+                    </p>
                     <p><span className="font-medium">Hire Date:</span> Week {selectedStaff.hireDate.week}, {selectedStaff.hireDate.season} {selectedStaff.hireDate.year}</p>
-                    <p><span className="font-medium">Monthly Wage:</span> ${selectedStaff.wage}</p>
+                    <p><span className="font-medium">Monthly Wage:</span> €{formatNumber(selectedStaff.wage)}</p>
                     <p><span className="font-medium">Specializations:</span> {
                       selectedStaff.specializations?.length > 0
                         ? selectedStaff.specializations.map(spec => staffService.SpecializedRoles[spec].title).join(', ')

@@ -5,6 +5,7 @@ import { getActivityById } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
 import { getNationalityFlag } from '../../lib/core/utils/formatUtils';
 import { toast } from '../../lib/ui/toast';
+import { formatNumber } from '@/lib/core/utils/utils';
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -208,7 +209,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
             <div 
               key={i}
               className="h-full bg-wine-light opacity-60 border-r border-gray-100"
-              title={`Week ${i + 1}: ${Math.round(weekWork)} units`}
+              title={`Week ${i + 1}: ${formatNumber(weekWork, 0)} units`}
             />
           );
         })}
@@ -267,10 +268,10 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
 
         <div className="grid grid-cols-3 gap-4 mb-3 text-sm">
           <div>
-            <span className="font-medium">Work per Week:</span> {workProgress.workPerWeek} units
+            <span className="font-medium">Work per Week:</span> {formatNumber(workProgress.workPerWeek, 0)} units
           </div>
           <div>
-            <span className="font-medium">Work Progress:</span> {workProgress.appliedWork}/{workProgress.totalWork} units
+            <span className="font-medium">Work Progress:</span> {formatNumber(workProgress.appliedWork, 0)}/{formatNumber(workProgress.totalWork, 0)} units
           </div>
           <div>
             <span className="font-medium">Weeks to Complete:</span> {workProgress.weeksToComplete}
@@ -318,7 +319,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                 <th className="px-4 py-2 text-left">Name</th>
                 <th className="px-4 py-2 text-left">Nationality</th>
                 <th className="px-4 py-2 text-left">Skills</th>
-                <th className="px-4 py-2 text-right">Wage</th>
+                <th className="px-4 py-2 text-right">Wage (€/mo)</th>
                 <th className="px-4 py-2 text-center">
                   <input
                     type="checkbox"
@@ -334,13 +335,13 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
                 <tr key={member.id} className="border-t border-gray-100">
                   <td className="px-4 py-2">{member.name}</td>
                   <td className="px-4 py-2">
-                    <span className={`flag-icon ${getNationalityFlag(member.nationality)}`}></span>
+                    <span className={`fi ${getNationalityFlag(member.nationality)} mr-1`}></span>
                     {" "}{member.nationality}
                   </td>
                   <td className="px-4 py-2">
                     {renderSkillBars(member)}
                   </td>
-                  <td className="px-4 py-2 text-right">€{member.wage.toLocaleString()}</td>
+                  <td className="px-4 py-2 text-right">€{formatNumber(member.wage)}</td>
                   <td className="px-4 py-2 text-center">
                     <input
                       type="checkbox"

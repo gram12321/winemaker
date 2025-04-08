@@ -2,6 +2,7 @@ import React from 'react';
 import { WorkCategory } from '@/lib/game/workCalculator';
 import { getActivityById } from '@/lib/game/activityManager';
 import { useDisplayUpdate } from '@/lib/game/displayManager';
+import { formatNumber } from '@/lib/core/utils/utils';
 
 // Interface for the activity progress bar props
 interface ActivityProgressBarProps {
@@ -137,7 +138,7 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
       
       <div className="flex justify-between items-center">
         <div className="text-xs text-gray-600">
-          {Math.round(actualAppliedWork)} / {Math.round(actualTotalWork)} work points
+          {formatNumber(actualAppliedWork, 0)} / {formatNumber(actualTotalWork, 0)} work points
         </div>
         
         {onAssignStaff && (

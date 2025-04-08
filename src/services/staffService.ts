@@ -95,21 +95,6 @@ export interface Staff {
   workforce: number;
 }
 
-// Staff level utility functions
-export function getSkillLevelInfo(skillLevel: number) {
-  // Find the closest skill level
-  const levels = Object.values(SkillLevels);
-  const closest = levels.reduce((prev, curr) => {
-    return Math.abs(curr.value - skillLevel) < Math.abs(prev.value - skillLevel) ? curr : prev;
-  });
-  
-  return {
-    label: closest.label,
-    formattedName: closest.formattedName,
-    value: closest.value
-  };
-}
-
 // Helper function to get the current game date from gameState
 function getCurrentGameDate() {
   const gameState = getGameState();
@@ -317,8 +302,7 @@ export interface StaffSearchOptions {
 export function calculateSearchCost(options: StaffSearchOptions): number {
   const { numberOfCandidates, skillLevel, specializations } = options;
   const baseCost = 2000;
-  const skillInfo = getSkillLevelInfo(skillLevel);
-  const skillMultiplier = skillInfo.value;
+  const skillMultiplier = skillLevel;
   
   // Exponential scaling based on candidates and skill
   const candidateScaling = Math.pow(numberOfCandidates, 1.5);
@@ -749,4 +733,4 @@ export function completeHiringProcess(activityId: string): Staff | null {
   return addedStaff;
 }
 
-export default { createStaff, addStaff, removeStaff, updateStaff, getStaffById, getAllStaff, generateRandomSkills, calculateWage, getSkillLevelInfo, createTeam, saveTeam, loadTeams, assignStaffToTeam, calculateSearchCost, calculatePerCandidateCost, generateStaffCandidates, SpecializedRoles, SkillLevels, getAssignedStaffToActivity, assignStaffToActivityById, getStaffByTeam, assignTeamToActivity, calculateActivityStaffEfficiency, mapCategoryToSkill, mapSpecializationToCategory, initializeDefaultTeams, startStaffSearch, startHiringProcess, completeHiringProcess };
+export default { createStaff, addStaff, removeStaff, updateStaff, getStaffById, getAllStaff, generateRandomSkills, calculateWage, createTeam, saveTeam, loadTeams, assignStaffToTeam, calculateSearchCost, calculatePerCandidateCost, generateStaffCandidates, SpecializedRoles, SkillLevels, getAssignedStaffToActivity, assignStaffToActivityById, getStaffByTeam, assignTeamToActivity, calculateActivityStaffEfficiency, mapCategoryToSkill, mapSpecializationToCategory, initializeDefaultTeams, startStaffSearch, startHiringProcess, completeHiringProcess };

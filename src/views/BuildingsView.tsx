@@ -8,6 +8,7 @@ import { startBuildingConstruction, upgradeBuilding } from '@/services/buildingS
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BuildingDetailsPanel from '@/components/buildings/BuildingDetailsPanel';
+import { formatNumber } from '@/lib/core/utils/utils';
 
 /**
  * BuildingsView Component
@@ -73,11 +74,6 @@ const BuildingsView: React.FC = () => {
         [buildingType]: false
       });
     }
-  };
-  
-  // Function to format currency
-  const formatCurrency = (amount: number): string => {
-    return `€${amount.toLocaleString()}`;
   };
   
   return (
@@ -154,7 +150,7 @@ const BuildingsView: React.FC = () => {
                           
                           <div className="flex justify-between">
                             <span>Upgrade Cost:</span>
-                            <span className="font-medium">{formatCurrency(upgradeCost)}</span>
+                            <span className="font-medium">€{formatNumber(upgradeCost)}</span>
                           </div>
                         </>
                       )}
@@ -162,7 +158,7 @@ const BuildingsView: React.FC = () => {
                       {!existingBuilding && (
                         <div className="flex justify-between">
                           <span>Build Cost:</span>
-                          <span className="font-medium">{formatCurrency(buildCost)}</span>
+                          <span className="font-medium">€{formatNumber(buildCost)}</span>
                         </div>
                       )}
                     </div>

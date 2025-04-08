@@ -2,17 +2,20 @@ import React from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import displayManager from '../lib/game/displayManager';
 import { getGameState } from '../gameState';
-import { Vineyard } from '../lib/game/vineyard';
+import { Vineyard, calculateVineyardYield, calculateLandValue } from '../lib/game/vineyard';
 import { consoleService } from '../components/layout/Console';
-import { getVineyards, addVineyard, plantVineyard, harvestVineyard, calculateVineyardYield } from '../services/vineyardService';
+import { getVineyards, addVineyard, plantVineyard, harvestVineyard } from '../services/vineyardService';
 import { getActivitiesForTarget, getTargetProgress, getActivityById } from '../lib/game/activityManager';
 import { WorkCategory } from '../lib/game/workCalculator';
 import StorageSelector from '../components/buildings/StorageSelector';
 import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { BASELINE_VINE_DENSITY, formatGameDate } from '../lib/core/constants/gameConstants';
+import { ASPECT_FACTORS } from '../lib/core/constants/vineyardConstants';
 import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
 import PlantVineyardOptionsModal from '../components/vineyards/PlantVineyardOptionsModal';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
+import { getColorClass, formatNumber } from '@/lib/core/utils/utils';
+import { getFlagIconClass } from '@/lib/core/utils/formatUtils';
 
 // Display state type definition
 interface VineyardViewDisplayState {
@@ -357,6 +360,7 @@ const VineyardView: React.FC = () => {
                 <div className="p-4">
                   <h3 className="text-lg font-semibold">{vineyard.name}</h3>
                   <div className="text-sm text-gray-600 mt-1">
+                    <span className={`fi ${getFlagIconClass(vineyard.country)} mr-2`}></span>
                     {vineyard.region}, {vineyard.country}
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
@@ -401,10 +405,19 @@ const VineyardView: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold mb-2">Location Details</h3>
               <ul className="space-y-2">
-                <li><span className="font-medium">Region:</span> {selectedVineyard.region}, {selectedVineyard.country}</li>
+                <li>
+                  <span className="font-medium">Region:</span>
+                  <span className={`fi ${getFlagIconClass(selectedVineyard.country)} ml-2 mr-1`}></span>
+                  {selectedVineyard.region}, {selectedVineyard.country}
+                </li>
                 <li><span className="font-medium">Size:</span> {selectedVineyard.acres.toFixed(1)} acres</li>
                 <li><span className="font-medium">Altitude:</span> {selectedVineyard.altitude}m</li>
-                <li><span className="font-medium">Aspect:</span> {selectedVineyard.aspect}</li>
+                <li>
+                  <span className="font-medium">Aspect:</span> {selectedVineyard.aspect}
+                  <span className={`ml-2 ${getColorClass(ASPECT_FACTORS[selectedVineyard.aspect] ?? 0)}`}>
+                    ({((ASPECT_FACTORS[selectedVineyard.aspect] ?? 0) * 100).toFixed(0)}%)
+                  </span>
+                </li>
                 <li>
                   <span className="font-medium">Soil:</span>{' '}
                   {selectedVineyard.soil.join(', ')}
@@ -433,7 +446,7 @@ const VineyardView: React.FC = () => {
                   </li>
                   <li><span className="font-medium">Planted Grape:</span> {selectedVineyard.grape}</li>
                   <li><span className="font-medium">Vine Age:</span> {selectedVineyard.vineAge} {selectedVineyard.vineAge === 1 ? 'year' : 'years'}</li>
-                  <li><span className="font-medium">Planted Density:</span> {selectedVineyard.density.toLocaleString()} vines per acre</li>
+                  <li><span className="font-medium">Planted Density:</span> {formatNumber(selectedVineyard.density)} vines per acre</li>
                   <li>
                     <span className="font-medium">Health:</span>{' '}
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
@@ -452,7 +465,7 @@ const VineyardView: React.FC = () => {
                       ></div>
                     </div>
                   </li>
-                  <li><span className="font-medium">Expected Yield:</span> {selectedVineyard.status === 'Harvested' ? '0 kg (Harvested)' : `${Math.round(calculateVineyardYield(selectedVineyard)).toLocaleString()} kg`}</li>
+                  <li><span className="font-medium">Expected Yield:</span> {selectedVineyard.status === 'Harvested' ? '0 kg (Harvested)' : `${formatNumber(calculateVineyardYield(selectedVineyard))} kg`}</li>
                   
                   {/* Harvest controls */}
                   {selectedVineyard.status !== 'Harvested' && selectedVineyard.ripeness > 0.3 && (
@@ -529,11 +542,13 @@ const VineyardView: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-blue-50 p-3 rounded">
                 <div className="text-sm text-gray-600">Land Value</div>
-                <div className="text-lg font-semibold">${selectedVineyard.landValue.toLocaleString()}</div>
+                <div className="text-lg font-semibold">${formatNumber(selectedVineyard.landValue)}</div>
               </div>
               <div className="bg-green-50 p-3 rounded">
                 <div className="text-sm text-gray-600">Prestige</div>
-                <div className="text-lg font-semibold">{Math.round(selectedVineyard.vineyardPrestige * 100)}/100</div>
+                <div className={`text-lg font-semibold ${getColorClass(selectedVineyard.vineyardPrestige)}`}>
+                    {formatNumber(selectedVineyard.vineyardPrestige * 100)}/100
+                </div>
               </div>
               <div className="bg-amber-50 p-3 rounded">
                 <div className="text-sm text-gray-600">Annual Yield Factor</div>
