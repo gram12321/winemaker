@@ -427,6 +427,14 @@ function generateInitialCharacteristics(grapeType: GrapeVariety, quality: number
   
   // Adjust characteristics based on grape type
   switch (grapeType) {
+    case 'Barbera':
+      characteristics.sweetness = 0.3 + (quality * 0.1);
+      characteristics.acidity = 0.7 + (quality * 0.2);
+      characteristics.tannins = 0.4 + (quality * 0.2);
+      characteristics.body = 0.5 + (quality * 0.2);
+      characteristics.spice = 0.3 + (quality * 0.1);
+      characteristics.aroma = 0.4 + (quality * 0.2);
+      break;
     case 'Chardonnay':
       characteristics.sweetness = 0.4 + (quality * 0.2);
       characteristics.acidity = 0.6 + (quality * 0.2);
@@ -435,21 +443,21 @@ function generateInitialCharacteristics(grapeType: GrapeVariety, quality: number
       characteristics.tannins = 0.1 + (quality * 0.1);
       characteristics.spice = 0.2 + (quality * 0.2);
       break;
-    case 'Cabernet Sauvignon':
-      characteristics.sweetness = 0.2 + (quality * 0.1);
-      characteristics.acidity = 0.6 + (quality * 0.2);
-      characteristics.tannins = 0.7 + (quality * 0.2);
-      characteristics.body = 0.7 + (quality * 0.2);
-      characteristics.spice = 0.5 + (quality * 0.3);
-      characteristics.aroma = 0.5 + (quality * 0.3);
-      break;
-    case 'Merlot':
-      characteristics.sweetness = 0.3 + (quality * 0.2);
-      characteristics.acidity = 0.5 + (quality * 0.1);
-      characteristics.tannins = 0.6 + (quality * 0.2);
-      characteristics.body = 0.6 + (quality * 0.2);
+    case 'Pinot Noir':
+      characteristics.sweetness = 0.4 + (quality * 0.1);
+      characteristics.acidity = 0.65 + (quality * 0.2);
+      characteristics.tannins = 0.3 + (quality * 0.2);
+      characteristics.body = 0.4 + (quality * 0.2);
       characteristics.spice = 0.4 + (quality * 0.2);
-      characteristics.aroma = 0.5 + (quality * 0.3);
+      characteristics.aroma = 0.6 + (quality * 0.3);
+      break;
+    case 'Primitivo':
+      characteristics.sweetness = 0.5 + (quality * 0.2);
+      characteristics.acidity = 0.4 + (quality * 0.1);
+      characteristics.tannins = 0.6 + (quality * 0.2);
+      characteristics.body = 0.7 + (quality * 0.2);
+      characteristics.spice = 0.5 + (quality * 0.2);
+      characteristics.aroma = 0.6 + (quality * 0.3);
       break;
     case 'Sauvignon Blanc':
       characteristics.sweetness = 0.3 + (quality * 0.1);
@@ -459,9 +467,9 @@ function generateInitialCharacteristics(grapeType: GrapeVariety, quality: number
       characteristics.tannins = 0.1 + (quality * 0.1);
       characteristics.spice = 0.3 + (quality * 0.2);
       break;
-    // Add more grape varieties as needed
     default:
-      // Scale all characteristics with quality
+      // Fallback: Scale all characteristics with quality for unhandled cases (shouldn't happen)
+      console.warn(`[WineBatchService] Unhandled grape type in generateInitialCharacteristics: ${grapeType}. Applying default scaling.`);
       Object.keys(characteristics).forEach(key => {
         characteristics[key as keyof typeof characteristics] = 0.3 + (quality * 0.5);
       });
