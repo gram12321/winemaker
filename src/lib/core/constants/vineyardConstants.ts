@@ -156,4 +156,100 @@ export const REGION_PRESTIGE_RANKINGS: { [key: string]: number } = {
   "Jumilla, Spain": 0.39,
   "Rheinhessen, Germany": 0.37,
   "Puglia, Italy": 0.35
-}; 
+};
+
+// Grape Suitability Data (Migrated from names.js)
+export const GRAPE_SUITABILITY = {
+  Italy: {
+    Piedmont: { Barbera: 1.0, Chardonnay: 0.8, 'Pinot Noir': 0.6, Primitivo: 0.5, 'Sauvignon Blanc': 0.6 },
+    Tuscany: { Barbera: 0.9, Chardonnay: 0.7, 'Pinot Noir': 0.5, Primitivo: 0.7, 'Sauvignon Blanc': 0.7 },
+    Veneto: { Barbera: 0.85, Chardonnay: 0.75, 'Pinot Noir': 0.7, Primitivo: 0.6, 'Sauvignon Blanc': 0.8 },
+    Sicily: { Barbera: 0.8, Chardonnay: 0.6, 'Pinot Noir': 0.3, Primitivo: 0.8, 'Sauvignon Blanc': 0.5 },
+    Puglia: { Barbera: 0.9, Chardonnay: 0.65, 'Pinot Noir': 0.4, Primitivo: 1.0, 'Sauvignon Blanc': 0.4 }
+  },
+  France: {
+    Bordeaux: { Barbera: 0.7, Chardonnay: 0.8, 'Pinot Noir': 0.6, Primitivo: 0.6, 'Sauvignon Blanc': 0.9 },
+    "Burgundy (Bourgogne)": { Barbera: 0.4, Chardonnay: 1.0, 'Pinot Noir': 0.9, Primitivo: 0.3, 'Sauvignon Blanc': 0.7 },
+    Champagne: { Barbera: 0.2, Chardonnay: 0.9, 'Pinot Noir': 0.8, Primitivo: 0.2, 'Sauvignon Blanc': 0.6 },
+    "Loire Valley": { Barbera: 0.35, Chardonnay: 0.85, 'Pinot Noir': 0.7, Primitivo: 0.3, 'Sauvignon Blanc': 1.0 },
+    "Rhone Valley": { Barbera: 0.85, Chardonnay: 0.75, 'Pinot Noir': 0.5, Primitivo: 0.7, 'Sauvignon Blanc': 0.7 },
+    "Jura": { Barbera: 0.3, Chardonnay: 0.9, 'Pinot Noir': 0.8, Primitivo: 0.2, 'Sauvignon Blanc': 0.6 },
+  },
+  Spain: {
+    Rioja: { Barbera: 0.85, Chardonnay: 0.7, 'Pinot Noir': 0.4, Primitivo: 0.5, 'Sauvignon Blanc': 0.6 },
+    "Ribera del Duero": { Barbera: 0.8, Chardonnay: 0.6, 'Pinot Noir': 0.35, Primitivo: 0.4, 'Sauvignon Blanc': 0.5 },
+    Jumilla: { Barbera: 0.9, Chardonnay: 0.5, 'Pinot Noir': 0.3, Primitivo: 0.85, 'Sauvignon Blanc': 0.4 },
+    "La Mancha": { Barbera: 0.85, Chardonnay: 0.55, 'Pinot Noir': 0.25, Primitivo: 0.8, 'Sauvignon Blanc': 0.5 },
+    "Sherry (Jerez)": { Barbera: 0.8, Chardonnay: 0.5, 'Pinot Noir': 0.2, Primitivo: 0.7, 'Sauvignon Blanc': 0.4 },
+  },
+  "United States": {
+    "Napa Valley (California)": { Barbera: 0.9, Chardonnay: 1.0, 'Pinot Noir': 0.7, Primitivo: 0.85, 'Sauvignon Blanc': 0.8 },
+    "Sonoma County (California)": { Barbera: 0.85, Chardonnay: 0.95, 'Pinot Noir': 0.75, Primitivo: 0.8, 'Sauvignon Blanc': 0.7 },
+    "Willamette Valley (Oregon)": { Barbera: 0.4, Chardonnay: 0.85, 'Pinot Noir': 1.0, Primitivo: 0.3, 'Sauvignon Blanc': 0.6 },
+    "Finger Lakes (New York)": { Barbera: 0.3, Chardonnay: 0.7, 'Pinot Noir': 0.75, Primitivo: 0.2, 'Sauvignon Blanc': 0.5 },
+    "Central Coast (California)": { Barbera: 0.85, Chardonnay: 0.8, 'Pinot Noir': 0.6, Primitivo: 0.75, 'Sauvignon Blanc': 0.7 },
+  },
+  Germany: {
+    Mosel: { Barbera: 0.15, Chardonnay: 0.8, 'Pinot Noir': 1.0, Primitivo: 0.1, 'Sauvignon Blanc': 0.8 },
+    Rheingau: { Barbera: 0.2, Chardonnay: 0.85, 'Pinot Noir': 0.9, Primitivo: 0.15, 'Sauvignon Blanc': 0.85 },
+    Rheinhessen: { Barbera: 0.25, Chardonnay: 0.8, 'Pinot Noir': 0.85, Primitivo: 0.2, 'Sauvignon Blanc': 0.8 },
+    Pfalz: { Barbera: 0.3, Chardonnay: 0.75, 'Pinot Noir': 0.8, Primitivo: 0.25, 'Sauvignon Blanc': 0.75 },
+    Ahr: { Barbera: 0.1, Chardonnay: 0.7, 'Pinot Noir': 0.95, Primitivo: 0.1, 'Sauvignon Blanc': 0.6 },
+  },
+};
+
+// Real Price Range per Hectare (Migrated from names.js)
+export const REGION_REAL_PRICE_RANGES = {
+  "Burgundy (Bourgogne), France": [1000000, 10000000],
+  "Champagne, France": [500000, 2000000],
+  "Napa Valley (California), United States": [300000, 1000000],
+  "Bordeaux, France": [100000, 2000000],
+  "Tuscany, Italy": [80000, 1000000],
+  "Piedmont, Italy": [50000, 700000],
+  "Sonoma County (California), United States": [100000, 500000],
+  "Rheingau, Germany": [50000, 200000],
+  "Mosel, Germany": [30000, 150000],
+  "Rioja, Spain": [30000, 100000],
+  "Willamette Valley (Oregon), United States": [50000, 250000],
+  "Ribera del Duero, Spain": [30000, 80000],
+  "Central Coast (California), United States": [20000, 150000],
+  "Loire Valley, France": [20000, 80000],
+  "Rhone Valley, France": [30000, 120000],
+  "Pfalz, Germany": [15000, 60000],
+  "Veneto, Italy": [20000, 100000],
+  "Sherry (Jerez), Spain": [10000, 40000],
+  "Finger Lakes (New York), United States": [10000, 50000],
+  "Sicily, Italy": [10000, 60000],
+  "La Mancha, Spain": [5000, 30000],
+  "Ahr, Germany": [20000, 50000],
+  "Jumilla, Spain": [5000, 25000],
+  "Rheinhessen, Germany": [10000, 40000],
+  "Puglia, Italy": [5000, 30000],
+  "Jura, France": [25000, 45000], 
+};
+
+// --- Resource Definitions (Moved here from separate file plan) ---
+
+export interface Resource {
+  name: GrapeVariety;
+  naturalYield: number; // Base yield tendency (0-1 scale, higher is better)
+  fragile: number;      // How sensitive the resource is (0-1 scale, lower is more robust)
+}
+
+// Simple map for grape resource data 
+const grapeResourceData: Record<GrapeVariety, Resource> = {
+  "Barbera":        { name: "Barbera",        naturalYield: 0.7, fragile: 0.4 },
+  "Chardonnay":     { name: "Chardonnay",     naturalYield: 0.8, fragile: 0.6 },
+  "Pinot Noir":     { name: "Pinot Noir",     naturalYield: 0.6, fragile: 0.7 },
+  "Primitivo":      { name: "Primitivo",      naturalYield: 0.9, fragile: 0.3 },
+  "Sauvignon Blanc":{ name: "Sauvignon Blanc",naturalYield: 0.75, fragile: 0.5 },
+};
+
+/**
+ * Gets resource data for a given grape variety.
+ */
+export function getResourceByGrapeVariety(grapeName: GrapeVariety | null | undefined): Resource | undefined {
+  if (!grapeName) return undefined;
+  return grapeResourceData[grapeName];
+}
+// --- End Resource Definitions --- 

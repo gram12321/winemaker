@@ -1,5 +1,13 @@
 import { GameDate, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS, DEFAULT_VINEYARD_HEALTH, ORGANIC_CERTIFICATION_YEARS } from '@/lib/core/constants/gameConstants';
-import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS, REGION_PRESTIGE_RANKINGS } from '@/lib/core/constants/vineyardConstants';
+import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS, REGION_PRESTIGE_RANKINGS, GRAPE_SUITABILITY, REGION_REAL_PRICE_RANGES, getResourceByGrapeVariety } from '@/lib/core/constants/vineyardConstants';
+// Import name lists from staffConstants
+import { 
+  italianMaleNames, italianFemaleNames, 
+  germanMaleNames, germanFemaleNames, 
+  spanishMaleNames, spanishFemaleNames, 
+  frenchMaleNames, frenchFemaleNames, 
+  usMaleNames, usFemaleNames 
+} from '@/lib/core/constants/staffConstants';
 import { getGameState } from '@/gameState';
 
 // Vineyard interface
@@ -31,12 +39,16 @@ export interface Vineyard {
 }
 
 export function calculateVineyardYield(vineyard: Vineyard): number {
-  if (!vineyard.grape || vineyard.annualYieldFactor === 0 || vineyard.status === 'Harvested') {
+  // Get resource data
+  const resource = getResourceByGrapeVariety(vineyard.grape);
+  
+  if (!vineyard.grape || !resource || vineyard.annualYieldFactor === 0 || vineyard.status === 'Harvested') {
     return 0;
   }
 
   const densityModifier = vineyard.density / BASELINE_VINE_DENSITY;
-  const qualityMultiplier = (vineyard.ripeness + vineyard.vineyardHealth) / 2;
+  // Update quality multiplier to include naturalYield (as per old logic)
+  const qualityMultiplier = (vineyard.ripeness + resource.naturalYield + vineyard.vineyardHealth) / 3;
   let expectedYield = BASE_YIELD_PER_ACRE * vineyard.acres * qualityMultiplier * vineyard.annualYieldFactor * densityModifier;
   
   // Apply bonus multiplier if conventional
@@ -44,7 +56,8 @@ export function calculateVineyardYield(vineyard: Vineyard): number {
     expectedYield *= CONVENTIONAL_YIELD_BONUS;
   }
 
-  return expectedYield;
+  // Round the final yield
+  return Math.round(expectedYield);
 }
 
 export function getRemainingYield(vineyard: Vineyard): number {
@@ -57,42 +70,50 @@ export function getRemainingYield(vineyard: Vineyard): number {
 }
 
 /**
- * Calculates the land value based on country, region, altitude, and aspect
- * @param country The country of the vineyard
- * @param region The region within the country
- * @param altitude The altitude in meters
- * @param aspect The aspect (direction) of the vineyard
- * @returns The calculated land value
+ * Calculates the land value based on country, region, altitude, and aspect,
+ * incorporating real price ranges.
  */
 export function calculateLandValue(country: string, region: string, altitude: number, aspect: Aspect): number {
-  // This is a simplified version of the old calculateAndNormalizePriceFactor function
-  // We might need to revisit this if the old logic was more complex (using real price ranges etc.)
-  // For now, keep it similar to the current implementation but ensure it uses constants.
-  const baseValue = 1000; // Base value per acre (needs refinement based on old logic)
-
-  // Region prestige factor
+  // Get normalized factors (0-1 range, roughly)
   const prestigeKey = `${region}, ${country}`;
-  const regionPrestige = REGION_PRESTIGE_RANKINGS[prestigeKey] || 0.5; // Default to 0.5 if not found
-
-  // Altitude factor
+  const prestigeNormalized = REGION_PRESTIGE_RANKINGS[prestigeKey] || 0.5; 
+  
+  // Explicitly define altitudeRange type and handle defaults
+  let altitudeRange: [number, number];
   const countryData = REGION_ALTITUDE_RANGES[country as keyof typeof REGION_ALTITUDE_RANGES];
-  const altitudeRange: [number, number] = countryData ? (countryData[region as keyof typeof countryData] as [number, number] || [0, 100]) : [0, 100];
-  const altitudeFactor = normalizeAltitude(altitude, altitudeRange); // Use the existing normalize function
+  if (countryData && countryData[region as keyof typeof countryData]) {
+    altitudeRange = countryData[region as keyof typeof countryData] as [number, number];
+  } else {
+    altitudeRange = [0, 100]; // Default range
+  }
+  const altitudeNormalized = normalizeAltitude(altitude, altitudeRange);
 
-  // Aspect factor
-  const aspectFactor = ASPECT_FACTORS[aspect] || 0.5; // Use the existing ASPECT_FACTORS
+  // Use the ASPECT_FACTORS constant which maps directly to the normalized value (0.3-1.0)
+  const aspectNormalized = ASPECT_FACTORS[aspect] || 0.5; 
 
-  // Combine factors - adjust multipliers as needed to match old balance
-  // This needs careful calibration based on how 'regionRealPriceRanges' was used previously.
-  // A simple multiplicative approach:
-  return Math.round(baseValue * (1 + regionPrestige) * (1 + altitudeFactor) * (1 + aspectFactor));
+  // Calculate raw price factor by averaging normalized values (as per old logic)
+  const rawPriceFactor = (prestigeNormalized + aspectNormalized + altitudeNormalized) / 3;
+
+  // Integrate real price range (use lower bound as base price per hectare)
+  const realPriceRange = REGION_REAL_PRICE_RANGES[prestigeKey as keyof typeof REGION_REAL_PRICE_RANGES] || [5000, 10000] as [number, number]; 
+  const basePricePerHectare = realPriceRange[0]; 
+
+  // Convert hectare price to acre price (1 hectare = 2.47105 acres) 
+  const pricePerAcre = basePricePerHectare / 2.47105;
+
+  // Apply the combined factor to the base price per acre (as per old logic)
+  const finalValue = (rawPriceFactor + 1) * pricePerAcre;
+
+  return Math.round(finalValue);
 }
 
 export function normalizeAltitude(altitude: number, range: [number, number]): number {
-  const [min, max] = range;
-  if (altitude < min) return 0.1;
-  if (altitude > max) return 1.0;
-  return 0.1 + 0.9 * ((altitude - min) / (max - min));
+  const [minAltitude, maxAltitude] = range;
+  // Revert to old normalization logic (0.3 to 0.7 range)
+  if (maxAltitude <= minAltitude) return 0.5; // Avoid division by zero, return midpoint
+  const normalized = (altitude - minAltitude) / (maxAltitude - minAltitude);
+  const clamped = Math.max(0, Math.min(1, normalized)); // Clamp between 0 and 1
+  return 0.3 + clamped * (0.7 - 0.3);
 }
 
 export function calculateVineyardPrestige(vineyard: Vineyard): number {
@@ -132,13 +153,12 @@ function calculateAgeContribution(vineAge: number): number {
   } 
 }
 
-// Refine normalization if needed based on the output range of calculateLandValue
+// Refine normalization to match old logic
 function calculateLandValueContribution(landValue: number): number {
-  // Normalize land value between 0 and 1
-  // Example: If max expected land value is ~50000
-  const MAX_CONSIDERED_LAND_VALUE = 50000; // Adjust this based on expected values
-  const normalizedValue = Math.min(landValue / MAX_CONSIDERED_LAND_VALUE, 1);
-  return normalizedValue; // Weighting happens in calculateVineyardPrestige
+  // Normalize land value by dividing by the old constant 190000
+  const normalizedValue = landValue / 190000;
+  // Return the normalized value, allowing values potentially > 1 as per old comment
+  return Math.max(0, normalizedValue); // Ensure non-negative
 }
 
 function calculateRegionPrestigeContribution(region: string, country: string): number {
@@ -147,13 +167,18 @@ function calculateRegionPrestigeContribution(region: string, country: string): n
   return REGION_PRESTIGE_RANKINGS[prestigeKey] || 0.5; // Default if not found, weighting happens later
 }
 
-// TODO: Implement grape suitability logic if desired (using grapeSuitability from old names.js)
+// Use GRAPE_SUITABILITY constant
 function calculateGrapeSuitabilityContribution(grape: GrapeVariety | null, region: string, country: string): number {
-  if (!grape) return 0;
-  // Placeholder - requires migrating and using grapeSuitability data
-  // const suitabilityData = grapeSuitability[country]?.[region]?.[grape];
-  // return suitabilityData || 0.5; // Default suitability
-  return 0.8; // Placeholder value, weighting happens later
+  if (!grape || !country || !region) return 0;
+
+  const countrySuitability = GRAPE_SUITABILITY[country as keyof typeof GRAPE_SUITABILITY];
+  if (!countrySuitability) return 0.5; // Default if country not found
+
+  const regionSuitability = countrySuitability[region as keyof typeof countrySuitability];
+  if (!regionSuitability) return 0.5; // Default if region not found
+
+  // Return the suitability for the specific grape, or default 0.5
+  return regionSuitability[grape as keyof typeof regionSuitability] ?? 0.5;
 }
 
 export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vineyard {
@@ -226,10 +251,42 @@ function getRandomAspect(): Aspect {
   return getRandomFromArray(aspects);
 }
 
+// Updated generateVineyardName function
 function generateVineyardName(country: string, aspect: Aspect): string {
-  // Placeholder for name generation
-  // In the actual implementation, we would use the name generation logic from the old codebase
-  return `${country} ${aspect} Vineyard`;
+  let names: string[] = [];
+
+  // Determine gender-based name list based on the aspect
+  const isFemaleAspect = ["East", "Southeast", "South", "Southwest"].includes(aspect);
+
+  switch (country) {
+    case 'Italy':
+      names = isFemaleAspect ? italianFemaleNames : italianMaleNames;
+      break;
+    case 'Germany':
+      names = isFemaleAspect ? germanFemaleNames : germanMaleNames;
+      break;
+    case 'Spain':
+      names = isFemaleAspect ? spanishFemaleNames : spanishMaleNames;
+      break;
+    case 'France':
+      names = isFemaleAspect ? frenchFemaleNames : frenchMaleNames;
+      break;
+    case 'United States':
+      names = isFemaleAspect ? usFemaleNames : usMaleNames;
+      break;
+    default:
+      // Fallback for unmapped countries or if name lists are empty
+      return `${country} ${aspect} Vineyard`; 
+  }
+
+  // Handle empty name list case
+  if (names.length === 0) {
+     return `${country} ${aspect} Vineyard`;
+  }
+
+  const randomIndex = Math.floor(Math.random() * names.length);
+  // Construct the name like "[Random Name]'s [Aspect] Vineyard"
+  return `${names[randomIndex]}'s ${aspect} Vineyard`;
 }
 
 function getRandomSoils(country: string, region: string): string[] {
