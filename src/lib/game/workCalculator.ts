@@ -1,4 +1,6 @@
 import { Staff } from '@/gameState';
+import { REGION_ALTITUDE_RANGES } from '@/lib/core/constants/vineyardConstants';
+import { allResources } from '@/lib/game/resource';
 
 // Work activity categories
 export enum WorkCategory {
@@ -77,39 +79,91 @@ export interface ActivityProgress {
  * @returns Total work units required
  */
 export function calculateTotalWork(
-  amount: number, 
+  amount: number,
   factors: {
     category: WorkCategory;
     density?: number;
     taskMultipliers?: Record<string, number>;
     workModifiers?: number[];
+    altitude?: number;
+    country?: string;
+    region?: string;
+    resourceName?: string;
   }
 ): number {
-  const { category, density, taskMultipliers = {}, workModifiers = [] } = factors;
-  
+  const {
+    category,
+    density,
+    taskMultipliers = {},
+    workModifiers = [],
+    altitude,
+    country,
+    region,
+    resourceName
+  } = factors;
+
   // Get base rate for the task
   const baseRate = TASK_RATES[category];
-  
+  if (!baseRate) {
+    console.error(`[WorkCalculator] No base rate found for category: ${category}`);
+    return 0;
+  }
+
   // Adjust rate for density if applicable
-  const rate = DENSITY_BASED_TASKS.includes(category) && density 
+  const rate = DENSITY_BASED_TASKS.includes(category) && density
     ? baseRate / (density / DEFAULT_VINE_DENSITY)
     : baseRate;
-  
+
   // Calculate work weeks and convert to work units
   const multiplier = taskMultipliers[category] || 1.0;
   const workWeeks = (amount * multiplier) / rate;
   const workUnits = workWeeks * BASE_WORK_UNITS;
-  
+
   // Add any initial work defined for the task
   const initialWork = INITIAL_WORK[category] || 0;
-  
+
   // Calculate base work
-  const baseWork = initialWork + workUnits;
-  
+  let baseWork = initialWork + workUnits;
+
+  // --- Apply Planting Specific Modifiers --- START
+  let plantingModifiers: number[] = [];
+  if (category === WorkCategory.PLANTING) {
+    // 1. Altitude Effect (Migrated from old plantingOverlay.js)
+    if (altitude !== undefined && country && region) {
+      const countryData = REGION_ALTITUDE_RANGES[country as keyof typeof REGION_ALTITUDE_RANGES];
+      const altitudeRange = countryData ? (countryData[region as keyof typeof countryData] as [number, number] || null) : null;
+      if (altitudeRange) {
+        const [minAltitude, maxAltitude] = altitudeRange;
+        if (maxAltitude > minAltitude) { // Avoid division by zero
+          const medianAltitude = (minAltitude + maxAltitude) / 2;
+          const altitudeDeviation = (altitude - medianAltitude) / (maxAltitude - minAltitude);
+          // 5% less work for every 10% below median, 5% more for every 10% above
+          // This translates to a modifier of deviation * 0.5
+          const altitudeModifier = altitudeDeviation * 0.5;
+          plantingModifiers.push(altitudeModifier);
+        }
+      }
+    }
+
+    // 2. Fragility Effect (Migrated from old plantingOverlay.js)
+    if (resourceName) {
+      const resource = allResources.find(r => r.name === resourceName);
+      if (resource) {
+        const robustness = resource.fragile; // Assuming fragile is the robustness (0-1)
+        const fragilityModifier = (1 - robustness); // 0 means 0% extra, 0.6 means 60% extra
+        plantingModifiers.push(fragilityModifier);
+      }
+    }
+  }
+  // --- Apply Planting Specific Modifiers --- END
+
+  // Combine general modifiers and planting-specific modifiers
+  const allModifiers = [...workModifiers, ...plantingModifiers];
+
   // Apply modifiers
-  const totalWork = workModifiers.reduce((work, modifier) => 
+  const totalWork = allModifiers.reduce((work, modifier) =>
     work * (1 + modifier), baseWork);
-  
+
   // Return rounded up work units
   return Math.ceil(totalWork);
 }

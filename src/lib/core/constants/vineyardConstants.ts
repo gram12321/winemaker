@@ -5,18 +5,13 @@
 
 import { Season } from './gameConstants';
 
-// Grape varieties
-export type GrapeVariety = 
-  | "Barbera" 
-  | "Chardonnay" 
-  | "Pinot Noir" 
-  | "Primitivo" 
-  | "Sauvignon Blanc"
-  | "Cabernet Sauvignon"
-  | "Merlot"
-  | "Syrah"
-  | "Riesling"
-  | "Tempranillo";
+// Grape varieties - Reverted to original 5
+export type GrapeVariety =
+  | "Barbera"
+  | "Chardonnay"
+  | "Pinot Noir"
+  | "Primitivo"
+  | "Sauvignon Blanc";
 
 // Aspect directions
 export type Aspect = 
@@ -131,4 +126,34 @@ export const ASPECT_FACTORS = {
   "Northeast": 0.5,
   "Northwest": 0.5,
   "North": 0.3
+};
+
+// Migrated from names.js
+export const REGION_PRESTIGE_RANKINGS: { [key: string]: number } = {
+  "Burgundy (Bourgogne), France": 1.00,
+  "Champagne, France": 0.98,
+  "Napa Valley (California), United States": 0.90,
+  "Bordeaux, France": 0.87,
+  "Tuscany, Italy": 0.83,
+  "Piedmont, Italy": 0.80,
+  "Sonoma County (California), United States": 0.76,
+  "Rheingau, Germany": 0.73,
+  "Mosel, Germany": 0.72,
+  "Rioja, Spain": 0.70,
+  "Willamette Valley (Oregon), United States": 0.67,
+  "Ribera del Duero, Spain": 0.65,
+  "Jura, France": 0.65,
+  "Central Coast (California), United States": 0.63,
+  "Loire Valley, France": 0.61,
+  "Rhone Valley, France": 0.60,
+  "Pfalz, Germany": 0.57,
+  "Veneto, Italy": 0.55,
+  "Sherry (Jerez), Spain": 0.51,
+  "Finger Lakes (New York), United States": 0.48,
+  "Sicily, Italy": 0.46,
+  "La Mancha, Spain": 0.42,
+  "Ahr, Germany": 0.41,
+  "Jumilla, Spain": 0.39,
+  "Rheinhessen, Germany": 0.37,
+  "Puglia, Italy": 0.35
 }; 

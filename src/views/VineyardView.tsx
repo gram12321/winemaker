@@ -388,7 +388,7 @@ const VineyardView: React.FC = () => {
         )}
       </div>
 
-      {selectedVineyard && (
+      {selectedVineyard ? (
         <div className="Vineyard-details mt-6 bg-white border border-gray-200 rounded-lg shadow p-4">
           <div className="flex justify-between items-start mb-4">
             <h2 className="text-xl font-bold">{selectedVineyard.name}</h2>
@@ -412,9 +412,9 @@ const VineyardView: React.FC = () => {
                 <li>
                   <span className="font-medium">Farming Method:</span>{' '}
                   {selectedVineyard.farmingMethod}
-                  {selectedVineyard.farmingMethod === 'Ecological' && (
+                  {selectedVineyard.farmingMethod !== 'Conventional' && (
                     <span className="ml-1 text-green-600">
-                      ({selectedVineyard.organicYears} years)
+                      (Organic year: {selectedVineyard.organicYears})
                     </span>
                   )}
                 </li>
@@ -546,7 +546,7 @@ const VineyardView: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* --- Planting Modal --- */}
       {showPlantingModal && selectedVineyard && (

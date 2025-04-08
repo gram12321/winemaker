@@ -1,7 +1,7 @@
 // src/components/vineyards/PlantVineyardOptionsModal.tsx
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork } from '../../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
 import { GrapeVariety, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS } from '../../lib/core/constants/vineyardConstants';
 import { Vineyard } from '../../lib/game/vineyard';
 import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
@@ -33,17 +33,12 @@ const PlantVineyardOptionsModal: React.FC<PlantVineyardOptionsModalProps> = ({
       label: 'Grape Variety',
       type: 'select',
       defaultValue: options.grape,
-      options: [ // Add more grape varieties as needed
+      options: [ // Reverted to original 5 grape varieties
+        { value: 'Barbera', label: 'Barbera' },
         { value: 'Chardonnay', label: 'Chardonnay' },
         { value: 'Pinot Noir', label: 'Pinot Noir' },
-        { value: 'Cabernet Sauvignon', label: 'Cabernet Sauvignon' },
-        { value: 'Merlot', label: 'Merlot' },
-        { value: 'Sauvignon Blanc', label: 'Sauvignon Blanc' },
-        { value: 'Syrah', label: 'Syrah' },
-        { value: 'Riesling', label: 'Riesling' },
-        { value: 'Tempranillo', label: 'Tempranillo' },
-        { value: 'Barbera', label: 'Barbera' },
         { value: 'Primitivo', label: 'Primitivo' },
+        { value: 'Sauvignon Blanc', label: 'Sauvignon Blanc' },
       ],
       required: true,
       tooltip: 'Select the type of grape to plant in this vineyard.',
@@ -70,7 +65,7 @@ const PlantVineyardOptionsModal: React.FC<PlantVineyardOptionsModalProps> = ({
 
     // Basic time estimate (weeks = totalWork / baseWorkUnits)
     // This doesn't account for staff efficiency yet
-    const weeks = Math.ceil(totalWork / 50); // Assuming base 50 work units per week
+    const weeks = Math.ceil(totalWork / BASE_WORK_UNITS);
     const timeEstimate = `${weeks} week${weeks === 1 ? '' : 's'}`;
 
     setWorkEstimate({

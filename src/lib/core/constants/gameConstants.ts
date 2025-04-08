@@ -38,6 +38,7 @@ export const BASELINE_VINE_DENSITY = 5000; // vines per acre
 export const CONVENTIONAL_YIELD_BONUS = 1.1; // 10% bonus for conventional farming
 export const ORGANIC_CERTIFICATION_YEARS = 3; // Years to become certified ecological
 export const ORGANIC_HEALTH_IMPROVEMENT = 0.05; // Health improvement per year for organic vineyards
+export const DEFAULT_VINEYARD_HEALTH = 0.5; // Default health after uprooting/initial state
 
 // Ripeness Increases per Season
 export const RIPENESS_INCREASE = {

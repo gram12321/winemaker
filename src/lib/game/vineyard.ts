@@ -1,5 +1,5 @@
-import { GameDate, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from '@/lib/core/constants';
-import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS } from '@/lib/core/constants';
+import { GameDate, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS, DEFAULT_VINEYARD_HEALTH, ORGANIC_CERTIFICATION_YEARS } from '@/lib/core/constants/gameConstants';
+import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS, REGION_PRESTIGE_RANKINGS } from '@/lib/core/constants/vineyardConstants';
 import { getGameState } from '@/gameState';
 
 // Vineyard interface
@@ -27,6 +27,7 @@ export interface Vineyard {
   organicYears: number;
   remainingYield: number | null;
   ownedSince: GameDate;
+  upgrades?: string[];
 }
 
 export function calculateVineyardYield(vineyard: Vineyard): number {
@@ -65,21 +66,26 @@ export function getRemainingYield(vineyard: Vineyard): number {
  */
 export function calculateLandValue(country: string, region: string, altitude: number, aspect: Aspect): number {
   // This is a simplified version of the old calculateAndNormalizePriceFactor function
-  const baseValue = 1000;
-  
-  // Region prestige factor (would be based on regionPrestigeRankings)
-  const prestigeFactor = 1.0;
-  
-  // Altitude factor - use type assertion to handle indexing
+  // We might need to revisit this if the old logic was more complex (using real price ranges etc.)
+  // For now, keep it similar to the current implementation but ensure it uses constants.
+  const baseValue = 1000; // Base value per acre (needs refinement based on old logic)
+
+  // Region prestige factor
+  const prestigeKey = `${region}, ${country}`;
+  const regionPrestige = REGION_PRESTIGE_RANKINGS[prestigeKey] || 0.5; // Default to 0.5 if not found
+
+  // Altitude factor
   const countryData = REGION_ALTITUDE_RANGES[country as keyof typeof REGION_ALTITUDE_RANGES];
   const altitudeRange: [number, number] = countryData ? (countryData[region as keyof typeof countryData] as [number, number] || [0, 100]) : [0, 100];
-  const altitudeFactor = normalizeAltitude(altitude, altitudeRange);
-  
+  const altitudeFactor = normalizeAltitude(altitude, altitudeRange); // Use the existing normalize function
+
   // Aspect factor
-  // Typically south-facing slopes are most valuable, north-facing least valuable
-  const aspectFactor = ASPECT_FACTORS[aspect] || 0.5;
-  
-  return baseValue * prestigeFactor * altitudeFactor * aspectFactor;
+  const aspectFactor = ASPECT_FACTORS[aspect] || 0.5; // Use the existing ASPECT_FACTORS
+
+  // Combine factors - adjust multipliers as needed to match old balance
+  // This needs careful calibration based on how 'regionRealPriceRanges' was used previously.
+  // A simple multiplicative approach:
+  return Math.round(baseValue * (1 + regionPrestige) * (1 + altitudeFactor) * (1 + aspectFactor));
 }
 
 export function normalizeAltitude(altitude: number, range: [number, number]): number {
@@ -90,24 +96,24 @@ export function normalizeAltitude(altitude: number, range: [number, number]): nu
 }
 
 export function calculateVineyardPrestige(vineyard: Vineyard): number {
-  // Age contribution (30%)
-  const ageContribution = calculateAgeContribution(vineyard.vineAge);
-  
-  // Land value contribution (25%)
-  const landValueContribution = calculateLandValueContribution(vineyard.landValue);
-  
-  // Region prestige contribution (25%)
-  const prestigeRankingContribution = calculateRegionPrestigeContribution(vineyard.region, vineyard.country);
-  
-  // Grape variety suitability (20%)
-  const grapeContribution = calculateGrapeSuitabilityContribution(vineyard.grape, vineyard.region, vineyard.country);
-  
+  // Age contribution (30%) - Needs refinement if old logic was different
+  const ageContribution = calculateAgeContribution(vineyard.vineAge); // Existing function
+
+  // Land value contribution (25%) - Refined to use new landValue
+  const landValueContribution = calculateLandValueContribution(vineyard.landValue); // Existing function (may need adjustment based on new landValue range)
+
+  // Region prestige contribution (25%) - Refined
+  const prestigeRankingContribution = calculateRegionPrestigeContribution(vineyard.region, vineyard.country); // Existing function
+
+  // Grape variety suitability (20%) - Placeholder remains
+  const grapeContribution = calculateGrapeSuitabilityContribution(vineyard.grape, vineyard.region, vineyard.country); // Existing function
+
   const finalPrestige = (
-    ageContribution +
-    landValueContribution +
-    prestigeRankingContribution +
-    grapeContribution
-  ) || 0.01;
+    (ageContribution * 0.30) +
+    (landValueContribution * 0.25) +
+    (prestigeRankingContribution * 0.25) +
+    (grapeContribution * 0.20)
+  ) || 0.01; // Ensure weights sum to 1.0
 
   return Math.max(0.01, Math.min(1, finalPrestige));
 }
@@ -126,55 +132,46 @@ function calculateAgeContribution(vineAge: number): number {
   } 
 }
 
+// Refine normalization if needed based on the output range of calculateLandValue
 function calculateLandValueContribution(landValue: number): number {
   // Normalize land value between 0 and 1
-  // This is a placeholder; we would need a proper normalization function
-  const normalizedValue = Math.min(landValue / 10000, 1);
-  return normalizedValue * 0.25;
+  // Example: If max expected land value is ~50000
+  const MAX_CONSIDERED_LAND_VALUE = 50000; // Adjust this based on expected values
+  const normalizedValue = Math.min(landValue / MAX_CONSIDERED_LAND_VALUE, 1);
+  return normalizedValue; // Weighting happens in calculateVineyardPrestige
 }
 
 function calculateRegionPrestigeContribution(region: string, country: string): number {
-  // Placeholder for region prestige calculation
-  // In the actual implementation, we would use regionPrestigeRankings
-  return 0.5 * 0.25;
+  // Use the migrated REGION_PRESTIGE_RANKINGS
+  const prestigeKey = `${region}, ${country}`;
+  return REGION_PRESTIGE_RANKINGS[prestigeKey] || 0.5; // Default if not found, weighting happens later
 }
 
+// TODO: Implement grape suitability logic if desired (using grapeSuitability from old names.js)
 function calculateGrapeSuitabilityContribution(grape: GrapeVariety | null, region: string, country: string): number {
   if (!grape) return 0;
-  
-  // Placeholder for grape suitability calculation
-  // In the actual implementation, we would use grapeSuitability data
-  return 0.8 * 0.20;
+  // Placeholder - requires migrating and using grapeSuitability data
+  // const suitabilityData = grapeSuitability[country]?.[region]?.[grape];
+  // return suitabilityData || 0.5; // Default suitability
+  return 0.8; // Placeholder value, weighting happens later
 }
 
 export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vineyard {
   const country = options.country || getRandomFromObject(COUNTRY_REGION_MAP);
-  
-  // Handle country data with type assertion
   const countryRegions = COUNTRY_REGION_MAP[country as keyof typeof COUNTRY_REGION_MAP];
   const region = options.region || (countryRegions ? getRandomFromArray(countryRegions) : "");
-  
   const aspect = options.aspect || getRandomAspect();
-  const name = options.name || generateVineyardName(country, aspect);
-  
-  // Get soil data
-  const soil = options.soil ? 
-    (Array.isArray(options.soil) ? options.soil : [options.soil]) : 
-    getRandomSoils(country, region);
-  
+  const name = options.name || generateVineyardName(country, aspect); // Keep placeholder name gen
+  const soil = options.soil ? (Array.isArray(options.soil) ? options.soil : [options.soil]) : getRandomSoils(country, region);
   const altitude = options.altitude || getRandomAltitude(country, region);
   const acres = options.acres || getRandomAcres();
-  
-  // Get current game state for the game date
-  const { week, season, currentYear } = getGameState();
-  
 
-  const ownedSince: GameDate = options.ownedSince || {
-    week,
-    season,
-    year: currentYear
-  };
-  
+  const { week, season, currentYear } = getGameState();
+  const ownedSince: GameDate = options.ownedSince || { week, season, year: currentYear };
+
+  // Determine initial farming method - Default to Non-Conventional?
+  const initialFarmingMethod = options.farmingMethod || "Non-Conventional";
+
   const vineyard: Vineyard = {
     id,
     name,
@@ -186,24 +183,28 @@ export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vin
     soil,
     altitude,
     aspect,
-    density: options.density || BASELINE_VINE_DENSITY,
-    vineyardHealth: options.vineyardHealth || 0.5,
-    landValue: calculateLandValue(country, region, altitude, aspect),
+    density: options.density || 0, // Default density to 0 if not planted
+    vineyardHealth: options.vineyardHealth || DEFAULT_VINEYARD_HEALTH, // Use constant
+    landValue: 0, // Will be calculated below
     status: options.status || 'Ready to be planted',
     ripeness: options.ripeness || 0.0,
-    vineyardPrestige: 0, // Will be calculated
-    canBeCleared: options.canBeCleared ?? true,
-    annualYieldFactor: options.annualYieldFactor || (0.75 + Math.random()),
-    annualQualityFactor: options.annualQualityFactor || Math.random(),
-    farmingMethod: options.farmingMethod || "Non-Conventional",
-    organicYears: options.organicYears || 0,
+    vineyardPrestige: 0, // Will be calculated below
+    canBeCleared: options.canBeCleared ?? true, // Default to true
+    annualYieldFactor: options.annualYieldFactor || (0.75 + Math.random()), // Keep random for now
+    annualQualityFactor: options.annualQualityFactor || Math.random(), // Keep random for now
+    farmingMethod: initialFarmingMethod, // Initialize new field
+    organicYears: options.organicYears || (initialFarmingMethod === 'Ecological' ? ORGANIC_CERTIFICATION_YEARS : 0), // Initialize new field
     remainingYield: options.remainingYield === undefined ? null : options.remainingYield,
-    ownedSince
+    ownedSince,
+    upgrades: options.upgrades || [], // Initialize new field
   };
-  
-  // Calculate prestige after all other properties are set
+
+  // Calculate land value after other properties are set
+  vineyard.landValue = calculateLandValue(vineyard.country, vineyard.region, vineyard.altitude, vineyard.aspect);
+
+  // Calculate prestige after land value is set
   vineyard.vineyardPrestige = calculateVineyardPrestige(vineyard);
-  
+
   return vineyard;
 }
 
