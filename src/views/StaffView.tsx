@@ -8,12 +8,10 @@ import StaffAssignmentModal from '@/components/staff/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';
 import { ActivityProgressBar } from '../components/activities';
 import { WorkCategory } from '../lib/game/workCalculator';
-// Import utils for formatting and flags
-import { formatNumber } from '@/lib/core/utils/formatUtils';
-// Import the new flag function
-import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
+import { formatNumber, getSkillLevelInfo, getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
 
-// Create display state for staff activities
+
+// Create display state for staff activities  
 displayManager.createDisplayState('staffSearchActivity', {
   activityId: null as string | null
 });
