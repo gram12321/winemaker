@@ -12,7 +12,7 @@ import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
 import { BASELINE_VINE_DENSITY, formatGameDate } from '../lib/core/constants/gameConstants';
 import { ASPECT_FACTORS } from '../lib/core/constants/vineyardConstants';
 import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
-import PlantVineyardOptionsModal from '../components/vineyards/PlantVineyardOptionsModal';
+import PlantingOptionsModal from '@/components/vineyards/PlantingOptionsModal';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 import { formatNumber } from '@/lib/core/utils/formatUtils';
 import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
@@ -565,14 +565,14 @@ const VineyardView: React.FC = () => {
         </div>
       ) : null}
 
-      {/* --- Planting Modal --- */}
-      {showPlantingModal && selectedVineyard && (
+      {/* Planting Modal */}
+      {displayState.showPlantingModal && selectedVineyard && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-           <PlantVineyardOptionsModal
-             vineyard={selectedVineyard}
-             onClose={handleClosePlantingModal}
-             onSubmit={handlePlantVineyardSubmit}
-           />
+          <PlantingOptionsModal 
+            vineyard={selectedVineyard}
+            onClose={handleClosePlantingModal}
+            onSubmit={handlePlantVineyardSubmit}
+          />
         </div>
       )}
 

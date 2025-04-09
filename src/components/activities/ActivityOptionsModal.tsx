@@ -34,6 +34,7 @@ interface ActivityOptionsModalProps {
   canSubmit?: (options: Record<string, any>) => boolean;
   warningMessage?: string;
   disabledMessage?: string;
+  onOptionsChange?: (options: Record<string, any>) => void;
 }
 
 /**
@@ -52,7 +53,8 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
   submitLabel = 'Start Activity',
   canSubmit,
   warningMessage,
-  disabledMessage = 'Cannot start activity with current options'
+  disabledMessage = 'Cannot start activity with current options',
+  onOptionsChange
 }) => {
   // Initialize state with default values from fields
   const initialValues = fields.reduce((acc, field) => {
@@ -64,10 +66,14 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
   const [tooltipVisible, setTooltipVisible] = useState<string | null>(null);
   
   const handleChange = (id: string, value: any) => {
-    setOptions(prev => ({
-      ...prev,
-      [id]: value
-    }));
+    setOptions(prev => {
+      const newState = { ...prev, [id]: value };
+      // Call the onChange prop if provided
+      if (onOptionsChange) {
+        onOptionsChange(newState);
+      }
+      return newState;
+    });
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -131,7 +137,8 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
       {subtitle && <p className="text-gray-600 mb-6">{subtitle}</p>}
       
       <form onSubmit={handleSubmit}>
-        <div className="space-y-4">
+        {/* Use grid layout for fields */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6">
           {fields.map(field => (
             <div key={field.id} className="relative">
               <div className="flex items-center mb-1">

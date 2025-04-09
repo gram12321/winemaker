@@ -1,4 +1,3 @@
-// src/components/vineyards/PlantVineyardOptionsModal.tsx
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
 import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
@@ -6,13 +5,13 @@ import { GrapeVariety, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RA
 import { Vineyard } from '../../lib/game/vineyard';
 import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
 
-interface PlantVineyardOptionsModalProps {
+interface PlantingOptionsModalProps {
   vineyard: Vineyard;
   onClose: () => void;
   onSubmit: (options: { grape: GrapeVariety; density: number }) => void;
 }
 
-const PlantVineyardOptionsModal: React.FC<PlantVineyardOptionsModalProps> = ({
+const PlantingOptionsModal: React.FC<PlantingOptionsModalProps> = ({
   vineyard,
   onClose,
   onSubmit,
@@ -101,4 +100,4 @@ const PlantVineyardOptionsModal: React.FC<PlantVineyardOptionsModalProps> = ({
   );
 };
 
-export default PlantVineyardOptionsModal; 
+export default PlantingOptionsModal; 
