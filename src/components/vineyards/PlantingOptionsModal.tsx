@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
 import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
-import { GrapeVariety, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS } from '../../lib/core/constants/vineyardConstants';
+import { GrapeVariety, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS, getResourceByGrapeVariety } from '../../lib/core/constants/vineyardConstants';
 import { Vineyard } from '../../lib/game/vineyard';
 import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
+import { WorkFactor } from '../activities/WorkCalculationTable';
 
 interface PlantingOptionsModalProps {
   vineyard: Vineyard;
@@ -24,6 +25,7 @@ const PlantingOptionsModal: React.FC<PlantingOptionsModalProps> = ({
     totalWork: 0,
     timeEstimate: 'Calculating...',
   });
+  const [factors, setFactors] = useState<WorkFactor[]>([]);
 
   // Define the fields for the modal
   const fields: ActivityOptionField[] = [
@@ -55,24 +57,46 @@ const PlantingOptionsModal: React.FC<PlantingOptionsModalProps> = ({
     },
   ];
 
-  // Calculate work estimate whenever options change
+  // Calculate work estimate and factors whenever options change
   useEffect(() => {
+    const grapeResource = getResourceByGrapeVariety(options.grape);
+    const fragility = grapeResource?.fragile ?? 0; // Get fragility (0 = robust, 1 = fragile)
+    const robustness = 1 - fragility; // Calculate actual robustness
+    const fragilityModifier = fragility; // The modifier is the fragility value itself
+    const altitudeEffect = 0; // Placeholder for altitude effect calculation
+
     const totalWork = calculateTotalWork(vineyard.acres, {
       category: WorkCategory.PLANTING,
       density: options.density,
+      resourceName: options.grape, // Pass grape name for fragility calc
+      // Add altitude/region if needed for altitude calc
+      // altitude: vineyard.altitude,
+      // country: vineyard.country,
+      // region: vineyard.region,
     });
 
-    // Basic time estimate (weeks = totalWork / baseWorkUnits)
-    // This doesn't account for staff efficiency yet
+    // Basic time estimate
     const weeks = Math.ceil(totalWork / BASE_WORK_UNITS);
     const timeEstimate = `${weeks} week${weeks === 1 ? '' : 's'}`;
+    
+    // Construct factors for the breakdown table
+    const calculatedFactors: WorkFactor[] = [
+      { label: "Field Size", value: vineyard.acres, unit: "acres", isPrimary: true },
+      { label: "Task", value: "Planting", isPrimary: true },
+      { label: "Grape", value: options.grape },
+      { label: "Plant Density", value: options.density, unit: "vines/acre" },
+      { label: "Grape Robustness", value: `${(robustness * 100).toFixed(0)}% robust`, modifier: fragilityModifier, modifierLabel: "fragility effect" },
+      // Example row for altitude, needs real calculation logic
+      // { label: "Altitude", value: vineyard.altitude, unit: "m", modifier: altitudeEffect, modifierLabel: "altitude effect" },
+    ];
 
     setWorkEstimate({
       totalWork: Math.round(totalWork),
       timeEstimate,
-      // Cost estimate could be added here if planting has direct costs
     });
-  }, [options.density, vineyard.acres]);
+    setFactors(calculatedFactors); // Update factors state
+
+  }, [options.grape, options.density, vineyard.acres, vineyard.altitude, vineyard.country, vineyard.region]); // Add dependencies
 
   const handleOptionsChange = (changedOptions: Record<string, any>) => {
     setOptions({
@@ -92,10 +116,12 @@ const PlantingOptionsModal: React.FC<PlantingOptionsModalProps> = ({
       category={WorkCategory.PLANTING}
       fields={fields}
       workEstimate={workEstimate}
+      workFactors={factors}
       onClose={onClose}
-      onSubmit={handleSubmit} // Pass the options directly
+      onSubmit={handleSubmit}
       submitLabel="Start Planting"
-      // Add canSubmit logic if needed (e.g., check funds)
+      options={options}
+      onOptionsChange={handleOptionsChange}
     />
   );
 };

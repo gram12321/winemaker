@@ -1,5 +1,9 @@
 import { Staff } from '@/gameState';
-import { REGION_ALTITUDE_RANGES } from '@/lib/core/constants/vineyardConstants';
+import { 
+  REGION_ALTITUDE_RANGES, 
+  getResourceByGrapeVariety, 
+  GrapeVariety
+} from '@/lib/core/constants/vineyardConstants';
 import { allResources } from './resource';
 
 // Work activity categories
@@ -88,7 +92,9 @@ export function calculateTotalWork(
     altitude?: number;
     country?: string;
     region?: string;
-    resourceName?: string;
+    resourceName?: GrapeVariety | null;
+    skillLevel?: number;
+    specializations?: string[];
   }
 ): number {
   const {
@@ -99,7 +105,9 @@ export function calculateTotalWork(
     altitude,
     country,
     region,
-    resourceName
+    resourceName,
+    skillLevel,
+    specializations
   } = factors;
 
   // Get base rate for the task
@@ -147,18 +155,37 @@ export function calculateTotalWork(
 
     // 2. Fragility Effect (Migrated from old plantingOverlay.js)
     if (resourceName) {
-      const resource = allResources.find(r => r.name === resourceName);
+      // Use the imported function directly
+      const resource = getResourceByGrapeVariety(resourceName);
       if (resource) {
-        const robustness = resource.fragile; // Assuming fragile is the robustness (0-1)
-        const fragilityModifier = (1 - robustness); // 0 means 0% extra, 0.6 means 60% extra
+        // Fragility directly increases work -> modifier = fragility value
+        const fragilityModifier = resource.fragile; 
         plantingModifiers.push(fragilityModifier);
       }
     }
   }
   // --- Apply Planting Specific Modifiers --- END
 
-  // Combine general modifiers and planting-specific modifiers
-  const allModifiers = [...workModifiers, ...plantingModifiers];
+  // --- Apply Staff Search Specific Modifiers --- START
+  let staffSearchModifiers: number[] = [];
+  if (category === WorkCategory.STAFF_SEARCH) {
+    // Skill Level Modifier (0.1 -> +10%, 1.0 -> +100%)
+    if (skillLevel !== undefined) {
+      staffSearchModifiers.push(skillLevel);
+    }
+    // Specialization Modifier (+20% per specialization)
+    if (specializations && specializations.length > 0) {
+      staffSearchModifiers.push(specializations.length * 0.20);
+    }
+  }
+  // --- Apply Staff Search Specific Modifiers --- END
+
+  // Combine general modifiers and category-specific modifiers
+  const allModifiers = [
+    ...workModifiers, 
+    ...(category === WorkCategory.PLANTING ? plantingModifiers : []),
+    ...(category === WorkCategory.STAFF_SEARCH ? staffSearchModifiers : [])
+  ];
 
   // Apply modifiers
   const totalWork = allModifiers.reduce((work, modifier) =>

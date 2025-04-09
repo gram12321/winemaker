@@ -5,6 +5,7 @@ import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS } from '../../lib/gam
 import { StaffSearchOptions, SpecializedRoles, calculateSearchCost, calculatePerCandidateCost } from '../../services/staffService';
 import { getSkillLevelInfo } from '../../lib/core/utils/formatUtils';
 import { getGameState } from '../../gameState';
+import { WorkFactor } from '../activities/WorkCalculationTable'; // Corrected import path
 
 interface StaffSearchOptionsModalProps {
   onClose: () => void;
@@ -25,8 +26,9 @@ const StaffSearchOptionsModal: React.FC<StaffSearchOptionsModalProps> = ({
   const [workEstimate, setWorkEstimate] = useState<ActivityWorkEstimate>({
     totalWork: 0,
     timeEstimate: 'Calculating...',
-    costEstimate: 0,
   });
+
+  const [factors, setFactors] = useState<WorkFactor[]>([]);
 
   const currentSkillInfo = getSkillLevelInfo(options.skillLevel);
   const searchCost = calculateSearchCost(options);
@@ -68,22 +70,47 @@ const StaffSearchOptionsModal: React.FC<StaffSearchOptionsModalProps> = ({
     },
   ];
 
-  // Calculate work estimate whenever options change
+  // Calculate work estimate and factors whenever options change
   useEffect(() => {
+    // Calculate total work first
     const totalWork = calculateTotalWork(options.numberOfCandidates, {
       category: WorkCategory.STAFF_SEARCH,
-      // Pass skill level and specializations if they affect work calculation
-      // taskMultipliers: { [WorkCategory.STAFF_SEARCH]: options.skillLevel }, // Example if needed
+      // Pass skill level and specializations for calculation
+      skillLevel: options.skillLevel, 
+      specializations: options.specializations,
     });
 
+    // Basic time estimate
     const weeks = Math.ceil(totalWork / BASE_WORK_UNITS);
     const timeEstimate = `${weeks} week${weeks === 1 ? '' : 's'}`;
+    
+    // Construct factors for the breakdown table
+    const calculatedFactors: WorkFactor[] = [
+      { label: "Amount", value: options.numberOfCandidates, unit: "candidates", isPrimary: true },
+      { label: "Task", value: "Staff Search", isPrimary: true },
+      // Add method/skill level row
+      { 
+        label: "Method", 
+        value: `${currentSkillInfo.name} Level Search`, 
+        modifier: options.skillLevel, // Modifier is the skill level itself (0.1 to 1.0)
+        modifierLabel: "skill level effect" 
+      },
+      // Add specializations row if any are selected
+      ...(options.specializations.length > 0 ? [
+        {
+          label: "Specializations",
+          value: `${options.specializations.length} selected`,
+          modifier: options.specializations.length * 0.20, // +20% per specialization
+          modifierLabel: "specialization effect"
+        }
+      ] : [])
+    ];
 
     setWorkEstimate({
       totalWork: Math.round(totalWork),
       timeEstimate,
-      costEstimate: searchCost, // Use calculated search cost
     });
+    setFactors(calculatedFactors); // Update factors state
   // Depend on all options that affect work or cost
   }, [options.numberOfCandidates, options.skillLevel, options.specializations, searchCost]);
 
@@ -117,6 +144,7 @@ const StaffSearchOptionsModal: React.FC<StaffSearchOptionsModalProps> = ({
       category={WorkCategory.STAFF_SEARCH}
       fields={fields} // Pass defined fields (without specializations)
       workEstimate={workEstimate} // Pass calculated estimate
+      workFactors={factors} // Pass the constructed factors
       onClose={onClose}
       onSubmit={handleSubmit} // Pass submit handler
       submitLabel={`Start Search (€${searchCost.toLocaleString()})`}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { WorkCategory } from '../../lib/game/workCalculator';
+import WorkCalculationTable, { WorkFactor } from './WorkCalculationTable';
 
 export type ActivityOptionType = 'number' | 'select' | 'text' | 'checkbox' | 'range' | 'checkbox-group';
 
@@ -20,7 +21,6 @@ export interface ActivityOptionField {
 export interface ActivityWorkEstimate {
   totalWork: number;
   timeEstimate: string;
-  costEstimate?: number;
 }
 
 interface ActivityOptionsModalProps {
@@ -37,6 +37,7 @@ interface ActivityOptionsModalProps {
   disabledMessage?: string;
   options: Record<string, any>;
   onOptionsChange: (options: Record<string, any>) => void;
+  workFactors?: WorkFactor[];
 }
 
 /**
@@ -57,7 +58,8 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
   warningMessage,
   disabledMessage = 'Cannot start activity with current options',
   options,
-  onOptionsChange
+  onOptionsChange,
+  workFactors
 }) => {
   const handleChange = (id: string, value: any, type: ActivityOptionType = 'text') => {
     let newStateValue;
@@ -263,22 +265,11 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
         {/* Work Estimate Section */}
         <div className="bg-gray-50 p-4 rounded mb-4">
           <h3 className="font-medium mb-2">Work Estimate</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <p className="text-sm text-gray-600">Total Work Required:</p>
-              <p className="font-medium">{workEstimate.totalWork} units</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Time Estimate:</p>
-              <p className="font-medium">{workEstimate.timeEstimate}</p>
-            </div>
-            {workEstimate.costEstimate !== undefined && (
-              <div className="col-span-2">
-                <p className="text-sm text-gray-600">Cost Estimate:</p>
-                <p className="font-medium">€{workEstimate.costEstimate.toLocaleString()}</p>
-              </div>
-            )}
-          </div>
+          {workFactors ? (
+            <WorkCalculationTable factors={workFactors} totalWork={workEstimate.totalWork} />
+          ) : (
+            <p className="text-sm text-gray-600">Calculating work factors...</p> 
+          )}
         </div>
         
         {/* Warning Message */}
