@@ -1,6 +1,5 @@
 import React from 'react';
 import { WorkCategory } from '@/lib/game/workCalculator';
-import { getActivityById } from '@/lib/game/activityManager';
 import { useDisplayUpdate } from '@/lib/game/displayManager';
 import { formatNumber } from '@/lib/core/utils/formatUtils';
 
@@ -33,12 +32,9 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   // Use the display update hook - this is an authorized exception to the no-hooks rule
   useDisplayUpdate();
   
-  // Get the latest activity data directly
-  const activity = getActivityById(activityId);
-  
-  // Use the latest activity data if available, otherwise use the props
-  const actualAppliedWork = activity?.appliedWork ?? appliedWork;
-  const actualTotalWork = activity?.totalWork ?? totalWork;
+  // Use props directly for data
+  const actualAppliedWork = appliedWork;
+  const actualTotalWork = totalWork;
   
   // Calculate progress as a percentage, handling edge cases
   const calculateProgress = (): number => {
@@ -48,11 +44,6 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   
   // Format progress as a percentage
   const formattedProgress = Math.min(100, Math.round(calculateProgress()));
-  
-  // Log the progress values for debugging
-  console.log(`[ActivityProgressBar] Rendering activity ${activityId}: ${title}`);
-  console.log(`[ActivityProgressBar] Raw work values: ${actualAppliedWork}/${actualTotalWork}`);
-  console.log(`[ActivityProgressBar] Progress percentage: ${formattedProgress}%`);
   
   // Get icon based on category
   const getIconForCategory = (category: WorkCategory | string): string => {

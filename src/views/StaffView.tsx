@@ -2,13 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import staffService, { Staff, StaffTeam, StaffSearchOptions } from '../services/staffService';
 import StaffSearchOptionsModal from '@/components/staff/StaffSearchOptionsModal';
-import { getAllActivities, startActivityWithDisplayState, assignStaffWithDisplayState, setActivityCompletionCallback, getActivityProgressFromDisplayState, cancelActivityWithDisplayState } from '../lib/game/activityManager';
+import { 
+  getAllActivities, 
+  getActivityById, 
+  assignStaffWithDisplayState, 
+  setActivityCompletionCallback, 
+  getActivityProgressFromDisplayState, 
+  cancelActivityWithDisplayState,
+  startActivityWithDisplayState
+} from '../lib/game/activityManager';
 import displayManager from '../lib/game/displayManager';
 import StaffAssignmentModal from '@/components/staff/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';
-import { ActivityProgressBar } from '../components/activities';
+import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
 import { WorkCategory } from '../lib/game/workCalculator';
 import { formatNumber, getSkillLevelInfo, getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
+import { getGameState } from '../gameState';
+import { startStaffSearch, startHiringProcess } from '../services/staffService';
+import StaffSearchResults from '@/components/staff/StaffSearchResults';
 
 
 // Create display state for staff activities  
@@ -40,12 +51,33 @@ const StaffView: React.FC = () => {
 
   // Modal state
   const [showStaffSearch, setShowStaffSearch] = useState(false);
-  const [showStaffAssignment, setShowStaffAssignment] = useState(false);
+  const [showStaffAssignmentModal, setShowStaffAssignmentModal] = useState(false);
   const [showHiringStaffAssignment, setShowHiringStaffAssignment] = useState(false);
+  const [activityToAssignStaff, setActivityToAssignStaff] = useState<string | null>(null);
   
+  // Get ongoing activity IDs and related data from display state
+  const searchDisplayState = displayManager.getDisplayState('staffSearchActivity') || {};
+  const hiringDisplayState = displayManager.getDisplayState('staffHiringActivity') || {};
+  const searchActivityId = searchDisplayState.activityId;
+  const hiringActivityId = hiringDisplayState.activityId;
+  const searchActivity = searchActivityId ? getActivityById(searchActivityId) : null;
+  const hiringActivity = hiringActivityId ? getActivityById(hiringActivityId) : null;
+
   // Get activity progress info
   const searchActivityProgress = getActivityProgressFromDisplayState('staffSearchActivity');
   const hiringActivityProgress = getActivityProgressFromDisplayState('staffHiringActivity');
+
+  // Effect to update search results state when display state changes
+  useEffect(() => {
+    // Read the results directly from the searchDisplayState obtained outside the effect
+    if (searchDisplayState.results && searchDisplayState.results.length > 0) {
+      console.log("[StaffView] Received search results, updating state:", searchDisplayState.results);
+      setSearchResults(searchDisplayState.results);
+      // Clear results from display state once consumed?
+      // displayManager.updateDisplayState('staffSearchActivity', { results: [] }); 
+    }
+    // Depend on the whole state object or specifically searchDisplayState.results
+  }, [searchDisplayState]); 
 
   // Handle start of staff search
   const handleStartSearch = () => {
@@ -120,7 +152,7 @@ const StaffView: React.FC = () => {
 
   // Handle staff assignment to search activity
   const handleAssignStaffToSearch = () => {
-    setShowStaffAssignment(true);
+    setShowStaffAssignmentModal(true);
   };
 
   // Handle staff assignment to hiring activity
@@ -145,7 +177,7 @@ const StaffView: React.FC = () => {
     }
     
     if (finalSave) {
-      setShowStaffAssignment(false);
+      setShowStaffAssignmentModal(false);
     }
   };
 
@@ -246,6 +278,66 @@ const StaffView: React.FC = () => {
     handleStartHiring(staffToHire);
   };
 
+  const handleStartSearchModal = () => {
+    setShowStaffSearch(true);
+  };
+  
+  // Updated onSubmit handler for the modal
+  const handleStartSearchActivity = (options: StaffSearchOptions) => {
+    try {
+      const newActivityId = startStaffSearch(options);
+      if (newActivityId) {
+        console.log("Started search activity:", newActivityId);
+        // Store the activity ID in display state
+        displayManager.updateDisplayState('staffSearchActivity', { activityId: newActivityId });
+        toast({ title: "Staff search started!", description: "Assign staff to speed up the process." });
+      } else {
+        toast({ title: "Error", description: "Failed to start staff search activity.", variant: "destructive" });
+      }
+    } catch (error) {
+      console.error("Error starting staff search:", error);
+      toast({ title: "Error", description: "An error occurred while starting the search.", variant: "destructive" });
+    }
+    setShowStaffSearch(false); // Close modal regardless of success/failure for now
+  };
+
+  const handleAssignStaffToActivity = (activityId: string) => {
+    setActivityToAssignStaff(activityId);
+    setShowStaffAssignmentModal(true);
+  };
+
+  const handleStaffAssignmentModalClose = () => {
+    setShowStaffAssignmentModal(false);
+    setActivityToAssignStaff(null);
+  };
+
+  // Handler for clicking the Hire button
+  const handleHire = (candidate: Staff) => {
+    try {
+      const newHiringActivityId = startHiringProcess(candidate);
+      if (newHiringActivityId) {
+        console.log("[StaffView] Started hiring activity:", newHiringActivityId);
+        
+        // *** FIX: Clear the search activity ID first ***
+        displayManager.updateDisplayState('staffSearchActivity', { activityId: null, results: [] });
+        
+        // Now store the hiring activity ID in display state
+        displayManager.updateDisplayState('staffHiringActivity', { activityId: newHiringActivityId });
+        console.log("[StaffView] Updated staffHiringActivity display state with ID:", newHiringActivityId);
+        
+        // Clear search results from local component state
+        setSearchResults([]);
+
+        toast({ title: "Hiring Process Started", description: `Started hiring ${candidate.name}. Assign staff to Administration to complete.` });
+      } else {
+        toast({ title: "Error", description: "Failed to start hiring process.", variant: "destructive" });
+      }
+    } catch (error: any) {
+      console.error("Error starting hiring:", error);
+      toast({ title: "Error", description: error.message || "An error occurred during hiring.", variant: "destructive" });
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="flex justify-between mb-6">
@@ -266,34 +358,32 @@ const StaffView: React.FC = () => {
         </div>
       </div>
 
-      {/* Progress bars for staff activities */}
-      {searchActivityProgress.isInProgress && (
-        <div className="mb-6">
+      {/* Display ongoing search activity */}
+      {searchActivity && (
+        <div className="mb-4">
           <ActivityProgressBar
-            activityId={searchActivityProgress.activityId || ''}
-            title="Staff Search"
-            category={WorkCategory.STAFF_SEARCH}
-            progress={searchActivityProgress.progress}
-            appliedWork={searchActivityProgress.appliedWork}
-            totalWork={searchActivityProgress.totalWork}
-            onAssignStaff={handleAssignStaffToSearch}
-            className=""
+            activityId={searchActivity.id}
+            title={searchActivity.params?.title || "Staff Search"}
+            category={searchActivity.category}
+            appliedWork={searchActivity.appliedWork}
+            totalWork={searchActivity.totalWork}
+            progress={(searchActivity.appliedWork / searchActivity.totalWork) * 100}
+            onAssignStaff={() => handleAssignStaffToActivity(searchActivity.id)}
           />
         </div>
       )}
 
-      {/* Hiring Progress Bar */}
-      {hiringActivityProgress.isInProgress && (
-        <div className="mb-6">
+      {/* Display ongoing hiring activity progress bar - KEEP this one */}
+      {hiringActivity && (
+        <div className="mb-4">
           <ActivityProgressBar
-            activityId={hiringActivityProgress.activityId || ''}
-            title="Hiring Process"
-            category={WorkCategory.ADMINISTRATION}
-            progress={hiringActivityProgress.progress}
-            appliedWork={hiringActivityProgress.appliedWork}
-            totalWork={hiringActivityProgress.totalWork}
-            onAssignStaff={handleAssignStaffToHiring}
-            className=""
+            activityId={hiringActivity.id}
+            title={hiringActivity.params?.title || `Hiring: ${hiringActivity.params?.staffToHire?.name || 'Candidate'}`}
+            category={hiringActivity.category}
+            appliedWork={hiringActivity.appliedWork}
+            totalWork={hiringActivity.totalWork}
+            progress={(hiringActivity.appliedWork / hiringActivity.totalWork) * 100}
+            onAssignStaff={() => handleAssignStaffToActivity(hiringActivity.id)}
           />
         </div>
       )}
@@ -720,43 +810,39 @@ const StaffView: React.FC = () => {
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <StaffSearchOptionsModal
               onClose={() => setShowStaffSearch(false)}
-              onSubmit={(options) => {
-                // This is where StaffView starts the search activity
-                // Need to implement the logic to call startActivityWithDisplayState
-                console.log("Starting search with options:", options); 
-                // handleStartSearch(options); // Assuming handleStartSearch takes options
-                setShowStaffSearch(false); // Close modal after submit
-              }} 
+              onSubmit={handleStartSearchActivity}
             />
           </div>
         </div>
       )}
 
-      {/* Staff Assignment Modal */}
-      {showStaffAssignment && searchActivityProgress.activityId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <StaffAssignmentModal
-              activityId={searchActivityProgress.activityId}
-              category="ADMINISTRATION"
-              onClose={() => setShowStaffAssignment(false)}
-              initialAssignedStaffIds={[]}
-              onAssignmentChange={handleStaffAssigned}
-            />
-          </div>
+      {/* Staff Search Results Modal */}
+      {searchResults.length > 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          {/* Render the results component */}
+          <StaffSearchResults 
+            candidates={searchResults}
+            onHire={handleHire} // Pass the hire handler
+            onClose={() => {
+              setSearchResults([]); // Clear results on close
+              displayManager.updateDisplayState('staffSearchActivity', { results: [] }); // Also clear from display state
+            }}
+          />
         </div>
       )}
 
-      {/* Staff Assignment Modal for Hiring */}
-      {showHiringStaffAssignment && hiringActivityProgress.activityId && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      {/* Staff Assignment Modal (Generic) */}
+      {showStaffAssignmentModal && activityToAssignStaff && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <StaffAssignmentModal
-              activityId={hiringActivityProgress.activityId}
-              category="ADMINISTRATION"
-              onClose={() => setShowHiringStaffAssignment(false)}
-              initialAssignedStaffIds={[]}
-              onAssignmentChange={handleHiringStaffAssigned}
+              activityId={activityToAssignStaff}
+              category={getActivityById(activityToAssignStaff)?.category || ''} 
+              onClose={handleStaffAssignmentModalClose}
+              initialAssignedStaffIds={getActivityById(activityToAssignStaff)?.params?.assignedStaffIds || []}
+              onAssignmentChange={(staffIds, finalSave) => {
+                 console.log(`Staff assignment changed for ${activityToAssignStaff}:`, staffIds, finalSave);
+              }}
             />
           </div>
         </div>
