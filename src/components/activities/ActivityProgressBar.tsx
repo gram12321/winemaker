@@ -2,7 +2,7 @@ import React from 'react';
 import { WorkCategory } from '@/lib/game/workCalculator';
 import { getActivityById } from '@/lib/game/activityManager';
 import { useDisplayUpdate } from '@/lib/game/displayManager';
-import { formatNumber } from '@/lib/core/utils/utils';
+import { formatNumber } from '@/lib/core/utils/formatUtils';
 
 // Interface for the activity progress bar props
 interface ActivityProgressBarProps {

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import staffService, { Staff, StaffTeam, StaffSearchOptions } from '../services/staffService';
-import { StaffSearch } from '../components/staff';
+import StaffSearch from '@/components/staff/StaffSearch';
 import { getAllActivities, startActivityWithDisplayState, assignStaffWithDisplayState, setActivityCompletionCallback, getActivityProgressFromDisplayState, cancelActivityWithDisplayState } from '../lib/game/activityManager';
 import displayManager from '../lib/game/displayManager';
-import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
+import StaffAssignmentModal from '@/components/staff/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';
 import { ActivityProgressBar } from '../components/activities';
 import { WorkCategory } from '../lib/game/workCalculator';
 // Import utils for formatting and flags
-import { formatNumber, getSkillLevelInfo } from '@/lib/core/utils/utils'; 
+import { formatNumber } from '@/lib/core/utils/formatUtils';
 // Import the new flag function
 import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
 

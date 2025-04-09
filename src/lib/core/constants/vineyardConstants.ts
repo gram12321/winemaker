@@ -228,23 +228,40 @@ export const REGION_REAL_PRICE_RANGES = {
   "Jura, France": [25000, 45000], 
 };
 
-// --- Resource Definitions (Moved here from separate file plan) ---
+// Base Characteristics for Grapes (Migrated from resource.js)
+const baseGrapeCharacteristics = {
+  'Barbera':        { acidity: 0.2,  aroma: 0.0,  body: 0.1,  spice: 0.0,  sweetness: 0.0,  tannins: 0.1  },
+  'Chardonnay':     { acidity: -0.1, aroma: 0.15, body: 0.25, spice: 0.0,  sweetness: 0.0,  tannins: -0.15 },
+  'Pinot Noir':     { acidity: 0.15, aroma: 0.1,  body: -0.15,spice: 0.0,  sweetness: 0.0,  tannins: -0.1  },
+  'Primitivo':      { acidity: 0.0,  aroma: 0.2,  body: 0.2,  spice: 0.0,  sweetness: 0.2,  tannins: 0.2  },
+  'Sauvignon Blanc':{ acidity: 0.3,  aroma: 0.25, body: -0.2, spice: 0.1,  sweetness: -0.1, tannins: -0.2  }
+};
+
+export interface GrapeWineCharacteristics {
+  acidity: number;
+  aroma: number;
+  body: number;
+  spice: number;
+  sweetness: number;
+  tannins: number;
+}
 
 export interface Resource {
   name: GrapeVariety;
-  naturalYield: number; // Base yield tendency (0-1 scale, higher is better)
-  fragile: number;      // How sensitive the resource is (0-1 scale, lower is more robust)
-  proneToOxidation: number; // Added (0-1 scale, higher is more prone)
-  grapeColor: 'red' | 'white'; // Added
+  naturalYield: number; 
+  fragile: number;      
+  proneToOxidation: number; 
+  grapeColor: 'red' | 'white';
+  baseCharacteristics: GrapeWineCharacteristics; // Added base characteristics
 }
 
-// Simple map for grape resource data 
+// Add baseCharacteristics to the resource data
 const grapeResourceData: Record<GrapeVariety, Resource> = {
-  "Barbera":        { name: "Barbera",        naturalYield: 0.7, fragile: 0.4, proneToOxidation: 0.4, grapeColor: 'red'   },
-  "Chardonnay":     { name: "Chardonnay",     naturalYield: 0.8, fragile: 0.6, proneToOxidation: 0.7, grapeColor: 'white' },
-  "Pinot Noir":     { name: "Pinot Noir",     naturalYield: 0.6, fragile: 0.7, proneToOxidation: 0.8, grapeColor: 'red'   },
-  "Primitivo":      { name: "Primitivo",      naturalYield: 0.9, fragile: 0.3, proneToOxidation: 0.3, grapeColor: 'red'   },
-  "Sauvignon Blanc":{ name: "Sauvignon Blanc",naturalYield: 0.75, fragile: 0.5, proneToOxidation: 0.9, grapeColor: 'white' },
+  "Barbera":        { name: "Barbera",        naturalYield: 0.7, fragile: 0.4, proneToOxidation: 0.4, grapeColor: 'red',   baseCharacteristics: baseGrapeCharacteristics['Barbera'] },
+  "Chardonnay":     { name: "Chardonnay",     naturalYield: 0.8, fragile: 0.6, proneToOxidation: 0.7, grapeColor: 'white', baseCharacteristics: baseGrapeCharacteristics['Chardonnay'] },
+  "Pinot Noir":     { name: "Pinot Noir",     naturalYield: 0.6, fragile: 0.7, proneToOxidation: 0.8, grapeColor: 'red',   baseCharacteristics: baseGrapeCharacteristics['Pinot Noir'] },
+  "Primitivo":      { name: "Primitivo",      naturalYield: 0.9, fragile: 0.3, proneToOxidation: 0.3, grapeColor: 'red',   baseCharacteristics: baseGrapeCharacteristics['Primitivo'] },
+  "Sauvignon Blanc":{ name: "Sauvignon Blanc",naturalYield: 0.75, fragile: 0.5, proneToOxidation: 0.9, grapeColor: 'white', baseCharacteristics: baseGrapeCharacteristics['Sauvignon Blanc'] },
 };
 
 /**

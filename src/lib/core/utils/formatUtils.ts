@@ -5,9 +5,33 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-export const formatNumber = (num: number): string => {
-  return new Intl.NumberFormat('en-US').format(num);
-};
+/**
+ * Formats a number using German locale settings (dot for thousands, comma for decimal).
+ * Handles large numbers by abbreviating with 'Mio'.
+ */
+export function formatNumber(value: number, decimals = 0): string {
+  if (value === null || value === undefined) return "N/A";
+  // Check if value is effectively zero
+  if (Math.abs(value) < 0.0005) return "0";
+
+  const isNegative = value < 0;
+  const absValue = Math.abs(value);
+  let formattedValue;
+
+  if (absValue >= 1_000_000) {
+    formattedValue = `${(absValue / 1_000_000).toLocaleString('de-DE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })} Mio`;
+  } else {
+    formattedValue = absValue.toLocaleString('de-DE', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals
+    });
+  }
+
+  return isNegative ? `-${formattedValue}` : formattedValue;
+}
 
 export const formatPercentage = (value: number): string => {
   return `${(value * 100).toFixed(1)}%`;
@@ -33,4 +57,24 @@ export function getCountryCodeForFlag(countryName: string | undefined | null): s
   };
 
   return countryToCodeMap[countryName] || ''; // Return code or empty string
+}
+
+/**
+ * Returns a Tailwind CSS text color class based on a value (0-1).
+ */
+export function getColorClass(value: number): string {
+  const level = Math.max(0, Math.min(9, Math.floor(value * 10)));
+  const colorMap: Record<number, string> = {
+    0: 'text-red-600',
+    1: 'text-red-500',
+    2: 'text-orange-500',
+    3: 'text-amber-500',
+    4: 'text-yellow-500',
+    5: 'text-lime-500',
+    6: 'text-lime-600',
+    7: 'text-green-600',
+    8: 'text-green-700',
+    9: 'text-green-800',
+  };
+  return colorMap[level] || 'text-gray-500'; // Default to gray if level is unexpected
 }

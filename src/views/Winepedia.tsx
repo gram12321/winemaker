@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Table, TableHead, TableRow, TableCell, TableBody, TableHeader } from "../components/ui/table";
 import { Badge } from "../components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { GrapeInfoView } from './info/GrapeInfoView';
+import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 
 interface WinepediaProps {
   view: string;
@@ -21,6 +23,7 @@ export default function Winepedia({ view }: WinepediaProps) {
     wineTradition: number;
     relationship: number;
   }>>([]);
+  const [selectedGrapeForInfo, setSelectedGrapeForInfo] = useState<GrapeVariety | null>(null);
 
   useEffect(() => {
     // Simulate loading importers data
@@ -102,6 +105,16 @@ export default function Winepedia({ view }: WinepediaProps) {
     }
   ];
 
+  // Function to handle selecting a grape
+  const handleSelectGrape = (grapeName: GrapeVariety) => {
+    setSelectedGrapeForInfo(grapeName);
+  };
+
+  // Function to close the grape info view
+  const handleCloseGrapeInfo = () => {
+    setSelectedGrapeForInfo(null);
+  };
+
   const getCountryCode = (country: string): string => {
     const countryCodeMap: {[key: string]: string} = {
       'France': 'fr',
@@ -132,6 +145,16 @@ export default function Winepedia({ view }: WinepediaProps) {
 
   return (
     <div className="container mx-auto py-6">
+      {/* Conditionally render GrapeInfoView if a grape is selected */}
+      {selectedGrapeForInfo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <GrapeInfoView 
+            grapeName={selectedGrapeForInfo} 
+            onClose={handleCloseGrapeInfo} 
+          />
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-6">Wine-Pedia</h1>
       
       <Tabs defaultValue="grapeVarieties" value={activeTab} onValueChange={setActiveTab}>
@@ -145,7 +168,11 @@ export default function Winepedia({ view }: WinepediaProps) {
         <TabsContent value="grapeVarieties">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {grapeVarieties.map((grape, index) => (
-              <Card key={index} className="hover:shadow-md transition-shadow cursor-pointer">
+              <Card 
+                key={index} 
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleSelectGrape(grape.name as GrapeVariety)}
+              >
                 <CardHeader className="flex flex-row items-center gap-4 pb-2">
                   <div className="w-12 h-12 bg-wine/10 rounded-full flex items-center justify-center">
                     <span className="text-wine font-bold">{grape.name.charAt(0)}</span>

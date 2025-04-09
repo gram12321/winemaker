@@ -8,7 +8,7 @@ import { startBuildingConstruction, upgradeBuilding } from '@/services/buildingS
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BuildingDetailsPanel from '@/components/buildings/BuildingDetailsPanel';
-import { formatNumber } from '@/lib/core/utils/utils';
+import { formatNumber } from '@/lib/core/utils/formatUtils';
 
 /**
  * BuildingsView Component

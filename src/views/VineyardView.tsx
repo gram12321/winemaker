@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDisplayUpdate } from '../lib/game/displayManager';
 import displayManager from '../lib/game/displayManager';
-import { getGameState } from '../gameState';
+import { getGameState, updateGameState } from '@/gameState';
 import { Vineyard, calculateVineyardYield, calculateLandValue } from '../lib/game/vineyard';
 import { consoleService } from '../components/layout/Console';
 import { getVineyards, addVineyard, plantVineyard, harvestVineyard } from '../services/vineyardService';
@@ -14,8 +14,10 @@ import { ASPECT_FACTORS } from '../lib/core/constants/vineyardConstants';
 import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
 import PlantVineyardOptionsModal from '../components/vineyards/PlantVineyardOptionsModal';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
-import { getColorClass, formatNumber } from '@/lib/core/utils/utils';
+import { formatNumber } from '@/lib/core/utils/formatUtils';
 import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
+import { getColorClass } from '@/lib/core/utils/formatUtils';
+import { toast } from '@/lib/ui/toast';
 
 // Display state type definition
 interface VineyardViewDisplayState {
