@@ -17,12 +17,22 @@ interface WorkCalculationTableProps {
 
 export const WorkCalculationTable: React.FC<WorkCalculationTableProps> = ({ factors, totalWork }) => {
   const renderModifier = (modifier: number, label?: string) => {
-    if (modifier === 0) return null;
-    const sign = modifier > 0 ? '+' : '';
+    if (modifier === 0) {
+      // Optionally render "0% modifier" if modifier is exactly 0
+      return (
+        <small className="block text-gray-500 text-xs">
+          0% work modifier {label ? `(${label})` : ''}
+        </small>
+      );
+    } 
+    const sign = modifier > 0 ? '+' : ''; // Sign is added automatically by number format
     const percentage = formatNumber(modifier * 100, 0); // Format as integer percentage
+    const modifierText = modifier > 0 ? 'more' : 'less';
+    const colorClass = modifier > 0 ? 'text-red-600' : 'text-green-600'; // Red for more work, green for less
+    
     return (
-      <small className="block text-muted text-xs">
-        {sign}{percentage}% work modifier {label ? `(${label})` : ''}
+      <small className={`block ${colorClass} text-xs`}>
+        {Math.abs(Number(percentage))}% {modifierText} work {label ? `(${label})` : ''}
       </small>
     );
   };
@@ -34,8 +44,9 @@ export const WorkCalculationTable: React.FC<WorkCalculationTableProps> = ({ fact
           key={index} 
           className={`flex justify-between py-1 ${factor.isPrimary ? 'font-medium' : 'text-gray-700'} border-b border-gray-100 last:border-b-0`}
         >
-          <span className="w-2/5 pr-2">{factor.label}:</span>
-          <span className="w-3/5 text-right">
+          {/* Updated label span to accommodate potentially longer text */}
+          <span className="w-1/2 pr-2">{factor.label}:</span> 
+          <span className="w-1/2 text-right">
             {typeof factor.value === 'number' ? formatNumber(factor.value, 2) : factor.value}
             {factor.unit && ` ${factor.unit}`}
             {factor.modifier !== undefined && renderModifier(factor.modifier, factor.modifierLabel)}
@@ -44,8 +55,8 @@ export const WorkCalculationTable: React.FC<WorkCalculationTableProps> = ({ fact
       ))}
       {/* Total Work Row */}
       <div className="flex justify-between py-1 font-bold text-base mt-2 border-t pt-2">
-        <span className="w-2/5 pr-2">Total Work:</span>
-        <span className="w-3/5 text-right">
+        <span className="w-1/2 pr-2">Total Work:</span>
+        <span className="w-1/2 text-right">
           {formatNumber(totalWork, 0)} units
         </span>
       </div>
