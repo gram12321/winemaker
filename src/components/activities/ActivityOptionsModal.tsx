@@ -38,6 +38,7 @@ interface ActivityOptionsModalProps {
   options: Record<string, any>;
   onOptionsChange: (options: Record<string, any>) => void;
   workFactors?: WorkFactor[];
+  children?: React.ReactNode;
 }
 
 /**
@@ -59,7 +60,8 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
   disabledMessage = 'Cannot start activity with current options',
   options,
   onOptionsChange,
-  workFactors
+  workFactors,
+  children
 }) => {
   const handleChange = (id: string, value: any, type: ActivityOptionType = 'text') => {
     let newStateValue;
@@ -271,6 +273,9 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
             <p className="text-sm text-gray-600">Calculating work factors...</p> 
           )}
         </div>
+        
+        {/* RENDER CHILDREN HERE, after factors and before buttons */}
+        {children}
         
         {/* Warning Message */}
         {warningMessage && (

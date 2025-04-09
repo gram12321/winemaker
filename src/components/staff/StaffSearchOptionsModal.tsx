@@ -151,7 +151,17 @@ const StaffSearchOptionsModal: React.FC<StaffSearchOptionsModalProps> = ({
         // Merge changed fields with existing options state
         setOptions(prev => ({ ...prev, ...changedFields }));
       }} 
-    />
+    >
+      {/* Add separator and title for the second table */}
+      <hr className="my-6 border-gray-200" />
+      <h3 className="text-lg font-medium mb-4">Hiring Process (Per Candidate)</h3>
+      <div className="bg-gray-50 p-4 rounded mb-4">
+        <WorkCalculationTable 
+          factors={hiringFactors} // Use hiring factors
+          totalWork={hiringWorkEstimate.totalWork} // Use hiring estimate
+        />
+      </div>
+    </ActivityOptionsModal>
   );
 };
 
