@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { GrapeVariety, getResourceByGrapeVariety, GRAPE_SUITABILITY, COUNTRY_REGION_MAP } from '@/lib/core/constants/vineyardConstants';
+import {
+  GrapeVariety,
+  getResourceByGrapeVariety,
+  Resource,
+  GrapeWineCharacteristics,
+  COUNTRY_REGION_MAP,
+  GRAPE_SUITABILITY,
+  BASE_BALANCED_RANGES
+} from "@/lib/core/constants/vineyardConstants";
 import { formatPercentage, getColorClass } from '@/lib/core/utils/formatUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,40 +15,54 @@ import { formatNumber } from '@/lib/core/utils/formatUtils';
 
 // --- CharacteristicBar Component (Defined Inline) ---
 interface CharacteristicBarProps {
-  trait: string;
-  value: number; // Expected base characteristic value (-0.2 to 0.3 range)
+  characteristicName: keyof GrapeWineCharacteristics;
+  label: string;
+  value: number;
+  colorClass: string;
 }
 
-const CharacteristicBar: React.FC<CharacteristicBarProps> = ({ trait, value }) => {
-  // Convert base value (-0.2 to 0.3) to display value (0.3 to 0.8, then scale to 0-1)
-  const displayValueRaw = 0.5 + value;
-  // Clamp display value between 0 and 1 for the bar width
-  const displayValueClamped = Math.max(0, Math.min(1, displayValueRaw)); 
-  const percentage = (displayValueClamped * 100).toFixed(0);
+const CharacteristicBar: React.FC<CharacteristicBarProps> = ({ 
+  characteristicName,
+  label, 
+  value, 
+  colorClass 
+}) => {
+  // Value is now absolute (0-1), no need for deviation calculation
+  const displayValueClamped = Math.max(0, Math.min(1, value)); 
+  const [minBalance, maxBalance] = BASE_BALANCED_RANGES[characteristicName];
 
   return (
     <div className="flex items-center py-2 border-b last:border-b-0 border-gray-200">
       <div className="w-1/4 pr-2 text-sm font-medium text-gray-700 capitalize">
         {/* TODO: Add icons later if desired */}
-        {trait}
+        {label}
       </div>
       <div className="w-3/4 flex items-center">
         <div className="relative w-full h-2 bg-gray-200 rounded-full overflow-hidden">
           {/* Background bar */}
+          <div className="absolute inset-0 bg-gray-200"></div>
+          
+          {/* Base balanced range */}
           <div 
-            className="absolute top-0 left-0 h-full bg-wine rounded-full" 
-            style={{ width: `${percentage}%` }}
+            className="absolute top-0 bottom-0 bg-green-300/75"
+            style={{
+              left: `${minBalance * 100}%`,
+              width: `${(maxBalance - minBalance) * 100}%`
+            }}
+            title={`Balanced Range: ${formatPercentage(minBalance)} - ${formatPercentage(maxBalance)}`}
           ></div>
-          {/* Optional: Balanced range marker (example: 40%-60%) */}
-          {/* <div className="absolute top-0 h-full bg-green-600 opacity-30" style={{ left: `40%`, width: `20%` }}></div> */}
-          {/* Value Marker (as a thin line) */}
+
+          {/* TODO: Add adjusted range visualization here later 
+                (Requires migrating balanceCalculator logic) */}
+
+          {/* Value marker (using a thin div for now) */}
           <div 
-            className="absolute top-0 bottom-0 w-0.5 bg-black opacity-50"
-            style={{ left: `${percentage}%` }}
+            className="absolute top-0 bottom-0 w-1 bg-black z-10"
+            style={{ left: `${displayValueClamped * 100}%` }}
           ></div>
         </div>
         <span className="ml-3 text-sm font-medium text-gray-700 w-12 text-right">
-          {percentage}%
+          {formatPercentage(value)}
         </span>
       </div>
     </div>
@@ -106,8 +128,14 @@ export const GrapeInfoView: React.FC<GrapeInfoViewProps> = ({ grapeName, onClose
         {/* Grape Characteristics */}
         <div className="space-y-1">
           <h3 className="text-lg font-semibold mb-2 text-wine-dark">Grape Characteristics</h3>
-          {Object.entries(characteristics).map(([trait, value]) => (
-            <CharacteristicBar key={trait} trait={trait} value={value} />
+          {Object.entries(resource.baseCharacteristics).map(([key, val]) => (
+            <CharacteristicBar 
+              key={key} 
+              characteristicName={key as keyof GrapeWineCharacteristics}
+              label={key.charAt(0).toUpperCase() + key.slice(1)} 
+              value={val}
+              colorClass={getColorClass(val)} 
+            />
           ))}
         </div>
 

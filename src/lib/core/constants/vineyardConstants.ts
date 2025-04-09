@@ -229,12 +229,13 @@ export const REGION_REAL_PRICE_RANGES = {
 };
 
 // Base Characteristics for Grapes (Migrated from resource.js)
+// Values represent absolute position on a 0-1 scale (0.5 is midpoint)
 const baseGrapeCharacteristics = {
-  'Barbera':        { acidity: 0.2,  aroma: 0.0,  body: 0.1,  spice: 0.0,  sweetness: 0.0,  tannins: 0.1  },
-  'Chardonnay':     { acidity: -0.1, aroma: 0.15, body: 0.25, spice: 0.0,  sweetness: 0.0,  tannins: -0.15 },
-  'Pinot Noir':     { acidity: 0.15, aroma: 0.1,  body: -0.15,spice: 0.0,  sweetness: 0.0,  tannins: -0.1  },
-  'Primitivo':      { acidity: 0.0,  aroma: 0.2,  body: 0.2,  spice: 0.0,  sweetness: 0.2,  tannins: 0.2  },
-  'Sauvignon Blanc':{ acidity: 0.3,  aroma: 0.25, body: -0.2, spice: 0.1,  sweetness: -0.1, tannins: -0.2  }
+  'Barbera':        { acidity: 0.7,  aroma: 0.5,  body: 0.6,  spice: 0.5,  sweetness: 0.5,  tannins: 0.6  }, // acidity: 0.5+0.2, body: 0.5+0.1, tannins: 0.5+0.1
+  'Chardonnay':     { acidity: 0.4,  aroma: 0.65, body: 0.75, spice: 0.5,  sweetness: 0.5,  tannins: 0.35 }, // acidity: 0.5-0.1, aroma: 0.5+0.15, body: 0.5+0.25, tannins: 0.5-0.15
+  'Pinot Noir':     { acidity: 0.65, aroma: 0.6,  body: 0.35, spice: 0.5,  sweetness: 0.5,  tannins: 0.4  }, // acidity: 0.5+0.15, aroma: 0.5+0.1, body: 0.5-0.15, tannins: 0.5-0.1
+  'Primitivo':      { acidity: 0.5,  aroma: 0.7,  body: 0.7,  spice: 0.5,  sweetness: 0.7,  tannins: 0.7  }, // aroma: 0.5+0.2, body: 0.5+0.2, sweetness: 0.5+0.2, tannins: 0.5+0.2
+  'Sauvignon Blanc':{ acidity: 0.8,  aroma: 0.75, body: 0.3,  spice: 0.6,  sweetness: 0.4,  tannins: 0.3  }  // acidity: 0.5+0.3, aroma: 0.5+0.25, body: 0.5-0.2, spice: 0.5+0.1, sweetness: 0.5-0.1, tannins: 0.5-0.2
 };
 
 export interface GrapeWineCharacteristics {
@@ -272,6 +273,16 @@ export function getResourceByGrapeVariety(grapeName: GrapeVariety | null | undef
   return grapeResourceData[grapeName];
 }
 // --- End Resource Definitions --- 
+
+// Universal Base Balanced Ranges for Wine Characteristics
+export const BASE_BALANCED_RANGES: Record<keyof GrapeWineCharacteristics, [number, number]> = {
+  acidity: [0.4, 0.6],
+  aroma: [0.3, 0.7],
+  body: [0.4, 0.8],
+  spice: [0.35, 0.65],
+  sweetness: [0.4, 0.6],
+  tannins: [0.35, 0.65]
+};
 
 // Aspect Ratings by Region (Migrated from names.js)
 export const REGION_ASPECT_RATINGS = {
