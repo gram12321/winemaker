@@ -1,13 +1,6 @@
 import { GameDate, BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS, DEFAULT_VINEYARD_HEALTH, ORGANIC_CERTIFICATION_YEARS } from '@/lib/core/constants/gameConstants';
-import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS, REGION_PRESTIGE_RANKINGS, GRAPE_SUITABILITY, REGION_REAL_PRICE_RANGES, getResourceByGrapeVariety } from '@/lib/core/constants/vineyardConstants';
-// Import name lists from staffConstants
-import { 
-  italianMaleNames, italianFemaleNames, 
-  germanMaleNames, germanFemaleNames, 
-  spanishMaleNames, spanishFemaleNames, 
-  frenchMaleNames, frenchFemaleNames, 
-  usMaleNames, usFemaleNames 
-} from '@/lib/core/constants/staffConstants';
+import { GrapeVariety, Aspect, FarmingMethod, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, REGION_ASPECT_RATINGS, REGION_PRESTIGE_RANKINGS, GRAPE_SUITABILITY, REGION_REAL_PRICE_RANGES, getResourceByGrapeVariety } from '@/lib/core/constants/vineyardConstants';
+import { italianMaleNames, italianFemaleNames, germanMaleNames, germanFemaleNames, spanishMaleNames, spanishFemaleNames, frenchMaleNames, frenchFemaleNames, usMaleNames, usFemaleNames } from '@/lib/core/constants/staffConstants';
 import { getGameState } from '@/gameState';
 
 // Vineyard interface
@@ -36,6 +29,7 @@ export interface Vineyard {
   remainingYield: number | null;
   ownedSince: GameDate;
   upgrades?: string[];
+  //generateFarmlandPreview not implemented yet (Creates a specific Farmland instance based on country/region for starting conditions)
 }
 
 export function calculateVineyardYield(vineyard: Vineyard): number {
@@ -88,8 +82,10 @@ export function calculateLandValue(country: string, region: string, altitude: nu
   }
   const altitudeNormalized = normalizeAltitude(altitude, altitudeRange);
 
-  // Use the ASPECT_FACTORS constant which maps directly to the normalized value (0.3-1.0)
-  const aspectNormalized = ASPECT_FACTORS[aspect] || 0.5; 
+  // Use REGION_ASPECT_RATINGS instead of ASPECT_FACTORS
+  const countryAspects = REGION_ASPECT_RATINGS[country as keyof typeof REGION_ASPECT_RATINGS];
+  const regionAspects = countryAspects ? countryAspects[region as keyof typeof countryAspects] : null;
+  const aspectNormalized = regionAspects ? (regionAspects[aspect as keyof typeof regionAspects] ?? 0.5) : 0.5; // Default to 0.5 if not found
 
   // Calculate raw price factor by averaging normalized values (as per old logic)
   const rawPriceFactor = (prestigeNormalized + aspectNormalized + altitudeNormalized) / 3;
@@ -336,4 +332,5 @@ function getRandomAcres(): number {
   }
 
   return Number(acres.toFixed(2));
-} 
+}
+

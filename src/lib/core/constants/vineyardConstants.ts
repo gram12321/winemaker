@@ -234,15 +234,17 @@ export interface Resource {
   name: GrapeVariety;
   naturalYield: number; // Base yield tendency (0-1 scale, higher is better)
   fragile: number;      // How sensitive the resource is (0-1 scale, lower is more robust)
+  proneToOxidation: number; // Added (0-1 scale, higher is more prone)
+  grapeColor: 'red' | 'white'; // Added
 }
 
 // Simple map for grape resource data 
 const grapeResourceData: Record<GrapeVariety, Resource> = {
-  "Barbera":        { name: "Barbera",        naturalYield: 0.7, fragile: 0.4 },
-  "Chardonnay":     { name: "Chardonnay",     naturalYield: 0.8, fragile: 0.6 },
-  "Pinot Noir":     { name: "Pinot Noir",     naturalYield: 0.6, fragile: 0.7 },
-  "Primitivo":      { name: "Primitivo",      naturalYield: 0.9, fragile: 0.3 },
-  "Sauvignon Blanc":{ name: "Sauvignon Blanc",naturalYield: 0.75, fragile: 0.5 },
+  "Barbera":        { name: "Barbera",        naturalYield: 0.7, fragile: 0.4, proneToOxidation: 0.4, grapeColor: 'red'   },
+  "Chardonnay":     { name: "Chardonnay",     naturalYield: 0.8, fragile: 0.6, proneToOxidation: 0.7, grapeColor: 'white' },
+  "Pinot Noir":     { name: "Pinot Noir",     naturalYield: 0.6, fragile: 0.7, proneToOxidation: 0.8, grapeColor: 'red'   },
+  "Primitivo":      { name: "Primitivo",      naturalYield: 0.9, fragile: 0.3, proneToOxidation: 0.3, grapeColor: 'red'   },
+  "Sauvignon Blanc":{ name: "Sauvignon Blanc",naturalYield: 0.75, fragile: 0.5, proneToOxidation: 0.9, grapeColor: 'white' },
 };
 
 /**
@@ -253,3 +255,43 @@ export function getResourceByGrapeVariety(grapeName: GrapeVariety | null | undef
   return grapeResourceData[grapeName];
 }
 // --- End Resource Definitions --- 
+
+// Aspect Ratings by Region (Migrated from names.js)
+export const REGION_ASPECT_RATINGS = {
+  "Italy": {
+    "Piedmont": { "North": 0.25, "Northeast": 0.45, "East": 0.65, "Southeast": 1.00, "South": 0.90, "Southwest": 0.80, "West": 0.60, "Northwest": 0.40 },
+    "Tuscany": { "North": 0.30, "Northeast": 0.55, "East": 0.75, "Southeast": 1.00, "South": 0.90, "Southwest": 0.85, "West": 0.70, "Northwest": 0.50 },
+    "Veneto": { "North": 0.20, "Northeast": 0.40, "East": 0.60, "Southeast": 0.95, "South": 1.00, "Southwest": 0.85, "West": 0.65, "Northwest": 0.35 },
+    "Sicily": { "North": 0.45, "Northeast": 0.65, "East": 0.85, "Southeast": 1.00, "South": 0.90, "Southwest": 0.80, "West": 0.70, "Northwest": 0.55 },
+    "Puglia": { "North": 0.50, "Northeast": 0.65, "East": 0.85, "Southeast": 1.00, "South": 0.90, "Southwest": 0.85, "West": 0.75, "Northwest": 0.55 },
+  },
+  "France": {
+    "Bordeaux": { "North": 0.30, "Northeast": 0.40, "East": 0.60, "Southeast": 0.85, "South": 1.00, "Southwest": 0.95, "West": 0.80, "Northwest": 0.50 },
+    "Burgundy (Bourgogne)": { "North": 0.25, "Northeast": 0.45, "East": 0.65, "Southeast": 1.00, "South": 0.90, "Southwest": 0.80, "West": 0.55, "Northwest": 0.40 },
+    "Champagne": { "North": 0.20, "Northeast": 0.35, "East": 0.55, "Southeast": 0.90, "South": 1.00, "Southwest": 0.80, "West": 0.60, "Northwest": 0.35 },
+    "Loire Valley": { "North": 0.30, "Northeast": 0.50, "East": 0.65, "Southeast": 0.85, "South": 1.00, "Southwest": 0.90, "West": 0.75, "Northwest": 0.45 },
+    "Rhone Valley": { "North": 0.25, "Northeast": 0.50, "East": 0.70, "Southeast": 1.00, "South": 0.90, "Southwest": 0.85, "West": 0.65, "Northwest": 0.40 },
+    "Jura": { "North": 0.20, "Northeast": 0.45, "East": 0.65, "Southeast": 0.95, "South": 1.00, "Southwest": 0.85, "West": 0.60, "Northwest": 0.35 },
+  },
+  "Spain": {
+    "Rioja": { "North": 0.40, "Northeast": 0.55, "East": 0.75, "Southeast": 0.85, "South": 1.00, "Southwest": 0.90, "West": 0.80, "Northwest": 0.60 },
+    "Ribera del Duero": { "North": 0.35, "Northeast": 0.60, "East": 0.80, "Southeast": 0.90, "South": 1.00, "Southwest": 0.85, "West": 0.70, "Northwest": 0.55 },
+    "Jumilla": { "North": 0.50, "Northeast": 0.65, "East": 0.85, "Southeast": 1.00, "South": 0.90, "Southwest": 0.80, "West": 0.70, "Northwest": 0.60 },
+    "La Mancha": { "North": 0.45, "Northeast": 0.60, "East": 0.85, "Southeast": 1.00, "South": 0.90, "Southwest": 0.80, "West": 0.75, "Northwest": 0.50 },
+    "Sherry (Jerez)": { "North": 0.50, "Northeast": 0.70, "East": 0.85, "Southeast": 1.00, "South": 0.90, "Southwest": 0.85, "West": 0.80, "Northwest": 0.60 },
+  },
+  "United States": {
+    "Napa Valley (California)": { "North": 0.40, "Northeast": 0.65, "East": 0.85, "Southeast": 1.00, "South": 0.90, "Southwest": 0.85, "West": 0.75, "Northwest": 0.60 },
+    "Sonoma County (California)": { "North": 0.35, "Northeast": 0.60, "East": 0.80, "Southeast": 1.00, "South": 0.90, "Southwest": 0.85, "West": 0.75, "Northwest": 0.55 },
+    "Willamette Valley (Oregon)": { "North": 0.20, "Northeast": 0.45, "East": 0.70, "Southeast": 0.85, "South": 1.00, "Southwest": 0.90, "West": 0.65, "Northwest": 0.35 },
+    "Finger Lakes (New York)": { "North": 0.25, "Northeast": 0.50, "East": 0.70, "Southeast": 0.85, "South": 1.00, "Southwest": 0.85, "West": 0.75, "Northwest": 0.45 },
+    "Central Coast (California)": { "North": 0.35, "Northeast": 0.60, "East": 0.80, "Southeast": 1.00, "South": 0.90, "Southwest": 0.85, "West": 0.70, "Northwest": 0.50 },
+  },
+  "Germany": {
+    "Mosel": { "North": 0.15, "Northeast": 0.35, "East": 0.65, "Southeast": 0.95, "South": 1.00, "Southwest": 0.85, "West": 0.60, "Northwest": 0.30 },
+    "Rheingau": { "North": 0.20, "Northeast": 0.50, "East": 0.70, "Southeast": 0.90, "South": 1.00, "Southwest": 0.85, "West": 0.75, "Northwest": 0.40 },
+    "Rheinhessen": { "North": 0.25, "Northeast": 0.60, "East": 0.80, "Southeast": 0.90, "South": 1.00, "Southwest": 0.85, "West": 0.70, "Northwest": 0.50 },
+    "Pfalz": { "North": 0.30, "Northeast": 0.65, "East": 0.80, "Southeast": 0.90, "South": 1.00, "Southwest": 0.85, "West": 0.70, "Northwest": 0.50 },
+    "Ahr": { "North": 0.10, "Northeast": 0.40, "East": 0.65, "Southeast": 0.85, "South": 1.00, "Southwest": 0.80, "West": 0.65, "Northwest": 0.35 },
+  },
+}; 
