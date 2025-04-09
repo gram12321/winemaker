@@ -72,47 +72,43 @@ const StaffSearchOptionsModal: React.FC<StaffSearchOptionsModalProps> = ({
 
   // Calculate work estimate and factors whenever options change
   useEffect(() => {
-    // Calculate total work first
-    const totalWork = calculateTotalWork(options.numberOfCandidates, {
+    const workOptions = {
       category: WorkCategory.STAFF_SEARCH,
-      // Pass skill level and specializations for calculation
-      skillLevel: options.skillLevel, 
+      skillLevel: options.skillLevel,
       specializations: options.specializations,
-    });
+    };
+    
+    const totalWork = calculateTotalWork(options.numberOfCandidates, workOptions);
+    const cost = calculateSearchCost(options);
 
-    // Basic time estimate
-    const weeks = Math.ceil(totalWork / BASE_WORK_UNITS);
+    // Basic time estimate (assuming average staff contribution)
+    const avgStaffWorkPerWeek = 50; // Rough estimate
+    const weeks = Math.ceil(totalWork / avgStaffWorkPerWeek);
     const timeEstimate = `${weeks} week${weeks === 1 ? '' : 's'}`;
     
+    // Calculate modifiers for display
+    const skillModifier = options.skillLevel; // Skill level is directly the modifier
+    let specializationModifier = 0;
+    if (options.specializations.length > 0) {
+      // Use the new exponential calculation for the display modifier
+      specializationModifier = Math.pow(1.3, options.specializations.length) - 1;
+    }
+
     // Construct factors for the breakdown table
     const calculatedFactors: WorkFactor[] = [
       { label: "Amount", value: options.numberOfCandidates, unit: "candidates", isPrimary: true },
       { label: "Task", value: "Staff Search", isPrimary: true },
-      // Add method/skill level row
-      { 
-        label: "Method", 
-        value: `${currentSkillInfo.name} Level Search`, 
-        modifier: options.skillLevel, // Modifier is the skill level itself (0.1 to 1.0)
-        modifierLabel: "skill level effect" 
-      },
-      // Add specializations row if any are selected
-      ...(options.specializations.length > 0 ? [
-        {
-          label: "Specializations",
-          value: `${options.specializations.length} selected`,
-          modifier: options.specializations.length * 0.20, // +20% per specialization
-          modifierLabel: "specialization effect"
-        }
-      ] : [])
+      { label: "Method", value: `${getSkillLevelInfo(options.skillLevel).name} Level Search`, modifier: skillModifier, modifierLabel: "skill level effect" },
+      { label: "Specializations", value: `${options.specializations.length} selected`, modifier: specializationModifier, modifierLabel: "specialization effect" },
     ];
 
     setWorkEstimate({
       totalWork: Math.round(totalWork),
       timeEstimate,
     });
-    setFactors(calculatedFactors); // Update factors state
-  // Depend on all options that affect work or cost
-  }, [options.numberOfCandidates, options.skillLevel, options.specializations, searchCost]);
+    setFactors(calculatedFactors);
+
+  }, [options]);
 
   // Handle changes from the generic modal
   const handleOptionsChange = (changedOptions: Record<string, any>) => {

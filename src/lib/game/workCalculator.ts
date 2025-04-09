@@ -174,9 +174,14 @@ export function calculateTotalWork(
     if (skillLevel !== undefined) {
       staffSearchModifiers.push(skillLevel);
     }
-    // Specialization Modifier (+20% per specialization)
+    // Specialization Modifier - CHANGED to exponential scaling
     if (specializations && specializations.length > 0) {
-      staffSearchModifiers.push(specializations.length * 0.20);
+      // Using pow(1.3, count) as the multiplier.
+      // Since modifiers are added to 1 later (work * (1 + modifier)), 
+      // the modifier itself should be pow(1.3, count) - 1.
+      const specializationMultiplier = Math.pow(1.3, specializations.length);
+      const specializationModifier = specializationMultiplier - 1; 
+      staffSearchModifiers.push(specializationModifier);
     }
   }
   // --- Apply Staff Search Specific Modifiers --- END
