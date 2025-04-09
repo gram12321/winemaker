@@ -207,10 +207,6 @@ export function calculateStaffWorkContribution(
 ): number {
   if (!staff.length) return 0;
   
-  // Calculate staff tasks to simulate taskCount from old system
-  // In a real implementation, you'd check how many activities each staff is assigned to
-  const staffTaskCount = 1; // Default to 1 task per staff member
-  
   // Calculate total work contribution following old system's approach
   return staff.reduce((total, staffMember) => {
     // Get the relevant skill for this category
@@ -256,8 +252,8 @@ export function calculateStaffWorkContribution(
     // Match the old system's workforce calculation
     const workforce = staffMember.workforce || 50; // Default workforce is 50 in old system
     
-    // Direct port of the old system's formula: (workforce / taskCount) * relevantSkill
-    let staffContribution = (workforce / staffTaskCount) * relevantSkill;
+    // Calculate potential contribution WITHOUT dividing by task count
+    let staffPotentialContribution = workforce * relevantSkill;
     
     // Apply specialization bonus if applicable (multiplicative, not additive like before)
     if (staffMember.specializations && staffMember.specializations.length > 0) {
@@ -267,11 +263,11 @@ export function calculateStaffWorkContribution(
       
       if (hasRelevantSpecialization) {
         // Apply a 30% bonus multiplicatively as in the old system
-        staffContribution *= 1.3;
+        staffPotentialContribution *= 1.3;
       }
     }
     
-    return total + staffContribution;
+    return total + staffPotentialContribution;
   }, 0);
 }
 

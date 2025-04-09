@@ -6,6 +6,7 @@ import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/wor
 import { formatNumber } from '../../lib/core/utils/formatUtils';
 import { toast } from '../../lib/ui/toast';
 import { getCountryCodeForFlag } from '../../lib/core/utils/formatUtils';
+import { getAllActivities } from '../../lib/game/activityManager';
 
 interface StaffAssignmentModalProps {
   activityId: string;
@@ -133,7 +134,19 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   }
 
   const calculateWorkProgress = (): WorkProgressInfo => {
-    if (!activity || assignedStaffIds.length === 0) {
+    if (!activity) {
+      return {
+        workPerWeek: 0,
+        totalWork: activity?.totalWork || 100,
+        appliedWork: activity?.appliedWork || 0,
+        weeksToComplete: 'N/A',
+        progressPercentage: 0,
+        relevantSkill: getRelevantSkillForCategory(category)
+      };
+    }
+    
+    const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
+    if (assignedStaff.length === 0) {
       return {
         workPerWeek: 0,
         totalWork: activity?.totalWork || 100,
@@ -144,21 +157,42 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       };
     }
 
-    const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
-    
     // Convert the category to WorkCategory type for calculation
     const workCategoryValue = category as WorkCategory;
     
-    // Calculate staff work contribution
-    const workPerWeek = calculateStaffWorkContribution(
-      assignedStaff, 
-      workCategoryValue
-    );
+    // --- NEW: Calculate work considering multi-tasking --- 
+    let predictedWorkPerWeek = 0;
+    const allActivities = getAllActivities(); // Get all current activities
 
+    assignedStaff.forEach(staffMember => {
+      // Find how many activities this staff member is assigned to IN TOTAL
+      const tasksAssignedToStaff = allActivities.filter(act => 
+        act.params?.assignedStaffIds?.includes(staffMember.id)
+      ).length;
+      // Also count the CURRENT activity if they are newly assigned in the modal
+      const isAssignedToCurrent = assignedStaffIds.includes(staffMember.id);
+      const alreadyAssignedToCurrentInState = activity.params?.assignedStaffIds?.includes(staffMember.id);
+      
+      let currentTotalTasks = tasksAssignedToStaff;
+      // If newly assigned in modal but not yet saved in activity state, increment task count for prediction
+      if (isAssignedToCurrent && !alreadyAssignedToCurrentInState) {
+         currentTotalTasks += 1;
+      }
+      // Ensure task count is at least 1
+      const effectiveTaskCount = Math.max(1, currentTotalTasks); 
+
+      // Calculate the staff member's potential contribution to THIS category
+      const potentialContribution = calculateStaffWorkContribution([staffMember], workCategoryValue);
+      // Divide by their total predicted task count
+      const predictedContribution = potentialContribution / effectiveTaskCount;
+      predictedWorkPerWeek += predictedContribution;
+    });
+    // --- END NEW --- 
+    
     const totalWork = Math.round(activity.totalWork);
     const remainingWork = totalWork - Math.round(activity.appliedWork);
-    const weeksToComplete = workPerWeek > 0 
-      ? Math.ceil(remainingWork / workPerWeek)
+    const weeksToComplete = predictedWorkPerWeek > 0 
+      ? Math.ceil(remainingWork / predictedWorkPerWeek)
       : 'N/A';
 
     const progressPercentage = totalWork > 0 
@@ -166,7 +200,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
       : 0;
 
     return {
-      workPerWeek: Math.round(workPerWeek),
+      workPerWeek: Math.round(predictedWorkPerWeek),
       totalWork,
       appliedWork: Math.round(activity.appliedWork),
       weeksToComplete,

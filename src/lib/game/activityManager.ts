@@ -5,7 +5,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
-import {  ActivityProgress, WorkCategory, calculateToolSpeedBonus, calculateTotalWork } from './workCalculator';
+import {  ActivityProgress, WorkCategory, calculateToolSpeedBonus, calculateTotalWork, calculateStaffWorkContribution } from './workCalculator';
 import { consoleService } from '@/components/layout/Console';
 import displayManager from './displayManager';
 import { Staff } from '@/gameState';
@@ -593,7 +593,7 @@ export const processActivitiesTick = (): void => {
         // Add the task count property to match old system
         return {
           ...staff,
-          taskCount: staffTaskCount.get(id) || 1
+          taskCount: staffTaskCount.get(id) || 1 // Get actual task count for this staff member
         };
       }
       return null;
@@ -604,59 +604,27 @@ export const processActivitiesTick = (): void => {
     
     // Only apply work if staff is assigned (exact match to old system)
     if (assignedStaff.length > 0) {
-      // Calculate work for each staff member based on relevant skill and task count
-      let appliedWork = 0;
       
+      // Calculate work for each staff member individually, considering their task count
+      let appliedWorkThisTick = 0;
       assignedStaff.forEach(staff => {
-        // Get relevant skill based on activity category
-        let relevantSkill = 0;
-        switch (activity.category) {
-          case WorkCategory.PLANTING:
-          case WorkCategory.HARVESTING:
-          case WorkCategory.CLEARING:
-          case WorkCategory.UPROOTING:
-            relevantSkill = staff.skills?.field || 0;
-            break;
-          case WorkCategory.CRUSHING:
-          case WorkCategory.FERMENTATION:
-            relevantSkill = staff.skills?.winery || 0;
-            break;
-          case WorkCategory.BUILDING:
-          case WorkCategory.UPGRADING:
-          case WorkCategory.MAINTENANCE:
-            relevantSkill = staff.skills?.maintenance || 0;
-            break;
-          case WorkCategory.STAFF_SEARCH:
-          case WorkCategory.ADMINISTRATION:
-            relevantSkill = staff.skills?.administration || 0;
-            break;
-          default:
-            // Use highest skill as fallback
-            relevantSkill = Math.max(
-              staff.skills?.field || 0,
-              staff.skills?.winery || 0,
-              staff.skills?.maintenance || 0,
-              staff.skills?.administration || 0,
-              staff.skills?.sales || 0
-            );
-        }
-        
-        // Workforce division by task count (exactly like old system)
-        const workforce = staff.workforce || 50; // Default to 50 like old system
-        const staffWork = (workforce / staff.taskCount) * relevantSkill;
-        appliedWork += staffWork;
+        // Calculate the staff member's POTENTIAL contribution to this category
+        const potentialContribution = calculateStaffWorkContribution([staff], activity.category);
+        // Divide by their total task count
+        const actualContribution = potentialContribution / staff.taskCount;
+        appliedWorkThisTick += actualContribution;
       });
       
       // Apply tool bonus exactly like old system - multiplicative 
       if (assignedToolIds.length > 0) {
         const toolBonus = calculateToolSpeedBonus(assignedToolIds, activity.category);
-        appliedWork *= toolBonus;
+        appliedWorkThisTick *= toolBonus;
       }
       
       // Apply work to the activity
       const updatedActivity = {
         ...activity,
-        appliedWork: Math.min(activity.totalWork, activity.appliedWork + appliedWork)
+        appliedWork: Math.min(activity.totalWork, activity.appliedWork + appliedWorkThisTick)
       };
       
       updatedActivities.push(updatedActivity);
