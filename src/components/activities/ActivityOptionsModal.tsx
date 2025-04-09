@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { WorkCategory } from '../../lib/game/workCalculator';
 
-export type ActivityOptionType = 'number' | 'select' | 'text' | 'checkbox' | 'range';
+export type ActivityOptionType = 'number' | 'select' | 'text' | 'checkbox' | 'range' | 'checkbox-group';
 
 export interface ActivityOptionField {
   id: string;
   label: string;
   type: ActivityOptionType;
-  defaultValue?: string | number | boolean;
+  defaultValue?: string | number | boolean | string[];
   min?: number;
   max?: number;
   step?: number;
   options?: { value: string | number; label: string }[];
   tooltip?: string;
   required?: boolean;
+  checkboxOptions?: { value: string; label: string; description?: string }[];
 }
 
 export interface ActivityWorkEstimate {
@@ -34,7 +35,8 @@ interface ActivityOptionsModalProps {
   canSubmit?: (options: Record<string, any>) => boolean;
   warningMessage?: string;
   disabledMessage?: string;
-  onOptionsChange?: (options: Record<string, any>) => void;
+  options: Record<string, any>;
+  onOptionsChange: (options: Record<string, any>) => void;
 }
 
 /**
@@ -54,26 +56,24 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
   canSubmit,
   warningMessage,
   disabledMessage = 'Cannot start activity with current options',
+  options,
   onOptionsChange
 }) => {
-  // Initialize state with default values from fields
-  const initialValues = fields.reduce((acc, field) => {
-    acc[field.id] = field.defaultValue !== undefined ? field.defaultValue : '';
-    return acc;
-  }, {} as Record<string, any>);
-  
-  const [options, setOptions] = useState<Record<string, any>>(initialValues);
-  const [tooltipVisible, setTooltipVisible] = useState<string | null>(null);
-  
-  const handleChange = (id: string, value: any) => {
-    setOptions(prev => {
-      const newState = { ...prev, [id]: value };
-      // Call the onChange prop if provided
-      if (onOptionsChange) {
-        onOptionsChange(newState);
+  const handleChange = (id: string, value: any, type: ActivityOptionType = 'text') => {
+    let newStateValue;
+    if (type === 'checkbox-group') {
+      const currentArray = (options[id] || []) as string[];
+      const checked = value.checked;
+      const itemValue = value.itemValue;
+      if (checked) {
+        newStateValue = [...currentArray, itemValue];
+      } else {
+        newStateValue = currentArray.filter(v => v !== itemValue);
       }
-      return newState;
-    });
+    } else {
+      newStateValue = value;
+    }
+    onOptionsChange({ ...options, [id]: newStateValue });
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -137,8 +137,8 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
       {subtitle && <p className="text-gray-600 mb-6">{subtitle}</p>}
       
       <form onSubmit={handleSubmit}>
-        {/* Use grid layout for fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mb-6">
+        {/* Revert to single-column layout */}
+        <div className="space-y-4 mb-6">
           {fields.map(field => (
             <div key={field.id} className="relative">
               <div className="flex items-center mb-1">
@@ -151,17 +151,9 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
                     <button
                       type="button"
                       className="text-gray-400 hover:text-gray-600 text-sm"
-                      onMouseEnter={() => setTooltipVisible(field.id)}
-                      onMouseLeave={() => setTooltipVisible(null)}
                     >
                       ⓘ
                     </button>
-                    
-                    {tooltipVisible === field.id && (
-                      <div className="absolute z-10 w-64 p-2 text-xs bg-gray-800 text-white rounded shadow-lg -bottom-2 left-6">
-                        {field.tooltip}
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -172,7 +164,7 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
                   id={field.id}
                   className="w-full p-2 border rounded"
                   value={options[field.id] as string}
-                  onChange={e => handleChange(field.id, e.target.value)}
+                  onChange={e => handleChange(field.id, e.target.value, 'text')}
                   required={field.required}
                 />
               )}
@@ -183,7 +175,7 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
                   id={field.id}
                   className="w-full p-2 border rounded"
                   value={options[field.id] as number}
-                  onChange={e => handleChange(field.id, parseFloat(e.target.value))}
+                  onChange={e => handleChange(field.id, parseFloat(e.target.value), 'number')}
                   min={field.min}
                   max={field.max}
                   step={field.step}
@@ -198,7 +190,7 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
                     id={field.id}
                     className="w-full"
                     value={options[field.id] as number}
-                    onChange={e => handleChange(field.id, parseFloat(e.target.value))}
+                    onChange={e => handleChange(field.id, parseFloat(e.target.value), 'range')}
                     min={field.min}
                     max={field.max}
                     step={field.step}
@@ -215,7 +207,7 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
                   id={field.id}
                   className="w-full p-2 border rounded"
                   value={options[field.id] as string | number}
-                  onChange={e => handleChange(field.id, e.target.value)}
+                  onChange={e => handleChange(field.id, e.target.value, 'select')}
                   required={field.required}
                 >
                   {field.options.map(option => (
@@ -233,8 +225,35 @@ export const ActivityOptionsModal: React.FC<ActivityOptionsModalProps> = ({
                     id={field.id}
                     className="mr-2"
                     checked={options[field.id] as boolean}
-                    onChange={e => handleChange(field.id, e.target.checked)}
+                    onChange={e => handleChange(field.id, e.target.checked, 'checkbox')}
                   />
+                </div>
+              )}
+              
+              {field.type === 'checkbox-group' && field.checkboxOptions && (
+                <div className="space-y-2 mt-1">
+                  {field.checkboxOptions.map(option => (
+                    <div key={option.value} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={`${field.id}-${option.value}`}
+                        name={field.id}
+                        value={option.value}
+                        checked={(options[field.id] as string[] | undefined || []).includes(option.value)}
+                        onChange={e => handleChange(
+                          field.id, 
+                          { checked: e.target.checked, itemValue: option.value }, 
+                          'checkbox-group'
+                        )}
+                        className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine"
+                      />
+                      <label htmlFor={`${field.id}-${option.value}`} className="text-sm text-gray-700">
+                        {option.label}
+                        {option.description && <span className="text-xs text-gray-500 ml-1">({option.description})</span>}
+                      </label>
+                    </div>
+                  ))
+                  }
                 </div>
               )}
             </div>
