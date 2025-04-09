@@ -1,6 +1,6 @@
 import React from 'react';
 import { StaffSearchOptions, SpecializedRoles, calculateSearchCost, calculatePerCandidateCost, Staff as ServiceStaff } from '../../services/staffService';
-import { getSkillLevelInfo } from '../../lib/core/utils/utils';
+import { getSkillLevelInfo } from '../../lib/core/utils/formatUtils';
 import { getGameState, Player } from '../../gameState';
 import displayManager from '../../lib/game/displayManager';
 
