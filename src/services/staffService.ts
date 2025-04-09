@@ -411,7 +411,6 @@ export function getAssignedStaffToActivity(activityId: string): Staff[] {
   // First verify activity exists
   const activity = getActivityById(activityId);
   if (!activity) {
-    console.warn(`[StaffService] Trying to get staff for non-existent activity: ${activityId}`);
     return [];
   }
   
@@ -430,7 +429,6 @@ export function assignStaffToActivityById(activityId: string, staffIds: string[]
   // First ensure the activity exists
   const activity = getActivityById(activityId);
   if (!activity) {
-    console.error(`[StaffService] Cannot assign staff to non-existent activity: ${activityId}`);
     return null;
   }
   
@@ -448,7 +446,6 @@ export function assignStaffToActivityById(activityId: string, staffIds: string[]
       description: `Assigned ${staffIds.length} staff to activity.`
     });
   } else {
-    console.error(`[StaffService] Failed to assign staff to activity: ${activityId}`);
     toast({
       title: 'Assignment Failed',
       description: 'Could not assign staff to the activity.',
@@ -620,7 +617,6 @@ export function startStaffSearch(options: StaffSearchOptions): string | null {
   const { player } = getGameState();
 
   if (!player || player.money < searchCost) {
-    console.error('[StaffService] Insufficient funds to start staff search');
     return null; 
   }
   
@@ -637,13 +633,11 @@ export function startStaffSearch(options: StaffSearchOptions): string | null {
   // Define completion callback first
   const handleSearchComplete = async () => {
       if (!tempActivityId) return;
-      console.log(`Staff search activity ${tempActivityId} completed.`);
       const finalActivity = getActivityById(tempActivityId);
       const cost = finalActivity?.params?.searchCost || 0;
       const searchOpts = finalActivity?.params?.searchOptions;
 
       if (!searchOpts) {
-          console.error("Search options not found in completed activity!");
           return;
       }
 
@@ -652,17 +646,14 @@ export function startStaffSearch(options: StaffSearchOptions): string | null {
       
       // Generate candidates based on options stored in activity
       const candidates = generateStaffCandidates(searchOpts);
-      console.log('Generated candidates:', candidates);
-
-      // Update the activity parameters with results (optional, could just pass results via display state)
-      // if (finalActivity) {
-      //     finalActivity.params.candidates = candidates;
-      // }
-
-      // Notify StaffView via display state update
-      displayManager.updateDisplayState('staffSearchActivity', { activityId: null, results: candidates });
-
-      toast({ title: "Search Complete!", description: `Found ${candidates.length} potential candidates.` });
+      
+      // Store the results in the display state associated with the search
+      displayManager.updateDisplayState('staffSearchActivity', {
+        results: candidates,
+        activityId: null // Clear the activity ID when complete
+      });
+      
+      toast({ title: "Search Complete", description: `Found ${candidates.length} potential candidates.` });
   };
 
   // Create activity using imported functions
@@ -700,19 +691,15 @@ export function startHiringProcess(staff: Staff): string | null {
   const { player } = gameState;
   
   if (!player || player.money < staff.wage) {
-    console.error('[StaffService] Insufficient funds for first month\'s wage');
     return null; 
   }
   
   if (!staff || !staff.id || !staff.name) {
-    console.error('[StaffService] Invalid staff data for hiring process');
     return null; // Return null instead of throwing
   }
 
   // Define completion callback logic first
   const handleHiringComplete = (activityId: string) => { // Pass ID to callback
-      console.log(`[StaffService] Hiring activity ${activityId} completed.`);
-      
       const finalActivity = getActivityById(activityId);
       const staffToHire = finalActivity?.params?.staffToHire as Staff | undefined;
 

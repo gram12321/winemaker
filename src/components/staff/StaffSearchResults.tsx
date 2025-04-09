@@ -73,7 +73,7 @@ const StaffSearchResults: React.FC<StaffSearchResultsProps> = ({
                 <span>Skill: {getSkillLevelInfo(candidate.skillLevel).name}</span>
                 <span>
                   Specialization: {candidate.specializations?.length > 0 
-                    ? candidate.specializations.map(specId => SpecializedRoles[specId]?.title || specId).join(', ') 
+                    ? candidate.specializations.map(specId => SpecializedRoles[specId as keyof typeof SpecializedRoles]?.title || specId).join(', ') 
                     : 'Generalist'}
                 </span>
               </div>
@@ -85,8 +85,7 @@ const StaffSearchResults: React.FC<StaffSearchResultsProps> = ({
                 size="sm"
                 className="bg-wine hover:bg-wine-dark"
                 onClick={() => {
-                  console.log(`[StaffSearchResults] Hiring candidate: ${candidate.name}`)
-                  onHire(candidate)
+                  onHire(candidate);
                 }}
               >
                 Hire

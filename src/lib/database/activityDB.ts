@@ -70,7 +70,6 @@ export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
   try {
     const { player } = getGameState();
     if (!player?.id) {
-      console.error('[ActivityDB] No player ID found when loading activities');
       return [];
     }
 
@@ -89,7 +88,6 @@ export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
     
     return activities;
   } catch (error) {
-    console.error('[ActivityDB] Error loading activities:', error);
     return [];
   }
 }
@@ -115,7 +113,6 @@ export async function initializeActivitySystem(): Promise<void> {
         // Example: const buildingService = await import('../../services/buildingService');
         //          services.building = buildingService;
       } catch (error) {
-        console.error('[ActivityDB] Error importing services:', error);
       }
       
       // Set up callbacks for activities with targets
@@ -150,7 +147,6 @@ export async function initializeActivitySystem(): Promise<void> {
                 if (percentMatch) {
                   const percent = parseInt(percentMatch[1]);
                   activity.appliedWork = Math.round(activity.totalWork * (percent / 100));
-                  console.log(`[ActivityDB] Converted percentage (${percent}%) to work values: ${activity.appliedWork}/${activity.totalWork}`);
                 }
               }
             }
@@ -162,7 +158,6 @@ export async function initializeActivitySystem(): Promise<void> {
               activity.appliedWork = newAppliedWork;
               
               // Update target entity with raw work values
-              console.log(`[ActivityDB] Updating target ${activity.targetId} with progress for ${activity.category}: ${activity.appliedWork}/${activity.totalWork}`);
               await updateVineyard(activity.targetId, {
                 status: `${activity.category}: ${activity.appliedWork}/${activity.totalWork}`,
               });
@@ -186,7 +181,6 @@ export async function initializeActivitySystem(): Promise<void> {
       });
     }
   } catch (error) {
-    console.error('[ActivityDB] Error initializing activity system:', error);
     updateGameState({
       activities: []
     });
@@ -197,7 +191,6 @@ export async function saveActivityToDb(activity: Activity): Promise<boolean> {
   try {
     const { player } = getGameState();
     if (!player?.id) {
-      console.error('[ActivityDB] No player ID found when saving activity');
       return false;
     }
 
@@ -211,7 +204,6 @@ export async function saveActivityToDb(activity: Activity): Promise<boolean> {
     await setDoc(activityRef, sanitizedActivity);
     return true;
   } catch (error) {
-    console.error('Error saving activity to database:', error);
     return false;
   }
 }
@@ -220,7 +212,6 @@ export async function updateActivityInDb(activity: Activity): Promise<boolean> {
   try {
     const { player } = getGameState();
     if (!player?.id) {
-      console.error('[ActivityDB] No player ID found when updating activity');
       return false;
     }
 
@@ -228,7 +219,6 @@ export async function updateActivityInDb(activity: Activity): Promise<boolean> {
     const activityRef = doc(collection(db, ACTIVITIES_COLLECTION), activity.id);
     const activityDoc = await getDoc(activityRef);
     if (!activityDoc.exists() || activityDoc.data().userId !== player.id) {
-      console.error('[ActivityDB] Activity does not belong to current user');
       return false;
     }
 
@@ -241,7 +231,6 @@ export async function updateActivityInDb(activity: Activity): Promise<boolean> {
     await updateDoc(activityRef, sanitizedActivity);
     return true;
   } catch (error) {
-    console.error('Error updating activity in database:', error);
     return false;
   }
 }
@@ -250,7 +239,6 @@ export async function loadActivityFromDb(activityId: string): Promise<Activity |
   try {
     const { player } = getGameState();
     if (!player?.id) {
-      console.error('[ActivityDB] No player ID found when loading activity');
       return null;
     }
 
@@ -261,7 +249,6 @@ export async function loadActivityFromDb(activityId: string): Promise<Activity |
       const data = activitySnapshot.data();
       // Verify the activity belongs to the current user
       if (data.userId !== player.id) {
-        console.error('[ActivityDB] Activity does not belong to current user');
         return null;
       }
       return data as Activity;
@@ -269,7 +256,6 @@ export async function loadActivityFromDb(activityId: string): Promise<Activity |
     
     return null;
   } catch (error) {
-    console.error('Error loading activity from database:', error);
     return null;
   }
 }
@@ -278,7 +264,6 @@ export async function removeActivityFromDb(activityId: string): Promise<boolean>
   try {
     const { player } = getGameState();
     if (!player?.id) {
-      console.error('[ActivityDB] No player ID found when removing activity');
       return false;
     }
 
@@ -286,14 +271,12 @@ export async function removeActivityFromDb(activityId: string): Promise<boolean>
     const activityRef = doc(collection(db, ACTIVITIES_COLLECTION), activityId);
     const activityDoc = await getDoc(activityRef);
     if (!activityDoc.exists() || activityDoc.data().userId !== player.id) {
-      console.error('[ActivityDB] Activity does not belong to current user');
       return false;
     }
 
     await deleteDoc(activityRef);
     return true;
   } catch (error) {
-    console.error('Error removing activity from database:', error);
     return false;
   }
 }
@@ -311,10 +294,8 @@ export async function deleteAllActivitiesFromDb(): Promise<boolean> {
     });
     
     await Promise.all(deletePromises);
-    console.log(`[ActivityDB] Deleted ${deletePromises.length} activities from Firestore`);
     return true;
   } catch (error) {
-    console.error('[ActivityDB] Error deleting all activities:', error);
     return false;
   }
 }

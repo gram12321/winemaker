@@ -56,8 +56,8 @@ const StaffView: React.FC = () => {
   const [activityToAssignStaff, setActivityToAssignStaff] = useState<string | null>(null);
   
   // Get ongoing activity IDs and related data from display state
-  const searchDisplayState = displayManager.getDisplayState('staffSearchActivity') || {};
-  const hiringDisplayState = displayManager.getDisplayState('staffHiringActivity') || {};
+  const searchDisplayState = displayManager.getDisplayState('staffSearchActivity');
+  const hiringDisplayState = displayManager.getDisplayState('staffHiringActivity');
   const searchActivityId = searchDisplayState.activityId;
   const hiringActivityId = hiringDisplayState.activityId;
   const searchActivity = searchActivityId ? getActivityById(searchActivityId) : null;
@@ -69,14 +69,9 @@ const StaffView: React.FC = () => {
 
   // Effect to update search results state when display state changes
   useEffect(() => {
-    // Read the results directly from the searchDisplayState obtained outside the effect
-    if (searchDisplayState.results && searchDisplayState.results.length > 0) {
-      console.log("[StaffView] Received search results, updating state:", searchDisplayState.results);
+    if (searchDisplayState && searchDisplayState.results && searchDisplayState.results.length > 0) {
       setSearchResults(searchDisplayState.results);
-      // Clear results from display state once consumed?
-      // displayManager.updateDisplayState('staffSearchActivity', { results: [] }); 
     }
-    // Depend on the whole state object or specifically searchDisplayState.results
   }, [searchDisplayState]); 
 
   // Handle start of staff search
@@ -287,10 +282,9 @@ const StaffView: React.FC = () => {
     try {
       const newActivityId = startStaffSearch(options);
       if (newActivityId) {
-        console.log("Started search activity:", newActivityId);
-        // Store the activity ID in display state
         displayManager.updateDisplayState('staffSearchActivity', { activityId: newActivityId });
-        toast({ title: "Staff search started!", description: "Assign staff to speed up the process." });
+        setShowStaffSearch(false); // Close modal after starting
+        toast({ title: "Search Started", description: "Staff search initiated. Assign staff to Administration to proceed." });
       } else {
         toast({ title: "Error", description: "Failed to start staff search activity.", variant: "destructive" });
       }
@@ -298,7 +292,6 @@ const StaffView: React.FC = () => {
       console.error("Error starting staff search:", error);
       toast({ title: "Error", description: "An error occurred while starting the search.", variant: "destructive" });
     }
-    setShowStaffSearch(false); // Close modal regardless of success/failure for now
   };
 
   const handleAssignStaffToActivity = (activityId: string) => {
@@ -316,16 +309,10 @@ const StaffView: React.FC = () => {
     try {
       const newHiringActivityId = startHiringProcess(candidate);
       if (newHiringActivityId) {
-        console.log("[StaffView] Started hiring activity:", newHiringActivityId);
-        
-        // *** FIX: Clear the search activity ID first ***
         displayManager.updateDisplayState('staffSearchActivity', { activityId: null, results: [] });
         
-        // Now store the hiring activity ID in display state
         displayManager.updateDisplayState('staffHiringActivity', { activityId: newHiringActivityId });
-        console.log("[StaffView] Updated staffHiringActivity display state with ID:", newHiringActivityId);
         
-        // Clear search results from local component state
         setSearchResults([]);
 
         toast({ title: "Hiring Process Started", description: `Started hiring ${candidate.name}. Assign staff to Administration to complete.` });
@@ -841,7 +828,7 @@ const StaffView: React.FC = () => {
               onClose={handleStaffAssignmentModalClose}
               initialAssignedStaffIds={getActivityById(activityToAssignStaff)?.params?.assignedStaffIds || []}
               onAssignmentChange={(staffIds, finalSave) => {
-                 console.log(`Staff assignment changed for ${activityToAssignStaff}:`, staffIds, finalSave);
+                 // console.log(`Staff assignment changed for ${activityToAssignStaff}:`, staffIds, finalSave);
               }}
             />
           </div>

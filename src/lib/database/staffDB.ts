@@ -16,7 +16,6 @@ export const saveStaffToDb = async (staff: Staff): Promise<boolean> => {
     await setDoc(staffRef, staff);
     return true;
   } catch (error) {
-    console.error('Error saving staff to database:', error);
     return false;
   }
 };
@@ -29,7 +28,6 @@ export const loadAllStaffFromDb = async (): Promise<Staff[]> => {
     const staffSnapshot = await getDocs(collection(db, STAFF_COLLECTION));
     return staffSnapshot.docs.map(doc => doc.data() as Staff);
   } catch (error) {
-    console.error('Error loading staff from database:', error);
     return [];
   }
 };
@@ -43,7 +41,6 @@ export const removeStaffFromDb = async (staffId: string): Promise<boolean> => {
     await setDoc(staffRef, { deleted: true }, { merge: true });
     return true;
   } catch (error) {
-    console.error('Error removing staff from database:', error);
     return false;
   }
 };
@@ -59,7 +56,6 @@ export const updateStaffInDb = async (staff: Staff): Promise<boolean> => {
     await updateDoc(staffRef, sanitizedStaff);
     return true;
   } catch (error) {
-    console.error('Error updating staff in database:', error);
     return false;
   }
 };
@@ -90,7 +86,6 @@ export const saveTeamToDb = async (team: StaffTeam): Promise<boolean> => {
     localStorage.setItem('staffTeams', JSON.stringify(teams));
     return true;
   } catch (error) {
-    console.error('Error saving team to database:', error);
     return false;
   }
 };
@@ -107,7 +102,6 @@ export const loadTeamsFromDb = async (): Promise<StaffTeam[]> => {
     localStorage.setItem('staffTeams', JSON.stringify(teams));
     return teams;
   } catch (error) {
-    console.error('Error loading teams from database:', error);
     // Fallback to localStorage if Firebase fails
     const teamsJSON = localStorage.getItem('staffTeams');
     return teamsJSON ? JSON.parse(teamsJSON) : [];
@@ -126,7 +120,6 @@ export const saveStaffAssignmentsToDb = async (
     await setDoc(assignmentRef, { staffIds });
     return true;
   } catch (error) {
-    console.error('Error saving staff assignments to database:', error);
     return false;
   }
 };
@@ -142,7 +135,6 @@ export const loadStaffAssignmentsFromDb = async (
     const assignmentDoc = await getDoc(assignmentRef);
     return assignmentDoc.exists() ? assignmentDoc.data().staffIds : [];
   } catch (error) {
-    console.error('Error loading staff assignments from database:', error);
     return [];
   }
 };
@@ -166,10 +158,8 @@ export const deleteAllStaff = async (): Promise<boolean> => {
     });
     
     await Promise.all(deletePromises);
-    console.log(`Deleted ${deletePromises.length} staff records from Firestore`);
     return true;
   } catch (error) {
-    console.error('Error deleting all staff:', error);
     return false;
   }
 };
@@ -186,10 +176,8 @@ export const deleteAllTeams = async (): Promise<boolean> => {
     });
     
     await Promise.all(deletePromises);
-    console.log(`Deleted ${deletePromises.length} team records from Firestore`);
     return true;
   } catch (error) {
-    console.error('Error deleting all teams:', error);
     return false;
   }
 };
@@ -206,10 +194,8 @@ export const deleteAllStaffAssignments = async (): Promise<boolean> => {
     });
     
     await Promise.all(deletePromises);
-    console.log(`Deleted ${deletePromises.length} staff assignment records from Firestore`);
     return true;
   } catch (error) {
-    console.error('Error deleting all staff assignments:', error);
     return false;
   }
 };

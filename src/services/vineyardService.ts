@@ -79,7 +79,7 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
 
     // Import the activity manager and work calculator
     const { createActivityProgress } = await import('@/lib/game/workCalculator');
-    const { addActivity } = await import('@/lib/game/activityManager');
+    const { addActivity, updateActivity } = await import('@/lib/game/activityManager');
     const { WorkCategory } = await import('@/lib/game/workCalculator');
 
     // Create and add the planting activity
@@ -114,7 +114,7 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
             vineyardHealth: 0.8, // Start with 80% health
             vineAge: 0,
           });
-          consoleService.success(`${grape} planted in ${vineyard.name} with a density of ${density} vines per acre.`);
+          // consoleService.success(`${grape} planted in ${vineyard.name} with a density of ${density} vines per acre.`);
         },
         // Progress callback for partial updates
         progressCallback: async (progress) => {
@@ -122,12 +122,11 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
           const totalWork = plantingActivity.totalWork;
           const appliedWork = Math.round(totalWork * progress);
           
-          // Update the activity's appliedWork field
-          plantingActivity.appliedWork = appliedWork;
+          // Update the activity object in the global state
+          updateActivity(plantingActivity.id, { appliedWork });
           
           // Update the vineyard status with raw work values
           if (progress > 0 && progress < 1) {
-            console.log(`[VineyardService] Updating activity ${plantingActivity.id} progress: ${appliedWork}/${totalWork} (${Math.round(progress * 100)}%)`);
             await updateVineyard(id, {
               status: `Planting: ${appliedWork}/${totalWork}`,
             });
@@ -139,13 +138,15 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
     // Add the activity to the game state
     addActivity(plantingActivity);
 
-    // For now, since we don't have staff, let's initialize with 0% progress
-    const { updateActivity } = await import('@/lib/game/activityManager');
-    updateActivity(plantingActivity.id, {
+    // No need to call updateActivity here again, just add it
+    /*
+    const { updateActivity: initialUpdate } = await import('@/lib/game/activityManager');
+    initialUpdate(plantingActivity.id, {
       appliedWork: 0 // Start with 0% progress
     });
+    */
 
-    consoleService.info(`Started planting ${grape} in ${vineyard.name}.`);
+    // consoleService.info(`Started planting ${grape} in ${vineyard.name}.`);
     return vineyard;
   } catch (error) {
     console.error('Error planting vineyard:', error);
@@ -175,13 +176,13 @@ export async function harvestVineyard(
     
     // Check if it's winter - don't allow harvest to start
     if (gameState.season === 'Winter') {
-      consoleService.error(`Cannot harvest during Winter - vines are dormant`);
+      console.error(`Cannot harvest during Winter - vines are dormant`);
       return null;
     }
     
     // Check if status is dormancy
     if (vineyard.status === 'Dormancy') {
-      consoleService.error(`Cannot harvest during dormancy period`);
+      console.error(`Cannot harvest during dormancy period`);
       return null;
     }
 
@@ -266,7 +267,7 @@ export async function harvestVineyard(
             ...(newRemainingYield <= 0 || season === 'Winter' ? { ripeness: 0 } : {})
           });
 
-          consoleService.success(`Completed harvesting ${Math.round(harvestableAmount).toLocaleString()} kg of ${vineyard.grape} from ${vineyard.name}.`);
+          // consoleService.success(`Completed harvesting ${Math.round(harvestableAmount).toLocaleString()} kg of ${vineyard.grape} from ${vineyard.name}.`);
         },
         // Progress callback for partial updates
         progressCallback: async (progress) => {
@@ -281,7 +282,7 @@ export async function harvestVineyard(
               await updateActivityFn(harvestingActivity.id, { 
                 appliedWork: harvestingActivity.totalWork  // Set applied work to total work to mark as complete
               });
-              consoleService.info(`Harvesting of ${vineyard.grape} stopped: vineyard is now dormant`);
+              // consoleService.info(`Harvesting of ${vineyard.grape} stopped: vineyard is now dormant`);
               return;
             }
             
@@ -317,7 +318,7 @@ export async function harvestVineyard(
                 // Update the total harvested so far
                 harvestingActivity.params!.harvestedSoFar = previousHarvested + harvestedThisTick;
                 
-                consoleService.info(`Harvested ${Math.round(harvestedThisTick).toLocaleString()} kg of ${vineyard.grape} (${Math.round(progress * 100)}% complete).`);
+                // consoleService.info(`Harvested ${Math.round(harvestedThisTick).toLocaleString()} kg of ${vineyard.grape} (${Math.round(progress * 100)}% complete).`);
               }
             }
             
@@ -328,7 +329,7 @@ export async function harvestVineyard(
             // Update the activity's appliedWork field
             harvestingActivity.appliedWork = appliedWork;
 
-            console.log(`[VineyardService] Updating activity ${harvestingActivity.id} progress: ${appliedWork}/${totalWork} (${Math.round(progress * 100)}%)`);
+            // console.log(`[VineyardService] Updating activity ${harvestingActivity.id} progress: ${appliedWork}/${totalWork} (${Math.round(progress * 100)}%)`);
 
             // Update vineyard status with raw work values
             await updateVineyard(id, {
@@ -351,7 +352,7 @@ export async function harvestVineyard(
       appliedWork: 0 // Start with 0% progress
     });
 
-    consoleService.info(`Started harvesting ${vineyard.grape} from ${vineyard.name}. Grapes will be stored in ${storageNames}.`);
+    // consoleService.info(`Started harvesting ${vineyard.grape} from ${vineyard.name}. Grapes will be stored in ${storageNames}.`);
     return {
       vineyard,
       harvestedAmount: 0 // Initial harvested amount is 0

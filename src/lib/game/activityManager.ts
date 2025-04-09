@@ -79,7 +79,7 @@ export const startActivityWithDisplayState = (
   
   // Check if there's already an activity in progress
   if (displayState.activityId) {
-    console.warn(`[ActivityManager] Activity already in progress with ID ${displayState.activityId}`);
+    // console.warn(`[ActivityManager] Activity already in progress with ID ${displayState.activityId}`);
     return displayState.activityId;
   }
   
@@ -134,7 +134,7 @@ export const startActivityWithDisplayState = (
 
     return activityId;
   } catch (error) {
-    console.error('[ActivityManager] Error starting activity:', error);
+    // console.error('[ActivityManager] Error starting activity:', error);
     
     // Show error toast
     toast({
@@ -185,7 +185,7 @@ export const assignStaffWithDisplayState = (
     
     return true;
   } catch (error) {
-    console.error('[ActivityManager] Error assigning staff:', error);
+    // console.error('[ActivityManager] Error assigning staff:', error);
     
     toast({
       title: 'Assignment Failed',
@@ -259,8 +259,7 @@ export const cancelActivityWithDisplayState = (
     // Reset state
     displayManager.updateDisplayState(displayStateKey, { activityId: null });
     
-    console.log(`[ActivityManager] Cancelled activity ${activityId}`);
-    
+    // console.log(`[ActivityManager] Cancelled activity ${activityId}`);
     toast({
       title: 'Activity Cancelled',
       description: 'The activity has been cancelled.'
@@ -272,7 +271,7 @@ export const cancelActivityWithDisplayState = (
     
     return true;
   } catch (error) {
-    console.error('[ActivityManager] Error cancelling activity:', error);
+    // console.error('[ActivityManager] Error cancelling activity:', error);
     return false;
   }
 };
@@ -403,7 +402,7 @@ export const addActivity = (activity: ActivityProgress): ActivityProgress => {
   // Check if target already has an active activity
   if (activity.targetId && hasActiveActivity(activity.targetId, activity.category || undefined)) {
     const error = `Cannot start a new ${activity.category || 'work'} activity: target ${activity.targetId} already has an active activity`;
-    consoleService.error(error);
+    // consoleService.error(error);
     throw new Error(error);
   }
   
@@ -425,13 +424,13 @@ export const addActivity = (activity: ActivityProgress): ActivityProgress => {
       ...activityWithId,
       userId: player.id
     }).catch(error => {
-      console.error('[ActivityManager] Error saving activity to database:', error);
+      // console.error('[ActivityManager] Error saving activity to database:', error);
     });
   } else {
-    console.warn('[ActivityManager] Cannot save activity to database: no player ID found');
+    // console.warn('[ActivityManager] Cannot save activity to database: no player ID found');
   }
   
-  consoleService.info(`Started ${activityWithId.category} activity`);
+  // consoleService.info(`Started ${activityWithId.category} activity`);
   displayManager.updateAllDisplays();
   
   return activityWithId;
@@ -466,10 +465,10 @@ export const updateActivity = (id: string, updates: Partial<ActivityProgress>): 
         ...updatedActivity,
         userId: player.id
       }).catch(error => {
-        console.error('[ActivityManager] Error updating activity in database:', error);
+        // console.error('[ActivityManager] Error updating activity in database:', error);
       });
     } else {
-      console.warn('[ActivityManager] Cannot update activity in database: no player ID found');
+      // console.warn('[ActivityManager] Cannot update activity in database: no player ID found');
     }
   }
   
@@ -492,7 +491,7 @@ export const removeActivity = (id: string): boolean => {
     
     // Remove from Firebase in the background
     removeActivityFromDb(id).catch(error => {
-      console.error('[ActivityManager] Error removing activity from database:', error);
+      // console.error('[ActivityManager] Error removing activity from database:', error);
     });
     
     // Clean up callbacks
@@ -671,7 +670,7 @@ export const processActivitiesTick = (): void => {
           try {
             updatedActivity.completionCallback();
           } catch (error) {
-            console.error(`Error in completion callback for activity ${activity.id}:`, error);
+            // console.error(`Error in completion callback for activity ${activity.id}:`, error);
           }
         }
         
@@ -682,7 +681,7 @@ export const processActivitiesTick = (): void => {
             // Remove the callback after execution
             delete completionCallbacks[activity.id];
           } catch (error) {
-            console.error(`Error in stored completion callback for activity ${activity.id}:`, error);
+            // console.error(`Error in stored completion callback for activity ${activity.id}:`, error);
           }
         }
       } else {
@@ -694,7 +693,7 @@ export const processActivitiesTick = (): void => {
           try {
             updatedActivity.progressCallback(progress);
           } catch (error) {
-            console.error(`Error in progress callback for activity ${activity.id}:`, error);
+            // console.error(`Error in progress callback for activity ${activity.id}:`, error);
           }
         }
         
@@ -703,7 +702,7 @@ export const processActivitiesTick = (): void => {
           try {
             progressCallbacks[activity.id](progress);
           } catch (error) {
-            console.error(`Error in stored progress callback for activity ${activity.id}:`, error);
+            // console.error(`Error in stored progress callback for activity ${activity.id}:`, error);
           }
         }
       }
@@ -727,7 +726,7 @@ export const processActivitiesTick = (): void => {
     completedActivities.forEach(id => {
       const activity = activities.find(a => a.id === id);
       if (activity) {
-        consoleService.info(`Completed ${activity.category} activity`);
+        // consoleService.info(`Completed ${activity.category} activity`);
       }
     });
   }
