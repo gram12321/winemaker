@@ -89,7 +89,14 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
       {
         density: density,
         targetId: id,
-        additionalParams: { grape, density },
+        additionalParams: { 
+          grape, 
+          density,
+          altitude: vineyard.altitude,
+          country: vineyard.country,
+          region: vineyard.region,
+          resourceName: grape,
+        },
         // Callback when planting is complete
         completionCallback: async () => {
           const gameState = getGameState();

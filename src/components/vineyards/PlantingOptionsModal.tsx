@@ -63,16 +63,28 @@ const PlantingOptionsModal: React.FC<PlantingOptionsModalProps> = ({
     const fragility = grapeResource?.fragile ?? 0; // Get fragility (0 = robust, 1 = fragile)
     const robustness = 1 - fragility; // Calculate actual robustness
     const fragilityModifier = fragility; // The modifier is the fragility value itself
-    const altitudeEffect = 0; // Placeholder for altitude effect calculation
+    
+    // Calculate altitude modifier (you might need a separate helper function for clarity)
+    let altitudeModifier = 0;
+    const countryData = REGION_ALTITUDE_RANGES[vineyard.country as keyof typeof REGION_ALTITUDE_RANGES];
+    const altitudeRange = countryData ? (countryData[vineyard.region as keyof typeof countryData] as [number, number] || null) : null;
+    if (altitudeRange) {
+      const [minAltitude, maxAltitude] = altitudeRange;
+      if (maxAltitude > minAltitude) { 
+        const medianAltitude = (minAltitude + maxAltitude) / 2;
+        const altitudeDeviation = (vineyard.altitude - medianAltitude) / (maxAltitude - minAltitude);
+        altitudeModifier = altitudeDeviation * 0.5; // Matches logic in calculateTotalWork
+      }
+    }
 
     const totalWork = calculateTotalWork(vineyard.acres, {
       category: WorkCategory.PLANTING,
       density: options.density,
       resourceName: options.grape, // Pass grape name for fragility calc
-      // Add altitude/region if needed for altitude calc
-      // altitude: vineyard.altitude,
-      // country: vineyard.country,
-      // region: vineyard.region,
+      // UNCOMMENTED and pass altitude/country/region
+      altitude: vineyard.altitude,
+      country: vineyard.country,
+      region: vineyard.region,
     });
 
     // Basic time estimate
@@ -86,8 +98,8 @@ const PlantingOptionsModal: React.FC<PlantingOptionsModalProps> = ({
       { label: "Grape", value: options.grape },
       { label: "Plant Density", value: options.density, unit: "vines/acre" },
       { label: "Grape Robustness", value: `${(robustness * 100).toFixed(0)}% robust`, modifier: fragilityModifier, modifierLabel: "fragility effect" },
-      // Example row for altitude, needs real calculation logic
-      // { label: "Altitude", value: vineyard.altitude, unit: "m", modifier: altitudeEffect, modifierLabel: "altitude effect" },
+      // Use the calculated altitude modifier
+      { label: "Altitude", value: vineyard.altitude, unit: "m", modifier: altitudeModifier, modifierLabel: "altitude effect" },
     ];
 
     setWorkEstimate({

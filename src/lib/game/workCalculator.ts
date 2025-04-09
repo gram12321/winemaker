@@ -5,6 +5,7 @@ import {
   GrapeVariety
 } from '@/lib/core/constants/vineyardConstants';
 import { allResources } from './resource';
+import { v4 as uuidv4 } from 'uuid';
 
 // Work activity categories
 export enum WorkCategory {
@@ -345,7 +346,15 @@ export function createActivityProgress(
     targetId?: string;
     completionCallback?: () => void;
     progressCallback?: (progress: number) => void;
-    additionalParams?: Record<string, any>;
+    additionalParams?: Record<string, any> & { // Allow standard params + specific ones for calculation
+      // Factors needed for calculateTotalWork that might be passed in
+      altitude?: number;
+      country?: string;
+      region?: string;
+      resourceName?: GrapeVariety | null;
+      skillLevel?: number;
+      specializations?: string[];
+    };
   }
 ): ActivityProgress {
   const { 
@@ -355,25 +364,44 @@ export function createActivityProgress(
     targetId,
     completionCallback,
     progressCallback,
-    additionalParams = {}
+    additionalParams = {} // Default to empty object
   } = params;
   
+  // Extract calculation-specific factors from additionalParams
+  const { 
+    altitude,
+    country,
+    region,
+    resourceName,
+    skillLevel,
+    specializations,
+    // Capture remaining params to store on the activity, excluding the calc factors
+    ...storedParams 
+  } = additionalParams;
+
   const totalWork = calculateTotalWork(amount, {
     category,
     density,
     taskMultipliers,
-    workModifiers
+    workModifiers,
+    // Pass extracted factors
+    altitude,
+    country,
+    region,
+    resourceName,
+    skillLevel,
+    specializations
   });
   
   return {
-    id: Date.now().toString(),
+    id: uuidv4(), // Use uuidv4 for unique IDs
     category,
     totalWork,
     appliedWork: 0,
     completionCallback,
     progressCallback,
     targetId,
-    params: additionalParams
+    params: storedParams // Store only the remaining additionalParams
   };
 }
 

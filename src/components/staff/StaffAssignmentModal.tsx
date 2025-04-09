@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { getGameState, Staff } from '../../gameState';
 import staffService, { StaffTeam } from '../../services/staffService';
-import { getActivityById } from '../../lib/game/activityManager';
+import { getActivityById, getAllActivities } from '../../lib/game/activityManager';
 import { calculateStaffWorkContribution, WorkCategory } from '../../lib/game/workCalculator';
 import { formatNumber } from '../../lib/core/utils/formatUtils';
 import { toast } from '../../lib/ui/toast';
 import { getCountryCodeForFlag } from '../../lib/core/utils/formatUtils';
-import { getAllActivities } from '../../lib/game/activityManager';
+
 
 interface StaffAssignmentModalProps {
   activityId: string;
