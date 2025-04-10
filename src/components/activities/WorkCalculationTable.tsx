@@ -13,9 +13,10 @@ export interface WorkFactor {
 interface WorkCalculationTableProps {
   factors: WorkFactor[];
   totalWork: number;
+  maxWork?: number; // Add optional maxWork prop
 }
 
-export const WorkCalculationTable: React.FC<WorkCalculationTableProps> = ({ factors, totalWork }) => {
+export const WorkCalculationTable: React.FC<WorkCalculationTableProps> = ({ factors, totalWork, maxWork }) => {
   const renderModifier = (modifier: number, label?: string) => {
     if (modifier === 0) {
       // Optionally render "0% modifier" if modifier is exactly 0
@@ -53,11 +54,13 @@ export const WorkCalculationTable: React.FC<WorkCalculationTableProps> = ({ fact
           </span>
         </div>
       ))}
-      {/* Total Work Row */}
+      {/* Total Work Row - Display range if maxWork is provided */}
       <div className="flex justify-between py-1 font-bold text-base mt-2 border-t pt-2">
         <span className="w-1/2 pr-2">Total Work:</span>
         <span className="w-1/2 text-right">
-          {formatNumber(totalWork, 0)} units
+          {maxWork && maxWork > totalWork 
+            ? `${formatNumber(totalWork, 0)} - ${formatNumber(maxWork, 0)} units` 
+            : `${formatNumber(totalWork, 0)} units`}
         </span>
       </div>
     </div>

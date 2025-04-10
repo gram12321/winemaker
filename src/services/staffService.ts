@@ -800,4 +800,49 @@ export function completeHiringProcess(activityId: string): Staff | null {
   return addedStaff;
 }
 
-export default { createStaff, addStaff, removeStaff, updateStaff, getStaffById, getAllStaff, generateRandomSkills, calculateWage, createTeam, saveTeam, loadTeams, assignStaffToTeam, calculateSearchCost, calculatePerCandidateCost, generateStaffCandidates, SpecializedRoles, SkillLevels, getAssignedStaffToActivity, assignStaffToActivityById, getStaffByTeam, assignTeamToActivity, calculateActivityStaffEfficiency, mapCategoryToSkill, mapSpecializationToCategory, initializeDefaultTeams, startStaffSearch, startHiringProcess, completeHiringProcess };
+// --- NEW: Function to estimate hiring work range ---
+export function estimateHiringWorkRange(searchSkillLevel: number, searchSpecializations: string[]):
+{ minWork: number; maxWork: number } {
+  
+  // 1. Estimate min/max skill and wage based on search criteria (similar to old system)
+  const minSkill = searchSkillLevel * 0.4; // Minimum possible skill
+  const maxSkill = Math.min(1.0, 0.6 + (searchSkillLevel * 0.4)); // Maximum possible skill
+
+  const specializationBonus = searchSpecializations.length > 0 ? Math.pow(1.3, searchSpecializations.length) : 1;
+  const minWeeklyWage = (BASE_WEEKLY_WAGE + (minSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
+  const maxWeeklyWage = (BASE_WEEKLY_WAGE + (maxSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
+  
+  // 2. Define modifiers based on candidate complexity
+  // Wage Modifier (Linear, less extreme than old system's quadratic)
+  // Assumes higher wage = more complex contract/process. Adjust divisor to tune sensitivity.
+  const calculateWageModifier = (wage: number) => (wage / 5000) - 0.1; // e.g. 500 wage = -0% mod, 5000 wage = +90% mod
+  
+  // Specialization Modifier (Exponential, similar to old system)
+  const specializationModifier = searchSpecializations.length > 0 
+    ? Math.pow(1.5, searchSpecializations.length) - 1 
+    : 0;
+
+  // 3. Calculate work for min/max scenarios using ADMINISTRATION category
+  const minFactors = {
+      category: WorkCategory.ADMINISTRATION,
+      workModifiers: [
+          calculateWageModifier(minWeeklyWage),
+          specializationModifier
+      ]
+  };
+  const maxFactors = {
+      category: WorkCategory.ADMINISTRATION,
+      workModifiers: [
+          calculateWageModifier(maxWeeklyWage),
+          specializationModifier
+      ]
+  };
+
+  const minWork = calculateTotalWork(1, minFactors); // Amount is 1 (per hire)
+  const maxWork = calculateTotalWork(1, maxFactors);
+
+  return { minWork, maxWork };
+}
+// --- END NEW --- 
+
+export default { createStaff, addStaff, removeStaff, updateStaff, getStaffById, getAllStaff, generateRandomSkills, calculateWage, createTeam, saveTeam, loadTeams, assignStaffToTeam, calculateSearchCost, calculatePerCandidateCost, generateStaffCandidates, SpecializedRoles, SkillLevels, getAssignedStaffToActivity, assignStaffToActivityById, getStaffByTeam, assignTeamToActivity, calculateActivityStaffEfficiency, mapCategoryToSkill, mapSpecializationToCategory, initializeDefaultTeams, startStaffSearch, startHiringProcess, completeHiringProcess, estimateHiringWorkRange };
