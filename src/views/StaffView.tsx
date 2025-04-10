@@ -77,10 +77,6 @@ const StaffView: React.FC = () => {
   useEffect(() => {
     if (searchDisplayState && searchDisplayState.results && searchDisplayState.results.length > 0) {
       setSearchResults(searchDisplayState.results);
-      // If we have results and activity is done, show the results modal
-      if (!searchDisplayState.activityId) {
-        setShowStaffSearch(true);
-      }
     }
   }, [searchDisplayState]);
   
@@ -101,7 +97,6 @@ const StaffView: React.FC = () => {
           const results = staffService.generateStaffCandidates(activity.params.searchOptions);
           setSearchResults(results);
           setIsSearching(false);
-          setShowStaffSearch(true); // Show the modal with results
           
           toast({
             title: 'Staff Search Completed',
@@ -152,7 +147,6 @@ const StaffView: React.FC = () => {
           const results = staffService.generateStaffCandidates(activity.params.searchOptions);
           setSearchResults(results);
           setIsSearching(false);
-          setShowStaffSearch(true); // Show the modal with results
           
           toast({
             title: 'Staff Search Completed',
