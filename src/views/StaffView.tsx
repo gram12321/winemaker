@@ -24,11 +24,17 @@ import StaffSearchResults from '@/components/staff/StaffSearchResults';
 
 // Create display state for staff activities  
 displayManager.createDisplayState('staffSearchActivity', {
-  activityId: null as string | null
+  activityId: null as string | null,
+  progress: 0,
+  appliedWork: 0,
+  totalWork: 0
 });
 
 displayManager.createDisplayState('staffHiringActivity', {
-  activityId: null as string | null
+  activityId: null as string | null,
+  progress: 0,
+  appliedWork: 0,
+  totalWork: 0
 });
 
 const StaffView: React.FC = () => {

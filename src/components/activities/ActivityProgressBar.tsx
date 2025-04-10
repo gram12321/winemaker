@@ -1,6 +1,5 @@
 import React from 'react';
 import { WorkCategory } from '@/lib/game/workCalculator';
-import { useDisplayUpdate } from '@/lib/game/displayManager';
 import { formatNumber } from '@/lib/core/utils/formatUtils';
 
 // Interface for the activity progress bar props
@@ -29,21 +28,8 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
   onAssignStaff,
   className = '',
 }) => {
-  // Use the display update hook - this is an authorized exception to the no-hooks rule
-  useDisplayUpdate();
-  
-  // Use props directly for data
-  const actualAppliedWork = appliedWork;
-  const actualTotalWork = totalWork;
-  
   // Calculate progress as a percentage, handling edge cases
-  const calculateProgress = (): number => {
-    if (actualTotalWork <= 0) return 0;
-    return Math.min(100, (actualAppliedWork / actualTotalWork) * 100);
-  };
-  
-  // Format progress as a percentage
-  const formattedProgress = Math.min(100, Math.round(calculateProgress()));
+  const formattedProgress = Math.min(100, Math.round(progress));
   
   // Get icon based on category
   const getIconForCategory = (category: WorkCategory | string): string => {
@@ -69,9 +55,6 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
       [WorkCategory.MAINTENANCE]: '🔧',
     };
     
-    // Add any custom category mappings here
-    
-    // Return the appropriate icon or a default one
     return categoryIcons[category] || '📊';
   };
   
@@ -99,9 +82,6 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
       [WorkCategory.MAINTENANCE]: 'bg-gray-600',
     };
     
-    // Add any custom category mappings here
-    
-    // Return the appropriate color or a default one
     return categoryColors[category] || 'bg-wine';
   };
   
@@ -129,7 +109,7 @@ export const ActivityProgressBar: React.FC<ActivityProgressBarProps> = ({
       
       <div className="flex justify-between items-center">
         <div className="text-xs text-gray-600">
-          {formatNumber(actualAppliedWork, 0)} / {formatNumber(actualTotalWork, 0)} work points
+          {formatNumber(appliedWork, 0)} / {formatNumber(totalWork, 0)} work points
         </div>
         
         {onAssignStaff && (
