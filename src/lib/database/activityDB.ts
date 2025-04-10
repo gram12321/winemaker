@@ -96,9 +96,6 @@ export async function initializeActivitySystem(): Promise<void> {
   try {
     const activities = await loadAllActivitiesFromDb();
     
-    // Filter activities with targetId for entity-bound activities
-    const targetedActivities = activities.filter(a => a.targetId);
-    
     if (activities.length > 0) {
       const gameState = getGameState();
       
@@ -109,16 +106,40 @@ export async function initializeActivitySystem(): Promise<void> {
         const vineyardService = await import('../../services/vineyardService');
         services.vineyard = vineyardService;
         
+        // Import staff service for handling staff-related activities
+        const staffService = await import('../../services/staffService');
+        services.staff = staffService;
+        
+        // Import displayManager for updating UI display states
+        const displayManagerModule = await import('../game/displayManager');
+        services.displayManager = displayManagerModule.default;
+        
         // Add more service imports here as needed for other entity types
-        // Example: const buildingService = await import('../../services/buildingService');
-        //          services.building = buildingService;
       } catch (error) {
+        console.error('Error loading services:', error);
       }
       
-      // Set up callbacks for activities with targets
-      for (const activity of targetedActivities) {
-
-        // Register appropriate callback based on activity category and target type
+      // Separate activities by type
+      const vineyardActivities = activities.filter(a => 
+        a.targetId && (
+          a.category === WorkCategory.PLANTING ||
+          a.category === WorkCategory.HARVESTING ||
+          a.category === WorkCategory.CLEARING ||
+          a.category === WorkCategory.UPROOTING
+        )
+      );
+      
+      const staffSearchActivities = activities.filter(a => 
+        a.category === WorkCategory.STAFF_SEARCH
+      );
+      
+      const staffHiringActivities = activities.filter(a => 
+        a.category === WorkCategory.ADMINISTRATION && 
+        a.params?.staffToHire !== undefined
+      );
+      
+      // Process vineyard activities (maintain existing behavior)
+      for (const activity of vineyardActivities) {
         if (activity.targetId && services.vineyard) {
           const { updateVineyard, getVineyardById } = services.vineyard;
           const vineyard = getVineyardById(activity.targetId);
@@ -163,9 +184,70 @@ export async function initializeActivitySystem(): Promise<void> {
               });
             };
           }
+        }
+      }
+      
+      // Process staff search activities
+      for (const activity of staffSearchActivities) {
+        if (services.staff && services.displayManager) {
+          // Update display state with the activity ID
+          services.displayManager.updateDisplayState('staffSearchActivity', {
+            activityId: activity.id
+          });
           
-          // Add handlers for other entity types here
-          // else if (activity.targetId && services.building) { ... }
+          // Register completion callback
+          activity.completionCallback = async () => {
+            const finalActivity = activity;
+            const cost = finalActivity.params?.searchCost || 0;
+            const searchOpts = finalActivity.params?.searchOptions;
+            
+            if (!searchOpts) return;
+            
+            // Deduct cost 
+            const { updatePlayerMoney } = await import('../../gameState');
+            updatePlayerMoney(-cost);
+            
+            // Generate candidates
+            const candidates = services.staff.generateStaffCandidates(searchOpts);
+            
+            // Update display state with results and clear activity ID
+            services.displayManager.updateDisplayState('staffSearchActivity', {
+              results: candidates,
+              activityId: null
+            });
+            
+            // Show toast notification
+            const { toast } = await import('../../lib/ui/toast');
+            toast({ 
+              title: "Search Complete", 
+              description: `Found ${candidates.length} potential candidates.` 
+            });
+          };
+        }
+      }
+      
+      // Process staff hiring activities
+      for (const activity of staffHiringActivities) {
+        if (services.staff && services.displayManager && activity.params?.staffToHire) {
+          // Update display state with the activity ID
+          services.displayManager.updateDisplayState('staffHiringActivity', {
+            activityId: activity.id
+          });
+          
+          // Register completion callback
+          activity.completionCallback = async () => {
+            const staffToHire = activity.params?.staffToHire;
+            
+            if (!staffToHire) return;
+            
+            // Call the complete hiring process function
+            const hiredStaff = await services.staff.completeHiringProcess(activity.id);
+            
+            // Clear activity ID in display state
+            services.displayManager.updateDisplayState('staffHiringActivity', {
+              activityId: null
+            });
+          };
         }
       }
       
@@ -174,13 +256,13 @@ export async function initializeActivitySystem(): Promise<void> {
         ...gameState,
         activities: activities
       });
-
     } else {
       updateGameState({
         activities: []
       });
     }
   } catch (error) {
+    console.error('Error initializing activity system:', error);
     updateGameState({
       activities: []
     });

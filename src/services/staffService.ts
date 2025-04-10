@@ -668,7 +668,7 @@ export function startStaffSearch(options: StaffSearchOptions): string | null {
             candidates: [] as Staff[], 
             searchCost: searchCost // Store cost to deduct later
         },
-        completionCallback: handleSearchComplete // Assign the callback
+        completionCallback: handleSearchComplete // Assign the callback directly to the activity
     }
   );
   
@@ -677,6 +677,11 @@ export function startStaffSearch(options: StaffSearchOptions): string | null {
 
   // Add the activity to the manager
   newAddActivity(searchActivity);
+  
+  // Update the display state to track the activity
+  displayManager.updateDisplayState('staffSearchActivity', {
+    activityId: searchActivity.id
+  });
 
   toast({
     title: 'Staff Search Started',
@@ -733,6 +738,11 @@ export function startHiringProcess(staff: Staff): string | null {
 
   // Add the activity using the manager
   addActivity(activity);
+  
+  // Update the display state to track the activity
+  displayManager.updateDisplayState('staffHiringActivity', {
+    activityId: activity.id
+  });
 
   toast({
     title: 'Hiring Process Started',

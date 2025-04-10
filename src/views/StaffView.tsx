@@ -71,8 +71,58 @@ const StaffView: React.FC = () => {
   useEffect(() => {
     if (searchDisplayState && searchDisplayState.results && searchDisplayState.results.length > 0) {
       setSearchResults(searchDisplayState.results);
+      // If we have results and activity is done, show the results modal
+      if (!searchDisplayState.activityId) {
+        setShowStaffSearch(true);
+      }
     }
-  }, [searchDisplayState]); 
+  }, [searchDisplayState]);
+  
+  // Effect to handle restored activities on component mount
+  useEffect(() => {
+    // If there's an active search activity, update the UI state
+    if (searchActivityId) {
+      setIsSearching(true);
+    }
+    
+    // If there's an active search activity, make sure the completion callback is registered
+    if (searchActivity) {
+      setActivityCompletionCallback(searchActivity.id, () => {
+        // Get the activity to retrieve search options
+        const activity = searchActivity;
+        
+        if (activity && activity.params?.searchOptions) {
+          const results = staffService.generateStaffCandidates(activity.params.searchOptions);
+          setSearchResults(results);
+          setIsSearching(false);
+          setShowStaffSearch(true); // Show the modal with results
+          
+          toast({
+            title: 'Staff Search Completed',
+            description: `Found ${results.length} candidates matching your criteria.`
+          });
+        }
+      });
+    }
+    
+    // If there's an active hiring activity, make sure the completion callback is registered
+    if (hiringActivity) {
+      setActivityCompletionCallback(hiringActivity.id, () => {
+        // Call the completeHiringProcess function to finalize hiring
+        const hiredStaff = staffService.completeHiringProcess(hiringActivity.id);
+        if (hiredStaff) {
+          // Update search results to remove the hired staff
+          setSearchResults(prevResults => prevResults.filter(s => s.id !== hiredStaff.id));
+          
+          // Force staff list to update
+          displayManager.updateAllDisplays();
+          
+          // Select the newly hired staff to show details
+          setSelectedStaffId(hiredStaff.id);
+        }
+      });
+    }
+  }, []);
 
   // Handle start of staff search
   const handleStartSearch = () => {
@@ -280,17 +330,31 @@ const StaffView: React.FC = () => {
   // Updated onSubmit handler for the modal
   const handleStartSearchActivity = (options: StaffSearchOptions) => {
     try {
-      const newActivityId = startStaffSearch(options);
+      // Use staffService.startStaffSearch directly instead of startActivityWithDisplayState
+      const newActivityId = staffService.startStaffSearch(options);
+      
       if (newActivityId) {
-        displayManager.updateDisplayState('staffSearchActivity', { activityId: newActivityId });
         setShowStaffSearch(false); // Close modal after starting
-        toast({ title: "Search Started", description: "Staff search initiated. Assign staff to Administration to proceed." });
+        setIsSearching(true); // Update UI state
+        
+        toast({ 
+          title: "Search Started", 
+          description: "Staff search initiated. Assign staff to Administration to proceed." 
+        });
       } else {
-        toast({ title: "Error", description: "Failed to start staff search activity.", variant: "destructive" });
+        toast({ 
+          title: "Error", 
+          description: "Failed to start staff search activity.", 
+          variant: "destructive" 
+        });
       }
     } catch (error) {
       console.error("Error starting staff search:", error);
-      toast({ title: "Error", description: "An error occurred while starting the search.", variant: "destructive" });
+      toast({ 
+        title: "Error", 
+        description: "An error occurred while starting the search.", 
+        variant: "destructive" 
+      });
     }
   };
 
@@ -304,24 +368,34 @@ const StaffView: React.FC = () => {
     setActivityToAssignStaff(null);
   };
 
-  // Handler for clicking the Hire button
+  // Handler for hiring staff from search results
   const handleHire = (candidate: Staff) => {
     try {
-      const newHiringActivityId = startHiringProcess(candidate);
-      if (newHiringActivityId) {
-        displayManager.updateDisplayState('staffSearchActivity', { activityId: null, results: [] });
+      // Use staffService.startHiringProcess directly
+      const hiringActivityId = staffService.startHiringProcess(candidate);
+      
+      if (hiringActivityId) {
+        // Close the staff search modal
+        setShowStaffSearch(false);
         
-        displayManager.updateDisplayState('staffHiringActivity', { activityId: newHiringActivityId });
-        
-        setSearchResults([]);
-
-        toast({ title: "Hiring Process Started", description: `Started hiring ${candidate.name}. Assign staff to Administration to complete.` });
+        toast({
+          title: 'Hiring Process Started',
+          description: `Started hiring process for ${candidate.name}. Assign staff to complete the hiring.`
+        });
       } else {
-        toast({ title: "Error", description: "Failed to start hiring process.", variant: "destructive" });
+        toast({
+          title: 'Error',
+          description: 'Failed to start hiring process. Check your budget.',
+          variant: 'destructive'
+        });
       }
-    } catch (error: any) {
-      console.error("Error starting hiring:", error);
-      toast({ title: "Error", description: error.message || "An error occurred during hiring.", variant: "destructive" });
+    } catch (error) {
+      console.error("Error starting hiring process:", error);
+      toast({
+        title: 'Error',
+        description: 'An error occurred while starting the hiring process.',
+        variant: 'destructive'
+      });
     }
   };
 
