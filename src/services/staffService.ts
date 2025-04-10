@@ -144,7 +144,9 @@ export function addStaff(staff: Staff, saveToDb = false) {
   updateGameState({ staff: updatedStaff });
   
   if (saveToDb) {
-    saveStaffToDb(staff);
+    import('@/lib/database/gameStateDB').then(({ saveGameState }) => {
+      saveGameState();
+    });
   }
   
   return staff;
@@ -157,7 +159,9 @@ export function removeStaff(staffId: string, saveToDb = false) {
   updateGameState({ staff: updatedStaff });
   
   if (saveToDb) {
-    removeStaffFromDb(staffId);
+    import('@/lib/database/gameStateDB').then(({ saveGameState }) => {
+      saveGameState();
+    });
   }
   
   return updatedStaff;
@@ -172,7 +176,9 @@ export function updateStaff(updatedStaff: Staff, saveToDb = false) {
   updateGameState({ staff: updatedStaffList });
   
   if (saveToDb) {
-    updateStaffInDb(updatedStaff);
+    import('@/lib/database/gameStateDB').then(({ saveGameState }) => {
+      saveGameState();
+    });
   }
   
   return updatedStaff;
@@ -709,6 +715,7 @@ export function startHiringProcess(staff: Staff): string | null {
       const staffToHire = finalActivity?.params?.staffToHire as Staff | undefined;
 
       if (staffToHire) {
+        // Use addStaff with saveToDb=true to ensure data is saved properly
         addStaff(staffToHire, true); 
         updatePlayerMoney(-staffToHire.wage); 
         toast({ title: "Hiring Complete!", description: `${staffToHire.name} has joined your team.` });
@@ -789,8 +796,8 @@ export function completeHiringProcess(activityId: string): Staff | null {
   // Deduct wage from account
   updatePlayerMoney(-staffToHire.wage);
   
-  // Add the staff to your company
-  const addedStaff = addStaff(staffToHire);
+  // Add the staff to your company with saveToDb=true to ensure data is saved correctly
+  const addedStaff = addStaff(staffToHire, true);
   
   // Clean up - remove the activity
   removeActivity(activityId);

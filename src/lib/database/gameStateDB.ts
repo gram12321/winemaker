@@ -141,6 +141,20 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
     // Import updateGameState function here to avoid circular dependencies
     const { updateGameState } = await import('../../gameState');
     
+    // Create activities with proper types and callbacks before updating gameState
+    const activities = data.activities?.map((activity: any) => ({
+      id: activity.id,
+      category: activity.category,
+      totalWork: activity.totalWork || 0,
+      appliedWork: activity.appliedWork || 0, // Explicitly map appliedWork
+      targetId: activity.targetId || null,
+      params: activity.params || {},
+      userId: activity.userId || ''
+    })) || [];
+    
+    // Log the activities being loaded
+    console.log('Loading activities from Firestore:', activities);
+    
     // Update game state with loaded data
     updateGameState({
       player: data.player || null,
@@ -148,12 +162,16 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       buildings: data.buildings || [],
       staff: data.staff || [],
       wineBatches: data.wineBatches || [],
-      activities: data.activities || [],
+      activities: activities,
       week: data.week || 1,
       season: data.season || 'Spring',
       currentYear: data.currentYear || new Date().getFullYear(),
       currentView: 'mainMenu',
     });
+    
+    // After updating game state, initialize activity system to set up callbacks
+    const { initializeActivitySystem } = await import('../database/activityDB');
+    await initializeActivitySystem();
     
     return true;
   } catch (error) {

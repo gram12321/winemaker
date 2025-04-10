@@ -330,12 +330,17 @@ const StaffView: React.FC = () => {
   // Updated onSubmit handler for the modal
   const handleStartSearchActivity = (options: StaffSearchOptions) => {
     try {
+      console.log("Starting staff search with options:", options);
+      
       // Use staffService.startStaffSearch directly instead of startActivityWithDisplayState
       const newActivityId = staffService.startStaffSearch(options);
       
       if (newActivityId) {
         setShowStaffSearch(false); // Close modal after starting
         setIsSearching(true); // Update UI state
+        
+        // Log for debugging
+        console.log(`Staff search started with ID: ${newActivityId}`);
         
         toast({ 
           title: "Search Started", 
@@ -371,12 +376,15 @@ const StaffView: React.FC = () => {
   // Handler for hiring staff from search results
   const handleHire = (candidate: Staff) => {
     try {
+      console.log("Starting hiring process for candidate:", candidate.name);
+      
       // Use staffService.startHiringProcess directly
       const hiringActivityId = staffService.startHiringProcess(candidate);
       
       if (hiringActivityId) {
-        // Close the staff search modal
-        setShowStaffSearch(false);
+        // Close the staff search results modal
+        setSearchResults([]);
+        displayManager.updateDisplayState('staffSearchActivity', { results: [] });
         
         toast({
           title: 'Hiring Process Started',

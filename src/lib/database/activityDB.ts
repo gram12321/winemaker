@@ -26,7 +26,7 @@ function sanitizeActivityForDb(activity: Activity) {
     userId: activity.userId,  // Include userId in sanitized data
     category: activity.category,
     totalWork: activity.totalWork,
-    appliedWork: activity.appliedWork
+    appliedWork: activity.appliedWork  // Explicitly include appliedWork
   };
 
   // Add optional targetId if it exists
@@ -63,42 +63,90 @@ function sanitizeActivityForDb(activity: Activity) {
     sanitized.params = params;
   }
 
+  console.log(`Sanitized activity for DB: ${activity.id}, appliedWork: ${activity.appliedWork} -> ${sanitized.appliedWork}`);
   return sanitized;
 }
 
 export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
   try {
-    const { player } = getGameState();
-    if (!player?.id) {
+    const gameState = getGameState();
+    const companyName = gameState.player?.companyName;
+    
+    if (!companyName) {
+      console.warn('No company name found when loading activities');
       return [];
     }
 
-    const activitiesRef = collection(db, ACTIVITIES_COLLECTION);
-    const activitiesQuery = query(activitiesRef, where('userId', '==', player.id));
-    const querySnapshot = await getDocs(activitiesQuery);
+    // Get the company document
+    const companyRef = doc(db, 'companies', companyName);
+    const companyDoc = await getDoc(companyRef);
     
-    const activities: Activity[] = [];
-    querySnapshot.forEach((doc) => {
-      const data = doc.data();
-      activities.push({
-        ...data,
-        category: data.category as WorkCategory
-      } as Activity);
+    if (!companyDoc.exists()) {
+      console.warn('Company document not found when loading activities');
+      return [];
+    }
+
+    const data = companyDoc.data();
+    const activities = data.activities || [];
+    
+    // Map the activities to the correct type
+    const mappedActivities: Activity[] = activities.map((activity: any) => {
+      console.log('Loading activity from company document:', activity.id, 'with appliedWork:', activity.appliedWork);
+      return {
+        id: activity.id,
+        userId: activity.userId || gameState.player?.id || 'unknown',
+        category: activity.category as WorkCategory,
+        totalWork: activity.totalWork || 0,
+        appliedWork: activity.appliedWork || 0,
+        targetId: activity.targetId || null,
+        params: activity.params || {}
+      } as Activity;
     });
     
-    return activities;
+    console.log(`Loaded ${mappedActivities.length} activities from company document`);
+    return mappedActivities;
   } catch (error) {
+    console.error('Error loading activities:', error);
     return [];
   }
 }
 
 export async function initializeActivitySystem(): Promise<void> {
   try {
-    const activities = await loadAllActivitiesFromDb();
+    // First load activities from collection
+    const activitiesFromCollection = await loadAllActivitiesFromDb();
     
-    if (activities.length > 0) {
-      const gameState = getGameState();
-      
+    // Then get activities from game state - these are loaded from the company document
+    const gameState = getGameState();
+    const activitiesFromGameState = gameState.activities || [];
+    
+    console.log(`Activity initialization: ${activitiesFromCollection.length} activities from collection, ${activitiesFromGameState.length} activities from gameState`);
+    
+    // Merge activities, prioritizing those from collection but including those only in gameState
+    const combinedActivities: Activity[] = [...activitiesFromCollection];
+    
+    // Add activities from gameState that aren't in collection
+    const collectionIds = new Set(activitiesFromCollection.map(a => a.id));
+    activitiesFromGameState.forEach(a => {
+      if (!collectionIds.has(a.id)) {
+        console.log(`Adding activity from gameState that's not in collection: ${a.id}, appliedWork: ${a.appliedWork}`);
+        
+        // Create activity with all required fields
+        const activity: Activity = {
+          id: a.id,
+          userId: gameState.player?.id || 'unknown',
+          category: a.category,
+          totalWork: a.totalWork || 0,
+          appliedWork: a.appliedWork || 0,
+          targetId: a.targetId,
+          params: a.params
+        };
+        
+        combinedActivities.push(activity);
+      }
+    });
+    
+    if (combinedActivities.length > 0) {
       // Try to import services dynamically to avoid circular dependencies
       let services: Record<string, any> = {};
       try {
@@ -113,14 +161,12 @@ export async function initializeActivitySystem(): Promise<void> {
         // Import displayManager for updating UI display states
         const displayManagerModule = await import('../game/displayManager');
         services.displayManager = displayManagerModule.default;
-        
-        // Add more service imports here as needed for other entity types
       } catch (error) {
         console.error('Error loading services:', error);
       }
       
       // Separate activities by type
-      const vineyardActivities = activities.filter(a => 
+      const vineyardActivities = combinedActivities.filter(a => 
         a.targetId && (
           a.category === WorkCategory.PLANTING ||
           a.category === WorkCategory.HARVESTING ||
@@ -129,22 +175,26 @@ export async function initializeActivitySystem(): Promise<void> {
         )
       );
       
-      const staffSearchActivities = activities.filter(a => 
+      const staffSearchActivities = combinedActivities.filter(a => 
         a.category === WorkCategory.STAFF_SEARCH
       );
       
-      const staffHiringActivities = activities.filter(a => 
+      const staffHiringActivities = combinedActivities.filter(a => 
         a.category === WorkCategory.ADMINISTRATION && 
         a.params?.staffToHire !== undefined
       );
       
+      console.log(`Processing activities: ${vineyardActivities.length} vineyard, ${staffSearchActivities.length} staff search, ${staffHiringActivities.length} staff hiring`);
+      
       // Process vineyard activities (maintain existing behavior)
       for (const activity of vineyardActivities) {
-        if (activity.targetId && services.vineyard) {
+        if (activity.targetId && services.vineyard) { 
           const { updateVineyard, getVineyardById } = services.vineyard;
           const vineyard = getVineyardById(activity.targetId);
           
           if (vineyard) {
+            console.log(`Processing vineyard activity ${activity.id}, applied work: ${activity.appliedWork}`);
+            
             // Restore existing work values if they exist in the target entity's status
             const statusRegex = new RegExp(`${activity.category}: (\\d+)\\/(\\d+)`);
             const percentRegex = new RegExp(`${activity.category}: (\\d+)%`);
@@ -162,12 +212,14 @@ export async function initializeActivitySystem(): Promise<void> {
                 if (totalWork > 0 && activity.totalWork === 0) {
                   activity.totalWork = totalWork;
                 }
-             } else {
+                console.log(`Updated vineyard activity from status: ${activity.appliedWork}/${activity.totalWork}`);
+              } else {
                 // Fallback to percentage format
                 const percentMatch = vineyard.status.match(percentRegex);
                 if (percentMatch) {
                   const percent = parseInt(percentMatch[1]);
                   activity.appliedWork = Math.round(activity.totalWork * (percent / 100));
+                  console.log(`Updated vineyard activity from percent: ${activity.appliedWork}/${activity.totalWork} (${percent}%)`);
                 }
               }
             }
@@ -176,7 +228,7 @@ export async function initializeActivitySystem(): Promise<void> {
             activity.progressCallback = async (progress: number) => {
               // Calculate the new appliedWork value based on progress
               const newAppliedWork = Math.round(activity.totalWork * progress);
-              activity.appliedWork = newAppliedWork;
+              activity.appliedWork = newAppliedWork; 
               
               // Update target entity with raw work values
               await updateVineyard(activity.targetId, {
@@ -190,6 +242,8 @@ export async function initializeActivitySystem(): Promise<void> {
       // Process staff search activities
       for (const activity of staffSearchActivities) {
         if (services.staff && services.displayManager) {
+          console.log(`Processing staff search activity ${activity.id}, applied work: ${activity.appliedWork}/${activity.totalWork}`);
+          
           // Update display state with the activity ID
           services.displayManager.updateDisplayState('staffSearchActivity', {
             activityId: activity.id
@@ -201,7 +255,12 @@ export async function initializeActivitySystem(): Promise<void> {
             const cost = finalActivity.params?.searchCost || 0;
             const searchOpts = finalActivity.params?.searchOptions;
             
-            if (!searchOpts) return;
+            console.log(`Staff search completion callback for ${activity.id} with options:`, searchOpts);
+            
+            if (!searchOpts) {
+              console.warn(`No search options found for activity ${activity.id}`);
+              return;
+            }
             
             // Deduct cost 
             const { updatePlayerMoney } = await import('../../gameState');
@@ -209,6 +268,7 @@ export async function initializeActivitySystem(): Promise<void> {
             
             // Generate candidates
             const candidates = services.staff.generateStaffCandidates(searchOpts);
+            console.log(`Generated ${candidates.length} candidates for search`);
             
             // Update display state with results and clear activity ID
             services.displayManager.updateDisplayState('staffSearchActivity', {
@@ -222,6 +282,9 @@ export async function initializeActivitySystem(): Promise<void> {
               title: "Search Complete", 
               description: `Found ${candidates.length} potential candidates.` 
             });
+            
+            // Save any changes to activity
+            await saveActivityToDb(finalActivity);
           };
         }
       }
@@ -229,6 +292,8 @@ export async function initializeActivitySystem(): Promise<void> {
       // Process staff hiring activities
       for (const activity of staffHiringActivities) {
         if (services.staff && services.displayManager && activity.params?.staffToHire) {
+          console.log(`Processing staff hiring activity ${activity.id}, applied work: ${activity.appliedWork}/${activity.totalWork}`);
+          
           // Update display state with the activity ID
           services.displayManager.updateDisplayState('staffHiringActivity', {
             activityId: activity.id
@@ -238,7 +303,12 @@ export async function initializeActivitySystem(): Promise<void> {
           activity.completionCallback = async () => {
             const staffToHire = activity.params?.staffToHire;
             
-            if (!staffToHire) return;
+            if (!staffToHire) {
+              console.warn(`No staff to hire found for activity ${activity.id}`);
+              return;
+            }
+            
+            console.log(`Staff hiring completion callback for ${activity.id}, hiring:`, staffToHire.name);
             
             // Call the complete hiring process function
             const hiredStaff = await services.staff.completeHiringProcess(activity.id);
@@ -247,6 +317,9 @@ export async function initializeActivitySystem(): Promise<void> {
             services.displayManager.updateDisplayState('staffHiringActivity', {
               activityId: null
             });
+            
+            // Save any changes to activity
+            await saveActivityToDb(activity);
           };
         }
       }
@@ -254,12 +327,15 @@ export async function initializeActivitySystem(): Promise<void> {
       // Update game state with the restored activities
       updateGameState({
         ...gameState,
-        activities: activities
+        activities: combinedActivities
       });
+
+      console.log(`Activity system initialized with ${combinedActivities.length} activities`);
     } else {
       updateGameState({
         activities: []
       });
+      console.log('No activities to initialize');
     }
   } catch (error) {
     console.error('Error initializing activity system:', error);
@@ -271,48 +347,26 @@ export async function initializeActivitySystem(): Promise<void> {
 
 export async function saveActivityToDb(activity: Activity): Promise<boolean> {
   try {
-    const { player } = getGameState();
-    if (!player?.id) {
-      return false;
-    }
-
-    const activityWithUser = {
-      ...activity,
-      userId: player.id
-    };
-
-    const activityRef = doc(collection(db, ACTIVITIES_COLLECTION), activity.id);
-    const sanitizedActivity = sanitizeActivityForDb(activityWithUser);
+    console.log(`Saving activity to DB: ${activity.id}, appliedWork: ${activity.appliedWork}`);
+    const activityRef = doc(db, ACTIVITIES_COLLECTION, activity.id);
+    const sanitizedActivity = sanitizeActivityForDb(activity);
     await setDoc(activityRef, sanitizedActivity);
     return true;
   } catch (error) {
+    console.error('Error saving activity to DB:', error);
     return false;
   }
 }
 
 export async function updateActivityInDb(activity: Activity): Promise<boolean> {
   try {
-    const { player } = getGameState();
-    if (!player?.id) {
-      return false;
-    }
-
-    // Verify the activity belongs to the current user
-    const activityRef = doc(collection(db, ACTIVITIES_COLLECTION), activity.id);
-    const activityDoc = await getDoc(activityRef);
-    if (!activityDoc.exists() || activityDoc.data().userId !== player.id) {
-      return false;
-    }
-
-    const activityWithUser = {
-      ...activity,
-      userId: player.id
-    };
-
-    const sanitizedActivity = sanitizeActivityForDb(activityWithUser);
+    console.log(`Updating activity in DB: ${activity.id}, appliedWork: ${activity.appliedWork}`);
+    const activityRef = doc(db, ACTIVITIES_COLLECTION, activity.id);
+    const sanitizedActivity = sanitizeActivityForDb(activity);
     await updateDoc(activityRef, sanitizedActivity);
     return true;
   } catch (error) {
+    console.error('Error updating activity in DB:', error);
     return false;
   }
 }

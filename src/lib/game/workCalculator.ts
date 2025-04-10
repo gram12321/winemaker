@@ -425,6 +425,8 @@ export function applyWorkToActivity(
     appliedWork: Math.min(activity.totalWork, activity.appliedWork + workAmount)
   };
   
+  console.log(`Applying work to activity ${activity.id}: ${activity.appliedWork} -> ${updatedActivity.appliedWork} / ${activity.totalWork}`);
+  
   const progress = updatedActivity.appliedWork / updatedActivity.totalWork;
   
   // Call progress callback if provided
@@ -435,6 +437,35 @@ export function applyWorkToActivity(
   // Call completion callback if work is complete
   if (progress >= 1 && updatedActivity.completionCallback) {
     updatedActivity.completionCallback();
+  }
+  
+  // Save changes to the database if this is running in a context with access to it
+  try {
+    // Dynamically import and use activityDB to save changes
+    import('../database/activityDB').then(({ updateActivityInDb }) => {
+      // We need to add the userId for database operations
+      const { getGameState } = require('../../gameState');
+      const gameState = getGameState();
+      
+      // Only try to save if we have a player ID
+      if (gameState.player?.id) {
+        const dbActivity = {
+          ...updatedActivity,
+          userId: gameState.player.id
+        };
+        
+        updateActivityInDb(dbActivity as any).then(success => {
+          if (!success) {
+            console.warn(`Failed to save activity update for ${activity.id}`);
+          }
+        });
+      }
+    }).catch(err => {
+      console.warn('Could not save activity update to database:', err);
+    });
+  } catch (error) {
+    // Just log the error, don't throw - this is a non-blocking operation
+    console.warn('Error saving activity update:', error);
   }
   
   return updatedActivity;
