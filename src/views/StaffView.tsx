@@ -362,7 +362,7 @@ const StaffView: React.FC = () => {
       });
     }
   };
-
+  
   const handleAssignStaffToActivity = (activityId: string) => {
     setActivityToAssignStaff(activityId);
     setShowStaffAssignmentModal(true);
@@ -430,7 +430,7 @@ const StaffView: React.FC = () => {
       {/* Display ongoing search activity */}
       {searchActivity && (
         <div className="mb-4">
-          <ActivityProgressBar
+             <ActivityProgressBar
             activityId={searchActivity.id}
             title={searchActivity.params?.title || "Staff Search"}
             category={searchActivity.category}
@@ -445,7 +445,7 @@ const StaffView: React.FC = () => {
       {/* Display ongoing hiring activity progress bar - KEEP this one */}
       {hiringActivity && (
         <div className="mb-4">
-          <ActivityProgressBar
+             <ActivityProgressBar
             activityId={hiringActivity.id}
             title={hiringActivity.params?.title || `Hiring: ${hiringActivity.params?.staffToHire?.name || 'Candidate'}`}
             category={hiringActivity.category}
