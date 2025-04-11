@@ -1,10 +1,3 @@
-/**
- * Vineyard Constants
- * Data for vineyard locations, soil types, altitudes, etc.
- */
-
-import { Season } from './gameConstants';
-
 // Grape varieties - Reverted to original 5
 export type GrapeVariety =
   | "Barbera"

@@ -50,19 +50,33 @@ export const TASK_RATES: Record<string, number> = {
   [WorkCategory.ADMINISTRATION]: 1.0  // 1 administrative task/week
 };
 
+// Specific Rates for Clearing Sub-tasks (from old constants.js)
+const CLEARING_SUBTASK_RATES = {
+  'clear-vegetation': 0.5, // acres/week
+  'remove-debris': 0.4,    // acres/week
+  'soil-amendment': 0.8,    // acres/week
+};
+
 // Initial setup work for tasks that require setup before starting
 export const INITIAL_WORK: Record<string, number> = {
   [WorkCategory.PLANTING]: 10,
   [WorkCategory.HARVESTING]: 5,
   [WorkCategory.CRUSHING]: 10,
   [WorkCategory.FERMENTATION]: 25,
-  [WorkCategory.CLEARING]: 5,
+  [WorkCategory.CLEARING]: 5, // Base initial work for clearing category
   [WorkCategory.UPROOTING]: 10,
   [WorkCategory.BUILDING]: 200,
   [WorkCategory.UPGRADING]: 150,
   [WorkCategory.MAINTENANCE]: 10,
   [WorkCategory.STAFF_SEARCH]: 25,
   [WorkCategory.ADMINISTRATION]: 5
+};
+
+// Initial work for specific clearing sub-tasks (assumed 0 from old constants)
+const CLEARING_SUBTASK_INITIAL_WORK = {
+  'clear-vegetation': 0,
+  'remove-debris': 0,
+  'soil-amendment': 0,
 };
 
 // Activity progress interface
@@ -76,6 +90,9 @@ export interface ActivityProgress {
   targetId?: string;
   params?: Record<string, any>;
 }
+
+// Define valid clearing sub-task IDs as a type
+type ClearingSubTaskId = keyof typeof CLEARING_SUBTASK_RATES;
 
 /**
  * Calculate total work required for an activity
@@ -96,6 +113,13 @@ export function calculateTotalWork(
     resourceName?: GrapeVariety | null;
     skillLevel?: number;
     specializations?: string[];
+    additionalParams?: { // Look for clearingOptions here
+      clearingOptions?: {
+        tasks: { [key: string]: boolean };
+        replantingIntensity: number;
+        isOrganicAmendment: boolean;
+      }
+    }
   }
 ): number {
   const {
@@ -108,10 +132,79 @@ export function calculateTotalWork(
     region,
     resourceName,
     skillLevel,
-    specializations
+    specializations,
+    additionalParams
   } = factors;
 
-  // Get base rate for the task
+  console.log(`[WorkCalculator] Calculating work for category: ${category}`, { amount, factors });
+
+  // --- Special Handling for CLEARING Category with Sub-tasks --- 
+  if (category === WorkCategory.CLEARING && additionalParams?.clearingOptions) {
+    const clearingOpts = additionalParams.clearingOptions;
+    let totalClearingWork = 0;
+
+    console.log(`[WorkCalculator] Using CLEARING sub-task logic`, { clearingOpts });
+
+    Object.entries(clearingOpts.tasks).forEach(([taskId, isSelected]) => {
+      if (!isSelected) return;
+
+      let subTaskRate: number | undefined;
+      let subTaskInitialWork: number = 0;
+      let subTaskAmount = amount;
+      let subTaskCategory = WorkCategory.CLEARING;
+      let subTaskModifiers: number[] = [...workModifiers];
+
+      const isValidSubTask = taskId in CLEARING_SUBTASK_RATES;
+
+      if (taskId === 'remove-vines') {
+        subTaskCategory = WorkCategory.UPROOTING;
+        subTaskRate = TASK_RATES[subTaskCategory];
+        subTaskInitialWork = INITIAL_WORK[subTaskCategory];
+        subTaskAmount *= (clearingOpts.replantingIntensity / 100);
+        if (density && subTaskRate) {
+            subTaskRate = subTaskRate / (density / DEFAULT_VINE_DENSITY);
+        }
+        if (subTaskAmount <= 0) return;
+      } else if (isValidSubTask) {
+        const validTaskId = taskId as ClearingSubTaskId;
+        subTaskRate = CLEARING_SUBTASK_RATES[validTaskId];
+        subTaskInitialWork = CLEARING_SUBTASK_INITIAL_WORK[validTaskId];
+      } else {
+        console.warn(`[WorkCalculator] Unknown or invalid clearing sub-task ID: ${taskId}. Skipping.`);
+        return;
+      }
+
+      if (subTaskRate === undefined || subTaskRate <= 0) {
+        console.warn(`[WorkCalculator] Invalid or zero rate for sub-task: ${taskId}. Skipping.`);
+        return;
+      }
+
+      const workWeeks = subTaskAmount / subTaskRate;
+      const workUnits = workWeeks * BASE_WORK_UNITS;
+      let subTaskBaseWork = subTaskInitialWork + workUnits;
+      
+      const subTaskTotalWork = subTaskModifiers.reduce((work, modifier) =>
+        work * (1 + modifier), subTaskBaseWork);
+        
+      console.log(`[WorkCalculator] Sub-task ${taskId}:`, { 
+          subTaskAmount, 
+          subTaskRate, 
+          subTaskInitialWork, 
+          workUnits, 
+          subTaskModifiers, 
+          subTaskTotalWork 
+      });
+
+      totalClearingWork += subTaskTotalWork;
+    });
+
+    const finalWork = Math.ceil(totalClearingWork);
+    console.log(`[WorkCalculator] Final calculated CLEARING work (sum of sub-tasks): ${finalWork}`);
+    return finalWork > 0 ? finalWork : 1;
+  }
+  // --- End Special Handling for CLEARING --- 
+
+  // --- Standard Calculation for other categories or CLEARING without options --- 
   const baseRate = TASK_RATES[category];
   if (!baseRate) {
     console.error(`[WorkCalculator] No base rate found for category: ${category}`);
@@ -127,15 +220,15 @@ export function calculateTotalWork(
   const multiplier = taskMultipliers[category] || 1.0;
   const workWeeks = (amount * multiplier) / rate;
   const workUnits = workWeeks * BASE_WORK_UNITS;
-
-  // Add any initial work defined for the task
   const initialWork = INITIAL_WORK[category] || 0;
-
-  // Calculate base work
   let baseWork = initialWork + workUnits;
 
-  // --- Apply Planting Specific Modifiers --- START
-  let plantingModifiers: number[] = [];
+  console.log(`[WorkCalculator] Standard intermediate values for ${category}:`, {
+    baseRate, rate, multiplier, workWeeks, workUnits, initialWork, baseWork_beforeModifiers: baseWork
+  });
+
+  // Apply Category Specific Modifiers (Planting, Staff Search)
+  let categorySpecificModifiers: number[] = [];
   if (category === WorkCategory.PLANTING) {
     // 1. Altitude Effect (Migrated from old plantingOverlay.js)
     if (altitude !== undefined && country && region) {
@@ -149,7 +242,7 @@ export function calculateTotalWork(
           // 5% less work for every 10% below median, 5% more for every 10% above
           // This translates to a modifier of deviation * 0.5
           const altitudeModifier = altitudeDeviation * 0.5;
-          plantingModifiers.push(altitudeModifier);
+          categorySpecificModifiers.push(altitudeModifier);
         }
       }
     }
@@ -161,18 +254,14 @@ export function calculateTotalWork(
       if (resource) {
         // Fragility directly increases work -> modifier = fragility value
         const fragilityModifier = resource.fragile; 
-        plantingModifiers.push(fragilityModifier);
+        categorySpecificModifiers.push(fragilityModifier);
       }
     }
   }
-  // --- Apply Planting Specific Modifiers --- END
-
-  // --- Apply Staff Search Specific Modifiers --- START
-  let staffSearchModifiers: number[] = [];
   if (category === WorkCategory.STAFF_SEARCH) {
     // Skill Level Modifier (0.1 -> +10%, 1.0 -> +100%)
     if (skillLevel !== undefined) {
-      staffSearchModifiers.push(skillLevel);
+      categorySpecificModifiers.push(skillLevel);
     }
     // Specialization Modifier - CHANGED to exponential scaling
     if (specializations && specializations.length > 0) {
@@ -181,24 +270,25 @@ export function calculateTotalWork(
       // the modifier itself should be pow(1.3, count) - 1.
       const specializationMultiplier = Math.pow(1.3, specializations.length);
       const specializationModifier = specializationMultiplier - 1; 
-      staffSearchModifiers.push(specializationModifier);
+      categorySpecificModifiers.push(specializationModifier);
     }
   }
-  // --- Apply Staff Search Specific Modifiers --- END
 
   // Combine general modifiers and category-specific modifiers
   const allModifiers = [
     ...workModifiers, 
-    ...(category === WorkCategory.PLANTING ? plantingModifiers : []),
-    ...(category === WorkCategory.STAFF_SEARCH ? staffSearchModifiers : [])
+    ...categorySpecificModifiers
   ];
+  
+  console.log(`[WorkCalculator] Standard - Applying modifiers for ${category}:`, { allModifiers });
 
-  // Apply modifiers
   const totalWork = allModifiers.reduce((work, modifier) =>
     work * (1 + modifier), baseWork);
+    
+  const finalWork = Math.ceil(totalWork);
+  console.log(`[WorkCalculator] Standard - Final calculated work for ${category}: ${finalWork}`);
 
-  // Return rounded up work units
-  return Math.ceil(totalWork);
+  return finalWork > 0 ? finalWork : 1; // Ensure at least 1 work unit
 }
 
 /**

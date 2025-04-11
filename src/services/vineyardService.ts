@@ -414,52 +414,8 @@ export async function clearVineyard(
       throw new Error(`Vineyard with ID ${id} not found`);
     }
 
-    // Get the activity manager and necessary helpers
     const { startActivityWithDisplayState } = await import('../lib/game/activityManager');
-    const { WorkCategory, calculateTotalWork } = await import('../lib/game/workCalculator');
-
-    // --- Calculate Total Work based on selected tasks --- 
-    let totalWork = 0;
-    const TASK_ID_TO_CATEGORY: Record<string, WorkCategory> = {
-      'remove-vines': WorkCategory.UPROOTING,
-      'clear-vegetation': WorkCategory.CLEARING,
-      'remove-debris': WorkCategory.CLEARING,
-      'soil-amendment': WorkCategory.CLEARING
-    };
-    
-    Object.entries(options.tasks).forEach(([taskId, isSelected]) => {
-      if (!isSelected) return;
-      
-      const category = TASK_ID_TO_CATEGORY[taskId];
-      if (!category) return;
-
-      let taskAmount = vineyard.acres;
-      let taskSpecificFactors: any = {
-        category: category,
-        density: vineyard.density || 0,
-        altitude: vineyard.altitude,
-        country: vineyard.country,
-        region: vineyard.region,
-        workModifiers: [],
-      };
-
-      if (taskId === 'remove-vines') {
-        // Work is proportional to intensity, skip if 0
-        taskAmount *= (options.replantingIntensity / 100);
-        if (taskAmount <= 0) return; 
-      }
-      
-      if (taskId === 'soil-amendment' && options.isOrganicAmendment) {
-         taskSpecificFactors.workModifiers.push(0.2); // Add 20% modifier for organic
-      }
-      
-      totalWork += calculateTotalWork(taskAmount, taskSpecificFactors);
-    });
-    // Ensure total work is at least 1 if any task was selected
-    if (totalWork <= 0 && Object.values(options.tasks).some(v => v)) {
-        totalWork = 1; 
-    }
-    // --- End Work Calculation --- 
+    const { WorkCategory } = await import('../lib/game/workCalculator');
 
     // Create a title based on the selected tasks
     const selectedTaskLabels = Object.entries(options.tasks)
@@ -470,14 +426,16 @@ export async function clearVineyard(
       : selectedTaskLabels[0] || 'Clearing';
     const title = `Clearing ${vineyard.name} (${tasksString})`;
     
-    // Create the activity - amount is now the calculated totalWork
+    // Correctly pass vineyard.acres as the base amount for the activity
     const activityId = startActivityWithDisplayState('vineyardView', {
       category: WorkCategory.CLEARING,
-      amount: Math.max(1, Math.round(totalWork)), // Use calculated work, ensure at least 1
+      amount: vineyard.acres, // Use acres as the base amount
       title,
       targetId: id,
+      // Pass the specific options used, the activity manager/work calculator
+      // should interpret these to calculate the final work
       additionalParams: {
-        clearingOptions: options, // Store the specific options used
+        clearingOptions: options, 
       }
     });
 

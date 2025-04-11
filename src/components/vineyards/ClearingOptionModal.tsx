@@ -58,6 +58,7 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
   const fields: ActivityOptionField[] = [];
 
   useEffect(() => {
+    console.log('[ClearingOptionModal] Recalculating work...', { options, vineyardAcres: vineyard.acres });
     let totalWork = 0;
     const calculatedFactors: WorkFactor[] = [
       { label: "Field Size", value: vineyard.acres, unit: "acres", isPrimary: true },
@@ -87,7 +88,6 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
       if (taskId === 'remove-vines') {
         taskAmount *= (options.replantingIntensity / 100);
         if (taskAmount > 0) {
-           // No specific modifier here, work is scaled by amount
            taskLabel = `Vine Replanting (${options.replantingIntensity}%)`;
         } else {
             return; // Skip if intensity is 0
@@ -102,8 +102,16 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
         }
         taskLabel = `Soil Amendment (${options.isOrganicAmendment ? 'Organic' : 'Synthetic'})`;
       }
+      
+      console.log(`[ClearingOptionModal] Calculating work for task: ${taskId}`, {
+         taskAmount,
+         taskSpecificFactors
+       });
 
       const workForTask = calculateTotalWork(taskAmount, taskSpecificFactors);
+      
+      console.log(`[ClearingOptionModal] Work calculated for ${taskId}: ${workForTask}`);
+      
       totalWork += workForTask;
       
       if (workForTask > 0) {
@@ -111,7 +119,6 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
            label: taskLabel, 
            value: formatNumber(workForTask, 0), 
            unit: "units",
-           // Only show modifier if it's non-zero
            ...(modifier !== 0 && { modifier: modifier, modifierLabel: modifierLabel })
         });
       }
@@ -165,7 +172,6 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
   };
 
   const handleSubmit = () => {
-    // Ensure replanting intensity is 0 if remove-vines is not checked
     const finalOptions = { ...options };
     if (!options.tasks['remove-vines']) {
         finalOptions.replantingIntensity = 0;
@@ -173,8 +179,9 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
     onSubmit(finalOptions);
   };
 
-  const canSubmit = (opts: typeof options): boolean => {
-    return Object.values(opts.tasks).some(isSelected => isSelected);
+  const canSubmit = (opts: Record<string, any>): boolean => {
+    const tasks = opts.tasks as { [key: string]: boolean } | undefined;
+    return tasks ? Object.values(tasks).some(isSelected => isSelected) : false;
   };
 
   // --- Render Logic --- 
@@ -189,8 +196,8 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
       onClose={onClose}
       onSubmit={handleSubmit}
       submitLabel="Start Clearing"
-      options={options} // Pass options for potential use inside ActivityOptionsModal if needed
-      onOptionsChange={() => {}} // Handled manually
+      options={options}
+      onOptionsChange={() => {}}
       canSubmit={canSubmit}
       disabledMessage="You must select at least one clearing task"
     >
@@ -207,29 +214,9 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
             className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
           />
           <label htmlFor="remove-vines" className={`text-sm ${!vineyard.grape ? 'text-gray-400' : 'text-gray-700'}`}>
-            Vine Replanting {!vineyard.grape ? '(No vines planted)' : ''}
+            Remove vines
           </label>
         </div>
-        {/* Slider only shown when checked AND grapes exist */}
-        {options.tasks['remove-vines'] && vineyard.grape && (
-          <div className="mt-1 pl-6">
-            <label htmlFor="replantingIntensity" className="block text-xs text-gray-600 mb-1">Replanting Intensity: {options.replantingIntensity}%</label>
-            <input
-              type="range"
-              id="replantingIntensity"
-              min={0}
-              max={100}
-              step={10}
-              value={options.replantingIntensity}
-              onChange={(e) => handleSliderChange('replantingIntensity', parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Vine age reduction: {vineyard.vineAge} → {formatNumber(Math.max(0, vineyard.vineAge * (1 - options.replantingIntensity / 100)), 1)} years
-            </p>
-          </div>
-        )}
-
         {/* Clear Vegetation */}
         <div className="flex items-center">
           <input
@@ -237,11 +224,12 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
             id="clear-vegetation"
             checked={options.tasks['clear-vegetation']}
             onChange={(e) => handleTaskChange('clear-vegetation', e.target.checked)}
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine"
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
           />
-          <label htmlFor="clear-vegetation" className="text-sm text-gray-700">Clear Vegetation</label>
+          <label htmlFor="clear-vegetation" className="text-sm text-gray-700">
+            Clear vegetation
+          </label>
         </div>
-
         {/* Debris Removal */}
         <div className="flex items-center">
           <input
@@ -249,77 +237,34 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
             id="remove-debris"
             checked={options.tasks['remove-debris']}
             onChange={(e) => handleTaskChange('remove-debris', e.target.checked)}
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine"
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
           />
-          <label htmlFor="remove-debris" className="text-sm text-gray-700">Debris Removal</label>
+          <label htmlFor="remove-debris" className="text-sm text-gray-700">
+            Remove debris
+          </label>
         </div>
-
-        {/* Soil Amendment - Show checkbox first, radios appear below if checked */}
+        {/* Soil Amendment */}
         <div className="flex items-center">
           <input
             type="checkbox"
             id="soil-amendment"
             checked={options.tasks['soil-amendment']}
             onChange={(e) => handleTaskChange('soil-amendment', e.target.checked)}
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine"
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
           />
-          <label htmlFor="soil-amendment" className="text-sm text-gray-700">Soil Amendment</label>
+          <label htmlFor="soil-amendment" className="text-sm text-gray-700">
+            Soil amendment
+          </label>
         </div>
-        {/* Radios only shown when checked */}
-        {options.tasks['soil-amendment'] && (
-          <div className="mt-1 pl-6 space-y-1">
-            <label className="block text-xs text-gray-600">Amendment Method:</label>
-            <div className="flex items-center space-x-4">
-              <label className="flex items-center text-sm cursor-pointer">
-                <input
-                  type="radio"
-                  name="amendmentMethod"
-                  value="synthetic"
-                  checked={!options.isOrganicAmendment}
-                  onChange={() => handleAmendmentMethodChange(false)}
-                  className="mr-1 h-4 w-4 border-gray-300 text-wine focus:ring-wine"
-                /> Synthetic
-              </label>
-              <label className="flex items-center text-sm cursor-pointer">
-                <input
-                  type="radio"
-                  name="amendmentMethod"
-                  value="organic"
-                  checked={options.isOrganicAmendment}
-                  onChange={() => handleAmendmentMethodChange(true)}
-                  className="mr-1 h-4 w-4 border-gray-300 text-wine focus:ring-wine"
-                 /> Organic
-              </label>
-            </div>
-            <p className="text-xs text-gray-500">Current Status: {vineyard.farmingMethod} (Organic year: {vineyard.organicYears})</p>
-          </div>
-        )}
       </div>
 
       {/* Health Impact Section */}
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-        <h3 className="font-medium text-blue-800 mb-1">Projected Health Impact</h3>
-        <div className="flex items-center">
-          <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden">
-            <div
-              className="bg-green-500 h-full transition-all duration-300"
-              style={{ width: `${vineyard.vineyardHealth * 100}%` }}
-            />
-          </div>
-          <span className="ml-2 text-sm font-medium">→</span>
-          <div className="w-full ml-2 bg-gray-200 h-4 rounded-full overflow-hidden">
-            <div
-              className="bg-green-500 h-full transition-all duration-300"
-              style={{ width: `${projectedHealth * 100}%` }}
-            />
-          </div>
-        </div>
-        <p className="text-xs text-gray-600 mt-1">
-          Current: {Math.round(vineyard.vineyardHealth * 100)}% → Projected: {Math.round(projectedHealth * 100)}%
-        </p>
+        {/* ... health impact content ... */}
       </div>
+      {/* ActivityOptionsModal will render the WorkCalculationTable based on workFactors */}
     </ActivityOptionsModal>
   );
 };
 
-export default ClearingOptionModal; 
+export default ClearingOptionModal;
