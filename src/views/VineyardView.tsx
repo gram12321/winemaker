@@ -8,7 +8,7 @@ import { getVineyards, addVineyard, plantVineyard, harvestVineyard } from '../se
 import { getActivitiesForTarget, getTargetProgress, getActivityById } from '../lib/game/activityManager';
 import { WorkCategory } from '../lib/game/workCalculator';
 import StorageSelector from '../components/buildings/StorageSelector';
-import StaffAssignmentModal from '../components/staff/StaffAssignmentModal';
+import StaffAssignmentModal from '../components/activities/StaffAssignmentModal';
 import { BASELINE_VINE_DENSITY, formatGameDate } from '../lib/core/constants/gameConstants';
 import { ASPECT_FACTORS } from '../lib/core/constants/vineyardConstants';
 import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';

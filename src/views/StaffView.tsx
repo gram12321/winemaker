@@ -12,7 +12,7 @@ import {
   startActivityWithDisplayState
 } from '../lib/game/activityManager';
 import displayManager from '../lib/game/displayManager';
-import StaffAssignmentModal from '@/components/staff/StaffAssignmentModal';
+import StaffAssignmentModal from '@/components/activities/StaffAssignmentModal';
 import { toast } from '../lib/ui/toast';
 import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
 import { WorkCategory } from '../lib/game/workCalculator';

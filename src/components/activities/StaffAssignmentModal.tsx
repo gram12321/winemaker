@@ -134,15 +134,9 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
   }
 
   const calculateWorkProgress = (): WorkProgressInfo => {
+    // Throw error if activity is not found, aligning with fail-fast principle. This should never happen but check needs to be here, otherwise we will get lint errors.
     if (!activity) {
-      return {
-        workPerWeek: 0,
-        totalWork: activity?.totalWork || 100,
-        appliedWork: activity?.appliedWork || 0,
-        weeksToComplete: 'N/A',
-        progressPercentage: 0,
-        relevantSkill: getRelevantSkillForCategory(category)
-      };
+      throw new Error('Activity not found when calculating work progress. Cannot proceed.');
     }
     
     const assignedStaff = staff.filter(s => assignedStaffIds.includes(s.id));
@@ -156,7 +150,7 @@ const StaffAssignmentModal: React.FC<StaffAssignmentModalProps> = ({
         relevantSkill: getRelevantSkillForCategory(category)
       };
     }
-
+    
     // Convert the category to WorkCategory type for calculation
     const workCategoryValue = category as WorkCategory;
     
