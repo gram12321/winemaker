@@ -251,6 +251,29 @@ export async function harvestVineyard(
           // Get the current game state to check the season
           const currentGameState = getGameState();
           const { season } = currentGameState;
+
+          // --- Process the final harvest amount --- 
+          const harvestedSoFar = harvestingActivity.params?.harvestedSoFar || 0;
+          const totalHarvestable = harvestingActivity.params?.totalAmount || 0;
+          const finalHarvestAmount = totalHarvestable - harvestedSoFar;
+
+          if (finalHarvestAmount > 0) {
+            // Get the latest vineyard state for ripeness calculation
+            const finalVineyardState = getVineyardById(id);
+            const finalRipeness = finalVineyardState?.ripeness || vineyard.ripeness;
+
+            await addWineBatch(
+              id,
+              vineyard.grape as GrapeVariety,
+              finalHarvestAmount,
+              vineyard.annualQualityFactor * finalRipeness, // Use final ripeness
+              storageLocations,
+              false, // Don't save game state yet
+              finalRipeness // Pass final ripeness
+            );
+            // consoleService.info(`Harvested final ${Math.round(finalHarvestAmount).toLocaleString()} kg of ${vineyard.grape}.`);
+          }
+          // --- End final harvest processing ---
           
           // Calculate new remaining yield after harvest
           const newRemainingYield = remainingYield - harvestableAmount;
@@ -301,7 +324,8 @@ export async function harvestVineyard(
             const previousHarvested = harvestingActivity.params?.harvestedSoFar || 0;
             const totalHarvestable = harvestingActivity.params?.totalAmount || 0;
             const currentProgress = progress;
-            const previousProgress = previousHarvested / totalHarvestable;
+            // Ensure previousProgress is calculated correctly even if harvestedSoFar is 0
+            const previousProgress = totalHarvestable > 0 ? (previousHarvested / totalHarvestable) : 0;
             
             // Calculate amount harvested in this tick
             const harvestedThisTick = totalHarvestable * (currentProgress - previousProgress);
