@@ -392,4 +392,257 @@ export async function harvestVineyard(
     console.error('Error harvesting vineyard:', error);
     throw error;
   }
+}
+
+/**
+ * Clear a vineyard to improve its health
+ * @param id Vineyard ID to clear
+ * @param options Clearing options including tasks, replanting intensity, and amendment method
+ * @returns Updated vineyard or null if failed
+ */
+export async function clearVineyard(
+  id: string, 
+  options: { 
+    tasks: { [key: string]: boolean };
+    replantingIntensity: number;
+    isOrganicAmendment: boolean;
+  }
+): Promise<Vineyard | null> {
+  try {
+    const vineyard = getVineyardById(id);
+    if (!vineyard) {
+      throw new Error(`Vineyard with ID ${id} not found`);
+    }
+
+    // Get the activity manager and necessary helpers
+    const { startActivityWithDisplayState } = await import('../lib/game/activityManager');
+    const { WorkCategory, calculateTotalWork } = await import('../lib/game/workCalculator');
+
+    // --- Calculate Total Work based on selected tasks --- 
+    let totalWork = 0;
+    const TASK_ID_TO_CATEGORY: Record<string, WorkCategory> = {
+      'remove-vines': WorkCategory.UPROOTING,
+      'clear-vegetation': WorkCategory.CLEARING,
+      'remove-debris': WorkCategory.CLEARING,
+      'soil-amendment': WorkCategory.CLEARING
+    };
+    
+    Object.entries(options.tasks).forEach(([taskId, isSelected]) => {
+      if (!isSelected) return;
+      
+      const category = TASK_ID_TO_CATEGORY[taskId];
+      if (!category) return;
+
+      let taskAmount = vineyard.acres;
+      let taskSpecificFactors: any = {
+        category: category,
+        density: vineyard.density || 0,
+        altitude: vineyard.altitude,
+        country: vineyard.country,
+        region: vineyard.region,
+        workModifiers: [],
+      };
+
+      if (taskId === 'remove-vines') {
+        // Work is proportional to intensity, skip if 0
+        taskAmount *= (options.replantingIntensity / 100);
+        if (taskAmount <= 0) return; 
+      }
+      
+      if (taskId === 'soil-amendment' && options.isOrganicAmendment) {
+         taskSpecificFactors.workModifiers.push(0.2); // Add 20% modifier for organic
+      }
+      
+      totalWork += calculateTotalWork(taskAmount, taskSpecificFactors);
+    });
+    // Ensure total work is at least 1 if any task was selected
+    if (totalWork <= 0 && Object.values(options.tasks).some(v => v)) {
+        totalWork = 1; 
+    }
+    // --- End Work Calculation --- 
+
+    // Create a title based on the selected tasks
+    const selectedTaskLabels = Object.entries(options.tasks)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([taskId, _]) => taskId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
+    const tasksString = selectedTaskLabels.length > 1 
+      ? `${selectedTaskLabels.length} tasks` 
+      : selectedTaskLabels[0] || 'Clearing';
+    const title = `Clearing ${vineyard.name} (${tasksString})`;
+    
+    // Create the activity - amount is now the calculated totalWork
+    const activityId = startActivityWithDisplayState('vineyardView', {
+      category: WorkCategory.CLEARING,
+      amount: Math.max(1, Math.round(totalWork)), // Use calculated work, ensure at least 1
+      title,
+      targetId: id,
+      additionalParams: {
+        clearingOptions: options, // Store the specific options used
+      }
+    });
+
+    if (!activityId) {
+      throw new Error('Failed to start clearing activity');
+    }
+
+    // Update display state to track the activity ID
+    const displayManager = (await import('../lib/game/displayManager')).default;
+    displayManager.updateDisplayState('vineyardView', {
+      currentActivityId: activityId, 
+    });
+
+    // Set up completion callback
+    const { setActivityCompletionCallback } = await import('../lib/game/activityManager');
+    setActivityCompletionCallback(activityId, async () => {
+      try {
+        // Get the latest vineyard state before applying updates
+        const currentVineyard = getVineyardById(id);
+        if (!currentVineyard) {
+          throw new Error('Vineyard not found for completion callback');
+        }
+
+        // Calculate health improvement based on completed tasks
+        let healthImprovement = 0;
+        if (options.tasks['clear-vegetation']) healthImprovement += 0.10;
+        if (options.tasks['remove-debris']) healthImprovement += 0.05;
+        if (options.tasks['soil-amendment']) healthImprovement += 0.15;
+        if (options.tasks['remove-vines']) {
+          healthImprovement += (options.replantingIntensity / 100) * 0.20;
+        }
+        
+        const newHealth = Math.min(1.0, currentVineyard.vineyardHealth + healthImprovement);
+        
+        // Prepare updates object
+        const updates: Partial<Vineyard> = {
+          vineyardHealth: newHealth,
+          status: vineyard.grape ? vineyard.status : 'Not Planted', // Keep status or set to Not Planted
+          canBeCleared: false, // Mark as cleared for now, adjust later based on game logic
+        };
+        
+        if (options.tasks['remove-vines']) {
+          updates.vineAge = Math.max(0, currentVineyard.vineAge * (1 - options.replantingIntensity / 100));
+        }
+        
+        if (options.tasks['soil-amendment']) {
+          updates.farmingMethod = options.isOrganicAmendment ? 'Ecological' : 'Conventional';
+          if (!options.isOrganicAmendment) {
+            updates.organicYears = 0;
+          }
+        }
+        
+        // Apply updates to the vineyard
+        await updateVineyard(id, updates);
+        
+        // Console and Toast messages
+        const { consoleService } = await import('../components/layout/Console');
+        const { toast } = await import('../lib/ui/toast');
+        let message = `Clearing of ${currentVineyard.name} complete! Health improved to ${Math.round(newHealth * 100)}%.`;
+        if (updates.vineAge !== undefined) message += ` Vine age adjusted to ${updates.vineAge.toFixed(1)} years.`;
+        if (updates.farmingMethod) message += ` Farming method set to ${updates.farmingMethod}.`;
+        consoleService.success(message);
+        toast({ title: "Clearing Complete", description: message, variant: "success" });
+        
+        // Clear activity from display state
+        displayManager.updateDisplayState('vineyardView', { currentActivityId: null });
+      } catch (error) {
+        console.error('Error in clearing completion callback:', error);
+      }
+    });
+
+    return getVineyardById(id); // Return potentially updated vineyard state
+  } catch (error) {
+    console.error('Error clearing vineyard:', error);
+    return null;
+  }
+}
+
+/**
+ * Uproot a vineyard, removing all planted grapes and resetting health
+ * @param id Vineyard ID to uproot
+ * @returns Updated vineyard or null if failed
+ */
+export async function uprootVineyard(
+  id: string
+): Promise<Vineyard | null> {
+  try {
+    const vineyard = getVineyardById(id);
+    if (!vineyard) {
+      throw new Error(`Vineyard with ID ${id} not found`);
+    }
+
+    // Get the activity manager and start an activity
+    const { 
+      startActivityWithDisplayState, 
+      createActivityWithoutDisplayState 
+    } = await import('../lib/game/activityManager');
+    
+    // Create an activity for the uprooting process
+    const title = `Uprooting ${vineyard.name}`;
+    const activityId = startActivityWithDisplayState('vineyardView', {
+      category: 'uprooting',
+      amount: vineyard.acres,
+      title,
+      targetId: id,
+      density: vineyard.density || 0,
+      additionalParams: {
+        altitude: vineyard.altitude,
+        country: vineyard.country,
+        region: vineyard.region,
+      }
+    });
+
+    if (!activityId) {
+      throw new Error('Failed to start uprooting activity');
+    }
+
+    // Update display state to track the activity
+    const displayManager = (await import('../lib/game/displayManager')).default;
+    displayManager.updateDisplayState('vineyardView', {
+      currentActivityId: activityId,
+    });
+
+    // Set up completion callback to handle vineyard updates
+    const { setActivityCompletionCallback } = await import('../lib/game/activityManager');
+    setActivityCompletionCallback(activityId, async () => {
+      try {
+        // Get constants for default health
+        const { DEFAULT_FARMLAND_HEALTH } = await import('../lib/core/constants/gameConstants');
+        
+        // Update the vineyard with reset values
+        await updateVineyard(id, {
+          grape: null,
+          vineAge: 0,
+          density: 0,
+          vineyardHealth: DEFAULT_FARMLAND_HEALTH,
+          status: 'Not Planted',
+          ripeness: 0,
+          remainingYield: null,
+        });
+        
+        // Create success message 
+        const { consoleService } = await import('../components/layout/Console');
+        consoleService.success(`Uprooting of ${vineyard.name} complete! The vineyard is now ready for planting.`);
+        
+        // Update display state
+        displayManager.updateDisplayState('vineyardView', {
+          currentActivityId: null,
+        });
+        
+        // Also show a toast notification
+        const { toast } = await import('../lib/ui/toast');
+        toast({
+          title: "Uprooting Complete",
+          description: `The vineyard is now ready for planting with new grape varieties.`,
+          variant: "success",
+        });
+      } catch (error) {
+        console.error('Error in uprooting completion callback:', error);
+      }
+    });
+
+    return vineyard;
+  } catch (error) {
+    console.error('Error uprooting vineyard:', error);
+    return null;
+  }
 } 

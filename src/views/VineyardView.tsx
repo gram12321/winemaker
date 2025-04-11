@@ -4,7 +4,7 @@ import displayManager from '../lib/game/displayManager';
 import { getGameState, updateGameState } from '@/gameState';
 import { Vineyard, calculateVineyardYield, calculateLandValue } from '../lib/game/vineyard';
 import { consoleService } from '../components/layout/Console';
-import { getVineyards, addVineyard, plantVineyard, harvestVineyard } from '../services/vineyardService';
+import { getVineyards, addVineyard, plantVineyard, harvestVineyard, clearVineyard, uprootVineyard } from '../services/vineyardService';
 import { getActivitiesForTarget, getTargetProgress, getActivityById } from '../lib/game/activityManager';
 import { WorkCategory } from '../lib/game/workCalculator';
 import StorageSelector from '../components/buildings/StorageSelector';
@@ -13,6 +13,8 @@ import { BASELINE_VINE_DENSITY, formatGameDate } from '../lib/core/constants/gam
 import { ASPECT_FACTORS } from '../lib/core/constants/vineyardConstants';
 import { ActivityProgressBar } from '../components/activities/ActivityProgressBar';
 import PlantingOptionsModal from '@/components/vineyards/PlantingOptionsModal';
+import ClearingOptionModal from '@/components/vineyards/ClearingOptionModal';
+import UprootOptionModal from '@/components/vineyards/UprootOptionModal';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
 import { formatNumber } from '@/lib/core/utils/formatUtils';
 import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
@@ -27,22 +29,31 @@ interface VineyardViewDisplayState {
   showStaffAssignment?: boolean;
   currentActivityId?: string | null;
   showPlantingModal: boolean;
+  showClearingModal: boolean;
+  showUprootModal: boolean;
 }
 
 const getStatusColor = (status: string) => {
   switch (status) {
+    case 'Clearing in Progress':
+    case 'Uprooting in Progress':
+    case 'Planting in Progress':
+    case 'Harvesting in Progress':
+      return 'text-blue-600'; // Use blue for in-progress activities
+    case 'Not Planted':
+    case 'Ready to be planted': // Added this case explicitly
+      return 'text-gray-500';
     case 'Growing':
       return 'text-green-600';
-    case 'Ripening':
-      return 'text-amber-600';
     case 'Ready for Harvest':
-      return 'text-red-600';
-    case 'Dormancy':
-      return 'text-gray-600';
-    case 'No yield in first season':
-      return 'text-blue-600';
-    default:
       return 'text-amber-600';
+    case 'Harvested':
+    case 'Dormancy': // Grouped Dormancy here
+      return 'text-purple-600'; // Changed color for harvested/dormant
+    case 'No yield in first season':
+        return 'text-indigo-600'; // Different color for this specific state
+    default:
+      return 'text-gray-700';
   }
 };
 
@@ -54,6 +65,8 @@ displayManager.createDisplayState('vineyardView', {
   showStaffAssignment: false,
   currentActivityId: null,
   showPlantingModal: false,
+  showClearingModal: false,
+  showUprootModal: false,
 });
 
 const VineyardView: React.FC = () => {
@@ -70,6 +83,8 @@ const VineyardView: React.FC = () => {
     showStaffAssignment,
     currentActivityId,
     showPlantingModal,
+    showClearingModal,
+    showUprootModal,
   } = displayState;
 
   // Get the selected vineyard from the current game state using the ID
@@ -88,10 +103,30 @@ const VineyardView: React.FC = () => {
   // Fetch the absolute latest state of the activity object if it exists
   const latestHarvestingActivityState = currentHarvestingActivity ? getActivityById(currentHarvestingActivity.id) : null;
 
+  // Add activity tracking for clearing and uprooting
+  const currentClearingActivity = currentVineyardActivities.find(a => a.category === WorkCategory.CLEARING);
+  const latestClearingActivityState = currentClearingActivity ? getActivityById(currentClearingActivity.id) : null;
+
+  const currentUprootingActivity = currentVineyardActivities.find(a => a.category === WorkCategory.UPROOTING);
+  const latestUprootingActivityState = currentUprootingActivity ? getActivityById(currentUprootingActivity.id) : null;
+
   // Flags to determine if activities are in progress based on LATEST state
   const plantingInProgress = !!latestPlantingActivityState;
   const harvestingInProgress = !!latestHarvestingActivityState;
+  const clearingInProgress = !!latestClearingActivityState;
+  const uprootingInProgress = !!latestUprootingActivityState;
   // --- END NEW LOGIC ---
+
+  // Function to determine the display status
+  const getDisplayStatus = (vineyard: Vineyard, isClearing: boolean, isUprooting: boolean): string => {
+    if (isClearing) return 'Clearing in Progress';
+    if (isUprooting) return 'Uprooting in Progress';
+    // Add specific check for planting in progress based on activity
+    if (plantingInProgress && selectedVineyardId === vineyard.id) return 'Planting in Progress';
+    // Add specific check for harvesting in progress based on activity
+    if (harvestingInProgress && selectedVineyardId === vineyard.id) return 'Harvesting in Progress';
+    return vineyard.status || 'Unknown'; // Fallback to vineyard's own status
+  };
 
   // Handle adding a new vineyard using the vineyard service
   const handleAddVineyard = displayManager.createActionHandler(async () => {
@@ -225,6 +260,75 @@ const VineyardView: React.FC = () => {
     // ... 
   };
 
+  // NEW HANDLERS FOR CLEARING/UPROOTING
+  
+  // Open/close the clearing modal
+  const handleOpenClearingModal = displayManager.createActionHandler(() => {
+    if (!selectedVineyardId) return;
+    displayManager.updateDisplayState('vineyardView', { showClearingModal: true });
+  });
+
+  const handleCloseClearingModal = () => {
+    displayManager.updateDisplayState('vineyardView', { showClearingModal: false });
+  };
+
+  // Handle submission from the clearing modal
+  const handleClearVineyardSubmit = displayManager.createActionHandler(async (options: {
+    tasks: { [key: string]: boolean }; 
+    replantingIntensity: number;
+    isOrganicAmendment: boolean;
+  }) => {
+    if (!selectedVineyardId) return;
+
+    handleCloseClearingModal(); // Close modal first
+    displayManager.updateDisplayState('vineyardView', { loading: true });
+    
+    try {
+      const result = await clearVineyard(selectedVineyardId, options);
+      
+      if (!result) {
+        consoleService.error('Failed to start clearing vineyard.');
+      }
+    } catch (error) {
+      consoleService.error('Error clearing vineyard.');
+      console.error('Error clearing vineyard:', error);
+    } finally {
+      displayManager.updateDisplayState('vineyardView', { loading: false });
+    }
+  });
+
+  // Open/close the uprooting modal
+  const handleOpenUprootModal = displayManager.createActionHandler(() => {
+    if (!selectedVineyardId) return;
+    displayManager.updateDisplayState('vineyardView', { showUprootModal: true });
+  });
+
+  const handleCloseUprootModal = () => {
+    displayManager.updateDisplayState('vineyardView', { showUprootModal: false });
+  };
+
+  // Handle submission from the uprooting modal
+  const handleUprootVineyardSubmit = displayManager.createActionHandler(async () => {
+    if (!selectedVineyardId) return;
+
+    handleCloseUprootModal(); // Close modal first
+    displayManager.updateDisplayState('vineyardView', { loading: true });
+    
+    try {
+      // Use the actual uprooting service instead of placeholder
+      const result = await uprootVineyard(selectedVineyardId);
+      
+      if (!result) {
+        consoleService.error('Failed to start uprooting vineyard.');
+      }
+    } catch (error) {
+      consoleService.error('Error uprooting vineyard.');
+      console.error('Error uprooting vineyard:', error);
+    } finally {
+      displayManager.updateDisplayState('vineyardView', { loading: false });
+    }
+  });
+
   return (
     <div className="p-4">
       <div className="Vineyard-section mb-6">
@@ -245,43 +349,55 @@ const VineyardView: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {vineyards.map((vineyard) => (
-              <div 
-                key={vineyard.id} 
-                className={`bg-white border ${selectedVineyardId === vineyard.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'} rounded-lg shadow hover:shadow-md cursor-pointer`}
-                onClick={() => handleSelectVineyard(vineyard)}
-              >
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">{vineyard.name}</h3>
-                  <div className="text-sm text-gray-600 mt-1">
-                    <span className={`fi ${getCountryCodeForFlag(vineyard.country)} mr-2`}></span>
-                    {vineyard.region}, {vineyard.country}
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="font-medium">Size:</span> {vineyard.acres.toFixed(1)} acres
+            {vineyards.map((vineyard) => {
+              // Determine if activities are running for *this specific vineyard* in the map
+              const activitiesForThisVineyard = getActivitiesForTarget(vineyard.id);
+              const isClearingThis = activitiesForThisVineyard.some(a => a.category === WorkCategory.CLEARING);
+              const isUprootingThis = activitiesForThisVineyard.some(a => a.category === WorkCategory.UPROOTING);
+              const isPlantingThis = activitiesForThisVineyard.some(a => a.category === WorkCategory.PLANTING);
+              const isHarvestingThis = activitiesForThisVineyard.some(a => a.category === WorkCategory.HARVESTING);
+              
+              // Use the helper function to get the status for the card
+              const displayStatus = getDisplayStatus(vineyard, isClearingThis, isUprootingThis);
+              
+              return (
+                <div 
+                  key={vineyard.id} 
+                  className={`bg-white border ${selectedVineyardId === vineyard.id ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'} rounded-lg shadow hover:shadow-md cursor-pointer`}
+                  onClick={() => handleSelectVineyard(vineyard)}
+                >
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold">{vineyard.name}</h3>
+                    <div className="text-sm text-gray-600 mt-1">
+                      <span className={`fi ${getCountryCodeForFlag(vineyard.country)} mr-2`}></span>
+                      {vineyard.region}, {vineyard.country}
                     </div>
-                    <div>
-                      <span className="font-medium">Status:</span>{' '}
-                      <span className={getStatusColor(vineyard.status)}>
-                        {vineyard.status}
-                      </span>
-                    </div>
-                  </div>
-                  {vineyard.grape && (
-                    <div className="mt-2">
-                      <span className="font-medium">Ripeness:</span>{' '}
-                      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                        <div 
-                          className="bg-amber-500 h-2.5 rounded-full" 
-                          style={{ width: `${vineyard.ripeness * 100}%` }}
-                        ></div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <span className="font-medium">Size:</span> {vineyard.acres.toFixed(1)} acres
+                      </div>
+                      <div>
+                        <span className="font-medium">Status:</span>{' '}
+                        <span className={getStatusColor(displayStatus)}>
+                          {displayStatus}
+                        </span>
                       </div>
                     </div>
-                  )}
+                    {vineyard.grape && (
+                      <div className="mt-2">
+                        <span className="font-medium">Ripeness:</span>{' '}
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                          <div 
+                            className="bg-amber-500 h-2.5 rounded-full" 
+                            style={{ width: `${vineyard.ripeness * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -330,72 +446,75 @@ const VineyardView: React.FC = () => {
             
             <div>
               <h3 className="text-lg font-semibold mb-2">Vineyard Status</h3>
-              {selectedVineyard.grape ? (
-                <ul className="space-y-2">
-                  <li>
-                    <span className="font-medium">Status:</span>{' '}
-                    <span className={getStatusColor(selectedVineyard.status)}>
-                      {selectedVineyard.status}
-                    </span>
-                  </li>
-                  <li><span className="font-medium">Planted Grape:</span> {selectedVineyard.grape}</li>
-                  <li><span className="font-medium">Vine Age:</span> {selectedVineyard.vineAge} {selectedVineyard.vineAge === 1 ? 'year' : 'years'}</li>
-                  <li><span className="font-medium">Planted Density:</span> {formatNumber(selectedVineyard.density)} vines per acre</li>
-                  <li>
-                    <span className="font-medium">Health:</span>{' '}
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                      <div 
-                        className="bg-green-600 h-2.5 rounded-full" 
-                        style={{ width: `${selectedVineyard.vineyardHealth * 100}%` }}
-                      ></div>
-                    </div>
-                  </li>
-                  <li>
-                    <span className="font-medium">Ripeness:</span>{' '}
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
-                      <div 
-                        className="bg-amber-500 h-2.5 rounded-full" 
-                        style={{ width: `${selectedVineyard.ripeness * 100}%` }}
-                      ></div>
-                    </div>
-                  </li>
-                  <li><span className="font-medium">Expected Yield:</span> {selectedVineyard.status === 'Harvested' ? '0 kg (Harvested)' : `${formatNumber(calculateVineyardYield(selectedVineyard))} kg`}</li>
-                  
-                  {/* Harvest controls - use harvestingInProgress flag */}
-                  {selectedVineyard.status !== 'Harvested' && selectedVineyard.ripeness > 0.3 && (
-                    <>
-                      <li className="mt-4 pt-4 border-t border-gray-200">
-                        <StorageSelector 
-                          resourceType="grape"
-                          selectedStorageLocations={selectedStorageLocations}
-                          onStorageChange={handleStorageChange}
-                          requiredCapacity={Math.ceil(calculateVineyardYield(selectedVineyard))}
-                        />
+              {(() => {
+                // Use the helper function for the detailed view status as well
+                const detailedDisplayStatus = getDisplayStatus(selectedVineyard, clearingInProgress, uprootingInProgress);
+                
+                if (!selectedVineyard.grape && !plantingInProgress && !clearingInProgress && !uprootingInProgress) {
+                  return <p className="text-gray-600 mb-4">This vineyard is not planted yet.</p>;
+                } else {
+                  return (
+                    <ul className="space-y-2">
+                      <li>
+                        <span className="font-medium">Status:</span>{' '}
+                        <span className={getStatusColor(detailedDisplayStatus)}>
+                          {detailedDisplayStatus}
+                        </span>
                       </li>
-                      <li className="mt-4">
-                        <button 
-                          onClick={handleHarvestVineyard}
-                          className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded"
-                          disabled={loading || selectedStorageLocations.length === 0 || harvestingInProgress}
-                        >
-                          {loading ? 'Processing...' : (harvestingInProgress ? 'Harvesting...' : 'Start Harvest')}
-                        </button>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              ) : (
-                <div>
-                  <p className="text-gray-600 mb-4">This vineyard is not planted yet.</p>
-                  <button
-                    onClick={handleOpenPlantingModal}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                    disabled={loading || plantingInProgress}
-                  >
-                    {loading ? 'Processing...' : (plantingInProgress ? 'Planting...' : 'Plant Vineyard')}
-                  </button>
-                </div>
-              )}
+                      {/* Conditionally render other status details only if planted */}
+                      {selectedVineyard.grape && (
+                        <>
+                          <li><span className="font-medium">Planted Grape:</span> {selectedVineyard.grape}</li>
+                          <li><span className="font-medium">Vine Age:</span> {selectedVineyard.vineAge} {selectedVineyard.vineAge === 1 ? 'year' : 'years'}</li>
+                          <li><span className="font-medium">Planted Density:</span> {formatNumber(selectedVineyard.density)} vines per acre</li>
+                          <li>
+                            <span className="font-medium">Health:</span>{' '}
+                            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                              <div 
+                                className="bg-green-600 h-2.5 rounded-full" 
+                                style={{ width: `${selectedVineyard.vineyardHealth * 100}%` }}
+                              ></div>
+                            </div>
+                          </li>
+                          <li>
+                            <span className="font-medium">Ripeness:</span>{' '}
+                            <div className="w-full bg-gray-200 rounded-full h-2.5 mt-1">
+                              <div 
+                                className="bg-amber-500 h-2.5 rounded-full" 
+                                style={{ width: `${selectedVineyard.ripeness * 100}%` }}
+                              ></div>
+                            </div>
+                          </li>
+                          <li><span className="font-medium">Expected Yield:</span> {selectedVineyard.status === 'Harvested' ? '0 kg (Harvested)' : `${formatNumber(calculateVineyardYield(selectedVineyard))} kg`}</li>
+                          
+                          {/* Harvest controls - use harvestingInProgress flag */}
+                          {selectedVineyard.status !== 'Harvested' && selectedVineyard.ripeness > 0.3 && (
+                            <>
+                              <li className="mt-4 pt-4 border-t border-gray-200">
+                                <StorageSelector 
+                                  resourceType="grape"
+                                  selectedStorageLocations={selectedStorageLocations}
+                                  onStorageChange={handleStorageChange}
+                                  requiredCapacity={Math.ceil(calculateVineyardYield(selectedVineyard))}
+                                />
+                              </li>
+                              <li className="mt-4">
+                                <button 
+                                  onClick={handleHarvestVineyard}
+                                  className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded"
+                                  disabled={loading || selectedStorageLocations.length === 0 || harvestingInProgress}
+                                >
+                                  {loading ? 'Processing...' : (harvestingInProgress ? 'Harvesting...' : 'Start Harvest')}
+                                </button>
+                              </li>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </ul>
+                  );
+                }
+              })()}
               
               {/* Display planting progress - Use latestPlantingActivityState */}
               {plantingInProgress && latestPlantingActivityState && (
@@ -404,12 +523,10 @@ const VineyardView: React.FC = () => {
                     activityId={latestPlantingActivityState.id}
                     title="Planting Progress"
                     category={WorkCategory.PLANTING}
-                    // Calculate progress directly from latest state
                     progress={latestPlantingActivityState.totalWork > 0 ? (latestPlantingActivityState.appliedWork / latestPlantingActivityState.totalWork) * 100 : 0} 
                     appliedWork={latestPlantingActivityState.appliedWork}
                     totalWork={latestPlantingActivityState.totalWork}
                     onAssignStaff={() => handleAssignStaff(WorkCategory.PLANTING)}
-                    className=""
                   />
                 </div>
               )}
@@ -421,12 +538,10 @@ const VineyardView: React.FC = () => {
                     activityId={latestHarvestingActivityState.id}
                     title="Harvesting Progress"
                     category={WorkCategory.HARVESTING}
-                     // Calculate progress directly from latest state
                     progress={latestHarvestingActivityState.totalWork > 0 ? (latestHarvestingActivityState.appliedWork / latestHarvestingActivityState.totalWork) * 100 : 0}
                     appliedWork={latestHarvestingActivityState.appliedWork}
                     totalWork={latestHarvestingActivityState.totalWork}
                     onAssignStaff={() => handleAssignStaff(WorkCategory.HARVESTING)}
-                    className=""
                   />
                 </div>
               )}
@@ -456,6 +571,103 @@ const VineyardView: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Vineyard Status & Actions section */}
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold mb-2">Vineyard Actions</h3>
+            <div className="flex space-x-4 items-start">
+              {/* Planting Button (Only if not planted) */}
+              {!selectedVineyard.grape && (
+                <button
+                  onClick={handleOpenPlantingModal}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading || plantingInProgress || clearingInProgress || uprootingInProgress}
+                >
+                  {loading ? 'Processing...' : (plantingInProgress ? 'Planting...' : 'Plant Vineyard')}
+                </button>
+              )}
+
+              {/* Clearing Button (Always available if vineyard selected) */}
+              <button
+                onClick={handleOpenClearingModal}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || clearingInProgress || plantingInProgress || uprootingInProgress}
+              >
+                {loading ? 'Processing...' : (clearingInProgress ? 'Clearing...' : 'Clear Vineyard')}
+              </button>
+              
+              {/* Uprooting Button (Always visible, disable if not planted) */}
+              <button
+                onClick={handleOpenUprootModal}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading || uprootingInProgress || clearingInProgress || plantingInProgress || !selectedVineyard.grape}
+              >
+                {loading ? 'Processing...' : (uprootingInProgress ? 'Uprooting...' : 'Uproot Vineyard')}
+              </button>
+            </div>
+          </div>
+
+          {/* Activity Progress Bars */}          
+          {/* Display planting progress */}
+          {plantingInProgress && latestPlantingActivityState && (
+             <div className="my-4">
+               <ActivityProgressBar
+                 activityId={latestPlantingActivityState.id}
+                 title="Planting Progress"
+                 category={WorkCategory.PLANTING}
+                 progress={latestPlantingActivityState.totalWork > 0 ? (latestPlantingActivityState.appliedWork / latestPlantingActivityState.totalWork) * 100 : 0} 
+                 appliedWork={latestPlantingActivityState.appliedWork}
+                 totalWork={latestPlantingActivityState.totalWork}
+                 onAssignStaff={() => handleAssignStaff(WorkCategory.PLANTING)}
+               />
+             </div>
+           )}
+           
+          {/* Display clearing progress */}
+          {clearingInProgress && latestClearingActivityState && (
+            <div className="my-4">
+              <ActivityProgressBar
+                activityId={latestClearingActivityState.id}
+                title="Clearing Progress"
+                category={WorkCategory.CLEARING}
+                progress={latestClearingActivityState.totalWork > 0 ? (latestClearingActivityState.appliedWork / latestClearingActivityState.totalWork) * 100 : 0} 
+                appliedWork={latestClearingActivityState.appliedWork}
+                totalWork={latestClearingActivityState.totalWork}
+                onAssignStaff={() => handleAssignStaff(WorkCategory.CLEARING)}
+              />
+            </div>
+          )}
+          
+          {/* Display uprooting progress */}
+          {uprootingInProgress && latestUprootingActivityState && (
+            <div className="my-4">
+              <ActivityProgressBar
+                activityId={latestUprootingActivityState.id}
+                title="Uprooting Progress"
+                category={WorkCategory.UPROOTING}
+                progress={latestUprootingActivityState.totalWork > 0 ? (latestUprootingActivityState.appliedWork / latestUprootingActivityState.totalWork) * 100 : 0} 
+                appliedWork={latestUprootingActivityState.appliedWork}
+                totalWork={latestUprootingActivityState.totalWork}
+                onAssignStaff={() => handleAssignStaff(WorkCategory.UPROOTING)}
+              />
+            </div>
+          )}
+          
+          {/* Display harvesting progress */}          
+          {harvestingInProgress && latestHarvestingActivityState && (
+             <div className="my-4">
+               <ActivityProgressBar
+                 activityId={latestHarvestingActivityState.id}
+                 title="Harvesting Progress"
+                 category={WorkCategory.HARVESTING}
+                 progress={latestHarvestingActivityState.totalWork > 0 ? (latestHarvestingActivityState.appliedWork / latestHarvestingActivityState.totalWork) * 100 : 0}
+                 appliedWork={latestHarvestingActivityState.appliedWork}
+                 totalWork={latestHarvestingActivityState.totalWork}
+                 onAssignStaff={() => handleAssignStaff(WorkCategory.HARVESTING)}
+               />
+             </div>
+           )}
+          
         </div>
       ) : null}
 
@@ -466,6 +678,28 @@ const VineyardView: React.FC = () => {
             vineyard={selectedVineyard}
             onClose={handleClosePlantingModal}
             onSubmit={handlePlantVineyardSubmit}
+          />
+        </div>
+      )}
+
+      {/* Clearing Modal */}
+      {displayState.showClearingModal && selectedVineyard && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <ClearingOptionModal 
+            vineyard={selectedVineyard}
+            onClose={handleCloseClearingModal}
+            onSubmit={handleClearVineyardSubmit}
+          />
+        </div>
+      )}
+
+      {/* Uprooting Modal */}
+      {displayState.showUprootModal && selectedVineyard && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <UprootOptionModal 
+            vineyard={selectedVineyard}
+            onClose={handleCloseUprootModal}
+            onSubmit={handleUprootVineyardSubmit}
           />
         </div>
       )}
