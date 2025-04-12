@@ -515,36 +515,6 @@ const VineyardView: React.FC = () => {
                   );
                 }
               })()}
-              
-              {/* Display planting progress - Use latestPlantingActivityState */}
-              {plantingInProgress && latestPlantingActivityState && (
-                <div className="my-4">
-                  <ActivityProgressBar
-                    activityId={latestPlantingActivityState.id}
-                    title="Planting Progress"
-                    category={WorkCategory.PLANTING}
-                    progress={latestPlantingActivityState.totalWork > 0 ? (latestPlantingActivityState.appliedWork / latestPlantingActivityState.totalWork) * 100 : 0} 
-                    appliedWork={latestPlantingActivityState.appliedWork}
-                    totalWork={latestPlantingActivityState.totalWork}
-                    onAssignStaff={() => handleAssignStaff(WorkCategory.PLANTING)}
-                  />
-                </div>
-              )}
-              
-              {/* Display harvesting progress - Use latestHarvestingActivityState */}
-              {harvestingInProgress && latestHarvestingActivityState && (
-                <div className="my-4">
-                  <ActivityProgressBar
-                    activityId={latestHarvestingActivityState.id}
-                    title="Harvesting Progress"
-                    category={WorkCategory.HARVESTING}
-                    progress={latestHarvestingActivityState.totalWork > 0 ? (latestHarvestingActivityState.appliedWork / latestHarvestingActivityState.totalWork) * 100 : 0}
-                    appliedWork={latestHarvestingActivityState.appliedWork}
-                    totalWork={latestHarvestingActivityState.totalWork}
-                    onAssignStaff={() => handleAssignStaff(WorkCategory.HARVESTING)}
-                  />
-                </div>
-              )}
             </div>
           </div>
 
@@ -613,67 +583,57 @@ const VineyardView: React.FC = () => {
             </div>
           </div>
 
-          {/* Activity Progress Bars */}          
-          {/* Display planting progress */}
-          {plantingInProgress && latestPlantingActivityState && (
-             <div className="my-4">
-               <ActivityProgressBar
-                 activityId={latestPlantingActivityState.id}
-                 title="Planting Progress"
-                 category={WorkCategory.PLANTING}
-                 progress={latestPlantingActivityState.totalWork > 0 ? (latestPlantingActivityState.appliedWork / latestPlantingActivityState.totalWork) * 100 : 0} 
-                 appliedWork={latestPlantingActivityState.appliedWork}
-                 totalWork={latestPlantingActivityState.totalWork}
-                 onAssignStaff={() => handleAssignStaff(WorkCategory.PLANTING)}
-               />
-             </div>
-           )}
-           
-          {/* Display clearing progress */}
-          {clearingInProgress && latestClearingActivityState && (
-            <div className="my-4">
-              <ActivityProgressBar
-                activityId={latestClearingActivityState.id}
-                title="Clearing Progress"
-                category={WorkCategory.CLEARING}
-                progress={latestClearingActivityState.totalWork > 0 ? (latestClearingActivityState.appliedWork / latestClearingActivityState.totalWork) * 100 : 0} 
-                appliedWork={latestClearingActivityState.appliedWork}
-                totalWork={latestClearingActivityState.totalWork}
-                onAssignStaff={() => handleAssignStaff(WorkCategory.CLEARING)}
-              />
+          {/* Activity Progress Bars (conditionally rendered below actions) */}
+          {(plantingInProgress || harvestingInProgress || clearingInProgress || uprootingInProgress) && currentVineyardActivities.length > 0 && (
+            <div className="mt-4">
+              {/* Keep the Planting progress bar in this section */}
+              {plantingInProgress && 
+                <ActivityProgressBar
+                  activityId={currentVineyardActivities[0].id}
+                  title="Planting Progress"
+                  category={WorkCategory.PLANTING}
+                  progress={(currentVineyardActivities[0].appliedWork / currentVineyardActivities[0].totalWork) * 100}
+                  appliedWork={currentVineyardActivities[0].appliedWork}
+                  totalWork={currentVineyardActivities[0].totalWork}
+                  onAssignStaff={() => handleAssignStaff(WorkCategory.PLANTING)}
+                />
+              }
+              {/* Keep other progress bars in this section */}
+              {harvestingInProgress && 
+                <ActivityProgressBar
+                  activityId={currentVineyardActivities[0].id}
+                  title="Harvesting Progress"
+                  category={WorkCategory.HARVESTING}
+                  progress={(currentVineyardActivities[0].appliedWork / currentVineyardActivities[0].totalWork) * 100}
+                  appliedWork={currentVineyardActivities[0].appliedWork}
+                  totalWork={currentVineyardActivities[0].totalWork}
+                  onAssignStaff={() => handleAssignStaff(WorkCategory.HARVESTING)}
+                />
+              }
+              {clearingInProgress && 
+                <ActivityProgressBar
+                  activityId={currentVineyardActivities[0].id}
+                  title="Clearing Progress"
+                  category={WorkCategory.CLEARING}
+                  progress={(currentVineyardActivities[0].appliedWork / currentVineyardActivities[0].totalWork) * 100}
+                  appliedWork={currentVineyardActivities[0].appliedWork}
+                  totalWork={currentVineyardActivities[0].totalWork}
+                  onAssignStaff={() => handleAssignStaff(WorkCategory.CLEARING)}
+                />
+              }
+              {uprootingInProgress && 
+                <ActivityProgressBar
+                  activityId={currentVineyardActivities[0].id}
+                  title="Uprooting Progress"
+                  category={WorkCategory.UPROOTING}
+                  progress={(currentVineyardActivities[0].appliedWork / currentVineyardActivities[0].totalWork) * 100}
+                  appliedWork={currentVineyardActivities[0].appliedWork}
+                  totalWork={currentVineyardActivities[0].totalWork}
+                  onAssignStaff={() => handleAssignStaff(WorkCategory.UPROOTING)}
+                />
+              }
             </div>
           )}
-          
-          {/* Display uprooting progress */}
-          {uprootingInProgress && latestUprootingActivityState && (
-            <div className="my-4">
-              <ActivityProgressBar
-                activityId={latestUprootingActivityState.id}
-                title="Uprooting Progress"
-                category={WorkCategory.UPROOTING}
-                progress={latestUprootingActivityState.totalWork > 0 ? (latestUprootingActivityState.appliedWork / latestUprootingActivityState.totalWork) * 100 : 0} 
-                appliedWork={latestUprootingActivityState.appliedWork}
-                totalWork={latestUprootingActivityState.totalWork}
-                onAssignStaff={() => handleAssignStaff(WorkCategory.UPROOTING)}
-              />
-            </div>
-          )}
-          
-          {/* Display harvesting progress */}          
-          {harvestingInProgress && latestHarvestingActivityState && (
-             <div className="my-4">
-               <ActivityProgressBar
-                 activityId={latestHarvestingActivityState.id}
-                 title="Harvesting Progress"
-                 category={WorkCategory.HARVESTING}
-                 progress={latestHarvestingActivityState.totalWork > 0 ? (latestHarvestingActivityState.appliedWork / latestHarvestingActivityState.totalWork) * 100 : 0}
-                 appliedWork={latestHarvestingActivityState.appliedWork}
-                 totalWork={latestHarvestingActivityState.totalWork}
-                 onAssignStaff={() => handleAssignStaff(WorkCategory.HARVESTING)}
-               />
-             </div>
-           )}
-          
         </div>
       ) : null}
 
