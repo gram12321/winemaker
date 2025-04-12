@@ -6,6 +6,7 @@ import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
 import { formatNumber } from '@/lib/core/utils/formatUtils';
 import HealthBar from '../activities/HealthBar';
+import { CLEARING_SUBTASK_RATES, CLEARING_SUBTASK_INITIAL_WORK } from '@/lib/core/constants/vineyardConstants';
 
 interface ClearingOptionModalProps {
   vineyard: Vineyard;
@@ -16,21 +17,6 @@ interface ClearingOptionModalProps {
     isOrganicAmendment: boolean;
   }) => void;
 }
-
-// ===== CLEARING-SPECIFIC CONSTANTS =====
-// Clearing sub-task rates (acres per week)
-const CLEARING_SUBTASK_RATES = {
-  'clear-vegetation': 0.5, // 0.5 acres/week for vegetation clearing
-  'remove-debris': 0.4,    // 0.4 acres/week for debris removal
-  'soil-amendment': 0.8    // 0.8 acres/week for soil amendment
-};
-
-// Initial setup work for each clearing sub-task
-const CLEARING_SUBTASK_INITIAL_WORK = {
-  'clear-vegetation': 20,  // Initial setup work for vegetation clearing
-  'remove-debris': 15,     // Initial setup work for debris removal
-  'soil-amendment': 25     // Initial setup work for soil amendment
-};
 
 const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
   vineyard,

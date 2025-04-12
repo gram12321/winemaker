@@ -316,3 +316,19 @@ export const REGION_ASPECT_RATINGS = {
     "Ahr": { "North": 0.10, "Northeast": 0.40, "East": 0.65, "Southeast": 0.85, "South": 1.00, "Southwest": 0.80, "West": 0.65, "Northwest": 0.35 },
   },
 }; 
+
+// Add clearing subtask constants here
+
+// Clearing sub-task rates (acres per week)
+export const CLEARING_SUBTASK_RATES = {
+  'clear-vegetation': 0.5, // 0.5 acres/week for vegetation clearing
+  'remove-debris': 0.4,    // 0.4 acres/week for debris removal
+  'soil-amendment': 0.8    // 0.8 acres/week for soil amendment
+};
+
+// Initial setup work for each clearing sub-task
+export const CLEARING_SUBTASK_INITIAL_WORK = {
+  'clear-vegetation': 20,  // Initial setup work for vegetation clearing
+  'remove-debris': 15,     // Initial setup work for debris removal
+  'soil-amendment': 25     // Initial setup work for soil amendment
+}; 
