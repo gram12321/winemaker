@@ -1,14 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
 import { assignStaffToActivity, getActivityById, addActivity, removeActivity } from '../lib/game/activityManager';
-import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS } from '@/lib/game/workCalculator';
-import { saveStaffToDb, removeStaffFromDb, updateStaffInDb, saveTeamToDb, loadTeamsFromDb, saveStaffAssignmentsToDb } from '../lib/database/staffDB';
+import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK } from '@/lib/game/workCalculator';
+import { saveTeamToDb, loadTeamsFromDb, saveStaffAssignmentsToDb } from '../lib/database/staffDB';
 import { BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER, SkillLevels, DefaultTeams, italianMaleNames, italianFemaleNames, frenchMaleNames, frenchFemaleNames, spanishMaleNames, spanishFemaleNames, usMaleNames, usFemaleNames, germanMaleNames, germanFemaleNames, lastNamesByCountry } from '../lib/core/constants/staffConstants';
 import { toast } from '../lib/ui/toast';
 import { createActivityProgress } from '@/lib/game/workCalculator';
 import { addActivity as newAddActivity, setActivityCompletionCallback } from '@/lib/game/activityManager';
 import displayManager from '@/lib/game/displayManager';
-import { getVineyard, saveVineyard, removeVineyard, getAllVineyards } from '@/lib/database/vineyardDB';
 
 // Types for staff related functionality
 export interface StaffSkills {
@@ -620,38 +619,50 @@ export const STAFF_ACTIVITY_CATEGORIES = {
 // Function to start a staff search activity
 export function startStaffSearch(options: StaffSearchOptions): string | null {
   const { numberOfCandidates, skillLevel, specializations } = options;
+  const searchCost = calculateSearchCost(options);
+  const { player } = getGameState();
 
-  // Import necessary functions
-  const { startActivityWithDisplayState, setActivityCompletionCallback } = require('@/lib/game/activityManager');
-
+  if (!player || player.money < searchCost) {
+    return null; 
+  }
+  
   // Calculate work required for the search
   const rate = TASK_RATES[WorkCategory.STAFF_SEARCH];
   const initialWork = INITIAL_WORK[WorkCategory.STAFF_SEARCH];
 
-  // Calculate skill and specialization modifiers (example logic, adjust as needed)
-  const skillModifier = skillLevel > 0.5 ? (skillLevel - 0.5) * 0.4 : 0; // +0% to +20% for skill > 0.5
-  const specModifier = specializations.length > 0 ? Math.pow(1.3, specializations.length) - 1 : 0; // Matches logic from modal
+  // Calculate skill and specialization modifiers
+  const skillModifier = skillLevel > 0.5 ? (skillLevel - 0.5) * 0.4 : 0;
+  const specModifier = specializations.length > 0 ? Math.pow(1.3, specializations.length) - 1 : 0;
   const workModifiers = [skillModifier, specModifier];
 
   const totalWork = calculateTotalWork(numberOfCandidates, {
       rate,
       initialWork,
-      workModifiers,
-      // Staff search is not density based
-      // density: undefined, 
-      // useDensityAdjustment: false, 
+      workModifiers
   });
 
-  // Calculate cost
-  const searchCost = calculateSearchCost(options);
-
-  // Temp variable for activity ID to use in callback closure
-  let tempActivityId: string | null = null;
-
-  // Define completion callback first
-  const handleSearchComplete = async () => {
-      if (!tempActivityId) return;
-      const finalActivity = getActivityById(tempActivityId);
+  // Create activity using already imported functions
+  const searchActivity = createActivityProgress(
+    WorkCategory.STAFF_SEARCH,
+    numberOfCandidates, // Amount is number of candidates
+    {
+        // Pass options and work details as params
+        additionalParams: {
+            title: `Search: ${numberOfCandidates} candidates (Skill ≥ ${options.skillLevel * 100}%)`, 
+            searchOptions: options, // Store options for candidate generation
+            candidates: [] as Staff[], 
+            searchCost: searchCost // Store cost to deduct later
+        }
+        // Don't set completionCallback here - we'll set it after adding the activity
+    }
+  );
+  
+  // Add the activity to the manager
+  newAddActivity(searchActivity);
+  
+  // Set the completion callback with direct reference to the activity ID
+  setActivityCompletionCallback(searchActivity.id, async () => {
+      const finalActivity = getActivityById(searchActivity.id);
       const cost = finalActivity?.params?.searchCost || 0;
       const searchOpts = finalActivity?.params?.searchOptions;
 
@@ -672,29 +683,7 @@ export function startStaffSearch(options: StaffSearchOptions): string | null {
       });
       
       toast({ title: "Search Complete", description: `Found ${candidates.length} potential candidates.` });
-  };
-
-  // Create activity using imported functions
-  const searchActivity = createActivityProgress(
-    WorkCategory.STAFF_SEARCH,
-    numberOfCandidates, // Amount is number of candidates
-    {
-        // Pass options and work details as params
-        additionalParams: {
-            title: `Search: ${numberOfCandidates} candidates (Skill ≥ ${options.skillLevel * 100}%)`, 
-            searchOptions: options, // Store options for candidate generation
-            candidates: [] as Staff[], 
-            searchCost: searchCost // Store cost to deduct later
-        },
-        completionCallback: handleSearchComplete // Assign the callback directly to the activity
-    }
-  );
-  
-  // Assign the generated ID to the temp variable for the callback
-  tempActivityId = searchActivity.id;
-
-  // Add the activity to the manager
-  newAddActivity(searchActivity);
+  });
   
   // Update the display state to track the activity
   displayManager.updateDisplayState('staffSearchActivity', {
