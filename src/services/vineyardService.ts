@@ -598,17 +598,20 @@ export async function uprootVineyard(
     const { setActivityCompletionCallback } = await import('@/lib/game/activityManager');
     setActivityCompletionCallback(activityId, async () => {
       try {
-        // FIX: Use correct constant name DEFAULT_VINEYARD_HEALTH
+        // Import the constant within the callback scope or ensure it's available
         const { DEFAULT_VINEYARD_HEALTH } = await import('@/lib/core/constants/gameConstants');
 
+        // Update the vineyard state upon completion
         await updateVineyard(id, {
-          grape: null,
-          vineAge: 0,
-          density: 0,
-          vineyardHealth: DEFAULT_VINEYARD_HEALTH,
-          status: 'Not Planted',
-          ripeness: 0,
-          remainingYield: null,
+          grape: null,                // Remove grape
+          vineAge: 0,                 // Reset vine age
+          density: 0,                 // Reset density
+          vineyardHealth: DEFAULT_VINEYARD_HEALTH, // Reset health to default
+          status: 'Ready to be planted', // Set status
+          ripeness: 0,                // Reset ripeness
+          organicYears: 0,            // Reset organic years
+          remainingYield: null,         // Clear remaining yield
+          completedClearingTasks: [],   // Reset completed clearing tasks as well
         });
 
         const { consoleService } = await import('@/components/layout/Console');
@@ -621,7 +624,7 @@ export async function uprootVineyard(
         const { toast } = await import('@/lib/ui/toast');
         toast({
           title: "Uprooting Complete",
-          description: `The vineyard is now ready for planting with new grape varieties.`
+          description: `The vineyard ${vineyard.name} is now ready for planting with new grape varieties.`
         });
       } catch (error) {
         console.error('Error in uprooting completion callback:', error);
@@ -629,7 +632,7 @@ export async function uprootVineyard(
       }
     });
 
-    return vineyard;
+    return vineyard; // Return the initial vineyard state (before activity completion)
   } catch (error) {
     console.error('Error uprooting vineyard:', error);
     toast({ title: "Error", description: "Failed to start uprooting process.", variant: "destructive" });
