@@ -5,6 +5,7 @@ import { Vineyard } from '../../lib/game/vineyard';
 import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
 import { formatNumber } from '@/lib/core/utils/formatUtils';
+import HealthBar from '../activities/HealthBar';
 
 interface ClearingOptionModalProps {
   vineyard: Vineyard;
@@ -356,34 +357,11 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
       </div>
 
       {/* Health Impact Section */}
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-        <h3 className="text-sm font-medium text-blue-800 mb-2">Health Impact</h3>
-        <div className="flex items-center">
-          <div className="text-sm mr-3">
-            <span className="font-medium">Current:</span> {(vineyard.vineyardHealth * 100).toFixed(0)}%
-          </div>
-          <div className="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
-            <div 
-              className="h-full bg-green-600" 
-              style={{ width: `${vineyard.vineyardHealth * 100}%` }}
-            ></div>
-          </div>
-        </div>
-        <div className="flex items-center mt-2">
-          <div className="text-sm mr-3">
-            <span className="font-medium">After:</span> {(projectedHealth * 100).toFixed(0)}%
-          </div>
-          <div className="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
-            <div 
-              className="h-full bg-green-600" 
-              style={{ width: `${projectedHealth * 100}%` }}
-            ></div>
-          </div>
-        </div>
-        <p className="text-xs text-gray-600 mt-2">
-          Health improvement: +{((projectedHealth - vineyard.vineyardHealth) * 100).toFixed(0)}%
-        </p>
-      </div>
+      <HealthBar 
+        currentHealth={vineyard.vineyardHealth} 
+        projectedHealth={projectedHealth} 
+        className="mb-4"
+      />
     </ActivityOptionsModal>
   );
 };

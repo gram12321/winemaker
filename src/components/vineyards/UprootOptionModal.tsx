@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityOptionsModal, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
+import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
+import { WorkCategory, calculateTotalWork, getDefaultRate, getDefaultInitialWork } from '../../lib/game/workCalculator';
 import { Vineyard } from '../../lib/game/vineyard';
 import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
+import { formatNumber } from '@/lib/core/utils/formatUtils';
+import HealthBar from '../activities/HealthBar';
+import { BASE_WORK_UNITS } from '../../lib/game/workCalculator';
 
 interface UprootOptionModalProps {
   vineyard: Vineyard;
@@ -73,27 +76,12 @@ const UprootOptionModal: React.FC<UprootOptionModalProps> = ({
       onOptionsChange={setOptions}
       warningMessage={`Uprooting will reset the vineyard health to ${DEFAULT_VINEYARD_HEALTH * 100}% and remove all planted grapes.`}
     >
-      <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-        <h3 className="font-medium text-amber-800 mb-1">Health Impact</h3>
-        <div className="flex items-center">
-          <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden">
-            <div 
-              className="bg-green-500 h-full transition-all duration-300" 
-              style={{ width: `${vineyard.vineyardHealth * 100}%` }}
-            />
-          </div>
-          <span className="ml-2 text-sm font-medium">→</span>
-          <div className="w-full ml-2 bg-gray-200 h-4 rounded-full overflow-hidden">
-            <div 
-              className="bg-green-500 h-full transition-all duration-300" 
-              style={{ width: `${DEFAULT_VINEYARD_HEALTH * 100}%` }}
-            />
-          </div>
-        </div>
-        <p className="text-xs text-gray-600 mt-1">
-          Current: {Math.round(vineyard.vineyardHealth * 100)}% → After: {Math.round(DEFAULT_VINEYARD_HEALTH * 100)}%
-        </p>
-      </div>
+      <HealthBar 
+        currentHealth={vineyard.vineyardHealth} 
+        projectedHealth={DEFAULT_VINEYARD_HEALTH}
+        title="Health Reset" 
+        className="mb-4"
+      />
     </ActivityOptionsModal>
   );
 };
