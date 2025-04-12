@@ -598,10 +598,8 @@ export async function uprootVineyard(
     const { setActivityCompletionCallback } = await import('@/lib/game/activityManager');
     setActivityCompletionCallback(activityId, async () => {
       try {
-        // Import the constant within the callback scope or ensure it's available
         const { DEFAULT_VINEYARD_HEALTH } = await import('@/lib/core/constants/gameConstants');
 
-        // Update the vineyard state upon completion
         await updateVineyard(id, {
           grape: null,                // Remove grape
           vineAge: 0,                 // Reset vine age
