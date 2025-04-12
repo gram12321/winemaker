@@ -6,8 +6,12 @@ import {
 } from '@/lib/core/constants/vineyardConstants';
 import { allResources } from './resource';
 import { v4 as uuidv4 } from 'uuid';
+import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
 
-// Work activity categories
+// Import or define BASE_WORK_UNITS
+export const BASE_WORK_UNITS = 50; // work units per standard week
+
+// Simplified WorkCategory enum - keep this for compatibility
 export enum WorkCategory {
   PLANTING = 'planting',
   HARVESTING = 'harvesting',
@@ -22,32 +26,29 @@ export enum WorkCategory {
   ADMINISTRATION = 'administration'
 }
 
-// Base work units represent a standard amount of work per week
-export const BASE_WORK_UNITS = 50;
-
 // Default vine density used for density-based calculations
 export const DEFAULT_VINE_DENSITY = 5000;
 
-// Tasks that are affected by planting density
+// Define density-based tasks
 export const DENSITY_BASED_TASKS = [
   WorkCategory.PLANTING,
-  WorkCategory.HARVESTING,
-  WorkCategory.UPROOTING
+  WorkCategory.UPROOTING, 
+  WorkCategory.HARVESTING
 ];
 
 // Base processing rates for different tasks
-export const TASK_RATES: Record<string, number> = {
-  [WorkCategory.PLANTING]: 0.7,      // 0.7 acres/week
-  [WorkCategory.HARVESTING]: 4.4,    // 4.4 acres/week
-  [WorkCategory.CRUSHING]: 2.5,      // 2.5 tons/week
-  [WorkCategory.FERMENTATION]: 5.0,  // 5 kiloliters/week
-  [WorkCategory.CLEARING]: 0.5,      // 0.5 acres/week
-  [WorkCategory.UPROOTING]: 0.56,    // 0.56 acres/week
-  [WorkCategory.BUILDING]: 100000,   // €100,000 worth per week
-  [WorkCategory.UPGRADING]: 100000,  // €100,000 worth per week
-  [WorkCategory.MAINTENANCE]: 500000, // €500,000 worth per week
-  [WorkCategory.STAFF_SEARCH]: 5.0,  // 5 candidates/week
-  [WorkCategory.ADMINISTRATION]: 1.0  // 1 administrative task/week
+export const TASK_RATES: Record<WorkCategory, number> = {
+  [WorkCategory.PLANTING]: 0.7,     // acres/week
+  [WorkCategory.HARVESTING]: 4.4,    // acres/week
+  [WorkCategory.CRUSHING]: 2.5,     // tons/week
+  [WorkCategory.FERMENTATION]: 5.0,  // kL/week
+  [WorkCategory.CLEARING]: 1.0,     // Default rate for clearing
+  [WorkCategory.UPROOTING]: 0.56,    // acres/week
+  [WorkCategory.BUILDING]: 100000,  // €/week
+  [WorkCategory.UPGRADING]: 100000, // €/week
+  [WorkCategory.MAINTENANCE]: 500000, // €/week
+  [WorkCategory.STAFF_SEARCH]: 5.0,  // candidates/week
+  [WorkCategory.ADMINISTRATION]: 1.0 // default administration rate
 };
 
 // Specific Rates for Clearing Sub-tasks (from old constants.js)
@@ -58,7 +59,7 @@ const CLEARING_SUBTASK_RATES = {
 };
 
 // Initial setup work for tasks that require setup before starting
-export const INITIAL_WORK: Record<string, number> = {
+export const INITIAL_WORK: Record<WorkCategory, number> = {
   [WorkCategory.PLANTING]: 10,
   [WorkCategory.HARVESTING]: 5,
   [WorkCategory.CRUSHING]: 10,
@@ -95,200 +96,65 @@ export interface ActivityProgress {
 type ClearingSubTaskId = keyof typeof CLEARING_SUBTASK_RATES;
 
 /**
- * Calculate total work required for an activity
- * @param amount Amount of work (acres, kg, etc)
- * @param factors Various factors affecting work calculation
- * @returns Total work units required
+ * Core work calculation function - simplified to be a generic calculator
+ * without special case handling for different activities
  */
 export function calculateTotalWork(
   amount: number,
   factors: {
-    category: WorkCategory;
-    density?: number;
-    taskMultipliers?: Record<string, number>;
-    workModifiers?: number[];
-    altitude?: number;
-    country?: string;
-    region?: string;
-    resourceName?: GrapeVariety | null;
-    skillLevel?: number;
-    specializations?: string[];
-    additionalParams?: { // Look for clearingOptions here
-      clearingOptions?: {
-        tasks: { [key: string]: boolean };
-        replantingIntensity: number;
-        isOrganicAmendment: boolean;
-      }
-    }
+    rate: number; // Processing rate (units/week)
+    initialWork?: number; // Initial setup work
+    density?: number; // Vine density for density-based tasks
+    useDensityAdjustment?: boolean; // Whether to adjust for density 
+    workModifiers?: number[]; // Percentage modifiers (0.2 = +20%, -0.1 = -10%)
   }
 ): number {
-  const {
-    category,
-    density,
-    taskMultipliers = {},
-    workModifiers = [],
-    altitude,
-    country,
-    region,
-    resourceName,
-    skillLevel,
-    specializations,
-    additionalParams
+  const { 
+    rate, 
+    initialWork = 0, 
+    density, 
+    useDensityAdjustment = false,
+    workModifiers = [] 
   } = factors;
-
-  console.log(`[WorkCalculator] Calculating work for category: ${category}`, { amount, factors });
-
-  // --- Special Handling for CLEARING Category with Sub-tasks --- 
-  if (category === WorkCategory.CLEARING && additionalParams?.clearingOptions) {
-    const clearingOpts = additionalParams.clearingOptions;
-    let totalClearingWork = 0;
-
-    console.log(`[WorkCalculator] Using CLEARING sub-task logic`, { clearingOpts });
-
-    Object.entries(clearingOpts.tasks).forEach(([taskId, isSelected]) => {
-      if (!isSelected) return;
-
-      let subTaskRate: number | undefined;
-      let subTaskInitialWork: number = 0;
-      let subTaskAmount = amount;
-      let subTaskCategory = WorkCategory.CLEARING;
-      let subTaskModifiers: number[] = [...workModifiers];
-
-      const isValidSubTask = taskId in CLEARING_SUBTASK_RATES;
-
-      if (taskId === 'remove-vines') {
-        subTaskCategory = WorkCategory.UPROOTING;
-        subTaskRate = TASK_RATES[subTaskCategory];
-        subTaskInitialWork = INITIAL_WORK[subTaskCategory];
-        subTaskAmount *= (clearingOpts.replantingIntensity / 100);
-        if (density && subTaskRate) {
-            subTaskRate = subTaskRate / (density / DEFAULT_VINE_DENSITY);
-        }
-        if (subTaskAmount <= 0) return;
-      } else if (isValidSubTask) {
-        const validTaskId = taskId as ClearingSubTaskId;
-        subTaskRate = CLEARING_SUBTASK_RATES[validTaskId];
-        subTaskInitialWork = CLEARING_SUBTASK_INITIAL_WORK[validTaskId];
-      } else {
-        console.warn(`[WorkCalculator] Unknown or invalid clearing sub-task ID: ${taskId}. Skipping.`);
-        return;
-      }
-
-      if (subTaskRate === undefined || subTaskRate <= 0) {
-        console.warn(`[WorkCalculator] Invalid or zero rate for sub-task: ${taskId}. Skipping.`);
-        return;
-      }
-
-      const workWeeks = subTaskAmount / subTaskRate;
-      const workUnits = workWeeks * BASE_WORK_UNITS;
-      let subTaskBaseWork = subTaskInitialWork + workUnits;
-      
-      const subTaskTotalWork = subTaskModifiers.reduce((work, modifier) =>
-        work * (1 + modifier), subTaskBaseWork);
-        
-      console.log(`[WorkCalculator] Sub-task ${taskId}:`, { 
-          subTaskAmount, 
-          subTaskRate, 
-          subTaskInitialWork, 
-          workUnits, 
-          subTaskModifiers, 
-          subTaskTotalWork 
-      });
-
-      totalClearingWork += subTaskTotalWork;
-    });
-
-    const finalWork = Math.ceil(totalClearingWork);
-    console.log(`[WorkCalculator] Final calculated CLEARING work (sum of sub-tasks): ${finalWork}`);
-    return finalWork > 0 ? finalWork : 1;
-  }
-  // --- End Special Handling for CLEARING --- 
-
-  // --- Standard Calculation for other categories or CLEARING without options --- 
-  const baseRate = TASK_RATES[category];
-  if (!baseRate) {
-    console.error(`[WorkCalculator] No base rate found for category: ${category}`);
-    return 0;
-  }
-
-  // Adjust rate for density if applicable
-  const rate = DENSITY_BASED_TASKS.includes(category) && density
-    ? baseRate / (density / DEFAULT_VINE_DENSITY)
-    : baseRate;
-
-  // Calculate work weeks and convert to work units
-  const multiplier = taskMultipliers[category] || 1.0;
-  const workWeeks = (amount * multiplier) / rate;
-  const workUnits = workWeeks * BASE_WORK_UNITS;
-  const initialWork = INITIAL_WORK[category] || 0;
-  let baseWork = initialWork + workUnits;
-
-  console.log(`[WorkCalculator] Standard intermediate values for ${category}:`, {
-    baseRate, rate, multiplier, workWeeks, workUnits, initialWork, baseWork_beforeModifiers: baseWork
-  });
-
-  // Apply Category Specific Modifiers (Planting, Staff Search)
-  let categorySpecificModifiers: number[] = [];
-  if (category === WorkCategory.PLANTING) {
-    // 1. Altitude Effect (Migrated from old plantingOverlay.js)
-    if (altitude !== undefined && country && region) {
-      const countryData = REGION_ALTITUDE_RANGES[country as keyof typeof REGION_ALTITUDE_RANGES];
-      const altitudeRange = countryData ? (countryData[region as keyof typeof countryData] as [number, number] || null) : null;
-      if (altitudeRange) {
-        const [minAltitude, maxAltitude] = altitudeRange;
-        if (maxAltitude > minAltitude) { // Avoid division by zero
-          const medianAltitude = (minAltitude + maxAltitude) / 2;
-          const altitudeDeviation = (altitude - medianAltitude) / (maxAltitude - minAltitude);
-          // 5% less work for every 10% below median, 5% more for every 10% above
-          // This translates to a modifier of deviation * 0.5
-          const altitudeModifier = altitudeDeviation * 0.5;
-          categorySpecificModifiers.push(altitudeModifier);
-        }
-      }
-    }
-
-    // 2. Fragility Effect (Migrated from old plantingOverlay.js)
-    if (resourceName) {
-      // Use the imported function directly
-      const resource = getResourceByGrapeVariety(resourceName);
-      if (resource) {
-        // Fragility directly increases work -> modifier = fragility value
-        const fragilityModifier = resource.fragile; 
-        categorySpecificModifiers.push(fragilityModifier);
-      }
-    }
-  }
-  if (category === WorkCategory.STAFF_SEARCH) {
-    // Skill Level Modifier (0.1 -> +10%, 1.0 -> +100%)
-    if (skillLevel !== undefined) {
-      categorySpecificModifiers.push(skillLevel);
-    }
-    // Specialization Modifier - CHANGED to exponential scaling
-    if (specializations && specializations.length > 0) {
-      // Using pow(1.3, count) as the multiplier.
-      // Since modifiers are added to 1 later (work * (1 + modifier)), 
-      // the modifier itself should be pow(1.3, count) - 1.
-      const specializationMultiplier = Math.pow(1.3, specializations.length);
-      const specializationModifier = specializationMultiplier - 1; 
-      categorySpecificModifiers.push(specializationModifier);
-    }
-  }
-
-  // Combine general modifiers and category-specific modifiers
-  const allModifiers = [
-    ...workModifiers, 
-    ...categorySpecificModifiers
-  ];
   
-  console.log(`[WorkCalculator] Standard - Applying modifiers for ${category}:`, { allModifiers });
-
-  const totalWork = allModifiers.reduce((work, modifier) =>
+  // Adjust rate for density if needed
+  const adjustedRate = (useDensityAdjustment && density) 
+    ? rate / (density / BASELINE_VINE_DENSITY) 
+    : rate;
+  
+  // Calculate work units
+  const workWeeks = amount / adjustedRate;
+  const workUnits = workWeeks * BASE_WORK_UNITS;
+  
+  // Base work = initial setup + calculated work units
+  const baseWork = initialWork + workUnits;
+  
+  // Apply modifiers (e.g., skill bonuses, environmental factors)
+  const totalWork = workModifiers.reduce((work, modifier) => 
     work * (1 + modifier), baseWork);
-    
-  const finalWork = Math.ceil(totalWork);
-  console.log(`[WorkCalculator] Standard - Final calculated work for ${category}: ${finalWork}`);
+  
+  return Math.ceil(totalWork);
+}
 
-  return finalWork > 0 ? finalWork : 1; // Ensure at least 1 work unit
+/**
+ * Helper function to get the default rate for a work category
+ */
+export function getDefaultRate(category: WorkCategory): number {
+  return TASK_RATES[category] || 1.0;
+}
+
+/**
+ * Helper function to get the default initial work for a category
+ */
+export function getDefaultInitialWork(category: WorkCategory): number {
+  return INITIAL_WORK[category] || 0;
+}
+
+/**
+ * Helper function to check if a category is density-based
+ */
+export function isDensityBasedCategory(category: WorkCategory): boolean {
+  return DENSITY_BASED_TASKS.includes(category);
 }
 
 /**
@@ -501,62 +367,27 @@ export function createActivityProgress(
 }
 
 /**
- * Apply work to an activity progress tracker
- * @param activity Activity progress object
- * @param workAmount Amount of work to apply
- * @returns Updated activity progress object
+ * Basic function to apply work to an activity
  */
 export function applyWorkToActivity(
   activity: ActivityProgress,
   workAmount: number
 ): ActivityProgress {
-  const updatedActivity = {
-    ...activity,
-    appliedWork: Math.min(activity.totalWork, activity.appliedWork + workAmount)
-  };
-  
-  console.log(`Applying work to activity ${activity.id}: ${activity.appliedWork} -> ${updatedActivity.appliedWork} / ${activity.totalWork}`);
-  
-  const progress = updatedActivity.appliedWork / updatedActivity.totalWork;
+  const appliedWork = Math.min(activity.totalWork, activity.appliedWork + workAmount);
+  const progress = appliedWork / activity.totalWork;
   
   // Call progress callback if provided
-  if (updatedActivity.progressCallback) {
-    updatedActivity.progressCallback(progress);
+  if (activity.progressCallback) {
+    activity.progressCallback(progress);
   }
   
-  // Call completion callback if work is complete
-  if (progress >= 1 && updatedActivity.completionCallback) {
-    updatedActivity.completionCallback();
+  // Call completion callback if activity is complete
+  if (progress >= 1 && activity.completionCallback) {
+    activity.completionCallback();
   }
   
-  // Save changes to the database if this is running in a context with access to it
-  try {
-    // Dynamically import and use activityDB to save changes
-    import('../database/activityDB').then(({ updateActivityInDb }) => {
-      // We need to add the userId for database operations
-      const { getGameState } = require('../../gameState');
-      const gameState = getGameState();
-      
-      // Only try to save if we have a player ID
-      if (gameState.player?.id) {
-        const dbActivity = {
-          ...updatedActivity,
-          userId: gameState.player.id
-        };
-        
-        updateActivityInDb(dbActivity as any).then(success => {
-          if (!success) {
-            console.warn(`Failed to save activity update for ${activity.id}`);
-          }
-        });
-      }
-    }).catch(err => {
-      console.warn('Could not save activity update to database:', err);
-    });
-  } catch (error) {
-    // Just log the error, don't throw - this is a non-blocking operation
-    console.warn('Error saving activity update:', error);
-  }
-  
-  return updatedActivity;
+  return {
+    ...activity,
+    appliedWork,
+  };
 } 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, getDefaultRate, getDefaultInitialWork } from '../../lib/game/workCalculator';
 import { Vineyard } from '../../lib/game/vineyard';
 import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
@@ -16,12 +16,19 @@ interface ClearingOptionModalProps {
   }) => void;
 }
 
-// Define mapping from task ID to WorkCategory for calculation
-const TASK_ID_TO_CATEGORY: Record<string, WorkCategory> = {
-  'remove-vines': WorkCategory.UPROOTING, // Replanting uses uprooting work
-  'clear-vegetation': WorkCategory.CLEARING,
-  'remove-debris': WorkCategory.CLEARING,
-  'soil-amendment': WorkCategory.CLEARING
+// ===== CLEARING-SPECIFIC CONSTANTS =====
+// Clearing sub-task rates (acres per week)
+const CLEARING_SUBTASK_RATES = {
+  'clear-vegetation': 0.5, // 0.5 acres/week for vegetation clearing
+  'remove-debris': 0.4,    // 0.4 acres/week for debris removal
+  'soil-amendment': 0.8    // 0.8 acres/week for soil amendment
+};
+
+// Initial setup work for each clearing sub-task
+const CLEARING_SUBTASK_INITIAL_WORK = {
+  'clear-vegetation': 20,  // Initial setup work for vegetation clearing
+  'remove-debris': 15,     // Initial setup work for debris removal
+  'soil-amendment': 25     // Initial setup work for soil amendment
 };
 
 const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
@@ -29,6 +36,7 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  // ===== STATE MANAGEMENT =====
   const [options, setOptions] = useState<{
     tasks: { [key: string]: boolean };
     replantingIntensity: number;
@@ -40,7 +48,7 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
       'remove-debris': false,
       'soil-amendment': false,
     },
-    replantingIntensity: 0,
+    replantingIntensity: 100, // Default to 100% for remove-vines
     // Default based on current farming method
     isOrganicAmendment: vineyard.farmingMethod === 'Ecological' || vineyard.farmingMethod === 'Non-Conventional',
   });
@@ -53,78 +61,85 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
   const [factors, setFactors] = useState<WorkFactor[]>([]);
   const [projectedHealth, setProjectedHealth] = useState<number>(vineyard.vineyardHealth);
 
-  // --- Fields Definition --- 
   // We define fields here but render them manually
   const fields: ActivityOptionField[] = [];
 
+  // ===== WORK CALCULATION LOGIC =====
   useEffect(() => {
     console.log('[ClearingOptionModal] Recalculating work...', { options, vineyardAcres: vineyard.acres });
-    let totalWork = 0;
+    
+    // Calculate clearing work - similar to the previous special handling in workCalculator.ts
+    let totalClearingWork = 0;
     const calculatedFactors: WorkFactor[] = [
       { label: "Field Size", value: vineyard.acres, unit: "acres", isPrimary: true },
       { label: "Task", value: "Clearing", isPrimary: true },
     ];
 
-    // --- Calculate Work --- 
+    // Process each selected task
     Object.entries(options.tasks).forEach(([taskId, isSelected]) => {
       if (!isSelected) return;
 
-      const category = TASK_ID_TO_CATEGORY[taskId];
-      if (!category) return;
-
+      // Skip tasks with 0 amount
       let taskAmount = vineyard.acres;
-      let taskSpecificFactors: any = {
-        category: category,
-        density: vineyard.density || 0,
-        altitude: vineyard.altitude,
-        country: vineyard.country,
-        region: vineyard.region,
-        workModifiers: [],
-      };
       let taskLabel = taskId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-      let modifier = 0;
-      let modifierLabel = "";
+      let workModifiers: number[] = [];
+      let rate: number;
+      let initialWork: number;
+      let useDensityAdjustment = false;
 
+      // Handle each task type differently
       if (taskId === 'remove-vines') {
+        // Handle vine removal (uses UPROOTING category)
         taskAmount *= (options.replantingIntensity / 100);
-        if (taskAmount > 0) {
-           taskLabel = `Vine Replanting (${options.replantingIntensity}%)`;
-        } else {
-            return; // Skip if intensity is 0
+        if (taskAmount <= 0) return; // Skip if no work to do
+          
+        rate = getDefaultRate(WorkCategory.UPROOTING);
+        initialWork = getDefaultInitialWork(WorkCategory.UPROOTING);
+        useDensityAdjustment = true;
+        taskLabel = `Vine Replanting (${options.replantingIntensity}%)`;
+      } else if (taskId in CLEARING_SUBTASK_RATES) {
+        // Handle standard clearing sub-tasks
+        rate = CLEARING_SUBTASK_RATES[taskId as keyof typeof CLEARING_SUBTASK_RATES];
+        initialWork = CLEARING_SUBTASK_INITIAL_WORK[taskId as keyof typeof CLEARING_SUBTASK_INITIAL_WORK];
+          
+        // Add organic amendment modifier if applicable
+        if (taskId === 'soil-amendment' && options.isOrganicAmendment) {
+          workModifiers.push(0.2); // 20% more work for organic amendment
+          taskLabel = `Soil Amendment (Organic)`;
+        } else if (taskId === 'soil-amendment') {
+          taskLabel = `Soil Amendment (Synthetic)`;
         }
+      } else {
+        console.warn(`[ClearingOptionModal] Unknown task ID: ${taskId}`);
+        return; // Skip unknown tasks
       }
-      
-      if (taskId === 'soil-amendment') {
-        if (options.isOrganicAmendment) {
-           taskSpecificFactors.workModifiers.push(0.2); // Add 20% modifier for organic
-           modifier = 0.2;
-           modifierLabel = "organic method effect";
-        }
-        taskLabel = `Soil Amendment (${options.isOrganicAmendment ? 'Organic' : 'Synthetic'})`;
-      }
-      
-      console.log(`[ClearingOptionModal] Calculating work for task: ${taskId}`, {
-         taskAmount,
-         taskSpecificFactors
-       });
 
-      const workForTask = calculateTotalWork(taskAmount, taskSpecificFactors);
+      // Calculate work for this task using the simplified calculator
+      const taskWork = calculateTotalWork(taskAmount, {
+        rate,
+        initialWork,
+        density: useDensityAdjustment ? vineyard.density : undefined,
+        useDensityAdjustment,
+        workModifiers
+      });
       
-      console.log(`[ClearingOptionModal] Work calculated for ${taskId}: ${workForTask}`);
+      // Add to total work
+      totalClearingWork += taskWork;
       
-      totalWork += workForTask;
-      
-      if (workForTask > 0) {
-         calculatedFactors.push({ 
-           label: taskLabel, 
-           value: formatNumber(workForTask, 0), 
-           unit: "units",
-           ...(modifier !== 0 && { modifier: modifier, modifierLabel: modifierLabel })
-        });
-      }
+      // Add to factors for display
+      calculatedFactors.push({ 
+        label: taskLabel, 
+        value: formatNumber(taskWork, 0), 
+        unit: "units",
+        ...(workModifiers.length > 0 && { 
+          modifier: workModifiers[0], 
+          modifierLabel: options.isOrganicAmendment ? "organic method" : undefined 
+        })
+      });
     });
 
-    // --- Calculate Health --- 
+    // ===== HEALTH CALCULATION LOGIC =====
+    // Calculate health improvement from selected tasks
     let healthImprovement = 0;
     if (options.tasks['clear-vegetation']) healthImprovement += 0.10;
     if (options.tasks['remove-debris']) healthImprovement += 0.05;
@@ -136,18 +151,21 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
     const newHealth = Math.min(1.0, vineyard.vineyardHealth + healthImprovement);
     setProjectedHealth(newHealth);
 
-    // --- Update State --- 
-    const weeks = totalWork > 0 ? Math.ceil(totalWork / BASE_WORK_UNITS) : 0;
+    // ===== UPDATE UI STATE =====
+    // Calculate time estimate based on work
+    const BASE_WORK_UNITS = 50; // Match the value in workCalculator.ts
+    const weeks = totalClearingWork > 0 ? Math.ceil(totalClearingWork / BASE_WORK_UNITS) : 0;
     const timeEstimate = `${weeks} week${weeks === 1 ? '' : 's'}`;
 
     setWorkEstimate({
-      totalWork: Math.round(totalWork),
+      totalWork: Math.round(totalClearingWork),
       timeEstimate,
     });
     setFactors(calculatedFactors);
 
   }, [options, vineyard]);
 
+  // ===== EVENT HANDLERS =====
   const handleTaskChange = (taskId: string, checked: boolean) => {
     setOptions(prev => ({
       ...prev,
@@ -155,6 +173,7 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
         ...prev.tasks,
         [taskId]: checked,
       },
+      // Reset replanting intensity if removing vines is unchecked
       replantingIntensity: taskId === 'remove-vines' && !checked ? 0 : prev.replantingIntensity,
     }));
   };
@@ -163,7 +182,10 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
     setOptions(prev => ({
       ...prev,
       [id]: value,
-      tasks: id === 'replantingIntensity' && value > 0 && vineyard.grape ? { ...prev.tasks, 'remove-vines': true } : prev.tasks,
+      // Auto-check remove-vines if intensity is set above 0
+      tasks: id === 'replantingIntensity' && value > 0 && vineyard.grape 
+        ? { ...prev.tasks, 'remove-vines': true } 
+        : prev.tasks,
     }));
   };
   
@@ -184,7 +206,7 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
     return tasks ? Object.values(tasks).some(isSelected => isSelected) : false;
   };
 
-  // --- Render Logic --- 
+  // ===== RENDER UI =====
   return (
     <ActivityOptionsModal
       title={`Clear Vineyard: ${vineyard.name}`}
@@ -215,8 +237,43 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
           />
           <label htmlFor="remove-vines" className={`text-sm ${!vineyard.grape ? 'text-gray-400' : 'text-gray-700'}`}>
             Remove vines
+            {vineyard.grape && (
+              <span className="text-xs text-gray-500 ml-2">
+                (Current: {vineyard.grape})
+              </span>
+            )}
           </label>
         </div>
+        
+        {/* Vine Replanting Slider - only show if checkbox is checked */}
+        {options.tasks['remove-vines'] && (
+          <div className="ml-6 mt-2">
+            <div className="flex justify-between text-xs text-gray-600 mb-1">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={options.replantingIntensity}
+              onChange={(e) => handleSliderChange('replantingIntensity', parseInt(e.target.value))}
+              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="text-sm text-gray-700 mt-1">
+              Replanting intensity: <span className="font-medium">{options.replantingIntensity}%</span>
+              {vineyard.vineAge > 0 && (
+                <span className="text-xs text-gray-500 ml-2">
+                  (Vine age: {vineyard.vineAge.toFixed(1)} → 
+                  {(vineyard.vineAge * (1 - options.replantingIntensity/100)).toFixed(1)} years)
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        
         {/* Clear Vegetation */}
         <div className="flex items-center">
           <input
@@ -228,8 +285,12 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
           />
           <label htmlFor="clear-vegetation" className="text-sm text-gray-700">
             Clear vegetation
+            <span className="text-xs text-gray-500 ml-2">
+              (+10% health)
+            </span>
           </label>
         </div>
+        
         {/* Debris Removal */}
         <div className="flex items-center">
           <input
@@ -241,8 +302,12 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
           />
           <label htmlFor="remove-debris" className="text-sm text-gray-700">
             Remove debris
+            <span className="text-xs text-gray-500 ml-2">
+              (+5% health)
+            </span>
           </label>
         </div>
+        
         {/* Soil Amendment */}
         <div className="flex items-center">
           <input
@@ -254,15 +319,77 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
           />
           <label htmlFor="soil-amendment" className="text-sm text-gray-700">
             Soil amendment
+            <span className="text-xs text-gray-500 ml-2">
+              (+15% health)
+            </span>
           </label>
         </div>
+        
+        {/* Show amendment method options only if soil amendment is selected */}
+        {options.tasks['soil-amendment'] && (
+          <div className="ml-6 mt-2">
+            <div className="flex space-x-4">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  className="form-radio text-wine focus:ring-wine h-4 w-4"
+                  name="amendment-method"
+                  checked={!options.isOrganicAmendment}
+                  onChange={() => handleAmendmentMethodChange(false)}
+                />
+                <span className="ml-2 text-sm text-gray-700">Synthetic</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  className="form-radio text-wine focus:ring-wine h-4 w-4"
+                  name="amendment-method"
+                  checked={options.isOrganicAmendment}
+                  onChange={() => handleAmendmentMethodChange(true)}
+                />
+                <span className="ml-2 text-sm text-gray-700">Organic</span>
+                <span className="text-xs text-gray-500 ml-2">(+20% work)</span>
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Current farming method: <span className="font-medium">{vineyard.farmingMethod}</span>
+              {vineyard.organicYears > 0 && (
+                <span> ({vineyard.organicYears}/{DEFAULT_VINEYARD_HEALTH} years organic)</span>
+              )}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Health Impact Section */}
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-        {/* ... health impact content ... */}
+        <h3 className="text-sm font-medium text-blue-800 mb-2">Health Impact</h3>
+        <div className="flex items-center">
+          <div className="text-sm mr-3">
+            <span className="font-medium">Current:</span> {(vineyard.vineyardHealth * 100).toFixed(0)}%
+          </div>
+          <div className="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
+            <div 
+              className="h-full bg-green-600" 
+              style={{ width: `${vineyard.vineyardHealth * 100}%` }}
+            ></div>
+          </div>
+        </div>
+        <div className="flex items-center mt-2">
+          <div className="text-sm mr-3">
+            <span className="font-medium">After:</span> {(projectedHealth * 100).toFixed(0)}%
+          </div>
+          <div className="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
+            <div 
+              className="h-full bg-green-600" 
+              style={{ width: `${projectedHealth * 100}%` }}
+            ></div>
+          </div>
+        </div>
+        <p className="text-xs text-gray-600 mt-2">
+          Health improvement: +{((projectedHealth - vineyard.vineyardHealth) * 100).toFixed(0)}%
+        </p>
       </div>
-      {/* ActivityOptionsModal will render the WorkCalculationTable based on workFactors */}
     </ActivityOptionsModal>
   );
 };
