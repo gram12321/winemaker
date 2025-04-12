@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS } from '../../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
 import { Vineyard } from '../../lib/game/vineyard';
 import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
@@ -134,7 +134,6 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
 
     // ===== UPDATE UI STATE =====
     // Calculate time estimate based on work
-    const BASE_WORK_UNITS = 50; // Match the value in workCalculator.ts
     const weeks = totalClearingWork > 0 ? Math.ceil(totalClearingWork / BASE_WORK_UNITS) : 0;
     const timeEstimate = `${weeks} week${weeks === 1 ? '' : 's'}`;
 

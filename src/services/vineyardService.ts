@@ -426,16 +426,17 @@ export async function clearVineyard(
       return null;
     }
 
-    // Calculate the base health after reset
-    const baseHealthAfterReset = options.isOrganicAmendment ? 0.40 : 0.25;
+    // Store the original health value to use later
+    const originalHealth = initialVineyardState.vineyardHealth;
 
+    // Update the vineyard but DON'T reset health
     const updatedVineyard = await updateVineyard(id, {
       status: 'Clearing in Progress',
       grape: null,
       vineAge: 0,
       ripeness: 0,
       remainingYield: null,
-      vineyardHealth: baseHealthAfterReset,
+      // Don't reset vineyard health here
     });
 
     if (!updatedVineyard) {
@@ -464,7 +465,8 @@ export async function clearVineyard(
           taskId,
           isOrganic: options.isOrganicAmendment,
           taskRate: rate,
-          taskInitialWork: initialWork
+          taskInitialWork: initialWork,
+          originalHealth: originalHealth // Store the original health value
         }
       });
       if (activityId) {
@@ -475,8 +477,7 @@ export async function clearVineyard(
     // Check if any activities were actually created
     if (createdActivityIds.length === 0) {
       console.error('Failed to create any clearing activities');
-      // Optionally revert vineyard status here if needed
-      return updatedVineyard; // Return the state after reset
+      return updatedVineyard;
     }
 
     // --- Completion callback setup --- 
@@ -505,10 +506,6 @@ export async function clearVineyard(
 
         // If this is the last task to complete
         if (completedTaskCount >= totalTasks) {
-          // Fetch the vineyard state *after* the reset and individual task completions
-          const vineyardAfterAllTasks = getVineyardById(id);
-          const currentHealth = vineyardAfterAllTasks?.vineyardHealth ?? baseHealthAfterReset;
-
           // Calculate health improvement based on the ORIGINAL options
           let healthImprovement = 0;
           if (options.tasks['clear-vegetation']) healthImprovement += 0.10;
@@ -519,7 +516,8 @@ export async function clearVineyard(
             healthImprovement += (options.replantingIntensity / 100) * 0.20; // 20% max bonus from intensity
           }
 
-          const newHealth = Math.min(1.0, currentHealth + healthImprovement);
+          // Use the original health value as the base for improvement
+          const newHealth = Math.min(1.0, originalHealth + healthImprovement);
 
           // Update vineyard with final status and calculated health
           await updateVineyard(id, {

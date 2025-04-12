@@ -1,7 +1,7 @@
 // src/components/staff/StaffSearchOptionsModal.tsx
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork } from '../../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
 import { calculateSearchCost, estimateHiringWorkRange } from '../../services/staffService';
 import { SpecializedRoles as SpecializedRolesConstants, SkillLevels, BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER } from '../../lib/core/constants/staffConstants';
 import WorkCalculationTable, { WorkFactor } from '../activities/WorkCalculationTable';
@@ -98,21 +98,28 @@ const StaffSearchOptionsModal: React.FC<StaffSearchOptionsModalProps> = ({
 
   // Calculate work estimate and factors whenever options change
   useEffect(() => {
-    // --- Search Process Calculation (remains the same) ---
-    const searchWorkOptions = {
-      category: WorkCategory.STAFF_SEARCH,
-      skillLevel: options.skillLevel,
-      specializations: options.specializations,
-    };
-    const searchTotalWork = calculateTotalWork(options.numberOfCandidates, searchWorkOptions);
-    const searchCost = calculateSearchCost(options);
-    const searchWeeks = Math.ceil(searchTotalWork / 50); 
-    const searchTimeEstimate = `${searchWeeks} week${searchWeeks === 1 ? '' : 's'}`;
-    const searchSkillModifier = options.skillLevel;
+    // --- Search Process Calculation (updated to use constants) ---
+    const rate = TASK_RATES[WorkCategory.STAFF_SEARCH];
+    const initialWork = INITIAL_WORK[WorkCategory.STAFF_SEARCH];
+    
+    // Calculate skill and specialization modifiers
+    const searchSkillModifier = options.skillLevel > 0.5 ? (options.skillLevel - 0.5) * 0.4 : 0;
     let searchSpecModifier = 0;
     if (options.specializations.length > 0) {
       searchSpecModifier = Math.pow(1.3, options.specializations.length) - 1;
     }
+    const workModifiers = [searchSkillModifier, searchSpecModifier];
+    
+    const searchTotalWork = calculateTotalWork(options.numberOfCandidates, {
+      rate,
+      initialWork,
+      workModifiers
+    });
+    
+    const searchCost = calculateSearchCost(options);
+    const searchWeeks = Math.ceil(searchTotalWork / BASE_WORK_UNITS); 
+    const searchTimeEstimate = `${searchWeeks} week${searchWeeks === 1 ? '' : 's'}`;
+    
     const searchCalculatedFactors: WorkFactor[] = [
       { label: "Amount", value: options.numberOfCandidates, unit: "candidates", isPrimary: true },
       { label: "Task", value: "Staff Search", isPrimary: true },
@@ -128,8 +135,8 @@ const StaffSearchOptionsModal: React.FC<StaffSearchOptionsModalProps> = ({
 
     // --- Hiring Process Calculation (Now Dynamic Range) ---
     const { minWork, maxWork } = estimateHiringWorkRange(options.skillLevel, options.specializations);
-    const hiringMinWeeks = Math.ceil(minWork / 50); 
-    const hiringMaxWeeks = Math.ceil(maxWork / 50); 
+    const hiringMinWeeks = Math.ceil(minWork / BASE_WORK_UNITS); 
+    const hiringMaxWeeks = Math.ceil(maxWork / BASE_WORK_UNITS); 
     const hiringTimeEstimate = hiringMinWeeks === hiringMaxWeeks 
         ? `${hiringMinWeeks} week${hiringMinWeeks === 1 ? '' : 's'}`
         : `${hiringMinWeeks} - ${hiringMaxWeeks} weeks`;
