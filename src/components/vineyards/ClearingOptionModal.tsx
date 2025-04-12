@@ -184,7 +184,10 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
 
   const canSubmit = (opts: Record<string, any>): boolean => {
     const tasks = opts.tasks as { [key: string]: boolean } | undefined;
-    return tasks ? Object.values(tasks).some(isSelected => isSelected) : false;
+    // Ensure at least one *available* task is selected
+    return tasks ? Object.entries(tasks).some(([taskId, isSelected]) => 
+      isSelected && !vineyard.completedClearingTasks?.includes(taskId) 
+    ) : false;
   };
 
   // ===== RENDER UI =====
@@ -213,10 +216,10 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
             id="remove-vines"
             checked={options.tasks['remove-vines']}
             onChange={(e) => handleTaskChange('remove-vines', e.target.checked)}
-            disabled={!vineyard.grape}
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
+            disabled={!vineyard.grape || vineyard.completedClearingTasks?.includes('remove-vines')}
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <label htmlFor="remove-vines" className={`text-sm ${!vineyard.grape ? 'text-gray-400' : 'text-gray-700'}`}>
+          <label htmlFor="remove-vines" className={`text-sm ${!vineyard.grape || vineyard.completedClearingTasks?.includes('remove-vines') ? 'text-gray-400' : 'text-gray-700'}`}>
             Remove vines
             {vineyard.grape && (
               <span className="text-xs text-gray-500 ml-2">
@@ -262,9 +265,10 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
             id="clear-vegetation"
             checked={options.tasks['clear-vegetation']}
             onChange={(e) => handleTaskChange('clear-vegetation', e.target.checked)}
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
+            disabled={vineyard.completedClearingTasks?.includes('clear-vegetation')}
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <label htmlFor="clear-vegetation" className="text-sm text-gray-700">
+          <label htmlFor="clear-vegetation" className={`text-sm ${vineyard.completedClearingTasks?.includes('clear-vegetation') ? 'text-gray-400' : 'text-gray-700'}`}>
             Clear vegetation
             <span className="text-xs text-gray-500 ml-2">
               (+10% health)
@@ -279,9 +283,10 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
             id="remove-debris"
             checked={options.tasks['remove-debris']}
             onChange={(e) => handleTaskChange('remove-debris', e.target.checked)}
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
+            disabled={vineyard.completedClearingTasks?.includes('remove-debris')}
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <label htmlFor="remove-debris" className="text-sm text-gray-700">
+          <label htmlFor="remove-debris" className={`text-sm ${vineyard.completedClearingTasks?.includes('remove-debris') ? 'text-gray-400' : 'text-gray-700'}`}>
             Remove debris
             <span className="text-xs text-gray-500 ml-2">
               (+5% health)
@@ -296,9 +301,10 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
             id="soil-amendment"
             checked={options.tasks['soil-amendment']}
             onChange={(e) => handleTaskChange('soil-amendment', e.target.checked)}
-            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50"
+            disabled={vineyard.completedClearingTasks?.includes('soil-amendment')}
+            className="mr-2 h-4 w-4 rounded border-gray-300 text-wine focus:ring-wine disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <label htmlFor="soil-amendment" className="text-sm text-gray-700">
+          <label htmlFor="soil-amendment" className={`text-sm ${vineyard.completedClearingTasks?.includes('soil-amendment') ? 'text-gray-400' : 'text-gray-700'}`}>
             Soil amendment
             <span className="text-xs text-gray-500 ml-2">
               (+15% health)

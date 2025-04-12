@@ -1,6 +1,10 @@
+Fix:
 In topbar:  Set messagehistory to show newest on top. 
 In Harvest: Average value for winebatch for partial Harvest 
 Planting: We eventually want to set "No Yield in first Season" For newly planted fields. Or have very low yield on vinage = 0
+
+Additions:
+WE need to allow several staff search and hirering activities at the same time
 
 BUGS:
 flag ffunction dont work

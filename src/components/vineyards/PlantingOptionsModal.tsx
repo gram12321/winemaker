@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS } from '../../lib/game/workCalculator';
 import { GrapeVariety, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS, getResourceByGrapeVariety } from '../../lib/core/constants/vineyardConstants';
 import { Vineyard } from '../../lib/game/vineyard';
 import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
+import { formatNumber } from '@/lib/core/utils/formatUtils';
 
 interface PlantingOptionsModalProps {
   vineyard: Vineyard;
@@ -61,45 +62,53 @@ const PlantingOptionsModal: React.FC<PlantingOptionsModalProps> = ({
   useEffect(() => {
     const grapeResource = getResourceByGrapeVariety(options.grape);
     const fragility = grapeResource?.fragile ?? 0; // Get fragility (0 = robust, 1 = fragile)
-    const robustness = 1 - fragility; // Calculate actual robustness
-    const fragilityModifier = fragility; // The modifier is the fragility value itself
-    
-    // Calculate altitude modifier (you might need a separate helper function for clarity)
+    const fragilityModifier = fragility; // Modifier increases work for fragile grapes
+
+    // Calculate altitude modifier
     let altitudeModifier = 0;
     const countryData = REGION_ALTITUDE_RANGES[vineyard.country as keyof typeof REGION_ALTITUDE_RANGES];
     const altitudeRange = countryData ? (countryData[vineyard.region as keyof typeof countryData] as [number, number] || null) : null;
     if (altitudeRange) {
       const [minAltitude, maxAltitude] = altitudeRange;
-      if (maxAltitude > minAltitude) { 
+      if (maxAltitude > minAltitude) {
         const medianAltitude = (minAltitude + maxAltitude) / 2;
-        const altitudeDeviation = (vineyard.altitude - medianAltitude) / (maxAltitude - minAltitude);
-        altitudeModifier = altitudeDeviation * 0.5; // Matches logic in calculateTotalWork
+        // Calculate deviation from median, positive for high altitude, negative for low
+        // Modifier increases work for altitudes further from the median (0.5x deviation)
+        const altitudeDeviation = Math.abs(vineyard.altitude - medianAltitude) / ((maxAltitude - minAltitude) / 2); // Normalize deviation 0 to 1+
+        altitudeModifier = altitudeDeviation * 0.5; // Apply 0.5 factor to deviation
       }
     }
 
+    // Prepare factors for calculateTotalWork
+    const workModifiers = [fragilityModifier, altitudeModifier]; // Combine modifiers
+    const rate = TASK_RATES[WorkCategory.PLANTING];
+    const initialWork = INITIAL_WORK[WorkCategory.PLANTING];
+    const useDensityAdjustment = DENSITY_BASED_TASKS.includes(WorkCategory.PLANTING);
+
     const totalWork = calculateTotalWork(vineyard.acres, {
-      category: WorkCategory.PLANTING,
+      rate,
+      initialWork,
       density: options.density,
-      resourceName: options.grape, // Pass grape name for fragility calc
-      // UNCOMMENTED and pass altitude/country/region
-      altitude: vineyard.altitude,
-      country: vineyard.country,
-      region: vineyard.region,
+      useDensityAdjustment,
+      workModifiers,
     });
 
     // Basic time estimate
     const weeks = Math.ceil(totalWork / BASE_WORK_UNITS);
     const timeEstimate = `${weeks} week${weeks === 1 ? '' : 's'}`;
-    
+
     // Construct factors for the breakdown table
+    const robustness = 1 - fragility; // For display label
     const calculatedFactors: WorkFactor[] = [
       { label: "Field Size", value: vineyard.acres, unit: "acres", isPrimary: true },
       { label: "Task", value: "Planting", isPrimary: true },
       { label: "Grape", value: options.grape },
       { label: "Plant Density", value: options.density, unit: "vines/acre" },
-      { label: "Grape Robustness", value: `${(robustness * 100).toFixed(0)}% robust`, modifier: fragilityModifier, modifierLabel: "fragility effect" },
-      // Use the calculated altitude modifier
-      { label: "Altitude", value: vineyard.altitude, unit: "m", modifier: altitudeModifier, modifierLabel: "altitude effect" },
+      // Pass the fragility modifier (higher value means more work)
+      { label: "Grape Fragility", value: `${(fragility * 100).toFixed(0)}% fragile`, modifier: fragilityModifier, modifierLabel: "fragility effect" },
+      // Pass the altitude modifier (higher value means more work)
+      // Format the altitude modifier for display
+      { label: "Altitude Deviation", value: `${vineyard.altitude}m`, modifier: altitudeModifier, modifierLabel: `altitude effect (${altitudeModifier > 0 ? '+' : ''}${formatNumber(altitudeModifier * 100, 0)}%)` },
     ];
 
     setWorkEstimate({

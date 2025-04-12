@@ -77,7 +77,7 @@ export const saveGameState = async (): Promise<boolean> => {
           status: vineyard.status,
           ripeness: vineyard.ripeness,
           vineyardPrestige: vineyard.vineyardPrestige,
-          canBeCleared: vineyard.canBeCleared,
+          completedClearingTasks: vineyard.completedClearingTasks || [],
           annualYieldFactor: vineyard.annualYieldFactor,
           annualQualityFactor: vineyard.annualQualityFactor,
           farmingMethod: vineyard.farmingMethod,
@@ -158,7 +158,10 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
     // Update game state with loaded data
     updateGameState({
       player: data.player || null,
-      vineyards: data.vineyards || [],
+      vineyards: data.vineyards?.map((v: any) => ({ 
+        ...v, 
+        completedClearingTasks: v.completedClearingTasks || [] // Default to empty array if missing
+      })) || [],
       buildings: data.buildings || [],
       staff: data.staff || [],
       wineBatches: data.wineBatches || [],

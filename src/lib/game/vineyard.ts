@@ -21,7 +21,7 @@ export interface Vineyard {
   status: string;
   ripeness: number;
   vineyardPrestige: number;
-  canBeCleared: boolean;
+  completedClearingTasks: string[];
   annualYieldFactor: number;
   annualQualityFactor: number;
   farmingMethod: FarmingMethod;
@@ -210,7 +210,7 @@ export function createVineyard(id: string, options: Partial<Vineyard> = {}): Vin
     status: options.status || 'Ready to be planted',
     ripeness: options.ripeness || 0.0,
     vineyardPrestige: 0, // Will be calculated below
-    canBeCleared: options.canBeCleared ?? true, // Default to true
+    completedClearingTasks: options.completedClearingTasks || [],
     annualYieldFactor: options.annualYieldFactor || (0.75 + Math.random()), // Keep random for now
     annualQualityFactor: options.annualQualityFactor || Math.random(), // Keep random for now
     farmingMethod: initialFarmingMethod, // Initialize new field

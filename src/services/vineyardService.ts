@@ -483,16 +483,31 @@ export async function clearVineyard(
     // Use a counter for simplicity instead of complex filtering
     let completedTaskCount = 0;
     const totalTasks = createdActivityIds.length;
+    const completedTasksSet = new Set<string>(); // Track completed task IDs
 
     createdActivityIds.forEach(activityId => {
+      // Get the taskId associated with this activity
+      const activity = getActivityById(activityId);
+      const taskId = activity?.params?.taskId;
+
       setActivityCompletionCallback(activityId, async () => {
+        if (!taskId) return; // Should not happen
+        
         completedTaskCount++;
+        completedTasksSet.add(taskId);
+
+        // Update the vineyard's completed tasks list immediately when a task finishes
+        const currentVineyard = getVineyardById(id);
+        if (currentVineyard) {
+          const updatedCompletedTasks = Array.from(new Set([...currentVineyard.completedClearingTasks, taskId]));
+          await updateVineyard(id, { completedClearingTasks: updatedCompletedTasks });
+        }
 
         // If this is the last task to complete
         if (completedTaskCount >= totalTasks) {
-          // Fetch the vineyard state *after* the reset
-          const vineyardAfterReset = getVineyardById(id);
-          const currentHealth = vineyardAfterReset?.vineyardHealth ?? baseHealthAfterReset;
+          // Fetch the vineyard state *after* the reset and individual task completions
+          const vineyardAfterAllTasks = getVineyardById(id);
+          const currentHealth = vineyardAfterAllTasks?.vineyardHealth ?? baseHealthAfterReset;
 
           // Calculate health improvement based on the ORIGINAL options
           let healthImprovement = 0;
@@ -509,8 +524,9 @@ export async function clearVineyard(
           // Update vineyard with final status and calculated health
           await updateVineyard(id, {
             status: 'Cleared',
-            canBeCleared: false, // Prevent re-clearing immediately
-            vineyardHealth: newHealth
+            vineyardHealth: newHealth,
+            // Ensure completedClearingTasks reflects all tasks run
+            completedClearingTasks: Array.from(completedTasksSet)
           });
 
           toast({ title: "Clearing Complete", description: `${initialVineyardState.name} has been cleared. Health improved to ${(newHealth * 100).toFixed(0)}%.` });

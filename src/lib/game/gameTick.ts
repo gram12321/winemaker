@@ -193,6 +193,8 @@ const onNewYear = () => {
       annualYieldFactor: (0.75 + Math.random()),
       annualQualityFactor: Math.random(),
       remainingYield: null, // Reset remaining yield at the start of the year
+      // Reset completed clearing tasks for the new year
+      completedClearingTasks: [], 
       // Status update for first-year vineyards happens in Spring season change
       // status: vineyard.status === 'No yield in first season' ? 'Growing' : vineyard.status
     };

@@ -1,13 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState, updatePlayerMoney } from '../gameState';
 import { assignStaffToActivity, getActivityById, addActivity, removeActivity } from '../lib/game/activityManager';
-import { WorkCategory } from '../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS } from '@/lib/game/workCalculator';
 import { saveStaffToDb, removeStaffFromDb, updateStaffInDb, saveTeamToDb, loadTeamsFromDb, saveStaffAssignmentsToDb } from '../lib/database/staffDB';
 import { BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER, SkillLevels, DefaultTeams, italianMaleNames, italianFemaleNames, frenchMaleNames, frenchFemaleNames, spanishMaleNames, spanishFemaleNames, usMaleNames, usFemaleNames, germanMaleNames, germanFemaleNames, lastNamesByCountry } from '../lib/core/constants/staffConstants';
 import { toast } from '../lib/ui/toast';
-import { createActivityProgress, calculateTotalWork } from '@/lib/game/workCalculator';
+import { createActivityProgress } from '@/lib/game/workCalculator';
 import { addActivity as newAddActivity, setActivityCompletionCallback } from '@/lib/game/activityManager';
 import displayManager from '@/lib/game/displayManager';
+import { getVineyard, saveVineyard, removeVineyard, getAllVineyards } from '@/lib/database/vineyardDB';
 
 // Types for staff related functionality
 export interface StaffSkills {
@@ -618,20 +619,31 @@ export const STAFF_ACTIVITY_CATEGORIES = {
 
 // Function to start a staff search activity
 export function startStaffSearch(options: StaffSearchOptions): string | null {
-  const { numberOfCandidates } = options;
-  const searchCost = calculateSearchCost(options);
-  const { player } = getGameState();
+  const { numberOfCandidates, skillLevel, specializations } = options;
 
-  if (!player || player.money < searchCost) {
-    return null; 
-  }
-  
+  // Import necessary functions
+  const { startActivityWithDisplayState, setActivityCompletionCallback } = require('@/lib/game/activityManager');
+
   // Calculate work required for the search
+  const rate = TASK_RATES[WorkCategory.STAFF_SEARCH];
+  const initialWork = INITIAL_WORK[WorkCategory.STAFF_SEARCH];
+
+  // Calculate skill and specialization modifiers (example logic, adjust as needed)
+  const skillModifier = skillLevel > 0.5 ? (skillLevel - 0.5) * 0.4 : 0; // +0% to +20% for skill > 0.5
+  const specModifier = specializations.length > 0 ? Math.pow(1.3, specializations.length) - 1 : 0; // Matches logic from modal
+  const workModifiers = [skillModifier, specModifier];
+
   const totalWork = calculateTotalWork(numberOfCandidates, {
-      category: WorkCategory.STAFF_SEARCH,
-      skillLevel: options.skillLevel,
-      specializations: options.specializations
+      rate,
+      initialWork,
+      workModifiers,
+      // Staff search is not density based
+      // density: undefined, 
+      // useDensityAdjustment: false, 
   });
+
+  // Calculate cost
+  const searchCost = calculateSearchCost(options);
 
   // Temp variable for activity ID to use in callback closure
   let tempActivityId: string | null = null;
@@ -820,45 +832,49 @@ export function completeHiringProcess(activityId: string): Staff | null {
 // --- NEW: Function to estimate hiring work range ---
 export function estimateHiringWorkRange(searchSkillLevel: number, searchSpecializations: string[]):
 { minWork: number; maxWork: number } {
+  // No need to import BASE_WEEKLY_WAGE and SKILL_WAGE_MULTIPLIER locally anymore
+  // const { BASE_WEEKLY_WAGE, SKILL_WAGE_MULTIPLIER } = require('@/lib/core/constants/staffConstants'); // Import constants locally
   
-  // 1. Estimate min/max skill and wage based on search criteria (similar to old system)
-  const minSkill = searchSkillLevel * 0.4; // Minimum possible skill
-  const maxSkill = Math.min(1.0, 0.6 + (searchSkillLevel * 0.4)); // Maximum possible skill
-
-  const specializationBonus = searchSpecializations.length > 0 ? Math.pow(1.3, searchSpecializations.length) : 1;
-  const minWeeklyWage = (BASE_WEEKLY_WAGE + (minSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
-  const maxWeeklyWage = (BASE_WEEKLY_WAGE + (maxSkill * SKILL_WAGE_MULTIPLIER)) * specializationBonus;
-  
-  // 2. Define modifiers based on candidate complexity
-  // Wage Modifier (Linear, less extreme than old system's quadratic)
-  // Assumes higher wage = more complex contract/process. Adjust divisor to tune sensitivity.
+  // Reuse wage calculation logic
   const calculateWageModifier = (wage: number) => (wage / 5000) - 0.1; // e.g. 500 wage = -0% mod, 5000 wage = +90% mod
-  
-  // Specialization Modifier (Exponential, similar to old system)
-  const specializationModifier = searchSpecializations.length > 0 
-    ? Math.pow(1.5, searchSpecializations.length) - 1 
-    : 0;
 
-  // 3. Calculate work for min/max scenarios using ADMINISTRATION category
+  // Specialization modifier for hiring (potentially different from search)
+  const specializationModifier = searchSpecializations.length > 0 
+      ? Math.pow(1.5, searchSpecializations.length) - 1 
+      : 0; // Example: 1 spec = +50%, 2 specs = +125%
+
+  // Minimum estimate factors
+  const minSkillEstimate = searchSkillLevel * 0.4; // Lower bound skill
+  const minWageEstimate = (BASE_WEEKLY_WAGE + (minSkillEstimate * SKILL_WAGE_MULTIPLIER)) * (searchSpecializations.length > 0 ? Math.pow(1.3, searchSpecializations.length) : 1); // Lower bound wage
+  const minWageModifier = calculateWageModifier(minWageEstimate);
+  const minWorkModifiers = [minWageModifier, specializationModifier];
+  
+  // Maximum estimate factors
+  const maxSkillEstimate = searchSkillLevel * 1.2; // Upper bound skill
+  const maxWageEstimate = (BASE_WEEKLY_WAGE + (maxSkillEstimate * SKILL_WAGE_MULTIPLIER)) * (searchSpecializations.length > 0 ? Math.pow(1.3, searchSpecializations.length) : 1); // Upper bound wage
+  const maxWageModifier = calculateWageModifier(maxWageEstimate);
+  const maxWorkModifiers = [maxWageModifier, specializationModifier];
+
+  // Define factors for calculateTotalWork (Assuming HIRING is not a real category, maybe ADMINISTRATION? Using a placeholder rate/initial)
+  // If hiring IS a distinct category, define its rate/initial work in workCalculator constants
+  const placeholderRate = 1.0; // Placeholder: Adjust if HIRING category exists
+  const placeholderInitialWork = 15; // Placeholder: Adjust if HIRING category exists
+
   const minFactors = {
-      category: WorkCategory.ADMINISTRATION,
-      workModifiers: [
-          calculateWageModifier(minWeeklyWage),
-          specializationModifier
-      ]
+    rate: placeholderRate, 
+    initialWork: placeholderInitialWork,
+    workModifiers: minWorkModifiers
   };
   const maxFactors = {
-      category: WorkCategory.ADMINISTRATION,
-      workModifiers: [
-          calculateWageModifier(maxWeeklyWage),
-          specializationModifier
-      ]
+    rate: placeholderRate, 
+    initialWork: placeholderInitialWork,
+    workModifiers: maxWorkModifiers
   };
 
   const minWork = calculateTotalWork(1, minFactors); // Amount is 1 (per hire)
   const maxWork = calculateTotalWork(1, maxFactors);
 
-  return { minWork, maxWork };
+  return { minWork: Math.max(1, minWork), maxWork: Math.max(minWork, maxWork) }; // Ensure minWork is at least 1 and maxWork >= minWork
 }
 // --- END NEW --- 
 
