@@ -7,7 +7,6 @@ import { AlertCircle } from 'lucide-react';
 import { clearGameStorage } from '../lib/database/localStorageDB';
 import { deleteAllCompanies } from '../lib/database/companyDB';
 import { saveGameState } from '../lib/database/gameStateDB';
-import { deleteAllActivitiesFromDb } from '../lib/database/activityDB';
 import { deleteAllStaff, deleteAllTeams, deleteAllStaffAssignments } from '../lib/database/staffDB';
 
 interface AdminDashboardProps {
@@ -53,7 +52,6 @@ export default function AdminDashboard({ view }: AdminDashboardProps) {
       // Delete all data from different collections
       const results = await Promise.all([
         deleteAllCompanies(),
-        deleteAllActivitiesFromDb(),
         deleteAllStaff(),
         deleteAllTeams(),
         deleteAllStaffAssignments()
