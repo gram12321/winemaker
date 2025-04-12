@@ -102,12 +102,9 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
         rate = CLEARING_SUBTASK_RATES[taskId as keyof typeof CLEARING_SUBTASK_RATES];
         initialWork = CLEARING_SUBTASK_INITIAL_WORK[taskId as keyof typeof CLEARING_SUBTASK_INITIAL_WORK];
           
-        // Add organic amendment modifier if applicable
-        if (taskId === 'soil-amendment' && options.isOrganicAmendment) {
-          workModifiers.push(0.2); // 20% more work for organic amendment
-          taskLabel = `Soil Amendment (Organic)`;
-        } else if (taskId === 'soil-amendment') {
-          taskLabel = `Soil Amendment (Synthetic)`;
+        // No work penalty for organic amendment - just label it differently
+        if (taskId === 'soil-amendment') {
+          taskLabel = `Soil Amendment (${options.isOrganicAmendment ? 'Organic' : 'Synthetic'})`;
         }
       } else {
         console.warn(`[ClearingOptionModal] Unknown task ID: ${taskId}`);
@@ -130,11 +127,8 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
       calculatedFactors.push({ 
         label: taskLabel, 
         value: formatNumber(taskWork, 0), 
-        unit: "units",
-        ...(workModifiers.length > 0 && { 
-          modifier: workModifiers[0], 
-          modifierLabel: options.isOrganicAmendment ? "organic method" : undefined 
-        })
+        unit: "units"
+        // Removed the modifier display since we don't apply one for organic
       });
     });
 
@@ -348,7 +342,7 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
                   onChange={() => handleAmendmentMethodChange(true)}
                 />
                 <span className="ml-2 text-sm text-gray-700">Organic</span>
-                <span className="text-xs text-gray-500 ml-2">(+20% work)</span>
+                <span className="text-xs text-gray-500 ml-2">(Changes farming method)</span>
               </label>
             </div>
             <p className="text-xs text-gray-500 mt-1">

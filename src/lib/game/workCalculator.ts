@@ -11,7 +11,7 @@ import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
 // Import or define BASE_WORK_UNITS
 export const BASE_WORK_UNITS = 50; // work units per standard week
 
-// Simplified WorkCategory enum - keep this for compatibility
+// WorkCategory enum - defines all activity types in the game
 export enum WorkCategory {
   PLANTING = 'planting',
   HARVESTING = 'harvesting',
