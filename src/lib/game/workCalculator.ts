@@ -1,10 +1,5 @@
 import { Staff } from '@/gameState';
-import { 
-  REGION_ALTITUDE_RANGES, 
-  getResourceByGrapeVariety, 
-  GrapeVariety
-} from '@/lib/core/constants/vineyardConstants';
-import { allResources } from './resource';
+import { GrapeVariety, CLEARING_SUBTASK_RATES } from '@/lib/core/constants/vineyardConstants';
 import { v4 as uuidv4 } from 'uuid';
 import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
 
@@ -51,14 +46,7 @@ export const TASK_RATES: Record<WorkCategory, number> = {
   [WorkCategory.ADMINISTRATION]: 1.0 // default administration rate
 };
 
-// Specific Rates for Clearing Sub-tasks (from old constants.js)
-const CLEARING_SUBTASK_RATES = {
-  'clear-vegetation': 0.5, // acres/week
-  'remove-debris': 0.4,    // acres/week
-  'soil-amendment': 0.8,    // acres/week
-};
-
-// Initial setup work for tasks that require setup before starting
+// Define initial work for each category
 export const INITIAL_WORK: Record<WorkCategory, number> = {
   [WorkCategory.PLANTING]: 10,
   [WorkCategory.HARVESTING]: 5,
@@ -73,12 +61,7 @@ export const INITIAL_WORK: Record<WorkCategory, number> = {
   [WorkCategory.ADMINISTRATION]: 5
 };
 
-// Initial work for specific clearing sub-tasks (assumed 0 from old constants)
-const CLEARING_SUBTASK_INITIAL_WORK = {
-  'clear-vegetation': 0,
-  'remove-debris': 0,
-  'soil-amendment': 0,
-};
+
 
 // Activity progress interface
 export interface ActivityProgress {
@@ -137,21 +120,8 @@ export function calculateTotalWork(
 }
 
 /**
- * Helper function to get the default rate for a work category
- */
-export function getDefaultRate(category: WorkCategory): number {
-  return TASK_RATES[category] || 1.0;
-}
-
-/**
- * Helper function to get the default initial work for a category
- */
-export function getDefaultInitialWork(category: WorkCategory): number {
-  return INITIAL_WORK[category] || 0;
-}
-
-/**
- * Helper function to check if a category is density-based
+ * @deprecated Use DENSITY_BASED_TASKS.includes(category) directly instead
+ * Helper function to check if a category uses density-based calculations
  */
 export function isDensityBasedCategory(category: WorkCategory): boolean {
   return DENSITY_BASED_TASKS.includes(category);
@@ -321,7 +291,7 @@ export function createActivityProgress(
   const { 
     density, 
     taskMultipliers, 
-    workModifiers,
+    workModifiers = [],
     targetId,
     completionCallback,
     progressCallback,
@@ -340,18 +310,24 @@ export function createActivityProgress(
     ...storedParams 
   } = additionalParams;
 
-  const totalWork = calculateTotalWork(amount, {
-    category,
+  // Get rate and initial work based on category from constants
+  const rate = TASK_RATES[category];
+  const initialWork = INITIAL_WORK[category];
+  
+  // Check if this category should use density adjustment
+  const useDensityAdjustment = DENSITY_BASED_TASKS.includes(category);
+
+  // Apply task multiplier if available (for the specific category)
+  const multiplier = taskMultipliers?.[category] || 1.0;
+  const adjustedAmount = amount * multiplier;
+  
+  // Calculate total work using the simplified calculator
+  const totalWork = calculateTotalWork(adjustedAmount, {
+    rate,
+    initialWork,
     density,
-    taskMultipliers,
-    workModifiers,
-    // Pass extracted factors
-    altitude,
-    country,
-    region,
-    resourceName,
-    skillLevel,
-    specializations
+    useDensityAdjustment,
+    workModifiers
   });
   
   return {

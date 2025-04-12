@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork, getDefaultRate, getDefaultInitialWork } from '../../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS } from '../../lib/game/workCalculator';
 import { Vineyard } from '../../lib/game/vineyard';
 import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
 import { formatNumber } from '@/lib/core/utils/formatUtils';
 import HealthBar from '../activities/HealthBar';
-import { CLEARING_SUBTASK_RATES, CLEARING_SUBTASK_INITIAL_WORK } from '@/lib/core/constants/vineyardConstants';
+import { CLEARING_SUBTASK_RATES, CLEARING_SUBTASK_INITIAL_WORK } from '../../lib/core/constants/vineyardConstants';
 
 interface ClearingOptionModalProps {
   vineyard: Vineyard;
@@ -80,9 +80,9 @@ const ClearingOptionModal: React.FC<ClearingOptionModalProps> = ({
         taskAmount *= (options.replantingIntensity / 100);
         if (taskAmount <= 0) return; // Skip if no work to do
           
-        rate = getDefaultRate(WorkCategory.UPROOTING);
-        initialWork = getDefaultInitialWork(WorkCategory.UPROOTING);
-        useDensityAdjustment = true;
+        rate = TASK_RATES[WorkCategory.UPROOTING];
+        initialWork = INITIAL_WORK[WorkCategory.UPROOTING];
+        useDensityAdjustment = DENSITY_BASED_TASKS.includes(WorkCategory.UPROOTING);
         taskLabel = `Vine Replanting (${options.replantingIntensity}%)`;
       } else if (taskId in CLEARING_SUBTASK_RATES) {
         // Handle standard clearing sub-tasks

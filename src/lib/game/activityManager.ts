@@ -5,12 +5,22 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
-import {  ActivityProgress, WorkCategory, calculateToolSpeedBonus, calculateTotalWork, calculateStaffWorkContribution } from './workCalculator';
+import { 
+  ActivityProgress, 
+  WorkCategory, 
+  calculateToolSpeedBonus, 
+  calculateTotalWork, 
+  calculateStaffWorkContribution, 
+  TASK_RATES, 
+  INITIAL_WORK, 
+  DENSITY_BASED_TASKS,
+  createActivityProgress
+} from './workCalculator';
 import { consoleService } from '@/components/layout/Console';
 import displayManager from './displayManager';
 import { Staff } from '@/gameState';
 import { toast } from '../ui/toast';
-import { saveActivityToDb,  removeActivityFromDb,  updateActivityInDb } from '../database/activityDB';
+import { saveActivityToDb, removeActivityFromDb, updateActivityInDb } from '../database/activityDB';
 
 // Store activities in gameState
 const initializeActivitiesInGameState = () => {
@@ -50,10 +60,29 @@ export type Activity = ActivityProgress;
 export const estimateActivityWork = (options: Partial<ActivityOptions>): number => {
   if (!options.category || !options.amount) return 0;
   
+  const category = options.category;
+  
+  // Use category-level constants instead of parameters
+  const rate = TASK_RATES[category];
+  const initialWork = INITIAL_WORK[category];
+  const useDensityAdjustment = DENSITY_BASED_TASKS.includes(category);
+  
+  // For clearing subtasks - use the provided task rates if available
+  if (category === WorkCategory.CLEARING && options.additionalParams?.taskRate) {
+    return calculateTotalWork(options.amount, {
+      rate: options.additionalParams.taskRate,
+      initialWork: options.additionalParams.taskInitialWork || initialWork,
+      density: options.density,
+      useDensityAdjustment,
+      workModifiers: options.workModifiers
+    });
+  }
+  
   return calculateTotalWork(options.amount, {
-    category: options.category,
+    rate,
+    initialWork,
     density: options.density,
-    taskMultipliers: options.taskMultipliers,
+    useDensityAdjustment,
     workModifiers: options.workModifiers
   });
 };
@@ -78,7 +107,7 @@ export const startActivityWithDisplayState = (
   const displayState = displayManager.getDisplayState(displayStateKey);
   
   // Check if there's already an activity in progress
-  if (displayState.activityId) {
+  if (displayState.activityId && getActivityById(displayState.activityId)) {
     // console.warn(`[ActivityManager] Activity already in progress with ID ${displayState.activityId}`);
     return displayState.activityId;
   }
@@ -96,11 +125,23 @@ export const startActivityWithDisplayState = (
       additionalParams 
     } = options;
 
+    // Use category-level constants by default
+    let rate = TASK_RATES[category];
+    let initialWork = INITIAL_WORK[category];
+    const useDensityAdjustment = DENSITY_BASED_TASKS.includes(category);
+    
+    // For clearing subtasks - use the provided task rates if available
+    if (category === WorkCategory.CLEARING && additionalParams?.taskRate) {
+      rate = additionalParams.taskRate;
+      initialWork = additionalParams.taskInitialWork || initialWork;
+    }
+
     // Calculate total work required
     const totalWork = calculateTotalWork(amount, {
-      category,
+      rate,
+      initialWork,
       density,
-      taskMultipliers,
+      useDensityAdjustment,
       workModifiers
     });
 

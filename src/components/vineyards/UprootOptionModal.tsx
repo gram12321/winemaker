@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
-import { WorkCategory, calculateTotalWork, getDefaultRate, getDefaultInitialWork } from '../../lib/game/workCalculator';
+import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
 import { Vineyard } from '../../lib/game/vineyard';
 import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';
-import { formatNumber } from '@/lib/core/utils/formatUtils';
 import HealthBar from '../activities/HealthBar';
-import { BASE_WORK_UNITS } from '../../lib/game/workCalculator';
 
 interface UprootOptionModalProps {
   vineyard: Vineyard;
@@ -28,12 +26,17 @@ const UprootOptionModal: React.FC<UprootOptionModalProps> = ({
 
   // Calculate work estimate and factors when component mounts
   useEffect(() => {
+    // Use category-level constants directly
+    const rate = TASK_RATES[WorkCategory.UPROOTING];
+    const initialWork = INITIAL_WORK[WorkCategory.UPROOTING];
+    const useDensityAdjustment = DENSITY_BASED_TASKS.includes(WorkCategory.UPROOTING);
+    
     const totalWork = calculateTotalWork(vineyard.acres, {
-      category: WorkCategory.UPROOTING,
+      rate,
+      initialWork,
       density: vineyard.density || 0,
-      altitude: vineyard.altitude,
-      country: vineyard.country,
-      region: vineyard.region,
+      useDensityAdjustment,
+      workModifiers: []
     });
 
     // Basic time estimate
