@@ -21,36 +21,70 @@ function sanitizeActivityForDb(activity: Activity): ActivityForDb {
   delete sanitized.completionCallback;
   delete sanitized.progressCallback;
 
-  // Ensure essential fields exist and have defaults for DB storage
-  const dbActivity: ActivityForDb = {
-    id: sanitized.id!, 
-    userId: activity.userId || getGameState().player?.id || 'unknown', // Ensure userId exists for DB
-    category: sanitized.category!, 
-    totalWork: sanitized.totalWork || 0,
-    appliedWork: sanitized.appliedWork || 0,
-    targetId: sanitized.targetId, // Stored as is, can be undefined
-    params: sanitized.params || {}, // Default to empty object if undefined
+  // Create a recursive function to sanitize objects for Firebase
+  // by converting undefined values to null and handling nested objects
+  const sanitizeForFirebase = (obj: any): any => {
+    // If undefined, return null explicitly
+    if (obj === undefined) {
+      return null;
+    }
+    
+    // If null or not an object, return as is
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+    
+    // If it's an array, map each element recursively
+    if (Array.isArray(obj)) {
+      return obj.map(item => sanitizeForFirebase(item));
+    }
+    
+    // Handle regular objects
+    const result: Record<string, any> = {};
+    for (const key in obj) {
+      // Skip if property doesn't exist
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+      
+      // Convert undefined to null (Firebase doesn't support undefined)
+      if (obj[key] === undefined) {
+        result[key] = null;
+      } else {
+        // Recursively sanitize nested objects
+        result[key] = sanitizeForFirebase(obj[key]);
+      }
+    }
+    return result;
   };
 
-  // Ensure params sub-arrays exist IF params itself exists
-  if (dbActivity.params) { // Check if params exists before accessing sub-properties
-      dbActivity.params.assignedStaffIds = dbActivity.params.assignedStaffIds || [];
-      dbActivity.params.assignedToolIds = dbActivity.params.assignedToolIds || [];
-
-      // Remove undefined values from params
-      Object.keys(dbActivity.params).forEach(key => {
-          if (dbActivity.params![key] === undefined) { 
-              delete dbActivity.params![key];
-          }
-      });
-  } else {
-      // If params was initially null/undefined, ensure it's an empty object
-      dbActivity.params = {}; 
-  }
-
-  console.log(`Sanitized activity for DB save/update: ${dbActivity.id}, appliedWork: ${dbActivity.appliedWork}`);
-  // The returned object now matches ActivityForDb type
-  return dbActivity;
+  // First safely sanitize all properties that could contain nested objects
+  const sanitizedParams = sanitized.params ? sanitizeForFirebase(sanitized.params) : {};
+  
+  // Ensure essential fields exist and have defaults for DB storage
+  const dbActivity: ActivityForDb = {
+    id: sanitized.id || '', 
+    userId: sanitized.userId || getGameState().player?.id || 'unknown',
+    category: (sanitized.category || WorkCategory.ADMINISTRATION) as WorkCategory, // Use valid WorkCategory
+    totalWork: sanitized.totalWork || 0,
+    appliedWork: sanitized.appliedWork || 0,
+    targetId: sanitized.targetId || '', // Use empty string instead of null
+    params: {
+      ...sanitizedParams,
+      // Ensure these arrays always exist
+      assignedStaffIds: Array.isArray(sanitizedParams.assignedStaffIds) 
+        ? sanitizedParams.assignedStaffIds 
+        : [],
+      assignedToolIds: Array.isArray(sanitizedParams.assignedToolIds) 
+        ? sanitizedParams.assignedToolIds 
+        : []
+    }
+  };
+  
+  // Final sanitization to ensure no undefined values anywhere
+  const finalSanitized = sanitizeForFirebase(dbActivity) as ActivityForDb;
+  
+  console.log(`Sanitized activity for DB save/update: ${finalSanitized.id}, appliedWork: ${finalSanitized.appliedWork}`);
+  
+  return finalSanitized;
 }
 
 // --- Load function --- 
