@@ -16,10 +16,11 @@ import PlantingOptionsModal from '@/components/vineyards/PlantingOptionsModal';
 import ClearingOptionModal from '@/components/vineyards/ClearingOptionModal';
 import UprootOptionModal from '@/components/vineyards/UprootOptionModal';
 import { GrapeVariety } from '@/lib/core/constants/vineyardConstants';
-import { formatNumber } from '@/lib/core/utils/formatUtils';
+import { formatNumber, formatCurrency } from '@/lib/core/utils/formatUtils';
 import { getCountryCodeForFlag } from '@/lib/core/utils/formatUtils';
 import { getColorClass } from '@/lib/core/utils/formatUtils';
 import { toast } from '@/lib/ui/toast';
+import { getUpgrades, startUpgrade, Upgrade, categorizeUpgrades } from '../services/upgradeService';
 
 // Display state type definition
 interface VineyardViewDisplayState {
@@ -329,6 +330,43 @@ const VineyardView: React.FC = () => {
     }
   });
 
+  // Add after the existing const declarations
+  const allUpgrades = getUpgrades();
+  const { upgrades: vineyardUpgrades } = categorizeUpgrades(allUpgrades);
+  
+  // Filter upgrades that are applicable to farmland and not already applied
+  const availableUpgrades = vineyardUpgrades.filter(upgrade => {
+    if (upgrade.applicableTo !== 'farmland') return false;
+    if (!selectedVineyard) return false;
+    // Check if vineyard already has this upgrade
+    return !(selectedVineyard.upgrades || []).includes(upgrade.id.toString());
+  });
+
+  const handleStartUpgrade = async (upgrade: Upgrade) => {
+    if (!selectedVineyard) return;
+    
+    // Check if player can afford the upgrade
+    const { player } = gameState;
+    if (!player || player.money < upgrade.requirements.money) {
+      toast({
+        title: "Cannot Start Upgrade",
+        description: "Not enough money for this upgrade.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Start the upgrade
+    const success = await startUpgrade(upgrade.id, selectedVineyard);
+    if (!success) {
+      toast({
+        title: "Error",
+        description: "Failed to start upgrade. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="Vineyard-section mb-6">
@@ -547,6 +585,89 @@ const VineyardView: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Add after the vineyard value section */}
+          {selectedVineyard && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-4">Vineyard Upgrades</h3>
+              
+              {/* Active Upgrades */}
+              <div className="mb-4">
+                <h4 className="text-md font-medium mb-2">Active Upgrades</h4>
+                {(selectedVineyard.upgrades || []).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {(selectedVineyard.upgrades || []).map(upgradeId => {
+                      const upgrade = vineyardUpgrades.find(u => u.id.toString() === upgradeId);
+                      if (!upgrade) return null;
+                      return (
+                        <div key={upgradeId} className="bg-green-50 border border-green-200 rounded-md p-3">
+                          <h5 className="font-medium text-green-800">{upgrade.name}</h5>
+                          <p className="text-sm text-green-600">{upgrade.benefitsDescription}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">No active upgrades</p>
+                )}
+              </div>
+              
+              {/* Available Upgrades */}
+              <div>
+                <h4 className="text-md font-medium mb-2">Available Upgrades</h4>
+                {availableUpgrades.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {availableUpgrades.map(upgrade => (
+                      <div key={upgrade.id} className="border border-wine/20 rounded-md p-3 bg-white">
+                        <h5 className="font-medium text-wine">{upgrade.name}</h5>
+                        <p className="text-sm text-gray-600 mb-2">{upgrade.description}</p>
+                        <div className="text-sm space-y-1 mb-3">
+                          <p><span className="font-medium">Benefits:</span> {upgrade.benefitsDescription}</p>
+                          <p><span className="font-medium">Cost:</span> {formatCurrency(upgrade.requirements.money)}</p>
+                        </div>
+                        <button
+                          onClick={() => handleStartUpgrade(upgrade)}
+                          className="w-full bg-wine text-white px-3 py-1.5 rounded text-sm hover:bg-wine-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={!gameState.player || (gameState.player.money || 0) < upgrade.requirements.money}
+                        >
+                          Start Upgrade
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">No available upgrades</p>
+                )}
+              </div>
+              
+              {/* Ongoing Upgrade Activities */}
+              <div className="mt-4">
+                <h4 className="text-md font-medium mb-2">Ongoing Upgrades</h4>
+                <div className="space-y-3">
+                  {currentVineyardActivities
+                    .filter(activity => activity.category === WorkCategory.UPGRADING)
+                    .map(activity => (
+                      <ActivityProgressBar
+                        key={activity.id}
+                        activityId={activity.id}
+                        title={activity.params?.title || 'Upgrade Activity'}
+                        category={activity.category}
+                        progress={(activity.appliedWork / activity.totalWork) * 100}
+                        appliedWork={activity.appliedWork}
+                        totalWork={activity.totalWork}
+                        onAssignStaff={() => {
+                          displayManager.updateDisplayState('vineyardView', {
+                            showStaffAssignment: true,
+                            currentActivityId: activity.id
+                          });
+                        }}
+                        className="bg-white shadow-sm hover:shadow-md transition-shadow"
+                      />
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Vineyard Status & Actions section */}
           <div className="mt-4">

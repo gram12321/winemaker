@@ -26,7 +26,7 @@ export function UpgradeActivityList() {
   };
 
   return (
-    <div>
+    <div className="border border-wine/30 rounded-md p-4 bg-gray-50/50">
       <h2 className="text-xl font-semibold text-wine mb-4 border-b border-wine/20 pb-2">Ongoing Upgrades</h2>
       
       <div className="space-y-4">
@@ -43,6 +43,7 @@ export function UpgradeActivityList() {
               appliedWork={activity.appliedWork}
               totalWork={activity.totalWork}
               onAssignStaff={() => handleAssignStaff(activity.id)}
+              className="bg-white shadow-sm hover:shadow-md transition-shadow"
             />
           ))
         )}
