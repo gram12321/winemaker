@@ -1,6 +1,6 @@
 import { getGameState, updateGameState } from '@/gameState';
 import { consoleService } from '@/components/layout/Console';
-import { Building } from '@/lib/game/building';
+import { Building, createTool } from '@/lib/game/building';
 import { BuildingType, BUILDING_CONFIG } from '@/lib/core/constants';
 import { loadBuildings, saveBuildings, deserializeBuilding, serializeBuilding } from '@/lib/database/buildingDB';
 
@@ -137,8 +137,7 @@ export const addToolToBuilding = async (
   // Convert to Building instance
   const building = deserializeBuilding(buildings[buildingIndex]);
   
-  // Create new tool
-  const { createTool } = await import('@/lib/game/building');
+  // Create new tool using static import
   const newTool = createTool(toolName);
   
   if (!newTool) {

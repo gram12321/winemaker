@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
+import { ActivityOptionsModal, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
 import { WorkCategory, calculateTotalWork, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS, BASE_WORK_UNITS } from '../../lib/game/workCalculator';
 import { Vineyard } from '../../lib/game/vineyard';
 import { DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';

@@ -7,10 +7,7 @@ export const formatCurrency = (amount: number): string => {
   }).format(amount);
 };
 
-/**
- * Formats a number using German locale settings (dot for thousands, comma for decimal).
- * Handles large numbers by abbreviating with 'Mio'.
- */
+
 export function formatNumber(value: number, decimals = 0): string {
   if (value === null || value === undefined) return "N/A";
   // Check if value is effectively zero

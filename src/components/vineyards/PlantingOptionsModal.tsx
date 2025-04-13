@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityOptionsModal, ActivityOptionField, ActivityWorkEstimate } from '../activities/ActivityOptionsModal';
 import { WorkCategory, calculateTotalWork, BASE_WORK_UNITS, TASK_RATES, INITIAL_WORK, DENSITY_BASED_TASKS } from '../../lib/game/workCalculator';
-import { GrapeVariety, COUNTRY_REGION_MAP, REGION_SOIL_TYPES, REGION_ALTITUDE_RANGES, ASPECT_FACTORS, getResourceByGrapeVariety } from '../../lib/core/constants/vineyardConstants';
+import { GrapeVariety, REGION_ALTITUDE_RANGES,  getResourceByGrapeVariety } from '../../lib/core/constants/vineyardConstants';
 import { Vineyard } from '../../lib/game/vineyard';
 import { BASELINE_VINE_DENSITY } from '@/lib/core/constants/gameConstants';
 import { WorkFactor } from '../activities/WorkCalculationTable';

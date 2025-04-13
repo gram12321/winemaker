@@ -1,9 +1,3 @@
-/**
- * Building System Constants
- * Defines building types, costs, capacities, and tool types
- */
-
-// Building types
 export enum BuildingType {
   TOOL_SHED = 'Tool Shed',
   WAREHOUSE = 'Warehouse',

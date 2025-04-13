@@ -3,6 +3,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { getGameState, updateGameState } from '../../gameState';
 import { loadCompany } from './companyDB';
 import { clearGameStorage } from './localStorageDB';
+import { initializeActivitySystem } from './activityDB';
 
 export const handleLogout = async (): Promise<boolean> => {
   try {
@@ -129,7 +130,7 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
     }
     
     // Import updateGameState function here to avoid circular dependencies
-    const { updateGameState } = await import('../../gameState');
+    // const { updateGameState } = await import('../../gameState'); // This is likely still needed dynamically if gameState depends on gameStateDB
     
     // Create activities with proper types and callbacks before updating gameState
     const activities = data.activities?.map((activity: any) => ({
@@ -160,8 +161,7 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       currentView: 'mainMenu',
     });
     
-    // After updating game state, initialize activity system to set up callbacks
-    const { initializeActivitySystem } = await import('../database/activityDB');
+    // After updating game state, initialize activity system using static import
     await initializeActivitySystem();
     
     return true;

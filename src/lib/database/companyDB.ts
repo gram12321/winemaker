@@ -3,9 +3,6 @@ import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/fi
 import { Player } from '../../gameState';
 import { StorageKeys, saveToStorage } from './localStorageDB';
 
-/**
- * Check if a company exists in Firestore
- */
 export const checkCompanyExists = async (companyName: string): Promise<boolean> => {
   try {
     const docRef = doc(db, 'companies', companyName);
@@ -17,9 +14,6 @@ export const checkCompanyExists = async (companyName: string): Promise<boolean> 
   }
 };
 
-/**
- * Create a new company in Firestore
- */
 export const createCompany = async (companyName: string, player: Player, initialStaff: any[] = []): Promise<boolean> => {
   try {
     const docRef = doc(db, 'companies', companyName);
@@ -34,7 +28,7 @@ export const createCompany = async (companyName: string, player: Player, initial
       currentYear: new Date().getFullYear(),
     });
     
-    // Save to localStorage for quick access
+
     saveToStorage(StorageKeys.COMPANY_NAME, companyName);
     return true;
   } catch (error) {

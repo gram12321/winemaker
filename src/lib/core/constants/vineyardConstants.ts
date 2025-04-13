@@ -1,4 +1,4 @@
-// Grape varieties - Reverted to original 5
+
 export type GrapeVariety =
   | "Barbera"
   | "Chardonnay"
@@ -6,7 +6,6 @@ export type GrapeVariety =
   | "Primitivo"
   | "Sauvignon Blanc";
 
-// Aspect directions
 export type Aspect = 
   | "North" 
   | "Northeast" 
@@ -17,10 +16,10 @@ export type Aspect =
   | "West" 
   | "Northwest";
 
-// Conventional farming methods
+
 export type FarmingMethod = "Conventional" | "Non-Conventional" | "Ecological";
 
-// Countries and regions data
+
 export const COUNTRY_REGION_MAP = {
   "France": ["Bordeaux", "Burgundy (Bourgogne)", "Champagne", "Loire Valley", "Rhone Valley", "Jura"],
   "Germany": ["Ahr", "Mosel", "Pfalz", "Rheingau", "Rheinhessen"],
@@ -29,7 +28,7 @@ export const COUNTRY_REGION_MAP = {
   "United States": ["Central Coast (California)", "Finger Lakes (New York)", "Napa Valley (California)", "Sonoma County (California)", "Willamette Valley (Oregon)"],
 };
 
-// Soil types by region
+
 export const REGION_SOIL_TYPES = {
   "France": {
     "Bordeaux": ["Clay", "Gravel", "Limestone", "Sand"],

@@ -7,9 +7,6 @@ const STAFF_COLLECTION = 'staff';
 const TEAMS_COLLECTION = 'staffTeams';
 const STAFF_ASSIGNMENTS_COLLECTION = 'staffAssignments';
 
-/**
- * Save staff member to Firebase
- */
 export const saveStaffToDb = async (staff: Staff): Promise<boolean> => {
   try {
     const staffRef = doc(db, STAFF_COLLECTION, staff.id);
@@ -20,9 +17,6 @@ export const saveStaffToDb = async (staff: Staff): Promise<boolean> => {
   }
 };
 
-/**
- * Load all staff from Firebase
- */
 export const loadAllStaffFromDb = async (): Promise<Staff[]> => {
   try {
     const staffSnapshot = await getDocs(collection(db, STAFF_COLLECTION));
@@ -32,9 +26,6 @@ export const loadAllStaffFromDb = async (): Promise<Staff[]> => {
   }
 };
 
-/**
- * Remove staff member from Firebase
- */
 export const removeStaffFromDb = async (staffId: string): Promise<boolean> => {
   try {
     const staffRef = doc(db, STAFF_COLLECTION, staffId);
@@ -45,9 +36,6 @@ export const removeStaffFromDb = async (staffId: string): Promise<boolean> => {
   }
 };
 
-/**
- * Update staff member in Firebase
- */
 export const updateStaffInDb = async (staff: Staff): Promise<boolean> => {
   try {
     const staffRef = doc(db, STAFF_COLLECTION, staff.id);
@@ -60,9 +48,6 @@ export const updateStaffInDb = async (staff: Staff): Promise<boolean> => {
   }
 };
 
-/**
- * Save team to Firebase and localStorage
- */
 export const saveTeamToDb = async (team: StaffTeam): Promise<boolean> => {
   try {
     // Convert undefined values to null for Firebase compatibility
@@ -90,9 +75,6 @@ export const saveTeamToDb = async (team: StaffTeam): Promise<boolean> => {
   }
 };
 
-/**
- * Load teams from Firebase and update localStorage
- */
 export const loadTeamsFromDb = async (): Promise<StaffTeam[]> => {
   try {
     const teamsSnapshot = await getDocs(collection(db, TEAMS_COLLECTION));
@@ -108,9 +90,6 @@ export const loadTeamsFromDb = async (): Promise<StaffTeam[]> => {
   }
 };
 
-/**
- * Save staff assignments to Firebase
- */
 export const saveStaffAssignmentsToDb = async (
   activityId: string,
   staffIds: string[]
@@ -124,9 +103,6 @@ export const saveStaffAssignmentsToDb = async (
   }
 };
 
-/**
- * Load staff assignments from Firebase
- */
 export const loadStaffAssignmentsFromDb = async (
   activityId: string
 ): Promise<string[]> => {
@@ -139,17 +115,11 @@ export const loadStaffAssignmentsFromDb = async (
   }
 };
 
-/**
- * Clear all staff data from localStorage
- */
 export const clearStaffLocalStorage = (): void => {
   localStorage.removeItem('staffTeams');
 };
 
-/**
- * Delete all staff from Firestore
- * @returns Promise resolving to true if successful, false otherwise
- */
+
 export const deleteAllStaff = async (): Promise<boolean> => {
   try {
     const querySnapshot = await getDocs(collection(db, STAFF_COLLECTION));
@@ -164,10 +134,7 @@ export const deleteAllStaff = async (): Promise<boolean> => {
   }
 };
 
-/**
- * Delete all staff teams from Firestore
- * @returns Promise resolving to true if successful, false otherwise
- */
+
 export const deleteAllTeams = async (): Promise<boolean> => {
   try {
     const querySnapshot = await getDocs(collection(db, TEAMS_COLLECTION));
@@ -182,10 +149,7 @@ export const deleteAllTeams = async (): Promise<boolean> => {
   }
 };
 
-/**
- * Delete all staff assignments from Firestore
- * @returns Promise resolving to true if successful, false otherwise
- */
+
 export const deleteAllStaffAssignments = async (): Promise<boolean> => {
   try {
     const querySnapshot = await getDocs(collection(db, STAFF_ASSIGNMENTS_COLLECTION));
@@ -200,17 +164,4 @@ export const deleteAllStaffAssignments = async (): Promise<boolean> => {
   }
 };
 
-export default {
-  saveStaffToDb,
-  loadAllStaffFromDb,
-  removeStaffFromDb,
-  updateStaffInDb,
-  saveTeamToDb,
-  loadTeamsFromDb,
-  saveStaffAssignmentsToDb,
-  loadStaffAssignmentsFromDb,
-  clearStaffLocalStorage,
-  deleteAllStaff,
-  deleteAllTeams,
-  deleteAllStaffAssignments
-}; 
+export default { saveStaffToDb, loadAllStaffFromDb, removeStaffFromDb, updateStaffInDb, saveTeamToDb, loadTeamsFromDb, saveStaffAssignmentsToDb, loadStaffAssignmentsFromDb, clearStaffLocalStorage, deleteAllStaff, deleteAllTeams, deleteAllStaffAssignments };

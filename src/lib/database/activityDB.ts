@@ -2,6 +2,13 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import { getGameState, updateGameState } from '../../gameState';
 import { WorkCategory, ActivityProgress } from '../game/workCalculator';
+import { setActivityCompletionCallback } from '../game/activityManager';
+import { updateVineyard } from '../../services/vineyardService';
+import { DEFAULT_VINEYARD_HEALTH } from '../../lib/core/constants/gameConstants';
+import displayManager from '@/lib/game/displayManager';
+import { toast } from '@/lib/ui/toast';
+import { consoleService } from '@/components/layout/Console';
+import { generateStaffCandidates, completeHiringProcess } from '../../services/staffService';
 
 // Activity types
 export interface Activity extends ActivityProgress {
@@ -223,35 +230,33 @@ async function reattachActivityCallbacks(): Promise<void> {
   
   if (activitiesInState.length === 0) return;
   
-  const { setActivityCompletionCallback } = await import('../game/activityManager');
-  
   for (const activity of activitiesInState) {
     if (!activity.id) continue;
     
     try {
       switch (activity.category) {
         case 'clearing': {
-          await handleClearingCallbacks(activity, activitiesInState, setActivityCompletionCallback);
+          await handleClearingCallbacks(activity, activitiesInState);
           break;
         }
         case 'uprooting': {
-          await handleUprootingCallbacks(activity, setActivityCompletionCallback);
+          await handleUprootingCallbacks(activity);
           break;
         }
         case 'planting': {
-          await handlePlantingCallbacks(activity, setActivityCompletionCallback);
+          await handlePlantingCallbacks(activity);
           break;
         }
         case 'harvesting': {
-          await handleHarvestingCallbacks(activity, setActivityCompletionCallback);
+          await handleHarvestingCallbacks(activity);
           break;
         }
         case 'staffSearch': {
-          await handleStaffSearchCallbacks(activity, setActivityCompletionCallback);
+          await handleStaffSearchCallbacks(activity);
           break;
         }
         case 'administration': {
-          await handleAdministrationCallbacks(activity, setActivityCompletionCallback);
+          await handleAdministrationCallbacks(activity);
           break;
         }
         case 'crushing':
@@ -275,7 +280,6 @@ async function reattachActivityCallbacks(): Promise<void> {
 async function handleClearingCallbacks(
   activity: Activity, 
   activitiesInState: Activity[], 
-  setActivityCompletionCallback: (id: string, callback: () => void) => void
 ): Promise<void> {
   const targetId = activity.targetId;
   if (!targetId) return;
@@ -306,7 +310,6 @@ async function handleClearingCallbacks(
         const vineyard = getGameState().vineyards.find(v => v.id === targetId);
         if (vineyard && vineyard.status === 'Clearing in Progress') {
           // If the vineyard is still in clearing status, update its status to cleared
-          const { updateVineyard } = await import('../../services/vineyardService');
           
           // Collect all task IDs to calculate health improvement
           const completedTaskIds = new Set<string>();
@@ -348,7 +351,6 @@ async function handleClearingCallbacks(
 // Callback handler for uprooting activities
 async function handleUprootingCallbacks(
   activity: Activity,
-  setActivityCompletionCallback: (id: string, callback: () => void) => void
 ): Promise<void> {
   const targetId = activity.targetId;
   if (!targetId) return;
@@ -356,9 +358,6 @@ async function handleUprootingCallbacks(
   setActivityCompletionCallback(activity.id, async () => {
     const vineyard = getGameState().vineyards.find(v => v.id === targetId);
     if (vineyard) {
-      const { updateVineyard } = await import('../../services/vineyardService');
-      const { DEFAULT_VINEYARD_HEALTH } = await import('../../lib/core/constants/gameConstants');
-      
       await updateVineyard(targetId, {
         grape: null,
         vineAge: 0,
@@ -373,16 +372,13 @@ async function handleUprootingCallbacks(
       });
       
       // Update UI
-      const displayManager = (await import('@/lib/game/displayManager')).default;
       displayManager.updateDisplayState('vineyardView', { currentActivityId: null });
       
-      const { toast } = await import('@/lib/ui/toast');
       toast({
         title: "Uprooting Complete",
         description: "The vineyard is now ready for planting with new grape varieties."
       });
       
-      const { consoleService } = await import('@/components/layout/Console');
       consoleService.success(`Uprooting of vineyard complete! The vineyard is now ready for planting.`);
     }
   });
@@ -391,7 +387,6 @@ async function handleUprootingCallbacks(
 // Callback handler for planting activities
 async function handlePlantingCallbacks(
   activity: Activity,
-  setActivityCompletionCallback: (id: string, callback: () => void) => void
 ): Promise<void> {
   const targetId = activity.targetId;
   if (!targetId) return;
@@ -400,7 +395,6 @@ async function handlePlantingCallbacks(
     const vineyard = getGameState().vineyards.find(v => v.id === targetId);
     
     if (vineyard && vineyard.status.includes('Planting')) {
-      const { updateVineyard } = await import('../../services/vineyardService');
       const { season } = getGameState();
       
       // Get grape and density from activity parameters
@@ -432,7 +426,6 @@ async function handlePlantingCallbacks(
 // Callback handler for harvesting activities
 async function handleHarvestingCallbacks(
   activity: Activity,
-  setActivityCompletionCallback: (id: string, callback: () => void) => void
 ): Promise<void> {
   const targetId = activity.targetId;
   if (!targetId) return;
@@ -442,8 +435,6 @@ async function handleHarvestingCallbacks(
     const { season } = getGameState();
     
     if (vineyard && vineyard.status.includes('Harvesting')) {
-      const { updateVineyard } = await import('../../services/vineyardService');
-      
       // Assume fully harvested
       const newRemainingYield = 0;
       
@@ -464,13 +455,10 @@ async function handleHarvestingCallbacks(
 // Callback handler for staff search activities
 async function handleStaffSearchCallbacks(
   activity: Activity,
-  setActivityCompletionCallback: (id: string, callback: () => void) => void
 ): Promise<void> {
-  const { default: displayManager } = await import('@/lib/game/displayManager');
   displayManager.updateDisplayState('staffSearchActivity', { activityId: activity.id });
   
   setActivityCompletionCallback(activity.id, async () => {
-    const { generateStaffCandidates } = await import('../../services/staffService');
     const { updatePlayerMoney } = await import('../../gameState');
     
     // Get search parameters
@@ -495,7 +483,6 @@ async function handleStaffSearchCallbacks(
       activityId: null
     });
     
-    const { toast } = await import('@/lib/ui/toast');
     toast({
       title: "Search Complete",
       description: `Found ${candidates.length} potential candidates.`
@@ -506,16 +493,12 @@ async function handleStaffSearchCallbacks(
 // Callback handler for administration activities
 async function handleAdministrationCallbacks(
   activity: Activity,
-  setActivityCompletionCallback: (id: string, callback: () => void) => void
 ): Promise<void> {
   // Check if this is a hiring activity
   if (activity.params?.hiringProcess === true || activity.params?.staffToHire) {
-    const { default: displayManager } = await import('@/lib/game/displayManager');
     displayManager.updateDisplayState('staffHiringActivity', { activityId: activity.id });
     
     setActivityCompletionCallback(activity.id, async () => {
-      const { completeHiringProcess } = await import('../../services/staffService');
-      
       // Complete the hiring process
       completeHiringProcess(activity.id);
       

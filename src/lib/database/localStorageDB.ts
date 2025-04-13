@@ -1,9 +1,3 @@
-/**
- * Save data to localStorage
- * @param key The key to store the data under
- * @param data The data to store
- * @returns True if successful, false if error occurred
- */
 export const saveToStorage = <T>(key: string, data: T): boolean => {
   try {
     const serialized = JSON.stringify(data);
@@ -15,12 +9,6 @@ export const saveToStorage = <T>(key: string, data: T): boolean => {
   }
 };
 
-/**
- * Load data from localStorage
- * @param key The key to load data from
- * @param defaultValue Default value to return if key doesn't exist
- * @returns The loaded data or defaultValue if not found
- */
 export const loadFromStorage = <T>(key: string, defaultValue: T): T => {
   try {
     const serialized = localStorage.getItem(key);
@@ -34,11 +22,6 @@ export const loadFromStorage = <T>(key: string, defaultValue: T): T => {
   }
 };
 
-/**
- * Remove a specific item from localStorage
- * @param key The key to remove
- * @returns True if successful, false if error occurred
- */
 export const removeFromStorage = (key: string): boolean => {
   try {
     localStorage.removeItem(key);
@@ -49,10 +32,6 @@ export const removeFromStorage = (key: string): boolean => {
   }
 };
 
-/**
- * Clear all game-related data from localStorage
- * @returns True if successful, false if any errors occurred
- */
 export const clearGameStorage = (): boolean => {
   const gameKeys = [
     StorageKeys.COMPANY_NAME,
@@ -94,9 +73,6 @@ export const clearGameStorage = (): boolean => {
   return success;
 };
 
-/**
- * Storage keys used throughout the application
- */
 export const StorageKeys = {
   COMPANY_NAME: 'companyName',
   VINEYARDS: 'vineyards',

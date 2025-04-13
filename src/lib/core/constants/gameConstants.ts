@@ -1,8 +1,3 @@
-/**
- * Game Constants
- * Central location for all game constants and configuration values
- */
-
 // Time System
 export type Season = 'Spring' | 'Summer' | 'Fall' | 'Winter';
 export const SEASONS: Season[] = ['Spring', 'Summer', 'Fall', 'Winter'];
@@ -18,12 +13,6 @@ export interface GameDate {
   season: Season;
   year: number;
 }
-
-/**
- * Formats a GameDate object into a readable string
- * @param date GameDate object to format
- * @returns Formatted date string (e.g., "Week 3, Spring 2023")
- */
 export function formatGameDate(date: GameDate): string {
   return `Week ${date.week}, ${date.season} ${date.year}`;
 }
