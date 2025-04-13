@@ -1,18 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Vineyard, createVineyard } from '@/lib/game/vineyard';
 import { getGameState } from '@/gameState';
-import { 
-  GrapeVariety, 
-  CLEARING_SUBTASK_RATES, 
-  CLEARING_SUBTASK_INITIAL_WORK,
-  getResourceByGrapeVariety,
-  REGION_ALTITUDE_RANGES
-} from '@/lib/core/constants/vineyardConstants';
+import { GrapeVariety, CLEARING_SUBTASK_RATES, CLEARING_SUBTASK_INITIAL_WORK, getResourceByGrapeVariety, REGION_ALTITUDE_RANGES } from '@/lib/core/constants/vineyardConstants';
 import { addWineBatch } from './wineBatchService';
-import { BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS, DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
+import { BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS } from '@/lib/core/constants/gameConstants';
 import { getVineyard, saveVineyard, removeVineyard, getAllVineyards } from '@/lib/database/vineyardDB';
 import { WorkCategory } from '@/lib/game/workCalculator';
-import { getActivitiesForTarget, setActivityCompletionCallback, startActivityWithDisplayState, getActivityById } from '@/lib/game/activityManager';
+import { setActivityCompletionCallback, startActivityWithDisplayState, getActivityById } from '@/lib/game/activityManager';
 import { toast } from '@/lib/ui/toast';
 
 export async function addVineyard(vineyardData: Partial<Vineyard> = {}): Promise<Vineyard | null> {

@@ -121,14 +121,8 @@ export async function initializeActivitySystem(): Promise<void> {
       
       // Import necessary modules for callback reattachment
       const { setActivityCompletionCallback, getActivityById } = await import('../game/activityManager');
-      const { 
-        clearVineyard, 
-        plantVineyard, 
-        uprootVineyard,
-        harvestVineyard
-      } = await import('../../services/vineyardService');
       
-      // Handle each activity based on its category
+      // Re-attach completion callbacks for all activities
       for (const activity of activitiesInState) {
         if (!activity.id) continue;
         
