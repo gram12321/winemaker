@@ -19,6 +19,7 @@ import Profile from './views/Profile';
 import Achievements from './views/Achievements';
 import { VineyardView, InventoryView, BuildingsView } from './views';
 import StaffView from './views/StaffView';
+import FinanceView from './views/FinanceView';
 import { createStaff, type Nationality } from './services/staffService';
 
 function App() {
@@ -265,17 +266,10 @@ function App() {
             {view === 'sales' && (
               <div>
                 <h1 className="text-2xl font-bold mb-4">Wine Sales</h1>
-                {/* Sales content will go here */}
                 <p className="text-gray-600">Sales view coming soon...</p>
               </div>
             )}
-            {view === 'finance' && (
-              <div>
-                <h1 className="text-2xl font-bold mb-4">Financial Management</h1>
-                {/* Finance content will go here */}
-                <p className="text-gray-600">Finance view coming soon...</p>
-              </div>
-            )}
+            {view === 'finance' && <FinanceView />}
             
             {/* Additional Menu Views */}
             <Settings view={view} />

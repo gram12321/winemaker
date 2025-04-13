@@ -16,6 +16,7 @@ export enum WorkCategory {
   UPROOTING = 'uprooting',
   BUILDING = 'building',
   UPGRADING = 'upgrading',
+  UPGRADE = 'upgrading', // Alias for UPGRADING
   MAINTENANCE = 'maintenance',
   STAFF_SEARCH = 'staffSearch',
   ADMINISTRATION = 'administration'

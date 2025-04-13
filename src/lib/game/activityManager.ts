@@ -1,8 +1,3 @@
-/**
- * Activity Manager
- * Manages and tracks work activities in the game
- */
-
 import { v4 as uuidv4 } from 'uuid';
 import { getGameState, updateGameState } from '@/gameState';
 import { 
@@ -13,10 +8,9 @@ import {
   calculateStaffWorkContribution, 
   TASK_RATES, 
   INITIAL_WORK, 
-  DENSITY_BASED_TASKS,
-  createActivityProgress
+  DENSITY_BASED_TASKS
 } from './workCalculator';
-import { consoleService } from '@/components/layout/Console';
+
 import displayManager from './displayManager';
 import { Staff } from '@/gameState';
 import { toast } from '../ui/toast';
@@ -52,11 +46,7 @@ const progressCallbacks: Record<string, (progress: number) => void> = {};
 // Add the Activity type for clarity
 export type Activity = ActivityProgress;
 
-/**
- * Estimate work for a given activity
- * @param options Activity options
- * @returns Estimated work units
- */
+
 export const estimateActivityWork = (options: Partial<ActivityOptions>): number => {
   if (!options.category || !options.amount) return 0;
   
@@ -87,12 +77,7 @@ export const estimateActivityWork = (options: Partial<ActivityOptions>): number 
   });
 };
 
-/**
- * Start a new activity and link it to a display state
- * @param displayStateKey The display state key to update
- * @param options Activity options
- * @returns Activity ID if successful, null if failed
- */
+
 export const startActivityWithDisplayState = (
   displayStateKey: string, 
   options: ActivityOptions
@@ -188,12 +173,6 @@ export const startActivityWithDisplayState = (
   }
 };
 
-/**
- * Assign staff to an activity and update display state
- * @param displayStateKey The display state key 
- * @param staffIds IDs of staff to assign
- * @returns true if successful, false otherwise
- */
 export const assignStaffWithDisplayState = (
   displayStateKey: string,
   staffIds: string[]
@@ -238,11 +217,6 @@ export const assignStaffWithDisplayState = (
   }
 };
 
-/**
- * Set a completion callback for an activity
- * @param activityId Activity ID
- * @param callback Function to call when activity completes
- */
 export const setActivityCompletionCallback = (
   activityId: string,
   callback: () => void
@@ -258,11 +232,6 @@ export const setActivityCompletionCallback = (
   }
 };
 
-/**
- * Set a progress callback for an activity
- * @param activityId Activity ID
- * @param callback Function to call when activity progress changes
- */
 export const setActivityProgressCallback = (
   activityId: string,
   callback: (progress: number) => void
@@ -278,11 +247,6 @@ export const setActivityProgressCallback = (
   }
 };
 
-/**
- * Cancel an activity and clear its display state
- * @param displayStateKey The display state key
- * @returns true if successful, false otherwise
- */
 export const cancelActivityWithDisplayState = (
   displayStateKey: string
 ): boolean => {
@@ -317,11 +281,6 @@ export const cancelActivityWithDisplayState = (
   }
 };
 
-/**
- * Get activity progress information from display state
- * @param displayStateKey The display state key
- * @returns Activity progress information
- */
 export const getActivityProgressFromDisplayState = (
   displayStateKey: string
 ): {
@@ -433,48 +392,54 @@ export function hasActiveActivity(targetId: string, category?: string): boolean 
 /**
  * Add a new activity to the game state and saves to Firebase
  * @param activity Activity to add
- * @returns The added activity
+ * @returns The added activity or null if the activity cannot be added
  */
-export const addActivity = (activity: ActivityProgress): ActivityProgress => {
-  initializeActivitiesInGameState();
-  
+export const addActivity = (activity: ActivityProgress): ActivityProgress | null => {
   const gameState = getGameState();
-  
-  // Check if target already has an active activity
-  if (activity.targetId && hasActiveActivity(activity.targetId, activity.category || undefined)) {
-    const error = `Cannot start a new ${activity.category || 'work'} activity: target ${activity.targetId} already has an active activity`;
-    // consoleService.error(error);
-    throw new Error(error);
+  const activities = gameState.activities || [];
+
+  // Check if target already has an active activity of the same category
+  if (activity.targetId && activity.category) {
+    const hasActiveActivity = activities.some(
+      a => a.targetId === activity.targetId && 
+          a.category === activity.category &&
+          a.appliedWork < a.totalWork
+    );
+
+    if (hasActiveActivity) {
+      // Instead of throwing an error, show a toast message
+      toast({
+        title: "Activity Already in Progress",
+        description: "This target already has an active upgrade. Please wait for the current activity to complete.",
+        variant: "destructive"
+      });
+      return null;
+    }
   }
-  
-  // Ensure the activity has an ID
-  const activityWithId = {
+
+  // Ensure the activity has an ID if not provided
+  const newActivity = {
     ...activity,
-    id: activity.id || uuidv4()
+    id: activity.id || `activity-${uuidv4()}`
   };
-  
-  // Add to game state
-  const currentActivities = getAllActivities();
-  const updatedActivities = [...currentActivities, activityWithId];
-  updateGameState({ activities: updatedActivities });
-  
-  // Save to Firebase in the background - add userId for database compatibility
-  const { player } = getGameState();
+
+  updateGameState({
+    activities: [...activities, newActivity],
+  });
+
+  // Save to database if we have a player ID
+  const player = gameState.player;
   if (player?.id) {
     saveActivityToDb({
-      ...activityWithId,
+      ...newActivity,
       userId: player.id
     }).catch(error => {
-      // console.error('[ActivityManager] Error saving activity to database:', error);
+      console.error('Error saving activity to database:', error);
     });
-  } else {
-    // console.warn('[ActivityManager] Cannot save activity to database: no player ID found');
   }
-  
-  // consoleService.info(`Started ${activityWithId.category} activity`);
+
   displayManager.updateAllDisplays();
-  
-  return activityWithId;
+  return newActivity;
 };
 
 /**
