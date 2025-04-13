@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useDisplayUpdate } from '@/lib/game/displayManager';
 
-import { IncomeBalanceView } from '@/components/finance/IncomeBalanceView';
-import { CashFlowView } from '@/components/finance/CashFlowView';
-import { UpgradesView } from '@/components/finance/UpgradesView';
+import { CashFlowView, IncomeBalanceView, UpgradesView } from '@/components/finance';
 
 export default function FinanceView() {
   // Use the display update hook to ensure UI updates when game state changes
