@@ -12,7 +12,8 @@ alwaysApply: true
  - Dont use npm run build or npm run dev, unless specific told to. The user allready has a dev server running
  - DO NOT make import of files/functions you do not know for sure excist. If you wanna make imports, be sure check the excisting of those files/functions before using them
 - always use named imports. Avoid using default exports 
- - Dont use "require". Instead use ES "Import" Module
+ - Dont use "require". Instead use ES "Import" Module,
+ - Dont use inline imports. Place import on top of each file
 
 ### 💡 Project Summary
 - This is a iteration of a old project. The old project is localted im \winemaker_old or [readme_old.md](mdc:docforai/readme_old.md) for references

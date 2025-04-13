@@ -1,100 +1,24 @@
-import { doc, setDoc, collection, getDoc, deleteDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase.config';
 import { getGameState, updateGameState } from '../../gameState';
-import { WorkCategory, ActivityProgress } from '../game/workCalculator'; // Import ActivityProgress from workCalculator
+import { WorkCategory, ActivityProgress } from '../game/workCalculator';
 
-// Define Activity type for runtime (aligns with ActivityProgress)
+// Activity types
 export interface Activity extends ActivityProgress {
-  userId?: string; // Add userId as optional for runtime flexibility if needed
+  userId?: string;
 }
 
-// Define a type for Firestore storage, excluding callbacks
-// Include userId here as it seems to be stored/expected within the company doc array
 type ActivityForDb = Omit<Activity, 'completionCallback' | 'progressCallback'> & {
-  userId: string; // Make userId required for storage consistency
+  userId: string;
 };
 
-// Helper function to sanitize activity data for Firebase
-function sanitizeActivityForDb(activity: Activity): ActivityForDb {
-  const sanitized: Partial<Activity> = { ...activity }; 
-
-  delete sanitized.completionCallback;
-  delete sanitized.progressCallback;
-
-  // Create a recursive function to sanitize objects for Firebase
-  // by converting undefined values to null and handling nested objects
-  const sanitizeForFirebase = (obj: any): any => {
-    // If undefined, return null explicitly
-    if (obj === undefined) {
-      return null;
-    }
-    
-    // If null or not an object, return as is
-    if (obj === null || typeof obj !== 'object') {
-      return obj;
-    }
-    
-    // If it's an array, map each element recursively
-    if (Array.isArray(obj)) {
-      return obj.map(item => sanitizeForFirebase(item));
-    }
-    
-    // Handle regular objects
-    const result: Record<string, any> = {};
-    for (const key in obj) {
-      // Skip if property doesn't exist
-      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
-      
-      // Convert undefined to null (Firebase doesn't support undefined)
-      if (obj[key] === undefined) {
-        result[key] = null;
-      } else {
-        // Recursively sanitize nested objects
-        result[key] = sanitizeForFirebase(obj[key]);
-      }
-    }
-    return result;
-  };
-
-  // First safely sanitize all properties that could contain nested objects
-  const sanitizedParams = sanitized.params ? sanitizeForFirebase(sanitized.params) : {};
-  
-  // Ensure essential fields exist and have defaults for DB storage
-  const dbActivity: ActivityForDb = {
-    id: sanitized.id || '', 
-    userId: sanitized.userId || getGameState().player?.id || 'unknown',
-    category: (sanitized.category || WorkCategory.ADMINISTRATION) as WorkCategory, // Use valid WorkCategory
-    totalWork: sanitized.totalWork || 0,
-    appliedWork: sanitized.appliedWork || 0,
-    targetId: sanitized.targetId || '', // Use empty string instead of null
-    params: {
-      ...sanitizedParams,
-      // Ensure these arrays always exist
-      assignedStaffIds: Array.isArray(sanitizedParams.assignedStaffIds) 
-        ? sanitizedParams.assignedStaffIds 
-        : [],
-      assignedToolIds: Array.isArray(sanitizedParams.assignedToolIds) 
-        ? sanitizedParams.assignedToolIds 
-        : []
-    }
-  };
-  
-  // Final sanitization to ensure no undefined values anywhere
-  const finalSanitized = sanitizeForFirebase(dbActivity) as ActivityForDb;
-  
-  console.log(`Sanitized activity for DB save/update: ${finalSanitized.id}, appliedWork: ${finalSanitized.appliedWork}`);
-  
-  return finalSanitized;
-}
-
-// --- Load function --- 
+// Core database operations
 export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
   try {
     const gameState = getGameState();
     const companyName = gameState.player?.companyName;
 
     if (!companyName) {
-      console.warn('No company name found when loading activities');
       return [];
     }
 
@@ -102,32 +26,120 @@ export async function loadAllActivitiesFromDb(): Promise<Activity[]> {
     const companyDoc = await getDoc(companyRef);
 
     if (!companyDoc.exists()) {
-      console.warn('Company document not found when loading activities');
       return [];
     }
 
     const data = companyDoc.data();
     const activitiesFromDb: ActivityForDb[] = data.activities || [];
+    const mappedActivities: Activity[] = activitiesFromDb.map(activityData => ({ ...activityData } as Activity));
 
-    // Map to Activity[] for runtime use
-    const mappedActivities: Activity[] = activitiesFromDb.map((activityData) => {
-      // The loaded data now matches ActivityForDb, which is compatible with Activity 
-      // (minus callbacks, which are runtime only)
-      return {
-        ...activityData,
-        // userId is already part of activityData
-      } as Activity; 
-    });
-
-    console.log(`Loaded ${mappedActivities.length} activities from company document ${companyName}`);
     return mappedActivities;
   } catch (error) {
-    console.error('Error loading activities from company doc:', error);
     return [];
   }
 }
 
-// --- Initialization --- 
+export async function saveActivityToDb(activity: Activity): Promise<boolean> {
+  const gameState = getGameState();
+  const companyName = gameState.player?.companyName;
+  
+  if (!companyName) {
+    return false;
+  }
+  
+  const companyRef = doc(db, 'companies', companyName);
+
+  try {
+    const companyDoc = await getDoc(companyRef);
+    if (!companyDoc.exists()) {
+      return false;
+    }
+
+    const companyData = companyDoc.data();
+    const currentActivitiesFromDb: ActivityForDb[] = companyData.activities || [];
+    const sanitizedActivity = sanitizeActivityForDb(activity);
+
+    // Check if activity exists and update or add as needed
+    const activityIndex = currentActivitiesFromDb.findIndex(a => a.id === sanitizedActivity.id);
+    let updatedActivitiesForDb: ActivityForDb[];
+
+    if (activityIndex > -1) {
+      updatedActivitiesForDb = [...currentActivitiesFromDb];
+      updatedActivitiesForDb[activityIndex] = sanitizedActivity;
+    } else {
+      updatedActivitiesForDb = [...currentActivitiesFromDb, sanitizedActivity];
+    }
+
+    await updateDoc(companyRef, { activities: updatedActivitiesForDb });
+
+    // Update local gameState
+    const currentLocalActivities = gameState.activities || [];
+    const localIndex = currentLocalActivities.findIndex(a => a.id === activity.id);
+    let updatedLocalActivities;
+    
+    if (localIndex > -1) {
+      updatedLocalActivities = [...currentLocalActivities];
+      updatedLocalActivities[localIndex] = activity; 
+    } else {
+      updatedLocalActivities = [...currentLocalActivities, activity];
+    }
+    
+    updateGameState({ activities: updatedLocalActivities }); 
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+export async function updateActivityInDb(activity: Activity): Promise<boolean> {
+  return saveActivityToDb(activity);
+}
+
+export async function removeActivityFromDb(activityId: string): Promise<boolean> {
+  try {
+    const gameState = getGameState();
+    const companyName = gameState.player?.companyName;
+
+    if (!companyName) {
+      return false;
+    }
+
+    const companyRef = doc(db, 'companies', companyName);
+    const companyDoc = await getDoc(companyRef);
+    if (!companyDoc.exists()) {
+      return false;
+    }
+
+    const companyData = companyDoc.data();
+    const currentActivitiesFromDb: ActivityForDb[] = companyData.activities || [];
+    const updatedActivitiesForDb = currentActivitiesFromDb.filter(a => a.id !== activityId);
+
+    if (updatedActivitiesForDb.length === currentActivitiesFromDb.length) {
+      // Activity wasn't found in the database - this is fine, it's already not there
+      
+      // Still update local state if needed
+      const currentLocalActivities = gameState.activities || [];
+      const updatedLocalActivities = currentLocalActivities.filter(a => a.id !== activityId);
+      if (updatedLocalActivities.length !== currentLocalActivities.length) {
+        updateGameState({ activities: updatedLocalActivities }); 
+      }
+      
+      return true;
+    }
+
+    await updateDoc(companyRef, { activities: updatedActivitiesForDb });
+
+    // Update local gameState
+    const updatedLocalActivities = (gameState.activities || []).filter(a => a.id !== activityId);
+    updateGameState({ activities: updatedLocalActivities }); 
+
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+// Activity system initialization
 export async function initializeActivitySystem(): Promise<void> {
   try {
     const loadedActivities = await loadAllActivitiesFromDb();
@@ -140,480 +152,387 @@ export async function initializeActivitySystem(): Promise<void> {
                       ![...loadedActivityIds].every(id => currentActivityIds.has(id));
 
     if (needsUpdate) {
-       console.log(`Initializing/Updating gameState activities from DB: ${loadedActivities.length} activities loaded.`);
-       // loadedActivities is Activity[], which extends ActivityProgress
-       updateGameState({ activities: loadedActivities }); 
-    } else {
-       console.log(`Activity system already initialized or in sync with DB.`);
+      updateGameState({ activities: loadedActivities }); 
     }
 
     // Re-attach runtime callbacks for ongoing activities
-    const activitiesInState = getGameState().activities || [];
+    await reattachActivityCallbacks();
+  } catch (error) {
+    if (!getGameState().activities) {
+      updateGameState({ activities: [] });
+    }
+  }
+}
+
+// Helper function to sanitize activity data for Firebase
+function sanitizeActivityForDb(activity: Activity): ActivityForDb {
+  const sanitized: Partial<Activity> = { ...activity }; 
+
+  // Remove callbacks which can't be serialized
+  delete sanitized.completionCallback;
+  delete sanitized.progressCallback;
+
+  // Process nested objects and handle undefined values
+  const sanitizeForFirebase = (obj: any): any => {
+    if (obj === undefined) return null;
+    if (obj === null || typeof obj !== 'object') return obj;
     
-    if (activitiesInState.length > 0) {
-      console.log(`Re-attaching callbacks for ${activitiesInState.length} activities`);
+    if (Array.isArray(obj)) {
+      return obj.map(item => sanitizeForFirebase(item));
+    }
+    
+    const result: Record<string, any> = {};
+    for (const key in obj) {
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
       
-      // Import necessary modules for callback reattachment
-      const { setActivityCompletionCallback, getActivityById } = await import('../game/activityManager');
-      
-      // Re-attach completion callbacks for all activities
-      for (const activity of activitiesInState) {
-        if (!activity.id) continue;
-        
-        try {
-          // Re-attach completion callbacks based on activity category
-          switch (activity.category) {
-            case 'clearing': {
-              // For clearing tasks, we need to check which clearing task it is
-              // and potentially reconstruct the completion logic
-              const targetId = activity.targetId;
-              if (!targetId) continue;
-              
-              // Get all clearing activities for the same target (vineyard)
-              const relatedActivities = activitiesInState.filter(a => 
-                a.category === 'clearing' && a.targetId === targetId);
-              
-              // Only run this for the first activity of each vineyard to avoid duplication
-              if (relatedActivities[0]?.id === activity.id) {
-                console.log(`Re-attaching clearing callbacks for vineyard ${targetId}`);
-                
-                // For each related activity, reattach the callback logic
-                relatedActivities.forEach(clearingActivity => {
-                  const taskId = clearingActivity.params?.taskId;
-                  if (!taskId) return;
-                  
-                  // Re-attach the callback
-                  setActivityCompletionCallback(clearingActivity.id, async () => {
-                    console.log(`Clearing task ${taskId} completed for vineyard ${targetId}`);
-                    
-                    // Check if this was the last task
-                    const remainingActivities = getGameState().activities
-                      .filter(a => a.category === 'clearing' && a.targetId === targetId);
-                    
-                    // If this is the last activity or all have almost completed (applied work > 95% of total)
-                    const allNearlyComplete = remainingActivities.every(a => 
-                      a.appliedWork >= a.totalWork * 0.95);
-                    
-                    if (remainingActivities.length <= 1 || allNearlyComplete) {
-                      console.log(`All clearing tasks complete for vineyard ${targetId}, updating status`);
-                      
-                      // Manually trigger a simulated completion by using specific behavior
-                      // Get vineyard and check its status
-                      const vineyard = getGameState().vineyards.find(v => v.id === targetId);
-                      if (vineyard && vineyard.status === 'Clearing in Progress') {
-                        // If the vineyard is still in clearing status, update its status to cleared
-                        const { updateVineyard } = await import('../../services/vineyardService');
-                        
-                        // Collect all task IDs to calculate health improvement
-                        const completedTaskIds = new Set<string>();
-                        relatedActivities.forEach(a => {
-                          if (a.params?.taskId) {
-                            completedTaskIds.add(a.params.taskId);
-                          }
-                        });
-                        
-                        // Get original health and task parameters from activity params
-                        const originalActivity = relatedActivities.find(a => a.params?.originalHealth !== undefined);
-                        const originalHealth = originalActivity?.params?.originalHealth || vineyard.vineyardHealth;
-                        const isOrganic = !!originalActivity?.params?.isOrganic;
-                        
-                        // Reconstruct options to calculate health improvement
-                        let healthImprovement = 0;
-                        if (completedTaskIds.has('clear-vegetation')) healthImprovement += 0.10;
-                        if (completedTaskIds.has('remove-debris')) healthImprovement += 0.05;
-                        if (completedTaskIds.has('soil-amendment')) healthImprovement += 0.15;
-                        if (completedTaskIds.has('remove-vines')) {
-                          // Default to 100% replanting intensity if not specified
-                          const replantingIntensity = 100;
-                          healthImprovement += (replantingIntensity / 100) * 0.20;
-                        }
-                        
-                        // Calculate new health based on original health + improvements
-                        const newHealth = Math.min(1.0, originalHealth + healthImprovement);
-                        
-                        console.log(`Applying health change from ${originalHealth} to ${newHealth} for vineyard ${targetId}`);
-                        
-                        await updateVineyard(targetId, {
-                          status: 'Cleared',
-                          vineyardHealth: newHealth,
-                          completedClearingTasks: [...completedTaskIds],
-                          farmingMethod: isOrganic ? 'Non-Conventional' : 'Conventional'
-                        });
-                      }
-                    }
-                  });
-                });
-              }
-              break;
-            }
-            
-            case 'uprooting': {
-              // Similar logic for uprooting activities
-              const targetId = activity.targetId;
-              if (!targetId) continue;
-              
-              console.log(`Re-attaching uprooting callback for vineyard ${targetId}`);
-              setActivityCompletionCallback(activity.id, async () => {
-                // Get vineyard - don't check status until we update it
-                const vineyard = getGameState().vineyards.find(v => v.id === targetId);
-                if (vineyard) {
-                  // Log the current status
-                  console.log(`Executing uprooting callback for vineyard ${targetId} with status: ${vineyard.status}`);
-                  
-                  // If the vineyard is still in uprooting status, update its status
-                  const { updateVineyard } = await import('../../services/vineyardService');
-                  const { DEFAULT_VINEYARD_HEALTH } = await import('../../lib/core/constants/gameConstants');
-                  
-                  await updateVineyard(targetId, {
-                    grape: null,                // Remove grape
-                    vineAge: 0,                 // Reset vine age
-                    density: 0,                 // Reset density
-                    vineyardHealth: DEFAULT_VINEYARD_HEALTH, // Reset health to default
-                    status: 'Ready to be planted', // Set status
-                    ripeness: 0,                // Reset ripeness
-                    organicYears: 0,            // Reset organic years
-                    remainingYield: null,       // Clear remaining yield
-                    completedClearingTasks: [], // Reset completed clearing tasks as well
-                    farmingMethod: 'Conventional' // Reset to conventional farming
-                  });
-                  
-                  // Update display state
-                  const displayManager = (await import('@/lib/game/displayManager')).default;
-                  displayManager.updateDisplayState('vineyardView', {
-                    currentActivityId: null,
-                  });
-                  
-                  // Show notification
-                  const { toast } = await import('@/lib/ui/toast');
-                  toast({
-                    title: "Uprooting Complete",
-                    description: `The vineyard is now ready for planting with new grape varieties.`
-                  });
-                  
-                  const { consoleService } = await import('@/components/layout/Console');
-                  consoleService.success(`Uprooting of vineyard complete! The vineyard is now ready for planting.`);
-                }
-              });
-              break;
-            }
-            
-            case 'planting': {
-              const targetId = activity.targetId;
-              if (!targetId) continue;
-              
-              console.log(`Re-attaching planting callback for vineyard ${targetId}`);
-              setActivityCompletionCallback(activity.id, async () => {
-                // Get vineyard and check its status
-                const vineyard = getGameState().vineyards.find(v => v.id === targetId);
-                
-                if (vineyard && vineyard.status.includes('Planting')) {
-                  // If vineyard is still in planting status, finalize planting
-                  const { updateVineyard } = await import('../../services/vineyardService');
-                  const { season } = getGameState();
-                  
-                  // Get grape and density from activity parameters
-                  const grape = activity.params?.grape || activity.params?.additionalParams?.grape;
-                  const density = activity.params?.density || activity.params?.additionalParams?.density || 5000; // Default to 5000 if not specified
-                  
-                  // Determine initial status based on season
-                  let initialStatus = 'Growing';
-                  if (season === 'Winter') {
-                    initialStatus = 'No yield in first season';
-                  } else if (season === 'Summer') {
-                    initialStatus = 'Ripening';
-                  } else if (season === 'Fall') {
-                    initialStatus = 'Ready for Harvest';
-                  }
-                  
-                  // Update vineyard with new grape and density
-                  await updateVineyard(targetId, {
-                    grape,
-                    density,
-                    status: initialStatus,
-                    ripeness: season === 'Summer' || season === 'Fall' ? 0.1 : 0, // Start with some ripeness if in growing season
-                    vineyardHealth: 0.8, // Start with 80% health
-                    vineAge: 0,
-                  });
-                }
-              });
-              break;
-            }
-            
-            case 'harvesting': {
-              const targetId = activity.targetId;
-              if (!targetId) continue;
-              
-              console.log(`Re-attaching harvesting callback for vineyard ${targetId}`);
-              setActivityCompletionCallback(activity.id, async () => {
-                // Get vineyard and check its status
-                const vineyard = getGameState().vineyards.find(v => v.id === targetId);
-                const { season } = getGameState();
-                
-                if (vineyard && vineyard.status.includes('Harvesting')) {
-                  // If vineyard is still in harvesting status, finalize harvesting
-                  const { updateVineyard } = await import('../../services/vineyardService');
-                  
-                  // Calculate new remaining yield after harvest
-                  const newRemainingYield = 0; // Assume fully harvested
-                  
-                  // Determine the new status based on season and remaining yield
-                  let newStatus = 'Dormancy';
-                  
-                  if (season !== 'Winter' && newRemainingYield > 0) {
-                    // If it's not winter and there's still yield, keep it ready for harvest
-                    newStatus = 'Ready for Harvest';
-                  } else if (season === 'Winter' || newRemainingYield <= 0) {
-                    // If it's winter or no yield remains, go to dormancy
-                    newStatus = 'Dormancy';
-                  }
-                  
-                  // Update the vineyard with new status and remaining yield
-                  await updateVineyard(targetId, {
-                    remainingYield: newRemainingYield,
-                    status: newStatus,
-                    // Only reset ripeness if fully harvested or it's winter
-                    ...(newRemainingYield <= 0 || season === 'Winter' ? { ripeness: 0 } : {})
-                  });
-                }
-              });
-              break;
-            }
-            
-            case 'crushing':
-            case 'fermentation': {
-              // Handle winery-related activities
-              console.log(`Re-attaching ${activity.category} callback`);
-              setActivityCompletionCallback(activity.id, async () => {
-                // Wine production callbacks would go here
-                // In a more complete implementation, you'd call the appropriate completion methods
-                // from wineProductionService or similar
-              });
-              break;
-            }
-            
-            case 'staffSearch': {
-              console.log(`Re-attaching staff search callback`);
-              
-              // Update display state for staff search activities
-              const { default: displayManager } = await import('@/lib/game/displayManager');
-              displayManager.updateDisplayState('staffSearchActivity', {
-                activityId: activity.id
-              });
-              
-              setActivityCompletionCallback(activity.id, async () => {
-                // Import required staff service functions
-                const { generateStaffCandidates } = await import('../../services/staffService');
-                const { updatePlayerMoney } = await import('../../gameState');
-                
-                // Get the parameters needed to generate candidates
-                const options = {
-                  numberOfCandidates: activity.params?.numberOfCandidates || 5,
-                  skillLevel: activity.params?.skillLevel || 0.3,
-                  specializations: activity.params?.specializations || []
-                };
-                
-                // Deduct the cost
-                const cost = activity.params?.searchCost || 0;
-                if (cost > 0) {
-                  updatePlayerMoney(-cost);
-                }
-                
-                // Generate candidates based on the options
-                const candidates = generateStaffCandidates(options);
-                
-                // Update the display state
-                displayManager.updateDisplayState('staffSearchActivity', {
-                  results: candidates,
-                  activityId: null // Clear the activity ID when complete
-                });
-                
-                // Show notification
-                const { toast } = await import('@/lib/ui/toast');
-                toast({ 
-                  title: "Search Complete", 
-                  description: `Found ${candidates.length} potential candidates.` 
-                });
-              });
-              break;
-            }
-            
-            case 'administration': {
-              // Check if this is a hiring activity
-              if (activity.params?.hiringProcess === true || activity.params?.staffToHire) {
-                console.log(`Re-attaching staff hiring callback`);
-                
-                // Update display state for hiring activities
-                const { default: displayManager } = await import('@/lib/game/displayManager');
-                displayManager.updateDisplayState('staffHiringActivity', {
-                  activityId: activity.id
-                });
-                
-                setActivityCompletionCallback(activity.id, async () => {
-                  // Import required staff service functions
-                  const { completeHiringProcess } = await import('../../services/staffService');
-                  
-                  // Complete the hiring process for this candidate
-                  completeHiringProcess(activity.id);
-                  
-                  // Reset the display state when complete
-                  displayManager.updateDisplayState('staffHiringActivity', {
-                    activityId: null
-                  });
-                });
-              } else {
-                console.log(`Re-attaching generic administration callback`);
-                setActivityCompletionCallback(activity.id, async () => {
-                  // Generic completion for other administration activities
-                });
-              }
-              break;
-            }
-            
-            case 'building':
-            case 'upgrading':
-            case 'maintenance': {
-              // Handle building-related activities
-              console.log(`Re-attaching ${activity.category} callback`);
-              setActivityCompletionCallback(activity.id, async () => {
-                // Building callbacks would go here
-                // In a more complete implementation, you'd call the appropriate building 
-                // completion methods
-              });
-              break;
-            }
-            
-            default:
-              // Log unhandled activity type
-              console.log(`No specific callback re-attached for activity type: ${activity.category}`);
-          }
-        } catch (error) {
-          console.error(`Error re-attaching callbacks for activity ${activity.id}:`, error);
+      result[key] = obj[key] === undefined ? null : sanitizeForFirebase(obj[key]);
+    }
+    return result;
+  };
+
+  // Sanitize params object
+  const sanitizedParams = sanitized.params ? sanitizeForFirebase(sanitized.params) : {};
+  
+  // Create database-ready activity object with required fields
+  const dbActivity: ActivityForDb = {
+    id: sanitized.id || '', 
+    userId: sanitized.userId || getGameState().player?.id || 'unknown',
+    category: (sanitized.category || WorkCategory.ADMINISTRATION) as WorkCategory,
+    totalWork: sanitized.totalWork || 0,
+    appliedWork: sanitized.appliedWork || 0,
+    targetId: sanitized.targetId || '',
+    params: {
+      ...sanitizedParams,
+      assignedStaffIds: Array.isArray(sanitizedParams.assignedStaffIds) 
+        ? sanitizedParams.assignedStaffIds 
+        : [],
+      assignedToolIds: Array.isArray(sanitizedParams.assignedToolIds) 
+        ? sanitizedParams.assignedToolIds 
+        : []
+    }
+  };
+  
+  // Final sanitization pass
+  const finalSanitized = sanitizeForFirebase(dbActivity) as ActivityForDb;
+  return finalSanitized;
+}
+
+// Re-attach callbacks to activities loaded from the database
+async function reattachActivityCallbacks(): Promise<void> {
+  const activitiesInState = getGameState().activities || [];
+  
+  if (activitiesInState.length === 0) return;
+  
+  const { setActivityCompletionCallback } = await import('../game/activityManager');
+  
+  for (const activity of activitiesInState) {
+    if (!activity.id) continue;
+    
+    try {
+      switch (activity.category) {
+        case 'clearing': {
+          await handleClearingCallbacks(activity, activitiesInState, setActivityCompletionCallback);
+          break;
+        }
+        case 'uprooting': {
+          await handleUprootingCallbacks(activity, setActivityCompletionCallback);
+          break;
+        }
+        case 'planting': {
+          await handlePlantingCallbacks(activity, setActivityCompletionCallback);
+          break;
+        }
+        case 'harvesting': {
+          await handleHarvestingCallbacks(activity, setActivityCompletionCallback);
+          break;
+        }
+        case 'staffSearch': {
+          await handleStaffSearchCallbacks(activity, setActivityCompletionCallback);
+          break;
+        }
+        case 'administration': {
+          await handleAdministrationCallbacks(activity, setActivityCompletionCallback);
+          break;
+        }
+        case 'crushing':
+        case 'fermentation':
+        case 'building':
+        case 'upgrading':
+        case 'maintenance': {
+          setActivityCompletionCallback(activity.id, async () => {
+            // Generic callback for these activity types
+          });
+          break;
         }
       }
-    }
-
-  } catch (error) {
-    console.error('Error initializing activity system:', error);
-    if (!getGameState().activities) {
-       updateGameState({ activities: [] });
+    } catch (error) {
+      // Error re-attaching callbacks
     }
   }
 }
 
-// --- Refactored DB modification functions --- 
-
-export async function saveActivityToDb(activity: Activity): Promise<boolean> {
-  const gameState = getGameState();
-  const companyName = gameState.player?.companyName;
-  if (!companyName) {
-    console.error('Cannot save activity: Company name not found.');
-    return false;
-  }
-  const companyRef = doc(db, 'companies', companyName);
-
-  try {
-    const companyDoc = await getDoc(companyRef);
-    if (!companyDoc.exists()) {
-      console.error(`Cannot save activity: Company document '${companyName}' not found.`);
-      return false;
-    }
-
-    const companyData = companyDoc.data();
-    const currentActivitiesFromDb: ActivityForDb[] = companyData.activities || [];
-    // Sanitize the runtime Activity to the DB format
-    const sanitizedActivity = sanitizeActivityForDb(activity);
-
-    const activityIndex = currentActivitiesFromDb.findIndex(a => a.id === sanitizedActivity.id);
-    let updatedActivitiesForDb: ActivityForDb[];
-
-    if (activityIndex > -1) {
-      updatedActivitiesForDb = [...currentActivitiesFromDb];
-      updatedActivitiesForDb[activityIndex] = sanitizedActivity;
-      console.log(`Updating activity ${sanitizedActivity.id} in company doc ${companyName}`);
-    } else {
-      updatedActivitiesForDb = [...currentActivitiesFromDb, sanitizedActivity];
-       console.log(`Adding new activity ${sanitizedActivity.id} to company doc ${companyName}`);
-    }
-
-    await updateDoc(companyRef, { activities: updatedActivitiesForDb });
-
-    // Update local gameState using the original runtime activity object (with callbacks)
-    const currentLocalActivities = gameState.activities || [];
-    const localIndex = currentLocalActivities.findIndex(a => a.id === activity.id);
-    let updatedLocalActivities;
-    if (localIndex > -1) {
-        updatedLocalActivities = [...currentLocalActivities];
-        updatedLocalActivities[localIndex] = activity; 
-    } else {
-        updatedLocalActivities = [...currentLocalActivities, activity];
-    }
-    // gameState.activities is ActivityProgress[], and Activity extends ActivityProgress
-    updateGameState({ activities: updatedLocalActivities }); 
-
-    return true;
-  } catch (error) {
-    console.error(`Error saving activity ${activity.id} to company doc ${companyName}:`, error);
-    return false;
-  }
-}
-
-export async function updateActivityInDb(activity: Activity): Promise<boolean> {
-  console.log(`Calling updateActivityInDb for ${activity.id} - redirecting to saveActivityToDb`);
-  return saveActivityToDb(activity);
-}
-
-export async function removeActivityFromDb(activityId: string): Promise<boolean> {
-  try {
-    const gameState = getGameState();
-    const companyName = gameState.player?.companyName;
-
-    if (!companyName) {
-      console.error('Cannot remove activity: No company name found for current player');
-      return false;
-    }
-
-    const companyRef = doc(db, 'companies', companyName);
-    const companyDoc = await getDoc(companyRef);
-    if (!companyDoc.exists()) {
-      console.error(`Cannot remove activity: Company document '${companyName}' not found.`);
-      return false;
-    }
-
-    const companyData = companyDoc.data();
-    const currentActivitiesFromDb: ActivityForDb[] = companyData.activities || [];
-
-    const updatedActivitiesForDb = currentActivitiesFromDb.filter(a => a.id !== activityId);
-
-    if (updatedActivitiesForDb.length === currentActivitiesFromDb.length) {
-      // Activity wasn't found in the database - this is fine, it's already not there
-      console.log(`Activity ${activityId} not present in company doc ${companyName} - already removed.`);
+// Callback handler for clearing activities
+async function handleClearingCallbacks(
+  activity: Activity, 
+  activitiesInState: Activity[], 
+  setActivityCompletionCallback: (id: string, callback: () => void) => void
+): Promise<void> {
+  const targetId = activity.targetId;
+  if (!targetId) return;
+  
+  // Get all clearing activities for the same target (vineyard)
+  const relatedActivities = activitiesInState.filter(a => 
+    a.category === 'clearing' && a.targetId === targetId);
+  
+  // Only run this for the first activity of each vineyard to avoid duplication
+  if (relatedActivities[0]?.id !== activity.id) return;
+  
+  // For each related activity, reattach the callback logic
+  relatedActivities.forEach(clearingActivity => {
+    const taskId = clearingActivity.params?.taskId;
+    if (!taskId) return;
+    
+    setActivityCompletionCallback(clearingActivity.id, async () => {
+      // Check if this was the last task
+      const remainingActivities = getGameState().activities
+        .filter(a => a.category === 'clearing' && a.targetId === targetId);
       
-      // Still update local state if needed
-      const currentLocalActivities = gameState.activities || [];
-      const updatedLocalActivities = currentLocalActivities.filter(a => a.id !== activityId);
-      if (updatedLocalActivities.length !== currentLocalActivities.length) {
-        // Update local state only if it was different
-        updateGameState({ activities: updatedLocalActivities }); 
+      // If this is the last activity or all have almost completed (applied work > 95% of total)
+      const allNearlyComplete = remainingActivities.every(a => 
+        a.appliedWork >= a.totalWork * 0.95);
+      
+      if (remainingActivities.length <= 1 || allNearlyComplete) {
+        // Get vineyard and check its status
+        const vineyard = getGameState().vineyards.find(v => v.id === targetId);
+        if (vineyard && vineyard.status === 'Clearing in Progress') {
+          // If the vineyard is still in clearing status, update its status to cleared
+          const { updateVineyard } = await import('../../services/vineyardService');
+          
+          // Collect all task IDs to calculate health improvement
+          const completedTaskIds = new Set<string>();
+          relatedActivities.forEach(a => {
+            if (a.params?.taskId) {
+              completedTaskIds.add(a.params.taskId);
+            }
+          });
+          
+          // Get original health and task parameters from activity params
+          const originalActivity = relatedActivities.find(a => a.params?.originalHealth !== undefined);
+          const originalHealth = originalActivity?.params?.originalHealth || vineyard.vineyardHealth;
+          const isOrganic = !!originalActivity?.params?.isOrganic;
+          
+          // Reconstruct options to calculate health improvement
+          let healthImprovement = 0;
+          if (completedTaskIds.has('clear-vegetation')) healthImprovement += 0.10;
+          if (completedTaskIds.has('remove-debris')) healthImprovement += 0.05;
+          if (completedTaskIds.has('soil-amendment')) healthImprovement += 0.15;
+          if (completedTaskIds.has('remove-vines')) {
+            healthImprovement += 0.20; // Default to 100% replanting intensity
+          }
+          
+          // Calculate new health based on original health + improvements
+          const newHealth = Math.min(1.0, originalHealth + healthImprovement);
+          
+          await updateVineyard(targetId, {
+            status: 'Cleared',
+            vineyardHealth: newHealth,
+            completedClearingTasks: [...completedTaskIds],
+            farmingMethod: isOrganic ? 'Non-Conventional' : 'Conventional'
+          });
+        }
+      }
+    });
+  });
+}
+
+// Callback handler for uprooting activities
+async function handleUprootingCallbacks(
+  activity: Activity,
+  setActivityCompletionCallback: (id: string, callback: () => void) => void
+): Promise<void> {
+  const targetId = activity.targetId;
+  if (!targetId) return;
+  
+  setActivityCompletionCallback(activity.id, async () => {
+    const vineyard = getGameState().vineyards.find(v => v.id === targetId);
+    if (vineyard) {
+      const { updateVineyard } = await import('../../services/vineyardService');
+      const { DEFAULT_VINEYARD_HEALTH } = await import('../../lib/core/constants/gameConstants');
+      
+      await updateVineyard(targetId, {
+        grape: null,
+        vineAge: 0,
+        density: 0,
+        vineyardHealth: DEFAULT_VINEYARD_HEALTH,
+        status: 'Ready to be planted',
+        ripeness: 0,
+        organicYears: 0,
+        remainingYield: null,
+        completedClearingTasks: [],
+        farmingMethod: 'Conventional'
+      });
+      
+      // Update UI
+      const displayManager = (await import('@/lib/game/displayManager')).default;
+      displayManager.updateDisplayState('vineyardView', { currentActivityId: null });
+      
+      const { toast } = await import('@/lib/ui/toast');
+      toast({
+        title: "Uprooting Complete",
+        description: "The vineyard is now ready for planting with new grape varieties."
+      });
+      
+      const { consoleService } = await import('@/components/layout/Console');
+      consoleService.success(`Uprooting of vineyard complete! The vineyard is now ready for planting.`);
+    }
+  });
+}
+
+// Callback handler for planting activities
+async function handlePlantingCallbacks(
+  activity: Activity,
+  setActivityCompletionCallback: (id: string, callback: () => void) => void
+): Promise<void> {
+  const targetId = activity.targetId;
+  if (!targetId) return;
+  
+  setActivityCompletionCallback(activity.id, async () => {
+    const vineyard = getGameState().vineyards.find(v => v.id === targetId);
+    
+    if (vineyard && vineyard.status.includes('Planting')) {
+      const { updateVineyard } = await import('../../services/vineyardService');
+      const { season } = getGameState();
+      
+      // Get grape and density from activity parameters
+      const grape = activity.params?.grape || activity.params?.additionalParams?.grape;
+      const density = activity.params?.density || activity.params?.additionalParams?.density || 5000;
+      
+      // Determine initial status based on season
+      let initialStatus = 'Growing';
+      if (season === 'Winter') {
+        initialStatus = 'No yield in first season';
+      } else if (season === 'Summer') {
+        initialStatus = 'Ripening';
+      } else if (season === 'Fall') {
+        initialStatus = 'Ready for Harvest';
       }
       
-      // Return true since the end state is what we wanted - activity not in database
-      return true;
+      await updateVineyard(targetId, {
+        grape,
+        density,
+        status: initialStatus,
+        ripeness: season === 'Summer' || season === 'Fall' ? 0.1 : 0,
+        vineyardHealth: 0.8,
+        vineAge: 0,
+      });
     }
+  });
+}
 
-    console.log(`Removing activity ${activityId} from company doc ${companyName}`);
-    await updateDoc(companyRef, { activities: updatedActivitiesForDb });
+// Callback handler for harvesting activities
+async function handleHarvestingCallbacks(
+  activity: Activity,
+  setActivityCompletionCallback: (id: string, callback: () => void) => void
+): Promise<void> {
+  const targetId = activity.targetId;
+  if (!targetId) return;
+  
+  setActivityCompletionCallback(activity.id, async () => {
+    const vineyard = getGameState().vineyards.find(v => v.id === targetId);
+    const { season } = getGameState();
+    
+    if (vineyard && vineyard.status.includes('Harvesting')) {
+      const { updateVineyard } = await import('../../services/vineyardService');
+      
+      // Assume fully harvested
+      const newRemainingYield = 0;
+      
+      // Determine new status based on season
+      const newStatus = (season !== 'Winter' && newRemainingYield > 0) 
+        ? 'Ready for Harvest' 
+        : 'Dormancy';
+      
+      await updateVineyard(targetId, {
+        remainingYield: newRemainingYield,
+        status: newStatus,
+        ...(newRemainingYield <= 0 || season === 'Winter' ? { ripeness: 0 } : {})
+      });
+    }
+  });
+}
 
-    // Update local gameState
-    const updatedLocalActivities = (gameState.activities || []).filter(a => a.id !== activityId);
-    updateGameState({ activities: updatedLocalActivities }); 
+// Callback handler for staff search activities
+async function handleStaffSearchCallbacks(
+  activity: Activity,
+  setActivityCompletionCallback: (id: string, callback: () => void) => void
+): Promise<void> {
+  const { default: displayManager } = await import('@/lib/game/displayManager');
+  displayManager.updateDisplayState('staffSearchActivity', { activityId: activity.id });
+  
+  setActivityCompletionCallback(activity.id, async () => {
+    const { generateStaffCandidates } = await import('../../services/staffService');
+    const { updatePlayerMoney } = await import('../../gameState');
+    
+    // Get search parameters
+    const options = {
+      numberOfCandidates: activity.params?.numberOfCandidates || 5,
+      skillLevel: activity.params?.skillLevel || 0.3,
+      specializations: activity.params?.specializations || []
+    };
+    
+    // Deduct search cost
+    const cost = activity.params?.searchCost || 0;
+    if (cost > 0) {
+      updatePlayerMoney(-cost);
+    }
+    
+    // Generate candidates
+    const candidates = generateStaffCandidates(options);
+    
+    // Update UI
+    displayManager.updateDisplayState('staffSearchActivity', {
+      results: candidates,
+      activityId: null
+    });
+    
+    const { toast } = await import('@/lib/ui/toast');
+    toast({
+      title: "Search Complete",
+      description: `Found ${candidates.length} potential candidates.`
+    });
+  });
+}
 
-    return true;
-  } catch (error) {
-    console.error(`Error removing activity ${activityId}:`, error);
-    return false;
+// Callback handler for administration activities
+async function handleAdministrationCallbacks(
+  activity: Activity,
+  setActivityCompletionCallback: (id: string, callback: () => void) => void
+): Promise<void> {
+  // Check if this is a hiring activity
+  if (activity.params?.hiringProcess === true || activity.params?.staffToHire) {
+    const { default: displayManager } = await import('@/lib/game/displayManager');
+    displayManager.updateDisplayState('staffHiringActivity', { activityId: activity.id });
+    
+    setActivityCompletionCallback(activity.id, async () => {
+      const { completeHiringProcess } = await import('../../services/staffService');
+      
+      // Complete the hiring process
+      completeHiringProcess(activity.id);
+      
+      // Update UI
+      displayManager.updateDisplayState('staffHiringActivity', { activityId: null });
+    });
+  } else {
+    setActivityCompletionCallback(activity.id, async () => {
+      // Generic completion for other administration activities
+    });
   }
 }
 
-// --- Deprecated functions comment remains the same --- 
-
-export default { initializeActivitySystem, saveActivityToDb, updateActivityInDb, loadAllActivitiesFromDb, removeActivityFromDb };
+export default { 
+  initializeActivitySystem, 
+  loadAllActivitiesFromDb, 
+  saveActivityToDb, 
+  updateActivityInDb, 
+  removeActivityFromDb 
+};

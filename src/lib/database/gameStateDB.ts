@@ -4,16 +4,10 @@ import { getGameState, updateGameState } from '../../gameState';
 import { loadCompany } from './companyDB';
 import { clearGameStorage } from './localStorageDB';
 
-/**
- * Handle user logout - save current state, clear storage, and reset game state
- * @returns Promise resolving to true if handled successfully, false otherwise
- */
 export const handleLogout = async (): Promise<boolean> => {
   try {
-    // Save current state to Firebase first
     const saveResult = await saveGameState();
-    
-    // Clear all game-related data from localStorage
+
     clearGameStorage();
     localStorage.removeItem('companyName');
     localStorage.removeItem('consoleMessages');
@@ -39,10 +33,6 @@ export const handleLogout = async (): Promise<boolean> => {
   }
 };
 
-/**
- * Save the current game state to Firestore
- * @returns Promise resolving to true if saved successfully, false otherwise
- */
 export const saveGameState = async (): Promise<boolean> => {
   try {
     const gameState = getGameState();
@@ -151,9 +141,7 @@ export const loadGameState = async (companyName: string): Promise<boolean> => {
       params: activity.params || {},
       userId: activity.userId || ''
     })) || [];
-    
-    // Log the activities being loaded
-    console.log('Loading activities from Firestore:', activities);
+
     
     // Update game state with loaded data
     updateGameState({
