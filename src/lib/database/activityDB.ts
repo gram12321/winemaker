@@ -563,15 +563,16 @@ export async function updateActivityInDb(activity: Activity): Promise<boolean> {
 }
 
 export async function removeActivityFromDb(activityId: string): Promise<boolean> {
-  const gameState = getGameState();
-  const companyName = gameState.player?.companyName;
-  if (!companyName) {
-    console.error('Cannot remove activity: Company name not found.');
-    return false;
-  }
-  const companyRef = doc(db, 'companies', companyName);
-
   try {
+    const gameState = getGameState();
+    const companyName = gameState.player?.companyName;
+
+    if (!companyName) {
+      console.error('Cannot remove activity: No company name found for current player');
+      return false;
+    }
+
+    const companyRef = doc(db, 'companies', companyName);
     const companyDoc = await getDoc(companyRef);
     if (!companyDoc.exists()) {
       console.error(`Cannot remove activity: Company document '${companyName}' not found.`);
@@ -584,17 +585,22 @@ export async function removeActivityFromDb(activityId: string): Promise<boolean>
     const updatedActivitiesForDb = currentActivitiesFromDb.filter(a => a.id !== activityId);
 
     if (updatedActivitiesForDb.length === currentActivitiesFromDb.length) {
-      console.warn(`Activity ${activityId} not found in company doc ${companyName} for removal.`);
+      // Activity wasn't found in the database - this is fine, it's already not there
+      console.log(`Activity ${activityId} not present in company doc ${companyName} - already removed.`);
+      
+      // Still update local state if needed
       const currentLocalActivities = gameState.activities || [];
       const updatedLocalActivities = currentLocalActivities.filter(a => a.id !== activityId);
       if (updatedLocalActivities.length !== currentLocalActivities.length) {
-          // Update local state only if it was different
-          updateGameState({ activities: updatedLocalActivities }); 
+        // Update local state only if it was different
+        updateGameState({ activities: updatedLocalActivities }); 
       }
-      return false; 
+      
+      // Return true since the end state is what we wanted - activity not in database
+      return true;
     }
 
-     console.log(`Removing activity ${activityId} from company doc ${companyName}`);
+    console.log(`Removing activity ${activityId} from company doc ${companyName}`);
     await updateDoc(companyRef, { activities: updatedActivitiesForDb });
 
     // Update local gameState
@@ -603,7 +609,7 @@ export async function removeActivityFromDb(activityId: string): Promise<boolean>
 
     return true;
   } catch (error) {
-    console.error(`Error removing activity ${activityId} from company doc ${companyName}:`, error);
+    console.error(`Error removing activity ${activityId}:`, error);
     return false;
   }
 }
