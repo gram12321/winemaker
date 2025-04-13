@@ -1,7 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Vineyard, createVineyard } from '@/lib/game/vineyard';
 import { getGameState } from '@/gameState';
-import { GrapeVariety, CLEARING_SUBTASK_RATES, CLEARING_SUBTASK_INITIAL_WORK } from '@/lib/core/constants/vineyardConstants';
+import { 
+  GrapeVariety, 
+  CLEARING_SUBTASK_RATES, 
+  CLEARING_SUBTASK_INITIAL_WORK,
+  getResourceByGrapeVariety,
+  REGION_ALTITUDE_RANGES
+} from '@/lib/core/constants/vineyardConstants';
 import { addWineBatch } from './wineBatchService';
 import { BASE_YIELD_PER_ACRE, BASELINE_VINE_DENSITY, CONVENTIONAL_YIELD_BONUS, DEFAULT_VINEYARD_HEALTH } from '@/lib/core/constants/gameConstants';
 import { getVineyard, saveVineyard, removeVineyard, getAllVineyards } from '@/lib/database/vineyardDB';
@@ -99,6 +105,37 @@ export async function plantVineyard(id: string, grape: GrapeVariety, density: nu
           region: vineyard.region,
           resourceName: grape,
         },
+        // Pass work modifiers for accurate work calculation
+        workModifiers: (() => {
+          // Calculate grape fragility modifier
+          const grapeResource = getResourceByGrapeVariety(grape);
+          const fragility = grapeResource?.fragile ?? 0; // Get fragility (0 = robust, 1 = fragile)
+          const fragilityModifier = fragility; // Modifier increases work for fragile grapes
+          
+          // Calculate altitude modifier
+          let altitudeModifier = 0;
+          // Safely access the data with type assertions
+          const countryData = REGION_ALTITUDE_RANGES[vineyard.country as keyof typeof REGION_ALTITUDE_RANGES];
+          let altitudeRange: number[] | null = null;
+          
+          if (countryData && vineyard.region in countryData) {
+            altitudeRange = countryData[vineyard.region as keyof typeof countryData] as unknown as number[];
+          }
+          
+          if (altitudeRange && Array.isArray(altitudeRange) && altitudeRange.length >= 2) {
+            const minAltitude = altitudeRange[0];
+            const maxAltitude = altitudeRange[1];
+            if (maxAltitude > minAltitude) {
+              const medianAltitude = (minAltitude + maxAltitude) / 2;
+              // Calculate deviation from median, positive for high altitude, negative for low
+              // Modifier increases work for altitudes further from the median (0.5x deviation)
+              const altitudeDeviation = Math.abs(vineyard.altitude - medianAltitude) / ((maxAltitude - minAltitude) / 2); // Normalize deviation 0 to 1+
+              altitudeModifier = altitudeDeviation * 0.5; // Apply 0.5 factor to deviation
+            }
+          }
+          
+          return [fragilityModifier, altitudeModifier];
+        })(),
         // Callback when planting is complete
         completionCallback: async () => {
           const gameState = getGameState();

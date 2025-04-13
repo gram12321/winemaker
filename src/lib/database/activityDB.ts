@@ -365,6 +365,13 @@ export async function initializeActivitySystem(): Promise<void> {
             
             case 'staffSearch': {
               console.log(`Re-attaching staff search callback`);
+              
+              // Update display state for staff search activities
+              const { default: displayManager } = await import('@/lib/game/displayManager');
+              displayManager.updateDisplayState('staffSearchActivity', {
+                activityId: activity.id
+              });
+              
               setActivityCompletionCallback(activity.id, async () => {
                 // Import required staff service functions
                 const { generateStaffCandidates } = await import('../../services/staffService');
@@ -387,7 +394,6 @@ export async function initializeActivitySystem(): Promise<void> {
                 const candidates = generateStaffCandidates(options);
                 
                 // Update the display state
-                const { default: displayManager } = await import('@/lib/game/displayManager');
                 displayManager.updateDisplayState('staffSearchActivity', {
                   results: candidates,
                   activityId: null // Clear the activity ID when complete
@@ -407,12 +413,24 @@ export async function initializeActivitySystem(): Promise<void> {
               // Check if this is a hiring activity
               if (activity.params?.hiringProcess === true || activity.params?.staffToHire) {
                 console.log(`Re-attaching staff hiring callback`);
+                
+                // Update display state for hiring activities
+                const { default: displayManager } = await import('@/lib/game/displayManager');
+                displayManager.updateDisplayState('staffHiringActivity', {
+                  activityId: activity.id
+                });
+                
                 setActivityCompletionCallback(activity.id, async () => {
                   // Import required staff service functions
                   const { completeHiringProcess } = await import('../../services/staffService');
                   
                   // Complete the hiring process for this candidate
                   completeHiringProcess(activity.id);
+                  
+                  // Reset the display state when complete
+                  displayManager.updateDisplayState('staffHiringActivity', {
+                    activityId: null
+                  });
                 });
               } else {
                 console.log(`Re-attaching generic administration callback`);
